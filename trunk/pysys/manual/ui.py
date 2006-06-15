@@ -19,9 +19,13 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import tkMessageBox, logging
+try:
+	import tkMessageBox
+	from Tkinter import *
+except:
+	pass
 
-from Tkinter import	*
+import logging
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.xml.manual import XMLManualTestParser
