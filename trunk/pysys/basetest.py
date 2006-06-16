@@ -255,10 +255,21 @@ class BaseTest:
 	def assertTrue(self, expr):
 		if expr == TRUE:
 			self.addOutcome(PASSED)
+			log.info("Assertion on boolean expression equal to true ... passed")
 		else:
 			self.addOutcome(FAILED)
+			log.info("Assertion on boolean expression equal to true ... failed")
 	
+
+	def assertFalse(self, expr):
+		if expr == FALSE:
+			self.addOutcome(PASSED)
+			log.info("Assertion on boolean expression equal to true ... passed")
+		else:
+			self.addOutcome(FAILED)
+			log.info("Assertion on boolean expression equal to true ... failed")
 	
+
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=FALSE, replace=[], includes=[]):
 		if filedir1 == None: filedir1 = self.output
 		if filedir2 == None: filedir2 = self.reference

@@ -12,7 +12,9 @@ tenth entry is equal to 34.
   </description>
 
   <classification>
-    <suite>Fibonacci examples</suite>
+    <suites>
+      <suite>Fibonacci examples</suite>
+    </suites>
   </classification>
 
   <data>

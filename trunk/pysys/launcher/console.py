@@ -61,6 +61,7 @@ def createTestContainers(config, testIdSpecs, includes, excludes):
 
 	# trim down the list for those tests in the test specifiers 
 	tests = []
+	index = 0
 	if testIdSpecs == []:
 		tests = containers
 	else:
@@ -88,17 +89,17 @@ def createTestContainers(config, testIdSpecs, includes, excludes):
 					tests.extend(containers[index1:index2+1])
 			except :
 				print sys.exc_info()[1]
-				print "Unable to run requested testcase(s)"
+				print "Unable to locate requested testcase(s)"
 				sys.exit()
 
-	# trim down the list based on the include and exclude categories
+	# trim down the list based on the include and exclude suites
 	if len(excludes) != 0:
 		index = 0
 		while index != len(tests):
 			remove = FALSE
 
 			for exclude in excludes:
-				if exclude in tests[index].groups:
+				if exclude in tests[index].suites:
 					remove = TRUE
 					break
 
@@ -113,7 +114,7 @@ def createTestContainers(config, testIdSpecs, includes, excludes):
 			keep = FALSE
 				
 			for include in includes:
-				if include in tests[index].groups:
+				if include in tests[index].suites:
 					keep = TRUE
 					break
 
@@ -139,25 +140,24 @@ class ConsolePrintHelper:
 		self.includes = []
 		self.excludes = []
 		self.tests = None
-		self.optionString = 'hcfi:e:m:'
-		self.optionList = ["help", "categories", "full", "include=", "exclude=", "mode="] 
+		self.optionString = 'hsfi:e:m:'
+		self.optionList = ["help", "suites", "full", "include=", "exclude=", "mode="] 
 		
 
 	def printUsage(self):
 		print "\nUsage: %s [option]* [tests]*" % os.path.basename(sys.argv[0])
 		print "    where options include;"
 		print "       -h | --help                 print this message"
-		print "       -c | --categories           print all categories in use"
-		print "       -f | --full                 print all available information for each test"
-		print "       -m | --mode      STRING     print tests that run in given mode (default is all modes"
-		print "                                   Allowed values are local, localcont, remote, profile)"
-		print "       -i | --include   STRING     print tests in given category"
-		print "       -e | --exclude   STRING     do not print tests in given category"
+		print "       -f | --full                 print full information"
+		print "       -s | --suites               print test suites defined"
+		print "       -m | --mode      STRING     print tests that run in user defined mode "
+		print "       -i | --include   STRING     print tests in included suite (can be specified multiple times)"
+		print "       -e | --exclude   STRING     do not print tests in excluded suite (can be specified multiple times)"
 		print ""
 		print "   and where [tests] describes a set of tests to be printed to the console. Note that multiple test "
 		print "   sets can be specified, and where none are given all available tests will be run. If an include "
-		print "   group is given, only tests that belong to that group will be printed. If an exclude group is given, "
-		print "   tests in the group will not be run. The following syntax is used to select a test set;"
+		print "   suite is given, only tests that belong to that suite will be printed. If an exclude suite is given, "
+		print "   tests in the suite will not be run. The following syntax is used to select a test set;"
 		print ""
 		print "       test1    - a single testcase with id test1"
 		print "       :test2   - upto testcase with id test2"
@@ -165,7 +165,7 @@ class ConsolePrintHelper:
 		print "       id1:id2  - all tests between tests with ids test1 and test2"
 		print ""
 		print "   e.g. "
-		print "       %s -i cat1 -i cat2 --fule test1:test3" % os.path.basename(sys.argv[0])
+		print "       %s -i suite1 -e suite2 --full test1:test3" % os.path.basename(sys.argv[0])
 		print ""
 		sys.exit()
 
@@ -181,7 +181,7 @@ class ConsolePrintHelper:
 			if option in ("-h", "--help"):
 				self.printUsage()
 
-			if option in ("-c", "--categories"):
+			if option in ("-s", "--suites"):
 				self.list = TRUE
 
 			elif option in ("-f", "--full"):
@@ -201,14 +201,14 @@ class ConsolePrintHelper:
 		containers = createTestContainers(None, self.arguments, self.includes, self.excludes)		
 
 		if self.list == TRUE:
-			groups = []
+			suites = []
 			for container in containers:
-				for group in container.groups:
-					if group not in groups:
-						groups.append(group)
-			print "\nCurrent groups: "
-			for group in groups:
-				print "                 %s" % (group)
+				for suite in container.suites:
+					if suite not in suites:
+						suites.append(suite)
+			print "\nCurrent suites: "
+			for suite in suites:
+				print "                 %s" % (suite)
 			print "\n"
 			return 
 
@@ -260,8 +260,8 @@ class ConsoleLaunchHelper:
 		print "       -p | --purge                purge the output subdirectory on test pass"
 		print "       -f | --config    STRING     use specified config file for locating the test descriptors"
 		print "       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)"
-		print "       -i | --include   STRING     set the test categories to include (can be specified multiple times)"
-		print "       -e | --exclude   STRING     set the test categories to exclude (can be specified multiple times)"
+		print "       -i | --include   STRING     set the test suites to include (can be specified multiple times)"
+		print "       -e | --exclude   STRING     set the test suites to exclude (can be specified multiple times)"
 		print "       -c | --cycle     INT        set the the number of cycles to run the tests"
 		print "       -o | --outdir    STRING     set the name of the test output subdirectory"
 		print "       -m | --mode      STRING     set the user defined mode to run the tests"
@@ -271,8 +271,8 @@ class ConsoleLaunchHelper:
 		if printXOptions: printXOptions()
 		print ""
 		print "   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, "
-		print "   where none are given all available tests will be run. If an include group is given, only tests that "
-		print "   belong to that group will be run. If an exclude group is given, tests in the group will not be run. "
+		print "   where none are given all available tests will be run. If an include suite is given, only tests that "
+		print "   belong to that suite will be run. If an exclude suite is given, tests in the suite will not be run. "
 		print "   The following syntax is used to select a test set;"
 		print ""
 		print "       test1    - a single testcase with id test1"
