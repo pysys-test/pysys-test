@@ -52,10 +52,7 @@ class BaseTest:
 
 	def setKeywordArgs(self, xargs):
 		for key in xargs.keys():
-			try:
-				exec("self.%s = xargs['%s']" % (key, key))
-			except:
-				pass
+			setattr(self, key, xargs[key])
 
 
 	# methods to add to and obtain the test outcome
@@ -70,14 +67,14 @@ class BaseTest:
 		return list[0]
 
 
-	# test mehtods for execution, validation and cleanup. THe execute and validate methods
-	# are abstract and should be implemented by a subclass
+	# test methods for execution, validation and cleanup. The execute method is
+	# abstract and must be implemented by a subclass. 
 	def execute(self):
 		raise NotImplementedError, "The execute method of the BaseTest class must be implemented in a subclass"
 
 
 	def validate(self):
-		raise NotImplementedError, "The validate method of the BaseTest class must be implemented in a subclass"
+		pass
 
 
 	def cleanup(self):
