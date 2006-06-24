@@ -37,13 +37,49 @@ log.setLevel(logging.NOTSET)
 
 
 class BaseTest:
+	"""The parent class of all PySys system tests.
+
+	BaseTest is the parent class of all PySys system tests, and should be subclassed to provide 
+	an implementation of the execute() method. The class is instantiated with information on the 
+	test input, reference and output data locations, the user defined mode the test is to be executed 
+	in, and the user defined extra arguments required for test execution. 
+
+	The class provides important utility functions for process management, test timing, test validation 
+	and storage of test validation steps. Validation of the test can be performed multiple times through 
+	the assert* functions, building up an internal list of individual validation outcomes. Currently 
+	supported test outcomes are;
+	
+	  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
+	  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
+	  DUMPEDCORE:  A process started by the test produced a core file (unix only)
+	  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
+	  FAILED:      A validation step of the test failed
+	  NOTVERIFIED: No validation steps were performed
+	  INSPECT:     A validation step of the test requires manual inspection
+	  PASSED:      A validation step of the test pass
+	
+	The overall outcome of the test is based on a precedence of the outcomes in the list, based on the order
+	as given above i.e. if three validation steps were performed in the test with outcomes TIMEDOUT, FAILED, 
+	PASSED the overall outcome would be TIMEDOUT; a test only passes when all validation steps passed. 
+	 
+	"""
+
 	def __init__ (self, input, output, reference, mode, xargs):
+		"""Create an instance of the BaseTest class.
+		
+		@param input: Specifies the default directory used to store input data to the test
+		@param output: Specifies the default output subdirectory used to store data during the test execution
+		@param reference: Specifies the default directory used to store reference data used by the test for validation
+		@param mode: The user defined mode the test is to be run in
+		@param xargs: The dictionary of additional arguments to be set as data attributes to the test class
+		
+		"""
 		self.input = input
 		self.output = output
 		self.reference = reference
 		self.mode = mode
 		self.setKeywordArgs(xargs)
-		self.processList = []
+		self.pocessList = []
 		self.monitorList = []
 		self.manualTester = None
 		self.outcome = []
