@@ -56,11 +56,11 @@ class BaseTest:
 	  FAILED:      A validation step of the test failed
 	  NOTVERIFIED: No validation steps were performed
 	  INSPECT:     A validation step of the test requires manual inspection
-	  PASSED:      A validation step of the test pass
+	  PASSED:      A validation step of the test passed
 	
 	The overall outcome of the test is based on a precedence of the outcomes in the list, based on the order
 	as given above i.e. if three validation steps were performed in the test with outcomes TIMEDOUT, FAILED, 
-	PASSED the overall outcome would be TIMEDOUT; a test only passes when all validation steps passed. 
+	PASSED the overall outcome would be TIMEDOUT; a test only passes when all validation steps pass. 
 	 
 	"""
 
