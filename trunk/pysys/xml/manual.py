@@ -26,7 +26,7 @@ from pysys.constants import *
 log = logging.getLogger('pysys.xml.manual')
 
 DTD='''
-<!ELEMENT manual-testcase (step)+ > 
+<!ELEMENT pysysmanualtest (step)+ > 
 <!ELEMENT step (description) >
 <!ELEMENT description (#PCDATA) >
 <!ATTLIST step title CDATA #REQUIRED
@@ -66,10 +66,10 @@ class XMLManualTestParser:
 		except:
 			raise Exception, "%s " % (sys.exc_info()[1])
 		else:
-			if self.doc.getElementsByTagName('manual-testcase') == []:
-				raise Exception, "No <manual-testcase> element supplied in XML descriptor"
+			if self.doc.getElementsByTagName('pysysmanualtest') == []:
+				raise Exception, "No <pysysmanualtest> element supplied in XML descriptor"
 			else:
-				self.root = self.doc.getElementsByTagName('manual-testcase')[0]
+				self.root = self.doc.getElementsByTagName('pysysmanualtest')[0]
 
 				
 	def unlink(self):
@@ -96,7 +96,6 @@ class XMLManualTestParser:
 					description = ""
 			stepnumber = stepnumber + 1		
 			steps.append(XMLManualTestStep(stepnumber, title, validate, description))
-		
 		return steps
 
 

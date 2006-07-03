@@ -38,7 +38,7 @@ class ManualTester:
 	def __init__(self, owner, filename, logname):
 		self.owner = owner
 		self.root = Tk()
-		self.root.title("Manual Tester - [%s]" % filename)
+		self.root.title("PySys Manual Tester - [%s]" % filename)
 		self.root.resizable(TRUE, TRUE)
 		self.textFrame = Frame(self.root, relief=RAISED, borderwidth=1, padx=16, pady=10)
 		self.filename = filename

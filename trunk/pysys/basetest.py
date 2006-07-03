@@ -79,7 +79,7 @@ class BaseTest:
 		self.reference = reference
 		self.mode = mode
 		self.setKeywordArgs(xargs)
-		self.pocessList = []
+		self.processList = []
 		self.monitorList = []
 		self.manualTester = None
 		self.outcome = []
