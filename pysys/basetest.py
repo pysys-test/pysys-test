@@ -64,19 +64,19 @@ class BaseTest:
 	 
 	"""
 
-	def __init__ (self, input, output, reference, mode, xargs):
+	def __init__ (self, descriptor, outsubdir, mode, xargs):
 		"""Create an instance of the BaseTest class.
 		
-		@param input: Specifies the default directory used to store input data to the test
-		@param output: Specifies the default output subdirectory used to store data during the test execution
-		@param reference: Specifies the default directory used to store reference data used by the test for validation
+		@param descriptor: The descriptor for the test giving all test details
+		@param outsubdir: The output subdirectory the test output will be written to
 		@param mode: The user defined mode the test is to be run in
 		@param xargs: The dictionary of additional arguments to be set as data attributes to the test class
 		
 		"""
-		self.input = input
-		self.output = output
-		self.reference = reference
+		self.descriptor = descriptor
+		self.input = descriptor.input
+		self.output = os.path.join(descriptor.output, outsubdir)
+		self.reference = descriptor.reference
 		self.mode = mode
 		self.setKeywordArgs(xargs)
 		self.processList = []
