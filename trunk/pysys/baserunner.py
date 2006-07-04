@@ -31,13 +31,13 @@ log.setLevel(logging.NOTSET)
 
 
 class BaseRunner:
-	def __init__(self, record, purge, cycle, mode, outsubdir, tests, xargs):
+	def __init__(self, record, purge, cycle, mode, outsubdir, descriptors, xargs):
 		self.record = record
 		self.purge = purge
 		self.cycle = cycle
 		self.mode = mode
 		self.outsubdir = outsubdir
-		self.tests = tests
+		self.descriptors = descriptors
 		self.xargs = xargs
 		self.setKeywordArgs(xargs)
 
@@ -129,20 +129,24 @@ class BaseRunner:
 			for outcome in PRECEDENT: results[cycle][outcome] = []
 
 			# loop through tests for the cycle
-			for test in self.tests:
+			for descriptor in self.descriptors:
 				startTime = time.time()
 				blocked = FALSE
 				keyboardInterupt = FALSE
 
 				# set the output subdirectory and purge contents
 				try:
-					outputDirectory = "%s/%s" % (test.output, self.outsubdir)
-					if cycle == 0 and os.path.exists(outputDirectory): self.purgeDirectory(outputDirectory)	
-					if self.cycle > 1: outputDirectory = "%s/cycle%d" % (outputDirectory, cycle+1)
-					if not os.path.exists(outputDirectory):
-						os.makedirs(outputDirectory)
-					else:
-						self.purgeDirectory(outputDirectory)
+					outsubdir = self.outsubdir
+					if not os.path.exists(os.path.join(descriptor.output, outsubdir)):
+						os.makedirs(os.path.join(descriptor.output, outsubdir))
+					
+					if cycle == 0: self.purgeDirectory(os.path.join(descriptor.output, outsubdir))
+				
+					if self.cycle > 1: 
+						outsubdir = os.path.join(outsubdir, 'cycle%d' % (cycle+1))
+						os.makedirs(os.path.join(descriptor.output, outsubdir))
+
+					outputDirectory = os.path.join(descriptor.output, outsubdir)
 				except:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 					blocked = TRUE
@@ -155,22 +159,22 @@ class BaseRunner:
 
 				# run the test execute, validate and cleanup methods
 				log.info("==========================================")
-				log.info("		" + test.id)
+				log.info("		" + descriptor.id)
 				log.info("==========================================")
 				try:
-					sys.path.append(os.path.dirname(test.module))
-					exec( "from %s import %s" % (os.path.basename(test.module), test.classname) )
-					exec( "testObj = %s(r'%s', r'%s', r'%s', r'%s', self.xargs)" % (test.classname, test.input, outputDirectory, test.reference, self.mode) )
+					sys.path.append(os.path.dirname(descriptor.module))
+					exec( "from %s import %s" % (os.path.basename(descriptor.module), descriptor.classname) )
+					exec( "testObj = %s(descriptor, r'%s', r'%s', self.xargs)" % (descriptor.classname, outsubdir, self.mode) )
 				except:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-					testObj = BaseTest(test.input, outputDirectory, test.reference, self.mode, self.xargs) 
+					testObj = BaseTest(descriptor, outsubdir, self.mode, self.xargs) 
 					blocked = TRUE
 				sys.path.pop()
 
-				if test.state != 'runnable':
+				if descriptor.state != 'runnable':
 					testObj.outcome.append(SKIPPED)
 					
-				elif self.mode and self.mode not in test.modes:
+				elif self.mode and self.mode not in descriptor.modes:
 					log.info("Unable to run test in %s mode", CONSTANTS[self.mode])
 					testObj.outcome.append(SKIPPED)
 
@@ -219,16 +223,16 @@ class BaseRunner:
 				testTime = math.floor(100*(time.time() - startTime))/100.0
 				totalDuration = totalDuration + testTime
 				outcome = testObj.getOutcome()
-				results[cycle][outcome].append(test.id)
+				results[cycle][outcome].append(descriptor.id)
 				log.info("")
 				log.info("Test duration %.2f secs", testTime)
 				log.info("Test final outcome %s", LOOKUP[outcome])
 				log.info("")
-				if rootLogger.getEffectiveLevel() == logging._levelNames['CRITICAL']: log.critical("%s: %s", LOOKUP[outcome], test.id)
+				if rootLogger.getEffectiveLevel() == logging._levelNames['CRITICAL']: log.critical("%s: %s", LOOKUP[outcome], descriptor.id)
 				
 				# call the hook for end of test execution
-				self.testComplete(test, outputDirectory)
-				del sys.modules["%s" % os.path.basename(test.module)]
+				self.testComplete(testObj, outputDirectory)
+				del sys.modules["%s" % os.path.basename(descriptor.module)]
 				del testObj
 
 				# remove the run logger handler

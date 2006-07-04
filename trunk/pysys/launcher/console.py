@@ -39,22 +39,22 @@ log = logging.getLogger('pysys.launcher.console')
 log.setLevel(logging.NOTSET)
 
 
-def createTestContainers(config, testIdSpecs, includes, excludes):
+def createDescriptors(config, testIdSpecs, includes, excludes):
 	if not config:	
 		descriptors = []
-		containers = []
+		descriptorfiles = []
 		ignoreSet = sets.Set(OSWALK_IGNORES)
 		for root, dirs, files in os.walk(os.getcwd()):
-			if DEFAULT_DESCRIPTOR in files: descriptors.append(os.path.join(root, DEFAULT_DESCRIPTOR))
+			if DEFAULT_DESCRIPTOR in files: descriptorfiles.append(os.path.join(root, DEFAULT_DESCRIPTOR))
 			for ignore in (ignoreSet & sets.Set(dirs)): dirs.remove(ignore)
 
-		for descriptor in descriptors:
+		for descriptorfile in descriptorfiles:
 			try:
-				containers.append(XMLDescriptorParser(descriptor).getContainer())
+				descriptors.append(XMLDescriptorParser(descriptorfile).getContainer())
 			except Exception, value:
 				print sys.exc_info()[0], sys.exc_info()[1]
-				print "Error reading descriptor %s" % descriptor
-		containers.sort(lambda x, y: cmp(x.id, y.id))
+				print "Error reading descriptorfile %s" % descriptorfile
+		descriptors.sort(lambda x, y: cmp(x.id, y.id))
 	else:
 		print "Config file launching not yet implemented"
 		sys.exit(-1)
@@ -63,30 +63,30 @@ def createTestContainers(config, testIdSpecs, includes, excludes):
 	tests = []
 	index = 0
 	if testIdSpecs == []:
-		tests = containers
+		tests = descriptors
 	else:
 		for testIdSpec in testIdSpecs:
 			try:	
 				if re.search('^[\w_]*$', testIdSpec):
-					for i in range(0,len(containers)):
-						if containers[i].id == testIdSpec: index = i
-					tests.extend(containers[index:index+1])
+					for i in range(0,len(descriptors)):
+						if descriptors[i].id == testIdSpec: index = i
+					tests.extend(descriptors[index:index+1])
 				
 				elif re.search('^:[\w_]*', testIdSpec):
-					for i in range(0,len(containers)):
-						if containers[i].id == string.split(testIdSpec, ':')[1]: index = i
-					tests.extend(containers[:index+1])
+					for i in range(0,len(descriptors)):
+						if descriptors[i].id == string.split(testIdSpec, ':')[1]: index = i
+					tests.extend(descriptors[:index+1])
 
 				elif re.search('^[\w_]*:$', testIdSpec):
-					for i in range(0,len(containers)):
-					  	if containers[i].id == string.split(testIdSpec, ':')[0]: index = i
-					tests.extend(containers[index:])
+					for i in range(0,len(descriptors)):
+					  	if descriptors[i].id == string.split(testIdSpec, ':')[0]: index = i
+					tests.extend(descriptors[index:])
 
 				elif re.search('^[\w_]*:[\w_]*$', testIdSpec):
-					for i in range(0,len(containers)):
-					  	if containers[i].id == string.split(testIdSpec, ':')[0]: index1 = i
-					  	if containers[i].id == string.split(testIdSpec, ':')[1]: index2 = i
-					tests.extend(containers[index1:index2+1])
+					for i in range(0,len(descriptors)):
+					  	if descriptors[i].id == string.split(testIdSpec, ':')[0]: index1 = i
+					  	if descriptors[i].id == string.split(testIdSpec, ':')[1]: index2 = i
+					tests.extend(descriptors[index1:index2+1])
 			except :
 				print sys.exc_info()[1]
 				print "Unable to locate requested testcase(s)"
@@ -198,12 +198,12 @@ class ConsolePrintHelper:
 
 
 	def printTests(self):
-		containers = createTestContainers(None, self.arguments, self.includes, self.excludes)		
+		descriptors = createDescriptors(None, self.arguments, self.includes, self.excludes)		
 
 		if self.list == TRUE:
 			suites = []
-			for container in containers:
-				for suite in container.suites:
+			for descriptor in descriptors:
+				for suite in descriptor.suites:
 					if suite not in suites:
 						suites.append(suite)
 			print "\nCurrent suites: "
@@ -213,19 +213,19 @@ class ConsolePrintHelper:
 			return 
 
 		maxsize = 0
-		for container in containers:
-			if len(container.id) > maxsize: maxsize = len(container.id)
+		for descriptor in descriptors:
+			if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
 		maxsize = maxsize + 2
 		
-		for container in containers:
-			padding = " " * (maxsize - len(container.id))
+		for descriptor in descriptors:
+			padding = " " * (maxsize - len(descriptor.id))
 			if not self.full:
-				print "%s:%s%s" % (container.id, padding, container.title)
+				print "%s:%s%s" % (descriptor.id, padding, descriptor.title)
 			else:
 				print "=========================================="
-				print "		" + container.id
+				print "		" + descriptor.id
 				print "=========================================="
-				container.toString()
+				descriptor.toString()
 
 
 
@@ -247,7 +247,7 @@ class ConsoleLaunchHelper:
 		self.outsubdir = PLATFORM
 		self.mode = None
 		self.userOptions = {}
-		self.containers = []
+		self.descriptors = []
 		self.optionString = 'hrpf:v:i:e:c:o:m:X:'
 		self.optionList = ["help","record","purge","config=", "verbosity=", "include=","exclude=","cycle=","outdir=","mode="]
 
@@ -345,8 +345,8 @@ class ConsoleLaunchHelper:
 
 
 	def runTests(self, runner):
-		containers = createTestContainers(self.config, self.arguments, self.includes, self.excludes)
-		r = runner(self.record, self.purge, self.cycle, self.mode, self.outsubdir, containers, self.userOptions)
+		descriptors = createDescriptors(self.config, self.arguments, self.includes, self.excludes)
+		r = runner(self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions)
 		r.start()
 		r.cleanup()
 		
