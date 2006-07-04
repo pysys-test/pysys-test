@@ -128,9 +128,9 @@ class BaseTest:
 	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
 		if workingDir == None: workingDir = r'%s' % self.output
 		if displayName == None: displayName = os.path.basename(command)
-
+		
 		try:
-			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, os.path.join(workingDir, stdout), os.path.join(workingDir, stderr) )
+			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
 			process.start()
 			if state == FOREGROUND:
 				log.info("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
