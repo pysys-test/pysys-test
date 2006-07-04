@@ -26,7 +26,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.xml.descriptor import XMLDescriptorParser
 
-EXPR1 = re.compile("^[\w\.]*=[\w\.]*$")
+EXPR1 = re.compile("^[\w\.]*=.*$")
 EXPR2 = re.compile("^[\w\.]*$")
 
 consoleLogger = logging.StreamHandler(sys.stdout)
