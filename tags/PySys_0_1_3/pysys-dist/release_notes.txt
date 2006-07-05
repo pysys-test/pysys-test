@@ -1,0 +1,7 @@
+PySys 0.1.3 Release Notes
+=========================
+
+This is an early ALPHA release of the software for
+development purposes. The software is liable to change
+in a non-backwards compatible way until it has reached 
+a BETA status. 
