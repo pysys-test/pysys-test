@@ -38,7 +38,7 @@ class ManualTester:
 	def __init__(self, owner, filename, logname):
 		self.owner = owner
 		self.root = Tk()
-		self.root.title("PySys Manual Tester - [%s]" % filename)
+		self.root.title("PySys Manual Tester - [%s]" % self.owner.descriptor.id)
 		self.root.resizable(TRUE, TRUE)
 		self.textFrame = Frame(self.root, relief=RAISED, borderwidth=1, padx=16, pady=10)
 		self.filename = filename
@@ -48,7 +48,7 @@ class ManualTester:
 		self.logFd = open(self.logname, "w", 0)
 		self.testFlag = -1
 		self.resultDict = {}
-		self.currentStep = 0
+		self.currentStep = -1
 		self.stepLabel = None
 		self.isRunning = 1
 
@@ -86,18 +86,20 @@ class ManualTester:
 		compFlag=DISABLED
 		
 		#initiate the text frame
-		self.textFrameGUI("Step %d: %s" %(self.steps[self.currentStep].number, self.steps[self.currentStep].title), 
-							 self.steps[self.currentStep].description)
-
-		#initiate the radio	frame if the verification is needed
-		if self.steps[self.currentStep].validate=="true" or	self.steps[self.currentStep].validate=="TRUE":
-			self.radioFrameGUI(NORMAL)
-		else:
+		if self.currentStep == -1:
+			self.textFrameGUI("Test purpose",  self.owner.descriptor.purpose)
 			self.radioFrameGUI(DISABLED)
+		else:
+			self.textFrameGUI("Step %d: %s" %(self.steps[self.currentStep].number, self.steps[self.currentStep].title), 
+							 self.steps[self.currentStep].description)
+			if self.steps[self.currentStep].validate=="true" or	self.steps[self.currentStep].validate=="TRUE":
+				self.radioFrameGUI(NORMAL)
+			else:
+				self.radioFrameGUI(DISABLED)
 
-		# compile the visibility of	the	buttons
-		if self.currentStep==0:
-			backFlag=DISABLED		
+		# compile the visibility of the buttons
+		if self.currentStep == -1:
+			backFlag=DISABLED
 		if self.currentStep==self.numberOfSteps-1:
 			nextFlag=DISABLED
 			compFlag=NORMAL
@@ -108,7 +110,7 @@ class ManualTester:
 		# update the frame
 		self.textFrame.update()
 
-		
+
 	def textFrameGUI(self, labelText, description):
 		if self.stepLabel is not None:
 			self.stepLabel.grid_remove()
@@ -127,9 +129,9 @@ class ManualTester:
 		message.tag_config("a", relief=GROOVE)
 		message.insert(INSERT, description, ("f","a"))
 		message.config(state=DISABLED)
-		message.grid(row=5, column=0)		 
-
+		message.grid(row=5, column=0)
  
+		
 	def radioFrameGUI(self,	rstate):
 		v=IntVar()
 		radioFrame=Frame(self.textFrame, relief=RIDGE, borderwidth=2)
@@ -142,7 +144,7 @@ class ManualTester:
 	def buttonFrameGUI(self, backFlag, nextFlag, compFlag):
 		buttonFrame=Frame(self.root, relief=GROOVE, borderwidth=0, highlightthickness=5)	
 
-		quitButton = Button(buttonFrame, relief=RIDGE ,justify=LEFT	,text="Quit",borderwidth="1",command=self.quitCallBack,font=("verdana",	10,"bold"))
+		quitButton = Button(buttonFrame, relief=RIDGE ,justify=LEFT	,text="Quit", borderwidth="1",command=self.quitCallBack,font=("verdana",	10,"bold"))
 		mygrid=quitButton.grid(row=0, column=0, sticky=W, ipadx=13, ipady=3, padx=5, pady=5)
 
 		quitButton = Button(buttonFrame, justify=LEFT, text="",	borderwidth="0")
@@ -201,7 +203,12 @@ class ManualTester:
 	
 	# call back for the next button click
 	def nextCallBack(self):
-		if (self.steps[self.currentStep].validate=="true" or self.steps[self.currentStep].validate=="TRUE"):
+		if self.currentStep == -1:
+			self.currentStep=self.currentStep+1
+			self.compileGUI()
+			return 
+			
+		if self.steps[self.currentStep].validate=="true" or self.steps[self.currentStep].validate=="TRUE":
 			if self.testFlag==-1:
 				tkMessageBox.showwarning("Warning", "Please select the step outcome before continuing ...", parent=self.root)
 			else:
