@@ -87,7 +87,7 @@ class ManualTester:
 		
 		#initiate the text frame
 		if self.currentStep == -1:
-			self.textFrameGUI("Test purpose",  self.owner.descriptor.purpose)
+			self.textFrameGUI(self.owner.descriptor.title,  self.owner.descriptor.purpose)
 			self.radioFrameGUI(DISABLED)
 		else:
 			self.textFrameGUI("Step %d: %s" %(self.steps[self.currentStep].number, self.steps[self.currentStep].title), 
@@ -114,7 +114,7 @@ class ManualTester:
 	def textFrameGUI(self, labelText, description):
 		if self.stepLabel is not None:
 			self.stepLabel.grid_remove()
-		self.stepLabel = Label(self.textFrame, text=labelText, font=("Verdana", 10, "bold"))
+		self.stepLabel = Label(self.textFrame, text=labelText, font=("Verdana", 10, "bold"), pady=5, justify=LEFT, wraplength=450)
 		self.stepLabel.grid(row=1, sticky=W)
 		
 		yscrollbar = Scrollbar(self.textFrame, orient=VERTICAL)
