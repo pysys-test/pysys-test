@@ -1,4 +1,4 @@
-#!/usr/bin/env pyton
+ #!/usr/bin/env python
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and any associated documentation
 # files (the "Software"), to deal in the Software without
@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import sys, os, os.path, getopt, sets, re, string, logging
+import sys, os, os.path, glob, getopt, sets, re, string, logging
 
 from pysys import rootLogger
 from pysys.constants import *
@@ -28,6 +28,7 @@ from pysys.xml.descriptor import XMLDescriptorParser
 
 EXPR1 = re.compile("^[\w\.]*=.*$")
 EXPR2 = re.compile("^[\w\.]*$")
+EXPR3 = re.compile("^[\w]*_([0-9]+)$")
 
 consoleLogger = logging.StreamHandler(sys.stdout)
 consoleFormatter = logging.Formatter('%(asctime)s %(levelname)-5s %(message)s')
@@ -230,7 +231,56 @@ class ConsolePrintHelper:
 
 
 class ConsoleMakeTestHelper:
-	pass
+	def __init__(self, workingDir, importString, extendString):
+		self.workingDir = workingDir
+		self.importString = importString
+		self.extendString = extendString
+		self.testId = None
+
+
+	def printUsage(self):
+		print "\nUsage: %s [option]*" % os.path.basename(sys.argv[0])
+		print "   where the [option] includes;"
+		print "       -h | --help                 print this message"
+		print "       -n | --nextid               use the next available test id"
+		print "       -t | --testid   STRING      the test id to create"
+		print ""
+		print "You must either select the -n flag to create a test with the next availabe id"
+		print "or specify the testcase id manually using -t STRING"
+		sys.exit()
+
+
+	def parseArgs(self, args):
+		try:
+			optlist, arguments = getopt.getopt(args, 'hnt:', ["help", "nextid", "testid="] )
+		except:
+			print "Error parsing command line arguments: %s" % (sys.exc_info()[1])
+			self.printUsage()
+
+		for option, value in optlist:
+			if option in ("-h", "--help"):
+				self.printUsage()
+
+			elif option in ("-n", "--nextid"):
+				self.testId = self.getNextId()				  
+				
+			elif option in ("-t", "--testid"):
+				try:
+					self.testId = value
+				except:
+					print "A valid string must be supplied"
+					self.printUsage()
+
+
+	def getNextId(self):
+		testids = glob.glob(r'%s/[a-zA-Z0-9_]*_[0-9]*' % (self.workingDir))
+		testids.sort()
+		
+		if not testids: return None
+		match = re.match('(?P<base>[a-zA-Z0-9_]*_)(?P<number>[0-9]*)', os.path.basename(testids.pop()))
+		base = match.group('base')
+		number = int(match.group('number')) + 1
+		return base + str(number).rjust(3, "0")
 
 
 
