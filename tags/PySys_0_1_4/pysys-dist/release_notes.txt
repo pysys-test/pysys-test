@@ -1,0 +1,15 @@
+PySys 0.1.4 Release Notes
+=========================
+
+This is an early ALPHA release of the software for development purposes. 
+The software is liable to change in a non-backwards compatible way until 
+it has reached a BETA status.
+
+
+What is new in this release
+---------------------------
+
+- Added the ConsoleMakeTestHelper class to pysys.launcher.console.
+  This facilitates the creation of new testcase structures from the 
+  command line. Updated pysys-examples/fibonacci to demostrate the 
+  use of the utilitiy class 

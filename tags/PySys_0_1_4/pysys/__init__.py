@@ -1,0 +1,34 @@
+"""PySys System Test Framework.
+
+"""
+
+import sys, logging
+logging._levelNames[50] = 'CRIT'
+
+__author__  = "Moray Grieve (moraygrieve@users.sourceforge.net)"
+"""The author of PySys."""
+
+__status__  = "alpha"
+"""The status of this release."""
+
+__version__ = "0.1.2"
+"""The version of this release."""
+
+__date__    = "14 June 2006"
+"""The date of this release."""
+
+__all__     = [ "constants",
+                "exceptions",
+                "baserunner",
+                "basetest",
+                "launcher",
+                "manual",
+                "process",
+                "utils",
+                "xml"]
+"""The submodules of PySys."""
+
+rootLogger = logging.getLogger('pysys')
+"""The root logger for all logging within PySys."""
+
+rootLogger.setLevel(logging.INFO)
