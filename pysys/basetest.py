@@ -36,6 +36,18 @@ log = logging.getLogger('pysys.test')
 log.setLevel(logging.NOTSET)
 
 
+TEST_TEMPLATE = '''%s
+%s
+
+class %s(%s):
+	def execute(self):
+		pass
+
+	def validate(self):
+		pass
+'''
+
+
 class BaseTest:
 	"""The parent class of all PySys system tests.
 

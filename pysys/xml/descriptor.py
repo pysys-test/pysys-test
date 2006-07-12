@@ -53,7 +53,7 @@ DTD='''
 '''
 
 
-TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
+DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
 <pysytest state="runnable">
     
   <description> 
@@ -128,7 +128,7 @@ class XMLDescriptorCreator:
 	def writeXML(self):
 		'''Write a test descriptor template to file.'''
 		fp = open(self.file, 'w')
-		fp.writelines(TEMPLATE % (self.suite, self.testclass, self.module))
+		fp.writelines(DESCRIPTOR_TEMPLATE % (self.suite, self.testclass, self.module))
 		fp.close
 
 
