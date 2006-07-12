@@ -25,6 +25,8 @@ from pysys import rootLogger
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.xml.descriptor import XMLDescriptorParser
+from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
+from pysys.basetest import TEST_TEMPLATE
 
 EXPR1 = re.compile("^[\w\.]*=.*$")
 EXPR2 = re.compile("^[\w\.]*$")
@@ -231,15 +233,13 @@ class ConsolePrintHelper:
 
 
 class ConsoleMakeTestHelper:
-	def __init__(self, workingDir, importString, extendString):
+	def __init__(self, workingDir):
 		self.workingDir = workingDir
-		self.importString = importString
-		self.extendString = extendString
 		self.testId = None
 
 
 	def printUsage(self):
-		print "\nUsage: %s [option]*" % os.path.basename(sys.argv[0])
+		print "\nUsage: %s [option]+" % os.path.basename(sys.argv[0])
 		print "   where the [option] includes;"
 		print "       -h | --help                 print this message"
 		print "       -n | --nextid               use the next available test id"
@@ -257,6 +257,11 @@ class ConsoleMakeTestHelper:
 			print "Error parsing command line arguments: %s" % (sys.exc_info()[1])
 			self.printUsage()
 
+		if optlist == []:
+			print "Error - you must supply either the -n or -t option to %s ..." % os.path.basename(sys.argv[0])
+			self.printUsage()
+			sys.exit()
+			
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage()
@@ -270,6 +275,8 @@ class ConsoleMakeTestHelper:
 				except:
 					print "A valid string must be supplied"
 					self.printUsage()
+					
+		return self.testId
 
 
 	def getNextId(self):
@@ -281,6 +288,35 @@ class ConsoleMakeTestHelper:
 		base = match.group('base')
 		number = int(match.group('number')) + 1
 		return base + str(number).rjust(3, "0")
+
+
+	def makeTest(self, input=None, output=None, reference=None, descriptor=None, testclass=None, module=None, suite="", 
+				constantsImport=None, basetestImport=None, basetest=None, teststring=None):
+		if input==None: input = DEFAULT_INPUT
+		if output==None: output = DEFAULT_OUTPUT
+		if reference==None: reference = DEFAULT_REFERENCE
+		if descriptor==None: descriptor = DEFAULT_DESCRIPTOR
+		if testclass==None: testclass = DEFAULT_TESTCLASS
+		if module==None: module = DEFAULT_MODULE
+		if constantsImport ==None: constantsImport = "from pysys.constants import *"
+		if basetestImport == None: basetestImport = "from pysys.basetest import BaseTest"
+		if basetest == None: basetest = "BaseTest"
+		
+		os.makedirs(self.testId)
+		os.makedirs(os.path.join(self.testId, input))
+		os.makedirs(os.path.join(self.testId, output))
+		os.makedirs(os.path.join(self.testId, reference))
+		
+		descriptor_fp = open(os.path.join(self.testId, descriptor), "w")
+		descriptor_fp.write(DESCRIPTOR_TEMPLATE %(suite, testclass, module))
+		descriptor_fp.close()
+		
+		testclass_fp = open(os.path.join(self.testId, "%s.py" % module), "w")
+		if teststring == None:
+			testclass_fp.write(TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
+		else:
+			testclass_fp.write(teststring)
+		testclass_fp.close()
 
 
 
