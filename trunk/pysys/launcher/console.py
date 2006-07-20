@@ -42,7 +42,7 @@ log = logging.getLogger('pysys.launcher.console')
 log.setLevel(logging.NOTSET)
 
 
-def createDescriptors(config, testIdSpecs, includes, excludes):
+def createDescriptors(config, testIdSpecs, includes, excludes, trace=None):
 	if not config:	
 		descriptors = []
 		descriptorfiles = []
@@ -126,6 +126,17 @@ def createDescriptors(config, testIdSpecs, includes, excludes):
 			else:
 				index = index +1
 
+
+	# trim down the list based on the traceability
+	index = 0
+	while index != len(tests):
+		remove = FALSE
+		
+		if trace and ( trace not in tests[index].traceability ):
+			tests.pop(index)
+		else:
+			index = index + 1
+	
 	if len(tests) == 0:
 		print "The supplied options and subset of tests did not result in any tests being selected to run"
 		sys.exit()
@@ -137,14 +148,16 @@ def createDescriptors(config, testIdSpecs, includes, excludes):
 class ConsolePrintHelper:
 	def __init__(self):
 		self.arguments = []
-		self.list = FALSE
 		self.full = FALSE
+		self.suites = FALSE
+		self.requirements = FALSE
 		self.mode = None
+		self.trace = None
 		self.includes = []
 		self.excludes = []
 		self.tests = None
-		self.optionString = 'hsfi:e:m:'
-		self.optionList = ["help", "suites", "full", "include=", "exclude=", "mode="] 
+		self.optionString = 'hfsrm:t:i:e:'
+		self.optionList = ["help", "full", "suites", "requirements", "mode=", "trace=", "include=", "exclude="] 
 		
 
 	def printUsage(self):
@@ -153,7 +166,9 @@ class ConsolePrintHelper:
 		print "       -h | --help                 print this message"
 		print "       -f | --full                 print full information"
 		print "       -s | --suites               print test suites defined"
+		print "       -r | --requirements         print test requirements covered"
 		print "       -m | --mode      STRING     print tests that run in user defined mode "
+		print "       -t | --trace     STRING     print tests which cover requirement id " 
 		print "       -i | --include   STRING     print tests in included suite (can be specified multiple times)"
 		print "       -e | --exclude   STRING     do not print tests in excluded suite (can be specified multiple times)"
 		print ""
@@ -184,37 +199,56 @@ class ConsolePrintHelper:
 			if option in ("-h", "--help"):
 				self.printUsage()
 
-			if option in ("-s", "--suites"):
-				self.list = TRUE
-
 			elif option in ("-f", "--full"):
 				self.full = TRUE
+				
+			if option in ("-s", "--suites"):
+				self.suites = TRUE
+			
+			if option in ("-r", "--requirements"):
+				self.requirements = TRUE
+				
+			elif option in ("-m", "--mode"):
+				self.mode = value
 
+			elif option in ("-t", "--trace"):
+				self.trace = value
+				
 			elif option in ("-i", "--include"):
 				self.includes.append(value)
 
 			elif option in ("-e", "--exclude"):
 				self.excludes.append(value)
 
-			elif option in ("-m", "--mode"):
-				self.mode = value
-
 
 	def printTests(self):
-		descriptors = createDescriptors(None, self.arguments, self.includes, self.excludes)		
+		descriptors = createDescriptors(None, self.arguments, self.includes, self.excludes, self.trace)		
 
-		if self.list == TRUE:
+		exit = 0
+		if self.suites == TRUE:
 			suites = []
 			for descriptor in descriptors:
 				for suite in descriptor.suites:
 					if suite not in suites:
 						suites.append(suite)
-			print "\nCurrent suites: "
+			print "\nSuites defined: "
 			for suite in suites:
 				print "                 %s" % (suite)
-			print "\n"
-			return 
+			exit = 1
 
+		if self.requirements == TRUE:
+			requirements = []
+			for descriptor in descriptors:
+				for requirement in descriptor.traceability:
+					if requirement not in requirements:
+						requirements.append(requirement)
+			print "\nRequirements covered: "
+			for requirement in requirements:
+				print "                 %s" % (requirement)
+			exit = 1
+		
+		if exit: return
+			
 		maxsize = 0
 		for descriptor in descriptors:
 			if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
