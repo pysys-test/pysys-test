@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='PySys',
-		version='0.1.4',
+		version='0.1.5',
 		description='Python System Test Framework',
 		author='Moray Grieve',
 		author_email='moraygrieve@users.sourceforge.net',
