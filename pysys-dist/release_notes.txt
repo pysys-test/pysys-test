@@ -1,4 +1,4 @@
-PySys 0.1.4 Release Notes
+PySys 0.1.5 Release Notes
 =========================
 
 This is an early ALPHA release of the software for development purposes. 
@@ -9,6 +9,16 @@ it has reached a BETA status.
 What is new in this release
 ---------------------------
 
+- Added support for the requirements traceability. This includes printing 
+  requirements covered by a set of testcases, and running testcases which 
+  cover a particular requirement id
+  
+  
+Release History
+---------------
+
+0.1.3 to 0.1.4
+--------------
 - Added the ConsoleMakeTestHelper class to pysys.launcher.console.
   This facilitates the creation of new testcase structures from the 
   command line. Updated pysys-examples/fibonacci to demostrate the 
