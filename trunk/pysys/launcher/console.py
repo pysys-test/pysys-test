@@ -42,7 +42,7 @@ log = logging.getLogger('pysys.launcher.console')
 log.setLevel(logging.NOTSET)
 
 
-def createDescriptors(config, testIdSpecs, includes, excludes, trace=None):
+def createDescriptors(config, testIdSpecs, includes, excludes, trace):
 	if not config:	
 		descriptors = []
 		descriptorfiles = []
@@ -361,6 +361,7 @@ class ConsoleLaunchHelper:
 		self.purge = FALSE
 		self.config = None
 		self.verbosity = INFO
+		self.trace = None
 		self.includes = []
 		self.excludes = []
 		self.cycle = 1
@@ -368,8 +369,8 @@ class ConsoleLaunchHelper:
 		self.mode = None
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpf:v:i:e:c:o:m:X:'
-		self.optionList = ["help","record","purge","config=", "verbosity=", "include=","exclude=","cycle=","outdir=","mode="]
+		self.optionString = 'hrpf:v:t:i:e:c:o:m:X:'
+		self.optionList = ["help","record","purge","config=", "verbosity=", "trace=", "include=","exclude=","cycle=","outdir=","mode="]
 
 
 	def printUsage(self, printXOptions):
@@ -380,6 +381,7 @@ class ConsoleLaunchHelper:
 		print "       -p | --purge                purge the output subdirectory on test pass"
 		print "       -f | --config    STRING     use specified config file for locating the test descriptors"
 		print "       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)"
+		print "       -t | --trace     STRING     set the requirement id for the test run"
 		print "       -i | --include   STRING     set the test suites to include (can be specified multiple times)"
 		print "       -e | --exclude   STRING     set the test suites to exclude (can be specified multiple times)"
 		print "       -c | --cycle     INT        set the the number of cycles to run the tests"
@@ -438,6 +440,9 @@ class ConsoleLaunchHelper:
 				elif self.verbosity == "CRIT":
 					rootLogger.setLevel(logging.CRITICAL)	
 
+			elif option in ("-t", "--trace"):
+				self.trace = value
+									
 			elif option in ("-i", "--include"):
 				self.includes.append(value)
 
@@ -465,7 +470,7 @@ class ConsoleLaunchHelper:
 
 
 	def runTests(self, runner):
-		descriptors = createDescriptors(self.config, self.arguments, self.includes, self.excludes)
+		descriptors = createDescriptors(self.config, self.arguments, self.includes, self.excludes, self.trace)
 		r = runner(self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions)
 		r.start()
 		r.cleanup()
