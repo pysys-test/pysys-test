@@ -14,11 +14,19 @@ tenth entry is equal to 34.
   <classification>
     <suites>
       <suite>Fibonacci examples</suite>
+      <suite>Fibonacci examples2</suite>
     </suites>
   </classification>
 
   <data>
     <class name="PySysTest" module="run"/>
   </data>
+  
+  <traceability>
+    <requirements>  
+      <requirement id="AL1" />    
+      <requirement id="AL2" />    
+    </requirements>
+  </traceability>
 </pysystest>
 
