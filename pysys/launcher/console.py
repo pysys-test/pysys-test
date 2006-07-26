@@ -64,7 +64,6 @@ def createDescriptors(config, testIdSpecs, includes, excludes, trace):
 
 	# trim down the list for those tests in the test specifiers 
 	tests = []
-	index = 0
 	if testIdSpecs == []:
 		tests = descriptors
 	else:
@@ -74,7 +73,6 @@ def createDescriptors(config, testIdSpecs, includes, excludes, trace):
 					for i in range(0,len(descriptors)):
 						if descriptors[i].id == testIdSpec: index = i
 					tests.extend(descriptors[index:index+1])
-				
 				elif re.search('^:[\w_]*', testIdSpec):
 					for i in range(0,len(descriptors)):
 						if descriptors[i].id == string.split(testIdSpec, ':')[1]: index = i
@@ -91,7 +89,6 @@ def createDescriptors(config, testIdSpecs, includes, excludes, trace):
 					  	if descriptors[i].id == string.split(testIdSpec, ':')[1]: index2 = i
 					tests.extend(descriptors[index1:index2+1])
 			except :
-				print sys.exc_info()[1]
 				print "Unable to locate requested testcase(s)"
 				sys.exit()
 
