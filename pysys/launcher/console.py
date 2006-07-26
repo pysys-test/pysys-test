@@ -22,6 +22,7 @@
 import sys, os, os.path, glob, getopt, sets, re, string, logging
 
 from pysys import rootLogger
+from pysys import __version__
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.xml.descriptor import XMLDescriptorParser
@@ -158,6 +159,7 @@ class ConsolePrintHelper:
 		
 
 	def printUsage(self):
+		print "PySys System Test Framework (version %s)" % __version__ 
 		print "\nUsage: %s [option]* [tests]*" % os.path.basename(sys.argv[0])
 		print "    where options include;"
 		print "       -h | --help                 print this message"
@@ -270,6 +272,7 @@ class ConsoleMakeTestHelper:
 
 
 	def printUsage(self):
+		print "PySys System Test Framework (version %s)" % __version__ 
 		print "\nUsage: %s [option]+" % os.path.basename(sys.argv[0])
 		print "   where the [option] includes;"
 		print "       -h | --help                 print this message"
@@ -371,6 +374,7 @@ class ConsoleLaunchHelper:
 
 
 	def printUsage(self, printXOptions):
+		print "PySys System Test Framework (version %s)" % __version__ 
 		print "\nUsage: %s [option]* [tests]*" % os.path.basename(sys.argv[0])
 		print "   where the [option] includes;"
 		print "       -h | --help                 print this message"
