@@ -49,7 +49,7 @@ class PySysTest(BaseTest):
 		self.assertOrderedGrep('fibonacci.txt', exprList=['0', '1', '1', '5'])
 
 		# next validation looks for the number of lines matching a regexpr
-		self.assertLineCount('fibonacci.txt', expr='[0-9]*', condition='==10')
+		self.assertLineCount('fibonacci.txt', expr='[0-9]+', condition='==10')
 
 
       
