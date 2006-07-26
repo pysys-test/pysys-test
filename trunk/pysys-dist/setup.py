@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
+import pysys
 from distutils.core import setup
 
 setup(name='PySys',
-		version='0.1.5',
+		version=pysys.__version__,
+		author=pysys.__author__,
+		author_email=pysys.__author_email__,
 		description='Python System Test Framework',
-		author='Moray Grieve',
-		author_email='moraygrieve@users.sourceforge.net',
 		url="http://sourceforge.net/projects/pysys",
 		packages=['pysys', 'pysys.launcher',  'pysys.manual', 'pysys.process', 'pysys.process.plat-win32', 'pysys.process.plat-unix', 'pysys.utils', 'pysys.xml']
 		)
