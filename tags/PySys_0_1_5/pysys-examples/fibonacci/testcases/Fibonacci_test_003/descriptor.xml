@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest state="runnable">
+    
+  <description> 
+    <title>Python as an external process to calculate the fibonacci series - validate on stdout</title>    
+    <purpose><![CDATA[
+In this example testcase, the pysys process module is used to start a separate python 
+process to calculate the first ten entries of the fibonacci series. The python process 
+executes a script which prints to stdout the first ten entries of the series. The stdout 
+and stderr of the process are written to the testcase output subdirectory and used in the 
+testcase validation to determine that the correct values are calculated. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <suites>
+      <suite></suite>
+    </suites>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+</pysystest>
