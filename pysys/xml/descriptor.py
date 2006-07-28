@@ -54,7 +54,7 @@ DTD='''
 
 
 DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
-<pysytest state="runnable">
+<pysystest state="runnable">
     
   <description> 
     <title></title>    
@@ -72,6 +72,12 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
   <data>
     <class name="%s" module="%s"/>
   </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
 </pysystest>
 ''' 
 
