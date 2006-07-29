@@ -1,0 +1,18 @@
+<pysysmanualtest>
+
+  <step title="The first example test step" validate="false">
+    <description><![CDATA[
+]]> 
+    </description>  
+  </step>
+  
+  <step title="The second example test step" validate="true">
+    <description><![CDATA[
+]]> 
+    </description>  
+  </step>
+
+</pysysmanualtest>
+
+
+
