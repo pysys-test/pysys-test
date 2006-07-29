@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest state="runnable">
+    
+  <description> 
+    <title>Manual calculation of the fibonnaci series using the manual tester</title>    
+    <purpose><![CDATA[
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <suites>
+      <suite></suite>
+    </suites>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+</pysystest>
