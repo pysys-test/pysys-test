@@ -43,25 +43,21 @@ log = logging.getLogger('pysys.launcher.console')
 log.setLevel(logging.NOTSET)
 
 
-def createDescriptors(config, testIdSpecs, includes, excludes, trace):
-	if not config:	
-		descriptors = []
-		descriptorfiles = []
-		ignoreSet = sets.Set(OSWALK_IGNORES)
-		for root, dirs, files in os.walk(os.getcwd()):
-			if DEFAULT_DESCRIPTOR in files: descriptorfiles.append(os.path.join(root, DEFAULT_DESCRIPTOR))
-			for ignore in (ignoreSet & sets.Set(dirs)): dirs.remove(ignore)
+def createDescriptors(testIdSpecs, type, includes, excludes, trace):
+	descriptors = []
+	descriptorfiles = []
+	ignoreSet = sets.Set(OSWALK_IGNORES)
+	for root, dirs, files in os.walk(os.getcwd()):
+		if DEFAULT_DESCRIPTOR in files: descriptorfiles.append(os.path.join(root, DEFAULT_DESCRIPTOR))
+		for ignore in (ignoreSet & sets.Set(dirs)): dirs.remove(ignore)
 
-		for descriptorfile in descriptorfiles:
-			try:
-				descriptors.append(XMLDescriptorParser(descriptorfile).getContainer())
-			except Exception, value:
-				print sys.exc_info()[0], sys.exc_info()[1]
-				print "Error reading descriptorfile %s" % descriptorfile
-		descriptors.sort(lambda x, y: cmp(x.id, y.id))
-	else:
-		print "Config file launching not yet implemented"
-		sys.exit(-1)
+	for descriptorfile in descriptorfiles:
+		try:
+			descriptors.append(XMLDescriptorParser(descriptorfile).getContainer())
+		except Exception, value:
+			print sys.exc_info()[0], sys.exc_info()[1]
+			print "Error reading descriptorfile %s" % descriptorfile
+	descriptors.sort(lambda x, y: cmp(x.id, y.id))
 
 	# trim down the list for those tests in the test specifiers 
 	tests = []
@@ -92,7 +88,16 @@ def createDescriptors(config, testIdSpecs, includes, excludes, trace):
 			except :
 				print "Unable to locate requested testcase(s)"
 				sys.exit()
-
+				
+	# trim down the list based on the type
+	if type:
+		index = 0
+		while index != len(tests):
+			if type != tests[index].type:
+				tests.pop(index)
+			else:
+				index = index + 1
+			
 	# trim down the list based on the include and exclude suites
 	if len(excludes) != 0:
 		index = 0
@@ -126,14 +131,13 @@ def createDescriptors(config, testIdSpecs, includes, excludes, trace):
 
 
 	# trim down the list based on the traceability
-	index = 0
-	while index != len(tests):
-		remove = FALSE
-		
-		if trace and ( trace not in tests[index].traceability ):
-			tests.pop(index)
-		else:
-			index = index + 1
+	if trace:
+		index = 0
+		while index != len(tests):
+			if trace not in tests[index].traceability :
+				tests.pop(index)
+			else:
+				index = index + 1
 	
 	if len(tests) == 0:
 		print "The supplied options and subset of tests did not result in any tests being selected to run"
@@ -150,12 +154,13 @@ class ConsolePrintHelper:
 		self.suites = FALSE
 		self.requirements = FALSE
 		self.mode = None
+		self.type = None
 		self.trace = None
 		self.includes = []
 		self.excludes = []
 		self.tests = None
-		self.optionString = 'hfsrm:t:i:e:'
-		self.optionList = ["help", "full", "suites", "requirements", "mode=", "trace=", "include=", "exclude="] 
+		self.optionString = 'hfsrm:a:t:i:e:'
+		self.optionList = ["help","full","suites","requirements","mode=","type=","trace=","include=","exclude="] 
 		
 
 	def printUsage(self):
@@ -167,6 +172,7 @@ class ConsolePrintHelper:
 		print "       -s | --suites               print test suites defined"
 		print "       -r | --requirements         print test requirements covered"
 		print "       -m | --mode      STRING     print tests that run in user defined mode "
+		print "       -a | --type      STRING     print tests of supplied type (auto or manual, default all)"
 		print "       -t | --trace     STRING     print tests which cover requirement id " 
 		print "       -i | --include   STRING     print tests in included suite (can be specified multiple times)"
 		print "       -e | --exclude   STRING     do not print tests in excluded suite (can be specified multiple times)"
@@ -210,6 +216,12 @@ class ConsolePrintHelper:
 			elif option in ("-m", "--mode"):
 				self.mode = value
 
+			elif option in ("-a", "--type"):
+				self.type = value
+				if self.type not in ["auto", "manual"]:
+					log.warn("Unsupported test type - valid types are auto and manual")
+					sys.exit(1)
+
 			elif option in ("-t", "--trace"):
 				self.trace = value
 				
@@ -221,7 +233,7 @@ class ConsolePrintHelper:
 
 
 	def printTests(self):
-		descriptors = createDescriptors(None, self.arguments, self.includes, self.excludes, self.trace)		
+		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace)		
 
 		exit = 0
 		if self.suites == TRUE:
@@ -269,7 +281,7 @@ class ConsoleMakeTestHelper:
 	def __init__(self, workingDir):
 		self.workingDir = workingDir
 		self.testId = None
-
+		self.type = None
 
 	def printUsage(self):
 		print "PySys System Test Framework (version %s)" % __version__ 
@@ -278,6 +290,7 @@ class ConsoleMakeTestHelper:
 		print "       -h | --help                 print this message"
 		print "       -n | --nextid               use the next available test id"
 		print "       -t | --testid   STRING      the test id to create"
+		print "       -a | --type     STRING      set the test type to auto or manual (default auto)"
 		print ""
 		print "You must either select the -n flag to create a test with the next availabe id"
 		print "or specify the testcase id manually using -t STRING"
@@ -286,7 +299,7 @@ class ConsoleMakeTestHelper:
 
 	def parseArgs(self, args):
 		try:
-			optlist, arguments = getopt.getopt(args, 'hnt:', ["help", "nextid", "testid="] )
+			optlist, arguments = getopt.getopt(args, 'hnt:a:', ["help","nextid","testid=","type="] )
 		except:
 			print "Error parsing command line arguments: %s" % (sys.exc_info()[1])
 			self.printUsage()
@@ -309,7 +322,13 @@ class ConsoleMakeTestHelper:
 				except:
 					print "A valid string must be supplied"
 					self.printUsage()
-					
+
+			elif option in ("-a", "--type"):
+				self.type = value
+				if self.type not in ["auto", "manual"]:
+					log.warn("Unsupported test type - valid types are auto and manual")
+					sys.exit(1)					
+
 		return self.testId
 
 
@@ -324,8 +343,8 @@ class ConsoleMakeTestHelper:
 		return base + str(number).rjust(3, "0")
 
 
-	def makeTest(self, input=None, output=None, reference=None, descriptor=None, testclass=None, module=None, suite="", 
-				constantsImport=None, basetestImport=None, basetest=None, teststring=None):
+	def makeTest(self, input=None, output=None, reference=None, descriptor=None, testclass=None, module=None,
+				 suite="", constantsImport=None, basetestImport=None, basetest=None, teststring=None):
 		if input==None: input = DEFAULT_INPUT
 		if output==None: output = DEFAULT_OUTPUT
 		if reference==None: reference = DEFAULT_REFERENCE
@@ -342,7 +361,7 @@ class ConsoleMakeTestHelper:
 		os.makedirs(os.path.join(self.testId, reference))
 		
 		descriptor_fp = open(os.path.join(self.testId, descriptor), "w")
-		descriptor_fp.write(DESCRIPTOR_TEMPLATE %(suite, testclass, module))
+		descriptor_fp.write(DESCRIPTOR_TEMPLATE %(self.type, suite, testclass, module))
 		descriptor_fp.close()
 		
 		testclass_fp = open(os.path.join(self.testId, "%s.py" % module), "w")
@@ -359,8 +378,8 @@ class ConsoleLaunchHelper:
 		self.arguments = []
 		self.record = FALSE
 		self.purge = FALSE
-		self.config = None
 		self.verbosity = INFO
+		self.type = None
 		self.trace = None
 		self.includes = []
 		self.excludes = []
@@ -369,8 +388,8 @@ class ConsoleLaunchHelper:
 		self.mode = None
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpf:v:t:i:e:c:o:m:X:'
-		self.optionList = ["help","record","purge","config=", "verbosity=", "trace=", "include=","exclude=","cycle=","outdir=","mode="]
+		self.optionString = 'hrpv:a:t:i:e:c:o:m:X:'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode="]
 
 
 	def printUsage(self, printXOptions):
@@ -380,8 +399,8 @@ class ConsoleLaunchHelper:
 		print "       -h | --help                 print this message"
 		print "       -r | --record               record the test results in the working directory"
 		print "       -p | --purge                purge the output subdirectory on test pass"
-		print "       -f | --config    STRING     use specified config file for locating the test descriptors"
 		print "       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)"
+		print "       -a | --type      STRING     set the test type to run (auto or manual, default is both)" 
 		print "       -t | --trace     STRING     set the requirement id for the test run"
 		print "       -i | --include   STRING     set the test suites to include (can be specified multiple times)"
 		print "       -e | --exclude   STRING     set the test suites to exclude (can be specified multiple times)"
@@ -424,11 +443,8 @@ class ConsoleLaunchHelper:
 			elif option in ("-r", "--record"):
 				self.record = TRUE
 
-			elif option in ("-u", "--purge"):
+			elif option in ("-p", "--purge"):
 				self.purge = TRUE		  
-
-			elif option in ("-f", "--config"):
-				self.config = value
 
 			elif option in ("-v", "--verbosity"):
 				self.verbosity = value
@@ -440,6 +456,12 @@ class ConsoleLaunchHelper:
 					rootLogger.setLevel(logging.WARN)	
 				elif self.verbosity == "CRIT":
 					rootLogger.setLevel(logging.CRITICAL)	
+
+			elif option in ("-a", "--type"):
+				self.type = value
+				if self.type not in ["auto", "manual"]:
+					log.warn("Unsupported test type - valid types are auto and manual")
+					sys.exit(1)
 
 			elif option in ("-t", "--trace"):
 				self.trace = value
@@ -471,7 +493,7 @@ class ConsoleLaunchHelper:
 
 
 	def runTests(self, runner):
-		descriptors = createDescriptors(self.config, self.arguments, self.includes, self.excludes, self.trace)
+		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace)
 		r = runner(self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions)
 		r.start()
 		r.cleanup()
