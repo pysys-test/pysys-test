@@ -43,6 +43,7 @@ DTD='''
 <!ELEMENT suite (#PCDATA) >
 <!ELEMENT mode (#PCDATA) >
 <!ELEMENT requirement EMPTY >
+<!ATTLIST pysystest type (auto | manual ) "auto" >
 <!ATTLIST pysystest state (runnable | deprecated | skipped) "runnable" >
 <!ATTLIST class name CDATA #REQUIRED
                 module CDATA #REQUIRED >
@@ -54,7 +55,7 @@ DTD='''
 
 
 DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
-<pysystest state="runnable">
+<pysystest type="%s" state="runnable">
     
   <description> 
     <title></title>    
@@ -85,9 +86,10 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
 class XMLDescriptorContainer:
 	'''Holder class for the contents of a test descriptor.'''
 
-	def __init__(self, id, state, title, purpose, suites, modes, classname, module, input, output, reference, traceability):
+	def __init__(self, id, type, state, title, purpose, suites, modes, classname, module, input, output, reference, traceability):
 		'''Class constructor.'''
 		self.id = id
+		self.type = type
 		self.state = state
 		self.title = title
 		self.purpose = purpose
@@ -103,6 +105,7 @@ class XMLDescriptorContainer:
 		
 	def toString(self):
 		print "Test id:           %s" % self.id
+		print "Test type:         %s" % self.type
 		print "Test state:        %s" % self.state
 		print "Test title:        %s" % self.title
 		print "Test purpose:     ",
@@ -118,15 +121,17 @@ class XMLDescriptorContainer:
 		print "Test output:       %s" % self.output
 		print "Test reference:    %s" % self.reference
 		print "Test traceability: %s" % self.traceability
+		print ""
 
 
 
 class XMLDescriptorCreator:
 	'''Helper class to create a test desriptor template.'''
 		
-	def __init__(self, file, suite=DEFAULT_SUITE, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
+	def __init__(self, file, type="auto", suite=DEFAULT_SUITE, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
 		'''Class constructor.'''
 		self.file=file
+		self.type = type
 		self.suite = suite
 		self.testclass = testclass
 		self.module = module
@@ -134,7 +139,7 @@ class XMLDescriptorCreator:
 	def writeXML(self):
 		'''Write a test descriptor template to file.'''
 		fp = open(self.file, 'w')
-		fp.writelines(DESCRIPTOR_TEMPLATE % (self.suite, self.testclass, self.module))
+		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.suite, self.testclass, self.module))
 		fp.close
 
 
@@ -170,7 +175,7 @@ class XMLDescriptorParser:
 
 	def getContainer(self):
 		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
-		return XMLDescriptorContainer(self.getID(), self.getState(),
+		return XMLDescriptorContainer(self.getID(), self.getType(), self.getState(),
 										self.getTitle(), self.getPurpose(),
 										self.getsuites(), self.getModes(),
 										self.getClassDetails()[0],
@@ -189,12 +194,24 @@ class XMLDescriptorParser:
 	def getID(self):
 		'''Return the id of the test.'''
 		return os.path.basename(self.dirname)
-	
-	
+
+
+	def getType(self):
+		'''Return the type attribute of the test element.'''
+		type = self.root.getAttribute("type")	
+		if type == "":
+			type = "auto"
+		elif type not in ["auto", "manual"]:
+			raise Exception, "The type attribute of the test element should be \"auto\" or \"manual\""
+		return type
+
+
 	def getState(self):
 		'''Return the state attribute of the test element.'''
 		state = self.root.getAttribute("state")	
-		if state not in ["runnable", "deprecated", "skipped"]: 
+		if state == "":
+			state = "runnable"
+		elif state not in ["runnable", "deprecated", "skipped"]: 
 			raise Exception, "The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\""
 		return state 
 	
