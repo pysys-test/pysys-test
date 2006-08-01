@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="yes"?>
-<pysystest state="runnable">
+<pysystest type="auto" state="runnable">
     
   <description> 
     <title>Python to calculate the fibonacci series - validate in memory</title>

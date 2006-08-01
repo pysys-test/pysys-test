@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="yes"?>
-<pysystest state="runnable">
+<pysystest type="manual" state="runnable">
     
   <description> 
     <title>Manual calculation of the fibonnaci series using the manual tester</title>    
