@@ -290,7 +290,7 @@ class ConsoleMakeTestHelper:
 		print "       -h | --help                 print this message"
 		print "       -n | --nextid               use the next available test id"
 		print "       -t | --testid   STRING      the test id to create"
-		print "       -a | --type     STRING      set the test type to auto or manual (default auto)"
+		print "       -a | --type     STRING      set the test type (auto or manual, default is auto)"
 		print ""
 		print "You must either select the -n flag to create a test with the next availabe id"
 		print "or specify the testcase id manually using -t STRING"
