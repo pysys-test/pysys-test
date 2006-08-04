@@ -49,7 +49,7 @@ class BaseRunner:
 			except:
 				pass
 
-			
+
 	def purgeDirectory(self, dir, delTop=FALSE):
 		for file in os.listdir(dir):
 		  	path = os.path.join(dir, file)
@@ -116,7 +116,7 @@ class BaseRunner:
 		pass
 
 
-	def start(self, printSummary=TRUE):
+	def start(self, writers=[]):
 		results = {}
 		totalDuration = 0
 		
@@ -257,25 +257,11 @@ class BaseRunner:
 			except:
 				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-		# print out the test summary if the runner is performing this
-		if printSummary:
-			log.info("")
-			log.info("Total duration: %.2f (secs)", totalDuration)		
-			log.info("Summary of non passes: ")
-			fails = 0
-			for cycle in results.keys():
-				for outcome in results[cycle].keys():
-					if outcome in FAILS : fails = fails + len(results[cycle][outcome])
-			if fails == 0:
-				log.info("	THERE WERE NO NON PASSES")
-			else:
-				if self.cycle == 1:
-					for outcome in FAILS:
-						for test in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], test)
-				else:
-					for key in results.keys():
-						for outcome in FAILS:
-							for test in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], test)
+
+		# send the results to all results writers
+		for writer in writers:
+			writer().writeResults(results, totalDuration=totalDuration)
+
 
 		# return the results dictionary
 		return results
