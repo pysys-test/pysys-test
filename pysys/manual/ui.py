@@ -122,7 +122,7 @@ class ManualTester:
 		xscrollbar = Scrollbar(self.textFrame, orient=HORIZONTAL)
 		xscrollbar.grid(row=6, column=0, sticky=S+W+E, ipadx=90)		
 
-		message=Text(self.textFrame, height=17, width=70, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set, padx=15, pady=10, wrap=None)		 
+		message=Text(self.textFrame, height=17, width=70, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set, padx=15, pady=10, wrap=NONE)		 
 		yscrollbar.config(command=message.yview)
 		xscrollbar.config(command=message.xview)
 		message.tag_config("f", font=("Helvetica", 10, "bold"))
