@@ -1,4 +1,4 @@
- #!/usr/bin/env python
+#!/usr/bin/env python
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and any associated documentation
 # files (the "Software"), to deal in the Software without
@@ -492,10 +492,10 @@ class ConsoleLaunchHelper:
 					exec("self.userOptions['%s'] = %d" % (value, TRUE))
 
 
-	def runTests(self, runner):
+	def runTests(self, runner, writers=[]):
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace)
 		r = runner(self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions)
-		r.start()
+		r.start(writers)
 		r.cleanup()
 		
 
