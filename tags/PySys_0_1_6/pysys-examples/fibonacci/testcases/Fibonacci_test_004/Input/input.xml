@@ -1,0 +1,35 @@
+<pysysmanualtest>
+
+  <step title="Get a calculator" validate="false">
+    <description><![CDATA[
+OK - if you are going to do this manually you need to go off and 
+get a calculator.
+]]> 
+    </description>  
+  </step>
+  
+  <step title="Start working out the series" validate="true">
+    <description><![CDATA[
+Using your calculator you should work out the first 10 entries of the series, 
+where starting with 0 and 1 (the first and second entries), each new number 
+in the series is simply the sum of the two before it. Hence perform the 
+following;
+
+Entry 0         = 0
+Entry 1         = 1
+Entry 2 = (0+1) = 1
+Entry 3 = (1+1) = 2
+Entry 4 = (1+2) = 3
+.
+.
+
+Continue performing this until you calculate the tenth entry, and confirm that
+the entry = 34.
+]]> 
+    </description>  
+  </step>
+
+</pysysmanualtest>
+
+
+
