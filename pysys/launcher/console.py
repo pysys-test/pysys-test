@@ -495,7 +495,7 @@ class ConsoleLaunchHelper:
 	def runTests(self, runner, writers=[]):
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace)
 		r = runner(self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions)
-		r.start(writers)
+		r.start(writers=writers)
 		r.cleanup()
 		
 
