@@ -266,23 +266,24 @@ class BaseRunner:
 
 			
 		# log the summary output to the console
-		log.info("")
-		log.info("Total duration: %.2f (secs)", totalDuration)		
-		log.info("Summary of non passes: ")
-		fails = 0
-		for cycle in results.keys():
-			for outcome in results[cycle].keys():
-				if outcome in FAILS : fails = fails + len(results[cycle][outcome])
-		if fails == 0:
-			log.info("	THERE WERE NO NON PASSES")
-		else:
-			if len(results) == 1:
-				for outcome in FAILS:
-					for test in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], test)
+		if printSummary:
+			log.info("")
+			log.info("Total duration: %.2f (secs)", totalDuration)		
+			log.info("Summary of non passes: ")
+			fails = 0
+			for cycle in results.keys():
+				for outcome in results[cycle].keys():
+					if outcome in FAILS : fails = fails + len(results[cycle][outcome])
+			if fails == 0:
+				log.info("	THERE WERE NO NON PASSES")
 			else:
-				for key in results.keys():
+				if len(results) == 1:
 					for outcome in FAILS:
-						for test in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], test)
+						for test in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], test)
+				else:
+					for key in results.keys():
+						for outcome in FAILS:
+							for test in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], test)
 
 
 		# return the results dictionary
