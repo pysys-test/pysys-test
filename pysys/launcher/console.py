@@ -492,10 +492,10 @@ class ConsoleLaunchHelper:
 					exec("self.userOptions['%s'] = %d" % (value, TRUE))
 
 
-	def runTests(self, runner, writers=[]):
+	def runTests(self, runner, printSummary=TRUE, writers=[]):
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace)
 		r = runner(self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions)
-		r.start(writers=writers)
+		r.start(printSummary, writers)
 		r.cleanup()
 		
 

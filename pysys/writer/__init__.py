@@ -19,44 +19,34 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import logging
+__all__ = []
 
+import logging, time
 from pysys import rootLogger
 from pysys.constants import *
 from pysys.exceptions import *
-
-__all__ = []
 
 log = logging.getLogger('pysys.writer')
 log.setLevel(logging.NOTSET)
 
 
-class ConsoleResultsWriter:
-
-	def writeResults(self, results, **kwargs):
-		if kwargs.has_key('totalDuration'):
-			totalDuration = kwargs['totalDuration']
-		else:
-			totalDuration = "n/a"
+class LogFileResultsWriter:
+	"""Class to log results to a logfile in the current directory."""
+	
+	def __init__(self, logfile):
+		try:
+			self.fp = open(logfile, "a", 0)
+		except:
+			pass
 			
-		log.info("")
-		log.info("Total duration: %.2f (secs)", totalDuration)		
-		log.info("Summary of non passes: ")
-		fails = 0
-		for cycle in results.keys():
-			for outcome in results[cycle].keys():
-				if outcome in FAILS : fails = fails + len(results[cycle][outcome])
-		if fails == 0:
-			log.info("	THERE WERE NO NON PASSES")
-		else:
-			if len(results) == 1:
-				for outcome in FAILS:
-					for test in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], test)
-			else:
-				for key in results.keys():
-					for outcome in FAILS:
-						for test in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], test)
+	def writeResults(self, results, **kwargs):
+		self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
+		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
+		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
+		self.fp.write('\n')
 
-
-
-
+		self.fp.write('Summary of test outcome:\n')	
+		for outcome in PRECEDENT:
+			for test in results[outcome]: self.fp.write("%s: %s\n" % (LOOKUP[outcome], test))
+		self.fp.write('\n\n\n')
+		self.fp.close()
