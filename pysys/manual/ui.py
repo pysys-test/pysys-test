@@ -35,209 +35,126 @@ log.setLevel(logging.NOTSET)
 
 
 class ManualTester:
-	def __init__(self, owner, filename, logname):
+	def __init__(self, owner, filename, logname=None):
 		self.owner = owner
-		self.root = Tk()
-		self.root.title("PySys Manual Tester - [%s]" % self.owner.descriptor.id)
-		self.root.resizable(TRUE, TRUE)
-		self.textFrame = Frame(self.root, relief=RAISED, borderwidth=1, padx=16, pady=10)
+		self.parentContainer = Tk()
+		self.parentContainer.protocol('WM_DELETE_WINDOW', self.quitPressed)
+		self.parentContainer.wm_geometry("500x400")
+		self.parentContainer.title("PySys Manual Tester - [%s]" % self.owner.descriptor.id)
+		self.parentContainer.resizable(TRUE, TRUE)
+		self.titleBox = Label(self.parentContainer, text="Test Title Here", font=("Verdana 11 bold"), wraplength=480)
+		self.titleBox.pack(fill=X, padx=5, pady=5)
+		self.displayContainer = Frame(self.parentContainer)
+		self.xscrollbar = Scrollbar(self.displayContainer, orient=HORIZONTAL)
+		self.xscrollbar.pack(fill=X, side=BOTTOM)
+		self.messageBox = Text(self.displayContainer, wrap=WORD, width=1, height=1, padx=10, pady=10)
+		self.messageBox.insert(INSERT, "Test Body Here")
+		self.messageBox.pack(fill=BOTH, expand=YES, side=LEFT)
+		self.yscrollbar = Scrollbar(self.displayContainer, orient=VERTICAL)
+		self.yscrollbar.pack(fill=Y, side=LEFT)
+		self.yscrollbar.config(command=self.messageBox.yview)
+		self.xscrollbar.config(command=self.messageBox.xview)
+		self.displayContainer.pack(fill=BOTH, expand=YES, padx=5, pady=5)
+		self.messageBox.config(xscrollcommand=self.xscrollbar.set, yscrollcommand=self.yscrollbar.set, font=("Helvetica 10"))
+		self.inputContainer = Frame(self.parentContainer)
+		self.quitButton = Button(self.inputContainer, text="Quit", command=self.quitPressed, pady=5, padx=5, font=("Verdana 10 bold"))
+		self.quitButton.pack(side=LEFT, padx=5, pady=5)
+		self.backButton = Button(self.inputContainer, text="< Back", command=self.backPressed, state=DISABLED, pady=5, padx=5, font=("Verdana 10 bold"))
+		self.backButton.pack(side=LEFT, padx=5, pady=5)
+		self.multiButton = Button(self.inputContainer, text="Start", command=self.multiPressed, default=ACTIVE, pady=5, padx=5, font=("Verdana 10 bold"))
+		self.multiButton.pack(side=RIGHT, padx=5, pady=5)
+		self.failButton = Button(self.inputContainer, text="Fail", command=self.failPressed, pady=5, padx=5, font=("Verdana 10 bold"))
+		self.failButton.pack(side=RIGHT, padx=5, pady=5)
+		self.inputContainer.pack(fill=X, padx=5, pady=5)
+
+		self.isRunning = 1
 		self.filename = filename
 		self.steps = self.parseInputXML(self.filename)
-		self.numberOfSteps = len(self.steps)
-		self.logname = logname
-		self.logFd = open(self.logname, "w", 0)
-		self.testFlag = -1
-		self.resultDict = {}
 		self.currentStep = -1
-		self.stepLabel = None
-		self.isRunning = 1
+		self.results = range(len(self.steps))
+		self.doStep()
 
+	def quitPressed(self):
+		self.owner.log.warning("Application terminated by User (FAILED)")
+		self.owner.outcome.append(FAILED)
+		self.stop()
+
+	def backPressed(self):
+		if self.currentStep >= 0:
+			self.currentStep = self.currentStep - 1
+			self.doStep()
+
+	def failPressed(self):
+		self.results[self.currentStep] = 0
+		self.currentStep = self.currentStep + 1
+		self.doStep()
+
+	def multiPressed(self):
+		if self.currentStep == len(self.steps):
+			self.stop()
+			return
+		elif self.currentStep >= 0:
+			if self.steps[self.currentStep].validate == 'true':
+				self.results[self.currentStep] = 1
+			else: self.results[self.currentStep] = 2
+		self.currentStep = self.currentStep + 1
+		self.doStep()
+
+	def doStep(self):
+		self.messageBox.config(state=NORMAL, wrap=WORD)
+		self.messageBox.delete(1.0, END)
+		if self.currentStep < 0:
+			self.multiButton.config(text="Start")
+			self.backButton.config(state=DISABLED)
+			self.failButton.forget()
+			self.messageBox.insert(INSERT, self.owner.descriptor.purpose)
+			self.titleBox.config(text=self.owner.descriptor.title)
+		elif self.currentStep == len(self.steps):
+			self.multiButton.config(text="Finish")
+			self.failButton.forget()
+			self.messageBox.insert(INSERT, self.reportToString())
+			self.titleBox.config(text="Test Complete - Report")
+		elif self.currentStep >= 0:
+			if self.steps[self.currentStep].wrap == 'false': self.messageBox.config(wrap=NONE)
+			self.backButton.config(state=NORMAL)
+			self.failButton.pack(side=RIGHT, padx=5, pady=5)
+			self.multiButton.config(text="Pass")
+			self.messageBox.insert(INSERT, self.steps[self.currentStep].description)
+			self.titleBox.config(text="Step %s of %s - %s" % (self.currentStep + 1, len(self.steps), self.steps[self.currentStep].title))
+			if self.steps[self.currentStep].validate == 'false':
+				self.multiButton.config(text="Next >")
+				self.failButton.forget()
+		self.messageBox.config(state=DISABLED)
+
+	def reportToString(self):
+		result = ""
+		intToRes = ["FAILED", "PASSED", "N/A"]
+		for r in range(len(self.results)):
+			result += "\nStep %s - %s: %s" % (r + 1, self.steps[r].title, intToRes[self.results[r]])
+		return result
+
+	def logResults(self):
+		intToRes = ["FAILED", "PASSED", "N/A"]
+		for r in range(len(self.results)):
+			if r < self.currentStep:
+				self.owner.log.info("Step %s - %s: %s" % (r + 1, self.steps[r].title, intToRes[self.results[r]]))
+				if self.results[r] == 0: self.owner.outcome.append(FAILED)
+				elif self.results[r] == 1: self.owner.outcome.append(PASSED)
 
 	def start(self):
-		self.compileGUI()
-		Scale()
-		self.root.mainloop()
-	
+		self.parentContainer.mainloop()
 
 	def stop(self):
-		try:
-			if self.logFd is not None:
-				self.logFd.close()
-		except:
-			pass
+		self.logResults()
 		self.isRunning = 0
-		self.root.quit()
-
+		self.parentContainer.quit()
+		self.parentContainer.destroy()
 
 	def running(self):
 		return self.isRunning
-
 
 	def parseInputXML(self, input):
 		parser = XMLManualTestParser(input)
 		steps = parser.getSteps()
 		parser.unlink()
 		return steps
-			
-
-	def compileGUI(self):
-		backFlag=NORMAL
-		nextFlag=NORMAL
-		compFlag=DISABLED
-		
-		#initiate the text frame
-		if self.currentStep == -1:
-			self.textFrameGUI(self.owner.descriptor.title,  self.owner.descriptor.purpose)
-			self.radioFrameGUI(DISABLED)
-		else:
-			self.textFrameGUI("Step %d: %s" %(self.steps[self.currentStep].number, self.steps[self.currentStep].title), 
-							 self.steps[self.currentStep].description)
-			if self.steps[self.currentStep].validate=="true" or	self.steps[self.currentStep].validate=="TRUE":
-				self.radioFrameGUI(NORMAL)
-			else:
-				self.radioFrameGUI(DISABLED)
-
-		# compile the visibility of the buttons
-		if self.currentStep == -1:
-			backFlag=DISABLED
-		if self.currentStep==self.numberOfSteps-1:
-			nextFlag=DISABLED
-			compFlag=NORMAL
-			
-		# initiate the button frame
-		self.buttonFrameGUI(backFlag, nextFlag, compFlag)
-
-		# update the frame
-		self.textFrame.update()
-
-
-	def textFrameGUI(self, labelText, description):
-		if self.stepLabel is not None:
-			self.stepLabel.grid_remove()
-		self.stepLabel = Label(self.textFrame, text=labelText, font=("Verdana", 10, "bold"), pady=5, justify=LEFT, wraplength=450)
-		self.stepLabel.grid(row=1, sticky=W)
-		
-		yscrollbar = Scrollbar(self.textFrame, orient=VERTICAL)
-		yscrollbar.grid(row=5, column=1, sticky=W+N+S, ipady=90)
-		xscrollbar = Scrollbar(self.textFrame, orient=HORIZONTAL)
-		xscrollbar.grid(row=6, column=0, sticky=S+W+E, ipadx=90)		
-
-		message=Text(self.textFrame, height=17, width=70, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set, padx=15, pady=10, wrap=NONE)		 
-		yscrollbar.config(command=message.yview)
-		xscrollbar.config(command=message.xview)
-		message.tag_config("f", font=("Helvetica", 10, "bold"))
-		message.tag_config("a", relief=GROOVE)
-		message.insert(INSERT, description, ("f","a"))
-		message.config(state=DISABLED)
-		message.grid(row=5, column=0)
- 
-		
-	def radioFrameGUI(self,	rstate):
-		v=IntVar()
-		radioFrame=Frame(self.textFrame, relief=RIDGE, borderwidth=2)
-		Radiobutton(radioFrame,	text="Pass", variable=v, font=("Verdana", 10,"bold"), value=1, state=rstate	,command=self.callBackPassRadio).grid(row=2,column=0)
-		Radiobutton(radioFrame,	text="Fail", variable=v, font=("Verdana", 10,"bold"), value=2, state=rstate	,command=self.callBackFailRadio).grid(row=2,column=1)
-		radioFrame.grid(row=7, sticky=NW, pady=5)
-		self.textFrame.grid(row=1) 
-
-
-	def buttonFrameGUI(self, backFlag, nextFlag, compFlag):
-		buttonFrame=Frame(self.root, relief=GROOVE, borderwidth=0, highlightthickness=5)	
-
-		quitButton = Button(buttonFrame, relief=RIDGE ,justify=LEFT	,text="Quit", borderwidth="1",command=self.quitCallBack,font=("verdana",	10,"bold"))
-		mygrid=quitButton.grid(row=0, column=0, sticky=W, ipadx=13, ipady=3, padx=5, pady=5)
-
-		quitButton = Button(buttonFrame, justify=LEFT, text="",	borderwidth="0")
-		mygrid=quitButton.grid(row=0, column=1, padx=30, pady=5)
-		
-		backButton = Button(buttonFrame, relief=RIDGE, justify=RIGHT, text="< Back", command=self.backCallBack,	borderwidth="1",font=("Verdana", 10,"bold"), state=backFlag)
-		backButton.grid(row=0,column=3, padx=10, pady=5 ,ipadx=13, ipady=3)
-		
-		nextButton = Button(buttonFrame, relief=RIDGE, justify=RIGHT, text="Next >", command=self.nextCallBack,	borderwidth="1", font=("Verdana", 10,"bold"), state=nextFlag)
-		nextButton.grid(row=0, column=4, padx=10, pady=5, ipadx=13, ipady=3) 
-		
-		compButton = Button(buttonFrame, relief=RIDGE,justify=RIGHT, text="Complete", command=self.completeCallBack, borderwidth="1", font=("Verdana",	10,"bold"),	state=compFlag)
-		compButton.grid(row=0, column=5, padx=10, pady=5, ipadx=10, ipady=3)
-		
-		buttonFrame.grid(row=9, sticky=N+W+E+S)
-
-
-	#call back for radio Button	Pass
-	def callBackPassRadio(self):
-		self.testFlag=1
-
-
-	#call back for radio Button	Fail
-	def callBackFailRadio(self):
-		self.testFlag=0
-
-		
-	# call back	for	complete button	click 
-	def completeCallBack(self):
-		if (self.steps[self.currentStep].validate=="true" or self.steps[self.currentStep].validate=="TRUE"):
-			if self.testFlag==-1:
-				tkMessageBox.showwarning("Warning", "Please select the step outcome before continuing ...", parent=self.root)
-			else:
-				self.storeResult()
-				self.logResults()
-				self.stop()
-		else:
-			self.logResults()
-			self.stop()
-
-
-	# call back for quit button click
-	def quitCallBack(self):
-		self.logResults()
-		self.logFd.write("Application terminated from quit")
-		self.owner.outcome.append(BLOCKED)
-		self.stop()
-	
-
-	# call back	for	back button click
-	def backCallBack(self):
-		self.currentStep=self.currentStep-1
-		self.compileGUI()
-		self.storeResult()
-
-	
-	# call back for the next button click
-	def nextCallBack(self):
-		if self.currentStep == -1:
-			self.currentStep=self.currentStep+1
-			self.compileGUI()
-			return 
-			
-		if self.steps[self.currentStep].validate=="true" or self.steps[self.currentStep].validate=="TRUE":
-			if self.testFlag==-1:
-				tkMessageBox.showwarning("Warning", "Please select the step outcome before continuing ...", parent=self.root)
-			else:
-				self.storeResult()
-				self.currentStep=self.currentStep+1
-				self.testFlag=-1
-		else:
-			self.currentStep=self.currentStep+1
-		self.compileGUI()		 
-
-
-	def logResults(self, logname=None):
-		inKey=1
-		if len(self.resultDict.keys()):
-			self.logFd.write("Test Execution Status;\n")
-			self.logFd.write("XML Feed : " + self.filename + "\n\n")
-
-			for	key in self.resultDict.keys():
-				if self.resultDict[key]:
-					myStr="Verification Step %d (%s) : %6s" %(inKey, self.steps[key].title, "PASSED\n")
-					self.owner.outcome.append(PASSED)
-				else:
-					myStr="Verification Step %d (%s) : %6s" %(inKey, self.steps[key].title, "FAILED\n")
-					self.owner.outcome.append(FAILED)
-				self.logFd.write(myStr)
-				inKey=inKey+1
-
-		 
-	#store the result
-	def	storeResult(self):
-		self.resultDict[self.currentStep]=self.testFlag
-
