@@ -42,7 +42,7 @@ class ManualTester:
 		self.parentContainer.wm_geometry("500x400")
 		self.parentContainer.title("PySys Manual Tester - [%s]" % self.owner.descriptor.id)
 		self.parentContainer.resizable(TRUE, TRUE)
-		self.titleBox = Label(self.parentContainer, text="Test Title Here", font=("Verdana 11 bold"), wraplength=480)
+		self.titleBox = Label(self.parentContainer, text="Test Title Here", font=("Verdana 10 bold"), padx=8, anchor=W, wraplength=480)
 		self.titleBox.pack(fill=X, padx=5, pady=5)
 		self.displayContainer = Frame(self.parentContainer)
 		self.xscrollbar = Scrollbar(self.displayContainer, orient=HORIZONTAL)
@@ -77,7 +77,7 @@ class ManualTester:
 		self.doStep()
 
 	def quitPressed(self):
-		self.owner.log.warning("Application terminated by User (FAILED)")
+		self.owner.log.critical("Application terminated by user (FAILED)")
 		self.owner.outcome.append(FAILED)
 		self.stop()
 
@@ -110,12 +110,12 @@ class ManualTester:
 			self.backButton.config(state=DISABLED)
 			self.failButton.forget()
 			self.messageBox.insert(INSERT, self.owner.descriptor.purpose)
-			self.titleBox.config(text=self.owner.descriptor.title)
+			self.titleBox.config(text="Title - %s" % self.owner.descriptor.title)
 		elif self.currentStep == len(self.steps):
 			self.multiButton.config(text="Finish")
 			self.failButton.forget()
 			self.messageBox.insert(INSERT, self.reportToString())
-			self.titleBox.config(text="Test Complete - Report")
+			self.titleBox.config(text="Test Complete - Summary Report")
 		elif self.currentStep >= 0:
 			if self.steps[self.currentStep].wrap == 'false':  self.messageBox.config(wrap=NONE)
 			self.backButton.config(state=NORMAL)
