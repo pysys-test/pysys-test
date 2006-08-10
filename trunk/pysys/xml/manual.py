@@ -30,22 +30,25 @@ DTD='''
 <!ELEMENT step (description) >
 <!ELEMENT description (#PCDATA) >
 <!ATTLIST step title CDATA #REQUIRED
-               requiresVerification (true | false) "true" >
+               validate (true | false) "true" 
+               wrap (true | false) "true">
 '''
 
 
 class XMLManualTestStep:
-	def __init__(self, number, title, validate, description):
+	def __init__(self, number, title, validate, wrap, description):
 		self.number = number
 		self.title = title
 		self.validate = validate
+		self.wrap = wrap
 		self.description = description
-	
+
 		
 	def toString(self):
 		print "Step number:       %d" % self.number
 		print "Step title:        %s" % self.title 
 		print "Step validate:     %s" % self.validate
+		print "Step wrap:         %s" % self.wrap
 		print "Step description:     ",
 		desc = self.description.split('\n')
 		for index in range(0, len(desc)):
@@ -86,6 +89,7 @@ class XMLManualTestParser:
 		for stepsNode in stepsNodeList:
 			title = stepsNode.getAttribute("title")
 			validate = stepsNode.getAttribute("validate")
+			wrap = stepsNode.getAttribute("wrap")
 
 			if stepsNode.getElementsByTagName('description') == []:
 				raise Exception, "No <description> child element of <step> supplied in XML manual test input file"
@@ -95,12 +99,9 @@ class XMLManualTestParser:
 				except:
 					description = ""
 			stepnumber = stepnumber + 1		
-			steps.append(XMLManualTestStep(stepnumber, title, validate, description))
+			steps.append(XMLManualTestStep(stepnumber, title, validate, wrap, description))
 		return steps
 
-
-
-		  
 
 
 
