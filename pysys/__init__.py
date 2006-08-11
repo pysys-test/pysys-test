@@ -28,6 +28,7 @@ __all__     = [ "constants",
                 "manual",
                 "process",
                 "utils",
+                "writer",
                 "xml"]
 """The submodules of PySys."""
 

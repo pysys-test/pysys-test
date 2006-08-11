@@ -11,8 +11,12 @@ What's new in this release
 - The Manual Tester UI has been updated so that it can be resized, and is 
   easier to navigate through the tests. Many thanks to Tim McCormick who 
   contributed to the UI improvements
+- The BaseRunner start method now takes an optional list of result writer
+  class instances to perform test audit logging at the end of a test cycle.
+  This allows custom result writers to be passed to the runner to, for 
+  example, write the results to a database, proprietary system etc
 
-  
+
 Installation
 ------------
 Installation on windows is performed by downloading the PySys-X.Y.Z.win32.exe 

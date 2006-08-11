@@ -9,5 +9,5 @@ setup(name='PySys',
 		author_email=pysys.__author_email__,
 		description='Python System Test Framework',
 		url="http://sourceforge.net/projects/pysys",
-		packages=['pysys', 'pysys.launcher',  'pysys.manual', 'pysys.process', 'pysys.process.plat-win32', 'pysys.process.plat-unix', 'pysys.utils', 'pysys.xml']
+		packages=['pysys', 'pysys.launcher',  'pysys.manual', 'pysys.process', 'pysys.process.plat-win32', 'pysys.process.plat-unix', 'pysys.utils', 'pysys.writer', 'pysys.xml']
 		)
