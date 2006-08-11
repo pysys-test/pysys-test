@@ -1,4 +1,4 @@
-PySys 0.1.6 Release Notes
+PySys 0.1.7 Release Notes
 =========================
 
 This is an early ALPHA release of the software for development purposes. 
@@ -6,18 +6,62 @@ The software is liable to change in a non-backwards compatible way until
 it has reached a BETA status.
 
 
-What is new in this release
----------------------------
+What's new in this release
+--------------------------
+- The Manual Tester UI has been updated so that it can be resized, and is 
+  easier to navigate through the tests. Many thanks to Tim McCormick who 
+  contributed to the UI improvements
+
+  
+Installation
+------------
+Installation on windows is performed by downloading the PySys-X.Y.Z.win32.exe 
+installer executable and running. To install on unix systems you should download
+the source tar.gz archive and perform the following
+
+ $ tar zxvpf PySys-X.Y.Z.tar.gz
+ $ cd PySys-X.Y.Z
+ $ python setup.py build
+ $ python setup.py install
+ 
+To install you may need to have root privileges on the machine. Installation on 
+both windows and unix will install the PySys modules into the site-packages area
+of the default python
+
+  
+Running the Samples
+-------------------
+PySys has a set of basic examples to demonstrate it's use for running automated 
+and manual testcases. The samples are distributed in a unix line ending friendly 
+tar.gz archive, and a windows line ending friendly zip file. To unpack the tests 
+on unix systems use
+
+ $ tar zxvpf PySys-examples.X.Y.Z.tar.gz
+ $ cd pysys-examples/fibonacci/testcases
+
+The testcases directory consists of 4 example testcases, and 3 launch executables, 
+namely runTest.py (used to run a set of tests), printTest.py (used to print details
+about a set of tests), and makeTest.py (used to create a new testcase directory 
+structure). Each launch executable has a detailed help summary which will be printed
+to the console using the -h option. To print the help usage, and then run all tests 
+in the testcases directory use
+
+ $ runTest.py -h
+ $ runTest.py
+
+
+Release History
+---------------
+0.1.5 to 0.1.6
+--------------
 - Added the ability to differentiate between automated and manual testcases 
   using the test attribute to the pysystest element in the testcase 
   descriptor. If the attribute is not present the test will be assumed to 
   be an automated test. The runTest and printTest launch helpers allow you 
-  to different between automated and manaul tests using the --type command 
-  line argument. For more information see the examples in pysys-examples
-  
-  
-Release History
----------------
+  to differentiate between automated and manual tests using the --type 
+  command line argument. For more information see the examples in 
+  pysys-examples
+
 0.1.4 to 0.1.5
 --------------
 - Added support for the requirements traceability. This includes printing 
@@ -28,5 +72,5 @@ Release History
 --------------
 - Added the ConsoleMakeTestHelper class to pysys.launcher.console.
   This facilitates the creation of new testcase structures from the 
-  command line. Updated pysys-examples/fibonacci to demostrate the 
-  use of the utilitiy class 
+  command line. Updated pysys-examples/fibonacci to demonstrate the 
+  use of the utility class 
