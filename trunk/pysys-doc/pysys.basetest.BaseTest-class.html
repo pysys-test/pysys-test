@@ -1,0 +1,984 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pysys.basetest.BaseTest</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pysys-module.html">Package&nbsp;pysys</a> ::
+        <a href="pysys.basetest-module.html">Module&nbsp;basetest</a> ::
+        Class&nbsp;BaseTest
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pysys.basetest.BaseTest-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h2 class="class">Class BaseTest
+<br/><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest">source&nbsp;code</a></span></h2>
+<pre class="literalblock">
+The parent class of all PySys system tests.
+
+BaseTest is the parent class of all PySys system tests, and should be subclassed to provide 
+an implementation of the execute() method. The class is instantiated with information on the 
+test input, reference and output data locations, the user defined mode the test is to be executed 
+in, and the user defined extra arguments required for test execution. 
+
+The class provides important utility functions for process management, test timing, test validation 
+and storage of test validation steps. Validation of the test can be performed multiple times through 
+the assert* functions, building up an internal list of individual validation outcomes. Currently 
+supported test outcomes are;
+
+  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
+  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
+  DUMPEDCORE:  A process started by the test produced a core file (unix only)
+  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
+  FAILED:      A validation step of the test failed
+  NOTVERIFIED: No validation steps were performed
+  INSPECT:     A validation step of the test requires manual inspection
+  PASSED:      A validation step of the test passed
+
+The overall outcome of the test is based on a precedence of the outcomes in the list, based on the order
+as given above i.e. if three validation steps were performed in the test with outcomes TIMEDOUT, FAILED, 
+PASSED the overall outcome would be TIMEDOUT; a test only passes when all validation steps pass. 
+ 
+
+</pre><br /><br />
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="summary">Instance Methods</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">descriptor</span>,
+        <span class="sig-arg">outsubdir</span>,
+        <span class="sig-arg">mode</span>,
+        <span class="sig-arg">xargs</span>)</span>
+    <br />Create an instance of the BaseTest class.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#setKeywordArgs" class="sig-name">setKeywordArgs</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xargs</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#addOutcome" class="sig-name">addOutcome</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">outcome</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#getOutcome" class="sig-name">getOutcome</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#execute" class="sig-name">execute</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#validate" class="sig-name">validate</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#cleanup" class="sig-name">cleanup</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#startProcess" class="sig-name">startProcess</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">command</span>,
+        <span class="sig-arg">arguments</span>,
+        <span class="sig-arg">environs</span>=<span class="sig-default">{}</span>,
+        <span class="sig-arg">workingDir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">state</span>=<span class="sig-default">FOREGROUND</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">stdout</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">stderr</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">displayName</span>=<span class="sig-default">None</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopProcess" class="sig-name">stopProcess</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">process</span>,
+        <span class="sig-arg">hard</span>=<span class="sig-default">FALSE</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#signalProcess" class="sig-name">signalProcess</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">process</span>,
+        <span class="sig-arg">signal</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitProcess" class="sig-name">waitProcess</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">process</span>,
+        <span class="sig-arg">timeout</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#startProcessMonitor" class="sig-name">startProcessMonitor</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">process</span>,
+        <span class="sig-arg">interval</span>,
+        <span class="sig-arg">file</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopProcessMonitor" class="sig-name">stopProcessMonitor</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">monitor</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#startManualTester" class="sig-name">startManualTester</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file</span>,
+        <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">state</span>=<span class="sig-default">FOREGROUND</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['ManualTester']</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopManualTester" class="sig-name">stopManualTester</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitManualTester" class="sig-name">waitManualTester</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['ManualTester']</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#wait" class="sig-name">wait</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">interval</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitForSocket" class="sig-name">waitForSocket</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">port</span>,
+        <span class="sig-arg">host</span>=<span class="sig-default">'localhost'</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSocket']</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitForFile" class="sig-name">waitForFile</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForFile']</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitForSignal" class="sig-name">waitForSignal</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">basename</span>,
+        <span class="sig-arg">expr</span>,
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSignal']</span>,
+        <span class="sig-arg">poll</span>=<span class="sig-default">0.25</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertTrue" class="sig-name">assertTrue</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">expr</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertFalse" class="sig-name">assertFalse</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">expr</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertDiff" class="sig-name">assertDiff</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file1</span>,
+        <span class="sig-arg">file2</span>,
+        <span class="sig-arg">filedir1</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">filedir2</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">ignores</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">sort</span>=<span class="sig-default">FALSE</span>,
+        <span class="sig-arg">replace</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">includes</span>=<span class="sig-default">[]</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertGrep" class="sig-name">assertGrep</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file</span>,
+        <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
+        <span class="sig-arg">contains</span>=<span class="sig-default">TRUE</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertOrderedGrep" class="sig-name">assertOrderedGrep</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file</span>,
+        <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">exprList</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">contains</span>=<span class="sig-default">TRUE</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertLineCount" class="sig-name">assertLineCount</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file</span>,
+        <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>)</span>
+    
+  </td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="details">Method Details</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">descriptor</span>,
+        <span class="sig-arg">outsubdir</span>,
+        <span class="sig-arg">mode</span>,
+        <span class="sig-arg">xargs</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Create an instance of the BaseTest class.
+  <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>descriptor</code></strong> - The descriptor for the test giving all test details</li>
+        <li><strong class="pname"><code>outsubdir</code></strong> - The output subdirectory the test output will be written to</li>
+        <li><strong class="pname"><code>mode</code></strong> - The user defined mode the test is to be run in</li>
+        <li><strong class="pname"><code>xargs</code></strong> - The dictionary of additional arguments to be set as data 
+          attributes to the test class</li>
+    </ul>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="setKeywordArgs"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">setKeywordArgs</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xargs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.setKeywordArgs">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="addOutcome"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">addOutcome</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">outcome</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.addOutcome">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getOutcome"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getOutcome</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.getOutcome">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="execute"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">execute</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.execute">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="validate"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">validate</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.validate">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="cleanup"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">cleanup</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.cleanup">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="startProcess"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">startProcess</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">command</span>,
+        <span class="sig-arg">arguments</span>,
+        <span class="sig-arg">environs</span>=<span class="sig-default">{}</span>,
+        <span class="sig-arg">workingDir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">state</span>=<span class="sig-default">FOREGROUND</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">stdout</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">stderr</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">displayName</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.startProcess">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="stopProcess"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">stopProcess</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">process</span>,
+        <span class="sig-arg">hard</span>=<span class="sig-default">FALSE</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.stopProcess">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="signalProcess"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">signalProcess</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">process</span>,
+        <span class="sig-arg">signal</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.signalProcess">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="waitProcess"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">waitProcess</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">process</span>,
+        <span class="sig-arg">timeout</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.waitProcess">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="startProcessMonitor"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">startProcessMonitor</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">process</span>,
+        <span class="sig-arg">interval</span>,
+        <span class="sig-arg">file</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.startProcessMonitor">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="stopProcessMonitor"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">stopProcessMonitor</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">monitor</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.stopProcessMonitor">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="startManualTester"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">startManualTester</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file</span>,
+        <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">state</span>=<span class="sig-default">FOREGROUND</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['ManualTester']</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.startManualTester">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="stopManualTester"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">stopManualTester</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.stopManualTester">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="waitManualTester"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">waitManualTester</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['ManualTester']</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.waitManualTester">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="wait"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">wait</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">interval</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.wait">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="waitForSocket"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">waitForSocket</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">port</span>,
+        <span class="sig-arg">host</span>=<span class="sig-default">'localhost'</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSocket']</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.waitForSocket">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="waitForFile"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">waitForFile</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForFile']</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.waitForFile">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="waitForSignal"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">waitForSignal</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">basename</span>,
+        <span class="sig-arg">expr</span>,
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSignal']</span>,
+        <span class="sig-arg">poll</span>=<span class="sig-default">0.25</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.waitForSignal">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="assertTrue"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">assertTrue</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">expr</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.assertTrue">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="assertFalse"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">assertFalse</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">expr</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.assertFalse">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="assertDiff"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">assertDiff</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file1</span>,
+        <span class="sig-arg">file2</span>,
+        <span class="sig-arg">filedir1</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">filedir2</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">ignores</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">sort</span>=<span class="sig-default">FALSE</span>,
+        <span class="sig-arg">replace</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">includes</span>=<span class="sig-default">[]</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.assertDiff">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="assertGrep"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">assertGrep</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file</span>,
+        <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
+        <span class="sig-arg">contains</span>=<span class="sig-default">TRUE</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.assertGrep">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="assertOrderedGrep"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">assertOrderedGrep</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file</span>,
+        <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">exprList</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">contains</span>=<span class="sig-default">TRUE</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.assertOrderedGrep">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="assertLineCount"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">assertLineCount</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">file</span>,
+        <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.assertLineCount">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Fri Aug 11 21:49:50 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
