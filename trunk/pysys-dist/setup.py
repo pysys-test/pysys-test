@@ -34,6 +34,8 @@ def get_site_packages_path():
 docfiles = ['pysys-doc/epydoc.css', 'pysys-doc/epydoc.js']
 docfiles.extend(glob.glob('pysys-doc/*.html'))
 
+releasenotes = ['pysys-dist/pysys-release.txt']
+
 setup(name='PySys',
 		version=pysys.__version__,
 		author=pysys.__author__,
@@ -42,6 +44,9 @@ setup(name='PySys',
 		url="http://sourceforge.net/projects/pysys",
 		packages=['pysys', 'pysys.launcher',  'pysys.manual', 'pysys.process', 'pysys.process.plat-win32', 
 		          'pysys.process.plat-unix', 'pysys.utils', 'pysys.writer', 'pysys.xml'],
-		data_files=[('%s/pysys-doc' % get_site_packages_path(), docfiles)],
+		data_files=[('%s/pysys-doc' % get_site_packages_path(), docfiles), (get_site_packages_path(), releasenotes)],
 		scripts = ['pysys-dist/pysys_postinstall.py']
 		)
+		
+		
+# to run use python.exe pysys-dist/setup.py bdist_wininst --install-script pysys_postinstall.py"
