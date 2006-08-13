@@ -69,7 +69,7 @@
   href="pysys.basetest.BaseTest-class.html#validate" 
   class="link">validate()</a> methods provide the ability to perform custom
   setup and cleanup actions for a particual test, and to perform all 
-  validation steps in a specific method should this prove logically more 
+  validation steps in a single method should this prove logically more 
   simple.</p>
   The class provides utility functions for process management, test 
   timing and test validation. Validation of the test can be performed 
@@ -294,7 +294,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#wait" class="sig-name">wait</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">interval</span>)</span>
-    
+    <br />Wait for a specified period of time.
   </td>
 </tr>
 <tr>
@@ -306,7 +306,7 @@
         <span class="sig-arg">port</span>,
         <span class="sig-arg">host</span>=<span class="sig-default">'localhost'</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSocket']</span>)</span>
-    
+    <br />Wait for a socket connection to be established.
   </td>
 </tr>
 <tr>
@@ -317,7 +317,7 @@
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitForFile" class="sig-name">waitForFile</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">filename</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForFile']</span>)</span>
-    
+    <br />Wait for a file to be written to disk.
   </td>
 </tr>
 <tr>
@@ -328,10 +328,11 @@
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitForSignal" class="sig-name">waitForSignal</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">basename</span>,
         <span class="sig-arg">expr</span>,
-        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>,
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;&gt;=1&quot;</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSignal']</span>,
         <span class="sig-arg">poll</span>=<span class="sig-default">0.25</span>)</span>
-    
+    <br />Wait for a particular regular expression to be seen on a set 
+      number of lines in a text file.
   </td>
 </tr>
 <tr>
@@ -341,7 +342,8 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertTrue" class="sig-name">assertTrue</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">expr</span>)</span>
-    
+    <br />Perform a validation assert on the supplied expression evaluating 
+      to true.
   </td>
 </tr>
 <tr>
@@ -351,7 +353,8 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertFalse" class="sig-name">assertFalse</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">expr</span>)</span>
-    
+    <br />Perform a validation assert on the supplied expression evaluating 
+      to false.
   </td>
 </tr>
 <tr>
@@ -368,7 +371,8 @@
         <span class="sig-arg">sort</span>=<span class="sig-default">FALSE</span>,
         <span class="sig-arg">replace</span>=<span class="sig-default">[]</span>,
         <span class="sig-arg">includes</span>=<span class="sig-default">[]</span>)</span>
-    
+    <br />Perform a validation assert on the comparison of two input text 
+      files.
   </td>
 </tr>
 <tr>
@@ -381,7 +385,8 @@
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
         <span class="sig-arg">contains</span>=<span class="sig-default">TRUE</span>)</span>
-    
+    <br />Perform a validation assert on a regular expression occurring in a
+      text file.
   </td>
 </tr>
 <tr>
@@ -394,7 +399,8 @@
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">exprList</span>=<span class="sig-default">[]</span>,
         <span class="sig-arg">contains</span>=<span class="sig-default">TRUE</span>)</span>
-    
+    <br />Perform a validation assert on a list of regular expressions 
+      occurring in specified order in a text file.
   </td>
 </tr>
 <tr>
@@ -407,7 +413,8 @@
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
         <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>)</span>
-    
+    <br />Perform a validation assert on the number of lines in a text file 
+      matching a specific regular expression.
   </td>
 </tr>
 </table>
@@ -977,8 +984,12 @@
     ></td>
   </table>
   
-  
+  Wait for a specified period of time.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>interval</code></strong> - The time interval in seconds to wait</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -997,8 +1008,23 @@
     ></td>
   </table>
   
-  
+  <p>Wait for a socket connection to be established.</p>
+  This method blocks until connection to a particular host:port pair can
+  be established. This is useful for test timing where a component under 
+  test creates a socket for client server interaction - calling of this 
+  method ensures that on return of the method call the server process is 
+  running and a client is able to create connections to it. If a connection
+  cannot be made within the specified timeout interval, a 
+  <code>TIMEDOUT</code> outcome is written to the outcome list, and the 
+  method returns to the caller.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>port</code></strong> - The port value in the socket host:port pair</li>
+        <li><strong class="pname"><code>host</code></strong> - The host value in the socket host:port pair</li>
+        <li><strong class="pname"><code>timeout</code></strong> - The timeout in seconds to wait for connection to the 
+          socket</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1016,8 +1042,19 @@
     ></td>
   </table>
   
-  
+  <p>Wait for a file to be written to disk.</p>
+  This method blocks until a file is created on disk. This is useful for
+  test timing where a component under test creates a file (e.g. for 
+  logging) indicating it has performed all initialisation actions and is 
+  ready for the test execution steps. If a file is not created on disk 
+  within the specified timeout interval, a <code>TIMEDOUT</code> outcome is
+  written to the outcome list, and the method returns to the caller.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>filename</code></strong> - The full path to the file to wait for creation</li>
+        <li><strong class="pname"><code>timeout</code></strong> - The timeout in seconds to wait for the file to be created</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1029,7 +1066,7 @@
   <h3><span class="sig"><span class="sig-name">waitForSignal</span>(<span class="sig-arg">self</span>,
         <span class="sig-arg">basename</span>,
         <span class="sig-arg">expr</span>,
-        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>,
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;&gt;=1&quot;</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSignal']</span>,
         <span class="sig-arg">poll</span>=<span class="sig-default">0.25</span>)</span>
   </h3>
@@ -1038,8 +1075,29 @@
     ></td>
   </table>
   
-  
+  <p>Wait for a particular regular expression to be seen on a set number of
+  lines in a text file.</p>
+  This method blocks until a particular regular expression is seen in a 
+  text file on a set number of lines. The number of lines which should 
+  match the regular expression is given by the <code>condition</code> 
+  argument in textual form i.e. for a match on more than 2 lines use 
+  condition =&quot;&gt;2&quot;. If the regular expression is not seen in 
+  the file matching the supplied condition within the specified timeout 
+  interval, a <code>TIMEDOUT</code> outcome is written to the outcome list,
+  and the method returns to the caller.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>basename</code></strong> - The full path to the file to check for the regular 
+          expression</li>
+        <li><strong class="pname"><code>exp</code></strong> - The regular expression to search for in the text file</li>
+        <li><strong class="pname"><code>condition</code></strong> - The condition to be met for the number of lines matching the 
+          regular expression</li>
+        <li><strong class="pname"><code>timeout</code></strong> - The timeout in seconds to wait for the regular expression and 
+          to check against the condition</li>
+        <li><strong class="pname"><code>poll</code></strong> - The time in seconds to poll the file looking for the regular 
+          expression and to check against the condition</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1056,8 +1114,16 @@
     ></td>
   </table>
   
-  
+  <p>Perform a validation assert on the supplied expression evaluating to 
+  true.</p>
+  If the supplied expression evaluates to true a <code>PASSED</code> 
+  outcome is added to the outcome list. Should the expression evaluate to 
+  false, a <code>FAILED</code> outcome is added.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>expr</code></strong> - The expression to check for the true | false value</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1074,8 +1140,16 @@
     ></td>
   </table>
   
-  
+  <p>Perform a validation assert on the supplied expression evaluating to 
+  false.</p>
+  If the supplied expression evaluates to false a <code>PASSED</code> 
+  outcome is added to the outcome list. Should the expression evaluate to 
+  true, a <code>FAILED</code> outcome is added.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>expr</code></strong> - The expression to check for the true | false value</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1099,8 +1173,38 @@
     ></td>
   </table>
   
-  
+  <p>Perform a validation assert on the comparison of two input text 
+  files.</p>
+  This method performs a file diff comparison on two input files. The 
+  files are pre-processed prior to the comparison to either ignore 
+  particular lines, sort their constituent lines, replace matches to 
+  regular expressions in a line with an alternate value, or to only include
+  particular lines. Should the files after pre-processing be equivalent a 
+  <code>PASSED</code> value is added to the test outcome list, otherwise a 
+  <code>FAILED</code> value is added.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>file1</code></strong> - The basename of the first file used in the file comparison</li>
+        <li><strong class="pname"><code>file2</code></strong> - The basename of the second file used in the file 
+          comparison</li>
+        <li><strong class="pname"><code>filedir1</code></strong> - The dirname of the first file (defaults to the testcase output
+          subdirectory)</li>
+        <li><strong class="pname"><code>filedir2</code></strong> - The dirname of the second file (defaults to the testcase 
+          reference directory)</li>
+        <li><strong class="pname"><code>ignores</code></strong> - A list of regular expressions used to denote lines in the 
+          files which should be ignored</li>
+        <li><strong class="pname"><code>sort</code></strong> - Boolean flag to indicate if the lines in the files should be 
+          sorted prior to the comparison</li>
+        <li><strong class="pname"><code>replace</code></strong> - List of tuples of the form ('regexpr', 'replacement'). For 
+          each regular expression in the list, any occurences in the files 
+          is replaced with the replacement value prior to the comparison 
+          being carried out. This is often useful to replace timestamps in 
+          logfiles etc.</li>
+        <li><strong class="pname"><code>includes</code></strong> - A list of regular expressions used to denote lines in the 
+          files which should be used in the comparison. Only lines which 
+          match an expression in the list are used for the comparison</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1120,8 +1224,14 @@
     ></td>
   </table>
   
-  
+  Perform a validation assert on a regular expression occurring in a 
+  text file.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>file</code></strong> - </li>
+        <li><strong class="pname"><code>filedir</code></strong> - </li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1141,8 +1251,14 @@
     ></td>
   </table>
   
-  
+  Perform a validation assert on a list of regular expressions occurring
+  in specified order in a text file.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>file</code></strong> - </li>
+        <li><strong class="pname"><code>filedir</code></strong> - </li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1162,8 +1278,14 @@
     ></td>
   </table>
   
-  
+  Perform a validation assert on the number of lines in a text file 
+  matching a specific regular expression.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>file</code></strong> - </li>
+        <li><strong class="pname"><code>filedir</code></strong> - </li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1194,7 +1316,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">Generated by Epydoc
-        3.0alpha2 on Sun Aug 13 17:04:14 2006</td>
+        3.0alpha2 on Sun Aug 13 21:20:17 2006</td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
     </td>
