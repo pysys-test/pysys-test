@@ -542,11 +542,11 @@ class BaseTest:
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=FALSE, replace=[], includes=[]):
 		"""Perform a validation assert on the comparison of two input text files.
 		
-		This method performs a file diff comparison on two input files. The files are pre-processed prior 
-		to the comparison to either ignore particular lines, sort their constituent lines, replace matches 
-		to regular expressions in a line with an alternate value, or to only include particular lines. Should the 
-		files after pre-processing be equivalent a C{PASSED} value is added to the test outcome list, otherwise
-		a C{FAILED} value is added.
+		This method performs a file comparison on two input files. The files are pre-processed prior to the 
+		comparison to either ignore particular lines, sort their constituent lines, replace matches to regular 
+		expressions in a line with an alternate value, or to only include particular lines. Should the files 
+		after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, otherwise
+		a C{FAILED} outcome is added.
 		
 		@param file1: The basename of the first file used in the file comparison
 		@param file2: The basename of the second file used in the file comparison
@@ -582,10 +582,15 @@ class BaseTest:
 	def assertGrep(self, file, filedir=None, expr='', contains=TRUE):
 		"""Perform a validation assert on a regular expression occurring in a text file.
 		
-		@param file:
-		@param filedir:
-		@expr:
-		@contains:
+		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
+		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
+		C{FAILED} outcome is added. Should C{contains} be set to false, a C{PASSED} outcome will only 
+		be added should the regular expression not be seen in the file.
+		
+		@param file: The basename of the file used in the grep
+		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		@param expr: The regular expression to check for in the file
+		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
 		
 		"""
 		if filedir == None: filedir = self.output
@@ -607,10 +612,16 @@ class BaseTest:
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=TRUE):   
 		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
 		
-		@param file:
-		@param filedir:
-		@exprList:
-		@contains:
+		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome 
+		to the test outcome list if the supplied regular expressions in the C{exprList} are seen in the file
+		in the order they appear in the list; otherwise a C{FAILED} outcome is added. Should C{contains} be set 
+		to false, a C{PASSED} outcome will only be added should the regular expressions not be seen in the file in 
+		the order they appear in the list.
+		
+		@param file: The basename of the file used in the ordered grep
+		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		@param exprList: A list of regular expressions which should occur in the file in the order they appear in the list
+		@param contains: Boolean flag to denote if the expressions should or should not be seen in the file in the order specified
 		
 		"""
 		if filedir == None: filedir = self.output
@@ -633,13 +644,17 @@ class BaseTest:
 			log.info("Ordered grep on input file %s ... %s", file, LOOKUP[result].lower())
 
 
-	def assertLineCount(self, file, filedir=None, expr='', condition="==1"):
+	def assertLineCount(self, file, filedir=None, expr='', condition=">=1"):
 		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
 		
-		@param file:
-		@param filedir:
-		@expr:
-		@condition:
+		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
+		input file matching the specified regular expression evaluate to true when evaluated against 
+		the supplied condition.
+		
+		@param file: The basename of the file used in the line count
+		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		@param expr: The regular expression used to match a line of the input file
+		@param condition: The condition to be met for the number of lines matching the regular expression
 		
 		"""	
 		if filedir == None: filedir = self.output

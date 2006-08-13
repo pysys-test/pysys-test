@@ -412,7 +412,7 @@
         <span class="sig-arg">file</span>,
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
-        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>)</span>
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;&gt;=1&quot;</span>)</span>
     <br />Perform a validation assert on the number of lines in a text file 
       matching a specific regular expression.
   </td>
@@ -1175,13 +1175,13 @@
   
   <p>Perform a validation assert on the comparison of two input text 
   files.</p>
-  This method performs a file diff comparison on two input files. The 
-  files are pre-processed prior to the comparison to either ignore 
-  particular lines, sort their constituent lines, replace matches to 
-  regular expressions in a line with an alternate value, or to only include
+  This method performs a file comparison on two input files. The files 
+  are pre-processed prior to the comparison to either ignore particular 
+  lines, sort their constituent lines, replace matches to regular 
+  expressions in a line with an alternate value, or to only include 
   particular lines. Should the files after pre-processing be equivalent a 
-  <code>PASSED</code> value is added to the test outcome list, otherwise a 
-  <code>FAILED</code> value is added.
+  <code>PASSED</code> outcome is added to the test outcome list, otherwise 
+  a <code>FAILED</code> outcome is added.
   <dl><dt></dt><dd>
     <dl><dt>Parameters:</dt></dl>
     <ul>
@@ -1224,13 +1224,23 @@
     ></td>
   </table>
   
-  Perform a validation assert on a regular expression occurring in a 
-  text file.
+  <p>Perform a validation assert on a regular expression occurring in a 
+  text file.</p>
+  When the <code>contains</code> input argument is set to true, this 
+  method will add a <code>PASSED</code> outcome to the test outcome list if
+  the supplied regular expression is seen in the file; otherwise a 
+  <code>FAILED</code> outcome is added. Should <code>contains</code> be set
+  to false, a <code>PASSED</code> outcome will only be added should the 
+  regular expression not be seen in the file.
   <dl><dt></dt><dd>
     <dl><dt>Parameters:</dt></dl>
     <ul>
-        <li><strong class="pname"><code>file</code></strong> - </li>
-        <li><strong class="pname"><code>filedir</code></strong> - </li>
+        <li><strong class="pname"><code>file</code></strong> - The basename of the file used in the grep</li>
+        <li><strong class="pname"><code>filedir</code></strong> - The dirname of the file (defaults to the testcase output 
+          subdirectory)</li>
+        <li><strong class="pname"><code>expr</code></strong> - The regular expression to check for in the file</li>
+        <li><strong class="pname"><code>contains</code></strong> - Boolean flag to denote if the expression should or should not 
+          be seen in the file</li>
     </ul>
   </dd></dl>
 </td></tr></table>
@@ -1251,13 +1261,26 @@
     ></td>
   </table>
   
-  Perform a validation assert on a list of regular expressions occurring
-  in specified order in a text file.
+  <p>Perform a validation assert on a list of regular expressions occurring
+  in specified order in a text file.</p>
+  When the <code>contains</code> input argument is set to true, this 
+  method will append a <code>PASSED</code> outcome to the test outcome list
+  if the supplied regular expressions in the <code>exprList</code> are seen
+  in the file in the order they appear in the list; otherwise a 
+  <code>FAILED</code> outcome is added. Should <code>contains</code> be set
+  to false, a <code>PASSED</code> outcome will only be added should the 
+  regular expressions not be seen in the file in the order they appear in 
+  the list.
   <dl><dt></dt><dd>
     <dl><dt>Parameters:</dt></dl>
     <ul>
-        <li><strong class="pname"><code>file</code></strong> - </li>
-        <li><strong class="pname"><code>filedir</code></strong> - </li>
+        <li><strong class="pname"><code>file</code></strong> - The basename of the file used in the ordered grep</li>
+        <li><strong class="pname"><code>filedir</code></strong> - The dirname of the file (defaults to the testcase output 
+          subdirectory)</li>
+        <li><strong class="pname"><code>exprList</code></strong> - A list of regular expressions which should occur in the file 
+          in the order they appear in the list</li>
+        <li><strong class="pname"><code>contains</code></strong> - Boolean flag to denote if the expressions should or should not
+          be seen in the file in the order specified</li>
     </ul>
   </dd></dl>
 </td></tr></table>
@@ -1271,20 +1294,29 @@
         <span class="sig-arg">file</span>,
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
-        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>)</span>
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;&gt;=1&quot;</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.assertLineCount">source&nbsp;code</a></span>&nbsp;</span
     ></td>
   </table>
   
-  Perform a validation assert on the number of lines in a text file 
-  matching a specific regular expression.
+  <p>Perform a validation assert on the number of lines in a text file 
+  matching a specific regular expression.</p>
+  This method will add a <code>PASSED</code> outcome to the outcome list
+  if the number of lines in the input file matching the specified regular 
+  expression evaluate to true when evaluated against the supplied 
+  condition.
   <dl><dt></dt><dd>
     <dl><dt>Parameters:</dt></dl>
     <ul>
-        <li><strong class="pname"><code>file</code></strong> - </li>
-        <li><strong class="pname"><code>filedir</code></strong> - </li>
+        <li><strong class="pname"><code>file</code></strong> - The basename of the file used in the line count</li>
+        <li><strong class="pname"><code>filedir</code></strong> - The dirname of the file (defaults to the testcase output 
+          subdirectory)</li>
+        <li><strong class="pname"><code>expr</code></strong> - The regular expression used to match a line of the input 
+          file</li>
+        <li><strong class="pname"><code>condition</code></strong> - The condition to be met for the number of lines matching the 
+          regular expression</li>
     </ul>
   </dd></dl>
 </td></tr></table>
@@ -1316,7 +1348,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">Generated by Epydoc
-        3.0alpha2 on Sun Aug 13 21:20:17 2006</td>
+        3.0alpha2 on Sun Aug 13 21:58:49 2006</td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
     </td>
