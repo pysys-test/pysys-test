@@ -52,7 +52,7 @@ class BaseTest:
 	"""The base class for all PySys test classes.
 
 	BaseTest is the parent class of all PySys system tests, and should be subclassed to provide 
-	an implementation of the C{execute()} method. Additional C{setup()}, C{cleanup()} and C{validate()}
+	an implementation of the L{execute()} method. Additional L{setup()}, L{cleanup()} and L{validate()}
 	methods provide the ability to perform custom setup and cleanup actions for a particual test, and to 
 	perform all validation steps in a specific method should this prove logically more simple.
 	
@@ -141,8 +141,7 @@ class BaseTest:
 		@return: The overall test outcome
 		@rtype:  integer
 
-		"""
-	
+		"""	
 		if len(self.outcome) == 0: return NOTVERIFIED
 		list = copy.copy(self.outcome)
 		list.sort(lambda x, y: cmp(PRECEDENT.index(x), PRECEDENT.index(y)))
@@ -203,6 +202,33 @@ class BaseTest:
 
 	# process manipulation methods
 	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
+		"""Start a process running in the foreground or background, and return the exit status or process handle respectively.
+
+		The method allows spawning of new processes in a platform independent way. The command, arguments, environment and 
+		working directory to run the process in can all be specified in the arguments to the method, along with the filenames
+		used for capturing the stdout and stderr of the process. Processes may be started in the C{FOREGROUND}, in which case 
+		the method does not return until the process has completed or a time out occurs, or in the C{BACKGROUND} in which case
+		the method returns immediately to the caller returning a handle to the process to allow manipulation at a later stage. 
+		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process handle are automatically
+		killed on completion of the test via the L{cleanup()} method of the BaseTest. 
+
+		This method uses the L{pysys.process.helper} module to start the process. On failure conditions the method may append 
+		C{BLOCKED} or C{TIMEDOUT} outcomes to the test validation data structure when it was not possible to start the process 
+		(e.g. command does not exist etc), or the timeout period expired (indicating a potential deadlock or livelock in the process).
+						
+		@param command: The command to start the process (should include the full path)
+		@param arguments: A list of arguments to pass to the command
+		@param environs: A dictionary of the environment to run the process in (defaults to clean environment)
+		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
+		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
+		@param timeout: The timeout period after which to termintate processes running in the C{FOREGROUND}
+		@param stdout: The filename used to capture the stdout of the process
+		@param stderr: The filename user to capture the stderr of the process
+		@param displayName: A display name to use (defaults to the basename of the command)
+		@return: The exit status of a C{FOREGROUND} process, or process handle of a C{BACKGROUND} process
+		@rtype: integer | handle
+
+		"""
 		if workingDir == None: workingDir = r'%s' % self.output
 		if displayName == None: displayName = os.path.basename(command)
 		
@@ -224,27 +250,54 @@ class BaseTest:
 			return process
 
 		
-	def stopProcess(self, process, hard=FALSE):
+	def stopProcess(self, process, hard=TRUE):
+		"""Send a soft or hard kill to a running process to stop it's execution.
+	
+		This method uses the L{pysys.process.helper} module to stop a running process. 
+		Should the request to stop the running process fail, a C{BLOCKED} outcome will 
+		be added to the test outcome list.
+		
+		@param process: The process handle returned from the L{startProcess()} method
+		@param hard: Set to false to perform a soft kill on the process (Unix systems only)
+		
+		"""
 		if process.running():
 			try:
 				process.stop(hard)
 				log.info("Stopped process with process id %d", process.pid)
 			except ProcessError:
-				log.info("Unable to start process")
+				log.info("Unable to stop process")
 				self.addOutcome(BLOCKED)
 
 
 	def signalProcess(self, process, signal):
+		"""Send a signal to a running process (Unix only).
+	
+		This method uses the L{pysys.process.helper} module to send a signal to a running 
+		process. Should the request to send the signal to the running process fail, a 
+		C{BLOCKED} outcome will be added to the test outcome list.
+			
+		@param process: The process handle returned from the L{startProcess()} method
+		@param signal: The integer value of the signal to send
+		
+		"""
 		if process.running():
 			try:
 				process.signal(signal)
 				log.info("Sent %d signal to process with process id %d", signal, process.pid)
 			except ProcessError:
-				log.info("Unable to start process")
+				log.info("Unable to send signal to process")
 				self.addOutcome(BLOCKED)
 
 
 	def waitProcess(self, process, timeout):
+		"""Wait for a process to terminate, return on termination or expiry of the timeout.
+	
+		@param process: The process handle returned from the L{startProcess()} method
+		@param timeout: The timeout value in seconds to wait before returning
+		
+		@todo: The underlying implementation in the process helper needs to be implemented
+		"""
 		try:
 			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
 			process.waitProcess(timeout)
@@ -254,6 +307,22 @@ class BaseTest:
 
 
 	def startProcessMonitor(self, process, interval, file):
+		"""Start a separate thread to log process statistics to logfile, and return a handle to the process monitor.
+		
+		This method uses the L{pysys.process.monitor} module to perform logging of the process statistics, 
+		starting the monitor as a seperate background thread. Should the request to log the statistics fail 
+		a C{BLOCKED} outcome will be added to the test outcome list. All process monitors not explicitly 
+		stopped using the returned handle are automatically stopped on completion of the test via the L{cleanup()} 
+		method of the BaseTest. 
+		
+		@param process: The process handle returned from the L{startProcess()} method
+		@param interval: The interval in seconds between collecting and logging the process statistics
+		@param file: The full path to the filename used for logging the process statistics
+		
+		@return: A handle to the process monitor
+		@rtype: handle
+		
+		"""
 		monitor = ProcessMonitor(process, interval, file)
 		try:
 			monitor.start()
@@ -265,11 +334,33 @@ class BaseTest:
 
 
 	def stopProcessMonitor(self, monitor):
+		"""Stop a process monitor.
+		
+		@param monitor: The process monitor handle returned from the L{startProcessMonitor()} method
+		
+		"""
 		if monitor.running: monitor.stop()
 
 
 	# methods to control the manual tester user interface
 	def startManualTester(self, file, filedir=None, state=FOREGROUND, timeout=TIMEOUTS['ManualTester']):
+		"""Start the manual tester.
+		
+		The manual tester user interface (UI) is used to describe a series of manual steps to be performed 
+		to execute and validate a test. Only a single instance of the UI can be running at any given time, and 
+		can be run either in the C{FOREGROUND} (method will not return until the UI is closed or the timeout
+		occurs) or in the C{BACKGROUND} (method will return straight away so automated actions may be performed 
+		concurrently). Should the UI be terminated due to expiry of the timeout, a C{TIMEDOUT} outcome will be 
+		added to the outcome list. The UI can be stopped via the L{stopManualTester()} method. An instance of the 
+		UI not explicitly stopped within a test will automatically be stopped via the L{cleanup()} method of the 
+		BaseTest.
+		
+		@param file: The name of the manual test xml input file (see L{pysys.xml.manual} for details on the DTD)
+		@param filedir: The directory containing the manual test xml input file (defaults to the output subdirectory)
+		@param state: Start the manual tester either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
+		@param timeout: The timeout period after which to termintate a manual tester running in the C{FOREGROUND}
+		
+		"""
 		if filedir == None: filedir = self.input
 	
 		if not self.manualTester or self.manualTester.running() == 0:
@@ -292,6 +383,9 @@ class BaseTest:
 
 
 	def stopManualTester(self):
+		"""Stop the manual tester if running.
+		
+		"""
 		if self.manualTester and self.manualTester.running():
 			self.manualTester.stop()
 			time.sleep(1)
@@ -300,6 +394,9 @@ class BaseTest:
 
 
 	def waitManualTester(self, timeout=TIMEOUTS['ManualTester']):
+		"""Wait for the manual tester to be stopped via user interaction.
+		
+		"""
 		if self.manualTester and self.manualTester.running():
 			startTime = time.time()
 			while self.manualTester.running() == 1:
