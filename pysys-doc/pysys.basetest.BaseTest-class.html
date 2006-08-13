@@ -60,9 +60,14 @@
 <br/><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest">source&nbsp;code</a></span></h2>
 <p>The base class for all PySys test classes.</p>
   <p>BaseTest is the parent class of all PySys system tests, and should be 
-  subclassed to provide an implementation of the <code>execute()</code> 
-  method. Additional <code>setup()</code>, <code>cleanup()</code> and 
-  <code>validate()</code> methods provide the ability to perform custom 
+  subclassed to provide an implementation of the <a 
+  href="pysys.basetest.BaseTest-class.html#execute" 
+  class="link">execute()</a> method. Additional <a 
+  href="pysys.basetest.BaseTest-class.html#setup" class="link">setup()</a>,
+  <a href="pysys.basetest.BaseTest-class.html#cleanup" 
+  class="link">cleanup()</a> and <a 
+  href="pysys.basetest.BaseTest-class.html#validate" 
+  class="link">validate()</a> methods provide the ability to perform custom
   setup and cleanup actions for a particual test, and to perform all 
   validation steps in a specific method should this prove logically more 
   simple.</p>
@@ -175,7 +180,7 @@
 </tr>
 <tr>
   <td width="15%" align="right" valign="top" class="rtype">
-    &nbsp;
+    integer | handle
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#startProcess" class="sig-name">startProcess</a>(<span class="sig-arg">self</span>,
@@ -188,7 +193,8 @@
         <span class="sig-arg">stdout</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">stderr</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">displayName</span>=<span class="sig-default">None</span>)</span>
-    
+    <br />Start a process running in the foreground or background, and 
+      return the exit status or process handle respectively.
   </td>
 </tr>
 <tr>
@@ -198,8 +204,9 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopProcess" class="sig-name">stopProcess</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
-        <span class="sig-arg">hard</span>=<span class="sig-default">FALSE</span>)</span>
-    
+        <span class="sig-arg">hard</span>=<span class="sig-default">TRUE</span>)</span>
+    <br />Send a soft or hard kill to a running process to stop it's 
+      execution.
   </td>
 </tr>
 <tr>
@@ -210,7 +217,7 @@
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#signalProcess" class="sig-name">signalProcess</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
         <span class="sig-arg">signal</span>)</span>
-    
+    <br />Send a signal to a running process (Unix only).
   </td>
 </tr>
 <tr>
@@ -221,19 +228,21 @@
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitProcess" class="sig-name">waitProcess</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
         <span class="sig-arg">timeout</span>)</span>
-    
+    <br />Wait for a process to terminate, return on termination or expiry 
+      of the timeout.
   </td>
 </tr>
 <tr>
   <td width="15%" align="right" valign="top" class="rtype">
-    &nbsp;
+    handle
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#startProcessMonitor" class="sig-name">startProcessMonitor</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
         <span class="sig-arg">interval</span>,
         <span class="sig-arg">file</span>)</span>
-    
+    <br />Start a separate thread to log process statistics to logfile, and 
+      return a handle to the process monitor.
   </td>
 </tr>
 <tr>
@@ -243,7 +252,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopProcessMonitor" class="sig-name">stopProcessMonitor</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">monitor</span>)</span>
-    
+    <br />Stop a process monitor.
   </td>
 </tr>
 <tr>
@@ -256,7 +265,7 @@
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">state</span>=<span class="sig-default">FOREGROUND</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['ManualTester']</span>)</span>
-    
+    <br />Start the manual tester.
   </td>
 </tr>
 <tr>
@@ -265,7 +274,7 @@
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopManualTester" class="sig-name">stopManualTester</a>(<span class="sig-arg">self</span>)</span>
-    
+    <br />Stop the manual tester if running.
   </td>
 </tr>
 <tr>
@@ -275,7 +284,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitManualTester" class="sig-name">waitManualTester</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['ManualTester']</span>)</span>
-    
+    <br />Wait for the manual tester to be stopped via user interaction.
   </td>
 </tr>
 <tr>
@@ -664,8 +673,50 @@
     ></td>
   </table>
   
-  
+  <p>Start a process running in the foreground or background, and return 
+  the exit status or process handle respectively.</p>
+  <p>The method allows spawning of new processes in a platform independent 
+  way. The command, arguments, environment and working directory to run the
+  process in can all be specified in the arguments to the method, along 
+  with the filenames used for capturing the stdout and stderr of the 
+  process. Processes may be started in the <code>FOREGROUND</code>, in 
+  which case the method does not return until the process has completed or 
+  a time out occurs, or in the <code>BACKGROUND</code> in which case the 
+  method returns immediately to the caller returning a handle to the 
+  process to allow manipulation at a later stage. All processes started in 
+  the <code>BACKGROUND</code> and not explicitly killed using the returned 
+  process handle are automatically killed on completion of the test via the
+  <a href="pysys.basetest.BaseTest-class.html#cleanup" 
+  class="link">cleanup()</a> method of the BaseTest.</p>
+  This method uses the <a href="pysys.process.helper-module.html" 
+  class="link">pysys.process.helper</a> module to start the process. On 
+  failure conditions the method may append <code>BLOCKED</code> or 
+  <code>TIMEDOUT</code> outcomes to the test validation data structure when
+  it was not possible to start the process (e.g. command does not exist 
+  etc), or the timeout period expired (indicating a potential deadlock or 
+  livelock in the process).
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>command</code></strong> - The command to start the process (should include the full 
+          path)</li>
+        <li><strong class="pname"><code>arguments</code></strong> - A list of arguments to pass to the command</li>
+        <li><strong class="pname"><code>environs</code></strong> - A dictionary of the environment to run the process in 
+          (defaults to clean environment)</li>
+        <li><strong class="pname"><code>workingDir</code></strong> - The working directory for the process to run in (defaults to 
+          the testcase output subdirectory)</li>
+        <li><strong class="pname"><code>state</code></strong> - Run the process either in the <code>FOREGROUND</code> or 
+          <code>BACKGROUND</code> (defaults to <code>FOREGROUND</code>)</li>
+        <li><strong class="pname"><code>timeout</code></strong> - The timeout period after which to termintate processes running
+          in the <code>FOREGROUND</code></li>
+        <li><strong class="pname"><code>stdout</code></strong> - The filename used to capture the stdout of the process</li>
+        <li><strong class="pname"><code>stderr</code></strong> - The filename user to capture the stderr of the process</li>
+        <li><strong class="pname"><code>displayName</code></strong> - A display name to use (defaults to the basename of the 
+          command)</li>
+    </ul>
+    <dl><dt>Returns: <code>integer | handle</code></dt>
+        <dd>The exit status of a <code>FOREGROUND</code> process, or 
+          process handle of a <code>BACKGROUND</code> process</dd></dl>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -676,15 +727,28 @@
   <tr valign="top"><td>
   <h3><span class="sig"><span class="sig-name">stopProcess</span>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
-        <span class="sig-arg">hard</span>=<span class="sig-default">FALSE</span>)</span>
+        <span class="sig-arg">hard</span>=<span class="sig-default">TRUE</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.stopProcess">source&nbsp;code</a></span>&nbsp;</span
     ></td>
   </table>
   
-  
+  <p>Send a soft or hard kill to a running process to stop it's 
+  execution.</p>
+  This method uses the <a href="pysys.process.helper-module.html" 
+  class="link">pysys.process.helper</a> module to stop a running process. 
+  Should the request to stop the running process fail, a 
+  <code>BLOCKED</code> outcome will be added to the test outcome list.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>process</code></strong> - The process handle returned from the <a 
+          href="pysys.basetest.BaseTest-class.html#startProcess" 
+          class="link">startProcess()</a> method</li>
+        <li><strong class="pname"><code>hard</code></strong> - Set to false to perform a soft kill on the process (Unix 
+          systems only)</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -702,8 +766,20 @@
     ></td>
   </table>
   
-  
+  <p>Send a signal to a running process (Unix only).</p>
+  This method uses the <a href="pysys.process.helper-module.html" 
+  class="link">pysys.process.helper</a> module to send a signal to a 
+  running process. Should the request to send the signal to the running 
+  process fail, a <code>BLOCKED</code> outcome will be added to the test 
+  outcome list.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>process</code></strong> - The process handle returned from the <a 
+          href="pysys.basetest.BaseTest-class.html#startProcess" 
+          class="link">startProcess()</a> method</li>
+        <li><strong class="pname"><code>signal</code></strong> - The integer value of the signal to send</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -721,8 +797,21 @@
     ></td>
   </table>
   
-  
+  Wait for a process to terminate, return on termination or expiry of 
+  the timeout.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>process</code></strong> - The process handle returned from the <a 
+          href="pysys.basetest.BaseTest-class.html#startProcess" 
+          class="link">startProcess()</a> method</li>
+        <li><strong class="pname"><code>timeout</code></strong> - The timeout value in seconds to wait before returning</li>
+    </ul>
+      <p><strong>To Do:</strong>
+        The underlying implementation in the process helper needs to be 
+        implemented
+      </p>
+      </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -741,8 +830,30 @@
     ></td>
   </table>
   
-  
+  <p>Start a separate thread to log process statistics to logfile, and 
+  return a handle to the process monitor.</p>
+  This method uses the <a href="pysys.process.monitor-module.html" 
+  class="link">pysys.process.monitor</a> module to perform logging of the 
+  process statistics, starting the monitor as a seperate background thread.
+  Should the request to log the statistics fail a <code>BLOCKED</code> 
+  outcome will be added to the test outcome list. All process monitors not 
+  explicitly stopped using the returned handle are automatically stopped on
+  completion of the test via the <a 
+  href="pysys.basetest.BaseTest-class.html#cleanup" 
+  class="link">cleanup()</a> method of the BaseTest.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>process</code></strong> - The process handle returned from the <a 
+          href="pysys.basetest.BaseTest-class.html#startProcess" 
+          class="link">startProcess()</a> method</li>
+        <li><strong class="pname"><code>interval</code></strong> - The interval in seconds between collecting and logging the 
+          process statistics</li>
+        <li><strong class="pname"><code>file</code></strong> - The full path to the filename used for logging the process 
+          statistics</li>
+    </ul>
+    <dl><dt>Returns: <code>handle</code></dt>
+        <dd>A handle to the process monitor</dd></dl>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -759,8 +870,14 @@
     ></td>
   </table>
   
-  
+  Stop a process monitor.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>monitor</code></strong> - The process monitor handle returned from the <a 
+          href="pysys.basetest.BaseTest-class.html#startProcessMonitor" 
+          class="link">startProcessMonitor()</a> method</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -780,8 +897,35 @@
     ></td>
   </table>
   
-  
+  <p>Start the manual tester.</p>
+  The manual tester user interface (UI) is used to describe a series of 
+  manual steps to be performed to execute and validate a test. Only a 
+  single instance of the UI can be running at any given time, and can be 
+  run either in the <code>FOREGROUND</code> (method will not return until 
+  the UI is closed or the timeout occurs) or in the <code>BACKGROUND</code>
+  (method will return straight away so automated actions may be performed 
+  concurrently). Should the UI be terminated due to expiry of the timeout, 
+  a <code>TIMEDOUT</code> outcome will be added to the outcome list. The UI
+  can be stopped via the <a 
+  href="pysys.basetest.BaseTest-class.html#stopManualTester" 
+  class="link">stopManualTester()</a> method. An instance of the UI not 
+  explicitly stopped within a test will automatically be stopped via the <a
+  href="pysys.basetest.BaseTest-class.html#cleanup" 
+  class="link">cleanup()</a> method of the BaseTest.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>file</code></strong> - The name of the manual test xml input file (see <a 
+          href="pysys.xml.manual-module.html" 
+          class="link">pysys.xml.manual</a> for details on the DTD)</li>
+        <li><strong class="pname"><code>filedir</code></strong> - The directory containing the manual test xml input file 
+          (defaults to the output subdirectory)</li>
+        <li><strong class="pname"><code>state</code></strong> - Start the manual tester either in the <code>FOREGROUND</code> 
+          or <code>BACKGROUND</code> (defaults to 
+          <code>FOREGROUND</code>)</li>
+        <li><strong class="pname"><code>timeout</code></strong> - The timeout period after which to termintate a manual tester 
+          running in the <code>FOREGROUND</code></li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -797,7 +941,7 @@
     ></td>
   </table>
   
-  
+  Stop the manual tester if running.
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -815,7 +959,7 @@
     ></td>
   </table>
   
-  
+  Wait for the manual tester to be stopped via user interaction.
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -1050,7 +1194,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">Generated by Epydoc
-        3.0alpha2 on Sun Aug 13 12:58:24 2006</td>
+        3.0alpha2 on Sun Aug 13 17:04:14 2006</td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
     </td>
