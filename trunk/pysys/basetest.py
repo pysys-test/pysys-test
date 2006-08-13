@@ -412,10 +412,29 @@ class BaseTest:
 	# on various conditions i.e. a socket becoming available for connections,
 	# a file to exist etc
 	def wait(self, interval):
+		"""Wait for a specified period of time.
+		
+		@param interval: The time interval in seconds to wait
+		
+		"""
 		time.sleep(interval)
 
 
 	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket']):
+		"""Wait for a socket connection to be established.
+		
+		This method blocks until connection to a particular host:port pair can be established. 
+		This is useful for test timing where a component under test creates a socket for client 
+		server interaction - calling of this method ensures that on return of the method call 
+		the server process is running and a client is able to create connections to it. If a 
+		connection cannot be made within the specified timeout interval, a C{TIMEDOUT} outcome 
+		is written to the outcome list, and the method returns to the caller.
+		
+		@param port: The port value in the socket host:port pair
+		@param host: The host value in the socket host:port pair
+		@param timeout: The timeout in seconds to wait for connection to the socket
+		
+		"""
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
 		startTime = time.time()
@@ -432,6 +451,18 @@ class BaseTest:
 
 
 	def waitForFile(self, filename, timeout=TIMEOUTS['WaitForFile']):
+		"""Wait for a file to be written to disk.
+		
+		This method blocks until a file is created on disk. This is useful for test timing where 
+		a component under test creates a file (e.g. for logging) indicating it has performed all 
+		initialisation actions and is ready for the test execution steps. If a file is not created 
+		on disk within the specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome 
+		list, and the method returns to the caller.
+		
+		@param filename: The full path to the file to wait for creation
+		@param timeout: The timeout in seconds to wait for the file to be created
+		
+		"""
 		startTime = time.time()
 		while not os.path.exists(filename):
 			if timeout:
@@ -441,7 +472,22 @@ class BaseTest:
 			time.sleep(0.01)
 
 
-	def waitForSignal(self, basename, expr, condition="==1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25):
+	def waitForSignal(self, basename, expr, condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25):
+		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
+		
+		This method blocks until a particular regular expression is seen in a text file on a set
+		number of lines. The number of lines which should match the regular expression is given by 
+		the C{condition} argument in textual form i.e. for a match on more than 2 lines use condition =\">2\".
+		If the regular expression is not seen in the file matching the supplied condition within the 
+		specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome list, and the method 
+		returns to the caller.
+		
+		@param basename: The full path to the file to check for the regular expression
+		@param exp: The regular expression to search for in the text file
+		@param condition: The condition to be met for the number of lines matching the regular expression
+		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
+		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
+		"""
 		file = os.path.join(self.output, basename)
 
 		startTime = time.time()
