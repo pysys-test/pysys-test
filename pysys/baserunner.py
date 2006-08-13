@@ -185,6 +185,7 @@ class BaseRunner:
 
 				else:
 					try:
+						testObj.setup()
 						testObj.execute()
 					except KeyboardInterrupt:
 						keyboardInterupt = TRUE
