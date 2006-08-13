@@ -49,31 +49,17 @@ class %s(%s):
 
 
 class BaseTest:
-	"""The parent class of all PySys system tests.
+	"""The base class for all PySys test classes.
 
 	BaseTest is the parent class of all PySys system tests, and should be subclassed to provide 
-	an implementation of the execute() method. The class is instantiated with information on the 
-	test input, reference and output data locations, the user defined mode the test is to be executed 
-	in, and the user defined extra arguments required for test execution. 
-
-	The class provides important utility functions for process management, test timing, test validation 
-	and storage of test validation steps. Validation of the test can be performed multiple times through 
-	the assert* functions, building up an internal list of individual validation outcomes. Currently 
-	supported test outcomes are;
+	an implementation of the C{execute()} method. Additional C{setup()}, C{cleanup()} and C{validate()}
+	methods provide the ability to perform custom setup and cleanup actions for a particual test, and to 
+	perform all validation steps in a specific method should this prove logically more simple.
 	
-	  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
-	  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
-	  DUMPEDCORE:  A process started by the test produced a core file (unix only)
-	  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
-	  FAILED:      A validation step of the test failed
-	  NOTVERIFIED: No validation steps were performed
-	  INSPECT:     A validation step of the test requires manual inspection
-	  PASSED:      A validation step of the test passed
-	
-	The overall outcome of the test is based on a precedence of the outcomes in the list, based on the order
-	as given above i.e. if three validation steps were performed in the test with outcomes TIMEDOUT, FAILED, 
-	PASSED the overall outcome would be TIMEDOUT; a test only passes when all validation steps pass. 
-	 
+	The class provides utility functions for process management, test timing and test validation. 
+	Validation of the test can be performed multiple times through the C{assert*} functions, building 
+	up an internal data structure storing the individual validation outcomes. The overall outcome of 
+	the test is determined using a precedence order of the individual outcomes. 
 	"""
 
 	def __init__ (self, descriptor, outsubdir, mode, xargs):
@@ -99,16 +85,64 @@ class BaseTest:
 
 
 	def setKeywordArgs(self, xargs):
+		"""Set the xargs as data attributes of the test class.
+				
+		Values in the xargs dictionary are set as data attributes using the builtin C{setattr()} method. 
+		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
+		form C{self.foo} with C{value bar}. This is used so that subclasses can define default values of 
+		data attributes, which can be overriden on instantiation e.g. using the -X options to the 
+		runTest.py launch executable.
+		
+		@param xargs: A dictionary of the user defined extra arguments
+		
+		"""
 		for key in xargs.keys():
 			setattr(self, key, xargs[key])
 
 
 	# methods to add to and obtain the test outcome
 	def addOutcome(self, outcome):
+		"""Add a test validation outcome to the validation list.
+		
+		The method provides the ability to add a validation outcome to the internal data structure 
+		storing the list of test validation outcomes. In a single test run multiple validations may 
+		be performed. The currently supported validation outcomes are::
+				
+		  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
+		  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
+		  DUMPEDCORE:  A process started by the test produced a core file (unix only)
+		  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
+		  FAILED:      A validation step of the test failed
+		  NOTVERIFIED: No validation steps were performed
+		  INSPECT:     A validation step of the test requires manual inspection
+		  PASSED:      A validation step of the test passed 
+		
+		The outcomes are considered to have a precedence order, as defined by the order of the outcomes listed
+		above. Thus a C{BLOCKED} outcome has a higher precedence than a C{PASSED} outcome. The outcomes are defined 
+		in L{pysys.constants}. 
+		
+		@param outcome: The outcome to add
+		
+		"""
 		self.outcome.append(outcome)
 
 
 	def getOutcome(self):
+		"""Get the overall outcome of the test based on the precedence order.
+				
+		The method returns the overal outcome of the test based on the outcomes stored in the internal data 
+		structure. The precedence order of the possible outcomes is used to determined the overall outcome 
+		of the test, e.g. if C{PASSED}, C{BLOCKED} and C{FAILED} were recorded during the execution of the test, 
+		the overall outcome would be C{BLOCKED}. 
+		
+		The method returns the integer value of the outcome as defined in L{pysys.constants}. To convert this 
+		to a string representation use the C{LOOKUP} dictionary i.e. C{LOOKUP}[test.getOutcome()]
+		
+		@return: The overall test outcome
+		@rtype:  integer
+
+		"""
+	
 		if len(self.outcome) == 0: return NOTVERIFIED
 		list = copy.copy(self.outcome)
 		list.sort(lambda x, y: cmp(PRECEDENT.index(x), PRECEDENT.index(y)))
@@ -117,15 +151,46 @@ class BaseTest:
 
 	# test methods for execution, validation and cleanup. The execute method is
 	# abstract and must be implemented by a subclass. 
+	def setup(self):
+		"""Setup method which may optionally be overridden to perform custom setup operations prior to test execution.
+		
+		"""
+		pass		
+
+
 	def execute(self):
+		"""Execute method which must be overridden to perform the test execution steps.
+		
+		@raises NotImplementedError:  Raised exeception should the method not be overridden
+		"""
 		raise NotImplementedError, "The execute method of the BaseTest class must be implemented in a subclass"
 
 
 	def validate(self):
+		"""Validate method which may optionally be overridden to group all validation steps.
+		
+		"""
 		pass
 
 
 	def cleanup(self):
+		"""Cleanup method which performs cleanup actions after execution and validation of the test.
+		
+		The cleanup method performs actions to stop all processes started in the background and not 
+		explicitly killed during the test execution. It also stops all process monitors running in 
+		seperate threads, and any instances of the manual tester user interface. Should a custom cleanup 
+		for a subclass be required, the BaseTest cleanup method should first be called. e.g. ::
+		
+		  class MyTest(BaseTest):
+		  
+		    def cleanup(self):
+		      # call base test cleanup first
+		      BaseTest.cleanup(self)
+				
+		      # perform custom cleanup actions
+		      ...
+				
+		"""
 		if self.manualTester and self.manualTester.running():
 			self.stopManualTester()
 	

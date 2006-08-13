@@ -58,34 +58,20 @@
 <!-- ==================== CLASS DESCRIPTION ==================== -->
 <h2 class="class">Class BaseTest
 <br/><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest">source&nbsp;code</a></span></h2>
-<pre class="literalblock">
-The parent class of all PySys system tests.
-
-BaseTest is the parent class of all PySys system tests, and should be subclassed to provide 
-an implementation of the execute() method. The class is instantiated with information on the 
-test input, reference and output data locations, the user defined mode the test is to be executed 
-in, and the user defined extra arguments required for test execution. 
-
-The class provides important utility functions for process management, test timing, test validation 
-and storage of test validation steps. Validation of the test can be performed multiple times through 
-the assert* functions, building up an internal list of individual validation outcomes. Currently 
-supported test outcomes are;
-
-  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
-  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
-  DUMPEDCORE:  A process started by the test produced a core file (unix only)
-  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
-  FAILED:      A validation step of the test failed
-  NOTVERIFIED: No validation steps were performed
-  INSPECT:     A validation step of the test requires manual inspection
-  PASSED:      A validation step of the test passed
-
-The overall outcome of the test is based on a precedence of the outcomes in the list, based on the order
-as given above i.e. if three validation steps were performed in the test with outcomes TIMEDOUT, FAILED, 
-PASSED the overall outcome would be TIMEDOUT; a test only passes when all validation steps pass. 
- 
-
-</pre><br /><br />
+<p>The base class for all PySys test classes.</p>
+  <p>BaseTest is the parent class of all PySys system tests, and should be 
+  subclassed to provide an implementation of the <code>execute()</code> 
+  method. Additional <code>setup()</code>, <code>cleanup()</code> and 
+  <code>validate()</code> methods provide the ability to perform custom 
+  setup and cleanup actions for a particual test, and to perform all 
+  validation steps in a specific method should this prove logically more 
+  simple.</p>
+  The class provides utility functions for process management, test 
+  timing and test validation. Validation of the test can be performed 
+  multiple times through the <code>assert*</code> functions, building up an
+  internal data structure storing the individual validation outcomes. The 
+  overall outcome of the test is determined using a precedence order of the
+  individual outcomes.<br /><br />
 
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
@@ -124,7 +110,7 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#setKeywordArgs" class="sig-name">setKeywordArgs</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">xargs</span>)</span>
-    
+    <br />Set the xargs as data attributes of the test class.
   </td>
 </tr>
 <tr>
@@ -134,7 +120,17 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#addOutcome" class="sig-name">addOutcome</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">outcome</span>)</span>
-    
+    <br />Add a test validation outcome to the validation list.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    integer
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#getOutcome" class="sig-name">getOutcome</a>(<span class="sig-arg">self</span>)</span>
+    <br />Get the overall outcome of the test based on the precedence 
+      order.
   </td>
 </tr>
 <tr>
@@ -142,8 +138,9 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
     &nbsp;
    </td>
   <td>
-    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#getOutcome" class="sig-name">getOutcome</a>(<span class="sig-arg">self</span>)</span>
-    
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#setup" class="sig-name">setup</a>(<span class="sig-arg">self</span>)</span>
+    <br />Setup method which may optionally be overridden to perform custom 
+      setup operations prior to test execution.
   </td>
 </tr>
 <tr>
@@ -152,7 +149,8 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#execute" class="sig-name">execute</a>(<span class="sig-arg">self</span>)</span>
-    
+    <br />Execute method which must be overridden to perform the test 
+      execution steps.
   </td>
 </tr>
 <tr>
@@ -161,7 +159,8 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#validate" class="sig-name">validate</a>(<span class="sig-arg">self</span>)</span>
-    
+    <br />Validate method which may optionally be overridden to group all 
+      validation steps.
   </td>
 </tr>
 <tr>
@@ -170,7 +169,8 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#cleanup" class="sig-name">cleanup</a>(<span class="sig-arg">self</span>)</span>
-    
+    <br />Cleanup method which performs cleanup actions after execution and 
+      validation of the test.
   </td>
 </tr>
 <tr>
@@ -465,8 +465,19 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
     ></td>
   </table>
   
-  
+  <p>Set the xargs as data attributes of the test class.</p>
+  Values in the xargs dictionary are set as data attributes using the 
+  builtin <code>setattr()</code> method. Thus an xargs dictionary of the 
+  form <code>{'foo': 'bar'}</code> will result in a data attribute of the 
+  form <code>self.foo</code> with <code>value bar</code>. This is used so 
+  that subclasses can define default values of data attributes, which can 
+  be overriden on instantiation e.g. using the -X options to the runTest.py
+  launch executable.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>xargs</code></strong> - A dictionary of the user defined extra arguments</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -483,8 +494,31 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
     ></td>
   </table>
   
-  
+  <p>Add a test validation outcome to the validation list.</p>
+  The method provides the ability to add a validation outcome to the 
+  internal data structure storing the list of test validation outcomes. In 
+  a single test run multiple validations may be performed. The currently 
+  supported validation outcomes are:
+<pre class="literalblock">
+ SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
+ BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
+ DUMPEDCORE:  A process started by the test produced a core file (unix only)
+ TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
+ FAILED:      A validation step of the test failed
+ NOTVERIFIED: No validation steps were performed
+ INSPECT:     A validation step of the test requires manual inspection
+ PASSED:      A validation step of the test passed 
+</pre>
+  The outcomes are considered to have a precedence order, as defined by 
+  the order of the outcomes listed above. Thus a <code>BLOCKED</code> 
+  outcome has a higher precedence than a <code>PASSED</code> outcome. The 
+  outcomes are defined in <a href="pysys.constants-module.html" 
+  class="link">pysys.constants</a>.
   <dl><dt></dt><dd>
+    <dl><dt>Parameters:</dt></dl>
+    <ul>
+        <li><strong class="pname"><code>outcome</code></strong> - The outcome to add</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -500,7 +534,37 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
     ></td>
   </table>
   
+  <p>Get the overall outcome of the test based on the precedence order.</p>
+  <p>The method returns the overal outcome of the test based on the 
+  outcomes stored in the internal data structure. The precedence order of 
+  the possible outcomes is used to determined the overall outcome of the 
+  test, e.g. if <code>PASSED</code>, <code>BLOCKED</code> and 
+  <code>FAILED</code> were recorded during the execution of the test, the 
+  overall outcome would be <code>BLOCKED</code>.</p>
+  The method returns the integer value of the outcome as defined in <a 
+  href="pysys.constants-module.html" class="link">pysys.constants</a>. To 
+  convert this to a string representation use the <code>LOOKUP</code> 
+  dictionary i.e. <code>LOOKUP</code>[test.getOutcome()]
+  <dl><dt></dt><dd>
+    <dl><dt>Returns: <code>integer</code></dt>
+        <dd>The overall test outcome</dd></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="setup"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">setup</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.setup">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
   
+  Setup method which may optionally be overridden to perform custom 
+  setup operations prior to test execution.
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -517,8 +581,13 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
     ></td>
   </table>
   
-  
+  Execute method which must be overridden to perform the test execution 
+  steps.
   <dl><dt></dt><dd>
+    <dl><dt>Raises:</dt></dl>
+    <ul>
+        <li><code><strong class='fraise'>NotImplementedError</strong></code> - Raised exeception should the method not be overridden</li>
+    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -534,7 +603,8 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
     ></td>
   </table>
   
-  
+  Validate method which may optionally be overridden to group all 
+  validation steps.
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -551,7 +621,24 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
     ></td>
   </table>
   
-  
+  <p>Cleanup method which performs cleanup actions after execution and 
+  validation of the test.</p>
+  The cleanup method performs actions to stop all processes started in 
+  the background and not explicitly killed during the test execution. It 
+  also stops all process monitors running in seperate threads, and any 
+  instances of the manual tester user interface. Should a custom cleanup 
+  for a subclass be required, the BaseTest cleanup method should first be 
+  called. e.g. :
+<pre class="literalblock">
+ class MyTest(BaseTest):
+ 
+   def cleanup(self):
+     # call base test cleanup first
+     BaseTest.cleanup(self)
+               
+     # perform custom cleanup actions
+     ...
+</pre>
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -963,7 +1050,7 @@ PASSED the overall outcome would be TIMEDOUT; a test only passes when all valida
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">Generated by Epydoc
-        3.0alpha2 on Fri Aug 11 21:49:50 2006</td>
+        3.0alpha2 on Sun Aug 13 12:58:24 2006</td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
     </td>
