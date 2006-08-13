@@ -54,7 +54,7 @@ class BaseTest:
 	BaseTest is the parent class of all PySys system tests, and should be subclassed to provide 
 	an implementation of the L{execute()} method. Additional L{setup()}, L{cleanup()} and L{validate()}
 	methods provide the ability to perform custom setup and cleanup actions for a particual test, and to 
-	perform all validation steps in a specific method should this prove logically more simple.
+	perform all validation steps in a single method should this prove logically more simple.
 	
 	The class provides utility functions for process management, test timing and test validation. 
 	Validation of the test can be performed multiple times through the C{assert*} functions, building 
@@ -506,6 +506,14 @@ class BaseTest:
 	# a test based on the occurrence of regular expressions in text files. All methods
 	# directly append to the test outcome list
 	def assertTrue(self, expr):
+		"""Perform a validation assert on the supplied expression evaluating to true.
+		
+		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
+		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
+		
+		@param expr: The expression to check for the true | false value
+				
+		"""
 		if expr == TRUE:
 			self.addOutcome(PASSED)
 			log.info("Assertion on boolean expression equal to true ... passed")
@@ -515,6 +523,14 @@ class BaseTest:
 	
 
 	def assertFalse(self, expr):
+		"""Perform a validation assert on the supplied expression evaluating to false.
+		
+		If the supplied expression evaluates to false a C{PASSED} outcome is added to the 
+		outcome list. Should the expression evaluate to true, a C{FAILED} outcome is added.
+		
+		@param expr: The expression to check for the true | false value
+				
+		"""
 		if expr == FALSE:
 			self.addOutcome(PASSED)
 			log.info("Assertion on boolean expression equal to true ... passed")
@@ -524,6 +540,27 @@ class BaseTest:
 	
 
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=FALSE, replace=[], includes=[]):
+		"""Perform a validation assert on the comparison of two input text files.
+		
+		This method performs a file diff comparison on two input files. The files are pre-processed prior 
+		to the comparison to either ignore particular lines, sort their constituent lines, replace matches 
+		to regular expressions in a line with an alternate value, or to only include particular lines. Should the 
+		files after pre-processing be equivalent a C{PASSED} value is added to the test outcome list, otherwise
+		a C{FAILED} value is added.
+		
+		@param file1: The basename of the first file used in the file comparison
+		@param file2: The basename of the second file used in the file comparison
+		@param filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
+		@param filedir2: The dirname of the second file (defaults to the testcase reference directory)
+		@param ignores: A list of regular expressions used to denote lines in the files which should be ignored
+		@param sort: Boolean flag to indicate if the lines in the files should be sorted prior to the comparison
+		@param replace: List of tuples of the form ('regexpr', 'replacement'). For each regular expression in the 
+			list, any occurences in the files is replaced with the replacement value prior to the comparison being 
+			carried out. This is often useful to replace timestamps in logfiles etc.
+		@param includes: A list of regular expressions used to denote lines in the files which should be used in the 
+			comparison. Only lines which match an expression in the list are used for the comparison
+		
+		"""
 		if filedir1 == None: filedir1 = self.output
 		if filedir2 == None: filedir2 = self.reference
 		f1 = os.path.join(filedir1, file1)
@@ -543,6 +580,14 @@ class BaseTest:
 
 
 	def assertGrep(self, file, filedir=None, expr='', contains=TRUE):
+		"""Perform a validation assert on a regular expression occurring in a text file.
+		
+		@param file:
+		@param filedir:
+		@expr:
+		@contains:
+		
+		"""
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
 
@@ -560,6 +605,14 @@ class BaseTest:
 
 
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=TRUE):   
+		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
+		
+		@param file:
+		@param filedir:
+		@exprList:
+		@contains:
+		
+		"""
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
 
@@ -581,6 +634,14 @@ class BaseTest:
 
 
 	def assertLineCount(self, file, filedir=None, expr='', condition="==1"):
+		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
+		
+		@param file:
+		@param filedir:
+		@expr:
+		@condition:
+		
+		"""	
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
 
