@@ -281,7 +281,7 @@ class ConsoleMakeTestHelper:
 	def __init__(self, workingDir):
 		self.workingDir = workingDir
 		self.testId = None
-		self.type = None
+		self.type = "auto"
 
 	def printUsage(self):
 		print "PySys System Test Framework (version %s)" % __version__ 
@@ -355,15 +355,21 @@ class ConsoleMakeTestHelper:
 		if basetestImport == None: basetestImport = "from pysys.basetest import BaseTest"
 		if basetest == None: basetest = "BaseTest"
 		
+		log.info("Creating directory %s ..." % self.testId)
 		os.makedirs(self.testId)
+		log.info("Creating directory %s ..." % os.path.join(self.testId, input))
 		os.makedirs(os.path.join(self.testId, input))
+		log.info("Creating directory %s ..." % os.path.join(self.testId, output))
 		os.makedirs(os.path.join(self.testId, output))
+		log.info("Creating directory %s ..." % os.path.join(self.testId, reference))
 		os.makedirs(os.path.join(self.testId, reference))
 		
+		log.info("Creating descriptor %s ..." % os.path.join(self.testId, descriptor))
 		descriptor_fp = open(os.path.join(self.testId, descriptor), "w")
 		descriptor_fp.write(DESCRIPTOR_TEMPLATE %(self.type, suite, testclass, module))
 		descriptor_fp.close()
 		
+		log.info("Creating test class module %s ..." % os.path.join(self.testId, "%s.py" % module))	
 		testclass_fp = open(os.path.join(self.testId, "%s.py" % module), "w")
 		if teststring == None:
 			testclass_fp.write(TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))

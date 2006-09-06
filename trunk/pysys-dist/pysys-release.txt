@@ -19,6 +19,8 @@ What's new in this release
   start menu items
 - Added the setup() method to the BaseTest class to allow custom setup actions to be 
   performed prior to execution of a particular test case
+- Fixed a bug where if the --type option was not supplied to ConsoleMakeTestHelper
+  as a command line option, the resulting descriptor had type="None"
 
 
 Installation
