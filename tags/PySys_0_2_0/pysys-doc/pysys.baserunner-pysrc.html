@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pysys.baserunner</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pysys-module.html">Package&nbsp;pysys</a> ::
+        Module&nbsp;baserunner
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pysys.baserunner-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="pysys.baserunner-module.html">Module pysys.baserunner</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno">  1</span>  <span class="py-line"><span class="py-comment">#!/usr/bin/env python</span> </span>
+<span class="lineno">  2</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Permission is hereby granted, free of charge, to any person</span> </span>
+<span class="lineno">  3</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># obtaining a copy of this software and any associated documentation</span> </span>
+<span class="lineno">  4</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># files (the "Software"), to deal in the Software without</span> </span>
+<span class="lineno">  5</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># restriction, including without limitation the rights to use, copy,</span> </span>
+<span class="lineno">  6</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># modify, merge, publish, distribute, sublicense, and/or sell copies</span> </span>
+<span class="lineno">  7</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># of the Software, and to permit persons to whom the Software is</span> </span>
+<span class="lineno">  8</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># furnished to do so, subject to the following conditions:</span> </span>
+<span class="lineno">  9</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#</span> </span>
+<span class="lineno"> 10</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># The above copyright notice and this permission notice shall be</span> </span>
+<span class="lineno"> 11</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># included in all copies or substantial portions of the Software.</span> </span>
+<span class="lineno"> 12</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#</span> </span>
+<span class="lineno"> 13</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># The software is provided "as is", without warranty of any</span> </span>
+<span class="lineno"> 14</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># kind, express or implied, including but not limited to the</span> </span>
+<span class="lineno"> 15</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># warranties of merchantability, fitness for a particular purpose</span> </span>
+<span class="lineno"> 16</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># and noninfringement. In no event shall the authors or copyright</span> </span>
+<span class="lineno"> 17</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># holders be liable for any claim, damages or other liability,</span> </span>
+<span class="lineno"> 18</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># whether in an action of contract, tort or otherwise, arising from,</span> </span>
+<span class="lineno"> 19</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># out of or in connection with the software or the use or other</span> </span>
+<span class="lineno"> 20</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># dealings in the software</span> </span>
+<span class="lineno"> 21</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno"> 22</span>  <span class="py-line"><span class="py-keyword">import</span> <span class="py-name">os</span><span class="py-op">,</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">,</span> <span class="py-name">stat</span><span class="py-op">,</span> <span class="py-name">re</span><span class="py-op">,</span> <span class="py-name">traceback</span><span class="py-op">,</span> <span class="py-name">time</span><span class="py-op">,</span> <span class="py-name">math</span><span class="py-op">,</span> <span class="py-name">logging</span><span class="py-op">,</span> <span class="py-name">string</span> </span>
+<span class="lineno"> 23</span>  <span class="py-line"> </span>
+<span class="lineno"> 24</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a> <span class="py-keyword">import</span> <a title="pysys.rootLogger" class="py-name" href="pysys-module.html#rootLogger">rootLogger</a> </span>
+<span class="lineno"> 25</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a><span class="py-op">.</span><a title="pysys.constants" class="py-name" href="pysys.constants-module.html">constants</a> <span class="py-keyword">import</span> <span class="py-op">*</span> </span>
+<span class="lineno"> 26</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a><span class="py-op">.</span><a title="pysys.exceptions" class="py-name" href="pysys.exceptions-module.html">exceptions</a> <span class="py-keyword">import</span> <span class="py-op">*</span> </span>
+<span class="lineno"> 27</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a><span class="py-op">.</span><a title="pysys.basetest" class="py-name" href="pysys.basetest-module.html">basetest</a> <span class="py-keyword">import</span> <a class="py-name" href="pysys.basetest.BaseTest-class.html">BaseTest</a> </span>
+<span class="lineno"> 28</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a><span class="py-op">.</span><a title="pysys.writer" class="py-name" href="pysys.writer-module.html">writer</a> <span class="py-keyword">import</span> <a class="py-name" href="pysys.writer.LogFileResultsWriter-class.html">LogFileResultsWriter</a> </span>
+<span class="lineno"> 29</span>  <span class="py-line"> </span>
+<span class="lineno"> 30</span>  <span class="py-line"><a class="py-name" href="pysys.baserunner-module.html#log">log</a> <span class="py-op">=</span> <span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">getLogger</span><span class="py-op">(</span><span class="py-string">'pysys.baserunner'</span><span class="py-op">)</span> </span>
+<span class="lineno"> 31</span>  <span class="py-line"><a class="py-name" href="pysys.baserunner-module.html#log">log</a><span class="py-op">.</span><span class="py-name">setLevel</span><span class="py-op">(</span><span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">NOTSET</span><span class="py-op">)</span> </span>
+<span class="lineno"> 32</span>  <span class="py-line"> </span>
+<span class="lineno"> 33</span>  <span class="py-line"> </span>
+<a name="BaseRunner"></a><div id="BaseRunner-def"><span class="lineno"> 34</span> <a class="pysrc-toggle" href="#" id="BaseRunner-toggle" onclick="toggle('BaseRunner'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html">BaseRunner</a><span class="py-op">:</span> </span>
+</div><div id="BaseRunner-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="BaseRunner-expanded"><a name="BaseRunner.__init__"></a><div id="BaseRunner.__init__-def"><span class="lineno"> 35</span> <a class="pysrc-toggle" href="#" id="BaseRunner.__init__-toggle" onclick="toggle('BaseRunner.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">record</span><span class="py-op">,</span> <span class="py-param">purge</span><span class="py-op">,</span> <span class="py-param">cycle</span><span class="py-op">,</span> <span class="py-param">mode</span><span class="py-op">,</span> <span class="py-param">outsubdir</span><span class="py-op">,</span> <span class="py-param">descriptors</span><span class="py-op">,</span> <span class="py-param">xargs</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.__init__-expanded"><span class="lineno"> 36</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">record</span> <span class="py-op">=</span> <span class="py-name">record</span> </span>
+<span class="lineno"> 37</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">purge</span> <span class="py-op">=</span> <span class="py-name">purge</span> </span>
+<span class="lineno"> 38</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">cycle</span> <span class="py-op">=</span> <span class="py-name">cycle</span> </span>
+<span class="lineno"> 39</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">mode</span> <span class="py-op">=</span> <span class="py-name">mode</span> </span>
+<span class="lineno"> 40</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">outsubdir</span> <span class="py-op">=</span> <span class="py-name">outsubdir</span> </span>
+<span class="lineno"> 41</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">descriptors</span> <span class="py-op">=</span> <span class="py-name">descriptors</span> </span>
+<span class="lineno"> 42</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">xargs</span> <span class="py-op">=</span> <span class="py-name">xargs</span> </span>
+<span class="lineno"> 43</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span id="link-0" class="py-name"><a title="pysys.baserunner.BaseRunner.setKeywordArgs
+pysys.basetest.BaseTest.setKeywordArgs" class="py-name" href="#" onclick="doclink('link-0', 'setKeywordArgs', 'Method setKeywordArgs()=pysys.baserunner.BaseRunner-class.html#setKeywordArgs,Method basetest.BaseTest.setKeywordArgs()=pysys.basetest.BaseTest-class.html#setKeywordArgs'); return false;">setKeywordArgs</a></span></span><span class="py-op">(</span><span class="py-name">xargs</span><span class="py-op">)</span> </span>
+</div><span class="lineno"> 44</span>  <span class="py-line"> </span>
+<span class="lineno"> 45</span>  <span class="py-line"> </span>
+<a name="BaseRunner.setKeywordArgs"></a><div id="BaseRunner.setKeywordArgs-def"><span class="lineno"> 46</span> <a class="pysrc-toggle" href="#" id="BaseRunner.setKeywordArgs-toggle" onclick="toggle('BaseRunner.setKeywordArgs'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#setKeywordArgs">setKeywordArgs</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">xargs</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.setKeywordArgs-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.setKeywordArgs-expanded"><span class="lineno"> 47</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">key</span> <span class="py-keyword">in</span> <span class="py-name">xargs</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 48</span>  <span class="py-line">                        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 49</span>  <span class="py-line">                                <span class="py-keyword">exec</span><span class="py-op">(</span><span class="py-string">"self.%s = xargs['%s']"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">key</span><span class="py-op">,</span> <span class="py-name">key</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 50</span>  <span class="py-line">                        <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno"> 51</span>  <span class="py-line">                                <span class="py-keyword">pass</span> </span>
+</div><span class="lineno"> 52</span>  <span class="py-line"> </span>
+<span class="lineno"> 53</span>  <span class="py-line"> </span>
+<a name="BaseRunner.purgeDirectory"></a><div id="BaseRunner.purgeDirectory-def"><span class="lineno"> 54</span> <a class="pysrc-toggle" href="#" id="BaseRunner.purgeDirectory-toggle" onclick="toggle('BaseRunner.purgeDirectory'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#purgeDirectory">purgeDirectory</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">dir</span><span class="py-op">,</span> <span class="py-param">delTop</span><span class="py-op">=</span><a title="pysys.constants.FALSE" class="py-name" href="pysys.constants-module.html#FALSE">FALSE</a><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.purgeDirectory-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.purgeDirectory-expanded"><span class="lineno"> 55</span>  <span class="py-line">                <span class="py-keyword">for</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a> <span class="py-keyword">in</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">listdir</span><span class="py-op">(</span><span class="py-name">dir</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 56</span>  <span class="py-line">                        <span class="py-name">path</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">dir</span><span class="py-op">,</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">)</span> </span>
+<span class="lineno"> 57</span>  <span class="py-line">                        <span class="py-keyword">if</span> <a title="pysys.constants.PLATFORM" class="py-name" href="pysys.constants-module.html#PLATFORM">PLATFORM</a> <span class="py-keyword">in</span> <span class="py-op">[</span><span class="py-string">'sunos'</span><span class="py-op">,</span> <span class="py-string">'linux'</span><span class="py-op">]</span><span class="py-op">:</span> </span>
+<span class="lineno"> 58</span>  <span class="py-line">                                <span class="py-name">mode</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">lstat</span><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">ST_MODE</span><span class="py-op">]</span> </span>
+<span class="lineno"> 59</span>  <span class="py-line">                        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 60</span>  <span class="py-line">                                <span class="py-name">mode</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">stat</span><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">ST_MODE</span><span class="py-op">]</span> </span>
+<span class="lineno"> 61</span>  <span class="py-line">                 </span>
+<span class="lineno"> 62</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">S_ISLNK</span><span class="py-op">(</span><span class="py-name">mode</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 63</span>  <span class="py-line">                                <span class="py-name">os</span><span class="py-op">.</span><span id="link-1" class="py-name"><a title="pysys.xml.descriptor.XMLDescriptorParser.unlink
+pysys.xml.manual.XMLManualTestParser.unlink" class="py-name" href="#" onclick="doclink('link-1', 'unlink', 'Method pysys.xml.descriptor.XMLDescriptorParser.unlink()=pysys.xml.descriptor.XMLDescriptorParser-class.html#unlink,Method pysys.xml.manual.XMLManualTestParser.unlink()=pysys.xml.manual.XMLManualTestParser-class.html#unlink'); return false;">unlink</a></span></span><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">)</span> </span>
+<span class="lineno"> 64</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">S_ISREG</span><span class="py-op">(</span><span class="py-name">mode</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 65</span>  <span class="py-line">                                <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">remove</span><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">)</span> </span>
+<span class="lineno"> 66</span>  <span class="py-line">                        <span class="py-keyword">elif</span> <span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">S_ISDIR</span><span class="py-op">(</span><span class="py-name">mode</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 67</span>  <span class="py-line">                                <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.baserunner.BaseRunner.purgeDirectory" class="py-name" href="pysys.baserunner.BaseRunner-class.html#purgeDirectory">purgeDirectory</a><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">,</span> <span class="py-name">delTop</span><span class="py-op">=</span><a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a><span class="py-op">)</span>                            </span>
+<span class="lineno"> 68</span>  <span class="py-line"> </span>
+<span class="lineno"> 69</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-name">delTop</span><span class="py-op">:</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">rmdir</span><span class="py-op">(</span><span class="py-name">dir</span><span class="py-op">)</span> </span>
+</div><span class="lineno"> 70</span>  <span class="py-line"> </span>
+<span class="lineno"> 71</span>  <span class="py-line"> </span>
+<a name="BaseRunner.detectCore"></a><div id="BaseRunner.detectCore-def"><span class="lineno"> 72</span> <a class="pysrc-toggle" href="#" id="BaseRunner.detectCore-toggle" onclick="toggle('BaseRunner.detectCore'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#detectCore">detectCore</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">dir</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.detectCore-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.detectCore-expanded"><span class="lineno"> 73</span>  <span class="py-line">                <span class="py-keyword">for</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a> <span class="py-keyword">in</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">listdir</span><span class="py-op">(</span><span class="py-name">dir</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 74</span>  <span class="py-line">                        <span class="py-name">path</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">dir</span><span class="py-op">,</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">)</span> </span>
+<span class="lineno"> 75</span>  <span class="py-line">                        <span class="py-name">mode</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">stat</span><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">ST_MODE</span><span class="py-op">]</span> </span>
+<span class="lineno"> 76</span>  <span class="py-line"> </span>
+<span class="lineno"> 77</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">S_ISREG</span><span class="py-op">(</span><span class="py-name">mode</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 78</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-name">re</span><span class="py-op">.</span><span class="py-name">search</span><span class="py-op">(</span><span class="py-string">'^core'</span><span class="py-op">,</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">)</span><span class="py-op">:</span> <span class="py-keyword">return</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+</div><span class="lineno"> 79</span>  <span class="py-line"> </span>
+<span class="lineno"> 80</span>  <span class="py-line"> </span>
+<a name="BaseRunner.setup"></a><div id="BaseRunner.setup-def"><span class="lineno"> 81</span> <a class="pysrc-toggle" href="#" id="BaseRunner.setup-toggle" onclick="toggle('BaseRunner.setup'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#setup">setup</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.setup-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.setup-expanded"><span class="lineno"> 82</span>  <span class="py-line">                <span class="py-keyword">pass</span> </span>
+</div><span class="lineno"> 83</span>  <span class="py-line"> </span>
+<span class="lineno"> 84</span>  <span class="py-line"> </span>
+<a name="BaseRunner.testComplete"></a><div id="BaseRunner.testComplete-def"><span class="lineno"> 85</span> <a class="pysrc-toggle" href="#" id="BaseRunner.testComplete-toggle" onclick="toggle('BaseRunner.testComplete'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#testComplete">testComplete</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">testObj</span><span class="py-op">,</span> <span class="py-param">dir</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.testComplete-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.testComplete-expanded"><span class="lineno"> 86</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">purge</span><span class="py-op">:</span> </span>
+<span class="lineno"> 87</span>  <span class="py-line">                        <span class="py-name">removeNonZero</span> <span class="py-op">=</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+<span class="lineno"> 88</span>  <span class="py-line">                        <span class="py-keyword">for</span> <span class="py-name">outcome</span> <span class="py-keyword">in</span> <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">:</span> </span>
+<span class="lineno"> 89</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-name">outcome</span> <span class="py-op">!=</span> <a title="pysys.constants.PASSED" class="py-name" href="pysys.constants-module.html#PASSED">PASSED</a><span class="py-op">:</span> </span>
+<span class="lineno"> 90</span>  <span class="py-line">                                        <span class="py-name">removeNonZero</span> <span class="py-op">=</span> <a title="pysys.constants.FALSE" class="py-name" href="pysys.constants-module.html#FALSE">FALSE</a> </span>
+<span class="lineno"> 91</span>  <span class="py-line">                                        <span class="py-keyword">break</span> </span>
+<span class="lineno"> 92</span>  <span class="py-line">                <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 93</span>  <span class="py-line">                        <span class="py-name">removeNonZero</span> <span class="py-op">=</span> <a title="pysys.constants.FALSE" class="py-name" href="pysys.constants-module.html#FALSE">FALSE</a> </span>
+<span class="lineno"> 94</span>  <span class="py-line"> </span>
+<span class="lineno"> 95</span>  <span class="py-line">                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 96</span>  <span class="py-line">                        <span class="py-keyword">for</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a> <span class="py-keyword">in</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">listdir</span><span class="py-op">(</span><span class="py-name">dir</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 97</span>  <span class="py-line">                                <span class="py-name">path</span> <span class="py-op">=</span> <span class="py-string">"%s/%s"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">dir</span><span class="py-op">,</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">)</span> </span>
+<span class="lineno"> 98</span>  <span class="py-line">                                <span class="py-keyword">if</span> <a title="pysys.constants.PLATFORM" class="py-name" href="pysys.constants-module.html#PLATFORM">PLATFORM</a> <span class="py-keyword">in</span> <span class="py-op">[</span><span class="py-string">'sunos'</span><span class="py-op">,</span> <span class="py-string">'linux'</span><span class="py-op">]</span><span class="py-op">:</span> </span>
+<span class="lineno"> 99</span>  <span class="py-line">                                        <span class="py-name">size</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">lstat</span><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">ST_SIZE</span><span class="py-op">]</span> </span>
+<span class="lineno">100</span>  <span class="py-line">                                <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">101</span>  <span class="py-line">                                        <span class="py-name">size</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">stat</span><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-name">stat</span><span class="py-op">.</span><span class="py-name">ST_SIZE</span><span class="py-op">]</span> </span>
+<span class="lineno">102</span>  <span class="py-line"> </span>
+<span class="lineno">103</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">size</span> <span class="py-op">==</span> <span class="py-number">0</span><span class="py-op">)</span> <span class="py-keyword">or</span> <span class="py-op">(</span><span class="py-name">removeNonZero</span> <span class="py-keyword">and</span> <span class="py-keyword">not</span> <span class="py-name">re</span><span class="py-op">.</span><span class="py-name">search</span><span class="py-op">(</span><span class="py-string">'run.log'</span><span class="py-op">,</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">104</span>  <span class="py-line">                                        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">105</span>  <span class="py-line">                                                <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">remove</span><span class="py-op">(</span><span class="py-name">path</span><span class="py-op">)</span> </span>
+<span class="lineno">106</span>  <span class="py-line">                                        <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">107</span>  <span class="py-line">                                                <span class="py-keyword">pass</span> </span>
+<span class="lineno">108</span>  <span class="py-line">                <span class="py-keyword">except</span> <span class="py-name">OSError</span><span class="py-op">:</span> </span>
+<span class="lineno">109</span>  <span class="py-line">                        <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">110</span>  <span class="py-line"> </span>
+<span class="lineno">111</span>  <span class="py-line"> </span>
+<a name="BaseRunner.cycleComplete"></a><div id="BaseRunner.cycleComplete-def"><span class="lineno">112</span> <a class="pysrc-toggle" href="#" id="BaseRunner.cycleComplete-toggle" onclick="toggle('BaseRunner.cycleComplete'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#cycleComplete">cycleComplete</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.cycleComplete-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.cycleComplete-expanded"><span class="lineno">113</span>  <span class="py-line">                <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">114</span>  <span class="py-line"> </span>
+<span class="lineno">115</span>  <span class="py-line"> </span>
+<a name="BaseRunner.cleanup"></a><div id="BaseRunner.cleanup-def"><span class="lineno">116</span> <a class="pysrc-toggle" href="#" id="BaseRunner.cleanup-toggle" onclick="toggle('BaseRunner.cleanup'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#cleanup">cleanup</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.cleanup-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.cleanup-expanded"><span class="lineno">117</span>  <span class="py-line">                <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">118</span>  <span class="py-line"> </span>
+<span class="lineno">119</span>  <span class="py-line"> </span>
+<a name="BaseRunner.start"></a><div id="BaseRunner.start-def"><span class="lineno">120</span> <a class="pysrc-toggle" href="#" id="BaseRunner.start-toggle" onclick="toggle('BaseRunner.start'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.baserunner.BaseRunner-class.html#start">start</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">printSummary</span><span class="py-op">=</span><a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a><span class="py-op">,</span> <span class="py-param">writers</span><span class="py-op">=</span><span class="py-op">[</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BaseRunner.start-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseRunner.start-expanded"><span class="lineno">121</span>  <span class="py-line">                <span class="py-name">results</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno">122</span>  <span class="py-line">                <span class="py-name">totalDuration</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno">123</span>  <span class="py-line">                 </span>
+<span class="lineno">124</span>  <span class="py-line">                <span class="py-comment"># call the hook to setup prior to running tests</span> </span>
+<span class="lineno">125</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">self</span><span class="py-op">.</span><span id="link-2" class="py-name"><a title="pysys.baserunner.BaseRunner.setup
+pysys.basetest.BaseTest.setup" class="py-name" href="#" onclick="doclink('link-2', 'setup', 'Method setup()=pysys.baserunner.BaseRunner-class.html#setup,Method basetest.BaseTest.setup()=pysys.basetest.BaseTest-class.html#setup'); return false;">setup</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">126</span>  <span class="py-line"> </span>
+<span class="lineno">127</span>  <span class="py-line">                <span class="py-comment"># loop through each cycle</span> </span>
+<span class="lineno">128</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-keyword">for</span> <span class="py-name">cycle</span> <span class="py-keyword">in</span> <span class="py-name">range</span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><span class="py-name">cycle</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">129</span>  <span class="py-line">                        <span class="py-name">results</span><span class="py-op">[</span><span class="py-name">cycle</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno">130</span>  <span class="py-line">                        <span class="py-keyword">for</span> <span class="py-name">outcome</span> <span class="py-keyword">in</span> <a title="pysys.constants.PRECEDENT" class="py-name" href="pysys.constants-module.html#PRECEDENT">PRECEDENT</a><span class="py-op">:</span> <span class="py-name">results</span><span class="py-op">[</span><span class="py-name">cycle</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno">131</span>  <span class="py-line"> </span>
+<span class="lineno">132</span>  <span class="py-line">                        <span class="py-comment"># loop through tests for the cycle</span> </span>
+<span class="lineno">133</span>  <span class="py-line"><span class="py-comment"></span>                        <span class="py-keyword">for</span> <a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a> <span class="py-keyword">in</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">descriptors</span><span class="py-op">:</span> </span>
+<span class="lineno">134</span>  <span class="py-line">                                <span class="py-name">startTime</span> <span class="py-op">=</span> <span class="py-name">time</span><span class="py-op">.</span><span class="py-name">time</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">135</span>  <span class="py-line">                                <span class="py-name">blocked</span> <span class="py-op">=</span> <a title="pysys.constants.FALSE" class="py-name" href="pysys.constants-module.html#FALSE">FALSE</a> </span>
+<span class="lineno">136</span>  <span class="py-line">                                <span class="py-name">keyboardInterupt</span> <span class="py-op">=</span> <a title="pysys.constants.FALSE" class="py-name" href="pysys.constants-module.html#FALSE">FALSE</a> </span>
+<span class="lineno">137</span>  <span class="py-line"> </span>
+<span class="lineno">138</span>  <span class="py-line">                                <span class="py-comment"># set the output subdirectory and purge contents</span> </span>
+<span class="lineno">139</span>  <span class="py-line"><span class="py-comment"></span>                                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">140</span>  <span class="py-line">                                        <span class="py-name">outsubdir</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">outsubdir</span> </span>
+<span class="lineno">141</span>  <span class="py-line">                                        <span class="py-keyword">if</span> <span class="py-keyword">not</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">exists</span><span class="py-op">(</span><span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">output</span><span class="py-op">,</span> <span class="py-name">outsubdir</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">142</span>  <span class="py-line">                                                <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">makedirs</span><span class="py-op">(</span><span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">output</span><span class="py-op">,</span> <span class="py-name">outsubdir</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">143</span>  <span class="py-line">                                         </span>
+<span class="lineno">144</span>  <span class="py-line">                                        <span class="py-keyword">if</span> <span class="py-name">cycle</span> <span class="py-op">==</span> <span class="py-number">0</span><span class="py-op">:</span> <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.baserunner.BaseRunner.purgeDirectory" class="py-name" href="pysys.baserunner.BaseRunner-class.html#purgeDirectory">purgeDirectory</a><span class="py-op">(</span><span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">output</span><span class="py-op">,</span> <span class="py-name">outsubdir</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">145</span>  <span class="py-line">                                 </span>
+<span class="lineno">146</span>  <span class="py-line">                                        <span class="py-keyword">if</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">cycle</span> <span class="py-op">&gt;</span> <span class="py-number">1</span><span class="py-op">:</span>  </span>
+<span class="lineno">147</span>  <span class="py-line">                                                <span class="py-name">outsubdir</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">outsubdir</span><span class="py-op">,</span> <span class="py-string">'cycle%d'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">cycle</span><span class="py-op">+</span><span class="py-number">1</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">148</span>  <span class="py-line">                                                <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">makedirs</span><span class="py-op">(</span><span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">output</span><span class="py-op">,</span> <span class="py-name">outsubdir</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">149</span>  <span class="py-line"> </span>
+<span class="lineno">150</span>  <span class="py-line">                                        <span class="py-name">outputDirectory</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">output</span><span class="py-op">,</span> <span class="py-name">outsubdir</span><span class="py-op">)</span> </span>
+<span class="lineno">151</span>  <span class="py-line">                                <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">152</span>  <span class="py-line">                                        <span id="link-3" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-3', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"caught %s: %s"</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">exc_info</span><span class="py-op">=</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">153</span>  <span class="py-line">                                        <span class="py-name">blocked</span> <span class="py-op">=</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+<span class="lineno">154</span>  <span class="py-line"> </span>
+<span class="lineno">155</span>  <span class="py-line">                                <span class="py-comment"># create the logger handler for the run log</span> </span>
+<span class="lineno">156</span>  <span class="py-line"><span class="py-comment"></span>                                <span class="py-name">runLogger</span> <span class="py-op">=</span> <span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">FileHandler</span><span class="py-op">(</span><span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">outputDirectory</span><span class="py-op">,</span> <span class="py-string">'run.log'</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">157</span>  <span class="py-line">                                <span class="py-name">runLogger</span><span class="py-op">.</span><span class="py-name">setFormatter</span><span class="py-op">(</span><span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">Formatter</span><span class="py-op">(</span><span class="py-string">'%(asctime)s %(levelname)-5s %(message)s'</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">158</span>  <span class="py-line">                                <span class="py-name">runLogger</span><span class="py-op">.</span><span class="py-name">setLevel</span><span class="py-op">(</span><span class="py-name">logging</span><span class="py-op">.</span><a title="pysys.constants.DEBUG" class="py-name" href="pysys.constants-module.html#DEBUG">DEBUG</a><span class="py-op">)</span> </span>
+<span class="lineno">159</span>  <span class="py-line">                                <a title="pysys.rootLogger" class="py-name" href="pysys-module.html#rootLogger">rootLogger</a><span class="py-op">.</span><span class="py-name">addHandler</span><span class="py-op">(</span><span class="py-name">runLogger</span><span class="py-op">)</span>                         </span>
+<span class="lineno">160</span>  <span class="py-line"> </span>
+<span class="lineno">161</span>  <span class="py-line">                                <span class="py-comment"># run the test execute, validate and cleanup methods</span> </span>
+<span class="lineno">162</span>  <span class="py-line"><span class="py-comment"></span>                                <span id="link-4" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-4', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"=========================================="</span><span class="py-op">)</span> </span>
+<span class="lineno">163</span>  <span class="py-line">                                <span id="link-5" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-5', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"              "</span> <span class="py-op">+</span> <a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">id</span><span class="py-op">)</span> </span>
+<span class="lineno">164</span>  <span class="py-line">                                <span id="link-6" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-6', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"=========================================="</span><span class="py-op">)</span> </span>
+<span class="lineno">165</span>  <span class="py-line">                                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">166</span>  <span class="py-line">                                        <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><a title="pysys.process.dirname" class="py-name" href="pysys.process-module.html#dirname">dirname</a><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">module</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">167</span>  <span class="py-line">                                        <span class="py-keyword">exec</span><span class="py-op">(</span> <span class="py-string">"from %s import %s"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">basename</span><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">module</span><span class="py-op">)</span><span class="py-op">,</span> <a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">classname</span><span class="py-op">)</span> <span class="py-op">)</span> </span>
+<span class="lineno">168</span>  <span class="py-line">                                        <span class="py-keyword">exec</span><span class="py-op">(</span> <span class="py-string">"testObj = %s(descriptor, r'%s', r'%s', self.xargs)"</span> <span class="py-op">%</span> <span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">classname</span><span class="py-op">,</span> <span class="py-name">outsubdir</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">mode</span><span class="py-op">)</span> <span class="py-op">)</span> </span>
+<span class="lineno">169</span>  <span class="py-line">                                <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">170</span>  <span class="py-line">                                        <span id="link-7" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-7', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"caught %s: %s"</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">exc_info</span><span class="py-op">=</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">171</span>  <span class="py-line">                                        <span class="py-name">testObj</span> <span class="py-op">=</span> <a title="pysys.basetest.BaseTest" class="py-name" href="pysys.basetest.BaseTest-class.html">BaseTest</a><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">,</span> <span class="py-name">outsubdir</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">mode</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">xargs</span><span class="py-op">)</span>  </span>
+<span class="lineno">172</span>  <span class="py-line">                                        <span class="py-name">blocked</span> <span class="py-op">=</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+<span class="lineno">173</span>  <span class="py-line">                                <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">pop</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">174</span>  <span class="py-line"> </span>
+<span class="lineno">175</span>  <span class="py-line">                                <span class="py-keyword">if</span> <a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">state</span> <span class="py-op">!=</span> <span class="py-string">'runnable'</span><span class="py-op">:</span> </span>
+<span class="lineno">176</span>  <span class="py-line">                                        <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.SKIPPED" class="py-name" href="pysys.constants-module.html#SKIPPED">SKIPPED</a><span class="py-op">)</span> </span>
+<span class="lineno">177</span>  <span class="py-line">                                         </span>
+<span class="lineno">178</span>  <span class="py-line">                                <span class="py-keyword">elif</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">mode</span> <span class="py-keyword">and</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">mode</span> <span class="py-keyword">not</span> <span class="py-keyword">in</span> <a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">modes</span><span class="py-op">:</span> </span>
+<span class="lineno">179</span>  <span class="py-line">                                        <span id="link-8" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-8', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"Unable to run test in %s mode"</span><span class="py-op">,</span> <span class="py-name">CONSTANTS</span><span class="py-op">[</span><span class="py-name">self</span><span class="py-op">.</span><span class="py-name">mode</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">180</span>  <span class="py-line">                                        <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.SKIPPED" class="py-name" href="pysys.constants-module.html#SKIPPED">SKIPPED</a><span class="py-op">)</span> </span>
+<span class="lineno">181</span>  <span class="py-line"> </span>
+<span class="lineno">182</span>  <span class="py-line">                                <span class="py-keyword">elif</span> <span class="py-name">blocked</span><span class="py-op">:</span> </span>
+<span class="lineno">183</span>  <span class="py-line">                                        <span id="link-9" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-9', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"Errors setting up test for execution"</span><span class="py-op">)</span> </span>
+<span class="lineno">184</span>  <span class="py-line">                                        <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.BLOCKED" class="py-name" href="pysys.constants-module.html#BLOCKED">BLOCKED</a><span class="py-op">)</span> </span>
+<span class="lineno">185</span>  <span class="py-line"> </span>
+<span class="lineno">186</span>  <span class="py-line">                                <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">187</span>  <span class="py-line">                                        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">188</span>  <span class="py-line">                                                <span class="py-name">testObj</span><span class="py-op">.</span><span id="link-10" class="py-name"><a title="pysys.baserunner.BaseRunner.setup
+pysys.basetest.BaseTest.setup" class="py-name" href="#" onclick="doclink('link-10', 'setup', 'Method pysys.baserunner.BaseRunner.setup()=pysys.baserunner.BaseRunner-class.html#setup,Method pysys.basetest.BaseTest.setup()=pysys.basetest.BaseTest-class.html#setup'); return false;">setup</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">189</span>  <span class="py-line">                                                <span class="py-name">testObj</span><span class="py-op">.</span><a title="pysys.basetest.BaseTest.execute" class="py-name" href="pysys.basetest.BaseTest-class.html#execute">execute</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">190</span>  <span class="py-line">                                        <span class="py-keyword">except</span> <span class="py-name">KeyboardInterrupt</span><span class="py-op">:</span> </span>
+<span class="lineno">191</span>  <span class="py-line">                                                <span class="py-name">keyboardInterupt</span> <span class="py-op">=</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+<span class="lineno">192</span>  <span class="py-line">                                                <span id="link-11" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-11', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"test interrupt from keyboard"</span><span class="py-op">)</span> </span>
+<span class="lineno">193</span>  <span class="py-line">                                                <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.BLOCKED" class="py-name" href="pysys.constants-module.html#BLOCKED">BLOCKED</a><span class="py-op">)</span> </span>
+<span class="lineno">194</span>  <span class="py-line">                                        <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">195</span>  <span class="py-line">                                                <span id="link-12" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-12', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"caught %s: %s"</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">exc_info</span><span class="py-op">=</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">196</span>  <span class="py-line">                                                <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.BLOCKED" class="py-name" href="pysys.constants-module.html#BLOCKED">BLOCKED</a><span class="py-op">)</span> </span>
+<span class="lineno">197</span>  <span class="py-line">                                        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">198</span>  <span class="py-line">                                                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">199</span>  <span class="py-line">                                                        <span class="py-name">testObj</span><span class="py-op">.</span><a title="pysys.basetest.BaseTest.validate" class="py-name" href="pysys.basetest.BaseTest-class.html#validate">validate</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">200</span>  <span class="py-line">                                                <span class="py-keyword">except</span> <span class="py-name">KeyboardInterrupt</span><span class="py-op">:</span> </span>
+<span class="lineno">201</span>  <span class="py-line">                                                        <span class="py-name">keyboardInterupt</span> <span class="py-op">=</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+<span class="lineno">202</span>  <span class="py-line">                                                        <span id="link-13" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-13', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"test interrupt from keyboard"</span><span class="py-op">)</span> </span>
+<span class="lineno">203</span>  <span class="py-line">                                                        <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.BLOCKED" class="py-name" href="pysys.constants-module.html#BLOCKED">BLOCKED</a><span class="py-op">)</span> </span>
+<span class="lineno">204</span>  <span class="py-line">                                                <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">205</span>  <span class="py-line">                                                        <span id="link-14" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-14', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"caught %s: %s"</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">exc_info</span><span class="py-op">=</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">206</span>  <span class="py-line">                                                        <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.BLOCKED" class="py-name" href="pysys.constants-module.html#BLOCKED">BLOCKED</a><span class="py-op">)</span> </span>
+<span class="lineno">207</span>  <span class="py-line">                                         </span>
+<span class="lineno">208</span>  <span class="py-line">                                                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">209</span>  <span class="py-line">                                                        <span class="py-keyword">if</span> <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.baserunner.BaseRunner.detectCore" class="py-name" href="pysys.baserunner.BaseRunner-class.html#detectCore">detectCore</a><span class="py-op">(</span><span class="py-name">outputDirectory</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">210</span>  <span class="py-line">                                                                <span id="link-15" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-15', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"core detected in output subdirectory"</span><span class="py-op">)</span> </span>
+<span class="lineno">211</span>  <span class="py-line">                                                                <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.DUMPEDCORE" class="py-name" href="pysys.constants-module.html#DUMPEDCORE">DUMPEDCORE</a><span class="py-op">)</span> </span>
+<span class="lineno">212</span>  <span class="py-line">                                                <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">213</span>  <span class="py-line">                                                        <span id="link-16" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-16', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"caught %s: %s"</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">exc_info</span><span class="py-op">=</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">214</span>  <span class="py-line"> </span>
+<span class="lineno">215</span>  <span class="py-line">                                        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">216</span>  <span class="py-line">                                                <span class="py-name">testObj</span><span class="py-op">.</span><span id="link-17" class="py-name"><a title="pysys.baserunner.BaseRunner.cleanup
+pysys.basetest.BaseTest.cleanup" class="py-name" href="#" onclick="doclink('link-17', 'cleanup', 'Method pysys.baserunner.BaseRunner.cleanup()=pysys.baserunner.BaseRunner-class.html#cleanup,Method pysys.basetest.BaseTest.cleanup()=pysys.basetest.BaseTest-class.html#cleanup'); return false;">cleanup</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">217</span>  <span class="py-line">                                        <span class="py-keyword">except</span> <span class="py-name">KeyboardInterrupt</span><span class="py-op">:</span> </span>
+<span class="lineno">218</span>  <span class="py-line">                                                <span class="py-name">keyboardInterupt</span> <span class="py-op">=</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+<span class="lineno">219</span>  <span class="py-line">                                                <span id="link-18" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-18', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"test interrupt from keyboard"</span><span class="py-op">)</span> </span>
+<span class="lineno">220</span>  <span class="py-line">                                                <span class="py-name">testObj</span><span class="py-op">.</span><span class="py-name">outcome</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.constants.BLOCKED" class="py-name" href="pysys.constants-module.html#BLOCKED">BLOCKED</a><span class="py-op">)</span> </span>
+<span class="lineno">221</span>  <span class="py-line">                                        <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">222</span>  <span class="py-line">                                                <span id="link-19" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-19', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"caught %s: %s"</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">exc_info</span><span class="py-op">=</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">223</span>  <span class="py-line"> </span>
+<span class="lineno">224</span>  <span class="py-line">                                <span class="py-comment"># get and log the final outcome for the test</span> </span>
+<span class="lineno">225</span>  <span class="py-line"><span class="py-comment"></span>                                <span class="py-name">testTime</span> <span class="py-op">=</span> <span class="py-name">math</span><span class="py-op">.</span><span class="py-name">floor</span><span class="py-op">(</span><span class="py-number">100</span><span class="py-op">*</span><span class="py-op">(</span><span class="py-name">time</span><span class="py-op">.</span><span class="py-name">time</span><span class="py-op">(</span><span class="py-op">)</span> <span class="py-op">-</span> <span class="py-name">startTime</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">/</span><span class="py-number">100.0</span> </span>
+<span class="lineno">226</span>  <span class="py-line">                                <span class="py-name">totalDuration</span> <span class="py-op">=</span> <span class="py-name">totalDuration</span> <span class="py-op">+</span> <span class="py-name">testTime</span> </span>
+<span class="lineno">227</span>  <span class="py-line">                                <span class="py-name">outcome</span> <span class="py-op">=</span> <span class="py-name">testObj</span><span class="py-op">.</span><a title="pysys.basetest.BaseTest.getOutcome" class="py-name" href="pysys.basetest.BaseTest-class.html#getOutcome">getOutcome</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">228</span>  <span class="py-line">                                <span class="py-name">results</span><span class="py-op">[</span><span class="py-name">cycle</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">id</span><span class="py-op">)</span> </span>
+<span class="lineno">229</span>  <span class="py-line">                                <span id="link-20" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-20', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">""</span><span class="py-op">)</span> </span>
+<span class="lineno">230</span>  <span class="py-line">                                <span id="link-21" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-21', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"Test duration %.2f secs"</span><span class="py-op">,</span> <span class="py-name">testTime</span><span class="py-op">)</span> </span>
+<span class="lineno">231</span>  <span class="py-line">                                <span id="link-22" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-22', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"Test final outcome %s"</span><span class="py-op">,</span> <a title="pysys.constants.LOOKUP" class="py-name" href="pysys.constants-module.html#LOOKUP">LOOKUP</a><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">232</span>  <span class="py-line">                                <span id="link-23" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-23', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">""</span><span class="py-op">)</span> </span>
+<span class="lineno">233</span>  <span class="py-line">                                <span class="py-keyword">if</span> <a title="pysys.rootLogger" class="py-name" href="pysys-module.html#rootLogger">rootLogger</a><span class="py-op">.</span><span class="py-name">getEffectiveLevel</span><span class="py-op">(</span><span class="py-op">)</span> <span class="py-op">==</span> <span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">_levelNames</span><span class="py-op">[</span><span class="py-string">'CRITICAL'</span><span class="py-op">]</span><span class="py-op">:</span> <span id="link-24" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-24', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">critical</span><span class="py-op">(</span><span class="py-string">"%s: %s"</span><span class="py-op">,</span> <a title="pysys.constants.LOOKUP" class="py-name" href="pysys.constants-module.html#LOOKUP">LOOKUP</a><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span><span class="py-op">,</span> <a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">id</span><span class="py-op">)</span> </span>
+<span class="lineno">234</span>  <span class="py-line">                                 </span>
+<span class="lineno">235</span>  <span class="py-line">                                <span class="py-comment"># call the hook for end of test execution</span> </span>
+<span class="lineno">236</span>  <span class="py-line"><span class="py-comment"></span>                                <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.baserunner.BaseRunner.testComplete" class="py-name" href="pysys.baserunner.BaseRunner-class.html#testComplete">testComplete</a><span class="py-op">(</span><span class="py-name">testObj</span><span class="py-op">,</span> <span class="py-name">outputDirectory</span><span class="py-op">)</span> </span>
+<span class="lineno">237</span>  <span class="py-line">                                <span class="py-keyword">del</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">modules</span><span class="py-op">[</span><span class="py-string">"%s"</span> <span class="py-op">%</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">basename</span><span class="py-op">(</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a><span class="py-op">.</span><span class="py-name">module</span><span class="py-op">)</span><span class="py-op">]</span> </span>
+<span class="lineno">238</span>  <span class="py-line">                                <span class="py-keyword">del</span> <span class="py-name">testObj</span> </span>
+<span class="lineno">239</span>  <span class="py-line"> </span>
+<span class="lineno">240</span>  <span class="py-line">                                <span class="py-comment"># remove the run logger handler</span> </span>
+<span class="lineno">241</span>  <span class="py-line"><span class="py-comment"></span>                                <a title="pysys.rootLogger" class="py-name" href="pysys-module.html#rootLogger">rootLogger</a><span class="py-op">.</span><span class="py-name">removeHandler</span><span class="py-op">(</span><span class="py-name">runLogger</span><span class="py-op">)</span> </span>
+<span class="lineno">242</span>  <span class="py-line"> </span>
+<span class="lineno">243</span>  <span class="py-line">                                <span class="py-comment"># prompt for continuation on control-C</span> </span>
+<span class="lineno">244</span>  <span class="py-line"><span class="py-comment"></span>                                <span class="py-keyword">if</span> <span class="py-name">keyboardInterupt</span> <span class="py-op">==</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a><span class="py-op">:</span> </span>
+<span class="lineno">245</span>  <span class="py-line">                                        <span class="py-keyword">while</span> <span class="py-number">1</span><span class="py-op">:</span> </span>
+<span class="lineno">246</span>  <span class="py-line">                                                <span class="py-keyword">print</span> <span class="py-string">""</span> </span>
+<span class="lineno">247</span>  <span class="py-line">                                                <span class="py-keyword">print</span> <span class="py-string">"Keyboard interupt detected, continue running tests? [yes|no] ... "</span><span class="py-op">,</span> </span>
+<span class="lineno">248</span>  <span class="py-line">                                                <span class="py-name">line</span> <span class="py-op">=</span> <span class="py-name">string</span><span class="py-op">.</span><span class="py-name">strip</span><span class="py-op">(</span><span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">stdin</span><span class="py-op">.</span><span class="py-name">readline</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">249</span>  <span class="py-line">                                                <span class="py-keyword">if</span> <span class="py-name">line</span> <span class="py-op">==</span> <span class="py-string">"y"</span> <span class="py-keyword">or</span> <span class="py-name">line</span> <span class="py-op">==</span> <span class="py-string">"yes"</span><span class="py-op">:</span> </span>
+<span class="lineno">250</span>  <span class="py-line">                                                        <span class="py-keyword">break</span> </span>
+<span class="lineno">251</span>  <span class="py-line">                                                <span class="py-keyword">elif</span> <span class="py-name">line</span> <span class="py-op">==</span> <span class="py-string">"n"</span> <span class="py-keyword">or</span> <span class="py-name">line</span> <span class="py-op">==</span> <span class="py-string">"no"</span><span class="py-op">:</span> </span>
+<span class="lineno">252</span>  <span class="py-line">                                                        <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.baserunner.BaseRunner.cycleComplete" class="py-name" href="pysys.baserunner.BaseRunner-class.html#cycleComplete">cycleComplete</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">253</span>  <span class="py-line">                                                        <span class="py-name">self</span><span class="py-op">.</span><span id="link-25" class="py-name"><a title="pysys.baserunner.BaseRunner.cleanup
+pysys.basetest.BaseTest.cleanup" class="py-name" href="#" onclick="doclink('link-25', 'cleanup', 'Method pysys.baserunner.BaseRunner.cleanup()=pysys.baserunner.BaseRunner-class.html#cleanup,Method pysys.basetest.BaseTest.cleanup()=pysys.basetest.BaseTest-class.html#cleanup'); return false;">cleanup</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">254</span>  <span class="py-line">                                                        <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exit</span><span class="py-op">(</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">255</span>  <span class="py-line"> </span>
+<span class="lineno">256</span>  <span class="py-line">                        <span class="py-comment"># call the hook for end of cycle</span> </span>
+<span class="lineno">257</span>  <span class="py-line"><span class="py-comment"></span>                        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">258</span>  <span class="py-line">                                <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.baserunner.BaseRunner.cycleComplete" class="py-name" href="pysys.baserunner.BaseRunner-class.html#cycleComplete">cycleComplete</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">259</span>  <span class="py-line">                        <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">260</span>  <span class="py-line">                                <span id="link-26" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-26', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"caught %s: %s"</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">exc_info</span><span class="py-op">=</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">261</span>  <span class="py-line"> </span>
+<span class="lineno">262</span>  <span class="py-line">                        <span class="py-comment"># send the results for this cycle to the result writers</span> </span>
+<span class="lineno">263</span>  <span class="py-line"><span class="py-comment"></span>                        <span class="py-keyword">if</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">record</span><span class="py-op">:</span> </span>
+<span class="lineno">264</span>  <span class="py-line">                                <a title="pysys.writer" class="py-name" href="pysys.writer-module.html">writer</a> <span class="py-op">=</span> <a title="pysys.writer.LogFileResultsWriter" class="py-name" href="pysys.writer.LogFileResultsWriter-class.html">LogFileResultsWriter</a><span class="py-op">(</span><span class="py-string">"foobar.log"</span><span class="py-op">)</span> </span>
+<span class="lineno">265</span>  <span class="py-line">                                <a title="pysys.writer" class="py-name" href="pysys.writer-module.html">writer</a><span class="py-op">.</span><a title="pysys.writer.LogFileResultsWriter.writeResults" class="py-name" href="pysys.writer.LogFileResultsWriter-class.html#writeResults">writeResults</a><span class="py-op">(</span><span class="py-name">results</span><span class="py-op">=</span><span class="py-name">results</span><span class="py-op">[</span><span class="py-name">cycle</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">266</span>  <span class="py-line">                                <span class="py-keyword">for</span> <a title="pysys.writer" class="py-name" href="pysys.writer-module.html">writer</a> <span class="py-keyword">in</span> <span class="py-name">writers</span><span class="py-op">:</span> <a title="pysys.writer" class="py-name" href="pysys.writer-module.html">writer</a><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">.</span><a title="pysys.writer.LogFileResultsWriter.writeResults" class="py-name" href="pysys.writer.LogFileResultsWriter-class.html#writeResults">writeResults</a><span class="py-op">(</span><span class="py-name">results</span><span class="py-op">=</span><span class="py-name">results</span><span class="py-op">[</span><span class="py-name">cycle</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">267</span>  <span class="py-line"> </span>
+<span class="lineno">268</span>  <span class="py-line">                         </span>
+<span class="lineno">269</span>  <span class="py-line">                <span class="py-comment"># log the summary output to the console</span> </span>
+<span class="lineno">270</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-keyword">if</span> <span class="py-name">printSummary</span><span class="py-op">:</span> </span>
+<span class="lineno">271</span>  <span class="py-line">                        <span id="link-27" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-27', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">""</span><span class="py-op">)</span> </span>
+<span class="lineno">272</span>  <span class="py-line">                        <span id="link-28" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-28', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"Total duration: %.2f (secs)"</span><span class="py-op">,</span> <span class="py-name">totalDuration</span><span class="py-op">)</span>           </span>
+<span class="lineno">273</span>  <span class="py-line">                        <span id="link-29" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-29', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"Summary of non passes: "</span><span class="py-op">)</span> </span>
+<span class="lineno">274</span>  <span class="py-line">                        <span class="py-name">fails</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno">275</span>  <span class="py-line">                        <span class="py-keyword">for</span> <span class="py-name">cycle</span> <span class="py-keyword">in</span> <span class="py-name">results</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">276</span>  <span class="py-line">                                <span class="py-keyword">for</span> <span class="py-name">outcome</span> <span class="py-keyword">in</span> <span class="py-name">results</span><span class="py-op">[</span><span class="py-name">cycle</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">277</span>  <span class="py-line">                                        <span class="py-keyword">if</span> <span class="py-name">outcome</span> <span class="py-keyword">in</span> <a title="pysys.constants.FAILS" class="py-name" href="pysys.constants-module.html#FAILS">FAILS</a> <span class="py-op">:</span> <span class="py-name">fails</span> <span class="py-op">=</span> <span class="py-name">fails</span> <span class="py-op">+</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">results</span><span class="py-op">[</span><span class="py-name">cycle</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">278</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">fails</span> <span class="py-op">==</span> <span class="py-number">0</span><span class="py-op">:</span> </span>
+<span class="lineno">279</span>  <span class="py-line">                                <span id="link-30" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-30', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"      THERE WERE NO NON PASSES"</span><span class="py-op">)</span> </span>
+<span class="lineno">280</span>  <span class="py-line">                        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">281</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">results</span><span class="py-op">)</span> <span class="py-op">==</span> <span class="py-number">1</span><span class="py-op">:</span> </span>
+<span class="lineno">282</span>  <span class="py-line">                                        <span class="py-keyword">for</span> <span class="py-name">outcome</span> <span class="py-keyword">in</span> <a title="pysys.constants.FAILS" class="py-name" href="pysys.constants-module.html#FAILS">FAILS</a><span class="py-op">:</span> </span>
+<span class="lineno">283</span>  <span class="py-line">                                                <span class="py-keyword">for</span> <span class="py-name">test</span> <span class="py-keyword">in</span> <span class="py-name">results</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span><span class="py-op">:</span> <span id="link-31" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-31', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"  %s: %s "</span><span class="py-op">,</span> <a title="pysys.constants.LOOKUP" class="py-name" href="pysys.constants-module.html#LOOKUP">LOOKUP</a><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">test</span><span class="py-op">)</span> </span>
+<span class="lineno">284</span>  <span class="py-line">                                <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">285</span>  <span class="py-line">                                        <span class="py-keyword">for</span> <span class="py-name">key</span> <span class="py-keyword">in</span> <span class="py-name">results</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">286</span>  <span class="py-line">                                                <span class="py-keyword">for</span> <span class="py-name">outcome</span> <span class="py-keyword">in</span> <a title="pysys.constants.FAILS" class="py-name" href="pysys.constants-module.html#FAILS">FAILS</a><span class="py-op">:</span> </span>
+<span class="lineno">287</span>  <span class="py-line">                                                        <span class="py-keyword">for</span> <span class="py-name">test</span> <span class="py-keyword">in</span> <span class="py-name">results</span><span class="py-op">[</span><span class="py-name">key</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span><span class="py-op">:</span> <span id="link-32" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-32', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">" [CYCLE %d] %s: %s "</span><span class="py-op">,</span> <span class="py-name">key</span><span class="py-op">+</span><span class="py-number">1</span><span class="py-op">,</span> <a title="pysys.constants.LOOKUP" class="py-name" href="pysys.constants-module.html#LOOKUP">LOOKUP</a><span class="py-op">[</span><span class="py-name">outcome</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">test</span><span class="py-op">)</span> </span>
+<span class="lineno">288</span>  <span class="py-line"> </span>
+<span class="lineno">289</span>  <span class="py-line"> </span>
+<span class="lineno">290</span>  <span class="py-line">                <span class="py-comment"># return the results dictionary</span> </span>
+<span class="lineno">291</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-keyword">return</span> <span class="py-name">results</span> </span>
+</div></div><span class="lineno">292</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Sep 06 22:29:41 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

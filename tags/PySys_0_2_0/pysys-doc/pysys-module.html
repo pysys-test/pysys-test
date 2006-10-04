@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pysys</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th bgcolor="#70b0f0" class="navselect"
+          >&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;pysys
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pysys-module.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PACKAGE DESCRIPTION ==================== -->
+<h2 class="package">Package pysys
+<br/><span class="codelink"><a href="pysys-pysrc.html">source&nbsp;code</a></span></h2>
+<p>PySys System Test Framework.</p>
+  <p>PySys has been designed using OO techniques to provide a generic 
+  extensible framework for the organisation and execution of system level 
+  testcases. It provides a clear abstraction of what a testcases is, how it
+  is structured on disk, how it is executed and validated, and how the 
+  outcome is reported for test auditing purposes.</p>
+  <p>Testcases are instances of a base test class (<a 
+  href="pysys.basetest.BaseTest-class.html" 
+  class="link">pysys.basetest.BaseTest</a>) which provides core 
+  functionality for cross platform process management and monitoring; in 
+  this manner an application under test (AUT) can be started and 
+  manipulated directly within the testcase. The base test class 
+  additionally provides a set of standard validation techniques based 
+  predominantly on regular expression matching within text files (e.g. 
+  stdout, logfile of the AUT etc). Testcases are executed through a base 
+  runner (<a href="pysys.baserunner.BaseRunner-class.html" 
+  class="link">pysys.baserunner.BaseRunner</a>) which provides the 
+  mechanism to control testcase flow and auditing. In both cases the base 
+  test and runner classes have been designed to be extended for a 
+  particular AUT, e.g. to allow a higher level of abstraction of AUT 
+  manipulation, tear up and tear down prior to executing a set of testcases
+  etc.</p>
+  PySys allows automated regression testcases to be built rapidly. Where
+  an AUT cannot be tested in an automated fashion, testcases can be written
+  to make use of a manual test user interface application (<a 
+  href="pysys.manual.ui.ManualTester-class.html" 
+  class="link">pysys.manual.ui.ManualTester</a>) which allows the steps 
+  required to execute the test to be presented to a tester in a clear and 
+  navigable manner. The tight integration of both manual and automated 
+  testcases provides a single system for all test organisation 
+  requirements.<br /><br />
+
+<!-- ==================== SUBMODULES ==================== -->
+<a name="section-Submodules"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="details">Submodules</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Submodules"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr><td><ul>
+    <li> <strong class="uidlink"><a href="pysys.baserunner-module.html">pysys.baserunner</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.basetest-module.html">pysys.basetest</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.constants-module.html">pysys.constants</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.exceptions-module.html">pysys.exceptions</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.launcher-module.html">pysys.launcher</a></strong></li>
+    <ul>
+    <li> <strong class="uidlink"><a href="pysys.launcher.console-module.html">pysys.launcher.console</a></strong></li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pysys.manual-module.html">pysys.manual</a></strong></li>
+    <ul>
+    <li> <strong class="uidlink"><a href="pysys.manual.ui-module.html">pysys.manual.ui</a></strong></li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pysys.process-module.html">pysys.process</a></strong></li>
+    <ul>
+    <li> <strong class="uidlink"><a href="pysys.process.helper-module.html">pysys.process.helper</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.process.monitor-module.html">pysys.process.monitor</a></strong></li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pysys.utils-module.html">pysys.utils</a></strong></li>
+    <ul>
+    <li> <strong class="uidlink"><a href="pysys.utils.filecopy-module.html">pysys.utils.filecopy</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.utils.filediff-module.html">pysys.utils.filediff</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.utils.filegrep-module.html">pysys.utils.filegrep</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.utils.filereplace-module.html">pysys.utils.filereplace</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.utils.fileunzip-module.html">pysys.utils.fileunzip</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.utils.linecount-module.html">pysys.utils.linecount</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.utils.smtpserver-module.html">pysys.utils.smtpserver</a></strong></li>
+    </ul>
+    </li>
+    <li> <strong class="uidlink"><a href="pysys.writer-module.html">pysys.writer</a></strong></li>
+    <li> <strong class="uidlink"><a href="pysys.xml-module.html">pysys.xml</a></strong></li>
+    <ul>
+    <li> <strong class="uidlink"><a href="pysys.xml.descriptor-module.html">pysys.xml.descriptor</a></strong></li>
+    <li class="private"> <strong class="uidlink"><a href="pysys.xml.manual-module.html">pysys.xml.manual</a></strong></li>
+    </ul>
+    </li>
+  </ul></td></tr>
+</table>
+
+<br />
+<!-- ==================== VARIABLES ==================== -->
+<a name="section-Variables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="summary">Variables</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Variables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr class="private">
+  <td width="15%">
+    <strong><a href="pysys-module.html#__author__">__author__</a></strong></td>
+  <td>The author of PySys.</td>
+</tr>
+<tr class="private">
+  <td width="15%">
+    <strong><a href="pysys-module.html#__author_email__">__author_email__</a></strong></td>
+  <td>The author's email address.</td>
+</tr>
+<tr class="private">
+  <td width="15%">
+    <strong><a href="pysys-module.html#__status__">__status__</a></strong></td>
+  <td>The status of this release.</td>
+</tr>
+<tr class="private">
+  <td width="15%">
+    <strong><a href="pysys-module.html#__version__">__version__</a></strong></td>
+  <td>The version of this release.</td>
+</tr>
+<tr class="private">
+  <td width="15%">
+    <strong><a href="pysys-module.html#__date__">__date__</a></strong></td>
+  <td>The date of this release.</td>
+</tr>
+<tr class="private">
+  <td width="15%">
+    <strong><a href="pysys-module.html#rootLogger">rootLogger</a></strong></td>
+  <td>The root logger for all logging within PySys.</td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== VARIABLES DETAILS ==================== -->
+<a name="section-VariablesDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="details">Variables Details</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-VariablesDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__author__"></a>
+<div class="private">
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+  <h3>__author__</h3>
+  The author of PySys.
+  <dl><dt></dt><dd>
+    <dl title="'Moray Grieve'"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span>Moray Grieve<span class="variable-quote">'</span>                                                         
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="__author_email__"></a>
+<div class="private">
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+  <h3>__author_email__</h3>
+  The author's email address.
+  <dl><dt></dt><dd>
+    <dl title="'moraygrieve@users.sourceforge.net'"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span>moraygrieve@users.sourceforge.net<span class="variable-quote">'</span>                                    
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="__status__"></a>
+<div class="private">
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+  <h3>__status__</h3>
+  The status of this release.
+  <dl><dt></dt><dd>
+    <dl title="'alpha'"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span>alpha<span class="variable-quote">'</span>                                                                
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="__version__"></a>
+<div class="private">
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+  <h3>__version__</h3>
+  The version of this release.
+  <dl><dt></dt><dd>
+    <dl title="'0.2.0'"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span>0.2.0<span class="variable-quote">'</span>                                                                
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="__date__"></a>
+<div class="private">
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+  <h3>__date__</h3>
+  The date of this release.
+  <dl><dt></dt><dd>
+    <dl title="'14 August 2006'"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span>14 August 2006<span class="variable-quote">'</span>                                                       
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="rootLogger"></a>
+<div class="private">
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+  <h3>rootLogger</h3>
+  The root logger for all logging within PySys.
+  <dl><dt></dt><dd>
+    <dl title="&lt;logging.Logger instance at 0x00BD7A30&gt;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;logging.Logger instance at 0x00BD7A30&gt;                                
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th bgcolor="#70b0f0" class="navselect"
+          >&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Sep 06 22:29:38 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

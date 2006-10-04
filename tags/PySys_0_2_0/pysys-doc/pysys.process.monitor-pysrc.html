@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pysys.process.monitor</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pysys-module.html">Package&nbsp;pysys</a> ::
+        <a href="pysys.process-module.html">Package&nbsp;process</a> ::
+        Module&nbsp;monitor
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pysys.process.monitor-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="pysys.process.monitor-module.html">Module pysys.process.monitor</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno">  1</span>  <span class="py-line"><span class="py-comment">#!/usr/bin/env python</span> </span>
+<span class="lineno">  2</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Permission is hereby granted, free of charge, to any person</span> </span>
+<span class="lineno">  3</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># obtaining a copy of this software and any associated documentation</span> </span>
+<span class="lineno">  4</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># files (the "Software"), to deal in the Software without</span> </span>
+<span class="lineno">  5</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># restriction, including without limitation the rights to use, copy,</span> </span>
+<span class="lineno">  6</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># modify, merge, publish, distribute, sublicense, and/or sell copies</span> </span>
+<span class="lineno">  7</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># of the Software, and to permit persons to whom the Software is</span> </span>
+<span class="lineno">  8</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># furnished to do so, subject to the following conditions:</span> </span>
+<span class="lineno">  9</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#</span> </span>
+<span class="lineno"> 10</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># The above copyright notice and this permission notice shall be</span> </span>
+<span class="lineno"> 11</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># included in all copies or substantial portions of the Software.</span> </span>
+<span class="lineno"> 12</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#</span> </span>
+<span class="lineno"> 13</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># The software is provided "as is", without warranty of any</span> </span>
+<span class="lineno"> 14</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># kind, express or implied, including but not limited to the</span> </span>
+<span class="lineno"> 15</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># warranties of merchantability, fitness for a particular purpose</span> </span>
+<span class="lineno"> 16</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># and noninfringement. In no event shall the authors or copyright</span> </span>
+<span class="lineno"> 17</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># holders be liable for any claim, damages or other liability,</span> </span>
+<span class="lineno"> 18</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># whether in an action of contract, tort or otherwise, arising from,</span> </span>
+<span class="lineno"> 19</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># out of or in connection with the software or the use or other</span> </span>
+<span class="lineno"> 20</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># dealings in the software</span> </span>
+<span class="lineno"> 21</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno"> 22</span>  <span class="py-line"><span class="py-keyword">import</span> <span class="py-name">os</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">,</span> <span class="py-name">string</span><span class="py-op">,</span> <span class="py-name">time</span><span class="py-op">,</span> <span class="py-name">thread</span><span class="py-op">,</span> <span class="py-name">win32api</span><span class="py-op">,</span> <span class="py-name">win32pdh</span> </span>
+<span class="lineno"> 23</span>  <span class="py-line"> </span>
+<span class="lineno"> 24</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a><span class="py-op">.</span><a title="pysys.constants" class="py-name" href="pysys.constants-module.html">constants</a> <span class="py-keyword">import</span> <span class="py-op">*</span> </span>
+<span class="lineno"> 25</span>  <span class="py-line"> </span>
+<span class="lineno"> 26</span>  <span class="py-line"> </span>
+<a name="ProcessMonitor"></a><div id="ProcessMonitor-def"><span class="lineno"> 27</span> <a class="pysrc-toggle" href="#" id="ProcessMonitor-toggle" onclick="toggle('ProcessMonitor'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.process.monitor.ProcessMonitor-class.html">ProcessMonitor</a><span class="py-op">:</span> </span>
+</div><div id="ProcessMonitor-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="ProcessMonitor-expanded"><a name="ProcessMonitor.__init__"></a><div id="ProcessMonitor.__init__-def"><span class="lineno"> 28</span> <a class="pysrc-toggle" href="#" id="ProcessMonitor.__init__-toggle" onclick="toggle('ProcessMonitor.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.process.monitor.ProcessMonitor-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">pid</span><span class="py-op">,</span> <span class="py-param">interval</span><span class="py-op">,</span> <span class="py-param">file</span><span class="py-op">=</span><span class="py-name">None</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessMonitor.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="ProcessMonitor.__init__-expanded"><span class="lineno"> 29</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.pid" class="py-name" href="pysys.process.monitor-module.html#pid">pid</a> <span class="py-op">=</span> <a title="pysys.process.monitor.pid" class="py-name" href="pysys.process.monitor-module.html#pid">pid</a> </span>
+<span class="lineno"> 30</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.interval" class="py-name" href="pysys.process.monitor-module.html#interval">interval</a> <span class="py-op">=</span> <a title="pysys.process.monitor.interval" class="py-name" href="pysys.process.monitor-module.html#interval">interval</a> </span>
+<span class="lineno"> 31</span>  <span class="py-line">                <span class="py-keyword">if</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">:</span> </span>
+<span class="lineno"> 32</span>  <span class="py-line">                        <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a> <span class="py-op">=</span> <span class="py-name">open</span><span class="py-op">(</span><a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">,</span> <span class="py-string">'w'</span><span class="py-op">,</span> <span class="py-number">0</span><span class="py-op">)</span> </span>
+<span class="lineno"> 33</span>  <span class="py-line">                <span class="py-keyword">else</span><span class="py-op">:</span>    </span>
+<span class="lineno"> 34</span>  <span class="py-line">                        <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a> <span class="py-op">=</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">stdout</span> </span>
+</div><span class="lineno"> 35</span>  <span class="py-line">                         </span>
+<span class="lineno"> 36</span>  <span class="py-line">                         </span>
+<a name="ProcessMonitor.win32GetInstance"></a><div id="ProcessMonitor.win32GetInstance-def"><span class="lineno"> 37</span> <a class="pysrc-toggle" href="#" id="ProcessMonitor.win32GetInstance-toggle" onclick="toggle('ProcessMonitor.win32GetInstance'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.process.monitor.ProcessMonitor-class.html#win32GetInstance">win32GetInstance</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">pid</span><span class="py-op">,</span> <span class="py-param">bRefresh</span><span class="py-op">=</span><span class="py-number">0</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessMonitor.win32GetInstance-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="ProcessMonitor.win32GetInstance-expanded"><span class="lineno"> 38</span>  <span class="py-line">                <span class="py-comment"># refresh allows process started after the python process</span> </span>
+<span class="lineno"> 39</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># to be picked up</span> </span>
+<span class="lineno"> 40</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-keyword">if</span> <span class="py-name">bRefresh</span><span class="py-op">:</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">EnumObjects</span><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-name">None</span><span class="py-op">,</span> <span class="py-number">0</span><span class="py-op">,</span> <span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno"> 41</span>  <span class="py-line">         </span>
+<span class="lineno"> 42</span>  <span class="py-line">                <span class="py-comment"># get a dictionary of all running processes, with the process</span> </span>
+<span class="lineno"> 43</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># name as the key, and the number of instances as the value</span> </span>
+<span class="lineno"> 44</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">items</span><span class="py-op">,</span> <span class="py-name">instances</span> <span class="py-op">=</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">EnumObjectItems</span><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">"Process"</span><span class="py-op">,</span> <span class="py-op">-</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno"> 45</span>  <span class="py-line">                <span class="py-name">instanceDict</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno"> 46</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">i</span> <span class="py-keyword">in</span> <span class="py-name">instances</span><span class="py-op">:</span> </span>
+<span class="lineno"> 47</span>  <span class="py-line">                        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 48</span>  <span class="py-line">                                <span class="py-name">instanceDict</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-name">instanceDict</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span> <span class="py-op">+</span> <span class="py-number">1</span> </span>
+<span class="lineno"> 49</span>  <span class="py-line">                        <span class="py-keyword">except</span> <span class="py-name">KeyError</span><span class="py-op">:</span> </span>
+<span class="lineno"> 50</span>  <span class="py-line">                                <span class="py-name">instanceDict</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno"> 51</span>  <span class="py-line">                         </span>
+<span class="lineno"> 52</span>  <span class="py-line">                <span class="py-comment"># find the instance name and the instance number for the requested</span> </span>
+<span class="lineno"> 53</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># process ID. Once found, return the instance name and the instance</span> </span>
+<span class="lineno"> 54</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># number so that this process can be tracked</span> </span>
+<span class="lineno"> 55</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">instance</span> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno"> 56</span>  <span class="py-line">                <span class="py-name">inum</span> <span class="py-op">=</span> <span class="py-op">-</span><span class="py-number">1</span> </span>
+<span class="lineno"> 57</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">instance</span><span class="py-op">,</span> <span class="py-name">numInstances</span> <span class="py-keyword">in</span> <span class="py-name">instanceDict</span><span class="py-op">.</span><span class="py-name">items</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 58</span>  <span class="py-line">                        <span class="py-keyword">for</span> <span class="py-name">inum</span> <span class="py-keyword">in</span> <span class="py-name">xrange</span><span class="py-op">(</span><span class="py-name">numInstances</span><span class="py-op">+</span><span class="py-number">1</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 59</span>  <span class="py-line">                                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 60</span>  <span class="py-line">                                        <span class="py-name">value</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.ProcessMonitor.win32getProfileAttribute" class="py-name" href="pysys.process.monitor.ProcessMonitor-class.html#win32getProfileAttribute">win32getProfileAttribute</a><span class="py-op">(</span><span class="py-name">instance</span><span class="py-op">,</span> <span class="py-name">inum</span><span class="py-op">,</span> <span class="py-string">"ID Process"</span><span class="py-op">)</span> </span>
+<span class="lineno"> 61</span>  <span class="py-line">                                        <span class="py-keyword">if</span> <span class="py-name">value</span> <span class="py-op">==</span> <a title="pysys.process.monitor.pid" class="py-name" href="pysys.process.monitor-module.html#pid">pid</a><span class="py-op">:</span> </span>
+<span class="lineno"> 62</span>  <span class="py-line">                                                <span class="py-keyword">return</span> <span class="py-name">instance</span><span class="py-op">,</span> <span class="py-name">inum</span> </span>
+<span class="lineno"> 63</span>  <span class="py-line">                                <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno"> 64</span>  <span class="py-line">                                        <span class="py-keyword">pass</span> </span>
+<span class="lineno"> 65</span>  <span class="py-line"> </span>
+<span class="lineno"> 66</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">instance</span><span class="py-op">,</span> <span class="py-name">inum</span> </span>
+</div><span class="lineno"> 67</span>  <span class="py-line"> </span>
+<span class="lineno"> 68</span>  <span class="py-line"> </span>
+<a name="ProcessMonitor.win32getProfileAttribute"></a><div id="ProcessMonitor.win32getProfileAttribute-def"><span class="lineno"> 69</span> <a class="pysrc-toggle" href="#" id="ProcessMonitor.win32getProfileAttribute-toggle" onclick="toggle('ProcessMonitor.win32getProfileAttribute'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.process.monitor.ProcessMonitor-class.html#win32getProfileAttribute">win32getProfileAttribute</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">instance</span><span class="py-op">,</span> <span class="py-param">inum</span><span class="py-op">,</span> <span class="py-param">counter</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessMonitor.win32getProfileAttribute-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="ProcessMonitor.win32getProfileAttribute-expanded"><span class="lineno"> 70</span>  <span class="py-line">                <span class="py-comment"># create the path for the counter of interest</span> </span>
+<span class="lineno"> 71</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">path</span> <span class="py-op">=</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">MakeCounterPath</span><span class="py-op">(</span><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">"Process"</span><span class="py-op">,</span> <span class="py-name">instance</span><span class="py-op">,</span> <span class="py-name">None</span><span class="py-op">,</span> <span class="py-name">inum</span><span class="py-op">,</span> <span class="py-name">counter</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 72</span>  <span class="py-line">                 </span>
+<span class="lineno"> 73</span>  <span class="py-line">                <span class="py-comment"># open the query and add the counter to the query</span> </span>
+<span class="lineno"> 74</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">query</span> <span class="py-op">=</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">OpenQuery</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno"> 75</span>  <span class="py-line">                <span class="py-name">hc</span> <span class="py-op">=</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">AddCounter</span><span class="py-op">(</span><span class="py-name">query</span><span class="py-op">,</span> <span class="py-name">path</span><span class="py-op">)</span> </span>
+<span class="lineno"> 76</span>  <span class="py-line"> </span>
+<span class="lineno"> 77</span>  <span class="py-line">                <span class="py-comment"># collect the data for the query object. We need to collect the query data twice </span> </span>
+<span class="lineno"> 78</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># to be able to calculate the "% Processor Time" counter value </span> </span>
+<span class="lineno"> 79</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># (see http://support.microsoft.com/default.aspx?scid=kb;EN-US;q262938)</span> </span>
+<span class="lineno"> 80</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">CollectQueryData</span><span class="py-op">(</span><span class="py-name">query</span><span class="py-op">)</span> </span>
+<span class="lineno"> 81</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-name">counter</span> <span class="py-op">==</span> <span class="py-string">"% Processor Time"</span><span class="py-op">:</span> </span>
+<span class="lineno"> 82</span>  <span class="py-line">                        <span class="py-name">time</span><span class="py-op">.</span><span class="py-name">sleep</span><span class="py-op">(</span><span class="py-number">0.25</span><span class="py-op">)</span>         </span>
+<span class="lineno"> 83</span>  <span class="py-line">                        <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">CollectQueryData</span><span class="py-op">(</span><span class="py-name">query</span><span class="py-op">)</span> </span>
+<span class="lineno"> 84</span>  <span class="py-line"> </span>
+<span class="lineno"> 85</span>  <span class="py-line">                <span class="py-comment"># Get the formatted value of the counter, remove and close the query</span> </span>
+<span class="lineno"> 86</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># and return the counter value. Note that the process may have gone away</span> </span>
+<span class="lineno"> 87</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># since getting the enum objects, so use try block and ignore exception</span> </span>
+<span class="lineno"> 88</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">value</span> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno"> 89</span>  <span class="py-line">                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 90</span>  <span class="py-line">                        <span class="py-name">value</span> <span class="py-op">=</span>  <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">GetFormattedCounterValue</span><span class="py-op">(</span><span class="py-name">hc</span><span class="py-op">,</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">PDH_FMT_LONG</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span>   </span>
+<span class="lineno"> 91</span>  <span class="py-line">                <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno"> 92</span>  <span class="py-line">                        <span class="py-keyword">pass</span> </span>
+<span class="lineno"> 93</span>  <span class="py-line"> </span>
+<span class="lineno"> 94</span>  <span class="py-line">                <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">RemoveCounter</span><span class="py-op">(</span><span class="py-name">hc</span><span class="py-op">)</span> </span>
+<span class="lineno"> 95</span>  <span class="py-line">                <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">CloseQuery</span><span class="py-op">(</span><span class="py-name">query</span><span class="py-op">)</span> </span>
+<span class="lineno"> 96</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">value</span> </span>
+</div><span class="lineno"> 97</span>  <span class="py-line"> </span>
+<span class="lineno"> 98</span>  <span class="py-line"> </span>
+<a name="ProcessMonitor.win32LogProfile"></a><div id="ProcessMonitor.win32LogProfile-def"><span class="lineno"> 99</span> <a class="pysrc-toggle" href="#" id="ProcessMonitor.win32LogProfile-toggle" onclick="toggle('ProcessMonitor.win32LogProfile'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.process.monitor.ProcessMonitor-class.html#win32LogProfile">win32LogProfile</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">instance</span><span class="py-op">,</span> <span class="py-param">inum</span><span class="py-op">,</span> <span class="py-param">interval</span><span class="py-op">,</span> <span class="py-param">file</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessMonitor.win32LogProfile-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="ProcessMonitor.win32LogProfile-expanded"><span class="lineno">100</span>  <span class="py-line">                <span class="py-comment"># open a query ready to perform repeat logging</span> </span>
+<span class="lineno">101</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">query</span> <span class="py-op">=</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">OpenQuery</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">102</span>  <span class="py-line">                 </span>
+<span class="lineno">103</span>  <span class="py-line">                <span class="py-comment"># get a list of counter file handles, append them to a list</span> </span>
+<span class="lineno">104</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># after adding them to the query</span> </span>
+<span class="lineno">105</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">fpcounters</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno">106</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">i</span> <span class="py-keyword">in</span> <span class="py-string">"% Processor Time"</span><span class="py-op">,</span> <span class="py-string">"Working Set"</span><span class="py-op">,</span> <span class="py-string">"Virtual Bytes"</span><span class="py-op">,</span> <span class="py-string">"Private Bytes"</span><span class="py-op">,</span> <span class="py-string">"Thread Count"</span><span class="py-op">:</span> </span>
+<span class="lineno">107</span>  <span class="py-line">                        <span class="py-name">path</span> <span class="py-op">=</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">MakeCounterPath</span><span class="py-op">(</span><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">"Process"</span><span class="py-op">,</span> <span class="py-name">instance</span><span class="py-op">,</span> <span class="py-name">None</span><span class="py-op">,</span> <span class="py-name">inum</span><span class="py-op">,</span> <span class="py-name">i</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">108</span>  <span class="py-line">                        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">109</span>  <span class="py-line">                                <span class="py-name">fpcounters</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">AddCounter</span><span class="py-op">(</span><span class="py-name">query</span><span class="py-op">,</span> <span class="py-name">path</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">110</span>  <span class="py-line">                        <span class="py-keyword">except</span> <span class="py-name">win32api</span><span class="py-op">.</span><span class="py-name">error</span><span class="py-op">:</span>  </span>
+<span class="lineno">111</span>  <span class="py-line">                                <span class="py-name">fpcounters</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><span class="py-number">0</span><span class="py-op">)</span> </span>
+<span class="lineno">112</span>  <span class="py-line">                                <span class="py-keyword">pass</span> </span>
+<span class="lineno">113</span>  <span class="py-line">                                 </span>
+<span class="lineno">114</span>  <span class="py-line">                <span class="py-comment"># perform the repeated collection of the query data and formatted values for each of the </span> </span>
+<span class="lineno">115</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># counter file handles and log the data</span> </span>
+<span class="lineno">116</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">data</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-number">0</span><span class="py-op">,</span> <span class="py-number">0</span><span class="py-op">,</span> <span class="py-number">0</span><span class="py-op">,</span> <span class="py-number">0</span><span class="py-op">,</span> <span class="py-number">0</span><span class="py-op">]</span> </span>
+<span class="lineno">117</span>  <span class="py-line">                <span class="py-keyword">while</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">active</span><span class="py-op">:</span> </span>
+<span class="lineno">118</span>  <span class="py-line">                        <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">CollectQueryData</span><span class="py-op">(</span><span class="py-name">query</span><span class="py-op">)</span> </span>
+<span class="lineno">119</span>  <span class="py-line">                        <span class="py-keyword">for</span> <span class="py-name">i</span> <span class="py-keyword">in</span> <span class="py-name">range</span><span class="py-op">(</span><span class="py-name">len</span><span class="py-op">(</span><span class="py-name">fpcounters</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">120</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-name">fpcounters</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">:</span> </span>
+<span class="lineno">121</span>  <span class="py-line">                                        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">122</span>  <span class="py-line">                                                <span class="py-name">data</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">GetFormattedCounterValue</span><span class="py-op">(</span><span class="py-name">fpcounters</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">PDH_FMT_LONG</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span> </span>
+<span class="lineno">123</span>  <span class="py-line">                                        <span class="py-keyword">except</span> <span class="py-name">win32api</span><span class="py-op">.</span><span class="py-name">error</span><span class="py-op">:</span> </span>
+<span class="lineno">124</span>  <span class="py-line">                                                <span class="py-name">data</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-op">-</span><span class="py-number">1</span> </span>
+<span class="lineno">125</span>  <span class="py-line"> </span>
+<span class="lineno">126</span>  <span class="py-line">                        <span class="py-name">currentTime</span> <span class="py-op">=</span> <span class="py-name">time</span><span class="py-op">.</span><span class="py-name">strftime</span><span class="py-op">(</span><span class="py-string">"%d/%m/%y %H:%M:%S"</span><span class="py-op">,</span> <span class="py-name">time</span><span class="py-op">.</span><span class="py-name">gmtime</span><span class="py-op">(</span><span class="py-name">time</span><span class="py-op">.</span><span class="py-name">time</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">127</span>  <span class="py-line">                        <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">.</span><a title="pysys.process.helper.NullDevice.write" class="py-name" href="pysys.process.helper.NullDevice-class.html#write">write</a><span class="py-op">(</span> <span class="py-string">"%s\t%s\t%d\t%d\t%d\t%d\n"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">currentTime</span><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">float</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">/</span><span class="py-number">1024</span><span class="py-op">,</span> </span>
+<span class="lineno">128</span>  <span class="py-line">                                                                                                          <span class="py-name">float</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">/</span><span class="py-number">1024</span><span class="py-op">,</span> <span class="py-name">float</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-number">3</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">/</span><span class="py-number">1024</span><span class="py-op">,</span> <span class="py-name">float</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-number">4</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">129</span>  <span class="py-line">                        <span class="py-name">time</span><span class="py-op">.</span><span class="py-name">sleep</span><span class="py-op">(</span><a title="pysys.process.monitor.interval" class="py-name" href="pysys.process.monitor-module.html#interval">interval</a><span class="py-op">)</span> </span>
+<span class="lineno">130</span>  <span class="py-line"> </span>
+<span class="lineno">131</span>  <span class="py-line">                <span class="py-comment"># on termination of the thread, remove the counters</span> </span>
+<span class="lineno">132</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># and close the query cleanly</span> </span>
+<span class="lineno">133</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-keyword">for</span> <span class="py-name">i</span> <span class="py-keyword">in</span> <span class="py-name">range</span><span class="py-op">(</span><span class="py-name">len</span><span class="py-op">(</span><span class="py-name">fpcounters</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">134</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">fpcounters</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">:</span>  <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">RemoveCounter</span><span class="py-op">(</span><span class="py-name">fpcounters</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">135</span>  <span class="py-line">                <span class="py-name">win32pdh</span><span class="py-op">.</span><span class="py-name">CloseQuery</span><span class="py-op">(</span><span class="py-name">query</span><span class="py-op">)</span> </span>
+</div><span class="lineno">136</span>  <span class="py-line"> </span>
+<span class="lineno">137</span>  <span class="py-line">         </span>
+<span class="lineno">138</span>  <span class="py-line">        <span class="py-comment"># public methods to start and stop a process monitor thread</span> </span>
+<a name="ProcessMonitor.start"></a><div id="ProcessMonitor.start-def"><span class="lineno">139</span> <a class="pysrc-toggle" href="#" id="ProcessMonitor.start-toggle" onclick="toggle('ProcessMonitor.start'); return false;">-</a><span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.process.monitor.ProcessMonitor-class.html#start">start</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessMonitor.start-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="ProcessMonitor.start-expanded"><span class="lineno">140</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">active</span> <span class="py-op">=</span> <span class="py-number">1</span> </span>
+<span class="lineno">141</span>  <span class="py-line">                <span class="py-name">instance</span><span class="py-op">,</span> <span class="py-name">inum</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.ProcessMonitor.win32GetInstance" class="py-name" href="pysys.process.monitor.ProcessMonitor-class.html#win32GetInstance">win32GetInstance</a><span class="py-op">(</span><a title="pysys.process.monitor.pid" class="py-name" href="pysys.process.monitor-module.html#pid">pid</a><span class="py-op">=</span><span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.pid" class="py-name" href="pysys.process.monitor-module.html#pid">pid</a><span class="py-op">,</span> <span class="py-name">bRefresh</span><span class="py-op">=</span><span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">142</span>  <span class="py-line">                <span class="py-name">thread</span><span class="py-op">.</span><span class="py-name">start_new_thread</span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.ProcessMonitor.win32LogProfile" class="py-name" href="pysys.process.monitor.ProcessMonitor-class.html#win32LogProfile">win32LogProfile</a><span class="py-op">,</span> <span class="py-op">(</span><span class="py-name">instance</span><span class="py-op">,</span> <span class="py-name">inum</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.interval" class="py-name" href="pysys.process.monitor-module.html#interval">interval</a><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">)</span><span class="py-op">)</span> </span>
+</div><span class="lineno">143</span>  <span class="py-line"> </span>
+<span class="lineno">144</span>  <span class="py-line"> </span>
+<a name="ProcessMonitor.stop"></a><div id="ProcessMonitor.stop-def"><span class="lineno">145</span> <a class="pysrc-toggle" href="#" id="ProcessMonitor.stop-toggle" onclick="toggle('ProcessMonitor.stop'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.process.monitor.ProcessMonitor-class.html#stop">stop</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessMonitor.stop-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="ProcessMonitor.stop-expanded"><span class="lineno">146</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">active</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+</div></div><span class="lineno">147</span>  <span class="py-line">                 </span>
+<span class="lineno">148</span>  <span class="py-line"> </span>
+<span class="lineno">149</span>  <span class="py-line"> </span>
+<span class="lineno">150</span>  <span class="py-line"> </span>
+<span class="lineno">151</span>  <span class="py-line"><span class="py-comment"># used to run class from the command line</span> </span>
+<span class="lineno">152</span>  <span class="py-line"><span class="py-comment"></span><span class="py-keyword">if</span> <span class="py-name">__name__</span> <span class="py-op">==</span> <span class="py-string">"__main__"</span><span class="py-op">:</span> </span>
+<span class="lineno">153</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">argv</span><span class="py-op">)</span> <span class="py-op">&lt;</span> <span class="py-number">5</span><span class="py-op">:</span> </span>
+<span class="lineno">154</span>  <span class="py-line">                <span class="py-keyword">print</span> <span class="py-string">"Usage: monitor.py &lt;pid&gt; &lt;interval&gt; &lt;duration&gt; &lt;filename&gt;"</span> </span>
+<span class="lineno">155</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">156</span>  <span class="py-line">                <span class="py-keyword">try</span><span class="py-op">:</span>  </span>
+<span class="lineno">157</span>  <span class="py-line">                        <a title="pysys.process.monitor.pid" class="py-name" href="pysys.process.monitor-module.html#pid">pid</a> <span class="py-op">=</span> <span class="py-name">int</span><span class="py-op">(</span><span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">argv</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">158</span>  <span class="py-line">                        <a title="pysys.process.monitor.interval" class="py-name" href="pysys.process.monitor-module.html#interval">interval</a> <span class="py-op">=</span> <span class="py-name">int</span><span class="py-op">(</span><span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">argv</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">159</span>  <span class="py-line">                        <a title="pysys.process.monitor.duration" class="py-name" href="pysys.process.monitor-module.html#duration">duration</a> <span class="py-op">=</span> <span class="py-name">int</span><span class="py-op">(</span><span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">argv</span><span class="py-op">[</span><span class="py-number">3</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">160</span>  <span class="py-line">                        <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a> <span class="py-op">=</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">argv</span><span class="py-op">[</span><span class="py-number">4</span><span class="py-op">]</span> </span>
+<span class="lineno">161</span>  <span class="py-line">                <span class="py-keyword">except</span><span class="py-op">:</span>  </span>
+<span class="lineno">162</span>  <span class="py-line">                        <span class="py-keyword">print</span> <span class="py-string">"Process ID, interval and duration should be valid integers"</span> </span>
+<span class="lineno">163</span>  <span class="py-line">                        <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exit</span><span class="py-op">(</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">)</span>     </span>
+<span class="lineno">164</span>  <span class="py-line">                 </span>
+<span class="lineno">165</span>  <span class="py-line">                <span id="link-0" class="py-name"><a title="pysys.process.monitor
+pysys.process.monitor.monitor" class="py-name" href="#" onclick="doclink('link-0', 'monitor', 'Module pysys.process.monitor=pysys.process.monitor-module.html,Variable pysys.process.monitor.monitor=pysys.process.monitor-module.html#monitor'); return false;">monitor</a></span></span> <span class="py-op">=</span> <a title="pysys.process.monitor.ProcessMonitor" class="py-name" href="pysys.process.monitor.ProcessMonitor-class.html">ProcessMonitor</a><span class="py-op">(</span><a title="pysys.process.monitor.pid" class="py-name" href="pysys.process.monitor-module.html#pid">pid</a><span class="py-op">,</span> <a title="pysys.process.monitor.interval" class="py-name" href="pysys.process.monitor-module.html#interval">interval</a><span class="py-op">,</span> <a title="pysys.process.monitor.file" class="py-name" href="pysys.process.monitor-module.html#file">file</a><span class="py-op">)</span> </span>
+<span class="lineno">166</span>  <span class="py-line">                <span id="link-1" class="py-name"><a title="pysys.process.monitor
+pysys.process.monitor.monitor" class="py-name" href="#" onclick="doclink('link-1', 'monitor', 'Module pysys.process.monitor=pysys.process.monitor-module.html,Variable pysys.process.monitor.monitor=pysys.process.monitor-module.html#monitor'); return false;">monitor</a></span></span><span class="py-op">.</span><span id="link-2" class="py-name"><a title="pysys.baserunner.BaseRunner.start
+pysys.manual.ui.ManualTester.start
+pysys.process.helper.ProcessWrapper.start
+pysys.process.monitor.ProcessMonitor.start
+pysys.utils.smtpserver.SimpleSMTPServerRunner.start" class="py-name" href="#" onclick="doclink('link-2', 'start', 'Method pysys.baserunner.BaseRunner.start()=pysys.baserunner.BaseRunner-class.html#start,Method pysys.manual.ui.ManualTester.start()=pysys.manual.ui.ManualTester-class.html#start,Method pysys.process.helper.ProcessWrapper.start()=pysys.process.helper.ProcessWrapper-class.html#start,Method pysys.process.monitor.ProcessMonitor.start()=pysys.process.monitor.ProcessMonitor-class.html#start,Method pysys.utils.smtpserver.SimpleSMTPServerRunner.start()=pysys.utils.smtpserver.SimpleSMTPServerRunner-class.html#start'); return false;">start</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">167</span>  <span class="py-line">                <span class="py-name">time</span><span class="py-op">.</span><span class="py-name">sleep</span><span class="py-op">(</span><a title="pysys.process.monitor.duration" class="py-name" href="pysys.process.monitor-module.html#duration">duration</a><span class="py-op">)</span> </span>
+<span class="lineno">168</span>  <span class="py-line">                <span id="link-3" class="py-name"><a title="pysys.process.monitor
+pysys.process.monitor.monitor" class="py-name" href="#" onclick="doclink('link-3', 'monitor', 'Module pysys.process.monitor=pysys.process.monitor-module.html,Variable pysys.process.monitor.monitor=pysys.process.monitor-module.html#monitor'); return false;">monitor</a></span></span><span class="py-op">.</span><span id="link-4" class="py-name"><a title="pysys.manual.ui.ManualTester.stop
+pysys.process.helper.ProcessWrapper.stop
+pysys.process.monitor.ProcessMonitor.stop
+pysys.utils.smtpserver.SimpleSMTPServerRunner.stop" class="py-name" href="#" onclick="doclink('link-4', 'stop', 'Method pysys.manual.ui.ManualTester.stop()=pysys.manual.ui.ManualTester-class.html#stop,Method pysys.process.helper.ProcessWrapper.stop()=pysys.process.helper.ProcessWrapper-class.html#stop,Method pysys.process.monitor.ProcessMonitor.stop()=pysys.process.monitor.ProcessMonitor-class.html#stop,Method pysys.utils.smtpserver.SimpleSMTPServerRunner.stop()=pysys.utils.smtpserver.SimpleSMTPServerRunner-class.html#stop'); return false;">stop</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">169</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Sep 06 22:29:40 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
