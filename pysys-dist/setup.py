@@ -36,17 +36,37 @@ docfiles.extend(glob.glob('pysys-doc/*.html'))
 
 releasenotes = ['pysys-dist/pysys-release.txt']
 
-setup(name='PySys',
-		version=pysys.__version__,
-		author=pysys.__author__,
-		author_email=pysys.__author_email__,
-		description='Python System Test Framework',
-		url="http://sourceforge.net/projects/pysys",
-		packages=['pysys', 'pysys.launcher',  'pysys.manual', 'pysys.process', 'pysys.process.plat-win32', 
-		          'pysys.process.plat-unix', 'pysys.utils', 'pysys.writer', 'pysys.xml'],
-		data_files=[('%s/pysys-doc' % get_site_packages_path(), docfiles), (get_site_packages_path(), releasenotes)],
-		scripts = ['pysys-dist/pysys_postinstall.py']
+if sys.platform.lower().startswith('win'):
+	setup(name='PySys',
+		  version=pysys.__version__,
+		  author=pysys.__author__,
+		  author_email=pysys.__author_email__,
+		  description='Python System Test Framework',
+		  url="http://sourceforge.net/projects/pysys",
+		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
+					'pysys.process', 'pysys.process.plat-win32', 
+					'pysys.process.plat-unix', 'pysys.utils',
+					'pysys.writer', 'pysys.xml'],
+		  data_files=[('%s/pysys-doc' % get_site_packages_path(), docfiles),
+					  (get_site_packages_path(), releasenotes)],
+		  scripts = ['pysys-dist/pysys_postinstall.py']
 		)
-		
-		
-# to run use python.exe pysys-dist/setup.py bdist_wininst --install-script pysys_postinstall.py"
+else:
+	setup(name='PySys',
+		  version=pysys.__version__,
+		  author=pysys.__author__,
+		  author_email=pysys.__author_email__,
+		  description='Python System Test Framework',
+		  url="http://sourceforge.net/projects/pysys",
+		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
+					'pysys.process', 'pysys.process.plat-win32', 
+					'pysys.process.plat-unix', 'pysys.utils',
+					'pysys.writer', 'pysys.xml']
+		)
+
+	
+# to run on windows use
+# python.exe pysys-dist/setup.py bdist_wininst --install-script pysys_postinstall.py
+
+# to run on unix use
+# /usr/lcal/bin/python2.4 setup.py source_dist
