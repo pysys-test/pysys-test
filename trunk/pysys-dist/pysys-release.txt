@@ -1,4 +1,4 @@
-PySys 0.2.0 Release Notes
+PySys 0.2.1 Release Notes
 =========================
 
 This is an early ALPHA release of the software for development purposes. The software 
@@ -12,15 +12,13 @@ Hammond. The extensions can be downloaded from http://sourceforge.net/projects/p
 
 What's new in this release
 --------------------------
-- This release includes updates to the Python doc strings for automated generation of 
-  epydoc using the Epydoc package (http://epydoc.sourceforge.net). The installer now 
-  distributes the generated epydoc in the site-packages/pysys-doc directory. For 
-  windows installs a link to the epydoc and release notes is now added as a link in the 
-  start menu items
-- Added the setup() method to the BaseTest class to allow custom setup actions to be 
-  performed prior to execution of a particular test case
-- Fixed a bug where if the --type option was not supplied to ConsoleMakeTestHelper
-  as a command line option, the resulting descriptor had type="None"
+- The Manual Tester has been updated to support the <expectedresult> element in the 
+  input xml file. This allows display of the expected result for a manual step to 
+  be presented in the user interface. The ability to optionally record a defect in 
+  the log output is also now included.
+- The createDescriptors method has been removed from the pysys.launcher.console 
+  package and moved into pysys.launcher. This allows the utility method to be 
+  used for other custom launchers.
 
 
 Installation
@@ -62,6 +60,18 @@ in the testcases directory use
 
 Release History
 ---------------
+0.1.7 to 0.2.0
+--------------
+- This release includes updates to the Python doc strings for automated generation of 
+  epydoc using the Epydoc package (http://epydoc.sourceforge.net). The installer now 
+  distributes the generated epydoc in the site-packages/pysys-doc directory. For 
+  windows installs a link to the epydoc and release notes is now added as a link in the 
+  start menu items
+- Added the setup() method to the BaseTest class to allow custom setup actions to be 
+  performed prior to execution of a particular test case
+- Fixed a bug where if the --type option was not supplied to ConsoleMakeTestHelper
+  as a command line option, the resulting descriptor had type="None"
+
 0.1.6 to 0.1.7
 --------------
 - The Manual Tester UI has been updated so that it can be resized, and is easier to 
