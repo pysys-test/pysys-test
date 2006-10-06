@@ -27,12 +27,11 @@ log = logging.getLogger('pysys.xml.manual')
 
 DTD='''
 <!ELEMENT pysysmanualtest (step)+ >
-<!ELEMENT step (description) >
+<!ELEMENT step (description, expectedresult?) >
 <!ELEMENT description (#PCDATA) >
 <!ELEMENT expectedresult (#PCDATA) >
 <!ATTLIST step title CDATA #REQUIRED
-               validate (true | false) "true" 
-               wrap (true | false) "true">
+               validate (true | false) "true">
 '''
 
 

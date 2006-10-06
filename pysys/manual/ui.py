@@ -122,7 +122,7 @@ class ManualTester:
 		self.doStep()
 	
 	def doStep(self):
-		self.messageBoxDetails.config(state=NORMAL, wrap=WORD)
+		self.messageBoxDetails.config(state=NORMAL)
 		self.messageBoxDetails.delete(1.0, END)
 		self.messageBoxExpected.config(state=NORMAL)
 		self.messageBoxExpected.delete(1.0, END)
@@ -144,7 +144,6 @@ class ManualTester:
 			self.messageBoxDetails.insert(INSERT, self.reportToString())
 			self.titleBox.config(text="Test Complete - Summary Report")
 		elif self.currentStep >= 0:
-			if self.steps[self.currentStep].wrap == 'false': self.messageBoxDetails.config(wrap=NONE)
 			self.backButton.config(state=NORMAL)
 			self.failButton.pack(side=RIGHT, padx=5, pady=5)
 			self.multiButton.config(text="Pass")
