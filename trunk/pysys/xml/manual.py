@@ -26,9 +26,10 @@ from pysys.constants import *
 log = logging.getLogger('pysys.xml.manual')
 
 DTD='''
-<!ELEMENT pysysmanualtest (step)+ > 
+<!ELEMENT pysysmanualtest (step)+ >
 <!ELEMENT step (description) >
 <!ELEMENT description (#PCDATA) >
+<!ELEMENT expectedresult (#PCDATA) >
 <!ATTLIST step title CDATA #REQUIRED
                validate (true | false) "true" 
                wrap (true | false) "true">
@@ -36,12 +37,13 @@ DTD='''
 
 
 class XMLManualTestStep:
-	def __init__(self, number, title, validate, wrap, description):
+	def __init__(self, number, title, validate, wrap, description, expectedResult):
 		self.number = number
 		self.title = title
 		self.validate = validate
 		self.wrap = wrap
 		self.description = description
+		self.expectedResult = expectedResult
 
 		
 	def toString(self):
@@ -53,13 +55,13 @@ class XMLManualTestStep:
 		desc = self.description.split('\n')
 		for index in range(0, len(desc)):
 			if index == 0: print desc[index]
-			if index != 0: print "                   %s" % desc[index]	
-			
-
+			if index != 0: print "                   %s" % desc[index]
+		print "Expected result:   %s" % self.expectedResult
 
 class XMLManualTestParser:
-	def __init__(self, xmlfile):		
+	def __init__(self, xmlfile):
 		self.dirname = os.path.dirname(xmlfile)
+		self.xmlfile = xmlfile
 
 		if not os.path.exists(xmlfile):
 			raise Exception, "Unable to find supplied manual test input file \"%s\"" % xmlfile
@@ -77,13 +79,13 @@ class XMLManualTestParser:
 				
 	def unlink(self):
 		if self.doc: self.doc.unlink()	
-	
+
 		
 	def getSteps(self):
 		stepsNodeList = self.root.getElementsByTagName('step')
 		if stepsNodeList == []:
 			raise Exception, "No <step> element supplied in XML manual test input file"
-		
+
 		steps = []
 		stepnumber = 0
 		for stepsNode in stepsNodeList:
@@ -98,10 +100,43 @@ class XMLManualTestParser:
 					description = stepsNode.getElementsByTagName('description')[0].childNodes[0].data
 				except:
 					description = ""
-			stepnumber = stepnumber + 1		
-			steps.append(XMLManualTestStep(stepnumber, title, validate, wrap, description))
+			try:
+				expectedResult = stepsNode.getElementsByTagName('expectedresult')[0].childNodes[0].data
+			except:
+				expectedResult = ""
+			stepnumber = stepnumber + 1
+			steps.append(XMLManualTestStep(stepnumber, title, validate, wrap, description, expectedResult))
 		return steps
 
+	def putSteps(self, steps):
+		stepsNodeList = self.root.getElementsByTagName('step')
+		for step in stepsNodeList:
+			self.root.removeChild(step)
+			step.unlink()
 
+		stepsNodeList = []
 
+		for step in range(len(steps)):
+			newStep = self.doc.createElement('step')
+			newDesc = self.doc.createElement('description')
+			newDesc.appendChild(self.doc.createCDATASection(""))
+			newStep.appendChild(newDesc)
+			newExp = self.doc.createElement('expectedresult')
+			newExp.appendChild(self.doc.createCDATASection(""))
+			newStep.appendChild(newExp)
+			self.root.appendChild(newStep)
+			stepsNodeList.append(newStep)
 
+			if steps[step].expectedResult == "\n": steps[step].expectedResult = ""
+
+			stepsNode = stepsNodeList[step]
+			stepsNode.setAttribute("title", steps[step].title)
+			stepsNode.setAttribute("validate", steps[step].validate)
+			stepsNode.setAttribute("wrap", steps[step].validate)
+			stepsNode.getElementsByTagName('description')[0].childNodes[0].data = steps[step].description
+			stepsNode.getElementsByTagName('expectedresult')[0].childNodes[0].data = steps[step].expectedResult
+
+	def writeXml(self):
+		f = open(self.xmlfile, 'w')
+		f.write(self.doc.toxml())
+		f.close()
