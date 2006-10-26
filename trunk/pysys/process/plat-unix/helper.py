@@ -124,11 +124,13 @@ class ProcessWrapper:
 		oldcwd = os.getcwd()
 		os.chdir(self.workingDir)
 
-		if self.state == FOREGROUND:
-		  	return self.startForegroundProcess()
-		else:
-		  	return self.startBackgroundProcess()
-		os.chdir(oldcwd)
+		try:
+			if self.state == FOREGROUND:
+				self.startForegroundProcess()
+			else:
+				self.startBackgroundProcess()
+		finally:
+			os.chdir(oldcwd)
 
 
 
