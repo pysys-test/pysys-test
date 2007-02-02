@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2.4
 import sys
 from pysys.launcher.console import ConsolePrintHelper
 
