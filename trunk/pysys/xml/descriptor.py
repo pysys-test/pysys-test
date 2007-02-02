@@ -28,19 +28,19 @@ log = logging.getLogger('pysys.xml.descriptor')
 DTD='''
 <!ELEMENT pysystest (description, classification?, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
-<!ELEMENT classification (suites?, modes?) >
+<!ELEMENT classification (groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
 <!ELEMENT traceability (requirements) >
 <!ELEMENT title (#PCDATA) >
 <!ELEMENT purpose (#PCDATA) >
-<!ELEMENT suites (suite)+ >
+<!ELEMENT groups (group)+ >
 <!ELEMENT modes (mode)+ >
 <!ELEMENT class EMPTY >
 <!ELEMENT input EMPTY >
 <!ELEMENT output EMPTY >
 <!ELEMENT reference EMPTY >
 <!ELEMENT requirements (requirement)+ >  
-<!ELEMENT suite (#PCDATA) >
+<!ELEMENT group (#PCDATA) >
 <!ELEMENT mode (#PCDATA) >
 <!ELEMENT requirement EMPTY >
 <!ATTLIST pysystest type (auto | manual ) "auto" >
@@ -65,9 +65,9 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
   </description>
 
   <classification>
-    <suites>
-      <suite>%s</suite>
-    </suites>
+    <groups>
+      <group>%s</group>
+    </groups>
   </classification>
 
   <data>
@@ -86,14 +86,14 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
 class XMLDescriptorContainer:
 	'''Holder class for the contents of a test descriptor.'''
 
-	def __init__(self, id, type, state, title, purpose, suites, modes, classname, module, input, output, reference, traceability):
+	def __init__(self, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
 		'''Class constructor.'''
 		self.id = id
 		self.type = type
 		self.state = state
 		self.title = title
 		self.purpose = purpose
-		self.suites = suites
+		self.groups = groups
 		self.modes = modes
 		self.classname = classname
 		self.module = module
@@ -113,7 +113,7 @@ class XMLDescriptorContainer:
 		for index in range(0, len(purpose)):
 			if index == 0: print purpose[index]
 			if index != 0: print "                   %s" % purpose[index] 
-		print "Test suites:       %s" % self.suites
+		print "Test groups:       %s" % self.groups
 		print "Test modes:        %s" % self.modes
 		print "Test classname:    %s" % self.classname
 		print "Test module:       %s" % self.module
@@ -128,18 +128,18 @@ class XMLDescriptorContainer:
 class XMLDescriptorCreator:
 	'''Helper class to create a test desriptor template.'''
 		
-	def __init__(self, file, type="auto", suite=DEFAULT_SUITE, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
+	def __init__(self, file, type="auto", group=DEFAULT_GROUP, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
 		'''Class constructor.'''
 		self.file=file
 		self.type = type
-		self.suite = suite
+		self.group = group
 		self.testclass = testclass
 		self.module = module
 	
 	def writeXML(self):
 		'''Write a test descriptor template to file.'''
 		fp = open(self.file, 'w')
-		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.suite, self.testclass, self.module))
+		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.group, self.testclass, self.module))
 		fp.close
 
 
@@ -177,7 +177,7 @@ class XMLDescriptorParser:
 		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
 		return XMLDescriptorContainer(self.getID(), self.getType(), self.getState(),
 										self.getTitle(), self.getPurpose(),
-										self.getsuites(), self.getModes(),
+										self.getgroups(), self.getModes(),
 										self.getClassDetails()[0],
 										os.path.join(self.dirname, self.getClassDetails()[1]),
 										os.path.join(self.dirname, self.getTestInput()),
@@ -248,18 +248,18 @@ class XMLDescriptorParser:
 				return ""
 			
 				
-	def getsuites(self):
-		'''Return a list of the suite names, contained in the character data of the suite elements.'''
+	def getgroups(self):
+		'''Return a list of the group names, contained in the character data of the group elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
 		if classificationNodeList == []:
 			raise Exception, "No <classification> element supplied in XML descriptor"
 		
-		suiteList = []
+		groupList = []
 		try:
-			suites = classificationNodeList[0].getElementsByTagName('suites')[0]
-			for node in suites.getElementsByTagName('suite'):
-				suiteList.append(node.childNodes[0].data)
-			return suiteList
+			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
+			for node in groups.getElementsByTagName('group'):
+				groupList.append(node.childNodes[0].data)
+			return groupList
 		except:
 			return []
 	

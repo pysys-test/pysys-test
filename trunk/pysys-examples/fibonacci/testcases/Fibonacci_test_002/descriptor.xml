@@ -17,9 +17,9 @@ perform multiple validations on the contents of the output file, to
   </description>
 
   <classification>
-    <suites>
-      <suite>Fibonacci examples</suite>
-    </suites>
+    <groups>
+      <group>Fibonacci examples</group>
+    </groups>
   </classification>
 
   <data>

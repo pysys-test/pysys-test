@@ -57,7 +57,7 @@ FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_DESCRIPTOR = 'descriptor.xml'
 DEFAULT_MODULE = 'run'
-DEFAULT_SUITE = "Test Suite"
+DEFAULT_GROUP = ""
 DEFAULT_TESTCLASS = 'PySysTest'
 DEFAULT_INPUT = "Input"
 DEFAULT_OUTPUT = "Output"

@@ -14,9 +14,9 @@ testcase validation to determine that the correct values are calculated.
   </description>
 
   <classification>
-    <suites>
-      <suite></suite>
-    </suites>
+    <groups>
+      <group></group>
+    </groups>
   </classification>
 
   <data>
