@@ -147,6 +147,7 @@ class ManualTester:
 			self.backButton.config(state=NORMAL)
 			self.failButton.pack(side=RIGHT, padx=5, pady=5)
 			self.multiButton.config(text="Pass")
+			self.failButton.config(text="Fail")
 			self.messageBoxDetails.insert(INSERT, self.steps[self.currentStep].description)
 			expectedResult = self.steps[self.currentStep].expectedResult
 			if expectedResult != "":
