@@ -67,14 +67,14 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 			else:
 				index = index + 1
 			
-	# trim down the list based on the include and exclude suites
+	# trim down the list based on the include and exclude groups
 	if len(excludes) != 0:
 		index = 0
 		while index != len(tests):
 			remove = FALSE
 
 			for exclude in excludes:
-				if exclude in tests[index].suites:
+				if exclude in tests[index].groups:
 					remove = TRUE
 					break
 
@@ -89,7 +89,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 			keep = FALSE
 				
 			for include in includes:
-				if include in tests[index].suites:
+				if include in tests[index].groups:
 					keep = TRUE
 					break
 
