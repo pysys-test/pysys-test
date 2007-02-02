@@ -11,7 +11,7 @@ tenth entry is equal to 34.
     </purpose>
   </description>
 
-  <classification testsuite="Fibonacci examples">
+  <classification>
     <groups/>
     <modes/>
   </classification>
