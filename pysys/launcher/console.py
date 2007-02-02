@@ -55,7 +55,7 @@ class ConsolePrintHelper:
 		self.includes = []
 		self.excludes = []
 		self.tests = None
-		self.optionString = 'hfsrm:a:t:i:e:'
+		self.optionString = 'hfgrm:a:t:i:e:'
 		self.optionList = ["help","full","groups","requirements","mode=","type=","trace=","include=","exclude="] 
 		
 
@@ -65,7 +65,7 @@ class ConsolePrintHelper:
 		print "    where options include;"
 		print "       -h | --help                 print this message"
 		print "       -f | --full                 print full information"
-		print "       -s | --groups               print test groups defined"
+		print "       -g | --groups               print test groups defined"
 		print "       -r | --requirements         print test requirements covered"
 		print "       -m | --mode      STRING     print tests that run in user defined mode "
 		print "       -a | --type      STRING     print tests of supplied type (auto or manual, default all)"
@@ -103,7 +103,7 @@ class ConsolePrintHelper:
 			elif option in ("-f", "--full"):
 				self.full = TRUE
 				
-			if option in ("-s", "--groups"):
+			if option in ("-g", "--groups"):
 				self.groups = TRUE
 			
 			if option in ("-r", "--requirements"):
