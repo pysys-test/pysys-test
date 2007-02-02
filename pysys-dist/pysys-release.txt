@@ -1,4 +1,4 @@
-PySys 0.2.1 Release Notes
+PySys 0.2.2 Release Notes
 =========================
 
 This is an early ALPHA release of the software for development purposes. The software 
@@ -12,13 +12,10 @@ Hammond. The extensions can be downloaded from http://sourceforge.net/projects/p
 
 What's new in this release
 --------------------------
-- The Manual Tester has been updated to support the <expectedresult> element in the 
-  input xml file. This allows display of the expected result for a manual step to 
-  be presented in the user interface. The ability to optionally record a defect in 
-  the log output is also now included.
-- The createDescriptors method has been removed from the pysys.launcher.console 
-  package and moved into pysys.launcher. This allows the utility method to be 
-  used for other custom launchers.
+- The suites element in the test descriptor has been renamed to groups. This is to 
+  allow testcases in a single directory to be classified as a single testsuite, and 
+  subsets thereof to be regarded as a group
+- Minor bug fixes to the manual tester and process module
 
 
 Installation
@@ -60,6 +57,16 @@ in the testcases directory use
 
 Release History
 ---------------
+0.2.0 to 0.2.1
+--------------
+- The Manual Tester has been updated to support the <expectedresult> element in the 
+  input xml file. This allows display of the expected result for a manual step to 
+  be presented in the user interface. The ability to optionally record a defect in 
+  the log output is also now included.
+- The createDescriptors method has been removed from the pysys.launcher.console 
+  package and moved into pysys.launcher. This allows the utility method to be 
+  used for other custom launchers.
+
 0.1.7 to 0.2.0
 --------------
 - This release includes updates to the Python doc strings for automated generation of 
