@@ -261,7 +261,7 @@ class BaseRunner:
 
 			# send the results for this cycle to the result writers
 			if self.record:
-				writer = LogFileResultsWriter("foobar.log")
+				writer = LogFileResultsWriter("%s.log" % self.outsubdir)
 				writer.writeResults(results=results[cycle])
 				for writer in writers: writer().writeResults(results=results[cycle])
 
