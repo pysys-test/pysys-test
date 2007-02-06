@@ -34,8 +34,18 @@ class LogFileResultsWriter:
 	"""Class to log results to a logfile in the current directory."""
 	
 	def __init__(self, logfile):
+		self.logfile = logfile
+		self.fp = None
+
+	def setup(self):
 		try:
-			self.fp = open(logfile, "a", 0)
+			self.fp = open(self.logfile, "w", 0)
+		except:
+			pass
+
+	def cleanup(self):
+		try:
+			if self.fp: close(self.fp)
 		except:
 			pass
 			

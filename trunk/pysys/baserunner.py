@@ -25,13 +25,13 @@ from pysys import rootLogger
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.basetest import BaseTest
-from pysys.writer import LogFileResultsWriter
 
 log = logging.getLogger('pysys.baserunner')
 log.setLevel(logging.NOTSET)
 
 
 class BaseRunner:
+
 	def __init__(self, record, purge, cycle, mode, outsubdir, descriptors, xargs):
 		self.record = record
 		self.purge = purge
@@ -261,10 +261,10 @@ class BaseRunner:
 
 			# send the results for this cycle to the result writers
 			if self.record:
-				writer = LogFileResultsWriter("%s.log" % self.outsubdir)
-				writer.writeResults(results=results[cycle])
-				for writer in writers: writer().writeResults(results=results[cycle])
-
+				for writer in writers:
+					writer.setup()
+					writer.writeResults(results=results[cycle])
+					writer.cleanup()
 			
 		# log the summary output to the console
 		if printSummary:
