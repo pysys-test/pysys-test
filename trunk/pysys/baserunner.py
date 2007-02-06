@@ -262,9 +262,12 @@ class BaseRunner:
 			# send the results for this cycle to the result writers
 			if self.record:
 				for writer in writers:
-					writer.setup()
-					writer.writeResults(results=results[cycle])
-					writer.cleanup()
+					try:
+						writer.setup()
+						writer.writeResults(results=results[cycle])
+						writer.cleanup()
+					except:
+						log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 		# log the summary output to the console
 		if printSummary:
