@@ -234,7 +234,10 @@ class BaseRunner:
 				
 				# call the hook for end of test execution
 				self.testComplete(testObj, outputDirectory)
-				del sys.modules["%s" % os.path.basename(descriptor.module)]
+				try:
+					del sys.modules["%s" % os.path.basename(descriptor.module)]
+				except:
+					pass
 				del testObj
 
 				# remove the run logger handler
