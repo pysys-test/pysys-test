@@ -181,43 +181,25 @@ class ConsoleMakeTestHelper:
 
 	def printUsage(self):
 		print "PySys System Test Framework (version %s)" % __version__ 
-		print "\nUsage: %s [option]+" % os.path.basename(sys.argv[0])
-		print "   where the [option] includes;"
+		print "\nUsage: %s [option]+ [testid]" % os.path.basename(sys.argv[0])
+		print "   where [option] includes;"
 		print "       -h | --help                 print this message"
-		print "       -n | --nextid               use the next available test id"
-		print "       -t | --testid   STRING      the test id to create"
-		print "       -a | --type     STRING      set the test type (auto or manual, default is auto)"
+		print "       -t | --type     STRING      set the test type (auto or manual, default is auto)"
 		print ""
-		print "You must either select the -n flag to create a test with the next availabe id"
-		print "or specify the testcase id manually using -t STRING"
+		print "   and where [testid] is the mandatory test identifier."
 		sys.exit()
 
 
 	def parseArgs(self, args):
 		try:
-			optlist, arguments = getopt.getopt(args, 'hnt:a:', ["help","nextid","testid=","type="] )
+			optlist, arguments = getopt.getopt(args, 'ht:', ["help","type="] )
 		except:
 			print "Error parsing command line arguments: %s" % (sys.exc_info()[1])
 			self.printUsage()
-
-		if optlist == []:
-			print "Error - you must supply either the -n or -t option to %s ..." % os.path.basename(sys.argv[0])
-			self.printUsage()
-			sys.exit()
 			
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage()
-
-			elif option in ("-n", "--nextid"):
-				self.testId = self.getNextId()				  
-				
-			elif option in ("-t", "--testid"):
-				try:
-					self.testId = value
-				except:
-					print "A valid string must be supplied"
-					self.printUsage()
 
 			elif option in ("-a", "--type"):
 				self.type = value
@@ -225,18 +207,13 @@ class ConsoleMakeTestHelper:
 					log.warn("Unsupported test type - valid types are auto and manual")
 					sys.exit(1)					
 
+		if arguments == []:
+			print "A valid string test id must be supplied"
+			self.printUsage()
+		else:
+			self.testId = arguments[0]
+
 		return self.testId
-
-
-	def getNextId(self):
-		testids = glob.glob(r'%s/[a-zA-Z0-9_]*_[0-9]*' % (self.workingDir))
-		testids.sort()
-		
-		if not testids: return None
-		match = re.match('(?P<base>[a-zA-Z0-9_]*_)(?P<number>[0-9]*)', os.path.basename(testids.pop()))
-		base = match.group('base')
-		number = int(match.group('number')) + 1
-		return base + str(number).rjust(3, "0")
 
 
 	def makeTest(self, input=None, output=None, reference=None, descriptor=None, testclass=None, module=None,
