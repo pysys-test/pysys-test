@@ -134,12 +134,15 @@ class ManualTester:
 			self.messageBoxDetails.insert(INSERT, self.owner.descriptor.purpose)
 			self.titleBox.config(text="Title - %s" % self.owner.descriptor.title)
 		elif self.currentStep == len(self.steps):
-			self.multiButton.config(text="Finish")
+			self.multiButton.config(text="Finish")		
+			failure = 0
 			for key in self.results.keys():
-				if self.results[key] == 0:
+				if self.results[key] == 0: failure = 1
+				if failure == 1:
 					self.failButton.pack(side=RIGHT, padx=5, pady=5)
 					self.failButton.config(text="Record defect")
-					break
+				else:
+					self.failButton.forget()
 			self.containerExpected.forget()
 			self.messageBoxDetails.insert(INSERT, self.reportToString())
 			self.titleBox.config(text="Test Complete - Summary Report")
