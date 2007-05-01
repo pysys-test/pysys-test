@@ -483,7 +483,7 @@ class BaseTest:
 		returns to the caller.
 		
 		@param basename: The full path to the file to check for the regular expression
-		@param exp: The regular expression to search for in the text file
+		@param expr: The regular expression to search for in the text file
 		@param condition: The condition to be met for the number of lines matching the regular expression
 		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
