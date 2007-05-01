@@ -31,8 +31,9 @@ def get_site_packages_path():
 	else:
 		return os.path.join("lib", "python%s" % sys.version[:3], "site-packages")
 
-docfiles = ['pysys-doc/epydoc.css', 'pysys-doc/epydoc.js']
-docfiles.extend(glob.glob('pysys-doc/*.html'))
+docfiles = ['pysys-doc/epydoc.css', 'pysys-doc/index.html']
+docfiles.extend(glob.glob('pysys-doc/private/*.*'))
+docfiles.extend(glob.glob('pysys-doc/public/*.*'))
 
 releasenotes = ['pysys-dist/pysys-release.txt']
 
