@@ -44,7 +44,8 @@ log.setLevel(logging.NOTSET)
 
 
 class ConsolePrintHelper:
-	def __init__(self):
+	def __init__(self, workingDir):
+		self.workingDir = workingDir
 		self.arguments = []
 		self.full = FALSE
 		self.groups = FALSE
@@ -129,7 +130,7 @@ class ConsolePrintHelper:
 
 
 	def printTests(self):
-		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace)		
+		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
 
 		exit = 0
 		if self.groups == TRUE:
@@ -253,7 +254,8 @@ class ConsoleMakeTestHelper:
 
 
 class ConsoleLaunchHelper:
-	def __init__(self):
+	def __init__(self, workingDir):
+		self.workingDir = workingDir
 		self.arguments = []
 		self.record = FALSE
 		self.purge = FALSE
@@ -369,14 +371,7 @@ class ConsoleLaunchHelper:
 				  exec("self.userOptions['%s'] = '%s'" % (value.split('=')[0], value.split('=')[1]) )
 				if EXPR2.search(value) != None:
 					exec("self.userOptions['%s'] = %d" % (value, TRUE))
-
-
-	def runTests(self, runner, printSummary=TRUE, writers=[]):
-		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace)
-		r = runner(self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions)
-		r.start(printSummary, writers)
-		r.cleanup()
+			
+		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
+		return self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions
 		
-
-
-

@@ -102,10 +102,7 @@ class ManualTester:
 			self.doStep()
 
 	def failPressed(self):
-		if self.currentStep == len(self.steps):	
-			self.addDefect()
-			return
-		elif self.currentStep >= 0:
+		if self.currentStep >= 0:
 			self.results[self.currentStep] = 0
 			self.currentStep = self.currentStep + 1
 			self.doStep()
@@ -135,14 +132,6 @@ class ManualTester:
 			self.titleBox.config(text="Title - %s" % self.owner.descriptor.title)
 		elif self.currentStep == len(self.steps):
 			self.multiButton.config(text="Finish")		
-			failure = 0
-			for key in self.results.keys():
-				if self.results[key] == 0: failure = 1
-				if failure == 1:
-					self.failButton.pack(side=RIGHT, padx=5, pady=5)
-					self.failButton.config(text="Record defect")
-				else:
-					self.failButton.forget()
 			self.containerExpected.forget()
 			self.messageBoxDetails.insert(INSERT, self.reportToString())
 			self.titleBox.config(text="Test Complete - Summary Report")
@@ -164,25 +153,6 @@ class ManualTester:
 				self.failButton.forget()
 		self.messageBoxDetails.config(state=DISABLED)
 		self.messageBoxExpected.config(state=DISABLED)
-			
-	def addDefect(self):
-		self.dlg = Toplevel()
-		self.dlg.wm_resizable(0,0)
-		self.dlg.title("PySys - Defect Entry")
-		self.dlgLabel = Label(self.dlg, text="Please enter an identifier for this defect:", font=("Verdana 9 bold"), padx=8)
-		self.dlgLabel.pack(side=TOP, padx=5, pady=5)
-		self.dlgTextField = Entry(self.dlg, width=50)
-		self.dlgTextField.pack(pady=5, padx=5)
-		self.dlgSaveButton = Button(self.dlg, text="Save", command=self.dlgSavePressed, pady=5, padx=5, font=("Verdana 9 bold"), default=ACTIVE)
-		self.dlgSaveButton.pack(side=RIGHT, padx=5, pady=5)
-		self.dlgNoButton = Button(self.dlg, text="Cancel", command=self.dlgNoPressed, pady=5, padx=5, font=("Verdana 9 bold"))
-		self.dlgNoButton.pack(side=LEFT, padx=5, pady=5)
-		self.dlg.focus_set()
-		self.dlg.grab_set()
-		self.dlg.transient(self.parentContainer)
-		self.dlg.wait_window(self.dlg)
-		self.dlg.destroy()
-		self.doStep()
 
 	def dlgSavePressed(self):
 		self.defect = self.dlgTextField.get()
