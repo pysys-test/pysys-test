@@ -31,8 +31,38 @@ log.setLevel(logging.NOTSET)
 
 
 class BaseRunner:
+	"""The base class for executing a set of PySys testcases.
 
+	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
+	with a list of L{pysys.xml.descriptor.XMLDescriptorContainer} objects detailing the set of testcases to be run. 
+	The runner iterates through the descriptor list and for each entry imports the L{pysys.basetest.BaseTest}
+	class for the testcase, creates an instance of the test class and then calls the setup(), execute(), validate() 
+	and cleanup() methods of the test class instance. The runner is responsible for ensuring the output 
+	subdirectory of each testcase is purged prior to test execution to remove stale output from a previous run, 
+	detects any core files produced during execution of a testcase from processes started via the L{pysys.process} 
+	module, and performs audit trail logging of the test results on completion of running a set of testcases.
+	
+	The runner contains the hook functions L{setup()}, L{testComplete()}, L{cycleComplete} and L{cleanup} to 
+	allow a subclass to perform custom operations prior to the execution of a set of testcases, between the 
+	execution of each testcase in a set, between each cycle of execution of a set of testcases, and on completion 
+	of all testcases respectively. Subclasses are typically used should some global conditions need to be setup 
+	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
+	etc), and subsequently cleaned up after test execution. 
+	   
+	"""
+	
 	def __init__(self, record, purge, cycle, mode, outsubdir, descriptors, xargs):
+		"""Create an instance of the BaseRunner class.
+		
+		@param record: Indicates if the test results should be recorded 
+		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
+		@param cycle: The number of times to execute the set of requested testcases
+		@param mode: The user defined mode to run the testcases in
+		@param outsubdir: The name of the output subdirectory
+		@param descriptors: List of L{pysys.xml.descriptor.XMLDescriptorContainer} detailing the testcases to be run
+		@param: xargs: The dictionary of additional arguments to be set as data attributes to the class
+		
+		"""
 		self.record = record
 		self.purge = purge
 		self.cycle = cycle
@@ -44,14 +74,26 @@ class BaseRunner:
 
 
 	def setKeywordArgs(self, xargs):
+		"""Set the xargs as data attributes of the class.
+				
+		Values in the xargs dictionary are set as data attributes using the builtin C{setattr()} method. 
+		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
+		form C{self.foo} with C{value bar}. 
+		
+		@param xargs: A dictionary of the user defined extra arguments
+		
+		"""
 		for key in xargs.keys():
-			try:
-				exec("self.%s = xargs['%s']" % (key, key))
-			except:
-				pass
+			setattr(self, key, xargs[key])
 
 
 	def purgeDirectory(self, dir, delTop=FALSE):
+		"""Recursively purge a directory removing all files and sub-directories.
+		
+		@param dir: The top level directory to be purged
+		@param delTop: Indicates if the top level directory should also be deleted
+		
+		"""
 		for file in os.listdir(dir):
 		  	path = os.path.join(dir, file)
 		  	if PLATFORM in ['sunos', 'linux']:
@@ -70,6 +112,12 @@ class BaseRunner:
 
 
 	def detectCore(self, dir):
+		"""Detect any core files in a directory (unix systems only), returning C{TRUE} if a core is present.
+		
+		@param dir: The directory to search for core files
+		@return: C{TRUE} if a core detected, None if no core detected
+		@rtype: integer 
+		"""
 		for file in os.listdir(dir):
 			path = os.path.join(dir, file)
 			mode = os.stat(path)[stat.ST_MODE]
@@ -79,10 +127,26 @@ class BaseRunner:
 
 
 	def setup(self):
+		"""Setup method which may optionally be overridden to perform custom setup operations prior to execution of a set of testcases.
+		
+		"""
 		pass
 
 
 	def testComplete(self, testObj, dir):
+		"""Test complete method which performs completion actions after execution of a testcase.
+		
+		The testComplete method performs purging of the output subdirectory of a testcase on completion 
+		of the test execution. Purging involves removing all files with a zero file length in order to 
+		only include files with content of interest. Should C{self.purge} be set, the purging will remove
+		all files (excluding the run.log) on a C{PASSED} outcome of the testcase in order to reduce the 
+		on-disk memory footprint when running a large number of tests. Should a custom testComplete for 
+		a subclass be required, the BaseRunner testComplete method should first be called.
+		
+		@param testObj: Reference to the L{pysys.basetest.BaseTest} instance of the test just completed
+		@param dir: The directory to perform the purge on
+				
+		"""
 		if self.purge:
 			removeNonZero = TRUE
 			for outcome in testObj.outcome:
@@ -110,14 +174,33 @@ class BaseRunner:
 
 
 	def cycleComplete(self):
+		"""Cycle complete method which may optionally be overridden to perform custom operations between the repeated execution of a set of testcases.
+		
+		"""
 		pass
 
 
 	def cleanup(self):
+		"""Cleanup method which may optionally be overridden to perform custom cleanup operations after execution of all testcases.
+		
+		"""
+		
 		pass
 
 
 	def start(self, printSummary=TRUE, writers=[]):
+		"""Start the execution of a set of testcases, returning a dictionary of the testcase outcomes.
+		
+		The start method is the main method for executing the set of requested testcases. The set of testcases 
+		are executed a number of times determined by the C{self.cycle} attribute. When executing a testcase 
+		all output from the execution is saved in the testcase output subdirectory; should C{self.cycle} be 
+		set to more than 1, the output subdirectory is further split into cycle[n] directories to sandbox the 
+		output from each iteration.
+		
+		@param printSummary: Indicates if the test results should be reported on test completion
+		@param writers: List of writers for test results audit reporting
+		
+		"""
 		results = {}
 		totalDuration = 0
 		
@@ -292,6 +375,8 @@ class BaseRunner:
 						for outcome in FAILS:
 							for test in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], test)
 
+		# call the hook to cleanup after running tests
+		self.cleanup()
 
 		# return the results dictionary
 		return results
