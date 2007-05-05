@@ -1,11 +1,11 @@
 """PySys System Test Framework.
 
-PySys has been designed using OO techniques to provide a generic extensible framework for the organisation and execution of 
-system level testcases. It provides a clear abstraction of what a testcases is, how it is structured on disk, how it is executed 
-and validated, and how the outcome is reported for test auditing purposes. 
+PySys has been designed to provide a generic extensible framework for the organisation and execution of system level testcases. 
+It provides a clear model of what a testcases is, how it is structured on disk, how it is executed and validated, and how the 
+outcome is reported for test auditing purposes. 
 
 Testcases are instances of a base test class (L{pysys.basetest.BaseTest}) which provides core functionality for cross platform 
-process management and monitoring; in this manner an application under test (AUT) can be started and manipulated directly 
+process management and manipulation; in this manner an application under test (AUT) can be started and manipulated directly 
 within the testcase. The base test class additionally provides a set of standard validation techniques based predominantly 
 on regular expression matching within text files (e.g. stdout, logfile of the AUT etc). Testcases are executed through a base 
 runner (L{pysys.baserunner.BaseRunner}) which provides the mechanism to control testcase flow and auditing. In both cases the 
@@ -14,8 +14,8 @@ of AUT manipulation, tear up and tear down prior to executing a set of testcases
 
 PySys allows automated regression testcases to be built rapidly. Where an AUT cannot be tested in an automated fashion, testcases 
 can be written to make use of a manual test user interface application (L{pysys.manual.ui.ManualTester}) which allows the steps 
-required to execute the test to be presented to a tester in a clear and navigable manner. The tight integration of both manual and 
-automated testcases provides a single system for all test organisation requirements. 
+required to execute the test to be presented to a tester in a concise and navigable manner. The tight integration of both manual 
+and automated testcases provides a single framework for all test organisation requirements. 
 
 """
 
@@ -36,7 +36,6 @@ __version__ = "0.2.2"
 
 __date__    = "01 May 2007"
 """The date of this release."""
-
 __all__     = [ "constants",
                 "exceptions",
                 "baserunner",

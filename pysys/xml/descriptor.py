@@ -84,10 +84,26 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
 
 
 class XMLDescriptorContainer:
-	'''Holder class for the contents of a test descriptor.'''
+	"""Holder class for the contents of a testcase descriptor. """
 
 	def __init__(self, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
-		'''Class constructor.'''
+		"""Create an instance of the XMLDescriptorContainer class.
+		
+		@param id: The testcase identifier
+		@param type: The type of the testcase (automated or manual)
+		@param state: The state of the testcase (runable, deprecated or skipped)
+		@param title: The title of the testcase
+		@param purpose: The purpose of the testcase
+		@param groups: A list of the user defined groups the testcase belongs to
+		@param modes: A list of the user defined modes the testcase can be run in
+		@param classname: The classname of the testcase
+		@param module: The full path to the python module containing the testcase class
+		@param input: The full path to the input directory of the testcase
+		@param output: The full path to the output parent directory of the testcase
+		@param reference: The full path to the reference directory of the testcase
+		@param traceability: A list of the requirements covered by the testcase
+		
+		"""
 		self.id = id
 		self.type = type
 		self.state = state
@@ -103,26 +119,32 @@ class XMLDescriptorContainer:
 		self.traceability = traceability
 
 		
-	def toString(self):
-		print "Test id:           %s" % self.id
-		print "Test type:         %s" % self.type
-		print "Test state:        %s" % self.state
-		print "Test title:        %s" % self.title
-		print "Test purpose:     ",
+	def __str__(self):
+		"""Return an informal string representation of the xml descriptor container object
+		
+		@return: The string represention
+		@rtype: string
+		"""
+		
+		str=    "Test id:           %s\n" % self.id
+		str=str+"Test type:         %s\n" % self.type
+		str=str+"Test state:        %s\n" % self.state
+		str=str+"Test title:        %s\n" % self.title
+		str=str+"Test purpose:     "
 		purpose = self.purpose.split('\n')
 		for index in range(0, len(purpose)):
-			if index == 0: print purpose[index]
-			if index != 0: print "                   %s" % purpose[index] 
-		print "Test groups:       %s" % self.groups
-		print "Test modes:        %s" % self.modes
-		print "Test classname:    %s" % self.classname
-		print "Test module:       %s" % self.module
-		print "Test input:        %s" % self.input
-		print "Test output:       %s" % self.output
-		print "Test reference:    %s" % self.reference
-		print "Test traceability: %s" % self.traceability
-		print ""
-
+			if index == 0: str=str+"%s\n" % purpose[index]
+			if index != 0: str=str+"                   %s\n" % purpose[index] 
+		str=str+"Test groups:       %s\n" % self.groups
+		str=str+"Test modes:        %s\n" % self.modes
+		str=str+"Test classname:    %s\n" % self.classname
+		str=str+"Test module:       %s\n" % self.module
+		str=str+"Test input:        %s\n" % self.input
+		str=str+"Test output:       %s\n" % self.output
+		str=str+"Test reference:    %s\n" % self.reference
+		str=str+"Test traceability: %s\n" % self.traceability
+		str=str+""
+		return str
 
 
 class XMLDescriptorCreator:
@@ -343,7 +365,7 @@ if __name__ == "__main__":
 	
 	if sys.argv[1] == "parse":
 		parser = XMLDescriptorParser(sys.argv[2])
-		parser.getContainer().toString()
+		print parser.getContainer()
 		parser.unlink()
 
 	elif sys.argv[1] == "create":

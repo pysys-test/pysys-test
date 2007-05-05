@@ -170,7 +170,7 @@ class ConsolePrintHelper:
 				print "=========================================="
 				print "		" + descriptor.id
 				print "=========================================="
-				descriptor.toString()
+				print descriptor
 
 
 

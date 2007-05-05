@@ -49,17 +49,26 @@ class %s(%s):
 
 
 class BaseTest:
-	"""The base class for all PySys test classes.
+	"""The base class for all PySys testcases.
 
-	BaseTest is the parent class of all PySys system tests, and should be subclassed to provide 
-	an implementation of the L{execute()} method. Additional L{setup()}, L{cleanup()} and L{validate()}
-	methods provide the ability to perform custom setup and cleanup actions for a particual test, and to 
-	perform all validation steps in a single method should this prove logically more simple.
+	BaseTest is the parent class of all PySys system testcases. The class provides utility functions for 
+	cross-platform process management and manipulation, test timing, and test validation. Any PySys testcase 
+	should inherit from the base test and provide an implementation of the abstract L{execute()} method 
+	defined in this class. Child classes can also overide the L{setup()}, L{cleanup()} and L{validate()} 
+	methods of the class to provide custom setup and cleanup actions for a particual test, and to perform 
+	all validation steps in a single method should this prove logically more simple.
 	
-	The class provides utility functions for process management, test timing and test validation. 
-	Validation of the test can be performed multiple times through the C{assert*} functions, building 
-	up an internal data structure storing the individual validation outcomes. The overall outcome of 
-	the test is determined using a precedence order of the individual outcomes. 
+	Execution of a PySys testcases is performed through an instance of the L{pysys.baserunner.BaseRunner}
+	class, or a subclass thereof. The base runner instantiates an instance of the testcase, and then calls 
+	the C{setup}, C{execute}, C{validate} and C{cleanup} methods of the instance. All processes started during 
+	the test execution are reference counted within the base test, and terminated within the C{cleanup} method.
+	
+	Validation of the testcase is through the C{assert*} methods. Execution of each method appends an outcome
+	to an internal data structure thus building up a record of the individual validation outcomes. Several 
+	potential outcomes are supported by the PySys framework (C{SKIPPED}, C{BLOCKED}, C{DUMPEDCORE}, C{TIMEDOUT}, 
+	C{FAILED}, C{NOTVERIFIED}, and C{PASSED}) and the overall outcome of the testcase is determined using a
+	precedence order of the individual outcomes.
+
 	"""
 
 	def __init__ (self, descriptor, outsubdir, mode, xargs):
