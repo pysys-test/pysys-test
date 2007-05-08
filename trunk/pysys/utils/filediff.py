@@ -29,6 +29,17 @@ log = logging.getLogger('pysys.utils.filediff')
 
 
 def trimContents(contents, expressions, exclude=TRUE):
+	"""Reduce a list of strings based by including/excluding lines which match a set of regular expressions, returning the processed list.
+	
+	The method reduces an input list of strings based on whether each string matches or does not match a 
+	list of regular expressions.
+	
+	@param contents: The input list of strings to trim based on matches to regular expressions
+	@param expressions: The input list of regular expressions
+	@param exclude: If true matches to the regular expressions exclude the line, if false matches include the line
+	@return: The processed list
+	@rtype: list
+	"""
 	if len(expressions) == 0:
 		return contents
 	
@@ -48,6 +59,17 @@ def trimContents(contents, expressions, exclude=TRUE):
 
 
 def replace(list, replacementList):
+	"""Replace all occurrences of keyword values in a list of strings with a set value, returning the processed list.
+	
+	The replacementList parameter should contain a list of tuples to use in the replacement, e.g. 
+	[('foo', 'bar'), ('swim', 'swam')].
+	
+	@param list: The input list of strings to performed the replacement on
+	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value
+	@return: The processed list
+	@rtype: list
+	
+	"""
 	for pair in replacementList:
 		regexp = re.compile(pair[0])
 		for j in range(0, len(list)):
@@ -58,6 +80,10 @@ def replace(list, replacementList):
 
 
 def logContents(message, list):
+	"""Log a list of strings, prepending the line number to each line in the log output.
+	
+	@param list: The list of strings to log
+	"""
 	count = 0
 	log.debug(message)
 	for line in list:
@@ -67,6 +93,23 @@ def logContents(message, list):
 
 
 def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[]):
+	"""Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.
+	
+	The method allows for preprocessing of the input files to trim down the files prior to the comparison 
+	being performed. Preprocessing is either to remove lines from the files which match a set of regular 
+	expressions, include only lines which match a set of regular expressions, replace certain keywords in 
+	the input files with a set value (e.g. to replace time stamps etc), or to sort the files before the 
+	comparison. Verbose logging of the method occurs at DEBUG level. 
+	
+	@param file1: The full path to the first file to use in the comparison
+	@param file2: The full path to the second file to use in the comparison
+	@param ignore: A list of regular expressions which remove matching lines in the input files before making the comparison
+	@param sort: Boolean to sort the input file contents before making the comparison
+	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input files before making the comparison
+	@param include: A list of regular expressions used to select lines from the input files to use in the comparison. 
+	@return: true|false
+	@rtype: integer
+	"""
 	for file in file1, file2:
 		if not os.path.exists(file):
 			raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
@@ -81,9 +124,6 @@ def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[])
 		f = open(file2, 'r')
 		for i in f.readlines(): list2.append(string.strip(i))
 		f.close()
-
-		#logContents("Contents of %s before pre-processing;" % file1, list1)
-		#logContents("Contents of %s before pre-processing;" % file2, list2)
 		
 		list1 = trimContents(list1, ignore, exclude=TRUE)
 		list2 = trimContents(list2, ignore, exclude=TRUE)
