@@ -29,7 +29,7 @@ log = logging.getLogger('pysys.utils.filediff')
 
 
 def trimContents(contents, expressions, exclude=TRUE):
-	"""Reduce a list of strings based by including/excluding lines which match a set of regular expressions, returning the processed list.
+	"""Reduce a list of strings based by including/excluding lines which match any of a set of regular expressions, returning the processed list.
 	
 	The method reduces an input list of strings based on whether each string matches or does not match a 
 	list of regular expressions.
@@ -95,19 +95,22 @@ def logContents(message, list):
 def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[]):
 	"""Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.
 	
-	The method allows for preprocessing of the input files to trim down the files prior to the comparison 
-	being performed. Preprocessing is either to remove lines from the files which match a set of regular 
-	expressions, include only lines which match a set of regular expressions, replace certain keywords in 
-	the input files with a set value (e.g. to replace time stamps etc), or to sort the files before the 
-	comparison. Verbose logging of the method occurs at DEBUG level. 
+	The method reads in the files and loads the contents of each as a list of strings. The two files are 
+	said to be equal if the two lists are equal. The method allows for preprocessing of the string lists 
+	to trim down their contents prior to the comparison being performed. Preprocessing is either to remove 
+	entries from the lists which match any entry in a set of regular expressions, include only lines which 
+	match any entry in a set of regular expressions, replace certain keywords in the string values of each list
+	with a set value (e.g. to replace time stamps etc), or to sort the lists before the comparison (e.g. where 
+	determinism may not exist). Verbose logging of the method occurs at DEBUG level showing the contents of the 
+	processed lists prior to the comparison being performed.  
 	
 	@param file1: The full path to the first file to use in the comparison
 	@param file2: The full path to the second file to use in the comparison
-	@param ignore: A list of regular expressions which remove matching lines in the input files before making the comparison
+	@param ignore: A list of regular expressions which remove entries in the input file contents before making the comparison
 	@param sort: Boolean to sort the input file contents before making the comparison
-	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input files before making the comparison
-	@param include: A list of regular expressions used to select lines from the input files to use in the comparison. 
-	@return: true|false
+	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison
+	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
+	@return: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
 	@rtype: integer
 	"""
 	for file in file1, file2:
