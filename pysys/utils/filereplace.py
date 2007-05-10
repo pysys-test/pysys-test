@@ -23,8 +23,28 @@ import os.path, sys, string
 
 from pysys.exceptions import *;
 
+def replace(input, output, dict={}):
+	"""Read an input file, and write to output tailoring the file to replace set keywords with values.
 
-def replace(input, output, dict={}, marker='$'):
+	The replace method reads in the contents of the input file line by line, checks for matches in 
+	each line to the keys within the dict input parameter, and replaces that key with the value of 
+	the key in the dict parameter when writing the contents to the output file. For instance, for 
+	dict of the form C{{'$CATSEAT$':'mat', '$DOGSEAT$':'hat'}} with an input file::
+	
+	  The cat sat on the $CATSEAT$
+	  The dog sat on the $DOGSEAT$
+	  
+	the ouptut file produced would have the contents::
+	  
+	  The cat sat on the mat
+	  The dog sat on the hat
+
+	@param input: The full path to the input file
+	@param output: The full path to the output file
+	@param dict: A dictionary of key/value pairs to use in the replacement
+	@raises FileNotFoundException: Raised if the input file does not exist
+	
+	"""
 	if not os.path.exists(input):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(input))
 	else:

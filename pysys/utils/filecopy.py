@@ -41,8 +41,12 @@ def filecopy(src, dst):
 	
 	@param src: Full path to the source filename
 	@param dst: Full path the destination filename
+ 	@raises FileNotFoundException: Raised if the source file does not exist
  
 	"""
+	if not os.path.exists(src):
+		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(src))
+	
 	fsrc = None
 	fdst = None
 	try:

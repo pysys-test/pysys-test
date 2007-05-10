@@ -32,6 +32,7 @@ def filegrep(file, expr):
 	@param expr: The regular expression (uncompiled) to search for in the input file
 	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
 	@rtype: integer
+	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
 	if not os.path.exists(file):
@@ -66,7 +67,8 @@ def orderedgrep(file, exprList):
 	@param exprList: A list of regular expressions (uncompiled) to search for in the input file
 	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
 	@rtype: integer
-	
+	@raises FileNotFoundException: Raised if the input file does not exist
+		
 	"""
 	list = copy.deepcopy(exprList)
 	list.reverse();
