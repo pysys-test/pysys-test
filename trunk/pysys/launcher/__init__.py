@@ -1,4 +1,5 @@
-__all__ = [ "console" ]
+__all__ = [ "createDescriptors",
+			"console" ]
 
 import sys, os, os.path, glob, getopt, sets, re, string, logging
 
@@ -12,6 +13,19 @@ log.setLevel(logging.NOTSET)
 
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
+	"""Create a list of descriptor objects representing a set of tests to run, returning the list.
+	
+	@param testIdSpecs: A string specifier for a set of testcase identifiers
+	@param type: The type of the tests to run (manual | auto)
+	@param includes: A list of test groups to include in the returned set
+	@param excludes: A list of test groups to exclude in the returned set
+	@param trace: A list of requirements to indicate tests to include in the returned set
+	@param dir: The parent directory to search for runnable tests
+	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
+	@rtype: list
+	@raises Exception: Raised if not testcases can be found or are returned by the requested input parameters
+	
+	"""
 	descriptors = []
 	descriptorfiles = []
 	ignoreSet = sets.Set(OSWALK_IGNORES)

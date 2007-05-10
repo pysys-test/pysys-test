@@ -112,6 +112,8 @@ def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[])
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
 	@return: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
 	@rtype: integer
+	@raises FileNotFoundException: Raised if either of the files do not exist
+
 	"""
 	for file in file1, file2:
 		if not os.path.exists(file):

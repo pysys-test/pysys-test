@@ -25,6 +25,19 @@ from pysys.exceptions import *;
 
 
 def linecount(file, regexpr=None):
+	"""Count the number of lines in an input file matching a regular expression, return the count.
+	
+	If the input regular expression is set to None, the method returns a count of the 
+	number of lines in the input file. The regular expression should be passed in as 
+	a string, i.e. C{"[a-z]_foo.*"} etc.
+	
+	@param file: The full path to the input file
+	@param regexpr: The regular expression used for counting matches
+	@return: The number of matching lines in the input file
+	@rtype: integer
+	@raises FileNotFoundException: Raised if the input file does not exist
+	
+	"""
 	count = 0
 
 	if not os.path.exists(file):
