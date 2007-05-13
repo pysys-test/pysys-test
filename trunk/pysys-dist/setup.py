@@ -31,12 +31,7 @@ def get_site_packages_path():
 	else:
 		return os.path.join("lib", "python%s" % sys.version[:3], "site-packages")
 
-docfiles = ['pysys-doc/epydoc.css', 'pysys-doc/index.html']
-docfiles.extend(glob.glob('pysys-doc/private/*.*'))
-docfiles.extend(glob.glob('pysys-doc/public/*.*'))
-
-releasenotes = ['pysys-dist/pysys-release.txt']
-
+		
 if sys.platform.lower().startswith('win'):
 	setup(name='PySys',
 		  version=pysys.__version__,
@@ -49,8 +44,10 @@ if sys.platform.lower().startswith('win'):
 					'pysys.process', 'pysys.process.plat-win32', 
 					'pysys.process.plat-unix', 'pysys.utils',
 					'pysys.writer', 'pysys.xml'],
-		  data_files=[('%s/pysys-doc' % get_site_packages_path(), docfiles),
-					  (get_site_packages_path(), releasenotes)]
+		  data_files=[('%s/pysys-doc' % get_site_packages_path(), ['pysys-doc/epydoc.css', 'pysys-doc/index.html']),
+		  			  ('%s/pysys-doc/private' % get_site_packages_path(), glob.glob('pysys-doc/private/*.*')),
+		  			  ('%s/pysys-doc/public' % get_site_packages_path(), glob.glob('pysys-doc/public/*.*')),
+					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt'])]
 		)
 else:
 	setup(name='PySys',
