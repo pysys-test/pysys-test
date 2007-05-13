@@ -44,7 +44,7 @@ log.setLevel(logging.NOTSET)
 
 
 class ConsolePrintHelper:
-	def __init__(self, workingDir):
+	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
 		self.full = FALSE
@@ -56,13 +56,14 @@ class ConsolePrintHelper:
 		self.includes = []
 		self.excludes = []
 		self.tests = None
+		self.name = name
 		self.optionString = 'hfgrm:a:t:i:e:'
 		self.optionList = ["help","full","groups","requirements","mode=","type=","trace=","include=","exclude="] 
 		
 
 	def printUsage(self):
-		print "PySys System Test Framework (version %s)" % __version__ 
-		print "\nUsage: %s [option]* [tests]*" % os.path.basename(sys.argv[0])
+		print "\nPySys System Test Framework (version %s): Console print test helper" % __version__ 
+		print "\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name)
 		print "    where options include;"
 		print "       -h | --help                 print this message"
 		print "       -f | --full                 print full information"
@@ -175,14 +176,15 @@ class ConsolePrintHelper:
 
 
 class ConsoleMakeTestHelper:
-	def __init__(self, workingDir):
+	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.testId = None
 		self.type = "auto"
+		self.name = name
 
 	def printUsage(self):
-		print "PySys System Test Framework (version %s)" % __version__ 
-		print "\nUsage: %s [option]+ [testid]" % os.path.basename(sys.argv[0])
+		print "\nPySys System Test Framework (version %s): Console make test helper" % __version__ 
+		print "\nUsage: %s %s [option]+ [testid]" % (os.path.basename(sys.argv[0]), self.name)
 		print "   where [option] includes;"
 		print "       -h | --help                 print this message"
 		print "       -t | --type     STRING      set the test type (auto or manual, default is auto)"
@@ -254,7 +256,7 @@ class ConsoleMakeTestHelper:
 
 
 class ConsoleLaunchHelper:
-	def __init__(self, workingDir):
+	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
 		self.record = FALSE
@@ -267,6 +269,7 @@ class ConsoleLaunchHelper:
 		self.cycle = 1
 		self.outsubdir = PLATFORM
 		self.mode = None
+		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
 		self.optionString = 'hrpv:a:t:i:e:c:o:m:X:'
@@ -274,8 +277,8 @@ class ConsoleLaunchHelper:
 
 
 	def printUsage(self, printXOptions):
-		print "PySys System Test Framework (version %s)" % __version__ 
-		print "\nUsage: %s [option]* [tests]*" % os.path.basename(sys.argv[0])
+		print "\nPySys System Test Framework (version %s): Console run test helper" % __version__ 
+		print "\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name)
 		print "   where the [option] includes;"
 		print "       -h | --help                 print this message"
 		print "       -r | --record               record the test results in the working directory"
