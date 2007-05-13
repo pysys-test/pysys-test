@@ -1,4 +1,4 @@
-PySys 0.2.2 Release Notes
+PySys 0.3.0 Release Notes
 =========================
 
 This is an early ALPHA release of the software for development purposes. The software 
@@ -12,10 +12,11 @@ Hammond. The extensions can be downloaded from http://sourceforge.net/projects/p
 
 What's new in this release
 --------------------------
-- The suites element in the test descriptor has been renamed to groups. This is to 
-  allow testcases in a single directory to be classified as a single testsuite, and 
-  subsets thereof to be regarded as a group
-- Minor bug fixes to the manual tester and process module
+- Updates to the epydoc output for documenting the classes and modules of pysys
+- Addition of the pysys.py module for printing, running and making new testcase
+  directory structures. This allows a single distributed script to be used to 
+  perform all functionality available from the console. 
+- Remove of the run method from the console launch helper.
 
 
 Installation
@@ -57,6 +58,13 @@ in the testcases directory use
 
 Release History
 ---------------
+0.2.1 to 0.2.2
+--------------
+- The suites element in the test descriptor has been renamed to groups. This is to 
+  allow testcases in a single directory to be classified as a single testsuite, and 
+  subsets thereof to be regarded as a group
+- Minor bug fixes to the manual tester and process module
+
 0.2.0 to 0.2.1
 --------------
 - The Manual Tester has been updated to support the <expectedresult> element in the 
