@@ -21,8 +21,7 @@
 
 import os, sys, time
 script_path = os.path.abspath(sys.path[0])
-sys.path = [p for p in sys.path if
-            os.path.abspath(p) != script_path]
+sys.path = [p for p in sys.path if os.path.abspath(p) != script_path]
 
 from pysys import __version__
 from pysys.constants import *
