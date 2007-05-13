@@ -44,7 +44,7 @@ if sys.platform.lower().startswith('win'):
 		  author_email=pysys.__author_email__,
 		  description='Python System Test Framework',
 		  url="http://sourceforge.net/projects/pysys",
-		  scripts = ['pysys-dist/scripts/pysys.py', 'pysys-dist/pysys_postinstall.py'],
+		  scripts = ['pysys-dist/scripts/pysys.py', 'pysys-dist/scripts/pysys_postinstall.py'],
 		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
 					'pysys.process', 'pysys.process.plat-win32', 
 					'pysys.process.plat-unix', 'pysys.utils',
@@ -59,11 +59,11 @@ else:
 		  author_email=pysys.__author_email__,
 		  description='Python System Test Framework',
 		  url="http://sourceforge.net/projects/pysys",
+		  scripts = ['pysys-dist/scripts/pysys.py'],
 		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
 					'pysys.process', 'pysys.process.plat-win32', 
 					'pysys.process.plat-unix', 'pysys.utils',
-					'pysys.writer', 'pysys.xml'],
-		  scripts = ['pysys-dist/pysys.py']
+					'pysys.writer', 'pysys.xml']
 		)
 
 	
