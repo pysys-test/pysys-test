@@ -25,7 +25,16 @@ from pysys.constants import *
 
 
 class ProcessMonitor:
+	"""
+	
+	
+	"""
+	
 	def __init__(self, pid, interval, file=None):
+		"""Construct an instance of the process monitor.
+		
+		
+		"""
 		self.pid = pid
 		self.interval = interval
 		if file:
@@ -34,7 +43,7 @@ class ProcessMonitor:
 			self.file = sys.stdout
 			
 			
-	def win32GetInstance(self, pid, bRefresh=0):
+	def __win32GetInstance(self, pid, bRefresh=0):
 		# refresh allows process started after the python process
 		# to be picked up
 		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
@@ -57,7 +66,7 @@ class ProcessMonitor:
 		for instance, numInstances in instanceDict.items():
 			for inum in xrange(numInstances+1):
 				try:
-					value = self.win32getProfileAttribute(instance, inum, "ID Process")
+					value = self.__win32getProfileAttribute(instance, inum, "ID Process")
 					if value == pid:
 						return instance, inum
 				except:
@@ -66,7 +75,7 @@ class ProcessMonitor:
 		return instance, inum
 
 
-	def win32getProfileAttribute(self, instance, inum, counter):
+	def __win32getProfileAttribute(self, instance, inum, counter):
 		# create the path for the counter of interest
 		path = win32pdh.MakeCounterPath((None, "Process", instance, None, inum, counter))
 		
@@ -96,7 +105,7 @@ class ProcessMonitor:
 		return value
 
 
-	def win32LogProfile(self, instance, inum, interval, file):
+	def __win32LogProfile(self, instance, inum, interval, file):
 		# open a query ready to perform repeat logging
 		query = win32pdh.OpenQuery()
 		
@@ -135,35 +144,18 @@ class ProcessMonitor:
 		win32pdh.CloseQuery(query)
 
 	
-	# public methods to start and stop a process monitor thread
 	def start(self):
+		"""Start the process monitor to log process statistics to file.
+		
+		"""
 		self.active = 1
-		instance, inum = self.win32GetInstance(pid=self.pid, bRefresh=1)
-		thread.start_new_thread(self.win32LogProfile, (instance, inum, self.interval, self.file))
+		instance, inum = self.__win32GetInstance(pid=self.pid, bRefresh=1)
+		thread.start_new_thread(self.__win32LogProfile, (instance, inum, self.interval, self.file))
 
 
 	def stop(self):
+		"""Stop the process monitor
+		
+		"""
 		self.active = 0
 		
-
-
-
-# used to run class from the command line
-if __name__ == "__main__":
-	if len(sys.argv) < 5:
-		print "Usage: monitor.py <pid> <interval> <duration> <filename>"
-	else:
-		try: 
-			pid = int(sys.argv[1])
-			interval = int(sys.argv[2])
-			duration = int(sys.argv[3])
-			file = sys.argv[4]
-		except: 
-			print "Process ID, interval and duration should be valid integers"
-			sys.exit(-1)	
-		
-		monitor = ProcessMonitor(pid, interval, file)
-		monitor.start()
-		time.sleep(duration)
-		monitor.stop()
-
