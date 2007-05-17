@@ -58,7 +58,7 @@ class BaseTest:
 	methods of the class to provide custom setup and cleanup actions for a particual test, and to perform 
 	all validation steps in a single method should this prove logically more simple.
 	
-	Execution of a PySys testcases is performed through an instance of the L{pysys.baserunner.BaseRunner}
+	Execution of a PySys testcase is performed through an instance of the L{pysys.baserunner.BaseRunner}
 	class, or a subclass thereof. The base runner instantiates an instance of the testcase, and then calls 
 	the C{setup}, C{execute}, C{validate} and C{cleanup} methods of the instance. All processes started during 
 	the test execution are reference counted within the base test, and terminated within the C{cleanup} method.
@@ -211,7 +211,7 @@ class BaseTest:
 
 	# process manipulation methods
 	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
-		"""Start a process running in the foreground or background, and return the exit status or process handle respectively.
+		"""Start a process running in the foreground or background, and return the process handle.
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments, environment and 
 		working directory to run the process in can all be specified in the arguments to the method, along with the filenames
@@ -223,7 +223,8 @@ class BaseTest:
 
 		This method uses the L{pysys.process.helper} module to start the process. On failure conditions the method may append 
 		C{BLOCKED} or C{TIMEDOUT} outcomes to the test validation data structure when it was not possible to start the process 
-		(e.g. command does not exist etc), or the timeout period expired (indicating a potential deadlock or livelock in the process).
+		(e.g. command does not exist etc), or the timeout period expired (indicating a potential deadlock or livelock in the 
+		process).
 						
 		@param command: The command to start the process (should include the full path)
 		@param arguments: A list of arguments to pass to the command
@@ -234,8 +235,8 @@ class BaseTest:
 		@param stdout: The filename used to capture the stdout of the process
 		@param stderr: The filename user to capture the stderr of the process
 		@param displayName: A display name to use (defaults to the basename of the command)
-		@return: The exit status of a C{FOREGROUND} process, or process handle of a C{BACKGROUND} process
-		@rtype: integer | handle
+		@return: The process handle of the process
+		@rtype: L{pysys.process.helper.ProcessWrapper}
 
 		"""
 		if workingDir == None: workingDir = r'%s' % self.output
@@ -256,7 +257,7 @@ class BaseTest:
 			self.addOutcome(TIMEDOUT)
 		else:
 			self.processList.append(process)
-			return process
+		return process
 
 		
 	def stopProcess(self, process, hard=TRUE):
@@ -309,7 +310,7 @@ class BaseTest:
 		"""
 		try:
 			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
-			process.waitProcess(timeout)
+			process.wait(timeout)
 		except ProcessTimeout:
 			log.info("Unable to wait for process")
 			self.addOutcome(TIMEDOUT)
