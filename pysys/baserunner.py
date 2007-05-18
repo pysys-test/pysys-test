@@ -48,7 +48,13 @@ class BaseRunner:
 	of all testcases respectively. Subclasses are typically used should some global conditions need to be setup 
 	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
 	etc), and subsequently cleaned up after test execution. 
-	   
+	      
+	@ivar mode: The user defined modes to run the tests within
+	@type mode: string
+	@ivar outsubdir: The directory name for the output subdirectory 
+	@type outsubdir: string
+	@ivar log: Reference to the logger instance of this class
+	@type log: L{logging.Logger}
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, outsubdir, descriptors, xargs):
@@ -71,6 +77,7 @@ class BaseRunner:
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.setKeywordArgs(xargs)
+		self.log = log
 
 
 	def setKeywordArgs(self, xargs):
