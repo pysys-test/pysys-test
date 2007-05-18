@@ -25,20 +25,24 @@ from pysys.constants import *
 
 
 class ProcessMonitor:
-	"""Win32 process monitor for logging of process statistics.
+	"""Win32 process monitor for the logging of process statistics.
 	
-	The win32 process monitor uses the win32pdh module to obtain statistics on a 
-	given process, as determined by its process id. Currently the statistis include the
-	percentage CPU usage, the working set (how many pages in RAM the virtual memory associated 
-	with the process currently has allocated), the virtual bytes (the process's virtual 
-	address space including shared memory segments), the private bytes (the process's virtual 
-	address space not including shared memory segments), and the number of threads associated 
-	with the process. These are logged to the file at a set interval using the parameters defined
-	at instantiation. The format of the log file is tab separated, with an intial timestamp used
-	to denote the time the statistics were obtained.  
+	The win32 process monitor uses the win32pdh module to obtain and log to file statistics on a 
+	given process as determined by the process id. Statistics obtained include the CPU usage (%), 
+	the working set (virtual memory pages allocated), the virtual bytes (virtual address space 
+	including shared memory segments), the private bytes (virtual address space not including 
+	shared memory segments), and the number of process threads. All memory values are quoted in 
+	MBytes. 
 	
-	   18/05/07 16:34:07       0       8564    81952   10772   21
+	Usage of the class is to create an instance specifying the process id, the logging interval and 
+	the log file. Once created, the process monitor is started and stopped via its L{start()} and 
+	L{stop()} methods. Process monitors are started as a seperate thread, so controll passes back to 
+	the caller of the C{start()} method immediately. The format of the log file is tab separated, 
+	with an intial timestamp used to denote the time the statistics were obtained, e.g. ::
 	
+		18/05/07 16:56:28       0       19464   46044   17708   1
+		18/05/07 16:56:38       37      19536   46044   17716   1
+		18/05/07 16:56:48       54      19616   46044   17984   1
 
 	"""
 	
