@@ -25,15 +25,30 @@ from pysys.constants import *
 
 
 class ProcessMonitor:
-	"""
+	"""Win32 process monitor for logging of process statistics.
 	
+	The win32 process monitor uses the win32pdh module to obtain statistics on a 
+	given process, as determined by its process id. Currently the statistis include the
+	percentage CPU usage, the working set (how many pages in RAM the virtual memory associated 
+	with the process currently has allocated), the virtual bytes (the process's virtual 
+	address space including shared memory segments), the private bytes (the process's virtual 
+	address space not including shared memory segments), and the number of threads associated 
+	with the process. These are logged to the file at a set interval using the parameters defined
+	at instantiation. The format of the log file is tab separated, with an intial timestamp used
+	to denote the time the statistics were obtained.  
 	
+	   18/05/07 16:34:07       0       8564    81952   10772   21
+	
+
 	"""
 	
 	def __init__(self, pid, interval, file=None):
 		"""Construct an instance of the process monitor.
 		
-		
+		@param pid: The process id to monitor
+		@param interval:  The interval in seconds to record the process statistics
+		@param file: The full path to the file to log the process statistics
+			
 		"""
 		self.pid = pid
 		self.interval = interval
@@ -143,18 +158,27 @@ class ProcessMonitor:
 			if fpcounters[i]:  win32pdh.RemoveCounter(fpcounters[i])
 		win32pdh.CloseQuery(query)
 
+
+	def running(self):
+		"""Return the running status of the process monitor.
+		
+		@return: The running status (L{pysys.constants.TRUE} | L{pysys.constants.FALSE})
+		@rtype: integer
+   		"""
+		return self.active
+
 	
 	def start(self):
-		"""Start the process monitor to log process statistics to file.
+		"""Start the process monitor.
 		
 		"""
 		self.active = 1
 		instance, inum = self.__win32GetInstance(pid=self.pid, bRefresh=1)
 		thread.start_new_thread(self.__win32LogProfile, (instance, inum, self.interval, self.file))
-
+		
 
 	def stop(self):
-		"""Stop the process monitor
+		"""Stop the process monitor.
 		
 		"""
 		self.active = 0

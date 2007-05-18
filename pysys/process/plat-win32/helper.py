@@ -74,6 +74,7 @@ class ProcessWrapper:
 	@type pid: integer
 	@ivar exitStatus: The process exit status for a completed process	
 	@type exitStatus: integer
+	
 	"""
 
 	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None):
