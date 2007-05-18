@@ -255,8 +255,8 @@ class BaseTest:
 		@param stdout: The filename used to capture the stdout of the process
 		@param stderr: The filename user to capture the stderr of the process
 		@param displayName: A display name to use (defaults to the basename of the command)
-		@return: The process handle of the process
-		@rtype: L{pysys.process.helper.ProcessWrapper}
+		@return: The process handle of the process (L{pysys.process.helper.ProcessWrapper})
+		@rtype: handle
 
 		"""
 		if workingDir == None: workingDir = r'%s' % self.output
@@ -349,14 +349,16 @@ class BaseTest:
 		@param interval: The interval in seconds between collecting and logging the process statistics
 		@param file: The full path to the filename used for logging the process statistics
 		
-		@return: A handle to the process monitor
+		@return: A handle to the process monitor (L{pysys.process.monitor.ProcessMonitor})
 		@rtype: handle
 		
 		"""
-		monitor = ProcessMonitor(process, interval, file)
+		monitor = ProcessMonitor(process.pid, interval, file)
 		try:
+			self.log.info("Starting process monitor on process with id = %d", process.pid)
 			monitor.start()
 		except ProcessError:
+			self.log.info("Unable to start process monitor")
 			self.addOutcome(BLOCKED)
 		else:
 			self.monitorList.append(monitor)
