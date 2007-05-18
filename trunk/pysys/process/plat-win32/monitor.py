@@ -32,7 +32,7 @@ class ProcessMonitor:
 	the working set (virtual memory pages allocated), the virtual bytes (virtual address space 
 	including shared memory segments), the private bytes (virtual address space not including 
 	shared memory segments), and the number of process threads. All memory values are quoted in 
-	MBytes. 
+	KBytes. 
 	
 	Usage of the class is to create an instance specifying the process id, the logging interval and 
 	the log file. Once created, the process monitor is started and stopped via its L{start()} and 
