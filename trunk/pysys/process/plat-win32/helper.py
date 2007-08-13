@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import string, os.path, time, thread, logging
+import string, os.path, time, thread, logging, threading, Queue
 import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes
 
 from pysys.constants import *
@@ -102,6 +102,8 @@ class ProcessWrapper:
 		# 'publicly' available data attributes set on execution
 		self.pid = None
 		self.exitStatus = None
+		self.stdin = None
+		self.outQueue = Queue.Queue()
 
 		# private instance variablesa
 		self.__hProcess = None
@@ -160,6 +162,19 @@ class ProcessWrapper:
 				if not self.running(): break
 
 
+	def __writeStdin(self):
+		while 1:
+			try:
+				try:
+					data = self.outQueue.get(block=True, timeout=0.5)
+				except Queue.Empty:
+					pass
+				else:
+					win32file.WriteFile(self.stdin, data, None)
+			except:
+				if not self.running(): break
+				
+
 	def __quotePath(self, input):
 		"""Private method to sanitise a windows path.
 		
@@ -217,13 +232,43 @@ class ProcessWrapper:
 		win32file.CloseHandle(hStdin_r)
 		win32file.CloseHandle(hStdout_w)
 		win32file.CloseHandle(hStderr_w)
-
+		
+		# set the handle to the stdin of the process 
+		self.stdin = hStdin
+		
 		# check to see if the process is running. If it is kick off the threads to collect
 		# the stdout and stderr
 		if self.running():					
 			thread.start_new_thread(self.__collectStdout, (hStdout, self.fStdout))
 			thread.start_new_thread(self.__collectStderr, (hStderr, self.fStderr))
+			thread.start_new_thread(self.__writeStdin, ())
+			#win32.addEvent(hStdout, self, self.doReadOut)
+        	#win32.addEvent(hStderr, self, self.doReadErr
 
+#	def doReadOut(self):
+#		"""Runs in thread."""
+#		try:
+#			hr, data = win32file.ReadFile(self.hStdout_r, 8192, None)
+#		except win32api.error:
+#			self.stdoutClosed = 1
+#			if self.stderrClosed:
+#				return main.CONNECTION_LOST
+#			else:
+#				return
+#		self.handleChunk(data)
+	
+#	def doReadErr(self):
+#		"""Runs in thread."""
+#		try:
+#			hr, data = win32file.ReadFile(self.hStderr_r, 8192, None)
+#		except win32api.error:
+#			self.stderrClosed = 1
+#			if self.stdoutClosed:
+#				return main.CONNECTION_LOST
+#			else:
+#				return
+#		self.handleError(data)
+#
 
 	def __startForegroundProcess(self):
 		"""Private method to start a process running in the foreground.
@@ -249,6 +294,10 @@ class ProcessWrapper:
 		exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
 		if exitStatus != win32con.STILL_ACTIVE:
 			self.exitStatus = exitStatus
+
+
+	def write(self, data):
+		self.outQueue.put(data)
 
 
 	def running(self):

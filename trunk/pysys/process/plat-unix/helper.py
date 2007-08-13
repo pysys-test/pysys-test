@@ -43,6 +43,7 @@ class ProcessWrapper:
 		# 'publicly' available data attributes set on execution
 		self.pid = None
 		self.exitStatus = None
+		self.stdin = None
 
 		# print process debug information
 		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
