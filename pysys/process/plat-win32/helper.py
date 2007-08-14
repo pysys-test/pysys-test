@@ -55,18 +55,18 @@ class ProcessWrapper:
 	"""Win32 process wrapper for process execution and management. 
 	
 	The win32 process wrapper provides the ability to start and stop an external process, setting 
-	the process environment, working directory and state i.e. a foreground process in which a case 
+	the process environment, working directory and state i.e. a foreground process in which case 
 	a call to the L{start()} method will not return until the process has exited, or a background 
 	process in which case the process is started in a separate thread allowing concurrent execution 
 	within the testcase. Processes started in the foreground can have a timeout associated with them, such
 	that should the timeout be exceeded, the process will be terminated and control	passed back to the 
 	caller of the method. The wrapper additionally allows control over logging of the process stdout 
-	and stderr to file.
+	and stderr to file, and writing to the process stdin.
 	
 	Usage of the class is to first create an instance, setting all runtime parameters of the process 
 	as data attributes to the class instance via the constructor. The process can then be started 
 	and stopped via the L{start()} and L{stop()} methods of the class, as well as interrogated for 
-	its executing status via the L{running()} method and waited for its completion via the L{wait()}
+	its executing status via the L{running()} method, and waited for its completion via the L{wait()}
 	method. During process execution the C{self.pid} and C{seld.exitStatus} data attributes are set 
 	within the class instance, and these values can be accessed directly via it's object reference.  
 
@@ -103,7 +103,7 @@ class ProcessWrapper:
 		self.pid = None
 		self.exitStatus = None
 
-		# private instance variablesa
+		# private instance variables
 		self.__hProcess = None
 		self.__hThread = None
 		self.__tid = None
@@ -244,22 +244,14 @@ class ProcessWrapper:
 			thread.start_new_thread(self.__collectStdout, (hStdout, self.fStdout))
 			thread.start_new_thread(self.__collectStderr, (hStderr, self.fStderr))
 			thread.start_new_thread(self.__writeStdin, (hStdin, ))
-#
+
 
 	def __startForegroundProcess(self):
 		"""Private method to start a process running in the foreground.
 		
 		"""
 		self.__startBackgroundProcess()
-		
-		startTime = time.time()
-		while self.running():
-			if self.timeout:
-				currentTime = time.time()
-				if currentTime > startTime + self.timeout:
-					self.stop()
-					raise ProcessTimeout, "Process timedout"
-			time.sleep(0.1)
+		self.wait(self.timeout)
 
 
 	def __setExitStatus(self):
@@ -283,7 +275,8 @@ class ProcessWrapper:
 		"""Check to see if a process is running, returning true if running.
 		
 		@return: The running status (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
-		@rtype: integer 
+		@rtype: integer
+		
 		"""
 		self.__setExitStatus()
 		if self.exitStatus != None: return FALSE
@@ -342,6 +335,7 @@ class ProcessWrapper:
 		
 		@raise ProcessError: Raised if there is an error creating the process
 		@raise ProcessTimeout: Raised in the process timed out (foreground process only)
+		
 		"""
 		if self.state == FOREGROUND:
 			self.__startForegroundProcess()
