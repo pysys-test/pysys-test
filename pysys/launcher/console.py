@@ -131,47 +131,50 @@ class ConsolePrintHelper:
 
 
 	def printTests(self):
-		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
+		try:
+			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
+		except Exception, (strerror):
+			log.info(strerror)
+		else:
+			exit = 0
+			if self.groups == TRUE:
+				groups = []
+				for descriptor in descriptors:
+					for group in descriptor.groups:
+						if group not in groups:
+							groups.append(group)
+				print "\nGroups defined: "
+				for group in groups:
+					print "                 %s" % (group)
+				exit = 1
 
-		exit = 0
-		if self.groups == TRUE:
-			groups = []
-			for descriptor in descriptors:
-				for group in descriptor.groups:
-					if group not in groups:
-						groups.append(group)
-			print "\nGroups defined: "
-			for group in groups:
-				print "                 %s" % (group)
-			exit = 1
-
-		if self.requirements == TRUE:
-			requirements = []
-			for descriptor in descriptors:
-				for requirement in descriptor.traceability:
-					if requirement not in requirements:
-						requirements.append(requirement)
-			print "\nRequirements covered: "
-			for requirement in requirements:
-				print "                 %s" % (requirement)
-			exit = 1
+			if self.requirements == TRUE:
+				requirements = []
+				for descriptor in descriptors:
+					for requirement in descriptor.traceability:
+						if requirement not in requirements:
+							requirements.append(requirement)
+				print "\nRequirements covered: "
+				for requirement in requirements:
+					print "                 %s" % (requirement)
+				exit = 1
 		
-		if exit: return
+			if exit: return
 			
-		maxsize = 0
-		for descriptor in descriptors:
-			if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
-		maxsize = maxsize + 2
-		
-		for descriptor in descriptors:
-			padding = " " * (maxsize - len(descriptor.id))
-			if not self.full:
-				print "%s:%s%s" % (descriptor.id, padding, descriptor.title)
-			else:
-				print "=========================================="
-				print "		" + descriptor.id
-				print "=========================================="
-				print descriptor
+			maxsize = 0
+			for descriptor in descriptors:
+				if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
+			maxsize = maxsize + 2
+			
+			for descriptor in descriptors:
+				padding = " " * (maxsize - len(descriptor.id))
+				if not self.full:
+					print "%s:%s%s" % (descriptor.id, padding, descriptor.title)
+				else:
+					print "=========================================="
+					print "		" + descriptor.id
+					print "=========================================="
+					print descriptor
 
 
 
@@ -374,7 +377,10 @@ class ConsoleLaunchHelper:
 				  exec("self.userOptions['%s'] = '%s'" % (value.split('=')[0], value.split('=')[1]) )
 				if EXPR2.search(value) != None:
 					exec("self.userOptions['%s'] = %d" % (value, TRUE))
-			
-		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
+		try:
+			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
+		except Exception, (strerror):
+			log.info(strerror)
+			descriptors = []
 		return self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions
 		
