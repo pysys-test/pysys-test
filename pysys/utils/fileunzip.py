@@ -25,13 +25,6 @@ from pysys.exceptions import *;
 
 
 def unzipall(path, binary=FALSE):
-	"""Unzip all .gz files in a given directory.
-	
-	@param path: The full path to the directory containing the archive files
-	@param binary: Boolean flag to indicate if the unzipped files should be written as binary 
-	@raises FileNotFoundException: Raised if the directory path does not exist
-	
-	"""
 	if not os.path.exists(path):
 		raise FileNotFoundException, "%s path does not exist" % (os.path.basename(path))
 
@@ -41,20 +34,6 @@ def unzipall(path, binary=FALSE):
 
 
 def unzip(zfilename, replace=FALSE, binary=FALSE):
-	"""Unzip a .gz archive and write the contents to disk.
-	
-	The method will unpack a file of the form C{file.data.gz} to C{file.data}, removing the 
-	archive file in the process if the replace input parameter is set to true. By default the 
-	unpacked archive is written as text data, unless the binary input parameter is set to true,
-	in which case the unpacked file is written as binary.
-	
-	@param zfilename: The full path to the archive file
-	@param replace: Boolean flag to indicate if the archive file should be removed after unpacking
-	@param binary: Boolean flag to indicate if the unzipped file should be written as binary
-	@raises FileNotFoundException: Raised if the archive file does not exist
-	@raises IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension
-	
-	"""
 	if not os.path.exists(zfilename):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(zfilename))
 

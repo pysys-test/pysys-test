@@ -39,8 +39,6 @@ INFO = 31
 DEBUG = 32
 
 LOOKUP = {}
-LOOKUP[TRUE] = "TRUE"
-LOOKUP[FALSE] = "FALSE"
 LOOKUP[PASSED] = "PASSED"
 LOOKUP[INSPECT] = "REQUIRES INSPECTION"
 LOOKUP[NOTVERIFIED] = "NOT VERIFIED"
@@ -59,7 +57,7 @@ FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_DESCRIPTOR = 'descriptor.xml'
 DEFAULT_MODULE = 'run'
-DEFAULT_GROUP = ""
+DEFAULT_SUITE = "Test Suite"
 DEFAULT_TESTCLASS = 'PySysTest'
 DEFAULT_INPUT = "Input"
 DEFAULT_OUTPUT = "Output"
@@ -99,75 +97,3 @@ elif re.search('linux', sys.platform):
 	DEVNULL = '/dev/null'
 	PATH = "/bin:/usr/bin:/usr/sbin:/usr/local/bin"
 	LD_LIBRARY_PATH = "/usr/lib"
-
-
-# reference to the project instance defining parameters for the 
-# pysys project
-PROJECT = None
-
-
-# load the project specific details
-def loadproject(start):
-	"""Load the pysys project file.
-	
-	The method walks up the directory tree from the supplied path until the 
-	.pysysproject file is found. The location of the project file defines
-	the project root location. The contents of the project file determine 
-	project specific contents as key=value pairs. These are translated into 
-	data attributes of the project class for reference within any loaded 
-	modules.
-	
-	To ensure that all loaded modules have a pre-initialised projects 
-	instance, any launching application should first import the loadproject
-	file, and then make a call to it prior to importing all names within the
-	constants module i.e.
-	
-		# load the project
-		from pysys.constants import loadproject
-		loadproject(os.getcwd())
-		
-		# import constants into top level namespace
-		from pysys.constants import *
-
-	"""
-	global PROJECT
-
-	search = start
-	drive, path = os.path.splitdrive(search)
-	while (not search == drive) and (not os.path.exists("%s/.pysysproject" % search)): 
-		search, drop = os.path.split(search) 
-		if not drop: search = drive
-	PROJECT = Project(search + "/")
-
-
-class Project:
-	"""Class detailing project specific information for a set or pysys tests.
-	
-	Reads the pysys project file if it exists, and translates key=value pairs into 
-	data attributes of the class instance. Thus for a project file with the following 
-	entries;
-	 
-	  FOO=bar
-	  KIT=kat
-	  
-	the project instance will have data attributes FOO and KIT, with values \"bar\" and 
-	\"kat\".
-		
-	@ivar root: Full path to the project root, as specified by the first .pysysproject
-				file encountered when walking down the directory tree from the start 
-				directory passed into the launcher (e.g. the working directory)  
-	@type root: string
-	
-	"""
-	
-	def __init__(self, root):
-		self.root = root
-		if os.path.exists("%s/.pysysproject" % root):
-			f = open("%s/.pysysproject" % root)
-			for line in f.readlines():
-				try:
-					key, value = line.strip().split("=")
-					setattr(self, key, value)
-					print key, value
-				except:
-					pass

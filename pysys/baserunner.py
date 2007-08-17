@@ -31,80 +31,26 @@ log.setLevel(logging.NOTSET)
 
 
 class BaseRunner:
-	"""The base class for executing a set of PySys testcases.
-
-	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
-	with a list of L{pysys.xml.descriptor.XMLDescriptorContainer} objects detailing the set of testcases to be run. 
-	The runner iterates through the descriptor list and for each entry imports the L{pysys.basetest.BaseTest}
-	subclass for the testcase, creates an instance of the test class and then calls the setup(), execute(), validate() 
-	and cleanup() methods of the test class instance. The runner is responsible for ensuring the output 
-	subdirectory of each testcase is purged prior to test execution to remove stale output from a previous run, 
-	detects any core files produced during execution of a testcase from processes started via the L{pysys.process} 
-	module, and performs audit trail logging of the test results on completion of running a set of testcases.
-	
-	The base runner contains the hook functions L{setup()}, L{testComplete()}, L{cycleComplete()} and L{cleanup()} to 
-	allow a subclass to perform custom operations prior to the execution of a set of testcases, between the 
-	execution of each testcase in a set, between each cycle of execution of a set of testcases, and on completion 
-	of all testcases respectively. Subclasses are typically used should some global conditions need to be setup 
-	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
-	etc), and subsequently cleaned up after test execution. 
-	      
-	@ivar mode: The user defined modes to run the tests within
-	@type mode: string
-	@ivar outsubdir: The directory name for the output subdirectory 
-	@type outsubdir: string
-	@ivar log: Reference to the logger instance of this class
-	@type log: L{logging.Logger}
-	@ivar project: Reference to the project details as set on the module load of the launching executable  
-	@type project: L{Project}
-	
-	"""
-	
-	def __init__(self, record, purge, cycle, mode, outsubdir, descriptors, xargs):
-		"""Create an instance of the BaseRunner class.
-		
-		@param record: Indicates if the test results should be recorded 
-		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
-		@param cycle: The number of times to execute the set of requested testcases
-		@param mode: The user defined mode to run the testcases in
-		@param outsubdir: The name of the output subdirectory
-		@param descriptors: List of XML descriptor containers detailing the set of testcases to be run
-		@param xargs: The dictionary of additional arguments to be set as data attributes to the class
-		
-		"""
+	def __init__(self, record, purge, cycle, mode, outsubdir, tests, xargs):
 		self.record = record
 		self.purge = purge
 		self.cycle = cycle
 		self.mode = mode
 		self.outsubdir = outsubdir
-		self.descriptors = descriptors
+		self.tests = tests
 		self.xargs = xargs
 		self.setKeywordArgs(xargs)
-		self.log = log
-		self.project = PROJECT
-		
-	
+
+
 	def setKeywordArgs(self, xargs):
-		"""Set the xargs as data attributes of the class.
-				
-		Values in the xargs dictionary are set as data attributes using the builtin C{setattr()} method. 
-		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
-		form C{self.foo} with C{value bar}. 
-		
-		@param xargs: A dictionary of the user defined extra arguments
-		
-		"""
 		for key in xargs.keys():
-			setattr(self, key, xargs[key])
+			try:
+				exec("self.%s = xargs['%s']" % (key, key))
+			except:
+				pass
 
-
+			
 	def purgeDirectory(self, dir, delTop=FALSE):
-		"""Recursively purge a directory removing all files and sub-directories.
-		
-		@param dir: The top level directory to be purged
-		@param delTop: Indicates if the top level directory should also be deleted
-		
-		"""
 		for file in os.listdir(dir):
 		  	path = os.path.join(dir, file)
 		  	if PLATFORM in ['sunos', 'linux']:
@@ -123,12 +69,6 @@ class BaseRunner:
 
 
 	def detectCore(self, dir):
-		"""Detect any core files in a directory (unix systems only), returning C{TRUE} if a core is present.
-		
-		@param dir: The directory to search for core files
-		@return: C{TRUE} if a core detected, None if no core detected
-		@rtype: integer 
-		"""
 		for file in os.listdir(dir):
 			path = os.path.join(dir, file)
 			mode = os.stat(path)[stat.ST_MODE]
@@ -138,26 +78,10 @@ class BaseRunner:
 
 
 	def setup(self):
-		"""Setup method which may optionally be overridden to perform custom setup operations prior to execution of a set of testcases.
-		
-		"""
 		pass
 
 
 	def testComplete(self, testObj, dir):
-		"""Test complete method which performs completion actions after execution of a testcase.
-		
-		The testComplete method performs purging of the output subdirectory of a testcase on completion 
-		of the test execution. Purging involves removing all files with a zero file length in order to 
-		only include files with content of interest. Should C{self.purge} be set, the purging will remove
-		all files (excluding the run.log) on a C{PASSED} outcome of the testcase in order to reduce the 
-		on-disk memory footprint when running a large number of tests. Should a custom testComplete for 
-		a subclass be required, the BaseRunner testComplete method should first be called.
-		
-		@param testObj: Reference to the L{pysys.basetest.BaseTest} instance of the test just completed
-		@param dir: The directory to perform the purge on
-				
-		"""
 		if self.purge:
 			removeNonZero = TRUE
 			for outcome in testObj.outcome:
@@ -185,33 +109,14 @@ class BaseRunner:
 
 
 	def cycleComplete(self):
-		"""Cycle complete method which may optionally be overridden to perform custom operations between the repeated execution of a set of testcases.
-		
-		"""
 		pass
 
 
 	def cleanup(self):
-		"""Cleanup method which may optionally be overridden to perform custom cleanup operations after execution of all testcases.
-		
-		"""
-		
 		pass
 
 
-	def start(self, printSummary=TRUE, writers=[]):
-		"""Start the execution of a set of testcases, returning a dictionary of the testcase outcomes.
-		
-		The start method is the main method for executing the set of requested testcases. The set of testcases 
-		are executed a number of times determined by the C{self.cycle} attribute. When executing a testcase 
-		all output from the execution is saved in the testcase output subdirectory; should C{self.cycle} be 
-		set to more than 1, the output subdirectory is further split into cycle[n] directories to sandbox the 
-		output from each iteration.
-		
-		@param printSummary: Indicates if the test results should be reported on test completion
-		@param writers: List of writers for test results audit reporting
-		
-		"""
+	def start(self, printSummary=TRUE):
 		results = {}
 		totalDuration = 0
 		
@@ -224,24 +129,20 @@ class BaseRunner:
 			for outcome in PRECEDENT: results[cycle][outcome] = []
 
 			# loop through tests for the cycle
-			for descriptor in self.descriptors:
+			for test in self.tests:
 				startTime = time.time()
 				blocked = FALSE
 				keyboardInterupt = FALSE
 
 				# set the output subdirectory and purge contents
 				try:
-					outsubdir = self.outsubdir
-					if not os.path.exists(os.path.join(descriptor.output, outsubdir)):
-						os.makedirs(os.path.join(descriptor.output, outsubdir))
-					
-					if cycle == 0: self.purgeDirectory(os.path.join(descriptor.output, outsubdir))
-				
-					if self.cycle > 1: 
-						outsubdir = os.path.join(outsubdir, 'cycle%d' % (cycle+1))
-						os.makedirs(os.path.join(descriptor.output, outsubdir))
-
-					outputDirectory = os.path.join(descriptor.output, outsubdir)
+					outputDirectory = "%s/%s" % (test.output, self.outsubdir)
+					if cycle == 0 and os.path.exists(outputDirectory): self.purgeDirectory(outputDirectory)	
+					if self.cycle > 1: outputDirectory = "%s/cycle%d" % (outputDirectory, cycle+1)
+					if not os.path.exists(outputDirectory):
+						os.makedirs(outputDirectory)
+					else:
+						self.purgeDirectory(outputDirectory)
 				except:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 					blocked = TRUE
@@ -254,22 +155,22 @@ class BaseRunner:
 
 				# run the test execute, validate and cleanup methods
 				log.info("==========================================")
-				log.info("		" + descriptor.id)
+				log.info("		" + test.id)
 				log.info("==========================================")
 				try:
-					sys.path.append(os.path.dirname(descriptor.module))
-					exec( "from %s import %s" % (os.path.basename(descriptor.module), descriptor.classname) )
-					exec( "testObj = %s(descriptor, r'%s', r'%s', self.xargs)" % (descriptor.classname, outsubdir, self.mode) )
+					sys.path.append(os.path.dirname(test.module))
+					exec( "from %s import %s" % (os.path.basename(test.module), test.classname) )
+					exec( "testObj = %s(r'%s', r'%s', r'%s', r'%s', self.xargs)" % (test.classname, test.input, outputDirectory, test.reference, self.mode) )
 				except:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-					testObj = BaseTest(descriptor, outsubdir, self.mode, self.xargs) 
+					testObj = BaseTest(test.input, outputDirectory, test.reference, self.mode, self.xargs) 
 					blocked = TRUE
 				sys.path.pop()
-				
-				if descriptor.state != 'runnable':
+
+				if test.state != 'runnable':
 					testObj.outcome.append(SKIPPED)
 					
-				elif self.mode and self.mode not in descriptor.modes:
+				elif self.mode and self.mode not in test.modes:
 					log.info("Unable to run test in %s mode", CONSTANTS[self.mode])
 					testObj.outcome.append(SKIPPED)
 
@@ -279,7 +180,6 @@ class BaseRunner:
 
 				else:
 					try:
-						testObj.setup()
 						testObj.execute()
 					except KeyboardInterrupt:
 						keyboardInterupt = TRUE
@@ -319,19 +219,16 @@ class BaseRunner:
 				testTime = math.floor(100*(time.time() - startTime))/100.0
 				totalDuration = totalDuration + testTime
 				outcome = testObj.getOutcome()
-				results[cycle][outcome].append(descriptor.id)
+				results[cycle][outcome].append(test.id)
 				log.info("")
 				log.info("Test duration %.2f secs", testTime)
 				log.info("Test final outcome %s", LOOKUP[outcome])
 				log.info("")
-				if rootLogger.getEffectiveLevel() == logging._levelNames['CRITICAL']: log.critical("%s: %s", LOOKUP[outcome], descriptor.id)
+				if rootLogger.getEffectiveLevel() == logging._levelNames['CRITICAL']: log.critical("%s: %s", LOOKUP[outcome], test.id)
 				
 				# call the hook for end of test execution
-				self.testComplete(testObj, outputDirectory)
-				try:
-					del sys.modules["%s" % os.path.basename(descriptor.module)]
-				except:
-					pass
+				self.testComplete(test, outputDirectory)
+				del sys.modules["%s" % os.path.basename(test.module)]
 				del testObj
 
 				# remove the run logger handler
@@ -356,17 +253,7 @@ class BaseRunner:
 			except:
 				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-			# send the results for this cycle to the result writers
-			if self.record:
-				for writer in writers:
-					try:
-						writer.setup()
-						writer.writeResults(results=results[cycle])
-						writer.cleanup()
-					except:
-						log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			
-		# log the summary output to the console
+		# print out the test summary if the runner is performing this
 		if printSummary:
 			log.info("")
 			log.info("Total duration: %.2f (secs)", totalDuration)		
@@ -378,16 +265,13 @@ class BaseRunner:
 			if fails == 0:
 				log.info("	THERE WERE NO NON PASSES")
 			else:
-				if len(results) == 1:
+				if self.cycle == 1:
 					for outcome in FAILS:
 						for test in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], test)
 				else:
 					for key in results.keys():
 						for outcome in FAILS:
 							for test in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], test)
-
-		# call the hook to cleanup after running tests
-		self.cleanup()
 
 		# return the results dictionary
 		return results

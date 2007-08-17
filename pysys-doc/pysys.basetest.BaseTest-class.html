@@ -58,25 +58,34 @@
 <!-- ==================== CLASS DESCRIPTION ==================== -->
 <h2 class="class">Class BaseTest
 <br/><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest">source&nbsp;code</a></span></h2>
-<p>The base class for all PySys test classes.</p>
-  <p>BaseTest is the parent class of all PySys system tests, and should be 
-  subclassed to provide an implementation of the <a 
-  href="pysys.basetest.BaseTest-class.html#execute" 
-  class="link">execute()</a> method. Additional <a 
-  href="pysys.basetest.BaseTest-class.html#setup" class="link">setup()</a>,
-  <a href="pysys.basetest.BaseTest-class.html#cleanup" 
-  class="link">cleanup()</a> and <a 
-  href="pysys.basetest.BaseTest-class.html#validate" 
-  class="link">validate()</a> methods provide the ability to perform custom
-  setup and cleanup actions for a particual test, and to perform all 
-  validation steps in a single method should this prove logically more 
-  simple.</p>
-  The class provides utility functions for process management, test 
-  timing and test validation. Validation of the test can be performed 
-  multiple times through the <code>assert*</code> functions, building up an
-  internal data structure storing the individual validation outcomes. The 
-  overall outcome of the test is determined using a precedence order of the
-  individual outcomes.<br /><br />
+<pre class="literalblock">
+The parent class of all PySys system tests.
+
+BaseTest is the parent class of all PySys system tests, and should be subclassed to provide 
+an implementation of the execute() method. The class is instantiated with information on the 
+test input, reference and output data locations, the user defined mode the test is to be executed 
+in, and the user defined extra arguments required for test execution. 
+
+The class provides important utility functions for process management, test timing, test validation 
+and storage of test validation steps. Validation of the test can be performed multiple times through 
+the assert* functions, building up an internal list of individual validation outcomes. Currently 
+supported test outcomes are;
+
+  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
+  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
+  DUMPEDCORE:  A process started by the test produced a core file (unix only)
+  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
+  FAILED:      A validation step of the test failed
+  NOTVERIFIED: No validation steps were performed
+  INSPECT:     A validation step of the test requires manual inspection
+  PASSED:      A validation step of the test passed
+
+The overall outcome of the test is based on a precedence of the outcomes in the list, based on the order
+as given above i.e. if three validation steps were performed in the test with outcomes TIMEDOUT, FAILED, 
+PASSED the overall outcome would be TIMEDOUT; a test only passes when all validation steps pass. 
+ 
+
+</pre><br /><br />
 
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
@@ -115,7 +124,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#setKeywordArgs" class="sig-name">setKeywordArgs</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">xargs</span>)</span>
-    <br />Set the xargs as data attributes of the test class.
+    
   </td>
 </tr>
 <tr>
@@ -125,17 +134,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#addOutcome" class="sig-name">addOutcome</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">outcome</span>)</span>
-    <br />Add a test validation outcome to the validation list.
-  </td>
-</tr>
-<tr>
-  <td width="15%" align="right" valign="top" class="rtype">
-    integer
-   </td>
-  <td>
-    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#getOutcome" class="sig-name">getOutcome</a>(<span class="sig-arg">self</span>)</span>
-    <br />Get the overall outcome of the test based on the precedence 
-      order.
+    
   </td>
 </tr>
 <tr>
@@ -143,9 +142,8 @@
     &nbsp;
    </td>
   <td>
-    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#setup" class="sig-name">setup</a>(<span class="sig-arg">self</span>)</span>
-    <br />Setup method which may optionally be overridden to perform custom 
-      setup operations prior to test execution.
+    <span class="sig"><a href="pysys.basetest.BaseTest-class.html#getOutcome" class="sig-name">getOutcome</a>(<span class="sig-arg">self</span>)</span>
+    
   </td>
 </tr>
 <tr>
@@ -154,8 +152,7 @@
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#execute" class="sig-name">execute</a>(<span class="sig-arg">self</span>)</span>
-    <br />Execute method which must be overridden to perform the test 
-      execution steps.
+    
   </td>
 </tr>
 <tr>
@@ -164,8 +161,7 @@
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#validate" class="sig-name">validate</a>(<span class="sig-arg">self</span>)</span>
-    <br />Validate method which may optionally be overridden to group all 
-      validation steps.
+    
   </td>
 </tr>
 <tr>
@@ -174,13 +170,12 @@
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#cleanup" class="sig-name">cleanup</a>(<span class="sig-arg">self</span>)</span>
-    <br />Cleanup method which performs cleanup actions after execution and 
-      validation of the test.
+    
   </td>
 </tr>
 <tr>
   <td width="15%" align="right" valign="top" class="rtype">
-    integer | handle
+    &nbsp;
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#startProcess" class="sig-name">startProcess</a>(<span class="sig-arg">self</span>,
@@ -193,8 +188,7 @@
         <span class="sig-arg">stdout</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">stderr</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">displayName</span>=<span class="sig-default">None</span>)</span>
-    <br />Start a process running in the foreground or background, and 
-      return the exit status or process handle respectively.
+    
   </td>
 </tr>
 <tr>
@@ -204,9 +198,8 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopProcess" class="sig-name">stopProcess</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
-        <span class="sig-arg">hard</span>=<span class="sig-default">TRUE</span>)</span>
-    <br />Send a soft or hard kill to a running process to stop it's 
-      execution.
+        <span class="sig-arg">hard</span>=<span class="sig-default">FALSE</span>)</span>
+    
   </td>
 </tr>
 <tr>
@@ -217,7 +210,7 @@
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#signalProcess" class="sig-name">signalProcess</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
         <span class="sig-arg">signal</span>)</span>
-    <br />Send a signal to a running process (Unix only).
+    
   </td>
 </tr>
 <tr>
@@ -228,21 +221,19 @@
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitProcess" class="sig-name">waitProcess</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
         <span class="sig-arg">timeout</span>)</span>
-    <br />Wait for a process to terminate, return on termination or expiry 
-      of the timeout.
+    
   </td>
 </tr>
 <tr>
   <td width="15%" align="right" valign="top" class="rtype">
-    handle
+    &nbsp;
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#startProcessMonitor" class="sig-name">startProcessMonitor</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
         <span class="sig-arg">interval</span>,
         <span class="sig-arg">file</span>)</span>
-    <br />Start a separate thread to log process statistics to logfile, and 
-      return a handle to the process monitor.
+    
   </td>
 </tr>
 <tr>
@@ -252,7 +243,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopProcessMonitor" class="sig-name">stopProcessMonitor</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">monitor</span>)</span>
-    <br />Stop a process monitor.
+    
   </td>
 </tr>
 <tr>
@@ -265,7 +256,7 @@
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">state</span>=<span class="sig-default">FOREGROUND</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['ManualTester']</span>)</span>
-    <br />Start the manual tester.
+    
   </td>
 </tr>
 <tr>
@@ -274,7 +265,7 @@
    </td>
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#stopManualTester" class="sig-name">stopManualTester</a>(<span class="sig-arg">self</span>)</span>
-    <br />Stop the manual tester if running.
+    
   </td>
 </tr>
 <tr>
@@ -284,7 +275,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitManualTester" class="sig-name">waitManualTester</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['ManualTester']</span>)</span>
-    <br />Wait for the manual tester to be stopped via user interaction.
+    
   </td>
 </tr>
 <tr>
@@ -294,7 +285,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#wait" class="sig-name">wait</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">interval</span>)</span>
-    <br />Wait for a specified period of time.
+    
   </td>
 </tr>
 <tr>
@@ -306,7 +297,7 @@
         <span class="sig-arg">port</span>,
         <span class="sig-arg">host</span>=<span class="sig-default">'localhost'</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSocket']</span>)</span>
-    <br />Wait for a socket connection to be established.
+    
   </td>
 </tr>
 <tr>
@@ -317,7 +308,7 @@
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitForFile" class="sig-name">waitForFile</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">filename</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForFile']</span>)</span>
-    <br />Wait for a file to be written to disk.
+    
   </td>
 </tr>
 <tr>
@@ -328,11 +319,10 @@
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#waitForSignal" class="sig-name">waitForSignal</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">basename</span>,
         <span class="sig-arg">expr</span>,
-        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;&gt;=1&quot;</span>,
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSignal']</span>,
         <span class="sig-arg">poll</span>=<span class="sig-default">0.25</span>)</span>
-    <br />Wait for a particular regular expression to be seen on a set 
-      number of lines in a text file.
+    
   </td>
 </tr>
 <tr>
@@ -342,8 +332,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertTrue" class="sig-name">assertTrue</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">expr</span>)</span>
-    <br />Perform a validation assert on the supplied expression evaluating 
-      to true.
+    
   </td>
 </tr>
 <tr>
@@ -353,8 +342,7 @@
   <td>
     <span class="sig"><a href="pysys.basetest.BaseTest-class.html#assertFalse" class="sig-name">assertFalse</a>(<span class="sig-arg">self</span>,
         <span class="sig-arg">expr</span>)</span>
-    <br />Perform a validation assert on the supplied expression evaluating 
-      to false.
+    
   </td>
 </tr>
 <tr>
@@ -371,8 +359,7 @@
         <span class="sig-arg">sort</span>=<span class="sig-default">FALSE</span>,
         <span class="sig-arg">replace</span>=<span class="sig-default">[]</span>,
         <span class="sig-arg">includes</span>=<span class="sig-default">[]</span>)</span>
-    <br />Perform a validation assert on the comparison of two input text 
-      files.
+    
   </td>
 </tr>
 <tr>
@@ -385,8 +372,7 @@
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
         <span class="sig-arg">contains</span>=<span class="sig-default">TRUE</span>)</span>
-    <br />Perform a validation assert on a regular expression occurring in a
-      text file.
+    
   </td>
 </tr>
 <tr>
@@ -399,8 +385,7 @@
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">exprList</span>=<span class="sig-default">[]</span>,
         <span class="sig-arg">contains</span>=<span class="sig-default">TRUE</span>)</span>
-    <br />Perform a validation assert on a list of regular expressions 
-      occurring in specified order in a text file.
+    
   </td>
 </tr>
 <tr>
@@ -412,9 +397,8 @@
         <span class="sig-arg">file</span>,
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
-        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;&gt;=1&quot;</span>)</span>
-    <br />Perform a validation assert on the number of lines in a text file 
-      matching a specific regular expression.
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>)</span>
+    
   </td>
 </tr>
 </table>
@@ -481,19 +465,8 @@
     ></td>
   </table>
   
-  <p>Set the xargs as data attributes of the test class.</p>
-  Values in the xargs dictionary are set as data attributes using the 
-  builtin <code>setattr()</code> method. Thus an xargs dictionary of the 
-  form <code>{'foo': 'bar'}</code> will result in a data attribute of the 
-  form <code>self.foo</code> with <code>value bar</code>. This is used so 
-  that subclasses can define default values of data attributes, which can 
-  be overriden on instantiation e.g. using the -X options to the runTest.py
-  launch executable.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>xargs</code></strong> - A dictionary of the user defined extra arguments</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -510,31 +483,8 @@
     ></td>
   </table>
   
-  <p>Add a test validation outcome to the validation list.</p>
-  The method provides the ability to add a validation outcome to the 
-  internal data structure storing the list of test validation outcomes. In 
-  a single test run multiple validations may be performed. The currently 
-  supported validation outcomes are:
-<pre class="literalblock">
- SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
- BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
- DUMPEDCORE:  A process started by the test produced a core file (unix only)
- TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
- FAILED:      A validation step of the test failed
- NOTVERIFIED: No validation steps were performed
- INSPECT:     A validation step of the test requires manual inspection
- PASSED:      A validation step of the test passed 
-</pre>
-  The outcomes are considered to have a precedence order, as defined by 
-  the order of the outcomes listed above. Thus a <code>BLOCKED</code> 
-  outcome has a higher precedence than a <code>PASSED</code> outcome. The 
-  outcomes are defined in <a href="pysys.constants-module.html" 
-  class="link">pysys.constants</a>.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>outcome</code></strong> - The outcome to add</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -550,37 +500,7 @@
     ></td>
   </table>
   
-  <p>Get the overall outcome of the test based on the precedence order.</p>
-  <p>The method returns the overal outcome of the test based on the 
-  outcomes stored in the internal data structure. The precedence order of 
-  the possible outcomes is used to determined the overall outcome of the 
-  test, e.g. if <code>PASSED</code>, <code>BLOCKED</code> and 
-  <code>FAILED</code> were recorded during the execution of the test, the 
-  overall outcome would be <code>BLOCKED</code>.</p>
-  The method returns the integer value of the outcome as defined in <a 
-  href="pysys.constants-module.html" class="link">pysys.constants</a>. To 
-  convert this to a string representation use the <code>LOOKUP</code> 
-  dictionary i.e. <code>LOOKUP</code>[test.getOutcome()]
-  <dl><dt></dt><dd>
-    <dl><dt>Returns: <code>integer</code></dt>
-        <dd>The overall test outcome</dd></dl>
-  </dd></dl>
-</td></tr></table>
-</div>
-<a name="setup"></a>
-<div>
-<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3><span class="sig"><span class="sig-name">setup</span>(<span class="sig-arg">self</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.setup">source&nbsp;code</a></span>&nbsp;</span
-    ></td>
-  </table>
   
-  Setup method which may optionally be overridden to perform custom 
-  setup operations prior to test execution.
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -597,13 +517,8 @@
     ></td>
   </table>
   
-  Execute method which must be overridden to perform the test execution 
-  steps.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Raises:</dt></dl>
-    <ul>
-        <li><code><strong class='fraise'>NotImplementedError</strong></code> - Raised exeception should the method not be overridden</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -619,8 +534,7 @@
     ></td>
   </table>
   
-  Validate method which may optionally be overridden to group all 
-  validation steps.
+  
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -637,24 +551,7 @@
     ></td>
   </table>
   
-  <p>Cleanup method which performs cleanup actions after execution and 
-  validation of the test.</p>
-  The cleanup method performs actions to stop all processes started in 
-  the background and not explicitly killed during the test execution. It 
-  also stops all process monitors running in seperate threads, and any 
-  instances of the manual tester user interface. Should a custom cleanup 
-  for a subclass be required, the BaseTest cleanup method should first be 
-  called. e.g. :
-<pre class="literalblock">
- class MyTest(BaseTest):
- 
-   def cleanup(self):
-     # call base test cleanup first
-     BaseTest.cleanup(self)
-               
-     # perform custom cleanup actions
-     ...
-</pre>
+  
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -680,50 +577,8 @@
     ></td>
   </table>
   
-  <p>Start a process running in the foreground or background, and return 
-  the exit status or process handle respectively.</p>
-  <p>The method allows spawning of new processes in a platform independent 
-  way. The command, arguments, environment and working directory to run the
-  process in can all be specified in the arguments to the method, along 
-  with the filenames used for capturing the stdout and stderr of the 
-  process. Processes may be started in the <code>FOREGROUND</code>, in 
-  which case the method does not return until the process has completed or 
-  a time out occurs, or in the <code>BACKGROUND</code> in which case the 
-  method returns immediately to the caller returning a handle to the 
-  process to allow manipulation at a later stage. All processes started in 
-  the <code>BACKGROUND</code> and not explicitly killed using the returned 
-  process handle are automatically killed on completion of the test via the
-  <a href="pysys.basetest.BaseTest-class.html#cleanup" 
-  class="link">cleanup()</a> method of the BaseTest.</p>
-  This method uses the <a href="pysys.process.helper-module.html" 
-  class="link">pysys.process.helper</a> module to start the process. On 
-  failure conditions the method may append <code>BLOCKED</code> or 
-  <code>TIMEDOUT</code> outcomes to the test validation data structure when
-  it was not possible to start the process (e.g. command does not exist 
-  etc), or the timeout period expired (indicating a potential deadlock or 
-  livelock in the process).
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>command</code></strong> - The command to start the process (should include the full 
-          path)</li>
-        <li><strong class="pname"><code>arguments</code></strong> - A list of arguments to pass to the command</li>
-        <li><strong class="pname"><code>environs</code></strong> - A dictionary of the environment to run the process in 
-          (defaults to clean environment)</li>
-        <li><strong class="pname"><code>workingDir</code></strong> - The working directory for the process to run in (defaults to 
-          the testcase output subdirectory)</li>
-        <li><strong class="pname"><code>state</code></strong> - Run the process either in the <code>FOREGROUND</code> or 
-          <code>BACKGROUND</code> (defaults to <code>FOREGROUND</code>)</li>
-        <li><strong class="pname"><code>timeout</code></strong> - The timeout period after which to termintate processes running
-          in the <code>FOREGROUND</code></li>
-        <li><strong class="pname"><code>stdout</code></strong> - The filename used to capture the stdout of the process</li>
-        <li><strong class="pname"><code>stderr</code></strong> - The filename user to capture the stderr of the process</li>
-        <li><strong class="pname"><code>displayName</code></strong> - A display name to use (defaults to the basename of the 
-          command)</li>
-    </ul>
-    <dl><dt>Returns: <code>integer | handle</code></dt>
-        <dd>The exit status of a <code>FOREGROUND</code> process, or 
-          process handle of a <code>BACKGROUND</code> process</dd></dl>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -734,28 +589,15 @@
   <tr valign="top"><td>
   <h3><span class="sig"><span class="sig-name">stopProcess</span>(<span class="sig-arg">self</span>,
         <span class="sig-arg">process</span>,
-        <span class="sig-arg">hard</span>=<span class="sig-default">TRUE</span>)</span>
+        <span class="sig-arg">hard</span>=<span class="sig-default">FALSE</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.stopProcess">source&nbsp;code</a></span>&nbsp;</span
     ></td>
   </table>
   
-  <p>Send a soft or hard kill to a running process to stop it's 
-  execution.</p>
-  This method uses the <a href="pysys.process.helper-module.html" 
-  class="link">pysys.process.helper</a> module to stop a running process. 
-  Should the request to stop the running process fail, a 
-  <code>BLOCKED</code> outcome will be added to the test outcome list.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>process</code></strong> - The process handle returned from the <a 
-          href="pysys.basetest.BaseTest-class.html#startProcess" 
-          class="link">startProcess()</a> method</li>
-        <li><strong class="pname"><code>hard</code></strong> - Set to false to perform a soft kill on the process (Unix 
-          systems only)</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -773,20 +615,8 @@
     ></td>
   </table>
   
-  <p>Send a signal to a running process (Unix only).</p>
-  This method uses the <a href="pysys.process.helper-module.html" 
-  class="link">pysys.process.helper</a> module to send a signal to a 
-  running process. Should the request to send the signal to the running 
-  process fail, a <code>BLOCKED</code> outcome will be added to the test 
-  outcome list.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>process</code></strong> - The process handle returned from the <a 
-          href="pysys.basetest.BaseTest-class.html#startProcess" 
-          class="link">startProcess()</a> method</li>
-        <li><strong class="pname"><code>signal</code></strong> - The integer value of the signal to send</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -804,21 +634,8 @@
     ></td>
   </table>
   
-  Wait for a process to terminate, return on termination or expiry of 
-  the timeout.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>process</code></strong> - The process handle returned from the <a 
-          href="pysys.basetest.BaseTest-class.html#startProcess" 
-          class="link">startProcess()</a> method</li>
-        <li><strong class="pname"><code>timeout</code></strong> - The timeout value in seconds to wait before returning</li>
-    </ul>
-      <p><strong>To Do:</strong>
-        The underlying implementation in the process helper needs to be 
-        implemented
-      </p>
-      </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -837,30 +654,8 @@
     ></td>
   </table>
   
-  <p>Start a separate thread to log process statistics to logfile, and 
-  return a handle to the process monitor.</p>
-  This method uses the <a href="pysys.process.monitor-module.html" 
-  class="link">pysys.process.monitor</a> module to perform logging of the 
-  process statistics, starting the monitor as a seperate background thread.
-  Should the request to log the statistics fail a <code>BLOCKED</code> 
-  outcome will be added to the test outcome list. All process monitors not 
-  explicitly stopped using the returned handle are automatically stopped on
-  completion of the test via the <a 
-  href="pysys.basetest.BaseTest-class.html#cleanup" 
-  class="link">cleanup()</a> method of the BaseTest.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>process</code></strong> - The process handle returned from the <a 
-          href="pysys.basetest.BaseTest-class.html#startProcess" 
-          class="link">startProcess()</a> method</li>
-        <li><strong class="pname"><code>interval</code></strong> - The interval in seconds between collecting and logging the 
-          process statistics</li>
-        <li><strong class="pname"><code>file</code></strong> - The full path to the filename used for logging the process 
-          statistics</li>
-    </ul>
-    <dl><dt>Returns: <code>handle</code></dt>
-        <dd>A handle to the process monitor</dd></dl>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -877,14 +672,8 @@
     ></td>
   </table>
   
-  Stop a process monitor.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>monitor</code></strong> - The process monitor handle returned from the <a 
-          href="pysys.basetest.BaseTest-class.html#startProcessMonitor" 
-          class="link">startProcessMonitor()</a> method</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -904,35 +693,8 @@
     ></td>
   </table>
   
-  <p>Start the manual tester.</p>
-  The manual tester user interface (UI) is used to describe a series of 
-  manual steps to be performed to execute and validate a test. Only a 
-  single instance of the UI can be running at any given time, and can be 
-  run either in the <code>FOREGROUND</code> (method will not return until 
-  the UI is closed or the timeout occurs) or in the <code>BACKGROUND</code>
-  (method will return straight away so automated actions may be performed 
-  concurrently). Should the UI be terminated due to expiry of the timeout, 
-  a <code>TIMEDOUT</code> outcome will be added to the outcome list. The UI
-  can be stopped via the <a 
-  href="pysys.basetest.BaseTest-class.html#stopManualTester" 
-  class="link">stopManualTester()</a> method. An instance of the UI not 
-  explicitly stopped within a test will automatically be stopped via the <a
-  href="pysys.basetest.BaseTest-class.html#cleanup" 
-  class="link">cleanup()</a> method of the BaseTest.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>file</code></strong> - The name of the manual test xml input file (see <a 
-          href="pysys.xml.manual-module.html" 
-          class="link">pysys.xml.manual</a> for details on the DTD)</li>
-        <li><strong class="pname"><code>filedir</code></strong> - The directory containing the manual test xml input file 
-          (defaults to the output subdirectory)</li>
-        <li><strong class="pname"><code>state</code></strong> - Start the manual tester either in the <code>FOREGROUND</code> 
-          or <code>BACKGROUND</code> (defaults to 
-          <code>FOREGROUND</code>)</li>
-        <li><strong class="pname"><code>timeout</code></strong> - The timeout period after which to termintate a manual tester 
-          running in the <code>FOREGROUND</code></li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -948,7 +710,7 @@
     ></td>
   </table>
   
-  Stop the manual tester if running.
+  
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -966,7 +728,7 @@
     ></td>
   </table>
   
-  Wait for the manual tester to be stopped via user interaction.
+  
   <dl><dt></dt><dd>
   </dd></dl>
 </td></tr></table>
@@ -984,12 +746,8 @@
     ></td>
   </table>
   
-  Wait for a specified period of time.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>interval</code></strong> - The time interval in seconds to wait</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1008,23 +766,8 @@
     ></td>
   </table>
   
-  <p>Wait for a socket connection to be established.</p>
-  This method blocks until connection to a particular host:port pair can
-  be established. This is useful for test timing where a component under 
-  test creates a socket for client server interaction - calling of this 
-  method ensures that on return of the method call the server process is 
-  running and a client is able to create connections to it. If a connection
-  cannot be made within the specified timeout interval, a 
-  <code>TIMEDOUT</code> outcome is written to the outcome list, and the 
-  method returns to the caller.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>port</code></strong> - The port value in the socket host:port pair</li>
-        <li><strong class="pname"><code>host</code></strong> - The host value in the socket host:port pair</li>
-        <li><strong class="pname"><code>timeout</code></strong> - The timeout in seconds to wait for connection to the 
-          socket</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1042,19 +785,8 @@
     ></td>
   </table>
   
-  <p>Wait for a file to be written to disk.</p>
-  This method blocks until a file is created on disk. This is useful for
-  test timing where a component under test creates a file (e.g. for 
-  logging) indicating it has performed all initialisation actions and is 
-  ready for the test execution steps. If a file is not created on disk 
-  within the specified timeout interval, a <code>TIMEDOUT</code> outcome is
-  written to the outcome list, and the method returns to the caller.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>filename</code></strong> - The full path to the file to wait for creation</li>
-        <li><strong class="pname"><code>timeout</code></strong> - The timeout in seconds to wait for the file to be created</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1066,7 +798,7 @@
   <h3><span class="sig"><span class="sig-name">waitForSignal</span>(<span class="sig-arg">self</span>,
         <span class="sig-arg">basename</span>,
         <span class="sig-arg">expr</span>,
-        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;&gt;=1&quot;</span>,
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>,
         <span class="sig-arg">timeout</span>=<span class="sig-default">TIMEOUTS ['WaitForSignal']</span>,
         <span class="sig-arg">poll</span>=<span class="sig-default">0.25</span>)</span>
   </h3>
@@ -1075,29 +807,8 @@
     ></td>
   </table>
   
-  <p>Wait for a particular regular expression to be seen on a set number of
-  lines in a text file.</p>
-  This method blocks until a particular regular expression is seen in a 
-  text file on a set number of lines. The number of lines which should 
-  match the regular expression is given by the <code>condition</code> 
-  argument in textual form i.e. for a match on more than 2 lines use 
-  condition =&quot;&gt;2&quot;. If the regular expression is not seen in 
-  the file matching the supplied condition within the specified timeout 
-  interval, a <code>TIMEDOUT</code> outcome is written to the outcome list,
-  and the method returns to the caller.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>basename</code></strong> - The full path to the file to check for the regular 
-          expression</li>
-        <li><strong class="pname"><code>exp</code></strong> - The regular expression to search for in the text file</li>
-        <li><strong class="pname"><code>condition</code></strong> - The condition to be met for the number of lines matching the 
-          regular expression</li>
-        <li><strong class="pname"><code>timeout</code></strong> - The timeout in seconds to wait for the regular expression and 
-          to check against the condition</li>
-        <li><strong class="pname"><code>poll</code></strong> - The time in seconds to poll the file looking for the regular 
-          expression and to check against the condition</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1114,16 +825,8 @@
     ></td>
   </table>
   
-  <p>Perform a validation assert on the supplied expression evaluating to 
-  true.</p>
-  If the supplied expression evaluates to true a <code>PASSED</code> 
-  outcome is added to the outcome list. Should the expression evaluate to 
-  false, a <code>FAILED</code> outcome is added.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>expr</code></strong> - The expression to check for the true | false value</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1140,16 +843,8 @@
     ></td>
   </table>
   
-  <p>Perform a validation assert on the supplied expression evaluating to 
-  false.</p>
-  If the supplied expression evaluates to false a <code>PASSED</code> 
-  outcome is added to the outcome list. Should the expression evaluate to 
-  true, a <code>FAILED</code> outcome is added.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>expr</code></strong> - The expression to check for the true | false value</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1173,38 +868,8 @@
     ></td>
   </table>
   
-  <p>Perform a validation assert on the comparison of two input text 
-  files.</p>
-  This method performs a file comparison on two input files. The files 
-  are pre-processed prior to the comparison to either ignore particular 
-  lines, sort their constituent lines, replace matches to regular 
-  expressions in a line with an alternate value, or to only include 
-  particular lines. Should the files after pre-processing be equivalent a 
-  <code>PASSED</code> outcome is added to the test outcome list, otherwise 
-  a <code>FAILED</code> outcome is added.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>file1</code></strong> - The basename of the first file used in the file comparison</li>
-        <li><strong class="pname"><code>file2</code></strong> - The basename of the second file used in the file 
-          comparison</li>
-        <li><strong class="pname"><code>filedir1</code></strong> - The dirname of the first file (defaults to the testcase output
-          subdirectory)</li>
-        <li><strong class="pname"><code>filedir2</code></strong> - The dirname of the second file (defaults to the testcase 
-          reference directory)</li>
-        <li><strong class="pname"><code>ignores</code></strong> - A list of regular expressions used to denote lines in the 
-          files which should be ignored</li>
-        <li><strong class="pname"><code>sort</code></strong> - Boolean flag to indicate if the lines in the files should be 
-          sorted prior to the comparison</li>
-        <li><strong class="pname"><code>replace</code></strong> - List of tuples of the form ('regexpr', 'replacement'). For 
-          each regular expression in the list, any occurences in the files 
-          is replaced with the replacement value prior to the comparison 
-          being carried out. This is often useful to replace timestamps in 
-          logfiles etc.</li>
-        <li><strong class="pname"><code>includes</code></strong> - A list of regular expressions used to denote lines in the 
-          files which should be used in the comparison. Only lines which 
-          match an expression in the list are used for the comparison</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1224,24 +889,8 @@
     ></td>
   </table>
   
-  <p>Perform a validation assert on a regular expression occurring in a 
-  text file.</p>
-  When the <code>contains</code> input argument is set to true, this 
-  method will add a <code>PASSED</code> outcome to the test outcome list if
-  the supplied regular expression is seen in the file; otherwise a 
-  <code>FAILED</code> outcome is added. Should <code>contains</code> be set
-  to false, a <code>PASSED</code> outcome will only be added should the 
-  regular expression not be seen in the file.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>file</code></strong> - The basename of the file used in the grep</li>
-        <li><strong class="pname"><code>filedir</code></strong> - The dirname of the file (defaults to the testcase output 
-          subdirectory)</li>
-        <li><strong class="pname"><code>expr</code></strong> - The regular expression to check for in the file</li>
-        <li><strong class="pname"><code>contains</code></strong> - Boolean flag to denote if the expression should or should not 
-          be seen in the file</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1261,27 +910,8 @@
     ></td>
   </table>
   
-  <p>Perform a validation assert on a list of regular expressions occurring
-  in specified order in a text file.</p>
-  When the <code>contains</code> input argument is set to true, this 
-  method will append a <code>PASSED</code> outcome to the test outcome list
-  if the supplied regular expressions in the <code>exprList</code> are seen
-  in the file in the order they appear in the list; otherwise a 
-  <code>FAILED</code> outcome is added. Should <code>contains</code> be set
-  to false, a <code>PASSED</code> outcome will only be added should the 
-  regular expressions not be seen in the file in the order they appear in 
-  the list.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>file</code></strong> - The basename of the file used in the ordered grep</li>
-        <li><strong class="pname"><code>filedir</code></strong> - The dirname of the file (defaults to the testcase output 
-          subdirectory)</li>
-        <li><strong class="pname"><code>exprList</code></strong> - A list of regular expressions which should occur in the file 
-          in the order they appear in the list</li>
-        <li><strong class="pname"><code>contains</code></strong> - Boolean flag to denote if the expressions should or should not
-          be seen in the file in the order specified</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1294,30 +924,15 @@
         <span class="sig-arg">file</span>,
         <span class="sig-arg">filedir</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">expr</span>=<span class="sig-default">''</span>,
-        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;&gt;=1&quot;</span>)</span>
+        <span class="sig-arg">condition</span>=<span class="sig-default">&quot;==1&quot;</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="pysys.basetest-pysrc.html#BaseTest.assertLineCount">source&nbsp;code</a></span>&nbsp;</span
     ></td>
   </table>
   
-  <p>Perform a validation assert on the number of lines in a text file 
-  matching a specific regular expression.</p>
-  This method will add a <code>PASSED</code> outcome to the outcome list
-  if the number of lines in the input file matching the specified regular 
-  expression evaluate to true when evaluated against the supplied 
-  condition.
+  
   <dl><dt></dt><dd>
-    <dl><dt>Parameters:</dt></dl>
-    <ul>
-        <li><strong class="pname"><code>file</code></strong> - The basename of the file used in the line count</li>
-        <li><strong class="pname"><code>filedir</code></strong> - The dirname of the file (defaults to the testcase output 
-          subdirectory)</li>
-        <li><strong class="pname"><code>expr</code></strong> - The regular expression used to match a line of the input 
-          file</li>
-        <li><strong class="pname"><code>condition</code></strong> - The condition to be met for the number of lines matching the 
-          regular expression</li>
-    </ul>
   </dd></dl>
 </td></tr></table>
 </div>
@@ -1348,7 +963,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">Generated by Epydoc
-        3.0alpha2 on Fri Oct 06 16:05:46 2006</td>
+        3.0alpha2 on Fri Aug 11 21:49:50 2006</td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
     </td>

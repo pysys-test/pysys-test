@@ -3,8 +3,7 @@ __all__ = [ "filecopy",
 				"filegrep",
 				"filereplace", 
 				"fileunzip",
-				"linecount",
-				"smtpserver" ]
+				"linecount" ]
 
 
 

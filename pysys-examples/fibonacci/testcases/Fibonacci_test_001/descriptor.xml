@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="yes"?>
-<pysystest type="auto" state="runnable">
+<pysystest state="runnable">
     
   <description> 
     <title>Python to calculate the fibonacci series - validate in memory</title>
@@ -12,19 +12,11 @@ tenth entry is equal to 34.
   </description>
 
   <classification>
-    <groups/>
-    <modes/>
+    <suite>Fibonacci examples</suite>
   </classification>
 
   <data>
     <class name="PySysTest" module="run"/>
   </data>
-  
-  <traceability>
-    <requirements>  
-      <requirement id="AL1" />    
-      <requirement id="AL2" />    
-    </requirements>
-  </traceability>
 </pysystest>
 

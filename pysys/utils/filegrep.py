@@ -26,15 +26,6 @@ from pysys.exceptions import *;
 
 
 def filegrep(file, expr):
-	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
-	
-	@param file: The full path to the input file
-	@param expr: The regular expression (uncompiled) to search for in the input file
-	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
-	@rtype: integer
-	@raises FileNotFoundException: Raised if the input file does not exist
-	
-	"""
 	if not os.path.exists(file):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
 	else:
@@ -48,28 +39,6 @@ def filegrep(file, expr):
 
 
 def orderedgrep(file, exprList):
-	"""Seach for ordered matches to a set of regular expressions in an input file, returning true if the matches occur in the correct order.
-	
-	The ordered grep method will only return true if matches to the set of regular expression in the expression 
-	list occur in the input file in the order they appear in the expression list. Matches to the regular expressions 
-	do not have to be across sequential lines in the input file, only in the correct order. For example, for a file 
-	with contents ::
-	  
-	    A is for apple 
-	    B is for book
-	    C is for cat
-	    D is for dog
-	
-	an expression list of ["^A.*$", "^C.*$", "^D.*$"] will return true, whilst an expression list of 
-	["^A.*$", "^C.$", "^B.$"] will return false.
-	
-	@param file: The full path to the input file
-	@param exprList: A list of regular expressions (uncompiled) to search for in the input file
-	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
-	@rtype: integer
-	@raises FileNotFoundException: Raised if the input file does not exist
-		
-	"""
 	list = copy.deepcopy(exprList)
 	list.reverse();
 	expr = list.pop();

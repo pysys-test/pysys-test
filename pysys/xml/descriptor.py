@@ -26,13 +26,14 @@ from pysys.constants import *
 log = logging.getLogger('pysys.xml.descriptor')
 
 DTD='''
-<!ELEMENT pysystest (description, classification?, data?, traceability?) > 
+<!ELEMENT pysystest (description, classification, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
-<!ELEMENT classification (groups?, modes?) >
+<!ELEMENT classification (suite, groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
 <!ELEMENT traceability (requirements) >
 <!ELEMENT title (#PCDATA) >
 <!ELEMENT purpose (#PCDATA) >
+<!ELEMENT suite (#PCDATA) >
 <!ELEMENT groups (group)+ >
 <!ELEMENT modes (mode)+ >
 <!ELEMENT class EMPTY >
@@ -43,7 +44,6 @@ DTD='''
 <!ELEMENT group (#PCDATA) >
 <!ELEMENT mode (#PCDATA) >
 <!ELEMENT requirement EMPTY >
-<!ATTLIST pysystest type (auto | manual ) "auto" >
 <!ATTLIST pysystest state (runnable | deprecated | skipped) "runnable" >
 <!ATTLIST class name CDATA #REQUIRED
                 module CDATA #REQUIRED >
@@ -54,8 +54,8 @@ DTD='''
 '''
 
 
-DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
-<pysystest type="%s" state="runnable">
+TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
+<pysytest state="runnable">
     
   <description> 
     <title></title>    
@@ -65,50 +65,26 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
   </description>
 
   <classification>
-    <groups>
-      <group>%s</group>
-    </groups>
+    <suite>%s</suite>
   </classification>
 
   <data>
     <class name="%s" module="%s"/>
   </data>
-  
-  <traceability>
-    <requirements>
-      <requirement id=""/>     
-    </requirements>
-  </traceability>
 </pysystest>
 ''' 
 
 
 class XMLDescriptorContainer:
-	"""Holder class for the contents of a testcase descriptor. """
+	'''Holder class for the contents of a test descriptor.'''
 
-	def __init__(self, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
-		"""Create an instance of the XMLDescriptorContainer class.
-		
-		@param id: The testcase identifier
-		@param type: The type of the testcase (automated or manual)
-		@param state: The state of the testcase (runable, deprecated or skipped)
-		@param title: The title of the testcase
-		@param purpose: The purpose of the testcase
-		@param groups: A list of the user defined groups the testcase belongs to
-		@param modes: A list of the user defined modes the testcase can be run in
-		@param classname: The classname of the testcase
-		@param module: The full path to the python module containing the testcase class
-		@param input: The full path to the input directory of the testcase
-		@param output: The full path to the output parent directory of the testcase
-		@param reference: The full path to the reference directory of the testcase
-		@param traceability: A list of the requirements covered by the testcase
-		
-		"""
+	def __init__(self, id, state, title, purpose, suite, groups, modes, classname, module, input, output, reference, traceability):
+		'''Class constructor.'''
 		self.id = id
-		self.type = type
 		self.state = state
 		self.title = title
 		self.purpose = purpose
+		self.suite = suite
 		self.groups = groups
 		self.modes = modes
 		self.classname = classname
@@ -119,49 +95,41 @@ class XMLDescriptorContainer:
 		self.traceability = traceability
 
 		
-	def __str__(self):
-		"""Return an informal string representation of the xml descriptor container object
-		
-		@return: The string represention
-		@rtype: string
-		"""
-		
-		str=    "Test id:           %s\n" % self.id
-		str=str+"Test type:         %s\n" % self.type
-		str=str+"Test state:        %s\n" % self.state
-		str=str+"Test title:        %s\n" % self.title
-		str=str+"Test purpose:     "
+	def toString(self):
+		print "Test id:           %s" % self.id
+		print "Test state:        %s" % self.state
+		print "Test title:        %s" % self.title
+		print "Test purpose:     ",
 		purpose = self.purpose.split('\n')
 		for index in range(0, len(purpose)):
-			if index == 0: str=str+"%s\n" % purpose[index]
-			if index != 0: str=str+"                   %s\n" % purpose[index] 
-		str=str+"Test groups:       %s\n" % self.groups
-		str=str+"Test modes:        %s\n" % self.modes
-		str=str+"Test classname:    %s\n" % self.classname
-		str=str+"Test module:       %s\n" % self.module
-		str=str+"Test input:        %s\n" % self.input
-		str=str+"Test output:       %s\n" % self.output
-		str=str+"Test reference:    %s\n" % self.reference
-		str=str+"Test traceability: %s\n" % self.traceability
-		str=str+""
-		return str
+			if index == 0: print purpose[index]
+			if index != 0: print "                   %s" % purpose[index]
+		print "Test suite:        %s" % self.suite 
+		print "Test groups:       %s" % self.groups
+		print "Test modes:        %s" % self.modes
+		print "Test classname:    %s" % self.classname
+		print "Test module:       %s" % self.module
+		print "Test input:        %s" % self.input
+		print "Test output:       %s" % self.output
+		print "Test reference:    %s" % self.reference
+		print "Test traceability: %s" % self.traceability
+
 
 
 class XMLDescriptorCreator:
 	'''Helper class to create a test desriptor template.'''
 		
-	def __init__(self, file, type="auto", group=DEFAULT_GROUP, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
+	def __init__(self, file, suite=DEFAULT_SUITE, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
 		'''Class constructor.'''
 		self.file=file
-		self.type = type
-		self.group = group
+		self.suite = suite
 		self.testclass = testclass
 		self.module = module
 	
 	def writeXML(self):
 		'''Write a test descriptor template to file.'''
 		fp = open(self.file, 'w')
-		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.group, self.testclass, self.module))
+		fp.writelines(TEMPLATE % (self.suite, self.testclass, self.module))
 		fp.close
 
 
@@ -197,9 +165,9 @@ class XMLDescriptorParser:
 
 	def getContainer(self):
 		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
-		return XMLDescriptorContainer(self.getID(), self.getType(), self.getState(),
+		return XMLDescriptorContainer(self.getID(), self.getState(),
 										self.getTitle(), self.getPurpose(),
-										self.getgroups(), self.getModes(),
+										self.getSuite(), self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
 										os.path.join(self.dirname, self.getClassDetails()[1]),
 										os.path.join(self.dirname, self.getTestInput()),
@@ -216,24 +184,12 @@ class XMLDescriptorParser:
 	def getID(self):
 		'''Return the id of the test.'''
 		return os.path.basename(self.dirname)
-
-
-	def getType(self):
-		'''Return the type attribute of the test element.'''
-		type = self.root.getAttribute("type")	
-		if type == "":
-			type = "auto"
-		elif type not in ["auto", "manual"]:
-			raise Exception, "The type attribute of the test element should be \"auto\" or \"manual\""
-		return type
-
-
+	
+	
 	def getState(self):
 		'''Return the state attribute of the test element.'''
 		state = self.root.getAttribute("state")	
-		if state == "":
-			state = "runnable"
-		elif state not in ["runnable", "deprecated", "skipped"]: 
+		if state not in ["runnable", "deprecated", "skipped"]: 
 			raise Exception, "The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\""
 		return state 
 	
@@ -268,9 +224,25 @@ class XMLDescriptorParser:
 				return purpose.childNodes[0].data
 			except:
 				return ""
+				
+				
+	def getSuite(self):
+		'''Return the test suite character data of the suite element.'''
+		classificationNodeList = self.root.getElementsByTagName('classification')
+		if classificationNodeList == []:
+			raise Exception, "No <classification> element supplied in XML descriptor"
+	
+		if classificationNodeList[0].getElementsByTagName('suite') == []:
+			raise Exception, "No <suite> child element of <classification> supplied in XML descriptor"
+		else:
+			try:
+				suite = classificationNodeList[0].getElementsByTagName('suite')[0]
+				return suite.childNodes[0].data
+			except:
+				return ""
 			
 				
-	def getgroups(self):
+	def getGroups(self):
 		'''Return a list of the group names, contained in the character data of the group elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
 		if classificationNodeList == []:
@@ -365,7 +337,7 @@ if __name__ == "__main__":
 	
 	if sys.argv[1] == "parse":
 		parser = XMLDescriptorParser(sys.argv[2])
-		print parser.getContainer()
+		parser.getContainer().toString()
 		parser.unlink()
 
 	elif sys.argv[1] == "create":

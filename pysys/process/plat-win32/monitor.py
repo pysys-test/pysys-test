@@ -25,35 +25,7 @@ from pysys.constants import *
 
 
 class ProcessMonitor:
-	"""Win32 process monitor for the logging of process statistics.
-	
-	The win32 process monitor uses the win32pdh module to obtain and log to file statistics on a 
-	given process as determined by the process id. Statistics obtained include the CPU usage (%), 
-	the working set (virtual memory pages allocated), the virtual bytes (virtual address space 
-	including shared memory segments), the private bytes (virtual address space not including 
-	shared memory segments), and the number of process threads. All memory values are quoted in 
-	KBytes. 
-	
-	Usage of the class is to create an instance specifying the process id, the logging interval and 
-	the log file. Once created, the process monitor is started and stopped via its L{start()} and 
-	L{stop()} methods. Process monitors are started as a seperate thread, so controll passes back to 
-	the caller of the C{start()} method immediately. The format of the log file is tab separated, 
-	with an intial timestamp used to denote the time the statistics were obtained, e.g. ::
-	
-		18/05/07 16:56:28       0       19464   46044   17708   1
-		18/05/07 16:56:38       37      19536   46044   17716   1
-		18/05/07 16:56:48       54      19616   46044   17984   1
-
-	"""
-	
 	def __init__(self, pid, interval, file=None):
-		"""Construct an instance of the process monitor.
-		
-		@param pid: The process id to monitor
-		@param interval:  The interval in seconds to record the process statistics
-		@param file: The full path to the file to log the process statistics
-			
-		"""
 		self.pid = pid
 		self.interval = interval
 		if file:
@@ -62,7 +34,7 @@ class ProcessMonitor:
 			self.file = sys.stdout
 			
 			
-	def __win32GetInstance(self, pid, bRefresh=0):
+	def win32GetInstance(self, pid, bRefresh=0):
 		# refresh allows process started after the python process
 		# to be picked up
 		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
@@ -85,7 +57,7 @@ class ProcessMonitor:
 		for instance, numInstances in instanceDict.items():
 			for inum in xrange(numInstances+1):
 				try:
-					value = self.__win32getProfileAttribute(instance, inum, "ID Process")
+					value = self.win32getProfileAttribute(instance, inum, "ID Process")
 					if value == pid:
 						return instance, inum
 				except:
@@ -94,7 +66,7 @@ class ProcessMonitor:
 		return instance, inum
 
 
-	def __win32getProfileAttribute(self, instance, inum, counter):
+	def win32getProfileAttribute(self, instance, inum, counter):
 		# create the path for the counter of interest
 		path = win32pdh.MakeCounterPath((None, "Process", instance, None, inum, counter))
 		
@@ -124,7 +96,7 @@ class ProcessMonitor:
 		return value
 
 
-	def __win32LogProfile(self, instance, inum, interval, file):
+	def win32LogProfile(self, instance, inum, interval, file):
 		# open a query ready to perform repeat logging
 		query = win32pdh.OpenQuery()
 		
@@ -162,28 +134,36 @@ class ProcessMonitor:
 			if fpcounters[i]:  win32pdh.RemoveCounter(fpcounters[i])
 		win32pdh.CloseQuery(query)
 
-
-	def running(self):
-		"""Return the running status of the process monitor.
-		
-		@return: The running status (L{pysys.constants.TRUE} | L{pysys.constants.FALSE})
-		@rtype: integer
-   		"""
-		return self.active
-
 	
+	# public methods to start and stop a process monitor thread
 	def start(self):
-		"""Start the process monitor.
-		
-		"""
 		self.active = 1
-		instance, inum = self.__win32GetInstance(pid=self.pid, bRefresh=1)
-		thread.start_new_thread(self.__win32LogProfile, (instance, inum, self.interval, self.file))
-		
+		instance, inum = self.win32GetInstance(pid=self.pid, bRefresh=1)
+		thread.start_new_thread(self.win32LogProfile, (instance, inum, self.interval, self.file))
+
 
 	def stop(self):
-		"""Stop the process monitor.
-		
-		"""
 		self.active = 0
 		
+
+
+
+# used to run class from the command line
+if __name__ == "__main__":
+	if len(sys.argv) < 5:
+		print "Usage: monitor.py <pid> <interval> <duration> <filename>"
+	else:
+		try: 
+			pid = int(sys.argv[1])
+			interval = int(sys.argv[2])
+			duration = int(sys.argv[3])
+			file = sys.argv[4]
+		except: 
+			print "Process ID, interval and duration should be valid integers"
+			sys.exit(-1)	
+		
+		monitor = ProcessMonitor(pid, interval, file)
+		monitor.start()
+		time.sleep(duration)
+		monitor.stop()
+
