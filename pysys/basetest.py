@@ -88,9 +88,11 @@ class BaseTest:
 	@type reference: string
 	@ivar log: Reference to the logger instance of this class
 	@type log: L{logging.Logger}
+	@ivar project: Reference to the project details as set on the module load of the launching executable  
+	@type project: L{Project}
 		
 	"""
-
+	
 	def __init__ (self, descriptor, outsubdir, mode, xargs):
 		"""Create an instance of the BaseTest class.
 		
@@ -111,8 +113,9 @@ class BaseTest:
 		self.manualTester = None
 		self.outcome = []
 		self.log = log
-
-
+		self.project = PROJECT
+		
+		
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the test class.
 				
@@ -175,6 +178,7 @@ class BaseTest:
 		list = copy.copy(self.outcome)
 		list.sort(lambda x, y: cmp(PRECEDENT.index(x), PRECEDENT.index(y)))
 		return list[0]
+			
 
 
 	# test methods for execution, validation and cleanup. The execute method is
@@ -469,20 +473,27 @@ class BaseTest:
 		"""
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
+		log.debug("Performing wait for socket creation:")
+		log.debug("  file:       %d" % port)
+		log.debug("  filedir:    %s" % host)
+		
+		exit = FALSE
 		startTime = time.time()
-		while 1:
+		while not exit:
 			try:
 				s.connect((host, port))
-				break
+				exit = TRUE
 			except socket.error:
 				if timeout:
 					currentTime = time.time()
 					if currentTime > startTime + timeout:
+						log.info("Timedout waiting for creation of socket")
 						break
 			time.sleep(0.01)
+		if exit: log.debug("Wait for socket creation completed successfully")
+	
 
-
-	def waitForFile(self, filename, timeout=TIMEOUTS['WaitForFile']):
+	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile']):
 		"""Wait for a file to be written to disk.
 		
 		This method blocks until a file is created on disk. This is useful for test timing where 
@@ -491,20 +502,32 @@ class BaseTest:
 		on disk within the specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome 
 		list, and the method returns to the caller.
 		
-		@param filename: The full path to the file to wait for creation
+		@param file: The basename of the file used to wait to be created
+		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param timeout: The timeout in seconds to wait for the file to be created
 		
 		"""
+		if filedir == None: filedir = self.output
+		f = os.path.join(filedir, file)
+		
+		log.debug("Performing wait for file creation:")
+		log.debug("  file:       %s" % file)
+		log.debug("  filedir:    %s" % filedir)
+		
+		exit = FALSE
 		startTime = time.time()
-		while not os.path.exists(filename):
+		while not exit:
 			if timeout:
 				currentTime = time.time()
 				if currentTime > startTime + timeout:
+					log.info("Timedout waiting for creation of file %s" % file)
 					break
 			time.sleep(0.01)
+			exit = os.path.exists(f)
+		if exit: log.debug("Wait for file creation completed successfully")
+			
 
-
-	def waitForSignal(self, basename, expr, condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25):
+	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25):
 		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
 		
 		This method blocks until a particular regular expression is seen in a text file on a set
@@ -514,22 +537,33 @@ class BaseTest:
 		specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome list, and the method 
 		returns to the caller.
 		
-		@param basename: The full path to the file to check for the regular expression
+		@param file: The basename of the file used to wait for the signal
+		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression to search for in the text file
 		@param condition: The condition to be met for the number of lines matching the regular expression
 		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		"""
-		file = os.path.join(self.output, basename)
-
+		if filedir == None: filedir = self.output
+		f = os.path.join(filedir, file)
+		
+		log.debug("Performing wait for signal in file:")
+		log.debug("  file:       %s" % file)
+		log.debug("  filedir:    %s" % filedir)
+		log.debug("  expression: %s" % expr)
+		log.debug("  condition:  %s" % condition)
+		
 		startTime = time.time()
 		while 1:
-			if os.path.exists(file):
-				if eval("%d %s" % (linecount(file, expr), condition)):
+			if os.path.exists(f):
+				if eval("%d %s" % (linecount(f, expr), condition)):
+					log.debug("Wait for signal in file completed successfully")
 					break
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
+				log.info("Timedout waiting for signal in file %s" % file)
+				log.debug("Number of matches to the expression are %d" % linecount(f, expr))
 				break
 			time.sleep(poll)
 
@@ -543,7 +577,7 @@ class BaseTest:
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
 		
-		@param expr: The expression to check for the true | false value
+		@param expr: The expression, as a string, to check for the true | false value
 				
 		"""
 		if expr == TRUE:
@@ -598,6 +632,12 @@ class BaseTest:
 		f1 = os.path.join(filedir1, file1)
 		f2 = os.path.join(filedir2, file2)
 
+		log.debug("Performing file comparison:")
+		log.debug("  file1:       %s" % file1)
+		log.debug("  filedir1:    %s" % filedir1)
+		log.debug("  file2:       %s" % file2)
+		log.debug("  filedir2:    %s" % filedir2)
+		
 		try:
 			result = filediff(f1, f2, ignores, sort, replace, includes)
 		except IOError, value:
@@ -628,6 +668,12 @@ class BaseTest:
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
 
+		log.debug("Performing grep on file:")
+		log.debug("  file:       %s" % file)
+		log.debug("  filedir:    %s" % filedir)
+		log.debug("  expr:       %s" % expr)
+		log.debug("  contains:   %s" % LOOKUP[contains])
+		
 		try:
 			result = filegrep(f, expr)
 		except IOError, value:
@@ -658,7 +704,13 @@ class BaseTest:
 		"""
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
-
+	
+		log.debug("Performing ordered grep on file:")
+		log.debug("  file:       %s" % file)
+		log.debug("  filedir:    %s" % filedir)
+		for expr in exprList: log.debug("  exprList:   %s" % expr)
+		log.debug("  contains:   %s" % LOOKUP[contains])
+		
 		try:
 			result = orderedgrep(f, exprList)
 		except IOError, value:

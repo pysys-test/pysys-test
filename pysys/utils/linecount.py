@@ -19,10 +19,12 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import os, os.path, sys, re
+import os, os.path, sys, re, logging
 
 from pysys.exceptions import *;
 
+# create the class logger
+log = logging.getLogger('pysys.utils.linecount')
 
 def linecount(file, regexpr=None):
 	"""Count the number of lines in an input file matching a regular expression, return the count.

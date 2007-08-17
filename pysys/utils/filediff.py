@@ -140,8 +140,8 @@ def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[])
 			list1.sort()
 			list2.sort()
 
-		logContents("Contents of %s after pre-processing;" % file1, list1)
-		logContents("Contents of %s after pre-processing;" % file2, list2)		
+		logContents("Contents of %s after pre-processing;" % os.path.basename(file1), list1)
+		logContents("Contents of %s after pre-processing;" % os.path.basename(file2), list2)		
 			
 		if list1 != list2:
 			log.debug("Unified diff between pre-processed input files;")
