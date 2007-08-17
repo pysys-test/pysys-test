@@ -55,6 +55,9 @@ class BaseRunner:
 	@type outsubdir: string
 	@ivar log: Reference to the logger instance of this class
 	@type log: L{logging.Logger}
+	@ivar project: Reference to the project details as set on the module load of the launching executable  
+	@type project: L{Project}
+	
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, outsubdir, descriptors, xargs):
@@ -78,8 +81,9 @@ class BaseRunner:
 		self.xargs = xargs
 		self.setKeywordArgs(xargs)
 		self.log = log
-
-
+		self.project = PROJECT
+		
+	
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the class.
 				
@@ -261,7 +265,7 @@ class BaseRunner:
 					testObj = BaseTest(descriptor, outsubdir, self.mode, self.xargs) 
 					blocked = TRUE
 				sys.path.pop()
-
+				
 				if descriptor.state != 'runnable':
 					testObj.outcome.append(SKIPPED)
 					
