@@ -69,7 +69,6 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 					  	if descriptors[i].id == string.split(testIdSpec, ':')[1]: index2 = i
 					tests.extend(descriptors[index1:index2+1])
 			except :
-				log.info("Unable to locate requested testcase(s)")
 				raise Exception("Unable to locate requested testcase(s)")
 				
 	# trim down the list based on the type
@@ -123,8 +122,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 				index = index + 1
 	
 	if len(tests) == 0:
-		log.info("The supplied options and subset of tests did not result in any tests being selected to run")
-		raise Exception("The supplied options and subset of tests did not result in any tests being selected to run")
+		raise Exception("The supplied options did not result in the selection of any tests")
 	else:
 		return tests
 		
