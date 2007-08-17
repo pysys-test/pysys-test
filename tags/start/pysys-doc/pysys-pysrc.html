@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pysys</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th bgcolor="#70b0f0" class="navselect"
+          >&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;pysys
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pysys-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="pysys-module.html">Package pysys</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"><span class="py-docstring">"""PySys System Test Framework.</span> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-docstring"></span> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-docstring">"""</span> </span>
+<span class="lineno"> 4</span>  <span class="py-line"> </span>
+<span class="lineno"> 5</span>  <span class="py-line"><span class="py-keyword">import</span> <span class="py-name">sys</span><span class="py-op">,</span> <span class="py-name">logging</span> </span>
+<span class="lineno"> 6</span>  <span class="py-line"><span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">_levelNames</span><span class="py-op">[</span><span class="py-number">50</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-string">'CRIT'</span> </span>
+<span class="lineno"> 7</span>  <span class="py-line"> </span>
+<span class="lineno"> 8</span>  <span class="py-line"><a class="py-name" href="pysys-module.html#__author__">__author__</a>  <span class="py-op">=</span> <span class="py-string">"Moray Grieve"</span> </span>
+<span class="lineno"> 9</span>  <span class="py-line"><span class="py-string">"""The author of PySys."""</span> </span>
+<span class="lineno">10</span>  <span class="py-line"> </span>
+<span class="lineno">11</span>  <span class="py-line"><a class="py-name" href="pysys-module.html#__author_email__">__author_email__</a> <span class="py-op">=</span> <span class="py-string">"moraygrieve@users.sourceforge.net"</span> </span>
+<span class="lineno">12</span>  <span class="py-line"><span class="py-string">"""The author's email address."""</span> </span>
+<span class="lineno">13</span>  <span class="py-line"> </span>
+<span class="lineno">14</span>  <span class="py-line"><a class="py-name" href="pysys-module.html#__status__">__status__</a>  <span class="py-op">=</span> <span class="py-string">"alpha"</span> </span>
+<span class="lineno">15</span>  <span class="py-line"><span class="py-string">"""The status of this release."""</span> </span>
+<span class="lineno">16</span>  <span class="py-line"> </span>
+<span class="lineno">17</span>  <span class="py-line"><a class="py-name" href="pysys-module.html#__version__">__version__</a> <span class="py-op">=</span> <span class="py-string">"0.1.7"</span> </span>
+<span class="lineno">18</span>  <span class="py-line"><span class="py-string">"""The version of this release."""</span> </span>
+<span class="lineno">19</span>  <span class="py-line"> </span>
+<span class="lineno">20</span>  <span class="py-line"><a class="py-name" href="pysys-module.html#__date__">__date__</a>    <span class="py-op">=</span> <span class="py-string">"11 August 2006"</span> </span>
+<span class="lineno">21</span>  <span class="py-line"><span class="py-string">"""The date of this release."""</span> </span>
+<span class="lineno">22</span>  <span class="py-line"> </span>
+<span class="lineno">23</span>  <span class="py-line"><span class="py-name">__all__</span>     <span class="py-op">=</span> <span class="py-op">[</span> <span class="py-string">"constants"</span><span class="py-op">,</span> </span>
+<span class="lineno">24</span>  <span class="py-line">                <span class="py-string">"exceptions"</span><span class="py-op">,</span> </span>
+<span class="lineno">25</span>  <span class="py-line">                <span class="py-string">"baserunner"</span><span class="py-op">,</span> </span>
+<span class="lineno">26</span>  <span class="py-line">                <span class="py-string">"basetest"</span><span class="py-op">,</span> </span>
+<span class="lineno">27</span>  <span class="py-line">                <span class="py-string">"launcher"</span><span class="py-op">,</span> </span>
+<span class="lineno">28</span>  <span class="py-line">                <span class="py-string">"manual"</span><span class="py-op">,</span> </span>
+<span class="lineno">29</span>  <span class="py-line">                <span class="py-string">"process"</span><span class="py-op">,</span> </span>
+<span class="lineno">30</span>  <span class="py-line">                <span class="py-string">"utils"</span><span class="py-op">,</span> </span>
+<span class="lineno">31</span>  <span class="py-line">                <span class="py-string">"writer"</span><span class="py-op">,</span> </span>
+<span class="lineno">32</span>  <span class="py-line">                <span class="py-string">"xml"</span><span class="py-op">]</span> </span>
+<span class="lineno">33</span>  <span class="py-line"><span class="py-string">"""The submodules of PySys."""</span> </span>
+<span class="lineno">34</span>  <span class="py-line"> </span>
+<span class="lineno">35</span>  <span class="py-line"><a class="py-name" href="pysys-module.html#rootLogger">rootLogger</a> <span class="py-op">=</span> <span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">getLogger</span><span class="py-op">(</span><span class="py-string">'pysys'</span><span class="py-op">)</span> </span>
+<span class="lineno">36</span>  <span class="py-line"><span class="py-string">"""The root logger for all logging within PySys."""</span> </span>
+<span class="lineno">37</span>  <span class="py-line"> </span>
+<span class="lineno">38</span>  <span class="py-line"><a class="py-name" href="pysys-module.html#rootLogger">rootLogger</a><span class="py-op">.</span><span class="py-name">setLevel</span><span class="py-op">(</span><span class="py-name">logging</span><span class="py-op">.</span><a title="pysys.constants.INFO" class="py-name" href="pysys.constants-module.html#INFO">INFO</a><span class="py-op">)</span> </span>
+<span class="lineno">39</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th bgcolor="#70b0f0" class="navselect"
+          >&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Fri Aug 11 21:49:55 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
