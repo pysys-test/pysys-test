@@ -19,7 +19,12 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import sys, re, os, socket
+import sys, re, os, socket, logging
+
+from pysys import rootLogger
+from pysys.xml.project import XMLProjectParser
+
+
 
 # constants used in testing
 FALSE=0
@@ -113,9 +118,8 @@ def loadproject(start):
 	The method walks up the directory tree from the supplied path until the 
 	.pysysproject file is found. The location of the project file defines
 	the project root location. The contents of the project file determine 
-	project specific contents as key=value pairs. These are translated into 
-	data attributes of the project class for reference within any loaded 
-	modules.
+	project specific constants as specified by property elements in the 
+	xml project file.
 	
 	To ensure that all loaded modules have a pre-initialised projects 
 	instance, any launching application should first import the loadproject
@@ -123,7 +127,8 @@ def loadproject(start):
 	constants module i.e.
 	
 		# load the project
-		from pysys.constants import loadproject
+
+				from pysys.constants import loadproject
 		loadproject(os.getcwd())
 		
 		# import constants into top level namespace
@@ -143,16 +148,9 @@ def loadproject(start):
 class Project:
 	"""Class detailing project specific information for a set or pysys tests.
 	
-	Reads the pysys project file if it exists, and translates key=value pairs into 
-	data attributes of the class instance. Thus for a project file with the following 
-	entries;
-	 
-	  FOO=bar
-	  KIT=kat
-	  
-	the project instance will have data attributes FOO and KIT, with values \"bar\" and 
-	\"kat\".
-		
+	Reads and parses the pysys project file if it exists and translates property element 
+	name/value entries in the project file into data attributes of the class instance. 
+	
 	@ivar root: Full path to the project root, as specified by the first .pysysproject
 				file encountered when walking down the directory tree from the start 
 				directory passed into the launcher (e.g. the working directory)  
@@ -162,12 +160,12 @@ class Project:
 	
 	def __init__(self, root):
 		self.root = root
-		if os.path.exists("%s/.pysysproject" % root):
-			f = open("%s/.pysysproject" % root)
-			for line in f.readlines():
-				try:
-					key, value = line.strip().split("=")
-					setattr(self, key, value)
-					print key, value
-				except:
-					pass
+		if os.path.exists("%s.pysysproject" % root):
+			parser = XMLProjectParser("%s.pysysproject" % root)
+			properties = parser.getProperties()
+			parser.unlink()
+			for key in properties.keys(): 
+				setattr(self, key, properties[key])
+				
+	
+	
