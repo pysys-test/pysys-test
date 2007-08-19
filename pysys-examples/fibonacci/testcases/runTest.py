@@ -1,5 +1,11 @@
 #! /usr/bin/env python2.4
 import os, sys, time
+
+# load the project file
+from pysys.constants import loadproject
+loadproject(os.getcwd())
+
+# load modules into top level namespace
 from pysys.constants import *
 from pysys.baserunner import BaseRunner
 from pysys.writer import LogFileResultsWriter
