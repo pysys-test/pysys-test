@@ -32,7 +32,7 @@ DTD='''
                    default CDATA #IMPLIED>
 '''
 
-EXPR1 = re.compile("(?P<replace>\${env.(?P<key>.*)})", re.M)
+EXPR1 = re.compile("(?P<replace>\${env.(?P<key>.*?)})", re.M)
 EXPR2 = re.compile("(?P<replace>\${(?P<key>.*?)})", re.M)
 
 class XMLProjectParser:

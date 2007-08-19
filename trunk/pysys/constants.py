@@ -25,7 +25,6 @@ from pysys import rootLogger
 from pysys.xml.project import XMLProjectParser
 
 
-
 # constants used in testing
 FALSE=0
 TRUE=1
@@ -127,8 +126,7 @@ def loadproject(start):
 	constants module i.e.
 	
 		# load the project
-
-				from pysys.constants import loadproject
+		from pysys.constants import loadproject
 		loadproject(os.getcwd())
 		
 		# import constants into top level namespace
@@ -142,7 +140,7 @@ def loadproject(start):
 	while (not search == drive) and (not os.path.exists("%s/.pysysproject" % search)): 
 		search, drop = os.path.split(search) 
 		if not drop: search = drive
-	PROJECT = Project(search + "/")
+	PROJECT = Project(search)
 
 
 class Project:
@@ -161,16 +159,17 @@ class Project:
 	def __init__(self, root):
 		self.root = root
 		
-		if os.path.exists("%s.pysysproject" % root):	
+		if os.path.exists("%s/.pysysproject" % root):	
 			# parse the project file
-			parser = XMLProjectParser("%s.pysysproject" % root)
+			parser = XMLProjectParser("%s/.pysysproject" % root)
 			properties = parser.getProperties()
 			parser.unlink()
 			
 			# set the data attributes
 			keys = properties.keys()
 			keys.sort()
-			for key in keys: 
+			for key in keys:
+				print key + ": " + properties[key] 
 				setattr(self, key, properties[key])
 				
 	
