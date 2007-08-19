@@ -32,8 +32,8 @@ DTD='''
                    default CDATA #IMPLIED>
 '''
 
-EXPR1 = re.compile("^.*\${env.(?P<key>.*)}.*$")
-EXPR2 = re.compile("^.*\${(?P<key>.*)}.*$")
+EXPR1 = re.compile("(?P<replace>\${env.(?P<key>.*)})", re.M)
+EXPR2 = re.compile("(?P<replace>\${(?P<key>.*?)})", re.M)
 
 class XMLProjectParser:
 	def __init__(self, xmlfile):
@@ -69,20 +69,22 @@ class XMLProjectParser:
 				value = propertyNode.getAttribute("value")
 				
 				if EXPR1.search(value) != None:
-					key = re.match(EXPR1, value).group("key")
-					try:
-						insert = os.environ[key]
-					except:
-						insert = propertyNode.getAttribute("default")
-					value = string.replace(value, r"${env.%s}"%key, insert)
-				
+					matches = EXPR1.findall(value)				
+					for m in matches:
+						try:
+							insert = os.environ[m[1]]
+						except :
+							insert = propertyNode.getAttribute("default")
+						value = string.replace(value, m[0], insert)
+			
 				elif EXPR2.search(value) != None:
-					key = re.match(EXPR2, value).group("key")
-					try:
-						insert = self.properties[re.match(EXPR2, value).group("key")]
-					except :
-						insert = propertyNode.getAttribute("default")
-					value = string.replace(value, r"${%s}"%key, insert)
+					matches = EXPR2.findall(value)				
+					for m in matches:
+						try:
+							insert = self.properties[m[1]]
+						except :
+							insert = propertyNode.getAttribute("default")
+						value = string.replace(value, m[0], insert)
 			except:
 				pass
 			else:
@@ -94,3 +96,4 @@ class XMLProjectParser:
 		f = open(self.xmlfile, 'w')
 		f.write(self.doc.toxml())
 		f.close()
+		

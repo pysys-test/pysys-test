@@ -160,11 +160,17 @@ class Project:
 	
 	def __init__(self, root):
 		self.root = root
-		if os.path.exists("%s.pysysproject" % root):
+		
+		if os.path.exists("%s.pysysproject" % root):	
+			# parse the project file
 			parser = XMLProjectParser("%s.pysysproject" % root)
 			properties = parser.getProperties()
 			parser.unlink()
-			for key in properties.keys(): 
+			
+			# set the data attributes
+			keys = properties.keys()
+			keys.sort()
+			for key in keys: 
 				setattr(self, key, properties[key])
 				
 	
