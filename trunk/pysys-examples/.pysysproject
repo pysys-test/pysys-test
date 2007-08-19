@@ -1,0 +1,11 @@
+<pysysproject>
+	<property name="env.user" value="${env.USERNAME}" />
+	<property name="env.user-preppend" value="append-on-front-${env.USERNAME}" />
+	<property name="env.user-append" value="${env.USERNAME}-append-on-back" />
+	<property name="env.default" value="${env.NOT_EXIST}" default="default value"/>
+	<property name="env-default-none" value="${env.NOT_EXIST}" />
+	<property name="user.firstname" value="Simon" />
+	<property name="user.lastname" value="Smith" />
+	<property name="user.title" value="Professor" />
+	<property name="user.full" value="${user.title} ${user.firstname} ${user.lastname}" />
+</pysysproject>
