@@ -169,6 +169,7 @@ class Project:
 			keys = properties.keys()
 			keys.sort()
 			for key in keys:
+				print key, properties[key]
 				setattr(self, key, properties[key])
 				
 	
