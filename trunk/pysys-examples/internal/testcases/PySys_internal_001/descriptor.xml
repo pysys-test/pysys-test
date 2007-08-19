@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Process Module - start process in foreground</title>    
+    <title>Project Loading - check correct data attributes set in project class</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
