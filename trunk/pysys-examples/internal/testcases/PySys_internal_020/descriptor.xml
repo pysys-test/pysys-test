@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title></title>    
+    <title>Process Module - start process in foreground</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
