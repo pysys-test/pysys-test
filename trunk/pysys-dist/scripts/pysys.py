@@ -23,6 +23,9 @@ import os, sys, time
 script_path = os.path.abspath(sys.path[0])
 sys.path = [p for p in sys.path if os.path.abspath(p) != script_path]
 
+from pysys.constants import loadproject
+loadproject(os.getcwd())
+
 from pysys import __version__
 from pysys.constants import *
 from pysys.baserunner import BaseRunner
