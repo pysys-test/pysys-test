@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title></title>    
+    <title>Process Module - write to process stdin</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
