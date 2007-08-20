@@ -5,6 +5,8 @@ import time, sys, os.path
 
 def run(loops):
 	count = 0
+	sys.stdout.write("Creating the reader")
+	sys.stdout.flush()
 	while 1:
 		line = sys.stdin.readline()
 		sys.stdout.write("Line (%s): Read in %s" % (count, line))
@@ -15,7 +17,7 @@ def run(loops):
 
 # entry point for running the script as an executable
 if __name__ == "__main__":
-	if len(sys.argv) < 2:
+	if len(sys.argv) < 1:
 		print "Usage: %s <count>" % os.path.basename(sys.argv[0])
 	else:
 		run(int(sys.argv[1]))
