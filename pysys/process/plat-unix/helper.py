@@ -90,7 +90,7 @@ class ProcessWrapper:
 		log.debug("  working dir  : %s", self.workingDir)
 		log.debug("  stdout       : %s", self.stdout)
 		log.debug("  stdout       : %s", self.stderr)
-		#for e in self.environs.keys(): log.debug("  environment  : %s=%s", e, environs[e])
+		for e in self.environs.keys(): log.debug("  environment  : %s=%s", e, environs[e])
 		
 
 	def __writeStdin(self, fd):
@@ -262,7 +262,7 @@ class ProcessWrapper:
 
 		try:
 			if self.state == FOREGROUND:
-				self.__startBackgroundProcess()
+				self.__startForegroundProcess()
 			else:
 				self.__startBackgroundProcess()
 		finally:

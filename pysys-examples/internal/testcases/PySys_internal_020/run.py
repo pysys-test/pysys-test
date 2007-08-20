@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 		script = "%s/internal/utilities/scripts/counter.py" % self.project.root
 	
 		self.hprocess = self.startProcess(command=sys.executable,
-						  arguments = [script, "2", "-101"],
+						  arguments = [script, "2", "3"],
 						  environs = os.environ,
 						  workingDir = self.input,
 						  stdout = "%s/counter.out" % self.output,
@@ -32,5 +32,5 @@ class PySysTest(BaseTest):
 		self.assertGrep('counter.err', expr='Process id of test executable is %d' % self.hprocess.pid)
 		
 		# check the return status of the process
-		self.assertTrue(self.hprocess.exitStatus == -101)
+		self.assertTrue(self.hprocess.exitStatus == 3)
 		
