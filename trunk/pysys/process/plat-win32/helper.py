@@ -28,6 +28,9 @@ from pysys.exceptions import *
 # create the class logger
 log = logging.getLogger('pysys.process.helper')
 
+# check for new lines on end of a string
+EXPR = re.compile(".*\n$")
+
 
 class NullDevice:
 	"""Class to implement the write and flush methods of a file descriptor. 
@@ -264,10 +267,21 @@ class ProcessWrapper:
 			self.exitStatus = exitStatus
 
 
-	def write(self, data):
+	def write(self, data, addNewLine=TRUE):
 		"""Write data to the stdin of the process.
 		
+		Note that when the addNewLine argument is set to true, if a new line does not 
+		terminate the input data string, a newline character will be added. If one 
+		already exists a new line character will not be added. Should you explicitly 
+		require to add data without the method appending a new line charater set 
+		addNewLine to false.
+		
+		@param data:       The data to write to the process stdout
+		@param addNewLine: True if a new line character is to be added to the end of 
+		                   the data string
+		
 		"""
+		if addNewLine and not EXPR.search(data): data = "%s\n" % data
 		self.__outQueue.put(data)
 
 
