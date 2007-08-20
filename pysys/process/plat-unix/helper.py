@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import signal, time, copy, logging, Queue, thread
+import signal, time, copy, logging, Queue, thread, errno
 
 from pysys.constants import *
 from pysys.exceptions import *
@@ -167,15 +167,25 @@ class ProcessWrapper:
 		
 		"""
 		if self.exitStatus != None: return
-		
-		pid, status = os.waitpid(self.pid, os.WNOHANG)
-		if pid == self.pid:
-			if os.WIFEXITED(status):
-				self.exitStatus = os.WEXITSTATUS(status)
-			elif os.WIFSIGNALED(status):
-				self.exitStatus = os.WTERMSIG(status)
-			else:
-				self.exitStatus = status
+
+		retries = 3
+		while retries > 0:	
+			try:
+				pid, status = os.waitpid(self.pid, os.WNOHANG)
+				if pid == self.pid:
+					if os.WIFEXITED(status):
+					  	self.exitStatus = os.WEXITSTATUS(status)
+					elif os.WIFSIGNALED(status):
+					  	self.exitStatus = os.WTERMSIG(status)
+					else:
+					  	self.exitStatus = status
+				retries=0
+	  		except OSError, e:
+				if e.errno == errno.ECHILD:
+		  			time.sleep(0.01)
+					retries=retries-1
+				else:
+					retries=0
 
 
 	def write(self, data):
@@ -225,14 +235,8 @@ class ProcessWrapper:
 		"""
 		if self.exitStatus !=None: return 
 		try:
-			win32api.TerminateProcess(self.__hProcess,0)
-			self.__setExitStatus()
-		except:
-			raise ProcessError, "Error stopping process"
-
-		try:
 			os.kill(self.pid, signal.SIGTERM)
-			self.__setExitStatus()
+			self.wait(timeout=0.5)
 		except:
 			raise ProcessError, "Error stopping process"
 
