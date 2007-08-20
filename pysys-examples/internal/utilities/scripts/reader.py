@@ -5,8 +5,6 @@ import time, sys, os.path
 
 def run(loops):
 	count = 0
-	sys.stdout.write("Creating the reader")
-	sys.stdout.flush()
 	while 1:
 		line = sys.stdin.readline()
 		sys.stdout.write("Line (%s): Read in %s" % (count, line))

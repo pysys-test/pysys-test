@@ -14,16 +14,18 @@ class PySysTest(BaseTest):
 						  stdout = "%s/reader.out" % self.output,
 						  stderr = "%s/reader.err" % self.output,
 						  state=BACKGROUND)
-						 
-		# write some lines into the process stdin
-		while not self.hprocess.running():
-			time.sleep(1)
-		
+
+		# write to the process stdin
 		self.log.info("Writing to the process stdin")
-		self.hprocess.write("The cat sat on the mat")
+		self.hprocess.write("The cat sat on the mat\n")
 		self.hprocess.write("No westlin winds and slaughtering guns")
-		self.hprocess.write("In the temple of science there are many mansions")
-		self.wait(3)
-	
+		self.hprocess.write("In the temple of science there are many mansions ", addNewLine=FALSE)
+		self.hprocess.write("and varied indeed are those that dwell therein ", addNewLine=FALSE)
+		self.hprocess.write("and the motives that have led them there", addNewLine=TRUE)
+
+		# wait for the strings to be writen to sdtout
+		self.waitForSignal("reader.out", expr="Line \(2\)", timeout=5)
+			
 	def validate(self):
-		pass
+		# validate against the reference file
+		self.assertDiff("reader.out", "ref_reader.out")
