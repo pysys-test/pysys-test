@@ -27,8 +27,8 @@ class PySysTest(BaseTest):
 		
 		# log what the process exit status is
 		self.log.info("Exit status of the process is %d",  self.hprocess.exitStatus)
-						  
-		
+
+	
 	def validate(self):
 		# process running status should have been true to start
 		self.assertTrue(self.initialstatus)
