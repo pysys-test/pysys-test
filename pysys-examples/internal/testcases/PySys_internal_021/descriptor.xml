@@ -2,15 +2,19 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title></title>    
+    <title>Process Module - start process in background</title>    
     <purpose><![CDATA[
+Tests for the successfull execution of a process in the background. The startProcess method should not block 
+in this case, allowing concurrent execution within the testcase. The running() method on the process handle is 
+used to query the running status of the process, and the waitProcess method is used to wait for completion of 
+the process until the process has completed execution.   
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group></group>
+      <group>Process</group>
     </groups>
   </classification>
 
