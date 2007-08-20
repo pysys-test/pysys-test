@@ -284,7 +284,7 @@ class BaseTest:
 		return process
 
 		
-	def stopProcess(self, process, hard=TRUE):
+	def stopProcess(self, process):
 		"""Send a soft or hard kill to a running process to stop it's execution.
 	
 		This method uses the L{pysys.process.helper} module to stop a running process. 
@@ -292,12 +292,11 @@ class BaseTest:
 		be added to the test outcome list.
 		
 		@param process: The process handle returned from the L{startProcess()} method
-		@param hard: Set to false to perform a soft kill on the process (Unix systems only)
 		
 		"""
 		if process.running():
 			try:
-				process.stop(hard)
+				process.stop()
 				log.info("Stopped process with process id %d", process.pid)
 			except ProcessError:
 				log.info("Unable to stop process")

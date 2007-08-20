@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title></title>    
+    <title>Process Module - stop background process</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
