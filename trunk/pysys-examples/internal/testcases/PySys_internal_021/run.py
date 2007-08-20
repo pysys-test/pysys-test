@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 		script = "%s/internal/utilities/scripts/counter.py" % self.project.root
 	
 		self.hprocess = self.startProcess(command=sys.executable,
-						  arguments = [script, "10", "-201"],
+						  arguments = [script, "10", "2"],
 						  environs = os.environ,
 						  workingDir = self.input,
 						  stdout = "%s/counter.out" % self.output,
@@ -36,4 +36,4 @@ class PySysTest(BaseTest):
 		self.assertDiff('counter.out', 'ref_counter.out')
 		
 		# check the return status of the process
-		self.assertTrue(self.hprocess.exitStatus == -201)
+		self.assertTrue(self.hprocess.exitStatus == 2)
