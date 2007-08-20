@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 		script = "%s/internal/utilities/scripts/counter.py" % self.project.root
 	
 		self.hprocess = self.startProcess(command=sys.executable,
-						  arguments = [script, "10", "0"],
+						  arguments = [script, "10", "-201"],
 						  environs = os.environ,
 						  workingDir = self.input,
 						  stdout = "%s/counter.out" % self.output,
@@ -16,13 +16,13 @@ class PySysTest(BaseTest):
 						  state=BACKGROUND)
 						  
 		# check the process status
-		self.initialstatus = self.hprocess.running())
+		self.initialstatus = self.hprocess.running()
 		
 		# wait for the process to complete (after 10 loops)
-		self.waitProcess(self.hprocess, timeout=15)
+		self.waitProcess(self.hprocess, timeout=10)
 		
 		# check the process status
-		self.finalstatus = self.hprocess.running())
+		self.finalstatus = self.hprocess.running()
 		
 		
 	def validate(self):
@@ -35,3 +35,5 @@ class PySysTest(BaseTest):
 		# check the sdtout of the process
 		self.assertDiff('counter.out', 'ref_counter.out')
 		
+		# check the return status of the process
+		self.assertTrue(self.hprocess.exitStatus == -201)

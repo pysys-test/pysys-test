@@ -599,10 +599,10 @@ class BaseTest:
 		"""
 		if expr == FALSE:
 			self.addOutcome(PASSED)
-			log.info("Assertion on boolean expression equal to true ... passed")
+			log.info("Assertion on boolean expression equal to false ... passed")
 		else:
 			self.addOutcome(FAILED)
-			log.info("Assertion on boolean expression equal to true ... failed")
+			log.info("Assertion on boolean expression equal to false ... failed")
 	
 
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=FALSE, replace=[], includes=[]):
