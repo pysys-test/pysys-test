@@ -4,6 +4,11 @@
   <description> 
     <title>Process Module - stop background process</title>    
     <purpose><![CDATA[
+Check for the correct stopping of a process that is running in the background. The 
+test starts of a process and after a certain time period calls the stopProcess method
+of the basetest to terminate execution of the process. The running status is noted 
+before and after termination, and the output of the process is checked to ensure it 
+did stop.
 ]]>
     </purpose>
   </description>
