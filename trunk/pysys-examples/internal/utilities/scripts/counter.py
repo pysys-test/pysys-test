@@ -10,7 +10,7 @@ def run(loops, status):
 		sys.stdout.flush()
 		count = count + 1
 		if count >= loops: break
-		time.sleep(1)
+		time.sleep(0.5)
 	sys.exit(status)
 
 # entry point for running the script as an executable

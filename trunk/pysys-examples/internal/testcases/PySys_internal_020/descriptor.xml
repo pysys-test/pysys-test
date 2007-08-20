@@ -4,9 +4,10 @@
   <description> 
     <title>Process Module - start process in foreground</title>    
     <purpose><![CDATA[
-Tests for the successfull execution of a process in the foreground. The startProcess method should block 
-in this case until the process has completed execution. The handle to the process should provide information
-on the process id, and the exit status of the process. 
+Tests for the successfull execution of a process in the foreground. The startProcess 
+method should block in this case until the process has completed execution. The handle 
+to the process should provide information on the process id, and the exit status of 
+the process. 
 ]]>
     </purpose>
   </description>
