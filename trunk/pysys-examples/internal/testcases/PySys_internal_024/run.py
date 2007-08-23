@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 						  workingDir = self.output,
 						  stdout = "%s/environment.out" % self.output,
 						  stderr = "%s/environment.err" % self.output,
-						  state=BACKGROUND)
+						  state=FOREGROUND)
 
 		# wait for the strings to be writen to sdtout
 		self.waitForSignal("environment.out", expr="Written process environment", timeout=5)
