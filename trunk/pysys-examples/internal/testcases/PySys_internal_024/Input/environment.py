@@ -6,8 +6,12 @@ import time, sys, os.path
 if __name__ == "__main__":
 	sys.stdout.write("Writing process environment\n")
 	sys.stdout.flush()
-	for env in os.environ:
-		sys.stdout.write("%-20s: %s\n" % (env, os.environ[env]))
+	
+	keys = os.environ.keys()
+	keys.sort()
+	
+	for key in keys:
+		sys.stdout.write("%-20s: %s\n" % (key, os.environ[key]))
 		sys.stdout.flush()
 	
 	sys.stdout.write("Written process environment\n")
