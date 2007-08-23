@@ -1,6 +1,5 @@
 <pysysproject>
-	<!-- Example setting of properties (from environment, and hard coded)
-	<property name="env_user" value="${env.USERNAME}" default="pysys-user"/>
-	<property name="dbhost" value="ahost.company.com"/>
-	-->
+	<!-- Set sccs properties -->
+	<property name="SCCS" value="cvs"/>
+	<property name="CVSROOT" value="${env.CVSROOT}" default=":ext:moraygrieve@pysys.cvs.sourceforge.net:/cvsroot/pysys"/>
 </pysysproject>
