@@ -23,13 +23,14 @@ import os.path, sys, string
 
 from pysys.exceptions import *;
 
-def replace(input, output, dict={}):
+def replace(input, output, dict={}, marker='$'):
 	"""Read an input file, and write to output tailoring the file to replace set keywords with values.
 
 	The replace method reads in the contents of the input file line by line, checks for matches in 
-	each line to the keys within the dict input parameter, and replaces that key with the value of 
-	the key in the dict parameter when writing the contents to the output file. For instance, for 
-	dict of the form C{{'$CATSEAT$':'mat', '$DOGSEAT$':'hat'}} with an input file::
+	each line to the keys in the dictionary dict parameter, and replaces each match with the value
+	of the dictionary for that key, writing the line to the output file. The marker parameter is a
+	character which can be used to denoted keywords in the file to be replaced. For instance, with 
+	dict of the form C{{'CATSEAT':'mat', 'DOGSEAT':'hat'}}, marker set to '$', and an input file::
 	
 	  The cat sat on the $CATSEAT$
 	  The dog sat on the $DOGSEAT$
@@ -40,8 +41,10 @@ def replace(input, output, dict={}):
 	  The dog sat on the hat
 
 	@param input: The full path to the input file
-	@param output: The full path to the output file
+	@param output: The full path to the output file with the keywords replaced
 	@param dict: A dictionary of key/value pairs to use in the replacement
+	@param marker: The character used to mark key words to be replaced (may be the empty string
+	               if no characters are used)
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""

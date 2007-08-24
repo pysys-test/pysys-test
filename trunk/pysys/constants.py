@@ -123,14 +123,7 @@ def loadproject(start):
 	To ensure that all loaded modules have a pre-initialised projects 
 	instance, any launching application should first import the loadproject
 	file, and then make a call to it prior to importing all names within the
-	constants module i.e.
-	
-		# load the project
-		from pysys.constants import loadproject
-		loadproject(os.getcwd())
-		
-		# import constants into top level namespace
-		from pysys.constants import *
+	constants module.
 
 	"""
 	global PROJECT
