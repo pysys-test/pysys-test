@@ -24,6 +24,9 @@ import os.path, sys, re, string, copy
 from pysys.constants import *;
 from pysys.exceptions import *;
 
+# create the class logger
+log = logging.getLogger('pysys.utils.filegrep')
+
 
 def filegrep(file, expr):
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
@@ -38,13 +41,12 @@ def filegrep(file, expr):
 	if not os.path.exists(file):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
 	else:
-		contents = open(file, 'r').read()
+		contents = open(file, 'r').readlines()
+		logContents("Contents of %s;" % os.path.basename(file), contents)
 		regexpr = re.compile(expr)
-		if regexpr.search(contents) != None:
-			return TRUE
-		else:
-			return FALSE
-
+		for line in contents:
+			if regexpr.search(line) != None: return TRUE
+		return FALSE
 
 
 def orderedgrep(file, exprList):
@@ -74,22 +76,32 @@ def orderedgrep(file, exprList):
 	list.reverse();
 	expr = list.pop();
 
-	
 	if not os.path.exists(file):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
 	else:
 		contents = open(file, 'r').readlines()	  
 		for i in range(len(contents)):
 			regexpr = re.compile(expr)
-			if regexpr.search(contents[i]) != None:
+			if regexpr.search(r"%s"%contents[i]) != None:
 				try:
 					expr = list.pop();
 				except:
 					return None
-
 		return expr
 
 
+def logContents(message, list):
+	"""Log a list of strings, prepending the line number to each line in the log output.
+	
+	@param list: The list of strings to log
+	"""
+	count = 0
+	log.debug(message)
+	for line in list:
+		count = count + 1
+		log.debug("  Line %-5d:  %s" % (count, line))
+
+		
 
 # entry point for running the script as an executable
 if __name__ == "__main__":
