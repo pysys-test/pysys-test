@@ -31,10 +31,10 @@ __author_email__ = "moraygrieve@users.sourceforge.net"
 __status__  = "alpha"
 """The status of this release."""
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 """The version of this release."""
 
-__date__    = "14 May 2007"
+__date__    = "24 Aug 2007"
 """The date of this release."""
 __all__     = [ "constants",
                 "exceptions",
