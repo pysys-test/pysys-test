@@ -58,7 +58,7 @@ on unix systems use
 
 To run or print information on the testcases, use the pysys.py script installed in
 to the scripts directory of the python install. For more information on the usage
-of the script use "pysys.py -h", or "pysys run -h" | "pysys print -h".
+of the script use "pysys.py -h", or "pysys.py run -h" | "pysys.py print -h".
 
 
 Release History
