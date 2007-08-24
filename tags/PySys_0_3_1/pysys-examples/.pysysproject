@@ -1,0 +1,5 @@
+<pysysproject>
+	<!-- Set sccs properties -->
+	<property name="SCCS" value="cvs"/>
+	<property name="CVSROOT" value="${env.CVSROOT}" default=":ext:moraygrieve@pysys.cvs.sourceforge.net:/cvsroot/pysys"/>
+</pysysproject>
