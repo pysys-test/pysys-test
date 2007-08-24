@@ -1,4 +1,4 @@
-PySys 0.3.0 Release Notes
+PySys 0.3.1 Release Notes
 =========================
 
 This is an early ALPHA release of the software for development purposes. The software 
@@ -8,15 +8,26 @@ PySys has been written and tested against Python 2.4 and higher. Whilst the pack
 may run on earlier versions no guarantee as to the successful operation can be made. 
 Running on windows requires installation of the pywin32 extensions written by Mark 
 Hammond. The extensions can be downloaded from http://sourceforge.net/projects/pywin32.
+Running the manual tester on unix systems requires the tcl/tk libraries to be installed
+and the python version to be compiled with tcl/tk support.
 
 
 What's new in this release
 --------------------------
-- Updates to the epydoc output for documenting the classes and modules of pysys
-- Addition of the pysys.py module for printing, running and making new testcase
-  directory structures. This allows a single distributed script to be used to 
-  perform all functionality available from the console. 
-- Remove of the run method from the console launch helper.
+- The process helper modules have been updated to allow the writing to the stdin 
+  of a process via the write() method on the process handle. 
+- Several bug fixes have been applied to the unix process helper module.
+- The pysys-examples/internal directory has been added to the examples module. 
+  This will contain internal testcases for self testing the pysys framework. 
+  These have been included in the distribution as examples of the use of the 
+  framework.
+- The pysys project file has been added into the framework to allow the setting 
+  of project specific constants within the application. The project file should be 
+  written to the base location of the project, with the filename .pysysproject. 
+  The location of this file denotes the root location of the project. For an 
+  example of the file see pysys-examples/.pysysproject. Any name value properties
+  within the file will be set as data attributes of the pysys.Project class, which 
+  is referenced in the pysys.constants module using the variable PROJECT. 
 
 
 Installation
@@ -32,7 +43,7 @@ the source tar.gz archive and perform the following
  
 To install you may need to have root privileges on the machine. Installation on 
 both windows and unix will install the PySys modules into the site-packages area
-of the default python
+of the default python. 
 
   
 Running the Samples
@@ -45,19 +56,21 @@ on unix systems use
  $ tar zxvpf PySys-examples.X.Y.Z.tar.gz
  $ cd pysys-examples/fibonacci/testcases
 
-The testcases directory consists of 4 example testcases, and 3 launch executables, 
-namely runTest.py (used to run a set of tests), printTest.py (used to print details
-about a set of tests), and makeTest.py (used to create a new testcase directory 
-structure). Each launch executable has a detailed help summary which will be printed
-to the console using the -h option. To print the help usage, and then run all tests 
-in the testcases directory use
-
- $ runTest.py -h
- $ runTest.py
+To run or print information on the testcases, use the pysys.py script installed in
+to the scripts directory of the python install. For more information on the usage
+of the script use "pysys.py -h", or "pysys run -h" | "pysys print -h".
 
 
 Release History
 ---------------
+0.2.2 to 0.3.0
+--------------
+- Updates to the epydoc output for documenting the classes and modules of pysys
+- Addition of the pysys.py module for printing, running and making new testcase
+  directory structures. This allows a single distributed script to be used to 
+  perform all functionality available from the console. 
+- Remove of the run method from the console launch helper.
+
 0.2.1 to 0.2.2
 --------------
 - The suites element in the test descriptor has been renamed to groups. This is to 
