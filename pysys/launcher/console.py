@@ -234,28 +234,32 @@ class ConsoleMakeTestHelper:
 		if basetestImport == None: basetestImport = "from pysys.basetest import BaseTest"
 		if basetest == None: basetest = "BaseTest"
 		
-		log.info("Creating directory %s ..." % self.testId)
-		os.makedirs(self.testId)
-		log.info("Creating directory %s ..." % os.path.join(self.testId, input))
-		os.makedirs(os.path.join(self.testId, input))
-		log.info("Creating directory %s ..." % os.path.join(self.testId, output))
-		os.makedirs(os.path.join(self.testId, output))
-		log.info("Creating directory %s ..." % os.path.join(self.testId, reference))
-		os.makedirs(os.path.join(self.testId, reference))
-		
-		log.info("Creating descriptor %s ..." % os.path.join(self.testId, descriptor))
-		descriptor_fp = open(os.path.join(self.testId, descriptor), "w")
-		descriptor_fp.write(DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
-		descriptor_fp.close()
-		
-		log.info("Creating test class module %s ..." % os.path.join(self.testId, "%s.py" % module))	
-		testclass_fp = open(os.path.join(self.testId, "%s.py" % module), "w")
-		if teststring == None:
-			testclass_fp.write(TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
+		log.info("Creating testcase %s ..." % self.testId)
+		try:	
+			os.makedirs(self.testId)
+			log.info("Created directory %s" % self.testId)
+		except OSError:
+			log.info("Error creating testcase " + self.testId +  " - directory already exists")
+			return
 		else:
-			testclass_fp.write(teststring)
-		testclass_fp.close()
-
+			os.makedirs(os.path.join(self.testId, input))
+			log.info("Created directory %s " % os.path.join(self.testId, input))
+			os.makedirs(os.path.join(self.testId, output))
+			log.info("Created directory %s " % os.path.join(self.testId, output))
+			os.makedirs(os.path.join(self.testId, reference))
+			log.info("Created directory %s " % os.path.join(self.testId, reference))
+			descriptor_fp = open(os.path.join(self.testId, descriptor), "w")
+			descriptor_fp.write(DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
+			descriptor_fp.close()
+			log.info("Created descriptor %s " % os.path.join(self.testId, descriptor))
+			testclass_fp = open(os.path.join(self.testId, "%s.py" % module), "w")
+			if teststring == None:
+				testclass_fp.write(TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
+			else:
+				testclass_fp.write(teststring)
+			testclass_fp.close()
+			log.info("Created test class module %s " % os.path.join(self.testId, "%s.py" % module))	
+		
 
 
 class ConsoleLaunchHelper:
