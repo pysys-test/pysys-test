@@ -61,7 +61,7 @@ FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
 
 
 # set the default descriptor filename, input, output and reference directory names
-DEFAULT_DESCRIPTOR = 'descriptor.xml'
+DEFAULT_DESCRIPTOR = ['.pysystest', 'descriptor.xml']  
 DEFAULT_MODULE = 'run'
 DEFAULT_GROUP = ""
 DEFAULT_TESTCLASS = 'PySysTest'
@@ -88,6 +88,7 @@ HOSTNAME = socket.getfqdn()
 if re.search('win32', sys.platform):
 	PLATFORM='win32'	
 	DEVNULL = 'nul'
+	ENVSEPERATOR = ';'
 	WINDIR = os.getenv('windir', 'c:\WINDOWS')
 	PATH = r"%s;%s\system32;%s\System32\Wbem" % (WINDIR, WINDIR, WINDIR)
 	LD_LIBRARY_PATH = ""
@@ -95,12 +96,14 @@ if re.search('win32', sys.platform):
 elif re.search('sunos', sys.platform):
 	PLATFORM='sunos'
 	DEVNULL = '/dev/null'
+	ENVSEPERATOR = ':'
 	PATH = "/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/openwin/bin:/opt/SUNWspro/bin"
 	LD_LIBRARY_PATH = "/usr/local/lib" 
 
 elif re.search('linux', sys.platform):
 	PLATFORM='linux'	
 	DEVNULL = '/dev/null'
+	ENVSEPERATOR = ':'
 	PATH = "/bin:/usr/bin:/usr/sbin:/usr/local/bin"
 	LD_LIBRARY_PATH = "/usr/lib"
 
