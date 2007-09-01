@@ -4,11 +4,6 @@ PySys 0.3.2 Release Notes
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
 may run on earlier versions no guarantee as to the successful operation can be made. 
 
-Running on windows requires installation of the pywin32 extensions written by Mark 
-Hammond. The extensions can be downloaded from http://sourceforge.net/projects/pywin32.
-Running the manual tester on unix systems requires the tcl/tk libraries to be installed
-and the python version to be compiled with tcl/tk support.
-
 
 What's new in this release
 --------------------------
