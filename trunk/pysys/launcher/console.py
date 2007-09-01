@@ -227,7 +227,7 @@ class ConsoleMakeTestHelper:
 		if input==None: input = DEFAULT_INPUT
 		if output==None: output = DEFAULT_OUTPUT
 		if reference==None: reference = DEFAULT_REFERENCE
-		if descriptor==None: descriptor = DEFAULT_DESCRIPTOR
+		if descriptor==None: descriptor = DEFAULT_DESCRIPTOR[0]
 		if testclass==None: testclass = DEFAULT_TESTCLASS
 		if module==None: module = DEFAULT_MODULE
 		if constantsImport ==None: constantsImport = "from pysys.constants import *"

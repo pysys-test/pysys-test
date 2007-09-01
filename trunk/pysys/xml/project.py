@@ -67,7 +67,7 @@ class XMLProjectParser:
 			try:
 				name = propertyNode.getAttribute("name") 
 				value = propertyNode.getAttribute("value")
-				
+
 				if EXPR1.search(value) != None:
 					matches = EXPR1.findall(value)				
 					for m in matches:
@@ -77,8 +77,8 @@ class XMLProjectParser:
 							insert = propertyNode.getAttribute("default")
 						value = string.replace(value, m[0], insert)
 			
-				elif EXPR2.search(value) != None:
-					matches = EXPR2.findall(value)				
+				if EXPR2.search(value) != None:
+					matches = EXPR2.findall(value)
 					for m in matches:
 						try:
 							insert = self.properties[m[1]]
@@ -86,7 +86,7 @@ class XMLProjectParser:
 							insert = propertyNode.getAttribute("default")
 						value = string.replace(value, m[0], insert)
 			except:
-				pass
+				log.info(sys.exc_info()[1])
 			else:
 				self.properties[name] = value
 		return self.properties

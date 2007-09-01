@@ -109,6 +109,7 @@ class BaseTest:
 		self.mode = mode
 		self.setKeywordArgs(xargs)
 		self.processList = []
+		self.processCount = {}
 		self.monitorList = []
 		self.manualTester = None
 		self.outcome = []
@@ -180,6 +181,24 @@ class BaseTest:
 		return list[0]
 			
 
+	def getInstanceCount(self, command):
+		"""Return the number of processes matching the basename of the command started within this testcase instance.
+
+		Any processes started via the L{startProcess()} method of this class have an instance 
+		count kept internally via a dictionary mapping of the basename of the command to the 
+		number of processes started for that basename. This method returns the instance count 
+		for the particular command basename, or 0 if no entry exists in the internal dictionary.
+		
+		@param command: The process command
+		@return: The number of processes started matching the command basename
+		@rtype:  integer
+		
+		"""
+		if self.processCount.has_key(os.path.basename(command)):
+			return self.processCount[os.path.basename(command)]
+		else:
+			return 0
+		
 
 	# test methods for execution, validation and cleanup. The execute method is
 	# abstract and must be implemented by a subclass. 
@@ -274,13 +293,21 @@ class BaseTest:
 			elif state == BACKGROUND:
 				log.info("Started %s in background with process id %d", displayName, process.pid)
 		except ProcessError:
-			log.info("Unable to start process")
+			log.info("Unable to start process", sys.exc_info()[1])
 			self.addOutcome(BLOCKED)
 		except ProcessTimeout:
 			log.info("Process timedout after %d seconds", timeout)
 			self.addOutcome(TIMEDOUT)
 		else:
-			self.processList.append(process)
+			self.processList.append(process) 	
+			try:
+				key = os.path.basename(command)
+				if self.processCount.has_key(key):
+					self.processCount[key] = self.processCount[key] + 1
+				else:
+			 		self.processCount[key] = 1
+			except:
+				pass
 		return process
 
 		
@@ -321,6 +348,27 @@ class BaseTest:
 			except ProcessError:
 				log.info("Unable to send signal to process")
 				self.addOutcome(BLOCKED)
+
+
+	def writeProcess(self, process, data, addNewLine=TRUE):
+		"""Write data to the stdin of a process.
+		
+		This method uses the L{pysys.process.helper} module to write a data string to the 
+		stdin of a process. This wrapper around the write method of the process helper only 
+		adds checking of the process running status prior to the write being performed, and 
+		logging to the testcase run log to detail the write.
+		
+		@param process: The process handle returned from the L{startProcess()} method
+		@param data: The data to write to the process		
+		@param addNewLine: True if a new line character is to be added to the end of the data string
+		
+		"""
+		if process.running():
+			process.write(data, addNewLine)
+			log.info("Written to stdin of process with process id %d", process.pid)
+			log.debug("  %s" % data)
+		else:
+			log.info("Write to process with process id %d stdin not performed as process is not running", process.pid)
 
 
 	def waitProcess(self, process, timeout):
@@ -367,7 +415,7 @@ class BaseTest:
 			self.monitorList.append(monitor)
 			return monitor
 
-
+	
 	def stopProcessMonitor(self, monitor):
 		"""Stop a process monitor.
 		
