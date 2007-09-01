@@ -181,21 +181,22 @@ class BaseTest:
 		return list[0]
 			
 
-	def getInstanceCount(self, command):
-		"""Return the number of processes matching the basename of the command started within this testcase instance.
+	def getInstanceCount(self, displayName):
+		"""Return the number of processes started within the testcase matching the supplied displayName.
 
-		Any processes started via the L{startProcess()} method of this class have an instance 
-		count kept internally via a dictionary mapping of the basename of the command to the 
-		number of processes started for that basename. This method returns the instance count 
-		for the particular command basename, or 0 if no entry exists in the internal dictionary.
+		The BaseTest class maintains a reference count of processes started within the class instance 
+		via the L{startProcess()} method. The reference count is maintained against a logical name for 
+		the process, which is the displayName used in the method call to L{startProcess()}, or the 
+		basename of the command if no displayName was supplied. The method returns the number of 
+		processes started with the supplied logical name, or 0 if no processes have been started. 
 		
-		@param command: The process command
+		@param displayName: The process display name
 		@return: The number of processes started matching the command basename
 		@rtype:  integer
 		
 		"""
-		if self.processCount.has_key(os.path.basename(command)):
-			return self.processCount[os.path.basename(command)]
+		if self.processCount.has_key(displayName):
+			return self.processCount[displayName]
 		else:
 			return 0
 		
@@ -277,7 +278,7 @@ class BaseTest:
 		@param timeout: The timeout period after which to termintate processes running in the C{FOREGROUND}
 		@param stdout: The filename used to capture the stdout of the process
 		@param stderr: The filename user to capture the stderr of the process
-		@param displayName: A display name to use (defaults to the basename of the command)
+		@param displayName: Logical name of the process used for display and reference counting (defaults to the basename of the command)
 		@return: The process handle of the process (L{pysys.process.helper.ProcessWrapper})
 		@rtype: handle
 
@@ -301,16 +302,15 @@ class BaseTest:
 		else:
 			self.processList.append(process) 	
 			try:
-				key = os.path.basename(command)
-				if self.processCount.has_key(key):
-					self.processCount[key] = self.processCount[key] + 1
+				if self.processCount.has_key(displayName):
+					self.processCount[displayName] = self.processCount[displayName] + 1
 				else:
-			 		self.processCount[key] = 1
+			 		self.processCount[displayName] = 1
 			except:
 				pass
 		return process
 
-		
+
 	def stopProcess(self, process):
 		"""Send a soft or hard kill to a running process to stop it's execution.
 	
