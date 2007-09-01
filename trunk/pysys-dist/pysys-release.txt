@@ -1,11 +1,9 @@
-PySys 0.3.1 Release Notes
+PySys 0.4.0 Release Notes
 =========================
-
-This is an early ALPHA release of the software for development purposes. The software 
-is liable to change in a non-backwards compatible way until it has reached a BETA status.
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
 may run on earlier versions no guarantee as to the successful operation can be made. 
+
 Running on windows requires installation of the pywin32 extensions written by Mark 
 Hammond. The extensions can be downloaded from http://sourceforge.net/projects/pywin32.
 Running the manual tester on unix systems requires the tcl/tk libraries to be installed
@@ -14,23 +12,29 @@ and the python version to be compiled with tcl/tk support.
 
 What's new in this release
 --------------------------
+- The default name of the PySys test descriptor file has been changed from 
+  "descriptor.xml", to ".pysystest". This change is to maintain a consistent
+  naming convention across configuration files within the framework, e.g. the 
+  project file ".pysysproject" denotes the project root and project specific 
+  information, whilst a test file ".pysystest" denotes a testcase within the 
+  project, and contains meta data for the test. Support for the previous name
+  is maintained, though it should be noted that testcases created with the 
+  "pysys.py make" command will have the new naming convention used.
+- The windows installer has been updated to add shortcuts to the uninstaller, 
+  and to create a separate directory for the inclusion of project extensions. 
+- The release notes have been split into a readme and the release notes. The 
+  readme will contain more detailed information for dependencies, installation 
+  and a getting started guide.  
+- The getInstanceCount method has been added to the pysys.basetest.BaseTest class
+  to reference count the number of named processes started during a test run. The
+  startProcess method of the class adds a reference count to an internal dictionary 
+  structure keyed on the displayName passed into the method to achieve this. 
+- The writeProcess method has been added to the pysys.basetest.BaseTest class to 
+  provide a wrapper around the write method of the underlying process helper class.
+  This wrapper perform a check on the running status of the process prior to the 
+  write, and performs additional logging to the run.log to audit the write. 
 - Fixed a bug in the replace method of the filereplace module, where the method 
   signature was missing the marker parameter
-- Added the extensions area to the package. This allows custom extensions to be 
-  added to PySys package for particular applications under test. 
-- The windows install now includes a link in the start menu item to uninstall 
-  PySys (Start -> Programs -> PySys -> Uninstall). 
-- The windows install now includes a link to the extensions directory, allowing 
-  extensions to PySys for a particular application under test (Start -> Programs 
-  -> PySys -> Extensions).
-- Split the release notes into a readme, and a release note. 
-- Added the getInstanceCount method to the basetest
-- Added the writeProcess method to the basetest
-- Default test descriptor is named .pysystest to make it more consistent to file 
-  naming for configuration files within the framework (e.g. .pysysproject defines
-  the project root, .pysystest defines a single testcase within the project). 
-  Support for the old descriptor name is continued, through all new testcases 
-  created will create the descriptor with the new name. 
 
   
 Release History
