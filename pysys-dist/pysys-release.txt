@@ -14,6 +14,29 @@ and the python version to be compiled with tcl/tk support.
 
 What's new in this release
 --------------------------
+- Fixed a bug in the replace method of the filereplace module, where the method 
+  signature was missing the marker parameter
+- Added the extensions area to the package. This allows custom extensions to be 
+  added to PySys package for particular applications under test. 
+- The windows install now includes a link in the start menu item to uninstall 
+  PySys (Start -> Programs -> PySys -> Uninstall). 
+- The windows install now includes a link to the extensions directory, allowing 
+  extensions to PySys for a particular application under test (Start -> Programs 
+  -> PySys -> Extensions).
+- Split the release notes into a readme, and a release note. 
+- Added the getInstanceCount method to the basetest
+- Added the writeProcess method to the basetest
+- Default test descriptor is named .pysystest to make it more consistent to file 
+  naming for configuration files within the framework (e.g. .pysysproject defines
+  the project root, .pysystest defines a single testcase within the project). 
+  Support for the old descriptor name is continued, through all new testcases 
+  created will create the descriptor with the new name. 
+
+  
+Release History
+---------------
+0.3.0 to 0.3.1
+--------------
 - The process helper modules have been updated to allow the writing to the stdin 
   of a process via the write() method on the process handle. 
 - Several bug fixes have been applied to the unix process helper module.
@@ -29,40 +52,6 @@ What's new in this release
   within the file will be set as data attributes of the pysys.Project class, which 
   is referenced in the pysys.constants module using the variable PROJECT. 
 
-
-Installation
-------------
-Installation on windows is performed by downloading the PySys-X.Y.Z.win32.exe 
-installer executable and running. To install on unix systems you should download
-the source tar.gz archive and perform the following
-
- $ tar zxvpf PySys-X.Y.Z.tar.gz
- $ cd PySys-X.Y.Z
- $ python setup.py build
- $ python setup.py install
- 
-To install you may need to have root privileges on the machine. Installation on 
-both windows and unix will install the PySys modules into the site-packages area
-of the default python. 
-
-  
-Running the Samples
--------------------
-PySys has a set of basic examples to demonstrate it's use for running automated 
-and manual testcases. The samples are distributed in a unix line ending friendly 
-tar.gz archive, and a windows line ending friendly zip file. To unpack the tests 
-on unix systems use
-
- $ tar zxvpf PySys-examples.X.Y.Z.tar.gz
- $ cd pysys-examples/fibonacci/testcases
-
-To run or print information on the testcases, use the pysys.py script installed in
-to the scripts directory of the python install. For more information on the usage
-of the script use "pysys.py -h", or "pysys.py run -h" | "pysys.py print -h".
-
-
-Release History
----------------
 0.2.2 to 0.3.0
 --------------
 - Updates to the epydoc output for documenting the classes and modules of pysys

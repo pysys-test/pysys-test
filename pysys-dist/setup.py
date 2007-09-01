@@ -38,7 +38,7 @@ if sys.platform.lower().startswith('win'):
 		  author=pysys.__author__,
 		  author_email=pysys.__author_email__,
 		  description='Python System Test Framework',
-		  url="http://sourceforge.net/projects/pysys",
+		  url="http://www.sourceforge.net/projects/pysys",
 		  scripts = ['pysys-dist/scripts/pysys.py', 'pysys-dist/scripts/pysys_postinstall.py'],
 		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
 					'pysys.process', 'pysys.process.plat-win32', 
@@ -47,7 +47,8 @@ if sys.platform.lower().startswith('win'):
 		  data_files=[('%s/pysys-doc' % get_site_packages_path(), ['pysys-doc/epydoc.css', 'pysys-doc/index.html']),
 		  			  ('%s/pysys-doc/private' % get_site_packages_path(), glob.glob('pysys-doc/private/*.*')),
 		  			  ('%s/pysys-doc/public' % get_site_packages_path(), glob.glob('pysys-doc/public/*.*')),
-					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt'])]
+					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
+					  (get_site_packages_path(), ['pysys-dist/pysys-readme.txt'])]
 		)
 else:
 	setup(name='PySys',
@@ -55,7 +56,7 @@ else:
 		  author=pysys.__author__,
 		  author_email=pysys.__author_email__,
 		  description='Python System Test Framework',
-		  url="http://sourceforge.net/projects/pysys",
+		  url="http://www.sourceforge.net/projects/pysys",
 		  scripts = ['pysys-dist/scripts/pysys.py'],
 		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
 					'pysys.process', 'pysys.process.plat-win32', 
@@ -68,4 +69,4 @@ else:
 # python.exe pysys-dist/setup.py bdist_wininst --install-script pysys_postinstall.py
 
 # to run on unix use
-# /usr/lcal/bin/python2.4 setup.py source_dist
+# /usr/lcal/bin/python2.4 setup.py sdist

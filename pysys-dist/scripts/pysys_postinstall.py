@@ -21,7 +21,8 @@
 
 import distutils.sysconfig, sys, os
 
-lib_dir = distutils.sysconfig.get_python_lib(plat_specific=1)
+python_dir = distutils.sysconfig.get_config_var("prefix")
+python_lib_dir = distutils.sysconfig.get_python_lib(plat_specific=1)
 
 def install():
 	try:
@@ -35,27 +36,52 @@ def install():
 		fldr = get_special_folder_path("CSIDL_PROGRAMS")
 
 	# Create the PySys link in start menu -> programs
-	directory = os.path.join(fldr, "PySys")
-	if not os.path.isdir(directory): os.mkdir(directory)
-	directory_created(directory)
-	sys.stdout.write("Created and registered %s \n" % directory)
+	pysysDirectory = os.path.join(fldr, "PySys")
+	if not os.path.isdir(pysysDirectory): os.mkdir(pysysDirectory)
+	directory_created(pysysDirectory)
+	sys.stdout.write("Created and registered %s \n" % pysysDirectory)
 	
-	# Create a shortcut to the documentation
-	filename = os.path.join(directory, "PySys Epydoc Documentation.lnk")
-	description = "Documentation for the PySys module"
-	create_shortcut("%s/pysys-doc/index.html"%lib_dir, description, filename)
+	# Create the extensions directory link in start menu -> programs -> PySys
+	extensionsDirectory = os.path.join(pysysDirectory, "Extensions")
+	if not os.path.isdir(extensionsDirectory): os.mkdir(extensionsDirectory)
+	directory_created(extensionsDirectory)
+	sys.stdout.write("Created and registered %s \n" % extensionsDirectory)
+
+	# Create the documents directory link in start menu -> programs -> PySys
+	documentsDirectory = os.path.join(pysysDirectory, "Documentation")
+	if not os.path.isdir(documentsDirectory): os.mkdir(documentsDirectory)
+	directory_created(documentsDirectory)
+	sys.stdout.write("Created and registered %s \n" % documentsDirectory)
+
+	# Create a shortcut to the epydoc documentation
+	filename = os.path.join(documentsDirectory, "PySys Epydoc.lnk")
+	description = "Epydoc API Documentation for the PySys module"
+	create_shortcut("%s/pysys-doc/index.html"%python_lib_dir, description, filename)
 	file_created(filename)
 	sys.stdout.write("Created and registered link to documentation\n")
-
+		
 	# Create a shortcut to the release notes
-	filename = os.path.join(directory, "Release Notes.lnk")
+	filename = os.path.join(pysysDirectory, "Release Notes.lnk")
 	description = "Release Notes for the PySys module"
-	create_shortcut("%s/pysys-release.txt"%lib_dir, description, filename)
+	create_shortcut("%s/pysys-release.txt"%python_lib_dir, description, filename)
 	file_created(filename)
 	sys.stdout.write("Created and registered link to release notes\n")
-
+		
+	# Create a shortcut to the readme
+	filename = os.path.join(pysysDirectory, "Readme.lnk")
+	description = "Readme for the PySys module"
+	create_shortcut("%s/pysys-readme.txt"%python_lib_dir, description, filename)
+	file_created(filename)
+	sys.stdout.write("Created and registered link to the readme\n")
+		
+	# Create a shortcut to the uninstaller
+	filename = os.path.join(pysysDirectory, "Uninstall.lnk")
+	description = "Uninstall the PySys module"
+	create_shortcut("%s/RemovePySys.exe" %python_dir, description, filename, "-u %s/PySys-wininst.log" % python_dir)
+	file_created(filename)
+	sys.stdout.write("Created and registered link to uninstaller\n")
 	
-
+	
 def printUsage():
 	print "\nUsage: %s [option]" % os.path.basename(sys.argv[0])
 	print "    where option is one of;"
