@@ -1,4 +1,4 @@
-PySys 0.4.0 Release Notes
+PySys 0.3.2 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
