@@ -14,7 +14,7 @@ What's new in this release
   information, whilst a test file ".pysystest" denotes a testcase within the 
   project, and contains meta data for the test. Support for the previous name
   is maintained, though it should be noted that testcases created with the 
-  "pysys.py make" command will have the new naming convention used.
+  'pysys.py make' command will have the new naming convention used.
 - The windows installer has been updated to add shortcuts to the uninstaller, 
   and to create a separate directory for the inclusion of project extensions. 
 - The release notes have been split into a readme and the release notes. The 
