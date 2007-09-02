@@ -14,7 +14,7 @@ and grepped from the stdout and stdin of the process.
 
   <classification>
     <groups>
-      <group>Process</group>
+      <group>process</group>
     </groups>
   </classification>
 

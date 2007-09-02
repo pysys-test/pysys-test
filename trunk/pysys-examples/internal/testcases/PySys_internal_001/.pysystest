@@ -4,13 +4,16 @@
   <description> 
     <title>Project Loading - check correct data attributes set in project class</title>    
     <purpose><![CDATA[
+Checks the correct extraction of project variables from a project file. Specfically 
+checks for property name expansions from both the environment, and from previously 
+defined properties.
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group>Project</group>
+      <group>project</group>
     </groups>
   </classification>
 
