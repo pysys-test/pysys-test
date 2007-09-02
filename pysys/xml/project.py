@@ -26,10 +26,13 @@ from pysys.constants import *
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
-<!ELEMENT pysysproject (property)+ >
-<!ATTLIST property name CDATA #IMPLIED
-                   value CDATA #IMPLIED
+<!ELEMENT pysysproject (property, path)+ >
+<!ATTLIST property name CDATA #REQUIRED
+                   value CDATA #REQUIRED
                    default CDATA #IMPLIED>
+<!ATTLIST path value CDATA #REQUIRED
+               relative CDATA #IMPLIED>
+
 '''
 
 EXPR1 = re.compile("(?P<replace>\${env.(?P<key>.*?)})", re.M)
@@ -86,10 +89,25 @@ class XMLProjectParser:
 							insert = propertyNode.getAttribute("default")
 						value = string.replace(value, m[0], insert)
 			except:
-				log.info(sys.exc_info()[1])
+				pass
 			else:
 				self.properties[name] = value
 		return self.properties
+
+
+	def addToPath(self):		
+		pathNodeList = self.root.getElementsByTagName('path')
+
+		for pathNode in pathNodeList:
+			try:
+				value = pathNode.getAttribute("value") 
+				relative = pathNode.getAttribute("relative")
+		
+				if relative == "true": value = os.path.join(self.dirname, value)
+				sys.path.append(os.path.normpath(value))
+
+			except:
+				pass
 
 
 	def writeXml(self):
