@@ -61,6 +61,7 @@ FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
 
 
 # set the default descriptor filename, input, output and reference directory names
+DEFAULT_PROJECTFILE = '.pysysproject'
 DEFAULT_DESCRIPTOR = ['.pysystest', 'descriptor.xml']  
 DEFAULT_MODULE = 'run'
 DEFAULT_GROUP = ""
@@ -133,7 +134,7 @@ def loadproject(start):
 
 	search = start
 	drive, path = os.path.splitdrive(search)
-	while (not search == drive) and (not os.path.exists("%s/.pysysproject" % search)): 
+	while (not search == drive) and (not os.path.exists(os.path.join(search, DEFAULT_PROJECTFILE))): 
 		search, drop = os.path.split(search) 
 		if not drop: search = drive
 	PROJECT = Project(search)
@@ -155,17 +156,20 @@ class Project:
 	def __init__(self, root):
 		self.root = root
 		
-		if os.path.exists("%s/.pysysproject" % root):	
+		if os.path.exists(os.path.join(root, DEFAULT_PROJECTFILE)):	
 			# parse the project file
-			parser = XMLProjectParser("%s/.pysysproject" % root)
-			properties = parser.getProperties()
-			parser.unlink()
+			parser = XMLProjectParser(os.path.join(root, DEFAULT_PROJECTFILE))
 			
-			# set the data attributes
+			# get the properties
+			properties = parser.getProperties()
 			keys = properties.keys()
 			keys.sort()
-			for key in keys:
-				setattr(self, key, properties[key])
-				
+			for key in keys: setattr(self, key, properties[key])
+			
+			# add to the python path
+			parser.addToPath()
+			
+			# set the data attributes
+			parser.unlink()	
 	
 	
