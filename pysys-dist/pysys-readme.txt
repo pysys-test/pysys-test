@@ -1,32 +1,22 @@
 PySys 0.3.2 Readme
 ==================
 
-Dependencies
-------------
-Running on windows requires installation of the pywin32 extensions written by 
-Mark Hammond (http://sourceforge.net/projects/pywin32). Running the manual 
-tester on unix systems requires the tcl/tk libraries to be installed on the 
-host machine and the Python version to be compiled with tcl/tk support.
+This document is a work in progress, and is intended to grow over the development 
+of the PySys framework to provide a source of more complete detailed information
+on the dependencies, installation, and development of testcases using the framework.
 
 
-Installation
-------------
-Installation on windows is performed by downloading the PySys-X.Y.Z.win32.exe 
-installer executable and running. To install on unix systems you should download
-the source tar.gz archive and perform the following
+Contents
+--------
+1 Running PySys
+  1.0 The 'pysys.py' launcher
+  1.1 The fibonacci samples
 
- $ tar zxvpf PySys-X.Y.Z.tar.gz
- $ cd PySys-X.Y.Z
- $ python setup.py build
- $ python setup.py install
- 
-To install on both windows and unix systems you may need to have root privileges 
-on the machine. Installation will install the PySys modules into the site-packages 
-area of the default Python. 
-
-
-Using the "pysys.py" launcher
------------------------------
+  
+1 Running PySys
+---------------
+1.0 The 'pysys.py' launcher 
+---------------------------
 PySys installs a launcher script 'pysys.py' as part of the installation process 
 to facilitate the management and execution of testcases. On unix systems the script 
 is installed into the Python binary directory, e.g. /usr/local/bin, and is hence 
@@ -50,8 +40,8 @@ top level option, e.g. for more information on running a set of testcases use
   $ pysys.py run --help
 
 
-Running the Samples
--------------------
+1.1 The fibonacci samples
+-------------------------
 PySys has a set of basic examples to demonstrate it's use for running automated 
 and manual testcases. The samples are distributed in a unix line ending friendly 
 tar.gz archive, and a windows line ending friendly zip file. To unpack the tests 
