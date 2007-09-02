@@ -3,10 +3,10 @@ PySys 0.3.2 Readme
 
 Dependencies
 ------------
-Running on windows requires installation of the pywin32 extensions written by Mark 
-Hammond. The extensions can be downloaded from http://sourceforge.net/projects/pywin32.
-Running the manual tester on unix systems requires the tcl/tk libraries to be installed
-and the python version to be compiled with tcl/tk support.
+Running on windows requires installation of the pywin32 extensions written by 
+Mark Hammond (http://sourceforge.net/projects/pywin32). Running the manual 
+tester on unix systems requires the tcl/tk libraries to be installed on the 
+host machine and the Python version to be compiled with tcl/tk support.
 
 
 Installation
@@ -29,12 +29,12 @@ Using the "pysys.py" launcher
 -----------------------------
 PySys installs a launcher script 'pysys.py' as part of the installation process 
 to facilitate the management and execution of testcases. On unix systems the script 
-is installed into the python binary directory, e.g. /usr/local/bin, and is hence 
+is installed into the Python binary directory, e.g. /usr/local/bin, and is hence 
 on the default user's path. On windows systems the script is installed into the 
 Scripts directory of the Python installation, e.g. c:\Python24\Scripts\pysys.py, 
 which is not by default on the user's path. To run on windows systems the Scripts 
 directory of the Python installation should be added to the user's path, and all 
-.py files associated with the python binary to allow direct execution of the 
+.py files associated with the Python binary to allow direct execution of the 
 script. 
 
 After installation, to see the available options to the pysys.py script use 
