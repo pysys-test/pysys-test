@@ -4,13 +4,16 @@
   <description> 
     <title>Process Module - write to process stdin</title>    
     <purpose><![CDATA[
+Checks the writing of data to the stdin on a process running in the foreground.
+The test uses the process handles returned from the startProcess method call 
+and calls the write method repeatedly. 
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group>Process</group>
+      <group>process</group>
     </groups>
   </classification>
 
