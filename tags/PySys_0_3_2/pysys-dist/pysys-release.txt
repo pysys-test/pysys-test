@@ -1,0 +1,182 @@
+PySys 0.3.2 Release Notes
+=========================
+
+PySys has been written and tested against Python 2.4 and higher. Whilst the package 
+may run on earlier versions no guarantee as to the successful operation can be made. 
+
+
+What's new in this release
+--------------------------
+- The default name of the PySys test descriptor file has been changed from 
+  "descriptor.xml", to ".pysystest". This change is to maintain a consistent
+  naming convention across configuration files within the framework, e.g. the 
+  project file ".pysysproject" denotes the project root and project specific 
+  information, whilst a test file ".pysystest" denotes a testcase within the 
+  project, and contains meta data for the test. Support for the previous name
+  is maintained, though it should be noted that testcases created with the 
+  'pysys.py make' command will have the new naming convention used.
+- The windows installer has been updated to add shortcuts to the uninstaller, 
+  and to create a separate directory for the inclusion of project extensions. 
+- The getInstanceCount method has been added to the pysys.basetest.BaseTest class
+  to reference count the number of named processes started during a test run. The
+  startProcess method of the class adds a reference count to an internal dictionary 
+  structure keyed on the displayName passed into the method to achieve this. 
+- The writeProcess method has been added to the pysys.basetest.BaseTest class to 
+  provide a wrapper around the write method of the underlying process helper class.
+  This wrapper perform a check on the running status of the process prior to the 
+  write, and performs additional logging to the run.log to audit the write. 
+- Fixed a bug in the replace method of the filereplace module, where the method 
+  signature was missing the marker parameter
+
+
+Dependencies
+------------
+Running on windows requires installation of the pywin32 extensions written by 
+Mark Hammond (http://sourceforge.net/projects/pywin32). Running the manual 
+tester on unix systems requires the tcl/tk libraries to be installed on the 
+host machine and the Python version to be compiled with tcl/tk support.
+
+
+Installation
+------------
+Installation on windows is performed by downloading the PySys-X.Y.Z.win32.exe 
+installer executable and running. To install on unix systems you should download
+the source tar.gz archive and perform the following
+
+ $ tar zxvpf PySys-X.Y.Z.tar.gz
+ $ cd PySys-X.Y.Z
+ $ python setup.py build
+ $ python setup.py install
+ 
+To install on both windows and unix systems you may need to have root privileges 
+on the machine. Installation will install the PySys modules into the site-packages 
+area of the default Python. 
+
+
+The 'pysys.py' launcher 
+-----------------------
+PySys installs a launcher script 'pysys.py' as part of the installation process 
+to facilitate the management and execution of testcases. On unix systems the script 
+is installed into the Python binary directory, e.g. /usr/local/bin, and is hence 
+on the default user's path. On windows systems the script is installed into the 
+Scripts directory of the Python installation, e.g. c:\Python24\Scripts\pysys.py, 
+which is not by default on the user's path. To run on windows systems the Scripts 
+directory of the Python installation should be added to the user's path, and all 
+.py files associated with the Python binary to allow direct execution of the 
+script. 
+
+After installation, to see the available options to the pysys.py script use 
+
+  $ pysys.py --help
+  
+The script takes three main top level command line options to it, namely 'run', 
+'print' and 'make', which are used to run a set of testcases, print the meta data
+for a set of testcases, or to make a new testcase directory structure respectively.
+For more information on the further options available to each add --help after the 
+top level option, e.g. for more information on running a set of testcases use
+
+  $ pysys.py run --help
+
+
+Running the samples
+-------------------
+PySys has a set of basic examples to demonstrate it's use for running automated 
+and manual testcases. The samples are distributed in a unix line ending friendly 
+tar.gz archive, and a windows line ending friendly zip file. To unpack the tests 
+on unix systems use
+
+ $ tar zxvpf PySys-examples.X.Y.Z.tar.gz
+ $ cd pysys-examples/fibonacci/testcases
+
+To run the testcases in the fibonacci area, after changing directory to the 
+testcases location, perform 
+ 
+ $ pysys.py run  
+
+
+Release History
+---------------
+0.3.0 to 0.3.1
+--------------
+- The process helper modules have been updated to allow the writing to the stdin 
+  of a process via the write() method on the process handle. 
+- Several bug fixes have been applied to the unix process helper module.
+- The pysys-examples/internal directory has been added to the examples module. 
+  This will contain internal testcases for self testing the pysys framework. 
+  These have been included in the distribution as examples of the use of the 
+  framework.
+- The pysys project file has been added into the framework to allow the setting 
+  of project specific constants within the application. The project file should be 
+  written to the base location of the project, with the filename .pysysproject. 
+  The location of this file denotes the root location of the project. For an 
+  example of the file see pysys-examples/.pysysproject. Any name value properties
+  within the file will be set as data attributes of the pysys.Project class, which 
+  is referenced in the pysys.constants module using the variable PROJECT. 
+
+0.2.2 to 0.3.0
+--------------
+- Updates to the epydoc output for documenting the classes and modules of pysys
+- Addition of the pysys.py module for printing, running and making new testcase
+  directory structures. This allows a single distributed script to be used to 
+  perform all functionality available from the console. 
+- Remove of the run method from the console launch helper.
+
+0.2.1 to 0.2.2
+--------------
+- The suites element in the test descriptor has been renamed to groups. This is to 
+  allow testcases in a single directory to be classified as a single testsuite, and 
+  subsets thereof to be regarded as a group
+- Minor bug fixes to the manual tester and process module
+
+0.2.0 to 0.2.1
+--------------
+- The Manual Tester has been updated to support the <expectedresult> element in the 
+  input xml file. This allows display of the expected result for a manual step to 
+  be presented in the user interface. The ability to optionally record a defect in 
+  the log output is also now included.
+- The createDescriptors method has been removed from the pysys.launcher.console 
+  package and moved into pysys.launcher. This allows the utility method to be 
+  used for other custom launchers.
+
+0.1.7 to 0.2.0
+--------------
+- This release includes updates to the Python doc strings for automated generation of 
+  epydoc using the Epydoc package (http://epydoc.sourceforge.net). The installer now 
+  distributes the generated epydoc in the site-packages/pysys-doc directory. For 
+  windows installs a link to the epydoc and release notes is now added as a link in the 
+  start menu items
+- Added the setup() method to the BaseTest class to allow custom setup actions to be 
+  performed prior to execution of a particular test case
+- Fixed a bug where if the --type option was not supplied to ConsoleMakeTestHelper
+  as a command line option, the resulting descriptor had type="None"
+
+0.1.6 to 0.1.7
+--------------
+- The Manual Tester UI has been updated so that it can be resized, and is easier to 
+  navigate through the tests. Many thanks to Tim McCormick who contributed to the UI 
+  improvements
+- The BaseRunner start method now takes an optional list of result writer class instances 
+  to perform test audit logging at the end of a test cycle. This allows custom result 
+  writers to be passed to the runner to, for example, write the results to a database, 
+  proprietary system etc
+  
+0.1.5 to 0.1.6
+--------------
+- Added the ability to differentiate between automated and manual testcases using the 
+  test attribute to the pysystest element in the testcase descriptor. If the attribute 
+  is not present the test will be assumed to be an automated test. The runTest and 
+  printTest launch helpers allow you to differentiate between automated and manual 
+  tests using the --type command line argument. For more information see the examples 
+  in pysys-examples
+
+0.1.4 to 0.1.5
+--------------
+- Added support for the requirements traceability. This includes printing requirements 
+  covered by a set of testcases, and running testcases which cover a particular 
+  requirement id
+
+0.1.3 to 0.1.4
+--------------
+- Added the ConsoleMakeTestHelper class to pysys.launcher.console. This facilitates 
+  the creation of new testcase structures from the command line. Updated 
+  pysys-examples/fibonacci to demonstrate the use of the utility class 
