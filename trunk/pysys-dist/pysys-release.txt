@@ -1,4 +1,4 @@
-PySys 0.3.2 Release Notes
+PySys 0.4.0 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
@@ -17,9 +17,6 @@ What's new in this release
   'pysys.py make' command will have the new naming convention used.
 - The windows installer has been updated to add shortcuts to the uninstaller, 
   and to create a separate directory for the inclusion of project extensions. 
-- The release notes have been split into a readme and the release notes. The 
-  readme will contain more detailed information for dependencies, installation 
-  and a getting started guide.  
 - The getInstanceCount method has been added to the pysys.basetest.BaseTest class
   to reference count the number of named processes started during a test run. The
   startProcess method of the class adds a reference count to an internal dictionary 
@@ -54,8 +51,49 @@ the source tar.gz archive and perform the following
 To install on both windows and unix systems you may need to have root privileges 
 on the machine. Installation will install the PySys modules into the site-packages 
 area of the default Python. 
+
+
+The 'pysys.py' launcher 
+-----------------------
+PySys installs a launcher script 'pysys.py' as part of the installation process 
+to facilitate the management and execution of testcases. On unix systems the script 
+is installed into the Python binary directory, e.g. /usr/local/bin, and is hence 
+on the default user's path. On windows systems the script is installed into the 
+Scripts directory of the Python installation, e.g. c:\Python24\Scripts\pysys.py, 
+which is not by default on the user's path. To run on windows systems the Scripts 
+directory of the Python installation should be added to the user's path, and all 
+.py files associated with the Python binary to allow direct execution of the 
+script. 
+
+After installation, to see the available options to the pysys.py script use 
+
+  $ pysys.py --help
   
-  
+The script takes three main top level command line options to it, namely 'run', 
+'print' and 'make', which are used to run a set of testcases, print the meta data
+for a set of testcases, or to make a new testcase directory structure respectively.
+For more information on the further options available to each add --help after the 
+top level option, e.g. for more information on running a set of testcases use
+
+  $ pysys.py run --help
+
+
+Running the samples
+-------------------
+PySys has a set of basic examples to demonstrate it's use for running automated 
+and manual testcases. The samples are distributed in a unix line ending friendly 
+tar.gz archive, and a windows line ending friendly zip file. To unpack the tests 
+on unix systems use
+
+ $ tar zxvpf PySys-examples.X.Y.Z.tar.gz
+ $ cd pysys-examples/fibonacci/testcases
+
+To run the testcases in the fibonacci area, after changing directory to the 
+testcases location, perform 
+ 
+ $ pysys.py run  
+
+
 Release History
 ---------------
 0.3.0 to 0.3.1
