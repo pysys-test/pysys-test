@@ -31,7 +31,7 @@ __author_email__ = "moraygrieve@users.sourceforge.net"
 __status__  = "beta"
 """The status of this release."""
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 """The version of this release."""
 
 __date__    = "02 Sept 2007"
