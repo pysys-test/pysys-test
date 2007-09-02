@@ -1,1 +1,3 @@
-__all__ = [ "descriptor" ]
+__all__ = [ "descriptor",
+			"project",
+			"manual" ]

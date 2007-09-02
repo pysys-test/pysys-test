@@ -47,8 +47,7 @@ if sys.platform.lower().startswith('win'):
 		  data_files=[('%s/pysys-doc' % get_site_packages_path(), ['pysys-doc/epydoc.css', 'pysys-doc/index.html']),
 		  			  ('%s/pysys-doc/private' % get_site_packages_path(), glob.glob('pysys-doc/private/*.*')),
 		  			  ('%s/pysys-doc/public' % get_site_packages_path(), glob.glob('pysys-doc/public/*.*')),
-					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
-					  (get_site_packages_path(), ['pysys-dist/pysys-readme.txt'])]
+					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt'])]
 		)
 else:
 	setup(name='PySys',
