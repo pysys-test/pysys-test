@@ -67,13 +67,6 @@ def install():
 	file_created(filename)
 	sys.stdout.write("Created and registered link to release notes\n")
 		
-	# Create a shortcut to the readme
-	filename = os.path.join(pysysDirectory, "Readme.lnk")
-	description = "Readme for the PySys module"
-	create_shortcut("%s/pysys-readme.txt"%python_lib_dir, description, filename)
-	file_created(filename)
-	sys.stdout.write("Created and registered link to the readme\n")
-		
 	# Create a shortcut to the uninstaller
 	filename = os.path.join(pysysDirectory, "Uninstall.lnk")
 	description = "Uninstall the PySys module"
