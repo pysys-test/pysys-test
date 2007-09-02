@@ -31,6 +31,30 @@ What's new in this release
 - Fixed a bug in the replace method of the filereplace module, where the method 
   signature was missing the marker parameter
 
+
+Dependencies
+------------
+Running on windows requires installation of the pywin32 extensions written by 
+Mark Hammond (http://sourceforge.net/projects/pywin32). Running the manual 
+tester on unix systems requires the tcl/tk libraries to be installed on the 
+host machine and the Python version to be compiled with tcl/tk support.
+
+
+Installation
+------------
+Installation on windows is performed by downloading the PySys-X.Y.Z.win32.exe 
+installer executable and running. To install on unix systems you should download
+the source tar.gz archive and perform the following
+
+ $ tar zxvpf PySys-X.Y.Z.tar.gz
+ $ cd PySys-X.Y.Z
+ $ python setup.py build
+ $ python setup.py install
+ 
+To install on both windows and unix systems you may need to have root privileges 
+on the machine. Installation will install the PySys modules into the site-packages 
+area of the default Python. 
+  
   
 Release History
 ---------------
