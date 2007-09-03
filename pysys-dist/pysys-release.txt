@@ -1,4 +1,4 @@
-PySys 0.3.3 Release Notes
+PySys 0.3.4 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
@@ -7,29 +7,9 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- The default name of the PySys test descriptor file has been changed from 
-  "descriptor.xml", to ".pysystest". This change is to maintain a consistent
-  naming convention across configuration files within the framework, e.g. the 
-  project file ".pysysproject" denotes the project root and project specific 
-  information, whilst a test file ".pysystest" denotes a testcase within the 
-  project, and contains meta data for the test. Support for the previous name
-  is maintained, though it should be noted that testcases created with the 
-  'pysys.py make' command will have the new naming convention used.
-- The windows installer has been updated to add shortcuts to the uninstaller, 
-  and to create a separate directory for the inclusion of project extensions. 
-- The getInstanceCount method has been added to the pysys.basetest.BaseTest class
-  to reference count the number of named processes started during a test run. The
-  startProcess method of the class adds a reference count to an internal dictionary 
-  structure keyed on the displayName passed into the method to achieve this. 
-- The writeProcess method has been added to the pysys.basetest.BaseTest class to 
-  provide a wrapper around the write method of the underlying process helper class.
-  This wrapper perform a check on the running status of the process prior to the 
-  write, and performs additional logging to the run.log to audit the write. 
-- Fixed a bug in the replace method of the filereplace module, where the method 
-  signature was missing the marker parameter
-- Added support to the pysys project file to allow adding path locations to the 
-  Python path. See the .pysysproject file in pysys-examples for more detail.
-
+- Fixed a bug where timedout processes started in the foreground were not being stopped 
+  automatically at the end of the testcase.
+  
 
 Dependencies
 ------------
@@ -98,6 +78,31 @@ testcases location, perform
 
 Release History
 ---------------
+0.3.2 to 0.3.3
+--------------
+- The default name of the PySys test descriptor file has been changed from 
+  "descriptor.xml", to ".pysystest". This change is to maintain a consistent
+  naming convention across configuration files within the framework, e.g. the 
+  project file ".pysysproject" denotes the project root and project specific 
+  information, whilst a test file ".pysystest" denotes a testcase within the 
+  project, and contains meta data for the test. Support for the previous name
+  is maintained, though it should be noted that testcases created with the 
+  'pysys.py make' command will have the new naming convention used.
+- The windows installer has been updated to add shortcuts to the uninstaller, 
+  and to create a separate directory for the inclusion of project extensions. 
+- The getInstanceCount method has been added to the pysys.basetest.BaseTest class
+  to reference count the number of named processes started during a test run. The
+  startProcess method of the class adds a reference count to an internal dictionary 
+  structure keyed on the displayName passed into the method to achieve this. 
+- The writeProcess method has been added to the pysys.basetest.BaseTest class to 
+  provide a wrapper around the write method of the underlying process helper class.
+  This wrapper perform a check on the running status of the process prior to the 
+  write, and performs additional logging to the run.log to audit the write. 
+- Fixed a bug in the replace method of the filereplace module, where the method 
+  signature was missing the marker parameter
+- Added support to the pysys project file to allow adding path locations to the 
+  Python path. See the .pysysproject file in pysys-examples for more detail.
+
 0.3.1 to 0.3.2
 --------------
 - Release was superceded immediately by the 0.3.3 release. See release notes for 
