@@ -297,7 +297,8 @@ class BaseTest:
 			log.info("Unable to start process", sys.exc_info()[1])
 			self.addOutcome(BLOCKED)
 		except ProcessTimeout:
-			log.info("Process timedout after %d seconds", timeout)
+			log.info("Process timedout after %d seconds, stopping process", timeout)
+			process.stop()
 			self.addOutcome(TIMEDOUT)
 		else:
 			self.processList.append(process) 	
