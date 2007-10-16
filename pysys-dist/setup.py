@@ -68,4 +68,4 @@ else:
 # python.exe pysys-dist/setup.py bdist_wininst --install-script pysys_postinstall.py
 
 # to run on unix use
-# /usr/lcal/bin/python2.4 setup.py sdist
+# /usr/local/bin/python2.4 setup.py sdist
