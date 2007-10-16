@@ -21,6 +21,7 @@ and automated testcases provides a single framework for all test organisation re
 
 import sys, logging
 logging._levelNames[50] = 'CRIT'
+logging._levelNames[30] = 'WARN'
 
 __author__  = "Moray Grieve"
 """The author of PySys."""
@@ -31,11 +32,12 @@ __author_email__ = "moraygrieve@users.sourceforge.net"
 __status__  = "beta"
 """The status of this release."""
 
-__version__ = "0.3.3"
+__version__ = "0.3.4"
 """The version of this release."""
 
-__date__    = "02 Sept 2007"
+__date__    = "15 Oct 2007"
 """The date of this release."""
+
 __all__     = [ "constants",
                 "exceptions",
                 "baserunner",
