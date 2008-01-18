@@ -294,7 +294,7 @@ class BaseTest:
 			elif state == BACKGROUND:
 				log.info("Started %s in background with process id %d", displayName, process.pid)
 		except ProcessError:
-			log.info("Unable to start process", sys.exc_info()[1])
+			log.info("%s", sys.exc_info()[1], exc_info=0)
 			self.addOutcome(BLOCKED)
 		except ProcessTimeout:
 			log.info("Process timedout after %d seconds, stopping process", timeout)
