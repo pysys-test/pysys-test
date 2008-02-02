@@ -1,4 +1,4 @@
-PySys 0.3.4 Release Notes
+PySys 0.3.5 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
@@ -7,9 +7,10 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- Fixed a bug where timedout processes started in the foreground were not being stopped 
-  automatically at the end of the testcase.
-  
+- Fixed a bug a testcase was not being marked as BLOCKED when unable to start a 
+  process using the process helper module.
+- Failure on the assertOrderedGrep now prints out the line the failure occurred on.
+
 
 Dependencies
 ------------
@@ -78,6 +79,12 @@ testcases location, perform
 
 Release History
 ---------------
+
+0.3.3 to 0.3.4
+--------------
+- Fixed a bug where timedout processes started in the foreground were not being stopped 
+  automatically at the end of the testcase.
+  
 0.3.2 to 0.3.3
 --------------
 - The default name of the PySys test descriptor file has been changed from 
