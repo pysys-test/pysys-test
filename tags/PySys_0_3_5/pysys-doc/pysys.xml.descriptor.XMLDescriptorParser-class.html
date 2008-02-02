@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pysys.xml.descriptor.XMLDescriptorParser</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pysys-module.html">Package&nbsp;pysys</a> ::
+        <a href="pysys.xml-module.html">Package&nbsp;xml</a> ::
+        <a href="pysys.xml.descriptor-module.html">Module&nbsp;descriptor</a> ::
+        Class&nbsp;XMLDescriptorParser
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pysys.xml.descriptor.XMLDescriptorParser-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h2 class="class">Class XMLDescriptorParser
+<br/><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser">source&nbsp;code</a></span></h2>
+<p>Helper class to parse an XML test descriptor.</p>
+  The class uses the minidom DOM (Document Object Model) non validating 
+  parser to provide accessor methods to return element attributes and 
+  character data from the test descriptor file. The class is instantiated 
+  with the filename of the test descriptor. It is the responsibility of the
+  user of the class to call the unlink() method of the class on completion 
+  in order to free the memory used in the parsing.<br /><br />
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="summary">Instance Methods</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xmlfile</span>)</span>
+    <br />Class constructor.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getContainer" class="sig-name">getContainer</a>(<span class="sig-arg">self</span>)</span>
+    <br />Create and return an instance of XMLDescriptorContainer for the 
+      contents of the descriptor.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#unlink" class="sig-name">unlink</a>(<span class="sig-arg">self</span>)</span>
+    <br />Clean up the DOM on completion.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getID" class="sig-name">getID</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the id of the test.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getType" class="sig-name">getType</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the type attribute of the test element.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getState" class="sig-name">getState</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the state attribute of the test element.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getTitle" class="sig-name">getTitle</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the test titlecharacter data of the description 
+      element.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getPurpose" class="sig-name">getPurpose</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the test purpose character data of the description 
+      element.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getsuites" class="sig-name">getsuites</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return a list of the suite names, contained in the character data 
+      of the suite elements.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getModes" class="sig-name">getModes</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return a list of the mode names, contained in the character data 
+      of the mode elements.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getClassDetails" class="sig-name">getClassDetails</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the test class attributes (name, module, searchpath), 
+      contained in the class element.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getTestInput" class="sig-name">getTestInput</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the test input path, contained in the input element.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getTestOutput" class="sig-name">getTestOutput</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the test output path, contained in the output element.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getTestReference" class="sig-name">getTestReference</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the test reference path, contained in the reference 
+      element.
+  </td>
+</tr>
+<tr>
+  <td width="15%" align="right" valign="top" class="rtype">
+    &nbsp;
+   </td>
+  <td>
+    <span class="sig"><a href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getRequirements" class="sig-name">getRequirements</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return a list of the requirement ids, contained in the character 
+      data of the requirement elements.
+  </td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="details">Method Details</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xmlfile</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Class constructor.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getContainer"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getContainer</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getContainer">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Create and return an instance of XMLDescriptorContainer for the 
+  contents of the descriptor.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="unlink"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">unlink</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.unlink">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Clean up the DOM on completion.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getID"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getID</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getID">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the id of the test.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getType"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getType</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getType">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the type attribute of the test element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getState"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getState</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getState">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the state attribute of the test element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getTitle"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getTitle</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getTitle">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the test titlecharacter data of the description element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getPurpose"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getPurpose</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getPurpose">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the test purpose character data of the description element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getsuites"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getsuites</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getsuites">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return a list of the suite names, contained in the character data of 
+  the suite elements.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getModes"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getModes</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getModes">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return a list of the mode names, contained in the character data of 
+  the mode elements.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getClassDetails"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getClassDetails</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getClassDetails">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the test class attributes (name, module, searchpath), contained
+  in the class element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getTestInput"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getTestInput</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getTestInput">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the test input path, contained in the input element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getTestOutput"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getTestOutput</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getTestOutput">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the test output path, contained in the output element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getTestReference"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getTestReference</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getTestReference">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the test reference path, contained in the reference 
+  element.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="getRequirements"></a>
+<div>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">getRequirements</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="pysys.xml.descriptor-pysrc.html#XMLDescriptorParser.getRequirements">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return a list of the requirement ids, contained in the character data 
+  of the requirement elements.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Fri Oct 06 16:05:46 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

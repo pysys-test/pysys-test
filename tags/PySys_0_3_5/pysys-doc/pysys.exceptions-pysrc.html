@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pysys.exceptions</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pysys-module.html">Package&nbsp;pysys</a> ::
+        Module&nbsp;exceptions
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pysys.exceptions-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="pysys.exceptions-module.html">Module pysys.exceptions</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"><span class="py-comment">#!/usr/bin/env python</span> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Permission is hereby granted, free of charge, to any person</span> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># obtaining a copy of this software and any associated documentation</span> </span>
+<span class="lineno"> 4</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># files (the "Software"), to deal in the Software without</span> </span>
+<span class="lineno"> 5</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># restriction, including without limitation the rights to use, copy,</span> </span>
+<span class="lineno"> 6</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># modify, merge, publish, distribute, sublicense, and/or sell copies</span> </span>
+<span class="lineno"> 7</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># of the Software, and to permit persons to whom the Software is</span> </span>
+<span class="lineno"> 8</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># furnished to do so, subject to the following conditions:</span> </span>
+<span class="lineno"> 9</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#</span> </span>
+<span class="lineno">10</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># The above copyright notice and this permission notice shall be</span> </span>
+<span class="lineno">11</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># included in all copies or substantial portions of the Software.</span> </span>
+<span class="lineno">12</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#</span> </span>
+<span class="lineno">13</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># The software is provided "as is", without warranty of any</span> </span>
+<span class="lineno">14</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># kind, express or implied, including but not limited to the</span> </span>
+<span class="lineno">15</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># warranties of merchantability, fitness for a particular purpose</span> </span>
+<span class="lineno">16</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># and noninfringement. In no event shall the authors or copyright</span> </span>
+<span class="lineno">17</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># holders be liable for any claim, damages or other liability,</span> </span>
+<span class="lineno">18</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># whether in an action of contract, tort or otherwise, arising from,</span> </span>
+<span class="lineno">19</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># out of or in connection with the software or the use or other</span> </span>
+<span class="lineno">20</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># dealings in the software</span> </span>
+<span class="lineno">21</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno">22</span>  <span class="py-line"> </span>
+<a name="FileNotFoundException"></a><div id="FileNotFoundException-def"><span class="lineno">23</span> <a class="pysrc-toggle" href="#" id="FileNotFoundException-toggle" onclick="toggle('FileNotFoundException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.exceptions.FileNotFoundException-class.html">FileNotFoundException</a><span class="py-op">:</span> </span>
+</div><div id="FileNotFoundException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="FileNotFoundException-expanded"><span class="lineno">24</span>  <span class="py-line">        <span class="py-docstring">"""Exception raised when a file cannot be found."""</span> </span>
+<span class="lineno">25</span>  <span class="py-line"> </span>
+<a name="FileNotFoundException.__init__"></a><div id="FileNotFoundException.__init__-def"><span class="lineno">26</span> <a class="pysrc-toggle" href="#" id="FileNotFoundException.__init__-toggle" onclick="toggle('FileNotFoundException.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.FileNotFoundException-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span><span class="py-param">value</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="FileNotFoundException.__init__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="FileNotFoundException.__init__-expanded"><span class="lineno">27</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span><span class="py-op">=</span><span class="py-name">value</span> </span>
+</div><span class="lineno">28</span>  <span class="py-line">                 </span>
+<a name="FileNotFoundException.__str__"></a><div id="FileNotFoundException.__str__-def"><span class="lineno">29</span> <a class="pysrc-toggle" href="#" id="FileNotFoundException.__str__-toggle" onclick="toggle('FileNotFoundException.__str__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.FileNotFoundException-class.html#__str__">__str__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="FileNotFoundException.__str__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="FileNotFoundException.__str__-expanded"><span class="lineno">30</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span> </span>
+</div></div><span class="lineno">31</span>  <span class="py-line"> </span>
+<span class="lineno">32</span>  <span class="py-line"> </span>
+<a name="IncorrectFileTypeException"></a><div id="IncorrectFileTypeException-def"><span class="lineno">33</span> <a class="pysrc-toggle" href="#" id="IncorrectFileTypeException-toggle" onclick="toggle('IncorrectFileTypeException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.exceptions.IncorrectFileTypeException-class.html">IncorrectFileTypeException</a><span class="py-op">:</span> </span>
+</div><div id="IncorrectFileTypeException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="IncorrectFileTypeException-expanded"><span class="lineno">34</span>  <span class="py-line">        <span class="py-docstring">"""Exception raised when the extension of a file is incorrect."""</span> </span>
+<span class="lineno">35</span>  <span class="py-line"> </span>
+<a name="IncorrectFileTypeException.__init__"></a><div id="IncorrectFileTypeException.__init__-def"><span class="lineno">36</span> <a class="pysrc-toggle" href="#" id="IncorrectFileTypeException.__init__-toggle" onclick="toggle('IncorrectFileTypeException.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.IncorrectFileTypeException-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span><span class="py-param">value</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="IncorrectFileTypeException.__init__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="IncorrectFileTypeException.__init__-expanded"><span class="lineno">37</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span><span class="py-op">=</span><span class="py-name">value</span> </span>
+</div><span class="lineno">38</span>  <span class="py-line">                 </span>
+<a name="IncorrectFileTypeException.__str__"></a><div id="IncorrectFileTypeException.__str__-def"><span class="lineno">39</span> <a class="pysrc-toggle" href="#" id="IncorrectFileTypeException.__str__-toggle" onclick="toggle('IncorrectFileTypeException.__str__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.IncorrectFileTypeException-class.html#__str__">__str__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="IncorrectFileTypeException.__str__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="IncorrectFileTypeException.__str__-expanded"><span class="lineno">40</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span> </span>
+</div></div><span class="lineno">41</span>  <span class="py-line"> </span>
+<span class="lineno">42</span>  <span class="py-line"> </span>
+<a name="ExecutableNotFoundException"></a><div id="ExecutableNotFoundException-def"><span class="lineno">43</span> <a class="pysrc-toggle" href="#" id="ExecutableNotFoundException-toggle" onclick="toggle('ExecutableNotFoundException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.exceptions.ExecutableNotFoundException-class.html">ExecutableNotFoundException</a><span class="py-op">:</span> </span>
+</div><div id="ExecutableNotFoundException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ExecutableNotFoundException-expanded"><span class="lineno">44</span>  <span class="py-line">        <span class="py-docstring">"""Exception raised when an executable cannot be found."""</span> </span>
+<span class="lineno">45</span>  <span class="py-line"> </span>
+<a name="ExecutableNotFoundException.__init__"></a><div id="ExecutableNotFoundException.__init__-def"><span class="lineno">46</span> <a class="pysrc-toggle" href="#" id="ExecutableNotFoundException.__init__-toggle" onclick="toggle('ExecutableNotFoundException.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.ExecutableNotFoundException-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span><span class="py-param">value</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ExecutableNotFoundException.__init__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="ExecutableNotFoundException.__init__-expanded"><span class="lineno">47</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span><span class="py-op">=</span><span class="py-name">value</span> </span>
+</div><span class="lineno">48</span>  <span class="py-line">                 </span>
+<a name="ExecutableNotFoundException.__str__"></a><div id="ExecutableNotFoundException.__str__-def"><span class="lineno">49</span> <a class="pysrc-toggle" href="#" id="ExecutableNotFoundException.__str__-toggle" onclick="toggle('ExecutableNotFoundException.__str__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.ExecutableNotFoundException-class.html#__str__">__str__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ExecutableNotFoundException.__str__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="ExecutableNotFoundException.__str__-expanded"><span class="lineno">50</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span> </span>
+</div></div><span class="lineno">51</span>  <span class="py-line"> </span>
+<a name="ProcessError"></a><div id="ProcessError-def"><span class="lineno">52</span> <a class="pysrc-toggle" href="#" id="ProcessError-toggle" onclick="toggle('ProcessError'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.exceptions.ProcessError-class.html">ProcessError</a><span class="py-op">:</span> </span>
+</div><div id="ProcessError-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ProcessError-expanded"><span class="lineno">53</span>  <span class="py-line">        <span class="py-docstring">"""Exception raised when creating a process."""</span> </span>
+<span class="lineno">54</span>  <span class="py-line"> </span>
+<a name="ProcessError.__init__"></a><div id="ProcessError.__init__-def"><span class="lineno">55</span> <a class="pysrc-toggle" href="#" id="ProcessError.__init__-toggle" onclick="toggle('ProcessError.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.ProcessError-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span><span class="py-param">value</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessError.__init__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="ProcessError.__init__-expanded"><span class="lineno">56</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span><span class="py-op">=</span><span class="py-name">value</span> </span>
+</div><span class="lineno">57</span>  <span class="py-line">                 </span>
+<a name="ProcessError.__str__"></a><div id="ProcessError.__str__-def"><span class="lineno">58</span> <a class="pysrc-toggle" href="#" id="ProcessError.__str__-toggle" onclick="toggle('ProcessError.__str__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.ProcessError-class.html#__str__">__str__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessError.__str__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="ProcessError.__str__-expanded"><span class="lineno">59</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span> </span>
+</div></div><span class="lineno">60</span>  <span class="py-line"> </span>
+<a name="ProcessTimeout"></a><div id="ProcessTimeout-def"><span class="lineno">61</span> <a class="pysrc-toggle" href="#" id="ProcessTimeout-toggle" onclick="toggle('ProcessTimeout'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.exceptions.ProcessTimeout-class.html">ProcessTimeout</a><span class="py-op">:</span> </span>
+</div><div id="ProcessTimeout-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ProcessTimeout-expanded"><span class="lineno">62</span>  <span class="py-line">        <span class="py-docstring">"""Exception raised when a process times out."""</span> </span>
+<span class="lineno">63</span>  <span class="py-line"> </span>
+<a name="ProcessTimeout.__init__"></a><div id="ProcessTimeout.__init__-def"><span class="lineno">64</span> <a class="pysrc-toggle" href="#" id="ProcessTimeout.__init__-toggle" onclick="toggle('ProcessTimeout.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.ProcessTimeout-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span><span class="py-param">value</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessTimeout.__init__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="ProcessTimeout.__init__-expanded"><span class="lineno">65</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span><span class="py-op">=</span><span class="py-name">value</span> </span>
+</div><span class="lineno">66</span>  <span class="py-line">                 </span>
+<a name="ProcessTimeout.__str__"></a><div id="ProcessTimeout.__str__-def"><span class="lineno">67</span> <a class="pysrc-toggle" href="#" id="ProcessTimeout.__str__-toggle" onclick="toggle('ProcessTimeout.__str__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.ProcessTimeout-class.html#__str__">__str__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProcessTimeout.__str__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="ProcessTimeout.__str__-expanded"><span class="lineno">68</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span> </span>
+</div></div><span class="lineno">69</span>  <span class="py-line"> </span>
+<a name="InvalidDescriptorException"></a><div id="InvalidDescriptorException-def"><span class="lineno">70</span> <a class="pysrc-toggle" href="#" id="InvalidDescriptorException-toggle" onclick="toggle('InvalidDescriptorException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.exceptions.InvalidDescriptorException-class.html">InvalidDescriptorException</a><span class="py-op">:</span> </span>
+</div><div id="InvalidDescriptorException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="InvalidDescriptorException-expanded"><span class="lineno">71</span>  <span class="py-line">        <span class="py-docstring">"""Exception raised when a testcase descriptor is invalid."""</span> </span>
+<span class="lineno">72</span>  <span class="py-line"> </span>
+<a name="InvalidDescriptorException.__init__"></a><div id="InvalidDescriptorException.__init__-def"><span class="lineno">73</span> <a class="pysrc-toggle" href="#" id="InvalidDescriptorException.__init__-toggle" onclick="toggle('InvalidDescriptorException.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.InvalidDescriptorException-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span><span class="py-param">value</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="InvalidDescriptorException.__init__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="InvalidDescriptorException.__init__-expanded"><span class="lineno">74</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span><span class="py-op">=</span><span class="py-name">value</span> </span>
+</div><span class="lineno">75</span>  <span class="py-line">                 </span>
+<a name="InvalidDescriptorException.__str__"></a><div id="InvalidDescriptorException.__str__-def"><span class="lineno">76</span> <a class="pysrc-toggle" href="#" id="InvalidDescriptorException.__str__-toggle" onclick="toggle('InvalidDescriptorException.__str__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.InvalidDescriptorException-class.html#__str__">__str__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="InvalidDescriptorException.__str__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="InvalidDescriptorException.__str__-expanded"><span class="lineno">77</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span> </span>
+</div></div><span class="lineno">78</span>  <span class="py-line"> </span>
+<a name="InvalidXMLException"></a><div id="InvalidXMLException-def"><span class="lineno">79</span> <a class="pysrc-toggle" href="#" id="InvalidXMLException-toggle" onclick="toggle('InvalidXMLException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="pysys.exceptions.InvalidXMLException-class.html">InvalidXMLException</a><span class="py-op">:</span> </span>
+</div><div id="InvalidXMLException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="InvalidXMLException-expanded"><span class="lineno">80</span>  <span class="py-line">        <span class="py-docstring">"""Exception raised when an input XML file is invalid."""</span> </span>
+<span class="lineno">81</span>  <span class="py-line"> </span>
+<a name="InvalidXMLException.__init__"></a><div id="InvalidXMLException.__init__-def"><span class="lineno">82</span> <a class="pysrc-toggle" href="#" id="InvalidXMLException.__init__-toggle" onclick="toggle('InvalidXMLException.__init__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.InvalidXMLException-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span><span class="py-param">value</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="InvalidXMLException.__init__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="InvalidXMLException.__init__-expanded"><span class="lineno">83</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span><span class="py-op">=</span><span class="py-name">value</span> </span>
+</div><span class="lineno">84</span>  <span class="py-line">                 </span>
+<a name="InvalidXMLException.__str__"></a><div id="InvalidXMLException.__str__-def"><span class="lineno">85</span> <a class="pysrc-toggle" href="#" id="InvalidXMLException.__str__-toggle" onclick="toggle('InvalidXMLException.__str__'); return false;">-</a><span class="py-line">        <span class="py-keyword">def</span> <a class="py-def-name" href="pysys.exceptions.InvalidXMLException-class.html#__str__">__str__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="InvalidXMLException.__str__-collapsed" style="display:none;" pad="++" indent="++++++++++++"></div><div id="InvalidXMLException.__str__-expanded"><span class="lineno">86</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">value</span> </span>
+</div></div><span class="lineno">87</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Fri Oct 06 16:05:49 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
