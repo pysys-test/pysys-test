@@ -760,20 +760,21 @@ class BaseTest:
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
 		try:
-			result = orderedgrep(f, exprList)
+			expr = orderedgrep(f, exprList)
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
-			if result == None and contains:
+			if expr == None and contains:
 				result = PASSED
-			elif result == None and not contains:
+			elif expr == None and not contains:
 				result = FAILED
-			elif result != None and not contains:
+			elif expr != None and not contains:
 				result = PASSED
 			else:
 				result = FAILED
 			self.outcome.append(result)
 			log.info("Ordered grep on input file %s ... %s", file, LOOKUP[result].lower())
+			if result == FAILED: log.info("Ordered grep failed on expression \"%s\"", expr)
 
 
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1"):

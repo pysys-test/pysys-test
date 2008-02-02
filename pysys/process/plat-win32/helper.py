@@ -194,7 +194,7 @@ class ProcessWrapper:
 	def __startBackgroundProcess(self):
 		"""Private method to start a process running in the background. 
 		
-		"""
+		"""	
 		# security attributes for pipes
 		sAttrs = win32security.SECURITY_ATTRIBUTES()
 		sAttrs.bInheritHandle = 1
