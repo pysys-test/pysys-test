@@ -31,7 +31,7 @@ from pysys.utils.linecount import linecount
 from pysys.process.helper import ProcessWrapper
 from pysys.process.monitor import ProcessMonitor
 from pysys.manual.ui import ManualTester
-from pysys.interfaces.processhelper import ProcessHelperInterface
+from pysys.interfaces.processuser import ProcessUserInterface
 
 log = logging.getLogger('pysys.test')
 log.setLevel(logging.NOTSET)
@@ -49,7 +49,7 @@ class %s(%s):
 '''
 
 
-class BaseTest(ProcessHelperInterface):
+class BaseTest(ProcessUserInterface):
 	"""The base class for all PySys testcases.
 
 	BaseTest is the parent class of all PySys system testcases. The class provides utility functions for 
