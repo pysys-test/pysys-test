@@ -19,6 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
+from pysys.constants import *
 
 class ProcessHelperInterface:
 	"""Interface class for modules which provide methods over interacting with processes.
