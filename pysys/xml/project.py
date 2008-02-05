@@ -26,10 +26,12 @@ from pysys.constants import *
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
-<!ELEMENT pysysproject (property, path)+ >
+<!ELEMENT pysysproject (property+, path+, runner?) >
 <!ATTLIST property name CDATA #REQUIRED
                    value CDATA #REQUIRED
                    default CDATA #IMPLIED>
+<!ATTLIST runner classname CDATA #REQUIRED
+                 modele CDATA #REQUIRED>
 <!ATTLIST path value CDATA #REQUIRED
                relative CDATA #IMPLIED>
 
@@ -93,6 +95,14 @@ class XMLProjectParser:
 			else:
 				self.properties[name] = value
 		return self.properties
+
+
+	def getRunnerDetails(self):
+		try:
+			runnerNodeList = self.root.getElementsByTagName('runner')[0]
+			return [runnerNodeList.getAttribute('classname'), runnerNodeList.getAttribute('module')]
+		except:
+			return [DEFAULT_RUNNER_CLASS, DEFAULT_RUNNER_MODULE]
 
 
 	def addToPath(self):		

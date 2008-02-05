@@ -22,8 +22,6 @@
 import sys, re, os, socket, logging
 
 from pysys import rootLogger
-from pysys.xml.project import XMLProjectParser
-
 
 # constants used in testing
 FALSE=0
@@ -69,7 +67,10 @@ DEFAULT_TESTCLASS = 'PySysTest'
 DEFAULT_INPUT = "Input"
 DEFAULT_OUTPUT = "Output"
 DEFAULT_REFERENCE = "Reference"
-
+DEFAULT_RUNNER_MODULE = 'pysys.baserunner'
+DEFAULT_RUNNER_CLASS = "BaseRunner"
+DEFAULT_LOGWRITER_MODULE = 'pysys.writer'
+DEFAULT_LOGWRITER_CLASS = "LogFileResultsWriter"
 
 # set the directories to not recursively walk when looking for the descriptors
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn' ]
@@ -130,6 +131,7 @@ def loadproject(start):
 	constants module.
 
 	"""
+
 	global PROJECT
 
 	search = start
@@ -158,6 +160,7 @@ class Project:
 		
 		if os.path.exists(os.path.join(root, DEFAULT_PROJECTFILE)):	
 			# parse the project file
+			from pysys.xml.project import XMLProjectParser
 			parser = XMLProjectParser(os.path.join(root, DEFAULT_PROJECTFILE))
 			
 			# get the properties
@@ -165,9 +168,12 @@ class Project:
 			keys = properties.keys()
 			keys.sort()
 			for key in keys: setattr(self, key, properties[key])
-			
+
 			# add to the python path
 			parser.addToPath()
+		
+			# get the runner if specified
+			self.runnerClassname, self.runnerModule = parser.getRunnerDetails()
 			
 			# set the data attributes
 			parser.unlink()	
