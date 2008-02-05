@@ -378,7 +378,6 @@ class BaseTest:
 		@param process: The process handle returned from the L{startProcess()} method
 		@param timeout: The timeout value in seconds to wait before returning
 		
-		@todo: The underlying implementation in the process helper needs to be implemented
 		"""
 		try:
 			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
