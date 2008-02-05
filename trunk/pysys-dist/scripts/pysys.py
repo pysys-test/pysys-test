@@ -28,7 +28,6 @@ loadproject(os.getcwd())
 
 from pysys import __version__
 from pysys.constants import *
-from pysys.baserunner import BaseRunner
 from pysys.writer import LogFileResultsWriter
 from pysys.launcher.console import ConsoleLaunchHelper
 from pysys.launcher.console import ConsoleMakeTestHelper
@@ -61,7 +60,8 @@ def runTest(args):
 	logwriter = LogFileResultsWriter("testsummary_%s.log" % time.strftime('%Y%m%d%H%M%S', time.gmtime(time.time())))
 	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
 	record, purge, cycle, mode, outsubdir, descriptors, userOptions = launcher.parseArgs(args)
-	runner = BaseRunner(record, purge, cycle, mode, outsubdir, descriptors, userOptions)
+	exec( "from %s import %s" % (PROJECT.runnerModule, PROJECT.runnerClassname) )
+	exec( "runner = %s(record, purge, cycle, mode, outsubdir, descriptors, userOptions)" % (PROJECT.runnerClassname))
 	runner.start(writers=[logwriter])
 
 if __name__ == "__main__":

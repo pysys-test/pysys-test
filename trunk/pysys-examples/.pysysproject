@@ -2,7 +2,7 @@
 	<!-- Set sccs properties -->
 	<property name="SCCS" value="cvs"/>
 	<property name="CVSROOT" value="${env.CVSROOT}" default=":ext:moraygrieve@pysys.cvs.sourceforge.net:/cvsroot/pysys"/>
-
+	
 	<!-- Example of adding a path relative to the project root to the python path
 	<path value="./src" relative="true"/>	
 	-->
