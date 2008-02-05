@@ -19,20 +19,38 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
+import os
+
 from pysys.constants import *
 
 class ProcessHelperInterface:
 	"""Interface class for modules which provide methods over interacting with processes.
 	
-	Th ProcessHelperInterface class can be considered setting the contract that the 
-	L{pysys.baserunner.BaseRunner} and L{pysys.basetest.BaseTest} classes ,must implement to 
-	provide utilities for interacting with processes (e.g. starting, stoppind, waiting 
-	etc). As these base classes implement this interface, any application helper classes 
-	that are written to make use of the base class functionalility can be used both within 
-	extensions to the BaseRunner and BaseTest classes.
+	Th ProcessHelperInterface class can be thought of as defining the contract that the 
+	L{pysys.baserunner.BaseRunner} and L{pysys.basetest.BaseTest} classes must implement to provide 
+	utilities for controlling and interacting with processes (e.g. starting, stopping etc). As these 
+	classes implement this interface, any application helper classes that are written to make use of 
+	the base class functionalility can be used both within extensions to the BaseRunner and BaseTest 
+	classes.
 	
+	@ivar input: Location for input to any processes (defaults to current working directory) 
+	@type input: string
+	@ivar output: Location for output from any processes (defaults to current working directory)
+	@type output: string
+
 	"""
 	
+	def __getattr__(self, name):
+		"""Set self.input or self.output to the current working directory if not defined.
+		
+		"""
+		
+		if name == "input" | name == "output":
+			return os.getcwd()
+		else:
+			raise AttributeError("Unknown class attrbite")
+
+
 	def getInstanceCount(self, displayName):
 		"""Return the number of processes started within the class instance matching the supplied displayName.
 		
