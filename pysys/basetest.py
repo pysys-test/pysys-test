@@ -103,14 +103,13 @@ class BaseTest(ProcessUserInterface):
 		@param xargs: The dictionary of additional arguments to be set as data attributes to the test class
 		
 		"""
+		ProcessUserInterface.__init__(self)
 		self.descriptor = descriptor
 		self.input = descriptor.input
 		self.output = os.path.join(descriptor.output, outsubdir)
 		self.reference = descriptor.reference
 		self.mode = mode
 		self.setKeywordArgs(xargs)
-		self.processList = []
-		self.processCount = {}
 		self.monitorList = []
 		self.manualTester = None
 		self.outcome = []
@@ -180,26 +179,6 @@ class BaseTest(ProcessUserInterface):
 		list = copy.copy(self.outcome)
 		list.sort(lambda x, y: cmp(PRECEDENT.index(x), PRECEDENT.index(y)))
 		return list[0]
-			
-
-	def getInstanceCount(self, displayName):
-		"""Return the number of processes started within the testcase matching the supplied displayName.
-
-		The BaseTest class maintains a reference count of processes started within the class instance 
-		via the L{startProcess()} method. The reference count is maintained against a logical name for 
-		the process, which is the displayName used in the method call to L{startProcess()}, or the 
-		basename of the command if no displayName was supplied. The method returns the number of 
-		processes started with the supplied logical name, or 0 if no processes have been started. 
-		
-		@param displayName: The process display name
-		@return: The number of processes started matching the command basename
-		@rtype:  integer
-		
-		"""
-		if self.processCount.has_key(displayName):
-			return self.processCount[displayName]
-		else:
-			return 0
 		
 
 	# test methods for execution, validation and cleanup. The execute method is
@@ -254,7 +233,7 @@ class BaseTest(ProcessUserInterface):
 			if process.running(): process.stop()
 
 
-	# process manipulation methods
+	# process manipulation methods of ProcessUserInterface
 	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
 		"""Start a process running in the foreground or background, and return the process handle.
 
@@ -350,27 +329,6 @@ class BaseTest(ProcessUserInterface):
 			except ProcessError:
 				log.info("Unable to send signal to process")
 				self.addOutcome(BLOCKED)
-
-
-	def writeProcess(self, process, data, addNewLine=TRUE):
-		"""Write data to the stdin of a process.
-		
-		This method uses the L{pysys.process.helper} module to write a data string to the 
-		stdin of a process. This wrapper around the write method of the process helper only 
-		adds checking of the process running status prior to the write being performed, and 
-		logging to the testcase run log to detail the write.
-		
-		@param process: The process handle returned from the L{startProcess()} method
-		@param data: The data to write to the process		
-		@param addNewLine: True if a new line character is to be added to the end of the data string
-		
-		"""
-		if process.running():
-			process.write(data, addNewLine)
-			log.info("Written to stdin of process with process id %d", process.pid)
-			log.debug("  %s" % data)
-		else:
-			log.info("Write to process with process id %d stdin not performed as process is not running", process.pid)
 
 
 	def waitProcess(self, process, timeout):
@@ -503,77 +461,6 @@ class BaseTest(ProcessUserInterface):
 		"""
 		time.sleep(interval)
 
-
-	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket']):
-		"""Wait for a socket connection to be established.
-		
-		This method blocks until connection to a particular host:port pair can be established. 
-		This is useful for test timing where a component under test creates a socket for client 
-		server interaction - calling of this method ensures that on return of the method call 
-		the server process is running and a client is able to create connections to it. If a 
-		connection cannot be made within the specified timeout interval, a C{TIMEDOUT} outcome 
-		is written to the outcome list, and the method returns to the caller.
-		
-		@param port: The port value in the socket host:port pair
-		@param host: The host value in the socket host:port pair
-		@param timeout: The timeout in seconds to wait for connection to the socket
-		
-		"""
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		
-		log.debug("Performing wait for socket creation:")
-		log.debug("  file:       %d" % port)
-		log.debug("  filedir:    %s" % host)
-		
-		exit = FALSE
-		startTime = time.time()
-		while not exit:
-			try:
-				s.connect((host, port))
-				exit = TRUE
-			except socket.error:
-				if timeout:
-					currentTime = time.time()
-					if currentTime > startTime + timeout:
-						log.info("Timedout waiting for creation of socket")
-						break
-			time.sleep(0.01)
-		if exit: log.debug("Wait for socket creation completed successfully")
-	
-
-	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile']):
-		"""Wait for a file to be written to disk.
-		
-		This method blocks until a file is created on disk. This is useful for test timing where 
-		a component under test creates a file (e.g. for logging) indicating it has performed all 
-		initialisation actions and is ready for the test execution steps. If a file is not created 
-		on disk within the specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome 
-		list, and the method returns to the caller.
-		
-		@param file: The basename of the file used to wait to be created
-		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param timeout: The timeout in seconds to wait for the file to be created
-		
-		"""
-		if filedir == None: filedir = self.output
-		f = os.path.join(filedir, file)
-		
-		log.debug("Performing wait for file creation:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		
-		exit = FALSE
-		startTime = time.time()
-		while not exit:
-			if timeout:
-				currentTime = time.time()
-				if currentTime > startTime + timeout:
-					log.info("Timedout waiting for creation of file %s" % file)
-					break
-			time.sleep(0.01)
-			exit = os.path.exists(f)
-		if exit: log.debug("Wait for file creation completed successfully")
-			
 
 	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25):
 		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.

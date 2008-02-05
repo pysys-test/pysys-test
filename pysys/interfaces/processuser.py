@@ -19,19 +19,24 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import os
+import os, time
 
 from pysys.constants import *
 
+log = logging.getLogger('pysys.interfaces.processuser')
+log.setLevel(logging.NOTSET)
+
+
 class ProcessUserInterface:
-	"""Interface class for modules which provide methods over interacting with processes.
+	"""Abstract class for modules which provide methods over interacting with processes.
 	
 	Th ProcessUserInterface class can be thought of as defining the contract that the 
 	L{pysys.baserunner.BaseRunner} and L{pysys.basetest.BaseTest} classes must implement to provide 
 	utilities for controlling and interacting with processes (e.g. starting, stopping etc). As these 
 	classes implement this interface, any application helper classes that are written to make use of 
 	the base class functionalility can be used both within extensions to the BaseRunner and BaseTest 
-	classes.
+	classes. This is not really an interface class, but an abstract class, as where possible methods 
+	of this class are implemented to facilitate code-reuse. 
 	
 	@ivar input: Location for input to any processes (defaults to current working directory) 
 	@type input: string
@@ -40,11 +45,18 @@ class ProcessUserInterface:
 
 	"""
 	
+	def __init__(self):
+		"""Default constructor.
+		
+		"""
+		self.processList = []
+		self.processCount = {}
+
+
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
 		
 		"""
-		
 		if name == "input" | name == "output":
 			return os.getcwd()
 		else:
@@ -52,15 +64,24 @@ class ProcessUserInterface:
 
 
 	def getInstanceCount(self, displayName):
-		"""Return the number of processes started within the class instance matching the supplied displayName.
+		"""Return the number of processes started within the testcase matching the supplied displayName.
+
+		The ProcessUserInterface class maintains a reference count of processes started within the class instance 
+		via the L{startProcess()} method. The reference count is maintained against a logical name for 
+		the process, which is the displayName used in the method call to L{startProcess()}, or the 
+		basename of the command if no displayName was supplied. The method returns the number of 
+		processes started with the supplied logical name, or 0 if no processes have been started. 
 		
 		@param displayName: The process display name
 		@return: The number of processes started matching the command basename
 		@rtype:  integer
 		
 		"""
-		raise NotImplementedError, "The method must be implemented by a subclass"
-
+		if self.processCount.has_key(displayName):
+			return self.processCount[displayName]
+		else:
+			return 0
+		
 	
 	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
 		"""Start a process running in the foreground or background, and return the process handle.
@@ -100,17 +121,6 @@ class ProcessUserInterface:
 		raise NotImplementedError, "The method must be implemented by a subclass"
 
 
-	def writeProcess(self, process, data, addNewLine=TRUE):
-		"""Write data to the stdin of a process.
-		
-		@param process: The process handle returned from the L{startProcess()} method
-		@param data: The data to write to the process		
-		@param addNewLine: True if a new line character is to be added to the end of the data string
-		
-		"""
-		raise NotImplementedError, "The method must be implemented by a subclass"
-
-
 	def waitProcess(self, process, timeout):
 		"""Wait for a process to terminate, return on termination or expiry of the timeout.
 	
@@ -121,24 +131,94 @@ class ProcessUserInterface:
 		raise NotImplementedError, "The method must be implemented by a subclass"
 
 
+	def writeProcess(self, process, data, addNewLine=TRUE):
+		"""Write data to the stdin of a process.
+		
+		This method uses the L{pysys.process.helper} module to write a data string to the 
+		stdin of a process. This wrapper around the write method of the process helper only 
+		adds checking of the process running status prior to the write being performed, and 
+		logging to the testcase run log to detail the write.
+		
+		@param process: The process handle returned from the L{startProcess()} method
+		@param data: The data to write to the process		
+		@param addNewLine: True if a new line character is to be added to the end of the data string
+		
+		"""
+		if process.running():
+			process.write(data, addNewLine)
+			log.info("Written to stdin of process with process id %d", process.pid)
+			log.debug("  %s" % data)
+		else:
+			log.info("Write to process with process id %d stdin not performed as process is not running", process.pid)
+
+
 	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket']):
 		"""Wait for a socket connection to be established.
-				
+		
+		This method blocks until connection to a particular host:port pair can be established. 
+		This is useful for test timing where a component under test creates a socket for client 
+		server interaction - calling of this method ensures that on return of the method call 
+		the server process is running and a client is able to create connections to it. If a 
+		connection cannot be made within the specified timeout interval, a C{TIMEDOUT} outcome 
+		is written to the outcome list, and the method returns to the caller.
+		
 		@param port: The port value in the socket host:port pair
 		@param host: The host value in the socket host:port pair
 		@param timeout: The timeout in seconds to wait for connection to the socket
 		
 		"""
-		raise NotImplementedError, "The method must be implemented by a subclass"
-
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		
+		log.debug("Performing wait for socket creation:")
+		log.debug("  file:       %d" % port)
+		log.debug("  filedir:    %s" % host)
+		
+		exit = FALSE
+		startTime = time.time()
+		while not exit:
+			try:
+				s.connect((host, port))
+				exit = TRUE
+			except socket.error:
+				if timeout:
+					currentTime = time.time()
+					if currentTime > startTime + timeout:
+						log.info("Timedout waiting for creation of socket")
+						break
+			time.sleep(0.01)
+		if exit: log.debug("Wait for socket creation completed successfully")
+	
 
 	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile']):
 		"""Wait for a file to be written to disk.
 		
+		This method blocks until a file is created on disk. This is useful for test timing where 
+		a component under test creates a file (e.g. for logging) indicating it has performed all 
+		initialisation actions and is ready for the test execution steps. If a file is not created 
+		on disk within the specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome 
+		list, and the method returns to the caller.
+		
 		@param file: The basename of the file used to wait to be created
-		@param filedir: The dirname of the file 
+		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param timeout: The timeout in seconds to wait for the file to be created
 		
 		"""
-		raise NotImplementedError, "The method must be implemented by a subclass"
+		if filedir == None: filedir = self.output
+		f = os.path.join(filedir, file)
 		
+		log.debug("Performing wait for file creation:")
+		log.debug("  file:       %s" % file)
+		log.debug("  filedir:    %s" % filedir)
+		
+		exit = FALSE
+		startTime = time.time()
+		while not exit:
+			if timeout:
+				currentTime = time.time()
+				if currentTime > startTime + timeout:
+					log.info("Timedout waiting for creation of file %s" % file)
+					break
+			time.sleep(0.01)
+			exit = os.path.exists(f)
+		if exit: log.debug("Wait for file creation completed successfully")
+			
