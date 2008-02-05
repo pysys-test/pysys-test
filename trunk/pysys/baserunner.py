@@ -25,13 +25,13 @@ from pysys import rootLogger
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.basetest import BaseTest
-from pysys.interfaces.processhelper import ProcessHelperInterface
+from pysys.interfaces.processuser import ProcessUserInterface
 
 log = logging.getLogger('pysys.baserunner')
 log.setLevel(logging.NOTSET)
 
 
-class BaseRunner(ProcessHelperInterface):
+class BaseRunner(ProcessUserInterface):
 	"""The base class for executing a set of PySys testcases.
 
 	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
