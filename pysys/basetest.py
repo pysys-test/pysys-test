@@ -28,10 +28,11 @@ from pysys.utils.filegrep import filegrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
+from pysys.process.user import ProcessUser
 from pysys.process.helper import ProcessWrapper
 from pysys.process.monitor import ProcessMonitor
 from pysys.manual.ui import ManualTester
-from pysys.interfaces.processuser import ProcessUserInterface
+from pysys.process.user import ProcessUser
 
 log = logging.getLogger('pysys.test')
 log.setLevel(logging.NOTSET)
@@ -49,7 +50,7 @@ class %s(%s):
 '''
 
 
-class BaseTest(ProcessUserInterface):
+class BaseTest(ProcessUser):
 	"""The base class for all PySys testcases.
 
 	BaseTest is the parent class of all PySys system testcases. The class provides utility functions for 
@@ -94,22 +95,22 @@ class BaseTest(ProcessUserInterface):
 		
 	"""
 	
-	def __init__ (self, descriptor, outsubdir, mode, xargs):
+	def __init__ (self, descriptor, outsubdir, runner):
 		"""Create an instance of the BaseTest class.
 		
 		@param descriptor: The descriptor for the test giving all test details
 		@param outsubdir: The output subdirectory the test output will be written to
-		@param mode: The user defined mode the test is to be run in
-		@param xargs: The dictionary of additional arguments to be set as data attributes to the test class
+		@param runner: Reference to the runner responsable for executing the testcase
 		
 		"""
-		ProcessUserInterface.__init__(self)
+		ProcessUser.__init__(self)
 		self.descriptor = descriptor
 		self.input = descriptor.input
 		self.output = os.path.join(descriptor.output, outsubdir)
 		self.reference = descriptor.reference
-		self.mode = mode
-		self.setKeywordArgs(xargs)
+		self.runner = runner
+		self.mode = runner.mode
+		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
 		self.manualTester = None
 		self.outcome = []
@@ -223,17 +224,16 @@ class BaseTest(ProcessUserInterface):
 		      ...
 				
 		"""
+		ProcessUser.__del__(self)
+		
 		if self.manualTester and self.manualTester.running():
 			self.stopManualTester()
 	
 		for monitor in self.monitorList:
 			if monitor.running(): monitor.stop()
 
-		for process in self.processList:
-			if process.running(): process.stop()
 
-
-	# process manipulation methods of ProcessUserInterface
+	# process manipulation methods of ProcessUser
 	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
 		"""Start a process running in the foreground or background, and return the process handle.
 
@@ -460,47 +460,6 @@ class BaseTest(ProcessUserInterface):
 		
 		"""
 		time.sleep(interval)
-
-
-	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25):
-		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
-		
-		This method blocks until a particular regular expression is seen in a text file on a set
-		number of lines. The number of lines which should match the regular expression is given by 
-		the C{condition} argument in textual form i.e. for a match on more than 2 lines use condition =\">2\".
-		If the regular expression is not seen in the file matching the supplied condition within the 
-		specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome list, and the method 
-		returns to the caller.
-		
-		@param file: The basename of the file used to wait for the signal
-		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param expr: The regular expression to search for in the text file
-		@param condition: The condition to be met for the number of lines matching the regular expression
-		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
-		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
-		"""
-		if filedir == None: filedir = self.output
-		f = os.path.join(filedir, file)
-		
-		log.debug("Performing wait for signal in file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		log.debug("  expression: %s" % expr)
-		log.debug("  condition:  %s" % condition)
-		
-		startTime = time.time()
-		while 1:
-			if os.path.exists(f):
-				if eval("%d %s" % (linecount(f, expr), condition)):
-					log.debug("Wait for signal in file completed successfully")
-					break
-				
-			currentTime = time.time()
-			if currentTime > startTime + timeout:
-				log.info("Timedout waiting for signal in file %s" % file)
-				log.debug("Number of matches to the expression are %d" % linecount(f, expr))
-				break
-			time.sleep(poll)
 
 
 	# test validation methods. These methods provide means to validate the outcome of
