@@ -24,14 +24,20 @@ import os, os.path, sys, stat, re, traceback, time, math, logging, string
 from pysys import rootLogger
 from pysys.constants import *
 from pysys.exceptions import *
+from pysys.utils.filecopy import filecopy
+from pysys.utils.filegrep import filegrep
+from pysys.utils.filediff import filediff
+from pysys.utils.filegrep import orderedgrep
+from pysys.utils.linecount import linecount
+from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
-from pysys.interfaces.processuser import ProcessUserInterface
+from pysys.process.user import ProcessUser
 
 log = logging.getLogger('pysys.baserunner')
 log.setLevel(logging.NOTSET)
 
 
-class BaseRunner(ProcessUserInterface):
+class BaseRunner(ProcessUser):
 	"""The base class for executing a set of PySys testcases.
 
 	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
@@ -73,7 +79,7 @@ class BaseRunner(ProcessUserInterface):
 		@param xargs: The dictionary of additional arguments to be set as data attributes to the class
 		
 		"""
-		ProcessUserInterface.__init__(self)
+		ProcessUser.__init__(self)
 		self.record = record
 		self.purge = purge
 		self.cycle = cycle
@@ -98,106 +104,6 @@ class BaseRunner(ProcessUserInterface):
 		"""
 		for key in xargs.keys():
 			setattr(self, key, xargs[key])
-
-
-	# process manipulation methods of ProcessUserInterface
-	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
-		"""Start a process running in the foreground or background, and return the process handle.
-
-		The method allows spawning of new processes in a platform independent way. The command, arguments, environment and 
-		working directory to run the process in can all be specified in the arguments to the method, along with the filenames
-		used for capturing the stdout and stderr of the process. Processes may be started in the C{FOREGROUND}, in which case 
-		the method does not return until the process has completed or a time out occurs, or in the C{BACKGROUND} in which case
-		the method returns immediately to the caller returning a handle to the process to allow manipulation at a later stage. 
-		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process handle are automatically
-		killed on completion of the test via the L{cleanup()} method of the BaseTest. 
-
-		@param command: The command to start the process (should include the full path)
-		@param arguments: A list of arguments to pass to the command
-		@param environs: A dictionary of the environment to run the process in (defaults to clean environment)
-		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
-		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
-		@param timeout: The timeout period after which to termintate processes running in the C{FOREGROUND}
-		@param stdout: The filename used to capture the stdout of the process
-		@param stderr: The filename user to capture the stderr of the process
-		@param displayName: Logical name of the process used for display and reference counting (defaults to the basename of the command)
-		@return: The process handle of the process (L{pysys.process.helper.ProcessWrapper})
-		@rtype: handle
-
-		"""
-		if workingDir == None: workingDir = r'%s' % self.output
-		if displayName == None: displayName = os.path.basename(command)
-		
-		try:
-			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
-			process.start()
-			if state == FOREGROUND:
-				log.info("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
-			elif state == BACKGROUND:
-				log.info("Started %s in background with process id %d", displayName, process.pid)
-		except ProcessError:
-			log.info("%s", sys.exc_info()[1], exc_info=0)
-		except ProcessTimeout:
-			log.info("Process timedout after %d seconds, stopping process", timeout)
-			process.stop()
-		else:
-			self.processList.append(process) 	
-			try:
-				if self.processCount.has_key(displayName):
-					self.processCount[displayName] = self.processCount[displayName] + 1
-				else:
-			 		self.processCount[displayName] = 1
-			except:
-				pass
-		return process
-
-
-	def stopProcess(self, process):
-		"""Send a soft or hard kill to a running process to stop it's execution.
-	
-		This method uses the L{pysys.process.helper} module to stop a running process. 
-		
-		@param process: The process handle returned from the L{startProcess()} method
-		
-		"""
-		if process.running():
-			try:
-				process.stop()
-				log.info("Stopped process with process id %d", process.pid)
-			except ProcessError:
-				log.info("Unable to stop process")
-
-
-	def signalProcess(self, process, signal):
-		"""Send a signal to a running process (Unix only).
-	
-		This method uses the L{pysys.process.helper} module to send a signal to a running 
-		process. 
-		
-		@param process: The process handle returned from the L{startProcess()} method
-		@param signal: The integer value of the signal to send
-		
-		"""
-		if process.running():
-			try:
-				process.signal(signal)
-				log.info("Sent %d signal to process with process id %d", signal, process.pid)
-			except ProcessError:
-				log.info("Unable to send signal to process")
-
-
-	def waitProcess(self, process, timeout):
-		"""Wait for a process to terminate, return on termination or expiry of the timeout.
-	
-		@param process: The process handle returned from the L{startProcess()} method
-		@param timeout: The timeout value in seconds to wait before returning
-		
-		"""
-		try:
-			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
-			process.wait(timeout)
-		except ProcessTimeout:
-			log.info("Unable to wait for process")
 
 
 	# utility methods
@@ -300,8 +206,7 @@ class BaseRunner(ProcessUserInterface):
 		"""Cleanup method which may optionally be overridden to perform custom cleanup operations after execution of all testcases.
 		
 		"""
-		
-		pass
+		ProcessUser.__del__(self)
 
 
 	# perform a test run
@@ -365,10 +270,10 @@ class BaseRunner(ProcessUserInterface):
 				try:
 					sys.path.append(os.path.dirname(descriptor.module))
 					exec( "from %s import %s" % (os.path.basename(descriptor.module), descriptor.classname) )
-					exec( "testObj = %s(descriptor, r'%s', r'%s', self.xargs)" % (descriptor.classname, outsubdir, self.mode) )
+					exec( "testObj = %s(descriptor, r'%s', self)" % (descriptor.classname, outsubdir) )
 				except:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-					testObj = BaseTest(descriptor, outsubdir, self.mode, self.xargs) 
+					testObj = BaseTest(descriptor, outsubdir, self) 
 					blocked = TRUE
 				sys.path.pop()
 				
@@ -376,7 +281,7 @@ class BaseRunner(ProcessUserInterface):
 					testObj.outcome.append(SKIPPED)
 					
 				elif self.mode and self.mode not in descriptor.modes:
-					log.info("Unable to run test in %s mode", CONSTANTS[self.mode])
+					log.info("Unable to run test in %s mode", self.mode)
 					testObj.outcome.append(SKIPPED)
 
 				elif blocked:
