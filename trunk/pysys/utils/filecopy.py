@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software.
 
-import sys
+import sys, os
 
 def copyfileobj(fsrc, fdst, length=16*1024):
 	"""Internal method to read bytes from a source file descriptor, and write to a destination file descriptor.

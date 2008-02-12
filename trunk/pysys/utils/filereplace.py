@@ -23,7 +23,7 @@ import os.path, sys, string
 
 from pysys.exceptions import *;
 
-def replace(input, output, dict={}, marker='$'):
+def replace(input, output, dict={}, marker=''):
 	"""Read an input file, and write to output tailoring the file to replace set keywords with values.
 
 	The replace method reads in the contents of the input file line by line, checks for matches in 
