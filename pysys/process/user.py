@@ -305,13 +305,13 @@ class ProcessUser:
 		while 1:
 			if os.path.exists(f):
 				if eval("%d %s" % (linecount(f, expr), condition)):
-					log.debug("Wait for signal in file completed successfully")
+					log.info("Wait for signal in %s completed successfully", file)
 					break
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
-				log.info("Timedout waiting for signal in file %s" % file)
-				log.debug("Number of matches to the expression are %d" % linecount(f, expr))
+				log.info("Wait for signal in %s timedout", file)
+				log.info("Number of matches to the expression are %d" % linecount(f, expr))
 				break
 			time.sleep(poll)
 
