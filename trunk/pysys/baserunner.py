@@ -255,6 +255,7 @@ class BaseRunner(ProcessUser):
 					outputDirectory = os.path.join(descriptor.output, outsubdir)
 				except:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					outputDirectory = ""
 					blocked = TRUE
 
 				# create the logger handler for the run log
@@ -346,6 +347,7 @@ class BaseRunner(ProcessUser):
 				del testObj
 
 				# remove the run logger handler
+				runLogger.close()
 				rootLogger.removeHandler(runLogger)
 
 				# prompt for continuation on control-C

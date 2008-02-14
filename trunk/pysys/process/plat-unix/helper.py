@@ -102,15 +102,12 @@ class ProcessWrapper:
 		"""
 		while 1:
 			try:
-				try:
-					data = self.__outQueue.get(block=True, timeout=0.25)
-				except Queue.Empty:
-					pass
-				else:
-					os.write(fd, data)	
-			except:
+				data = self.__outQueue.get(block=True, timeout=0.25)
+			except Queue.Empty:
 				if not self.running(): break
-				
+			else:
+				os.write(fd, data)	
+	
 
 	def __startBackgroundProcess(self):
 		"""Private method to start a process running in the background. 
