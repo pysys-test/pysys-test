@@ -1,4 +1,4 @@
-PySys 0.3.5 Release Notes
+PySys 0.4.0 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
@@ -7,10 +7,21 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- Fixed a bug a testcase was not being marked as BLOCKED when unable to start a 
-  process using the process helper module.
-- Failure on the assertOrderedGrep now prints out the line the failure occurred on.
-
+- The pysys.process.ProcessUser class has been added to define an interface to 
+  subclasses which use the underlying process helper classes. Both the BaseTest and 
+  BaseRunner classes now extend this so as to provide a common interface for process 
+  manipulation. A common paradigm for creating extension modules to PySys is to create 
+  a helper class which provides the methods for starting an interacting with the 
+  application under test (AUT). These helper classes have a call back to an instance 
+  of the ProcessUser so that it can make use of the high level process methods. As both 
+  the BaseTest and BaseRunner classes are instances of the ProcessUser, the extention 
+  module helper classes can be used in extensions to both of these to allow the AUT to 
+  be started both within a testcase, and within the runner module.
+- The method signature to the pysys.utils.filereplace replace method has been changed
+  to set the default value for the marker to the emty string
+- Bugs fixes for cleaning up leakage of file handles from the win32 process helper
+  and the base runner class.
+ 
 
 Dependencies
 ------------
@@ -79,6 +90,11 @@ testcases location, perform
 
 Release History
 ---------------
+0.3.4 to 0.3.5
+--------------
+- Fixed a bug a testcase was not being marked as BLOCKED when unable to start a 
+  process using the process helper module.
+- Failure on the assertOrderedGrep now prints out the line the failure occurred on.
 
 0.3.3 to 0.3.4
 --------------
