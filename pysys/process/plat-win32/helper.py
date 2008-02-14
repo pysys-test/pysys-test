@@ -170,14 +170,11 @@ class ProcessWrapper:
 		"""
 		while 1:
 			try:
-				try:
-					data = self.__outQueue.get(block=True, timeout=0.25)
-				except Queue.Empty:
-					pass
-				else:
-					win32file.WriteFile(hStdin, data, None)
-			except:
+				data = self.__outQueue.get(block=True, timeout=0.25)
+			except Queue.Empty:
 				if not self.running(): break
+			else:
+				win32file.WriteFile(hStdin, data, None)
 
 
 	def __quotePath(self, input):
