@@ -14,13 +14,13 @@ What's new in this release
   a helper class which provides the methods for starting an interacting with the 
   application under test (AUT). These helper classes have a call back to an instance 
   of the ProcessUser so that it can make use of the high level process methods. As both 
-  the BaseTest and BaseRunner classes are instances of the ProcessUser, the extention 
+  the BaseTest and BaseRunner classes are instances of the ProcessUser, the extension 
   module helper classes can be used in extensions to both of these to allow the AUT to 
-  be started both within a testcase, and within the runner module.
+  be started both within a testcase, and within the runner.
 - The method signature to the pysys.utils.filereplace replace method has been changed
-  to set the default value for the marker to the emty string
-- Bugs fixes for cleaning up leakage of file handles from the win32 process helper
-  and the base runner class.
+  to set the default value for the marker to the empty string
+- Bugs fixes for cleaning up leakage of threads from the process helpers, and file 
+  handle leakage from the base runner classes.
  
 
 Dependencies
