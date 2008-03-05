@@ -187,10 +187,14 @@ class BaseRunner(ProcessUser):
 					size = os.stat(path)[stat.ST_SIZE]
 
 				if (size == 0) or (removeNonZero and not re.search('run.log', file)):
-					try:
-						os.remove(path)
-					except:
-						pass
+					count = 0
+					while count < 3:
+						try:
+							os.remove(path)
+							break
+						except:
+							time.sleep(0.1)
+							count = count + 1
 		except OSError:
 			pass
 
