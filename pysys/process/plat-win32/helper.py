@@ -146,7 +146,9 @@ class ProcessWrapper:
 					str = string.replace(str, "\r\n", "\n")
 					self.fStdout.write(str)
 			except:
-				if not self.running(): break
+				if not self.running(): 
+					self.fStdout.close()
+					break
 
 
 	def __collectStderr(self, hStderr, fStderr):
@@ -161,7 +163,9 @@ class ProcessWrapper:
 				  	str = string.replace(str, "\r\n", "\n")
 					fStderr.write(str)
 			except:
-				if not self.running(): break
+				if not self.running(): 
+					self.fStderr.close()
+					break
 
 
 	def __writeStdin(self, hStdin):
@@ -320,13 +324,13 @@ class ProcessWrapper:
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
-		if self.exitStatus !=None: return 
+		if self.exitStatus != None: return 
 		try:
 			win32api.TerminateProcess(self.__hProcess,0)
 			self.__setExitStatus()
 		except:
 			raise ProcessError, "Error stopping process"
-
+		
 
 	def signal(self):
 		"""Send a signal to a running process. 
