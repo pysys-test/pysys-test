@@ -27,8 +27,9 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!ELEMENT pysysproject (property+, path+, runner?) >
-<!ATTLIST property name CDATA #REQUIRED
-                   value CDATA #REQUIRED
+<!ATTLIST property file CDATA #IMPLIED
+                   name CDATA #IMPLIED
+                   value CDATA #IMPLIED
                    default CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED
                  modele CDATA #REQUIRED>
@@ -39,6 +40,7 @@ DTD='''
 
 EXPR1 = re.compile("(?P<replace>\${env.(?P<key>.*?)})", re.M)
 EXPR2 = re.compile("(?P<replace>\${(?P<key>.*?)})", re.M)
+EXPR3 = re.compile("(?P<name>^.*)=(?P<value>.*)$", re.M)
 
 class XMLProjectParser:
 	def __init__(self, xmlfile):
@@ -69,10 +71,14 @@ class XMLProjectParser:
 		propertyNodeList = self.root.getElementsByTagName('property')
 
 		for propertyNode in propertyNodeList:
-			try:
+			if propertyNode.hasAttribute("file"): 
+				file = propertyNode.getAttribute("file")
+				self.getPropertiesFromFile(os.path.join(self.dirname, file))
+			
+			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
 				value = propertyNode.getAttribute("value")
-
+	
 				if EXPR1.search(value) != None:
 					matches = EXPR1.findall(value)				
 					for m in matches:
@@ -81,7 +87,7 @@ class XMLProjectParser:
 						except :
 							insert = propertyNode.getAttribute("default")
 						value = string.replace(value, m[0], insert)
-			
+				
 				if EXPR2.search(value) != None:
 					matches = EXPR2.findall(value)
 					for m in matches:
@@ -89,12 +95,33 @@ class XMLProjectParser:
 							insert = self.properties[m[1]]
 						except :
 							insert = propertyNode.getAttribute("default")
-						value = string.replace(value, m[0], insert)
-			except:
-				pass
-			else:
+						value = string.replace(value, m[0], insert)				
+						
 				self.properties[name] = value
 		return self.properties
+
+
+	def getPropertiesFromFile(self, file):
+		if os.path.exists(file):
+			try:
+				fp = open(file, "r")
+			except:	
+				pass
+			else:
+				for line in fp.readlines():
+					if EXPR3.search(line) != None:
+						name = re.match(EXPR3, line).group('name')
+			 			value = re.match(EXPR3, line).group('value')			 		
+						
+						if EXPR2.search(value) != None:
+							matches = EXPR2.findall(value)
+							for m in matches:
+								try:
+									insert = self.properties[m[1]]
+								except :
+									insert = propertyNode.getAttribute("default")
+								value = string.replace(value, m[0], insert)				
+						self.properties[name] = value
 
 
 	def getRunnerDetails(self):
