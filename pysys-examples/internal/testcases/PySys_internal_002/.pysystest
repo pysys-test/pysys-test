@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title></title>    
+    <title>Project Loading - import properties file</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
