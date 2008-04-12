@@ -1,4 +1,5 @@
 <pysysproject>
-	<property file="windows.properties" />
-	<property name="lib" value="lib_${version}.so"/>
+	<osfamily value="osfamily"/>
+	<property file="${osfamily}.properties" />
+	<property name="lib" value="lib_${osfamily}_${version}.so"/>
 </pysysproject>
