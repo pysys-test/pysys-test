@@ -7,6 +7,25 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
+- The OSFAMILY constant has been added to pysys.constants, and takes value 'windows' on 
+  all win32 operating systems, and 'unix' on sunos and linux operating systems. The 
+  value of the OSFAMILY can be used within the .pysysproject file using the <osfamily> 
+  element. This allows capturing the value to be used in replacement of other properties
+  defined within the project file. See below for more details.
+   
+- The .pysysproject file now takes the file attribute to the <property> element. This
+  allows properties to be read from file, where the properties are specified in the 
+  name=value syntax, e.g.
+  
+    <pysysproject>
+      <osfamily value="osfamily"/>
+      <property file="${osfamily}.properties" />
+      <property name="lib" value="lib_${osfamily}_${version}.so"/>
+    </pysysproject>
+  
+  For more details, see testcase PySys_internal_002 in the pysys-examples/internal 
+  area which demonstrates this. 
+  
 - Fixed the issue of removing zero size files from the output subdirectory on win32
   platforms; was due to the stderr and stdout file handles not being properly closed 
   down. Updated the BaseRunner to attempt to remove the zero sized files 3 times to 

@@ -89,6 +89,7 @@ TIMEOUTS['ManualTester'] = 1800
 HOSTNAME = socket.getfqdn()
 if re.search('win32', sys.platform):
 	PLATFORM='win32'	
+	OSFAMILY='windows'
 	DEVNULL = 'nul'
 	ENVSEPERATOR = ';'
 	WINDIR = os.getenv('windir', 'c:\WINDOWS')
@@ -97,6 +98,7 @@ if re.search('win32', sys.platform):
 
 elif re.search('sunos', sys.platform):
 	PLATFORM='sunos'
+	OSFAMILY='unix'
 	DEVNULL = '/dev/null'
 	ENVSEPERATOR = ':'
 	PATH = "/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/openwin/bin:/opt/SUNWspro/bin"
@@ -104,6 +106,7 @@ elif re.search('sunos', sys.platform):
 
 elif re.search('linux', sys.platform):
 	PLATFORM='linux'	
+	OSFAMILY='unix'
 	DEVNULL = '/dev/null'
 	ENVSEPERATOR = ':'
 	PATH = "/bin:/usr/bin:/usr/sbin:/usr/local/bin"
@@ -164,6 +167,7 @@ class Project:
 			parser = XMLProjectParser(os.path.join(root, DEFAULT_PROJECTFILE))
 			
 			# get the properties
+			parser.getOsFamily()
 			properties = parser.getProperties()
 			keys = properties.keys()
 			keys.sort()
