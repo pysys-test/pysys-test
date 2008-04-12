@@ -1,4 +1,4 @@
-PySys 0.4.1 Release Notes
+PySys 0.5.0 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
@@ -7,8 +7,8 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- The OSFAMILY constant has been added to pysys.constants, and takes value 'windows' on 
-  all win32 operating systems, and 'unix' on sunos and linux operating systems. The 
+- The OSFAMILY constant has been added to pysys.constants, and takes the value 'windows' 
+  on all win32 operating systems, and 'unix' on sunos and linux operating systems. The 
   value of the OSFAMILY can be used within the .pysysproject file using the <osfamily> 
   element. This allows capturing the value to be used in replacement of other properties
   defined within the project file. See below for more details.
