@@ -5,9 +5,10 @@ from pysys.constants import Project
 class PySysTest(BaseTest):
 
 	def execute(self):
+		os.environ["TEST_USER"] = "Felicity Kendal"
 		self.proj = Project(self.input)
 		for attr in dir(self.proj):
-			if attr in ['lib', 'library', 'version']:
+			if attr in ['lib', 'library', 'version', 'user']:
 				self.log.info("%s = %s", attr, eval("self.proj.%s" % attr))
 			
 	def validate(self):

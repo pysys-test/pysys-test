@@ -9,19 +9,32 @@ What's new in this release
 --------------------------
 - The OSFAMILY constant has been added to pysys.constants, and takes the value 'windows' 
   on all win32 operating systems, and 'unix' on sunos and linux operating systems. The 
-  value of the OSFAMILY can be used within the .pysysproject file using the <osfamily> 
-  element. This allows capturing the value to be used in replacement of other properties
-  defined within the project file. See below for more details.
+  value of the OSFAMILY can be used within the .pysysproject file using the osfamily 
+  attribute to the <property> element. This allows capturing the value to be used in 
+  expansion of other properties defined within the project file; see below for an example 
+  usage. Should no value be set in a properties file, a default value of "osfamily" is 
+  assumed. 
+  
+- The .pysysproject file now allows explicitly setting the environment value to be used
+  in expansions via the environment attribute to the <property> element; see below for an 
+  example usage. Should no value be set in a properties file, a default value of "env" is 
+  assumed (this allows for backwards compatibility).
    
 - The .pysysproject file now takes the file attribute to the <property> element. This
   allows properties to be read from file, where the properties are specified in the 
   name=value syntax, e.g.
   
     <pysysproject>
-      <osfamily value="osfamily"/>
+      <property environment="env"/>
+      <property osfamily="osfamily"/>
       <property file="${osfamily}.properties" />
-      <property name="lib" value="lib_${osfamily}_${version}.so"/>
+      <property name="lib" value="${library}_${osfamily}_${version}_${env.USER}.so"/>
     </pysysproject>
+  
+  where the property file contains the following;
+  
+     version=1.0
+     library=jstore${version}.jar
   
   For more details, see testcase PySys_internal_002 in the pysys-examples/internal 
   area which demonstrates this. 

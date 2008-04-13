@@ -167,7 +167,6 @@ class Project:
 			parser = XMLProjectParser(os.path.join(root, DEFAULT_PROJECTFILE))
 			
 			# get the properties
-			parser.getOsFamily()
 			properties = parser.getProperties()
 			keys = properties.keys()
 			keys.sort()

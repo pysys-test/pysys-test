@@ -27,7 +27,9 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!ELEMENT pysysproject (property+, path+, runner?) >
-<!ATTLIST property file CDATA #IMPLIED
+<!ATTLIST property environment CDATA #IMPLIED
+                   osfamily CDATA #IMPLIED
+                   file CDATA #IMPLIED
                    name CDATA #IMPLIED
                    value CDATA #IMPLIED
                    default CDATA #IMPLIED>
@@ -38,16 +40,18 @@ DTD='''
 
 '''
 
-EXPR1 = re.compile("(?P<replace>\${env.(?P<key>.*?)})", re.M)
-EXPR2 = re.compile("(?P<replace>\${(?P<key>.*?)})", re.M)
-EXPR3 = re.compile("(?P<name>^.*)=(?P<value>.*)$", re.M)
+PROPERTY_EXPAND_ENV = "(?P<replace>\${%s.(?P<key>.*?)})"
+PROPERTY_EXPAND = "(?P<replace>\${(?P<key>.*?)})"
+PROPERTY_FILE = "(?P<name>^.*)=(?P<value>.*)$"
 
 
 class XMLProjectParser:
 	def __init__(self, xmlfile):
 		self.dirname = os.path.dirname(xmlfile)
 		self.xmlfile = xmlfile
-		self.properties = {}
+		self.environment = 'env'
+		self.osfamily = 'osfamily'
+		self.properties = {self.osfamily:OSFAMILY}
 		
 		if not os.path.exists(xmlfile):
 			raise Exception, "Unable to find supplied project file \"%s\"" % xmlfile
@@ -68,37 +72,27 @@ class XMLProjectParser:
 		if self.doc: self.doc.unlink()	
 
 
-	def getOsFamily(self):
-		try:
-			osfamilyNode = self.root.getElementsByTagName('osfamily')[0]
-			value = osfamilyNode.getAttribute('value')
-			self.properties[value] = OSFAMILY
-		except:
-			pass
-
-
 	def getProperties(self):
 		propertyNodeList = self.root.getElementsByTagName('property')
 
 		for propertyNode in propertyNodeList:
-			if propertyNode.hasAttribute("file"): 
-				file = self.resolveValue(propertyNode.getAttribute("file"), propertyNode.getAttribute("default"))
+			if propertyNode.hasAttribute("environment"):
+				self.environment = propertyNode.getAttribute("environment")
+			
+			elif propertyNode.hasAttribute("osfamily"):
+				self.properties.pop(self.osfamily, "")
+				self.osfamily = propertyNode.getAttribute("osfamily")
+				self.properties[self.osfamily] = OSFAMILY
+				 	
+			elif propertyNode.hasAttribute("file"): 
+				file = self.expandFromProperty(propertyNode.getAttribute("file"), propertyNode.getAttribute("default"))
 				self.getPropertiesFromFile(os.path.join(self.dirname, file))
 			
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
-				value = propertyNode.getAttribute("value")
+				value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
+				self.properties[name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
 	
-				while EXPR1.search(value) != None:
-					matches = EXPR1.findall(value)				
-					for m in matches:
-						try:
-							insert = os.environ[m[1]]
-						except :
-							insert = propertyNode.getAttribute("default")
-						value = string.replace(value, m[0], insert)
-						 		
-				self.properties[name] = self.resolveValue(value, propertyNode.getAttribute("default"))
 		return self.properties
 
 
@@ -110,16 +104,31 @@ class XMLProjectParser:
 				pass
 			else:
 				for line in fp.readlines():
-					if EXPR3.search(line) != None:
-						name = re.match(EXPR3, line).group('name')
-			 			value = re.match(EXPR3, line).group('value')			 		
-						value = self.resolveValue(value, "")				
+					regex = re.compile(PROPERTY_FILE, re.M)
+					if regex.search(line) != None:
+						name = re.match(regex, line).group('name')
+			 			value = re.match(regex, line).group('value')			 		
+						value = self.expandFromProperty(value, "")				
 						self.properties[name.strip()] = value.strip()
 
 
-	def resolveValue(self, value, default):
-		while EXPR2.search(value) != None:
-			matches = EXPR2.findall(value)
+	def expandFromEnvironent(self, value, default):
+		regex = re.compile(PROPERTY_EXPAND_ENV%self.environment, re.M)
+		while regex.search(value) != None:
+			matches = regex.findall(value)				
+			for m in matches:
+				try:
+					insert = os.environ[m[1]]
+				except :
+					insert = default
+				value = string.replace(value, m[0], insert)
+		return value		
+
+
+	def expandFromProperty(self, value, default):
+		regex = re.compile(PROPERTY_EXPAND, re.M)
+		while regex.search(value) != None:
+			matches = regex.findall(value)
 			for m in matches:
 				try:
 					insert = self.properties[m[1]]
