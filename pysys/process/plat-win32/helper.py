@@ -95,7 +95,8 @@ class ProcessWrapper:
 		"""
 		self.command = command
 		self.arguments = arguments
-		self.environs = environs
+		self.environs = {}
+		for key in environs: self.environs[self.__stringToUnicode(key)] = self.__stringToUnicode(environs[key])
 		self.workingDir = workingDir
 		self.state = state
 		self.timeout = timeout
@@ -132,6 +133,16 @@ class ProcessWrapper:
 		log.debug("  stdout       : %s", self.stdout)
 		log.debug("  stdout       : %s", self.stderr)
 		for e in self.environs.keys(): log.debug("  environment  : %s=%s", e, environs[e])
+
+
+	def __stringToUnicode(self, s):
+		""" Converts a unicode string or a utf-8 bit string into a unicode string. 
+		
+		"""
+		if isinstance(s, unicode):
+			return s
+		else:
+			return unicode(s, "utf8")
 
 
 	def __collectStdout(self, hStdout, fStdout):	
