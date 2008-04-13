@@ -132,7 +132,9 @@ class ProcessWrapper:
 		log.debug("  working dir  : %s", self.workingDir)
 		log.debug("  stdout       : %s", self.stdout)
 		log.debug("  stdout       : %s", self.stderr)
-		for e in self.environs.keys(): log.debug("  environment  : %s=%s", e, environs[e])
+		keys= self.environs.keys()
+		keys.sort()
+		for e in keys: log.debug("  environment  : %s=%s", e, environs[e])
 
 
 	def __stringToUnicode(self, s):
@@ -158,6 +160,7 @@ class ProcessWrapper:
 					self.fStdout.write(str)
 			except:
 				if not self.running(): 
+					self.fStdout.flush()
 					self.fStdout.close()
 					break
 
@@ -174,7 +177,8 @@ class ProcessWrapper:
 				  	str = string.replace(str, "\r\n", "\n")
 					fStderr.write(str)
 			except:
-				if not self.running(): 
+				if not self.running():
+					self.fStderr.flush() 
 					self.fStderr.close()
 					break
 

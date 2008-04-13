@@ -93,8 +93,10 @@ class ProcessWrapper:
 		log.debug("  working dir  : %s", self.workingDir)
 		log.debug("  stdout       : %s", self.stdout)
 		log.debug("  stdout       : %s", self.stderr)
-		for e in self.environs.keys(): log.debug("  environment  : %s=%s", e, environs[e])
-		
+		keys= self.environs.keys()
+		keys.sort()
+		for e in keys: log.debug("  environment  : %s=%s", e, environs[e])		
+
 
 	def __writeStdin(self, fd):
 		"""Private method to write to the process stdin pipe.
