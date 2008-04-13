@@ -95,7 +95,7 @@ class ProcessWrapper:
 		log.debug("  stdout       : %s", self.stderr)
 		keys= self.environs.keys()
 		keys.sort()
-		for e in keys: log.debug("  environment  : %s=%s", e, environs[e])		
+		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])		
 
 
 	def __writeStdin(self, fd):
