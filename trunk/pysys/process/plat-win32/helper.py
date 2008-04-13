@@ -160,8 +160,9 @@ class ProcessWrapper:
 					self.fStdout.write(str)
 			except:
 				if not self.running(): 
-					self.fStdout.flush()
-					self.fStdout.close()
+					if self.fStdout: self.fStdout.flush()
+					if self.fStdout: self.fStdout.close()
+					if self.fStdout: self.fStdout = None
 					break
 
 
@@ -178,8 +179,9 @@ class ProcessWrapper:
 					fStderr.write(str)
 			except:
 				if not self.running():
-					self.fStderr.flush() 
-					self.fStderr.close()
+					if self.fStderr: self.fStderr.flush() 
+					if self.fStderr: self.fStderr.close()
+					if self.fStderr: self.fStderr = None
 					break
 
 
