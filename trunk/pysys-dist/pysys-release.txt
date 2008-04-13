@@ -44,8 +44,11 @@ What's new in this release
   down. Updated the BaseRunner to attempt to remove the zero sized files 3 times to 
   try to avoid race conditions of stopped background processes holding on to the file 
   handles too long before dying.
- 
 
+- The win32 process helper now ensures the environment in which the process runs is 
+  converted to unicode to avoid issues encountered with running under certain locales. 
+
+  
 Dependencies
 ------------
 Running on windows requires installation of the pywin32 extensions written by 
