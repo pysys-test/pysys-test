@@ -129,7 +129,6 @@ Release History
 - The win32 process helper now ensures the environment in which the process runs is 
   converted to unicode to avoid issues encountered with running under certain locales. 
 
-
 0.3.5 to 0.4.0
 --------------
 - The pysys.process.ProcessUser class has been added to define an interface to 
