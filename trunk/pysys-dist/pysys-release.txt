@@ -1,4 +1,4 @@
-PySys 0.5.0 Release Notes
+PySys 0.5.1 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
@@ -7,46 +7,13 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- The OSFAMILY constant has been added to pysys.constants, and takes the value 'windows' 
-  on all win32 operating systems, and 'unix' on sunos and linux operating systems. The 
-  value of the OSFAMILY can be used within the .pysysproject file using the osfamily 
-  attribute to the <property> element. This allows capturing the value to be used in 
-  expansion of other properties defined within the project file; see below for an example 
-  usage. Should no value be set in a properties file, a default value of "osfamily" is 
-  assumed. 
-  
-- The .pysysproject file now allows explicitly setting the environment value to be used
-  in expansions via the environment attribute to the <property> element; see below for an 
-  example usage. Should no value be set in a properties file, a default value of "env" is 
-  assumed (this allows for backwards compatibility).
-   
-- The .pysysproject file now takes the file attribute to the <property> element. This
-  allows properties to be read from file, where the properties are specified in the 
-  name=value syntax, e.g.
-  
-    <pysysproject>
-      <property environment="env"/>
-      <property osfamily="osfamily"/>
-      <property file="${osfamily}.properties" />
-      <property name="lib" value="${library}_${osfamily}_${version}_${env.USER}.so"/>
-    </pysysproject>
-  
-  where the property file contains the following;
-  
-     version=1.0
-     library=jstore${version}.jar
-  
-  For more details, see testcase PySys_internal_002 in the pysys-examples/internal 
-  area which demonstrates this. 
-  
-- Fixed the issue of removing zero size files from the output subdirectory on win32
-  platforms; was due to the stderr and stdout file handles not being properly closed 
-  down. Updated the BaseRunner to attempt to remove the zero sized files 3 times to 
-  try to avoid race conditions of stopped background processes holding on to the file 
-  handles too long before dying.
-
-- The win32 process helper now ensures the environment in which the process runs is 
-  converted to unicode to avoid issues encountered with running under certain locales. 
+- Fixed a bug in pysys.process.user.ProcessUser destructor to explicitly set the 
+  process list to null to allow process handles to be cleaned up on destruction. 
+  This bug only seemed to be exhibited when the process handle of a process 
+  returned in the startProcess() method was set as a data attribute to an instance
+  of the class. This handle was then both a data attribute of the class, and was 
+  contained in a list data attribute of the class. Under these codnitions the handles 
+  were not be released correctly.
 
   
 Dependencies
@@ -116,6 +83,50 @@ testcases location, perform
 
 Release History
 ---------------
+
+0.4.0 to 0.5.0
+--------------
+- The OSFAMILY constant has been added to pysys.constants, and takes the value 'windows' 
+  on all win32 operating systems, and 'unix' on sunos and linux operating systems. The 
+  value of the OSFAMILY can be used within the .pysysproject file using the osfamily 
+  attribute to the <property> element. This allows capturing the value to be used in 
+  expansion of other properties defined within the project file; see below for an example 
+  usage. Should no value be set in a properties file, a default value of "osfamily" is 
+  assumed. 
+  
+- The .pysysproject file now allows explicitly setting the environment value to be used
+  in expansions via the environment attribute to the <property> element; see below for an 
+  example usage. Should no value be set in a properties file, a default value of "env" is 
+  assumed (this allows for backwards compatibility).
+   
+- The .pysysproject file now takes the file attribute to the <property> element. This
+  allows properties to be read from file, where the properties are specified in the 
+  name=value syntax, e.g.
+  
+    <pysysproject>
+      <property environment="env"/>
+      <property osfamily="osfamily"/>
+      <property file="${osfamily}.properties" />
+      <property name="lib" value="${library}_${osfamily}_${version}_${env.USER}.so"/>
+    </pysysproject>
+  
+  where the property file contains the following;
+  
+     version=1.0
+     library=jstore${version}.jar
+  
+  For more details, see testcase PySys_internal_002 in the pysys-examples/internal 
+  area which demonstrates this. 
+  
+- Fixed the issue of removing zero size files from the output subdirectory on win32
+  platforms; was due to the stderr and stdout file handles not being properly closed 
+  down. Updated the BaseRunner to attempt to remove the zero sized files 3 times to 
+  try to avoid race conditions of stopped background processes holding on to the file 
+  handles too long before dying.
+
+- The win32 process helper now ensures the environment in which the process runs is 
+  converted to unicode to avoid issues encountered with running under certain locales. 
+
 
 0.3.5 to 0.4.0
 --------------
