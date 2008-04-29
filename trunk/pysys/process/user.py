@@ -322,3 +322,5 @@ class ProcessUser:
 		"""
 		for process in self.processList:
 			if process.running(): process.stop()
+		self.processList = []
+		self.processCount = {}
