@@ -12,8 +12,12 @@ tenth entry is equal to 34.
   </description>
 
   <classification>
-    <groups/>
-    <modes/>
+    <groups>
+      <group>examples</group>
+    </groups>
+    <modes>
+        <mode>mode1</mode>
+    </modes>
   </classification>
 
   <data>
