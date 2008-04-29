@@ -14,6 +14,8 @@ What's new in this release
   of the class. This handle was then both a data attribute of the class, and was 
   contained in a list data attribute of the class. Under these codnitions the handles 
   were not be released correctly.
+- The print mode of the pysys.py launcher now supports printing out the test user 
+  defined modes, and the printing out of tests that can be run in a given mode.
 
   
 Dependencies

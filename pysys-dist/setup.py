@@ -65,6 +65,7 @@ else:
 
 	
 # to run on windows use
+# python c:\Python24\Scripts\epydoc.py --html -o pysys-doc pysys
 # python.exe pysys-dist/setup.py bdist_wininst --install-script pysys_postinstall.py
 
 # to run on unix use
