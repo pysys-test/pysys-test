@@ -49,6 +49,7 @@ class ConsolePrintHelper:
 		self.arguments = []
 		self.full = FALSE
 		self.groups = FALSE
+		self.modes = FALSE
 		self.requirements = FALSE
 		self.mode = None
 		self.type = None
@@ -57,8 +58,8 @@ class ConsolePrintHelper:
 		self.excludes = []
 		self.tests = None
 		self.name = name
-		self.optionString = 'hfgrm:a:t:i:e:'
-		self.optionList = ["help","full","groups","requirements","mode=","type=","trace=","include=","exclude="] 
+		self.optionString = 'hfgdrm:a:t:i:e:'
+		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude="] 
 		
 
 	def printUsage(self):
@@ -68,6 +69,7 @@ class ConsolePrintHelper:
 		print "       -h | --help                 print this message"
 		print "       -f | --full                 print full information"
 		print "       -g | --groups               print test groups defined"
+		print "       -d | --modes                print test modes defined"
 		print "       -r | --requirements         print test requirements covered"
 		print "       -m | --mode      STRING     print tests that run in user defined mode "
 		print "       -a | --type      STRING     print tests of supplied type (auto or manual, default all)"
@@ -107,6 +109,9 @@ class ConsolePrintHelper:
 				
 			if option in ("-g", "--groups"):
 				self.groups = TRUE
+				
+			if option in ("-d", "--modes"):
+				self.modes = TRUE
 			
 			if option in ("-r", "--requirements"):
 				self.requirements = TRUE
@@ -148,6 +153,17 @@ class ConsolePrintHelper:
 					print "                 %s" % (group)
 				exit = 1
 
+			if self.modes == TRUE:
+				modes = []
+				for descriptor in descriptors:
+					for mode in descriptor.modes:
+						if mode not in modes:
+							modes.append(mode)
+				print "\nModes defined: "
+				for mode in modes:
+					print "                 %s" % (mode)
+				exit = 1
+
 			if self.requirements == TRUE:
 				requirements = []
 				for descriptor in descriptors:
@@ -167,6 +183,7 @@ class ConsolePrintHelper:
 			maxsize = maxsize + 2
 			
 			for descriptor in descriptors:
+				if self.mode and not self.mode in descriptor.modes: continue
 				padding = " " * (maxsize - len(descriptor.id))
 				if not self.full:
 					print "%s:%s%s" % (descriptor.id, padding, descriptor.title)
