@@ -11,7 +11,7 @@ This example testcase demonstrates the use of the manual tester user interface t
 
   <classification>
     <groups>
-      <group></group>
+      <group>examples</group>
     </groups>
   </classification>
 
