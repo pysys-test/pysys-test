@@ -12,8 +12,8 @@ What's new in this release
   This bug only seemed to be exhibited when the process handle of a process 
   returned in the startProcess() method was set as a data attribute to an instance
   of the class. This handle was then both a data attribute of the class, and was 
-  contained in a list data attribute of the class. Under these codnitions the handles 
-  were not be released correctly.
+  contained in a list data attribute of the class. Under these conditions the handles 
+  were not being released correctly.
 - The print mode of the pysys.py launcher now supports printing out the test user 
   defined modes, and the printing out of tests that can be run in a given mode.
 
