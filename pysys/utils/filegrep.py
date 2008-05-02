@@ -49,6 +49,28 @@ def filegrep(file, expr):
 		return FALSE
 
 
+def lastgrep(self, file, expr):
+	"""Search for matches to a regular expression in the last line of an input file, returning true if a match occurs.
+	
+	@param file: The full path to the input file
+	@param expr: The regular expression (uncompiled) to search for in the last line of the input file
+	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
+	@rtype: integer
+	@raises FileNotFoundException: Raised if the input file does not exist
+	
+	"""
+	if not os.path.exists(file):
+		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
+	else:
+		contents = open(file, 'r').readlines()
+		logContents("Contents of %s;" % os.path.basename(file), contents)
+		if len(contents) > 0:
+			line = contents[len(contents)-1]
+			regexpr = re.compile(expr)
+			if regexpr.search(line) != None: return TRUE
+		return FALSE
+
+
 def orderedgrep(file, exprList):
 	"""Seach for ordered matches to a set of regular expressions in an input file, returning true if the matches occur in the correct order.
 	
