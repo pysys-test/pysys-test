@@ -25,6 +25,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filecopy import filecopy
 from pysys.utils.filegrep import filegrep
+from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
@@ -570,6 +571,42 @@ class BaseTest(ProcessUser):
 		
 		try:
 			result = filegrep(f, expr)
+		except IOError, value:
+			self.addOutcome(BLOCKED)
+		else:
+			if result == contains:
+				result = PASSED
+			else:
+				result = FAILED
+			self.outcome.append(result)
+			log.info("Grep on input file %s ... %s", file, LOOKUP[result].lower())
+
+
+	def assertLastGrep(self, file, filedir=None, expr='', contains=TRUE):
+		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
+		
+		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
+		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
+		C{FAILED} outcome is added. Should C{contains} be set to false, a C{PASSED} outcome will only 
+		be added should the regular expression not be seen in the file.
+		
+		@param file: The basename of the file used in the grep
+		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		@param expr: The regular expression to check for in the last line of the file
+		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
+		
+		"""
+		if filedir == None: filedir = self.output
+		f = os.path.join(filedir, file)
+
+		log.debug("Performing grep on file:")
+		log.debug("  file:       %s" % file)
+		log.debug("  filedir:    %s" % filedir)
+		log.debug("  expr:       %s" % expr)
+		log.debug("  contains:   %s" % LOOKUP[contains])
+		
+		try:
+			result = lastgrep(f, expr)
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
