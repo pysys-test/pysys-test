@@ -1,4 +1,4 @@
-PySys 0.5.1 Release Notes
+PySys 0.5.2 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
@@ -7,17 +7,12 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- Fixed a bug in pysys.process.user.ProcessUser destructor to explicitly set the 
-  process list to null to allow process handles to be cleaned up on destruction. 
-  This bug only seemed to be exhibited when the process handle of a process 
-  returned in the startProcess() method was set as a data attribute to an instance
-  of the class. This handle was then both a data attribute of the class, and was 
-  contained in a list data attribute of the class. Under these conditions the handles 
-  were not being released correctly.
-- The print mode of the pysys.py launcher now supports printing out the test user 
-  defined modes, and the printing out of tests that can be run in a given mode.
+- The lastgrep method has been added to pysys.utils.filegrep, and the assertLastGrep 
+  method has been added to the BaseTest class. This allows test validation to be 
+  performed based on regular expression matching on the last line of an input file 
+  to the assertLastGrep method.
 
-  
+
 Dependencies
 ------------
 Running on windows requires installation of the pywin32 extensions written by 
@@ -86,6 +81,18 @@ testcases location, perform
 Release History
 ---------------
 
+0.5.0 to 0.5.1
+--------------
+- Fixed a bug in pysys.process.user.ProcessUser destructor to explicitly set the 
+  process list to null to allow process handles to be cleaned up on destruction. 
+  This bug only seemed to be exhibited when the process handle of a process 
+  returned in the startProcess() method was set as a data attribute to an instance
+  of the class. This handle was then both a data attribute of the class, and was 
+  contained in a list data attribute of the class. Under these conditions the handles 
+  were not being released correctly.
+- The print mode of the pysys.py launcher now supports printing out the test user 
+  defined modes, and the printing out of tests that can be run in a given mode.
+  
 0.4.0 to 0.5.0
 --------------
 - The OSFAMILY constant has been added to pysys.constants, and takes the value 'windows' 
