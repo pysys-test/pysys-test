@@ -36,9 +36,9 @@ class ProcessMonitor:
 	
 	Usage of the class is to create an instance specifying the process id, the logging interval and 
 	the log file. Once created, the process monitor is started and stopped via its L{start()} and 
-	L{stop()} methods. Process monitors are started as a seperate thread, so controll passes back to 
+	L{stop()} methods. Process monitors are started as a separate thread, so control passes back to 
 	the caller of the C{start()} method immediately. The format of the log file is tab separated, 
-	with an intial timestamp used to denote the time the statistics were obtained, e.g. ::
+	with an initial timestamp used to denote the time the statistics were obtained, e.g. ::
 	
 		18/05/07 16:56:28       0       19464   46044   17708   1
 		18/05/07 16:56:38       37      19536   46044   17716   1
