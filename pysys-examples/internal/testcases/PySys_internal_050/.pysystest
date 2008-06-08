@@ -4,6 +4,7 @@
   <description> 
     <title>Assertions - Check assertLastGrep</title>    
     <purpose><![CDATA[
+Checks a variety of input into the assertLastGrep method of the BaseTest
 ]]>
     </purpose>
   </description>
