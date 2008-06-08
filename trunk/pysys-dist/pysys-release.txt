@@ -14,7 +14,9 @@ What's new in this release
 - The win32 process monitor has been modified to calculate the percentage CPU usage 
   statistics as a sum over all available processors. A CPU usage of 100% represents
   the process fully utilising all available processors. 
+- The win32 process monitor now also logs the handle count of a process.
 
+  
 Dependencies
 ------------
 Running on windows requires installation of the pywin32 extensions written by 
