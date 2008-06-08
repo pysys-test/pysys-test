@@ -21,8 +21,9 @@
 
 import os.path, sys, re, string, copy
 
-from pysys.constants import *;
-from pysys.exceptions import *;
+from pysys.constants import *
+from pysys.exceptions import *
+from pysys.utils.filediff import trimContents
 
 # create the class logger
 log = logging.getLogger('pysys.utils.filegrep')
@@ -49,12 +50,14 @@ def filegrep(file, expr):
 		return FALSE
 
 
-def lastgrep(self, file, expr):
+def lastgrep(file, expr, ignore=[], include=[]):
 	"""Search for matches to a regular expression in the last line of an input file, returning true if a match occurs.
 	
 	@param file: The full path to the input file
 	@param expr: The regular expression (uncompiled) to search for in the last line of the input file
 	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
+	@param ignore: A list of regular expressions which remove entries in the input file contents before making the grep
+	@param include: A list of regular expressions used to select lines from the input file contents to use in the grep 
 	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
@@ -63,7 +66,10 @@ def lastgrep(self, file, expr):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
 	else:
 		contents = open(file, 'r').readlines()
-		logContents("Contents of %s;" % os.path.basename(file), contents)
+		contents = trimContents(contents, ignore, exclude=TRUE)
+		contents = trimContents(contents, include, exclude=FALSE)
+		
+		logContents("Contents of %s after pre-processing;" % os.path.basename(file), contents)
 		if len(contents) > 0:
 			line = contents[len(contents)-1]
 			regexpr = re.compile(expr)

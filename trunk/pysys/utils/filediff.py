@@ -21,8 +21,8 @@
 
 import os.path, sys, re, string, copy, difflib, logging
 
-from pysys.constants import *;
-from pysys.exceptions import *;
+from pysys.constants import *
+from pysys.exceptions import *
 
 # create the class logger
 log = logging.getLogger('pysys.utils.filediff')

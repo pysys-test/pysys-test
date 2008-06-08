@@ -21,7 +21,7 @@
 
 import os.path, sys, string
 
-from pysys.exceptions import *;
+from pysys.exceptions import *
 
 def replace(input, output, dict={}, marker=''):
 	"""Read an input file, and write to output tailoring the file to replace set keywords with values.

@@ -21,7 +21,7 @@
  
 import asyncore, smtpd, threading
 
-from pysys.constants import *;
+from pysys.constants import *
 
 
 class SimpleSMTPServer(smtpd.SMTPServer): 

@@ -580,9 +580,9 @@ class BaseTest(ProcessUser):
 				result = FAILED
 			self.outcome.append(result)
 			log.info("Grep on input file %s ... %s", file, LOOKUP[result].lower())
+			
 
-
-	def assertLastGrep(self, file, filedir=None, expr='', contains=TRUE):
+	def assertLastGrep(self, file, filedir=None, expr='', contains=TRUE, ignores=[], includes=[]):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -594,6 +594,9 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression to check for in the last line of the file
 		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
+		@param ignores: A list of regular expressions used to denote lines in the file which should be ignored
+		@param includes: A list of regular expressions used to denote lines in the file which should be used in the 
+			assertion.
 		
 		"""
 		if filedir == None: filedir = self.output
@@ -606,7 +609,7 @@ class BaseTest(ProcessUser):
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
 		try:
-			result = lastgrep(f, expr)
+			result = lastgrep(f, expr, ignores, includes)
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
