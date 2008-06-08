@@ -19,9 +19,12 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import os, sys, string, time, thread, win32api, win32pdh
+import os, sys, string, time, thread, logging, win32api, win32pdh
 
 from pysys.constants import *
+
+# create the class logger
+log = logging.getLogger('pysys.process.monitor')
 
 
 class ProcessMonitor:
@@ -29,10 +32,10 @@ class ProcessMonitor:
 	
 	The win32 process monitor uses the win32pdh module to obtain and log to file statistics on a 
 	given process as determined by the process id. Statistics obtained include the CPU usage (%), 
-	the working set (virtual memory pages allocated), the virtual bytes (virtual address space 
-	including shared memory segments), the private bytes (virtual address space not including 
-	shared memory segments), and the number of process threads. All memory values are quoted in 
-	KBytes. 
+	the working set (memory pages allocated), the virtual bytes (virtual address space including 
+	shared memory segments), the private bytes (virtual address space not including shared memory 
+	segments), and the number of process threads. All memory values are quoted in KBytes and the 
+	CPU precentage represents the usage over all available processors.
 	
 	Usage of the class is to create an instance specifying the process id, the logging interval and 
 	the log file. Once created, the process monitor is started and stopped via its L{start()} and 
@@ -40,9 +43,12 @@ class ProcessMonitor:
 	the caller of the C{start()} method immediately. The format of the log file is tab separated, 
 	with an initial timestamp used to denote the time the statistics were obtained, e.g. ::
 	
-		18/05/07 16:56:28       0       19464   46044   17708   1
-		18/05/07 16:56:38       37      19536   46044   17716   1
-		18/05/07 16:56:48       54      19616   46044   17984   1
+	    Time                 CPU    Working  Virtual  Private  Threads
+	    --------------------------------------------------------------                       
+		08/06/08 06:32:44     80    125164   212948   118740   44
+		08/06/08 06:32:49     86    125676   213972   120128   44
+		08/06/08 06:32:54     84    125520   212948   119116   44
+		08/06/08 06:32:59     78    125244   212948   119132   44
 
 	"""
 	
@@ -61,31 +67,26 @@ class ProcessMonitor:
 		else:	
 			self.file = sys.stdout
 			
-			
+							
 	def __win32GetInstance(self, pid, bRefresh=0):
-		# refresh allows process started after the python process
-		# to be picked up
 		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
 	
-		# get a dictionary of all running processes, with the process
-		# name as the key, and the number of instances as the value
+		# get the list of processes running
 		items, instances = win32pdh.EnumObjectItems(None, None, "Process", -1)
+		
+		# convert to a dictionary of process instance, to number of instances
 		instanceDict = {}
 		for i in instances:
-			try:
-				instanceDict[i] = instanceDict[i] + 1
-			except KeyError:
-				instanceDict[i] = 0
+			try: instanceDict[i] = instanceDict[i] + 1
+			except KeyError: instanceDict[i] = 0
 			
-		# find the instance name and the instance number for the requested
-		# process ID. Once found, return the instance name and the instance
-		# number so that this process can be tracked
+		# loop through to locate the instance and inum of the supplied pid
 		instance = None
 		inum = -1
 		for instance, numInstances in instanceDict.items():
 			for inum in xrange(numInstances+1):
 				try:
-					value = self.__win32getProfileAttribute(instance, inum, "ID Process")
+					value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")
 					if value == pid:
 						return instance, inum
 				except:
@@ -94,73 +95,92 @@ class ProcessMonitor:
 		return instance, inum
 
 
-	def __win32getProfileAttribute(self, instance, inum, counter):
-		# create the path for the counter of interest
-		path = win32pdh.MakeCounterPath((None, "Process", instance, None, inum, counter))
-		
-		# open the query and add the counter to the query
+	def __win32GetThreads(self, pid, bRefresh=0):
+		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
+
+		# get the list of threads running
+		items, instances = win32pdh.EnumObjectItems(None, None, "Thread", -1)
+				
+		# convert to a dictionary of thread instance, to number of instances
+		instanceNum = []
+		instanceDict = {}
+		for i in instances:
+			try: instanceDict[i] = instanceDict[i] + 1
+			except KeyError: instanceDict[i] = 0
+			instanceNum.append(instanceDict[i])
+			
+		# loop through to locate the instance and inum of each thread for the supplied process id
+		threads=[]
+		for i in range(0, len(instances)):
+			try:	
+				value = self.__win32getProfileAttribute("Thread", instances[i], instanceNum[i], "ID Process")
+				if value == pid: threads.append((instances[i], instanceNum[i]))
+			except:
+				pass
+		return threads
+
+
+	def __win32getProfileAttribute(self, object, instance, inum, counter):
+		# make the path, open and collect the query
+		path = win32pdh.MakeCounterPath((None, object, instance, None, inum, counter))
 		query = win32pdh.OpenQuery()
-		hc = win32pdh.AddCounter(query, path)
-
-		# collect the data for the query object. We need to collect the query data twice 
-		# to be able to calculate the "% Processor Time" counter value 
-		# (see http://support.microsoft.com/default.aspx?scid=kb;EN-US;q262938)
+		hcounter = win32pdh.AddCounter(query, path)
 		win32pdh.CollectQueryData(query)
-		if counter == "% Processor Time":
-			time.sleep(0.25)	
-			win32pdh.CollectQueryData(query)
-
-		# Get the formatted value of the counter, remove and close the query
-		# and return the counter value. Note that the process may have gone away
-		# since getting the enum objects, so use try block and ignore exception
+		
+		# format the counter value
 		value = None
 		try:
-			value =	 win32pdh.GetFormattedCounterValue(hc, win32pdh.PDH_FMT_LONG)[1]  
+			value =	 win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LONG)[1]  
 		except:
 			pass
-
-		win32pdh.RemoveCounter(hc)
+		
+		# tidy up and return the value
+		win32pdh.RemoveCounter(hcounter)
 		win32pdh.CloseQuery(query)
 		return value
 
 
-	def __win32LogProfile(self, instance, inum, interval, file):
-		# open a query ready to perform repeat logging
-		query = win32pdh.OpenQuery()
+	def __win32LogProfile(self, instance, inum, threads, num_processors, interval, file):
 		
-		# get a list of counter file handles, append them to a list
-		# after adding them to the query
-		fpcounters = []
-		for i in "% Processor Time", "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count":
-			path = win32pdh.MakeCounterPath((None, "Process", instance, None, inum, i))
-			try:
-				fpcounters.append(win32pdh.AddCounter(query, path))
-			except win32api.error: 
-				fpcounters.append(0)
-				pass
-				
-		# perform the repeated collection of the query data and formatted values for each of the 
-		# counter file handles and log the data
-		data = [0, 0, 0, 0, 0]
+		# create the process performance counters
+		process_counters=[]
+		process_query=win32pdh.OpenQuery()
+		for counter in "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count":
+			path = win32pdh.MakeCounterPath( (None, "Process", instance, None, inum, counter) )
+			process_counters.append(win32pdh.AddCounter(process_query, path))
+		win32pdh.CollectQueryData(process_query)
+					
+		# create the thread performance counters
+		thread_counters=[]
+		thread_query=win32pdh.OpenQuery()
+		for (instance, inum) in threads:
+			path=win32pdh.MakeCounterPath( (None, "Thread", instance, None, inum, "% Processor Time") )
+			thread_counters.append(win32pdh.AddCounter(thread_query, path))
+		win32pdh.CollectQueryData(thread_query)
+	
+		# perform the continual data collection until the thread is no longer active
+		data = [0, 0, 0, 0, 0]	
 		while self.active:
-			win32pdh.CollectQueryData(query)
-			for i in range(len(fpcounters)):
-				if fpcounters[i]:
-					try:
-						data[i] = win32pdh.GetFormattedCounterValue(fpcounters[i], win32pdh.PDH_FMT_LONG)[1]
-					except win32api.error:
-						data[i] = -1
+			win32pdh.CollectQueryData(process_query)
+			win32pdh.CollectQueryData(thread_query)
 
+			for i in range(len(process_counters)):
+				try:
+					data[i+1] = win32pdh.GetFormattedCounterValue(process_counters[i], win32pdh.PDH_FMT_LONG)[1]
+				except win32api.error:
+					data[i+1] = -1
+		
+			data[0]=0
+			for i in range(0, len(thread_counters)):
+				try:
+					data[0]=data[0]+win32pdh.GetFormattedCounterValue(thread_counters[i], win32pdh.PDH_FMT_LONG)[1] 
+				except:
+					pass
+	
 			currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
-			file.write( "%s\t%s\t%d\t%d\t%d\t%d\n" % (currentTime, data[0], float(data[1])/1024,
+			file.write( "%s\t%s\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]/num_processors, float(data[1])/1024,
 													  float(data[2])/1024, float(data[3])/1024, float(data[4])))
 			time.sleep(interval)
-
-		# on termination of the thread, remove the counters
-		# and close the query cleanly
-		for i in range(len(fpcounters)):
-			if fpcounters[i]:  win32pdh.RemoveCounter(fpcounters[i])
-		win32pdh.CloseQuery(query)
 
 
 	def running(self):
@@ -177,8 +197,22 @@ class ProcessMonitor:
 		
 		"""
 		self.active = 1
+		
+		# get the instance and instance number for this process id
 		instance, inum = self.__win32GetInstance(pid=self.pid, bRefresh=1)
-		thread.start_new_thread(self.__win32LogProfile, (instance, inum, self.interval, self.file))
+
+		# get the instance and instance number for each thread of this process if
+		threads = self.__win32GetThreads(pid=self.pid, bRefresh=1)
+		
+		# determine the number of available CPUs using the environment
+		if not os.environ.has_key("NUMBER_OF_PROCESSORS"):
+			log.error("Unable to determine the number of available processors - assume 1")
+			num_processors=1
+		else:
+			num_processors=int(os.environ["NUMBER_OF_PROCESSORS"])
+
+		# log the stats in a seperate thread
+		thread.start_new_thread(self.__win32LogProfile, (instance, inum, threads, num_processors, self.interval, self.file))
 		
 
 	def stop(self):
