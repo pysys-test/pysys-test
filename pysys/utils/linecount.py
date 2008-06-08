@@ -21,7 +21,7 @@
 
 import os, os.path, sys, re, logging
 
-from pysys.exceptions import *;
+from pysys.exceptions import *
 
 # create the class logger
 log = logging.getLogger('pysys.utils.linecount')
