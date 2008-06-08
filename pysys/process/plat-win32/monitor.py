@@ -34,8 +34,8 @@ class ProcessMonitor:
 	given process as determined by the process id. Statistics obtained include the CPU usage (%), 
 	the working set (memory pages allocated), the virtual bytes (virtual address space including 
 	shared memory segments), the private bytes (virtual address space not including shared memory 
-	segments), and the number of process threads. All memory values are quoted in KBytes and the 
-	CPU precentage represents the usage over all available processors.
+	segments), the number of process threads and the number of handles. All memory values are quoted 
+	in KBytes and the CPU precentage represents the usage over all available processors.
 	
 	Usage of the class is to create an instance specifying the process id, the logging interval and 
 	the log file. Once created, the process monitor is started and stopped via its L{start()} and 
@@ -43,12 +43,12 @@ class ProcessMonitor:
 	the caller of the C{start()} method immediately. The format of the log file is tab separated, 
 	with an initial timestamp used to denote the time the statistics were obtained, e.g. ::
 	
-	    Time                 CPU    Working  Virtual  Private  Threads
-	    --------------------------------------------------------------                       
-		08/06/08 06:32:44     80    125164   212948   118740   44
-		08/06/08 06:32:49     86    125676   213972   120128   44
-		08/06/08 06:32:54     84    125520   212948   119116   44
-		08/06/08 06:32:59     78    125244   212948   119132   44
+	    Time                 CPU    Working  Virtual  Private  Threads Handles
+	    ----------------------------------------------------------------------                       
+		08/06/08 06:32:44     80    125164   212948   118740   44      327
+		08/06/08 06:32:49     86    125676   213972   120128   44      328
+		08/06/08 06:32:54     84    125520   212948   119116   44	   328
+		08/06/08 06:32:59     78    125244   212948   119132   44	   328
 
 	"""
 	
@@ -145,12 +145,12 @@ class ProcessMonitor:
 		# create the process performance counters
 		process_counters=[]
 		process_query=win32pdh.OpenQuery()
-		for counter in "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count":
+		for counter in "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count":
 			path = win32pdh.MakeCounterPath( (None, "Process", instance, None, inum, counter) )
 			process_counters.append(win32pdh.AddCounter(process_query, path))
 		win32pdh.CollectQueryData(process_query)
 					
-		# create the thread performance counters
+		# create the thread performance counter
 		thread_counters=[]
 		thread_query=win32pdh.OpenQuery()
 		for (instance, inum) in threads:
@@ -159,7 +159,7 @@ class ProcessMonitor:
 		win32pdh.CollectQueryData(thread_query)
 	
 		# perform the continual data collection until the thread is no longer active
-		data = [0, 0, 0, 0, 0]	
+		data = [0]*(len(process_counters)+1)	
 		while self.active:
 			win32pdh.CollectQueryData(process_query)
 			win32pdh.CollectQueryData(thread_query)
@@ -178,8 +178,8 @@ class ProcessMonitor:
 					pass
 	
 			currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
-			file.write( "%s\t%s\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]/num_processors, float(data[1])/1024,
-													  float(data[2])/1024, float(data[3])/1024, float(data[4])))
+			file.write( "%s\t%s\t%d\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]/num_processors, float(data[1])/1024,
+													  float(data[2])/1024, float(data[3])/1024, float(data[4]), float(data[5])))
 			time.sleep(interval)
 
 
@@ -221,3 +221,26 @@ class ProcessMonitor:
 		"""
 		self.active = 0
 		
+			
+if __name__ == "__main__":
+	items, instances = win32pdh.EnumObjectItems(None, None, "System", -1)
+	print "System - available counters are; "
+	for item in items: print item
+	print 
+
+	items, instances = win32pdh.EnumObjectItems(None, None, "Processor", -1)
+	print "Processor - available counters are; "
+	for item in items: print item
+	print 
+
+	items, instances = win32pdh.EnumObjectItems(None, None, "Process", -1)
+	print "Process - available counters are; "
+	for item in items: print item
+	print 
+
+	items, instances = win32pdh.EnumObjectItems(None, None, "Thread", -1)
+	print "Thread - available counters are; "
+	for item in items: print item
+	print
+
+	 
