@@ -35,7 +35,7 @@ __status__  = "beta"
 __version__ = "0.5.2"
 """The version of this release."""
 
-__date__    = "3 May 2008"
+__date__    = "3 July 2008"
 """The date of this release."""
 
 __all__     = [ "constants",
