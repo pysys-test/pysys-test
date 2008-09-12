@@ -130,7 +130,7 @@ class XMLDescriptorContainer:
 		str=str+"Test type:         %s\n" % self.type
 		str=str+"Test state:        %s\n" % self.state
 		str=str+"Test title:        %s\n" % self.title
-		str=str+"Test purpose:     "
+		str=str+"Test purpose:      "
 		purpose = self.purpose.split('\n')
 		for index in range(0, len(purpose)):
 			if index == 0: str=str+"%s\n" % purpose[index]
