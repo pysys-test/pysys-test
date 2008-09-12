@@ -34,7 +34,7 @@ DTD='''
                    value CDATA #IMPLIED
                    default CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED
-                 modele CDATA #REQUIRED>
+                 module CDATA #REQUIRED>
 <!ATTLIST path value CDATA #REQUIRED
                relative CDATA #IMPLIED>
 
