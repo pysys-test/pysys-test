@@ -235,7 +235,7 @@ class BaseTest(ProcessUser):
 
 
 	# process manipulation methods of ProcessUser
-	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
+	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
 		"""Start a process running in the foreground or background, and return the process handle.
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments, environment and 
@@ -266,6 +266,7 @@ class BaseTest(ProcessUser):
 		"""
 		if workingDir == None: workingDir = r'%s' % self.output
 		if displayName == None: displayName = os.path.basename(command)
+		if environs == None: environs = {}
 		
 		try:
 			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
