@@ -28,15 +28,18 @@ log = logging.getLogger('pysys.xml.project')
 DTD='''
 <!ELEMENT pysysproject (property+, path+, runner?) >
 <!ATTLIST property environment CDATA #IMPLIED
-                   osfamily CDATA #IMPLIED
-                   file CDATA #IMPLIED
-                   name CDATA #IMPLIED
-                   value CDATA #IMPLIED
-                   default CDATA #IMPLIED>
+				   osfamily CDATA #IMPLIED
+				   file CDATA #IMPLIED
+				   name CDATA #IMPLIED
+				   value CDATA #IMPLIED
+				   default CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED
-                 module CDATA #REQUIRED>
+				 module CDATA #REQUIRED>
+<!ATTLIST writer classname CDATA #REQUIRED
+				 module CDATA #REQUIRED>
+				 file CDATA #REQUIRED>
 <!ATTLIST path value CDATA #REQUIRED
-               relative CDATA #IMPLIED>
+			   relative CDATA #IMPLIED>
 
 '''
 
@@ -83,7 +86,7 @@ class XMLProjectParser:
 				self.properties.pop(self.osfamily, "")
 				self.osfamily = propertyNode.getAttribute("osfamily")
 				self.properties[self.osfamily] = OSFAMILY
-				 	
+					
 			elif propertyNode.hasAttribute("file"): 
 				file = self.expandFromProperty(propertyNode.getAttribute("file"), propertyNode.getAttribute("default"))
 				self.getPropertiesFromFile(os.path.join(self.dirname, file))
@@ -100,14 +103,14 @@ class XMLProjectParser:
 		if os.path.exists(file):
 			try:
 				fp = open(file, "r")
-			except:	
+			except: 
 				pass
 			else:
 				for line in fp.readlines():
 					regex = re.compile(PROPERTY_FILE, re.M)
 					if regex.search(line) != None:
 						name = re.match(regex, line).group('name')
-			 			value = re.match(regex, line).group('value')			 		
+						value = re.match(regex, line).group('value')					
 						value = self.expandFromProperty(value, "")				
 						self.properties[name.strip()] = value.strip()
 
@@ -144,6 +147,16 @@ class XMLProjectParser:
 			return [runnerNodeList.getAttribute('classname'), runnerNodeList.getAttribute('module')]
 		except:
 			return [DEFAULT_RUNNER_CLASS, DEFAULT_RUNNER_MODULE]
+
+	def getWriterDetails(self):
+		try:
+			tuple = []
+			loggerNodeList = self.root.getElementsByTagName('writer')
+			for logger in loggerNodeList:
+				tuple.append([loggerNodeList.getAttribute('classname'), loggerNodeList.getAttribute('module'), loggerNodeList.getAttribute('file')])
+			return tuple
+		except:
+			return [[DEFAULT_WRITER_CLASS, DEFAULT_WRITER_MODULE, DEFAULT_WRITER_FILE]]
 
 
 	def addToPath(self):		
