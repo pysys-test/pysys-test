@@ -1,4 +1,4 @@
-PySys 0.5.2 Release Notes
+PySys 0.6.0 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
@@ -7,14 +7,10 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- The lastgrep method has been added to pysys.utils.filegrep, and the assertLastGrep 
-  method has been added to the BaseTest class. This allows test validation to be 
-  performed based on regular expression matching on the last line of an input file 
-  to the assertLastGrep method.
-- The win32 process monitor has been modified to calculate the percentage CPU usage 
-  statistics as a sum over all available processors. A CPU usage of 100% represents
-  the process fully utilising all available processors. 
-- The win32 process monitor now also logs the handle count of a process.
+- Added the clean mode of operation to the pysys.py launcher. This allows 
+  removal of testcase output subdirectories, e.g. before importing into a 
+  software repository. The -o option allows specifying the output subdirectory
+  name, which defaults to the platform identifier if not specified. 
 
   
 Dependencies
@@ -84,6 +80,17 @@ testcases location, perform
 
 Release History
 ---------------
+
+0.5.1 to 0.5.2
+--------------
+- The lastgrep method has been added to pysys.utils.filegrep, and the assertLastGrep 
+  method has been added to the BaseTest class. This allows test validation to be 
+  performed based on regular expression matching on the last line of an input file 
+  to the assertLastGrep method.
+- The win32 process monitor has been modified to calculate the percentage CPU usage 
+  statistics as a sum over all available processors. A CPU usage of 100% represents
+  the process fully utilising all available processors. 
+- The win32 process monitor now also logs the handle count of a process.
 
 0.5.0 to 0.5.1
 --------------
