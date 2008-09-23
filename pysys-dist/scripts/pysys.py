@@ -28,11 +28,10 @@ loadproject(os.getcwd())
 
 from pysys import __version__
 from pysys.constants import *
-from pysys.writer import LogFileResultsWriter
 from pysys.launcher.console import ConsoleLaunchHelper
 from pysys.launcher.console import ConsoleMakeTestHelper
 from pysys.launcher.console import ConsolePrintHelper
-
+from pysys.launcher.console import ConsoleCleanTestHelper
 
 def printUsage():
 	print "\nPySys System Test Framework (version %s)" % __version__ 
@@ -41,11 +40,25 @@ def printUsage():
 	print "       run    - run a set of tests rooted from the current working directory"
 	print "       make   - make a new testcase directory structure in the current working directory"
 	print "       print  - print details of a set of tests rooted from the current working directory"
+	print "       clean  - clean the output subdirectories of tests rooted from the current working directory"
 	print ""
 	print "    For more information on the options available to each mode, use the -h | --help option, e.g. "
 	print "       %s run --help " % os.path.basename(sys.argv[0])
 	sys.exit()
 	
+def runTest(args):
+	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
+	record, purge, cycle, mode, outsubdir, descriptors, userOptions = launcher.parseArgs(args)
+	
+	writers = []
+	for classname, module, filename in PROJECT.writers:
+		exec( "from %s import %s" % (module, classname) )	
+		exec( "writers.append(%s(time.strftime(\"%s\", time.gmtime(time.time()))))" % (classname, filename) )
+		
+	exec( "from %s import %s" % (PROJECT.runnerModule, PROJECT.runnerClassname) )
+	exec( "runner = %s(record, purge, cycle, mode, outsubdir, descriptors, userOptions)" % (PROJECT.runnerClassname))
+	runner.start(writers=writers)
+
 def makeTest(args):
 	maker = ConsoleMakeTestHelper(os.getcwd(), "make")
 	maker.parseArgs(args)
@@ -56,25 +69,24 @@ def printTest(args):
 	printer.parseArgs(args)
 	printer.printTests()
 	
-def runTest(args):
-	logwriter = LogFileResultsWriter("testsummary_%s.log" % time.strftime('%Y%m%d%H%M%S', time.gmtime(time.time())))
-	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
-	record, purge, cycle, mode, outsubdir, descriptors, userOptions = launcher.parseArgs(args)
-	exec( "from %s import %s" % (PROJECT.runnerModule, PROJECT.runnerClassname) )
-	exec( "runner = %s(record, purge, cycle, mode, outsubdir, descriptors, userOptions)" % (PROJECT.runnerClassname))
-	runner.start(writers=[logwriter])
-
+def cleanTest(args):
+	cleaner = ConsoleCleanTestHelper(os.getcwd(), "clean")
+	cleaner.parseArgs(args)
+	cleaner.clean()
+	
 if __name__ == "__main__":
 	if len(sys.argv) < 2: 
 		printUsage()
 	else:
 		mode = sys.argv[1]
-		if mode == "make":
+		if mode == "run":
+			runTest(sys.argv[2:])
+		elif mode == "make":
 			makeTest(sys.argv[2:])
 		elif mode == "print":
 			printTest(sys.argv[2:])
-		elif mode == "run":
-			runTest(sys.argv[2:])
+		elif mode == "clean":
+			cleanTest(sys.argv[2:])
 		else:
 			printUsage()
 
