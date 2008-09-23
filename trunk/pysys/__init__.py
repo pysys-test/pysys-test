@@ -29,13 +29,13 @@ __author__  = "Moray Grieve"
 __author_email__ = "moraygrieve@users.sourceforge.net"
 """The author's email address."""
 
-__status__  = "beta"
+__status__  = "alpha"
 """The status of this release."""
 
-__version__ = "0.5.2"
+__version__ = "0.6.0"
 """The version of this release."""
 
-__date__    = "3 July 2008"
+__date__    = "23 Sept 2008"
 """The date of this release."""
 
 __all__     = [ "constants",
