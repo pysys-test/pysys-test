@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import sys, os, os.path, glob, getopt, sets, re, string, logging
+import sys, os, os.path, stat, glob, getopt, sets, re, string, logging
 
 from pysys import rootLogger
 from pysys import __version__
@@ -41,6 +41,86 @@ rootLogger.addHandler(consoleLogger)
 
 log = logging.getLogger('pysys.launcher.console')
 log.setLevel(logging.NOTSET)
+
+
+class ConsoleCleanTestHelper:
+	def __init__(self, workingDir, name=""):
+		self.workingDir = workingDir
+		self.arguments = []
+		self.verbosity = INFO
+		self.outsubdir = PLATFORM
+		self.name = name
+		self.optionString = 'hv:o:'
+		self.optionList = ["help","verbosity=","outdir="]
+
+
+	def printUsage(self, printXOptions):
+		print "\nPySys System Test Framework (version %s): Console clean test helper" % __version__ 
+		print "\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name)
+		print "   where [option] includes;"
+		print "       -h | --help                 print this message"
+		print "       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)"
+		print "       -o | --outdir    STRING     set the name of the test output subdirectories to clean"
+		sys.exit()
+
+
+	def parseArgs(self, args, printXOptions=None):
+		try:
+			optlist, self.arguments = getopt.getopt(args, self.optionString, self.optionList)
+		except:
+			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
+			sys.exit(1)
+
+		for option, value in optlist:
+			if option in ("-h", "--help"):
+				self.printUsage(printXOptions)	  
+
+			elif option in ("-v", "--verbosity"):
+				self.verbosity = value
+				if self.verbosity == "DEBUG":
+					rootLogger.setLevel(logging.DEBUG)
+				elif self.verbosity == "INFO":
+					rootLogger.setLevel(logging.INFO)
+				elif self.verbosity == "WARN":
+					rootLogger.setLevel(logging.WARN)	
+				elif self.verbosity == "CRIT":
+					rootLogger.setLevel(logging.CRITICAL)	
+
+			elif option in ("-o", "--outdir"):
+				self.outsubdir = value
+
+
+	def clean(self):
+		try:
+			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir)		
+		except Exception, (strerror):
+			log.info(strerror)
+		else:
+			for descriptor in descriptors:
+				pathToDelete = os.path.join(descriptor.output, self.outsubdir)
+				if os.path.exists(pathToDelete):
+					log.info("Deleting output directory: " + pathToDelete)
+					self.purgeDirectory(pathToDelete, TRUE)
+				else:
+					log.debug("Output directory does not exist: " + pathToDelete)
+
+
+	def purgeDirectory(self, dir, delTop=FALSE):
+		for file in os.listdir(dir):
+			path = os.path.join(dir, file)
+			if PLATFORM in ['sunos', 'linux']:
+				mode = os.lstat(path)[stat.ST_MODE]
+			else:
+				mode = os.stat(path)[stat.ST_MODE]
+		
+			if stat.S_ISLNK(mode):
+				os.unlink(path)
+			if stat.S_ISREG(mode):
+				os.remove(path)
+			elif stat.S_ISDIR(mode):
+				self.purgeDirectory(path, delTop=TRUE)
+
+		if delTop: os.rmdir(dir)
 
 
 class ConsolePrintHelper:
@@ -303,7 +383,7 @@ class ConsoleLaunchHelper:
 	def printUsage(self, printXOptions):
 		print "\nPySys System Test Framework (version %s): Console run test helper" % __version__ 
 		print "\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name)
-		print "   where the [option] includes;"
+		print "   where [option] includes;"
 		print "       -h | --help                 print this message"
 		print "       -r | --record               record the test results in the working directory"
 		print "       -p | --purge                purge the output subdirectory on test pass"
