@@ -85,6 +85,9 @@ class XMLFileResultsWriter:
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
 			self.rootElement = self.document.documentElement
+			self.statusAttribute = self.document.createAttribute("status")
+			self.statusAttribute.value="running"
+			self.rootElement.setAttributeNode(self.statusAttribute)
 
 			# add the data node
 			element = self.document.createElement("timestamp")
@@ -122,6 +125,9 @@ class XMLFileResultsWriter:
 
 
 	def cleanup(self):
+		self.fp.seek(0)
+		self.statusAttribute.value="complete"
+		self.fp.write(self.document.toprettyxml(indent="  "))
 		try:
 			if self.fp: 
 				self.fp.flush()
