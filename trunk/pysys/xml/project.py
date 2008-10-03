@@ -62,12 +62,11 @@ class XMLProjectParser:
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
 		except:
-			raise Exception, "Error parsing supplied project file, " % (sys.exc_info()[1])
+			raise Exception, "Error parsing supplied project file: %s" % (sys.exc_info()[1])
 		else:
 			if self.doc.getElementsByTagName('pysysproject') == []:
 				raise Exception, "No <pysysproject> element supplied in project file"
 			else:
-			
 				self.root = self.doc.getElementsByTagName('pysysproject')[0]
 
 				
@@ -146,17 +145,20 @@ class XMLProjectParser:
 			runnerNodeList = self.root.getElementsByTagName('runner')[0]
 			return [runnerNodeList.getAttribute('classname'), runnerNodeList.getAttribute('module')]
 		except:
-			return [DEFAULT_RUNNER_CLASS, DEFAULT_RUNNER_MODULE]
+			return DEFAULT_RUNNER
 
 	def getWriterDetails(self):
 		try:
 			tuple = []
 			loggerNodeList = self.root.getElementsByTagName('writer')
-			for logger in loggerNodeList:
-				tuple.append([loggerNodeList.getAttribute('classname'), loggerNodeList.getAttribute('module'), loggerNodeList.getAttribute('file')])
+			if loggerNodeList != []:
+				for logger in loggerNodeList:
+					tuple.append([logger.getAttribute('classname'), logger.getAttribute('module'), logger.getAttribute('file')])
+			else:
+				tuple.append(DEFAULT_WRITER)
 			return tuple
 		except:
-			return [[DEFAULT_WRITER_CLASS, DEFAULT_WRITER_MODULE, DEFAULT_WRITER_FILE]]
+			return [DEFAULT_WRITER]
 
 
 	def addToPath(self):		

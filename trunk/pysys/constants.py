@@ -67,11 +67,8 @@ DEFAULT_TESTCLASS = 'PySysTest'
 DEFAULT_INPUT = 'Input'
 DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
-DEFAULT_RUNNER_MODULE = 'pysys.baserunner'
-DEFAULT_RUNNER_CLASS = 'BaseRunner'
-DEFAULT_WRITER_MODULE = 'pysys.writer'
-DEFAULT_WRITER_CLASS = 'LogFileResultsWriter'
-DEFAULT_WRITER_FILE = 'testsummary_%Y%m%d%H%M%S.log'
+DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
+DEFAULT_WRITER =  ['LogFileResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.log']
 
 # set the directories to not recursively walk when looking for the descriptors
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn' ]
@@ -165,24 +162,28 @@ class Project:
 		if os.path.exists(os.path.join(root, DEFAULT_PROJECTFILE)):	
 			# parse the project file
 			from pysys.xml.project import XMLProjectParser
-			parser = XMLProjectParser(os.path.join(root, DEFAULT_PROJECTFILE))
-			
-			# get the properties
-			properties = parser.getProperties()
-			keys = properties.keys()
-			keys.sort()
-			for key in keys: setattr(self, key, properties[key])
-
-			# add to the python path
-			parser.addToPath()
+			try:
+				parser = XMLProjectParser(os.path.join(root, DEFAULT_PROJECTFILE))
+			except:
+				print "%s" % sys.exc_info()[1]
+				sys.exit(1)
+			else:
+				# get the properties
+				properties = parser.getProperties()
+				keys = properties.keys()
+				keys.sort()
+				for key in keys: setattr(self, key, properties[key])
+				
+				# add to the python path
+				parser.addToPath()
 		
-			# get the runner if specified
-			self.runnerClassname, self.runnerModule = parser.getRunnerDetails()
+				# get the runner if specified
+				self.runnerClassname, self.runnerModule = parser.getRunnerDetails()
 		
-			# get the loggers to use
-			self.writers = parser.getWriterDetails()
+				# get the loggers to use
+				self.writers = parser.getWriterDetails()
 			
-			# set the data attributes
-			parser.unlink()	
+				# set the data attributes
+				parser.unlink()	
 	
 	

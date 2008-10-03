@@ -26,6 +26,8 @@ from pysys import rootLogger
 from pysys.constants import *
 from pysys.exceptions import *
 
+from xml.dom.minidom import getDOMImplementation
+
 log = logging.getLogger('pysys.writer')
 log.setLevel(logging.NOTSET)
 
@@ -57,6 +59,69 @@ class LogFileResultsWriter:
 
 		self.fp.write('Summary of test outcome:\n')	
 		for outcome in PRECEDENT:
-			for test in results[outcome]: self.fp.write("%s: %s\n" % (LOOKUP[outcome], test))
+			for result in results[outcome]: self.fp.write("%s: %s\n" % (LOOKUP[outcome], result[0].id))
 		self.fp.write('\n\n\n')
 		self.fp.close()
+		
+		
+class XMLFileResultsWriter:
+
+	def __init__(self, logfile):
+		self.logfile = logfile
+		self.fp = None
+
+	def setup(self):
+		try:
+			self.fp = open(self.logfile, "w", 0)
+		except:
+			pass
+
+	def cleanup(self):
+		try:
+			if self.fp: close(self.fp)
+		except:
+			pass
+			
+	def writeResults(self, results, **kwargs):
+		impl = getDOMImplementation()
+		document = impl.createDocument(None, "pysyslog", None)
+		rootElement = document.documentElement
+
+		# add the data node
+		element = document.createElement("date")
+		element.appendChild(document.createTextNode(time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+		rootElement.appendChild(element)
+
+		# add the platform node
+		element = document.createElement("platform")
+		element.appendChild(document.createTextNode(PLATFORM))
+		rootElement.appendChild(element)
+
+		# add the test host node
+		element = document.createElement("host")
+		element.appendChild(document.createTextNode(HOSTNAME))
+		rootElement.appendChild(element)
+
+		# create the results entry
+		resultsElement = document.createElement("results")
+		rootElement.appendChild(resultsElement)
+		for outcome in PRECEDENT:
+			for result in results[outcome]: 		
+				resultElement = document.createElement("result")
+				nameAttribute = document.createAttribute("id")
+				outcomeAttribute = document.createAttribute("outcome")
+				outputAttribute = document.createAttribute("output")
+				nameAttribute.value=result[0].id
+				outcomeAttribute.value=LOOKUP[outcome]
+				outputAttribute.value=self.convert_unc(HOSTNAME, result[1])
+				resultElement.setAttributeNode(nameAttribute)
+				resultElement.setAttributeNode(outcomeAttribute)
+				resultElement.setAttributeNode(outputAttribute)
+				resultsElement.appendChild(resultElement)
+		
+		self.fp.write(document.toprettyxml(indent="  "))
+		self.fp.close()
+
+	def convert_unc(self, host, path):
+		return ''.join(['\\\\', host, os.path.splitdrive(path)[1]])
+    	
