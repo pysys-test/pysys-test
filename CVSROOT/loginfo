@@ -28,5 +28,5 @@
 
 
 # send email commit notifications
-DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} moray.grieve@ntlworld.com
+DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv}  moraygrieve@users.sourceforge.net
 
