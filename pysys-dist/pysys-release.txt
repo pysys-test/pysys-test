@@ -11,7 +11,7 @@ What's new in this release
   removal of testcase output subdirectories, e.g. before importing into a 
   software repository. The -o option allows specifying the output subdirectory
   name, which defaults to the platform identifier if not specified. 
-- Added the ability to specifiy customer test output summary writers in the 
+- Added the ability to specifiy custom test output summary writers in the 
   .pysysproject file
 - Added the XMLFileResultsWriter class
 
