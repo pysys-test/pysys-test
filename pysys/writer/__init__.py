@@ -37,91 +37,130 @@ class LogFileResultsWriter:
 	
 	def __init__(self, logfile):
 		self.logfile = logfile
+		self.cycle = -1
 		self.fp = None
+
 
 	def setup(self):
 		try:
 			self.fp = open(self.logfile, "w", 0)
+			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
+			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
+			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
 		except:
 			pass
+
 
 	def cleanup(self):
 		try:
-			if self.fp: close(self.fp)
+			if self.fp: 
+				self.fp.write('\n\n\n')
+				self.fp.flush()
+				self.fp.close()
 		except:
-			pass
-			
-	def writeResults(self, results, **kwargs):
-		self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
-		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
-		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
-		self.fp.write('\n')
+			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-		self.fp.write('Summary of test outcome:\n')	
-		for outcome in PRECEDENT:
-			for result in results[outcome]: self.fp.write("%s: %s\n" % (LOOKUP[outcome], result[0].id))
-		self.fp.write('\n\n\n')
-		self.fp.close()
+			
+	def writeResult(self, testObj, **kwargs):
+		if kwargs.has_key("cycle"): 
+			if self.cycle != kwargs["cycle"]:
+				self.cycle = kwargs["cycle"]
+				self.fp.write('\n[Cycle %d]:\n'%self.cycle)	
+		
+		self.fp.write("%s: %s\n" % (LOOKUP[testObj.getOutcome()], testObj.descriptor.id))
+
 		
 		
 class XMLFileResultsWriter:
 
 	def __init__(self, logfile):
 		self.logfile = logfile
+		self.cycle = -1
 		self.fp = None
 
 	def setup(self):
 		try:
 			self.fp = open(self.logfile, "w", 0)
+		
+			impl = getDOMImplementation()
+			self.document = impl.createDocument(None, "pysyslog", None)
+			self.rootElement = self.document.documentElement
+
+			# add the data node
+			element = self.document.createElement("timestamp")
+			element.appendChild(self.document.createTextNode(time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+			self.rootElement.appendChild(element)
+
+			# add the platform node
+			element = self.document.createElement("platform")
+			element.appendChild(self.document.createTextNode(PLATFORM))
+			self.rootElement.appendChild(element)
+
+			# add the test host node
+			element = self.document.createElement("host")
+			element.appendChild(self.document.createTextNode(HOSTNAME))
+			self.rootElement.appendChild(element)
+
+			# add the test host node
+			element = self.document.createElement("root")
+			element.appendChild(self.document.createTextNode(PROJECT.root))
+			self.rootElement.appendChild(element)
+
+			# write the file out
+			self.fp.write(self.document.toprettyxml(indent="  "))
 		except:
-			pass
+			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
+
+	def createResultsNode(self):
+		# create the results entry
+		self.resultsElement = self.document.createElement("results")
+		cycleAttribute = self.document.createAttribute("cycle")
+		cycleAttribute.value="%d"%self.cycle
+		self.resultsElement.setAttributeNode(cycleAttribute)
+		self.rootElement.appendChild(self.resultsElement)
+
 
 	def cleanup(self):
 		try:
-			if self.fp: close(self.fp)
+			if self.fp: 
+				self.fp.flush()
+				self.fp.close()
 		except:
-			pass
+			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
 			
-	def writeResults(self, results, **kwargs):
-		impl = getDOMImplementation()
-		document = impl.createDocument(None, "pysyslog", None)
-		rootElement = document.documentElement
-
-		# add the data node
-		element = document.createElement("date")
-		element.appendChild(document.createTextNode(time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
-		rootElement.appendChild(element)
-
-		# add the platform node
-		element = document.createElement("platform")
-		element.appendChild(document.createTextNode(PLATFORM))
-		rootElement.appendChild(element)
-
-		# add the test host node
-		element = document.createElement("host")
-		element.appendChild(document.createTextNode(HOSTNAME))
-		rootElement.appendChild(element)
-
-		# create the results entry
-		resultsElement = document.createElement("results")
-		rootElement.appendChild(resultsElement)
-		for outcome in PRECEDENT:
-			for result in results[outcome]: 		
-				resultElement = document.createElement("result")
-				nameAttribute = document.createAttribute("id")
-				outcomeAttribute = document.createAttribute("outcome")
-				outputAttribute = document.createAttribute("output")
-				nameAttribute.value=result[0].id
-				outcomeAttribute.value=LOOKUP[outcome]
-				outputAttribute.value=self.convert_unc(HOSTNAME, result[1])
-				resultElement.setAttributeNode(nameAttribute)
-				resultElement.setAttributeNode(outcomeAttribute)
-				resultElement.setAttributeNode(outputAttribute)
-				resultsElement.appendChild(resultElement)
+	def writeResult(self, testObj, **kwargs):
+		self.fp.seek(0)
 		
-		self.fp.write(document.toprettyxml(indent="  "))
-		self.fp.close()
+		if kwargs.has_key("cycle"): 
+			if self.cycle != kwargs["cycle"]:
+				self.cycle = kwargs["cycle"]
+				self.createResultsNode()
+		
+		# create the results entry
+		resultElement = self.document.createElement("result")
+		nameAttribute = self.document.createAttribute("id")
+		outcomeAttribute = self.document.createAttribute("outcome")  
+		nameAttribute.value=testObj.descriptor.id
+		outcomeAttribute.value=LOOKUP[testObj.getOutcome()]
+		resultElement.setAttributeNode(nameAttribute)
+		resultElement.setAttributeNode(outcomeAttribute)
+		
+		element = self.document.createElement("timestamp")
+		element.appendChild(self.document.createTextNode(time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+		resultElement.appendChild(element)
 
-	def convert_unc(self, host, path):
-		return ''.join(['\\\\', host, os.path.splitdrive(path)[1]])
+		element = self.document.createElement("descriptor")
+		element.appendChild(self.document.createTextNode(testObj.descriptor.file))
+		resultElement.appendChild(element)
+
+		element = self.document.createElement("output")
+		element.appendChild(self.document.createTextNode(testObj.output))
+		resultElement.appendChild(element)
+		
+		self.resultsElement.appendChild(resultElement)
+	
+		# write the file out
+		self.fp.write(self.document.toprettyxml(indent="  "))
     	

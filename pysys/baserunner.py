@@ -233,6 +233,12 @@ class BaseRunner(ProcessUser):
 		# call the hook to setup prior to running tests
 		self.setup()
 
+		# call the hook to setup the test output writers
+		if self.record:
+			for writer in writers:
+				try: writer.setup()
+				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
 		# loop through each cycle
 		for cycle in range(self.cycle):
 			results[cycle] = {}
@@ -335,7 +341,7 @@ class BaseRunner(ProcessUser):
 				testTime = math.floor(100*(time.time() - startTime))/100.0
 				totalDuration = totalDuration + testTime
 				outcome = testObj.getOutcome()
-				results[cycle][outcome].append([descriptor, outputDirectory])
+				results[cycle][outcome].append(descriptor.id)
 				log.info("")
 				log.info("Test duration %.2f secs", testTime)
 				log.info("Test final outcome %s", LOOKUP[outcome])
@@ -344,10 +350,16 @@ class BaseRunner(ProcessUser):
 				
 				# call the hook for end of test execution
 				self.testComplete(testObj, outputDirectory)
-				try:
-					del sys.modules["%s" % os.path.basename(descriptor.module)]
-				except:
-					pass
+				
+				# pass the test object to the test writers is recording
+				if self.record:
+					for writer in writers:
+						try: writer.writeResult(testObj, cycle=cycle)
+						except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				
+				# perform cleanup actions
+				try: del sys.modules["%s" % os.path.basename(descriptor.module)]
+				except: pass
 				del testObj
 
 				# remove the run logger handler
@@ -373,15 +385,11 @@ class BaseRunner(ProcessUser):
 			except:
 				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-			# send the results for this cycle to the result writers
-			if self.record:
-				for writer in writers:
-					try:
-						writer.setup()
-						writer.writeResults(results=results[cycle])
-						writer.cleanup()
-					except:
-						log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		# perform cleanup on the test writers
+		if self.record:
+			for writer in writers:
+				try: writer.cleanup()
+				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 		# log the summary output to the console
 		if printSummary:
@@ -397,11 +405,11 @@ class BaseRunner(ProcessUser):
 			else:
 				if len(results) == 1:
 					for outcome in FAILS:
-						for result in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], result[0].id)
+						for id in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], id)
 				else:
 					for key in results.keys():
 						for outcome in FAILS:
-							for result in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], result[0].id)
+							for id in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
 
 		# call the hook to cleanup after running tests
 		self.cleanup()
