@@ -86,7 +86,7 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
 class XMLDescriptorContainer:
 	"""Holder class for the contents of a testcase descriptor. """
 
-	def __init__(self, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
+	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
 		"""Create an instance of the XMLDescriptorContainer class.
 		
 		@param id: The testcase identifier
@@ -104,6 +104,7 @@ class XMLDescriptorContainer:
 		@param traceability: A list of the requirements covered by the testcase
 		
 		"""
+		self.file = file
 		self.id = id
 		self.type = type
 		self.state = state
@@ -148,7 +149,7 @@ class XMLDescriptorContainer:
 
 
 class XMLDescriptorCreator:
-	'''Helper class to create a test desriptor template.'''
+	'''Helper class to create a test descriptor template.'''
 		
 	def __init__(self, file, type="auto", group=DEFAULT_GROUP, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
 		'''Class constructor.'''
@@ -179,7 +180,8 @@ class XMLDescriptorParser:
 	'''
 
 	def __init__(self, xmlfile):
-		'''Class constructor.'''		
+		'''Class constructor.'''	
+		self.file = xmlfile
 		self.dirname = os.path.dirname(xmlfile)
 		if not os.path.exists(xmlfile):
 			raise Exception, "Unable to find supplied test descriptor \"%s\"" % xmlfile
@@ -197,9 +199,9 @@ class XMLDescriptorParser:
 
 	def getContainer(self):
 		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
-		return XMLDescriptorContainer(self.getID(), self.getType(), self.getState(),
+		return XMLDescriptorContainer(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle(), self.getPurpose(),
-										self.getgroups(), self.getModes(),
+										self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
 										os.path.join(self.dirname, self.getClassDetails()[1]),
 										os.path.join(self.dirname, self.getTestInput()),
@@ -212,7 +214,12 @@ class XMLDescriptorParser:
 		'''Clean up the DOM on completion.'''
 		if self.doc: self.doc.unlink()
 
-		
+	
+	def getFile(self):
+		'''Return the filename of the test descriptor.'''
+		return self.file
+
+	
 	def getID(self):
 		'''Return the id of the test.'''
 		return os.path.basename(self.dirname)
@@ -270,7 +277,7 @@ class XMLDescriptorParser:
 				return ""
 			
 				
-	def getgroups(self):
+	def getGroups(self):
 		'''Return a list of the group names, contained in the character data of the group elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
 		if classificationNodeList == []:
