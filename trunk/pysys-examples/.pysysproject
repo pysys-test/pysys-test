@@ -6,4 +6,12 @@
 	<!-- Example of adding a path relative to the project root to the python path
 	<path value="./src" relative="true"/>	
 	-->
+
+	<!-- Example of adding specific test output summary writers for auditing and real-time monitoring of 
+	test run status. Should no test writer be explicitly defined, the the LogFileResultsWriter will be used 
+	as the default. Multiple test output summary writers can be defined, and the filename can use time format 
+	characters suitable for conversion with time.strftime, e.g. testsummary_%Y%m%d%H%M%S.log -->
+	<writer classname="LogFileResultsWriter" module="pysys.writer" file="testsummary.log"/>	
+	<writer classname="XMLFileResultsWriter" module="pysys.writer" file="testsummary.xml"/>	
+	
 </pysysproject>
