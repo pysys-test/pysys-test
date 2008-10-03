@@ -335,7 +335,7 @@ class BaseRunner(ProcessUser):
 				testTime = math.floor(100*(time.time() - startTime))/100.0
 				totalDuration = totalDuration + testTime
 				outcome = testObj.getOutcome()
-				results[cycle][outcome].append(descriptor.id)
+				results[cycle][outcome].append([descriptor, outputDirectory])
 				log.info("")
 				log.info("Test duration %.2f secs", testTime)
 				log.info("Test final outcome %s", LOOKUP[outcome])
@@ -397,11 +397,11 @@ class BaseRunner(ProcessUser):
 			else:
 				if len(results) == 1:
 					for outcome in FAILS:
-						for test in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], test)
+						for result in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], result[0].id)
 				else:
 					for key in results.keys():
 						for outcome in FAILS:
-							for test in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], test)
+							for result in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], result[0].id)
 
 		# call the hook to cleanup after running tests
 		self.cleanup()
