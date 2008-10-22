@@ -33,7 +33,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	
 	if dir == None: dir = os.getcwd()
 	for root, dirs, files in os.walk(dir):
-		intersection =  descriptorSet& sets.Set(files)
+		intersection =  descriptorSet & sets.Set(files)
 		if intersection : descriptorfiles.append(os.path.join(root, intersection.pop()))
 		for ignore in (ignoreSet & sets.Set(dirs)): dirs.remove(ignore)
 
