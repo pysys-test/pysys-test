@@ -78,13 +78,21 @@ class XMLFileResultsWriter:
 		self.cycle = -1
 		self.fp = None
 
+
+	def get_site_packages_path(self):
+		if sys.platform.lower().startswith('win'):
+			return os.path.join(sys.prefix, "Lib", "site-packages")
+		else:
+			return os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
+
+
 	def setup(self):
 		try:
 			self.fp = open(self.logfile, "w", 0)
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
-			stylesheet = self.document.createProcessingInstruction("xml:stylesheet", "href=\"pysyslog.xsl\" type=\"text/xsl\"")
+			stylesheet = self.document.createProcessingInstruction("xml-stylesheet", "href=\"%s\" type=\"text/xsl\"" % (os.path.join(self.get_site_packages_path(), 'pysys-log.xsl')))
 			self.document.insertBefore(stylesheet, self.document.childNodes[0])
 		
 			self.rootElement = self.document.documentElement
