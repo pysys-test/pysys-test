@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import sys, re, os, socket, logging
+import sys, re, os, socket, logging, sets
 
 from pysys import rootLogger
 
@@ -59,8 +59,8 @@ FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
 
 
 # set the default descriptor filename, input, output and reference directory names
-DEFAULT_PROJECTFILE = '.pysysproject'
-DEFAULT_DESCRIPTOR = ['.pysystest', 'descriptor.xml']  
+DEFAULT_PROJECTFILE = ['pysysproject.xml', '.pysysproject']
+DEFAULT_DESCRIPTOR = ['pysystest.xml', '.pysystest']  
 DEFAULT_MODULE = 'run'
 DEFAULT_GROUP = ""
 DEFAULT_TESTCLASS = 'PySysTest'
@@ -135,12 +135,20 @@ def loadproject(start):
 
 	global PROJECT
 
+	projectFile = None
+	projectFileSet = sets.Set(DEFAULT_PROJECTFILE)
+	
 	search = start
 	drive, path = os.path.splitdrive(search)
-	while (not search == drive) and (not os.path.exists(os.path.join(search, DEFAULT_PROJECTFILE))): 
-		search, drop = os.path.split(search) 
-		if not drop: search = drive
-	PROJECT = Project(search)
+	while (not search == drive):
+		intersection =  projectFileSet & sets.Set(os.listdir(search))
+		if intersection : 
+			projectFile = intersection.pop()
+			break
+		else:
+			search, drop = os.path.split(search)
+			if not drop: search = drive
+	PROJECT = Project(search, projectFile)
 
 
 class Project:
@@ -156,16 +164,16 @@ class Project:
 	
 	"""
 	
-	def __init__(self, root):
+	def __init__(self, root, projectFile):
 		self.root = root
-		
-		if os.path.exists(os.path.join(root, DEFAULT_PROJECTFILE)):	
+	
+		if projectFile != None and os.path.exists(os.path.join(root, projectFile)):	
 			# parse the project file
 			from pysys.xml.project import XMLProjectParser
 			try:
-				parser = XMLProjectParser(os.path.join(root, DEFAULT_PROJECTFILE))
+				parser = XMLProjectParser(os.path.join(root, projectFile))
 			except:
-				print "%s" % sys.exc_info()[1]
+				sys.stderr.write("ERROR: Error parsing project file %s, %s\n" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 				sys.exit(1)
 			else:
 				# get the properties
@@ -185,5 +193,5 @@ class Project:
 			
 				# set the data attributes
 				parser.unlink()	
-	
-	
+		else:
+			sys.stderr.write("WARNING: No project file found, taking project root to be %s \n" % root)

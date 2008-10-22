@@ -84,6 +84,9 @@ class XMLFileResultsWriter:
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
+			stylesheet = self.document.createProcessingInstruction("xml:stylesheet", "href=\"pysyslog.xsl\" type=\"text/xsl\"")
+			self.document.insertBefore(stylesheet, self.document.childNodes[0])
+		
 			self.rootElement = self.document.documentElement
 			self.statusAttribute = self.document.createAttribute("status")
 			self.statusAttribute.value="running"

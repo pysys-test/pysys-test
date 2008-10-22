@@ -62,7 +62,7 @@ class XMLProjectParser:
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
 		except:
-			raise Exception, "Error parsing supplied project file: %s" % (sys.exc_info()[1])
+			raise Exception, sys.exc_info()[1]
 		else:
 			if self.doc.getElementsByTagName('pysysproject') == []:
 				raise Exception, "No <pysysproject> element supplied in project file"
