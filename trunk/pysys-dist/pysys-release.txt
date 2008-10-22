@@ -7,13 +7,35 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- Added the clean mode of operation to the pysys.py launcher. This allows 
-  removal of testcase output subdirectories, e.g. before importing into a 
-  software repository. The -o option allows specifying the output subdirectory
-  name, which defaults to the platform identifier if not specified. 
+- The PySys test and PySys project files have been renamed by default from  
+  .pysystest to pysystest.xm, and .pysysproject to pysysproject.xml respectively. 
+  Backwards compatability is maintained for the previous file naming convention, 
+  though this will be deprecated in a later release; it is strongly advised that 
+  the new naming convention is adopted. New tests made using the PySys launcher 
+  will by default use the new naming convention. This change was made due to issues 
+  on Windows systems displaying and recognising hidden files, and files without 
+  specified extensions e.g. within the Eclipse framework, for display in internet 
+  browsers etc.
+- The clean mode of operation has been added to the pysys.py launcher. This 
+  allows removal of testcase output subdirectories, e.g. before importing into 
+  a source code control system. The -o option allows specifying the output 
+  subdirectory name to be deleted, which defaults to the platform identifier 
+  if not specified. 
+- Modified the test output summary writer interface to allow the tests output to 
+  be written during the test execution; previously a call to the writer was only 
+  made on completion of the test run. This allows monitoring the test output 
+  summary during the test execution to monitor the run time status of the tests. 
+- Added the XMLFileResultsWriter class to the pysys.writer module. This 
+  performs logging of the test output summary in an XML format, suitable for 
+  display via XLST in a web browser. A simple XSL stylesheet is included with 
+  the PySys distribution to provide better display in internet browsers. 
 - Added the ability to specifiy custom test output summary writers in the 
-  .pysysproject file
-- Added the XMLFileResultsWriter class
+  PySys project file via the <writer> tag. For an example see the .pysysproject
+  file in the pysys-examples distribution. Should no <writer> be specified in the 
+  project file, the default XMLFileResultsWriter will be used. Multiple writers 
+  may be specified in the PySys project file.  
+- Added exception logging on parsing errors in the PySys project file, e.g. 
+  when the file in badly formed due to invalid XML tokens etc.   
 
   
 Dependencies
