@@ -60,7 +60,7 @@ FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
 
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_PROJECTFILE = ['pysysproject.xml', '.pysysproject']
-DEFAULT_DESCRIPTOR = ['pysystest.xml', '.pysystest']  
+DEFAULT_DESCRIPTOR = ['pysystest.xml', '.pysystest', 'descriptor.xml']  
 DEFAULT_MODULE = 'run'
 DEFAULT_GROUP = ""
 DEFAULT_TESTCLASS = 'PySysTest'
@@ -68,7 +68,7 @@ DEFAULT_INPUT = 'Input'
 DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
 DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
-DEFAULT_WRITER =  ['LogFileResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.log']
+DEFAULT_WRITER =  ['XMLFileResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml']
 
 # set the directories to not recursively walk when looking for the descriptors
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn' ]
