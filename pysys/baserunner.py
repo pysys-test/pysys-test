@@ -230,7 +230,7 @@ class BaseRunner(ProcessUser):
 		results = {}
 		totalDuration = 0
 		totalExecuted = 0
-		
+
 		# call the hook to setup prior to running tests
 		self.setup()
 
