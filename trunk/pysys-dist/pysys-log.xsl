@@ -35,7 +35,7 @@
 			</style>
 		</head>
 	
-		<h1>PySys Test Sum<input style="position:absolute; left:86%; background:#DCDCDC    " type="button" value="Reload" onClick="window.location.reload()"/></h1>
+		<h1>PySys Test Summary<input style="position:absolute; left:86%; background:#DCDCDC    " type="button" value="Reload" onClick="window.location.reload()"/></h1>
 		<p class="header">Status: <b><xsl:value-of select="pysyslog/@status"/></b> (<b><xsl:value-of select="pysyslog/@completed"/></b>) </p>
 		<p class="header">Start time: <b><xsl:value-of select="pysyslog/timestamp"/></b></p>
 		<p class="header">Platform: <b><xsl:value-of select="pysyslog/platform"/></b></p>
