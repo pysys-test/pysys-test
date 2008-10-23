@@ -19,27 +19,29 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import os, os.path, sys, string, logging, xml.dom.minidom
+import os, os.path, sys, string, logging, time, xml.dom.minidom
 
 from pysys.constants import *
 
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
-<!ELEMENT pysysproject (property+, path+, runner?) >
+<!ELEMENT pysysproject (property+, path+, runner?, writers?) >
+<!ELEMENT writers (writer+) >
+<!ELEMENT writer (property+) >
 <!ATTLIST property environment CDATA #IMPLIED
 				   osfamily CDATA #IMPLIED
 				   file CDATA #IMPLIED
 				   name CDATA #IMPLIED
 				   value CDATA #IMPLIED
 				   default CDATA #IMPLIED>
+<!ATTLIST path value CDATA #REQUIRED
+			   relative CDATA #IMPLIED>				   
 <!ATTLIST runner classname CDATA #REQUIRED
 				 module CDATA #REQUIRED>
 <!ATTLIST writer classname CDATA #REQUIRED
 				 module CDATA #REQUIRED>
 				 file CDATA #REQUIRED>
-<!ATTLIST path value CDATA #REQUIRED
-			   relative CDATA #IMPLIED>
 
 '''
 
@@ -148,18 +150,34 @@ class XMLProjectParser:
 			return DEFAULT_RUNNER
 
 	def getWriterDetails(self):
+		writersNodeList = self.root.getElementsByTagName('writers')
+		if writersNodeList == []: return [DEFAULT_WRITER]
+		
 		try:
-			tuple = []
-			loggerNodeList = self.root.getElementsByTagName('writer')
-			if loggerNodeList != []:
-				for logger in loggerNodeList:
-					tuple.append([logger.getAttribute('classname'), logger.getAttribute('module'), logger.getAttribute('file')])
+			writers = []
+			writerNodeList = writersNodeList[0].getElementsByTagName('writer')
+			if writerNodeList != []:
+				for writerNode in writerNodeList:
+					try:
+						writer = [writerNode.getAttribute('classname'), writerNode.getAttribute('module'), writerNode.getAttribute('file'), {}]
+					except:
+						pass
+					else:
+						propertyNodeList = writerNode.getElementsByTagName('property')
+						for propertyNode in propertyNodeList:
+							try:
+								name = propertyNode.getAttribute("name") 
+								value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
+								writer[3][name] = value
+							except:
+								pass
+						writers.append(writer)				
 			else:
-				tuple.append(DEFAULT_WRITER)
-			return tuple
+				writers.append(DEFAULT_WRITER)
+			return writers
 		except:
 			return [DEFAULT_WRITER]
-
+		
 
 	def addToPath(self):		
 		pathNodeList = self.root.getElementsByTagName('path')

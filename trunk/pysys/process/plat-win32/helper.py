@@ -323,7 +323,7 @@ class ProcessWrapper:
 		exceeded. 
 		
 		@param timeout: The timeout to wait in seconds
-		@raise Process Timeout: Raised if the timeout is exceeded.
+		@raise ProcessTimeout: Raised if the timeout is exceeded.
 		
 		"""
 		startTime = time.time()
