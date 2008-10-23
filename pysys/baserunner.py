@@ -229,6 +229,7 @@ class BaseRunner(ProcessUser):
 		"""
 		results = {}
 		totalDuration = 0
+		totalExecuted = 0
 		
 		# call the hook to setup prior to running tests
 		self.setup()
@@ -236,7 +237,7 @@ class BaseRunner(ProcessUser):
 		# call the hook to setup the test output writers
 		if self.record:
 			for writer in writers:
-				try: writer.setup()
+				try: writer.setup(numTests=self.cycle * len(self.descriptors))
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 		# loop through each cycle
@@ -350,6 +351,7 @@ class BaseRunner(ProcessUser):
 				
 				# call the hook for end of test execution
 				self.testComplete(testObj, outputDirectory)
+				totalExecuted = totalExecuted + 1
 				
 				# pass the test object to the test writers is recording
 				if self.record:

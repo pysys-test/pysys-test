@@ -41,7 +41,7 @@ class LogFileResultsWriter:
 		self.fp = None
 
 
-	def setup(self):
+	def setup(self, **kwargs):
 		try:
 			self.fp = open(self.logfile, "w", 0)
 			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
@@ -76,6 +76,7 @@ class XMLFileResultsWriter:
 	def __init__(self, logfile):
 		self.logfile = logfile
 		self.cycle = -1
+		self.numResults = 0
 		self.fp = None
 
 
@@ -86,7 +87,11 @@ class XMLFileResultsWriter:
 			return os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
 
-	def setup(self):
+	def setup(self, **kwargs):
+		numTests = 0
+		if kwargs.has_key("numTests"): 
+			self.numTests = kwargs["numTests"]
+
 		try:
 			self.fp = open(self.logfile, "w", 0)
 		
@@ -94,12 +99,17 @@ class XMLFileResultsWriter:
 			self.document = impl.createDocument(None, "pysyslog", None)
 			stylesheet = self.document.createProcessingInstruction("xml-stylesheet", "href=\"%s\" type=\"text/xsl\"" % (os.path.join(self.get_site_packages_path(), 'pysys-log.xsl')))
 			self.document.insertBefore(stylesheet, self.document.childNodes[0])
-		
+
+			# create the root and add in the status, number of tests and number completed
 			self.rootElement = self.document.documentElement
 			self.statusAttribute = self.document.createAttribute("status")
 			self.statusAttribute.value="running"
 			self.rootElement.setAttributeNode(self.statusAttribute)
 
+			self.completedAttribute = self.document.createAttribute("completed")
+			self.completedAttribute.value="%s/%s" % (self.numResults, self.numTests)
+			self.rootElement.setAttributeNode(self.completedAttribute)
+	
 			# add the data node
 			element = self.document.createElement("timestamp")
 			element.appendChild(self.document.createTextNode(time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
@@ -178,6 +188,10 @@ class XMLFileResultsWriter:
 		
 		self.resultsElement.appendChild(resultElement)
 	
+		# update the count of completed tests
+		self.numResults = self.numResults + 1
+		self.completedAttribute.value="%s/%s" % (self.numResults, self.numTests)
+				
 		# write the file out
 		self.fp.write(self.document.toprettyxml(indent="  "))
     	
