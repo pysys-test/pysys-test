@@ -21,9 +21,9 @@ What's new in this release
   a source code control system. The -o option allows specifying the output 
   subdirectory name to be deleted, which defaults to the platform identifier 
   if not specified. 
-- Modified the test output summary writer interface to allow the tests output to 
-  be written during the test execution; previously a call to the writer was only 
-  made on completion of the test run. This allows monitoring the test output 
+- The test output summary writer interface has been changed so that the test output 
+  is written and updated during the test execution; previously a call to the writer 
+  was only made on completion of the test run. This allows monitoring the test output 
   summary during the test execution to monitor the run time status of the tests. 
 - Added the XMLFileResultsWriter class to the pysys.writer module. This 
   performs logging of the test output summary in an XML format, suitable for 
