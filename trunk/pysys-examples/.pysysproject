@@ -1,17 +1,24 @@
 <pysysproject>
-	<!-- Set sccs properties -->
-	<property name="SCCS" value="cvs"/>
-	<property name="CVSROOT" value="${env.CVSROOT}" default=":ext:moraygrieve@pysys.cvs.sourceforge.net:/cvsroot/pysys"/>
-	
-	<!-- Example of adding a path relative to the project root to the python path
-	<path value="./src" relative="true"/>	
-	-->
 
-	<!-- Example of adding specific test output summary writers for auditing and real-time monitoring of 
-	test run status. Should no test writer be explicitly defined, the the LogFileResultsWriter will be used 
-	as the default. Multiple test output summary writers can be defined, and the filename can use time format 
-	characters suitable for conversion with time.strftime, e.g. testsummary_%Y%m%d%H%M%S.log -->
-	<writer classname="LogFileResultsWriter" module="pysys.writer" file="testsummary.log"/>	
-	<writer classname="XMLFileResultsWriter" module="pysys.writer" file="testsummary.xml"/>	
+	<!-- Get a reference to the environment -->
+	<property environment="env"/>
+
+	<!-- Get a reference to the osfamily -->
+	<property osfamily="osfamily"/>
+
+	<!-- Import properties from file - fails silently if does not exist -->
+	<property file="${osfamily}.properties" />
 	
+	<!-- Get the user name from the environemnt - default to Test User -->
+	<property name="user" value="${env.USERNAME}" default="Test User"/>
+
+	<!-- Set the test writers -->
+	<writers>
+		<writer classname="XMLFileResultsWriter" module="pysys.writer" file="testsummary.xml">
+			<!--  Set properties on the writer class 
+			<property name="stylesheet" value="./pysyslog.xls"/>
+			-->
+		</writer>	
+		<writer classname="LogFileResultsWriter" module="pysys.writer" file="testsummary.log"/>
+	</writers>		
 </pysysproject>

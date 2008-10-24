@@ -6,7 +6,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		os.environ["TEST_USER"] = "Felicity Kendal"
-		self.proj = Project(self.input, 'pysysproject.xml'))
+		self.proj = Project(self.input, 'pysysproject.xml')
 	
 	def validate(self):
 		self.assertTrue(self.proj.env_user == "Felicity Kendal")
