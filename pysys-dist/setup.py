@@ -44,9 +44,7 @@ if sys.platform.lower().startswith('win'):
 					'pysys.process', 'pysys.process.plat-win32', 
 					'pysys.process.plat-unix', 'pysys.utils',
 					'pysys.writer', 'pysys.xml'],
-		  data_files=[('%s/pysys-doc' % get_site_packages_path(), ['pysys-doc/epydoc.css', 'pysys-doc/index.html']),
-		  			  ('%s/pysys-doc/private' % get_site_packages_path(), glob.glob('pysys-doc/private/*.*')),
-		  			  ('%s/pysys-doc/public' % get_site_packages_path(), glob.glob('pysys-doc/public/*.*')),
+		  data_files=[('%s/pysys-doc' % get_site_packages_path(), glob.glob('pysys-doc/*.*')),
 					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
 					  (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]
 		)
@@ -66,7 +64,7 @@ else:
 
 	
 # to run on windows use
-# python c:\Python24\Scripts\epydoc.py --html -o pysys-doc pysys
+# python c:\Python24\Scripts\epydoc.py --no-private --html -o pysys-doc pysys
 # python.exe pysys-dist/setup.py bdist_wininst --install-script pysys_postinstall.py
 # winzip32.exe -min -a -r -p dist\PySys-examples.X.Y.Z.zip pysys-examples
 
