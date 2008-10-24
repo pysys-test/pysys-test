@@ -51,9 +51,11 @@ def runTest(args):
 	record, purge, cycle, mode, outsubdir, descriptors, userOptions = launcher.parseArgs(args)
 	
 	writers = []
-	for classname, module, filename in PROJECT.writers:
+	for classname, module, filename, properties in PROJECT.writers:
 		exec( "from %s import %s" % (module, classname) )	
-		exec( "writers.append(%s(time.strftime(\"%s\", time.gmtime(time.time()))))" % (classname, filename) )
+		exec( "writer = %s(time.strftime(\"%s\", time.gmtime(time.time())))" % (classname, filename) )
+		for key in properties.keys(): setattr(writer, key, properties[key])
+		writers.append(writer)
 		
 	exec( "from %s import %s" % (PROJECT.runnerModule, PROJECT.runnerClassname) )
 	exec( "runner = %s(record, purge, cycle, mode, outsubdir, descriptors, userOptions)" % (PROJECT.runnerClassname))

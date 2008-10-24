@@ -1,4 +1,5 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:strip-space elements="output" />
 
 <xsl:template match="/">
 	<html>
@@ -56,9 +57,9 @@
 						</xsl:attribute> 
 					    <td><xsl:value-of select="@id"/></td>
 						<td>
-							<a ><xsl:attribute name="href"><xsl:value-of select="descriptor"/></xsl:attribute>
+							<a ><xsl:attribute name="href"><xsl:value-of select="normalize-space(descriptor)"/></xsl:attribute>
 							descriptor</a>, 
-							<a><xsl:attribute name="href"><xsl:value-of select="output"/></xsl:attribute>
+							<a><xsl:attribute name="href"><xsl:value-of select="normalize-space(output)"/></xsl:attribute>
 							output</a>
 						</td>
 						<td><xsl:value-of select="@outcome"/></td>
@@ -81,9 +82,9 @@
 						</xsl:attribute> 
 					    <td><xsl:value-of select="@id"/></td>
 						<td>
-							<a ><xsl:attribute name="href"><xsl:value-of select="descriptor"/></xsl:attribute>
+							<a ><xsl:attribute name="href"><xsl:value-of select="normalize-space(descriptor)"/></xsl:attribute>
 							descriptor</a>, 
-							<a><xsl:attribute name="href"><xsl:value-of select="output"/></xsl:attribute>
+							<a><xsl:attribute name="href"><xsl:value-of select="normalize-space(output)"/></xsl:attribute>
 							output</a>
 						</td>
 						<xsl:choose>
