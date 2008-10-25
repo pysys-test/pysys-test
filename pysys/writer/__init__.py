@@ -32,11 +32,18 @@ log = logging.getLogger('pysys.writer')
 log.setLevel(logging.NOTSET)
 
 
-class LogFileResultsWriter:
+def get_site_packages_path():
+		if sys.platform.lower().startswith('win'):
+			return os.path.join(sys.prefix, "Lib", "site-packages")
+		else:
+			return os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
+
+
+class TextResultsWriter:
 	"""Class to log results to a logfile in the current directory."""
 	
 	def __init__(self, logfile):
-		self.logfile = logfile
+		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.fp = None
 
@@ -71,20 +78,15 @@ class LogFileResultsWriter:
 
 		
 		
-class XMLFileResultsWriter:
+class XMLResultsWriter:
+	stylesheet = os.path.join(get_site_packages_path(), 'pysys-log.xsl')
+	useFileURL = "false"
 
 	def __init__(self, logfile):
-		self.logfile = logfile
+		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.numResults = 0
 		self.fp = None
-
-
-	def get_site_packages_path(self):
-		if sys.platform.lower().startswith('win'):
-			return os.path.join(sys.prefix, "Lib", "site-packages")
-		else:
-			return os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
 
 	def setup(self, **kwargs):
@@ -97,7 +99,7 @@ class XMLFileResultsWriter:
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
-			stylesheet = self.document.createProcessingInstruction("xml-stylesheet", "href=\"%s\" type=\"text/xsl\"" % (os.path.join(self.get_site_packages_path(), 'pysys-log.xsl')))
+			stylesheet = self.document.createProcessingInstruction("xml-stylesheet", "href=\"%s\" type=\"text/xsl\"" % (self.stylesheet))
 			self.document.insertBefore(stylesheet, self.document.childNodes[0])
 
 			# create the root and add in the status, number of tests and number completed
@@ -197,4 +199,10 @@ class XMLFileResultsWriter:
     	
     	
 	def pathToURL(self, path):
-		return urlparse.urlunparse(["file", HOSTNAME, path, "","",""])
+		try: 
+			if self.useFileURL.lower() == "false": return path
+		except:
+			return path
+		else:
+			return urlparse.urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])
+	
