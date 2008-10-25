@@ -91,7 +91,14 @@ class BaseRunner(ProcessUser):
 		self.log = log
 		self.project = PROJECT
 	
-	
+		self.writers = []
+		for classname, module, filename, properties in PROJECT.writers:
+			exec( "from %s import %s" % (module, classname) )	
+			exec( "writer = %s(\"%s\")" % (classname, filename) )
+			for key in properties.keys(): setattr(writer, key, properties[key])
+			self.writers.append(writer)
+
+
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the class.
 				
@@ -214,7 +221,7 @@ class BaseRunner(ProcessUser):
 
 
 	# perform a test run
-	def start(self, printSummary=TRUE, writers=[]):
+	def start(self, printSummary=TRUE):
 		"""Start the execution of a set of testcases, returning a dictionary of the testcase outcomes.
 		
 		The start method is the main method for executing the set of requested testcases. The set of testcases 
@@ -224,8 +231,7 @@ class BaseRunner(ProcessUser):
 		output from each iteration.
 		
 		@param printSummary: Indicates if the test results should be reported on test completion
-		@param writers: List of writers for test results audit reporting
-		
+	
 		"""
 		results = {}
 		totalDuration = 0
@@ -236,7 +242,7 @@ class BaseRunner(ProcessUser):
 
 		# call the hook to setup the test output writers
 		if self.record:
-			for writer in writers:
+			for writer in self.writers:
 				try: writer.setup(numTests=self.cycle * len(self.descriptors))
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
@@ -355,7 +361,7 @@ class BaseRunner(ProcessUser):
 				
 				# pass the test object to the test writers is recording
 				if self.record:
-					for writer in writers:
+					for writer in self.writers:
 						try: writer.writeResult(testObj, cycle=cycle)
 						except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				
@@ -389,7 +395,7 @@ class BaseRunner(ProcessUser):
 
 		# perform cleanup on the test writers
 		if self.record:
-			for writer in writers:
+			for writer in self.writers:
 				try: writer.cleanup()
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
