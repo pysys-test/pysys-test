@@ -32,13 +32,6 @@ log = logging.getLogger('pysys.writer')
 log.setLevel(logging.NOTSET)
 
 
-def get_site_packages_path():
-		if sys.platform.lower().startswith('win'):
-			return os.path.join(sys.prefix, "Lib", "site-packages")
-		else:
-			return os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
-
-
 class TextResultsWriter:
 	"""Class to log results to a logfile in the current directory."""
 	
@@ -79,7 +72,7 @@ class TextResultsWriter:
 		
 		
 class XMLResultsWriter:
-	stylesheet = os.path.join(get_site_packages_path(), 'pysys-log.xsl')
+	stylesheet = DEFAULT_STYLESHEET
 	useFileURL = "false"
 
 	def __init__(self, logfile):
