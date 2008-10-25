@@ -8,7 +8,8 @@
 	<property environment="env"/>
 
 	
-	<!-- Get a reference to the osfamily, which can then be used as a substitution variable 
+	<!-- 
+	Get a reference to the osfamily, which can then be used as a substitution variable 
 	within the project file, e.g. ${osfamily} would take the value windows on win32 systems,
 	and unix on Linux or Solaris.
 	 -->
@@ -21,7 +22,8 @@
 	can be reference internally within the PySys framework, e.g. in the below example user would 
 	be set on the project class referenced by pysys.constants.PROJECT, such that PROJECT.user is 
 	the USERNAME taken from the environment, or guest if the variable is not defined within the 
-	environment. 
+	environment. The literal value can be set directly on the property, in which case the default 
+	attribute is not required, e.g. <property name="maxFails" value="100"/>	
 	 -->
 	<property name="user" value="${env.USERNAME}" default="guest"/>	
 
@@ -29,8 +31,9 @@
 	<!-- 
 	Import properties from file (fails silently if the file does not exist). The imported 
 	file should be of the format name=value (one pair specified per line). Any imported names
-	can again be used as a substitution variable within the project file, and are also set as 
-	attributes to the project class.
+	can again be used as a substitution variables within the project file, and are also set as 
+	attributes to the project class. The value in the imported fail can be defined to use 
+	substitution through the ${variable} syntax (where variable must be defined before the import
 	 -->
 	<property file="${osfamily}.properties" />
 	
