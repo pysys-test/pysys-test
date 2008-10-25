@@ -53,7 +53,7 @@ def runTest(args):
 	writers = []
 	for classname, module, filename, properties in PROJECT.writers:
 		exec( "from %s import %s" % (module, classname) )	
-		exec( "writer = %s(time.strftime(\"%s\", time.gmtime(time.time())))" % (classname, filename) )
+		exec( "writer = %s(\"%s\")" % (classname, filename) )
 		for key in properties.keys(): setattr(writer, key, properties[key])
 		writers.append(writer)
 		
