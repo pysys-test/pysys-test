@@ -21,7 +21,7 @@
 
 __all__ = []
 
-import logging, time
+import logging, time, urlparse
 from pysys import rootLogger
 from pysys.constants import *
 from pysys.exceptions import *
@@ -127,7 +127,7 @@ class XMLFileResultsWriter:
 
 			# add the test host node
 			element = self.document.createElement("root")
-			element.appendChild(self.document.createTextNode(PROJECT.root))
+			element.appendChild(self.document.createTextNode(self.pathToURL(PROJECT.root)))
 			self.rootElement.appendChild(element)
 
 			# write the file out
@@ -179,11 +179,11 @@ class XMLFileResultsWriter:
 		resultElement.appendChild(element)
 
 		element = self.document.createElement("descriptor")
-		element.appendChild(self.document.createTextNode(testObj.descriptor.file))
+		element.appendChild(self.document.createTextNode(self.pathToURL(testObj.descriptor.file)))
 		resultElement.appendChild(element)
 
 		element = self.document.createElement("output")
-		element.appendChild(self.document.createTextNode(testObj.output))
+		element.appendChild(self.document.createTextNode(self.pathToURL(testObj.output)))
 		resultElement.appendChild(element)
 		
 		self.resultsElement.appendChild(resultElement)
@@ -195,3 +195,6 @@ class XMLFileResultsWriter:
 		# write the file out
 		self.fp.write(self.document.toprettyxml(indent="  "))
     	
+    	
+	def pathToURL(self, path):
+		return urlparse.urlunparse(["file", HOSTNAME, path, "","",""])
