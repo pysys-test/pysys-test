@@ -49,17 +49,9 @@ def printUsage():
 def runTest(args):
 	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
 	record, purge, cycle, mode, outsubdir, descriptors, userOptions = launcher.parseArgs(args)
-	
-	writers = []
-	for classname, module, filename, properties in PROJECT.writers:
-		exec( "from %s import %s" % (module, classname) )	
-		exec( "writer = %s(\"%s\")" % (classname, filename) )
-		for key in properties.keys(): setattr(writer, key, properties[key])
-		writers.append(writer)
-		
 	exec( "from %s import %s" % (PROJECT.runnerModule, PROJECT.runnerClassname) )
 	exec( "runner = %s(record, purge, cycle, mode, outsubdir, descriptors, userOptions)" % (PROJECT.runnerClassname))
-	runner.start(writers=writers)
+	runner.start()
 
 def makeTest(args):
 	maker = ConsoleMakeTestHelper(os.getcwd(), "make")

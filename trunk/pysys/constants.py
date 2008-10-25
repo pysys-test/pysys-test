@@ -19,9 +19,40 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import sys, re, os, socket, logging, sets
+import sys, re, os, os.path, socket, logging, sets
 
 from pysys import rootLogger
+
+# set the platform and platform related constants
+HOSTNAME = socket.getfqdn()
+if re.search('win32', sys.platform):
+	PLATFORM='win32'	
+	OSFAMILY='windows'
+	DEVNULL = 'nul'
+	ENVSEPERATOR = ';'
+	WINDIR = os.getenv('windir', 'c:\WINDOWS')
+	PATH = r'%s;%s\system32;%s\System32\Wbem' % (WINDIR, WINDIR, WINDIR)
+	LD_LIBRARY_PATH = ''
+	SITE_PACKAGES_DIR =  os.path.join(sys.prefix, "Lib", "site-packages")
+	
+elif re.search('sunos', sys.platform):
+	PLATFORM='sunos'
+	OSFAMILY='unix'
+	DEVNULL = '/dev/null'
+	ENVSEPERATOR = ':'
+	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/openwin/bin:/opt/SUNWspro/bin'
+	LD_LIBRARY_PATH = '/usr/local/lib' 
+	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
+
+elif re.search('linux', sys.platform):
+	PLATFORM='linux'	
+	OSFAMILY='unix'
+	DEVNULL = '/dev/null'
+	ENVSEPERATOR = ':'
+	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
+	LD_LIBRARY_PATH = '/usr/lib'
+	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
+
 
 # constants used in testing
 FALSE=0
@@ -69,6 +100,7 @@ DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
 DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
 DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml', {}]
+DEFAULT_STYLESHEET = os.path.join(SITE_PACKAGES_DIR, 'pysys-log.xsl')
 
 # set the directories to not recursively walk when looking for the descriptors
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn' ]
@@ -81,34 +113,6 @@ TIMEOUTS['WaitForSocket'] = 60
 TIMEOUTS['WaitForFile'] = 30
 TIMEOUTS['WaitForSignal'] = 60
 TIMEOUTS['ManualTester'] = 1800
-
-
-# set the platform and platform related constants
-HOSTNAME = socket.getfqdn()
-if re.search('win32', sys.platform):
-	PLATFORM='win32'	
-	OSFAMILY='windows'
-	DEVNULL = 'nul'
-	ENVSEPERATOR = ';'
-	WINDIR = os.getenv('windir', 'c:\WINDOWS')
-	PATH = r'%s;%s\system32;%s\System32\Wbem' % (WINDIR, WINDIR, WINDIR)
-	LD_LIBRARY_PATH = ''
-
-elif re.search('sunos', sys.platform):
-	PLATFORM='sunos'
-	OSFAMILY='unix'
-	DEVNULL = '/dev/null'
-	ENVSEPERATOR = ':'
-	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/openwin/bin:/opt/SUNWspro/bin'
-	LD_LIBRARY_PATH = '/usr/local/lib' 
-
-elif re.search('linux', sys.platform):
-	PLATFORM='linux'	
-	OSFAMILY='unix'
-	DEVNULL = '/dev/null'
-	ENVSEPERATOR = ':'
-	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
-	LD_LIBRARY_PATH = '/usr/lib'
 
 
 # reference to the project instance defining parameters for the 
