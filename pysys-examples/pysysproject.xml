@@ -1,0 +1,49 @@
+<pysysproject>
+
+	<!-- Get a reference to the environment -->
+	<property environment="env"/>
+
+	<!-- Get a reference to the osfamily -->
+	<property osfamily="osfamily"/>
+
+	<!-- Import properties from file - fails silently if does not exist -->
+	<property file="${osfamily}.properties" />
+	
+	<!-- Get the user name from the environemnt - default to Test User -->
+	<property name="user" value="${env.USERNAME}" default="Test User"/>
+
+	<!-- 
+	Set the test writers to write the test summary at runtime when the -r option is 
+	passed to the run mode of the pysys launcher. Multiple test writers can be configured
+	and properties can be set on the writers using a nested property tag; these are then set 
+	as attributes of the class. PySys ships the XMLResultsWriter and TextResultsWriter as two 
+	example writers, though custom writers can be created e.g. to output directly in HTML, 
+	insert into a relational database etc (see pysys.writers.__init__.py for the source code 
+	for the distributed writers). If no writer is specified in the project file, the 
+	XMLResultsWriter is used. 
+	
+	The writer tag details the classname (which should be added to the pythonpath using the 
+	path tag), the module of the writer class, and the filename template to use for the logging. 
+	The filename template is processed through time.strftime so that time information can be set 
+	into the filename, e.g. a filename template of 'testsummary-%Y%m%d%H%M%S.xml' will result in 
+	a file created with a name of  testsummary-20081025213308.xml etc.
+	-->
+	<writers>
+		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.xml">
+			<!--  
+			  Set properties on the XML test output writer class. The available properties that 
+			  can be set are the stylesheet location, and whether to use file URLs in all 
+			  references to resources on the local disk. Note that Mozilla Firefox requires the 
+			  stylesheet to be located next to the XML file when loading the file, and file URLs. 
+			  Internet Explorer and Chrome can load the stylesheet from any location on the local 
+			  disk, but cannot load files when referenced by a file URL. 
+			<property name="stylesheet" value="./pysys-log.xsl"/>
+			<property name="useFileURL" value="true"/>
+			-->
+		</writer>	
+		<!--
+		Add in the test results writer if straight text output is required 
+		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
+		--> 
+	</writers>		
+</pysysproject>
