@@ -33,8 +33,9 @@ log.setLevel(logging.NOTSET)
 
 
 class TextResultsWriter:
-	"""Class to log results to a logfile in the current directory."""
+	"""Class to log results to logfile in text format.
 	
+	"""
 	def __init__(self, logfile):
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
@@ -72,6 +73,9 @@ class TextResultsWriter:
 		
 		
 class XMLResultsWriter:
+	"""Class to log results to logfile in XML format.
+	
+	"""
 	stylesheet = DEFAULT_STYLESHEET
 	useFileURL = "false"
 
