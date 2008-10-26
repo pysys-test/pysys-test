@@ -26,23 +26,27 @@ from pysys.constants import *
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
-<!ELEMENT pysysproject (property+, path+, runner?, writers?) >
+<!DOCTYPE pysysproject [
+<!ELEMENT pysysproject (property*, path*, runner?, writers?) >
+<!ELEMENT property (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT runner (#PCDATA)>
 <!ELEMENT writers (writer+) >
-<!ELEMENT writer (property+) >
-<!ATTLIST property environment CDATA #IMPLIED
-				   osfamily CDATA #IMPLIED
-				   file CDATA #IMPLIED
-				   name CDATA #IMPLIED
-				   value CDATA #IMPLIED
-				   default CDATA #IMPLIED>
-<!ATTLIST path value CDATA #REQUIRED
-			   relative CDATA #IMPLIED>				   
-<!ATTLIST runner classname CDATA #REQUIRED
-				 module CDATA #REQUIRED>
-<!ATTLIST writer classname CDATA #REQUIRED
-				 module CDATA #REQUIRED>
-				 file CDATA #REQUIRED>
-
+<!ELEMENT writer (property*) >
+<!ATTLIST property environment CDATA #IMPLIED>
+<!ATTLIST property osfamily CDATA #IMPLIED>
+<!ATTLIST property file CDATA #IMPLIED>
+<!ATTLIST property name CDATA #IMPLIED>
+<!ATTLIST property value CDATA #IMPLIED>
+<!ATTLIST property default CDATA #IMPLIED>
+<!ATTLIST path value CDATA #REQUIRED>
+<!ATTLIST path relative CDATA #IMPLIED>
+<!ATTLIST runner classname CDATA #REQUIRED>
+<!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST writer classname CDATA #REQUIRED>
+<!ATTLIST writer module CDATA #REQUIRED>
+<!ATTLIST writer file CDATA #REQUIRED>
+]>
 '''
 
 PROPERTY_EXPAND_ENV = "(?P<replace>\${%s.(?P<key>.*?)})"
