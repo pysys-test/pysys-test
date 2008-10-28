@@ -132,10 +132,10 @@ PROJECT = None
 
 # load the project specific details
 def loadproject(start):
-	"""Load the pysys project file.
+	"""Load the PySys project file.
 	
 	The method walks up the directory tree from the supplied path until the 
-	.pysysproject file is found. The location of the project file defines
+	PySys project file is found. The location of the project file defines
 	the project root location. The contents of the project file determine 
 	project specific constants as specified by property elements in the 
 	xml project file.
@@ -168,14 +168,13 @@ def loadproject(start):
 
 
 class Project:
-	"""Class detailing project specific information for a set or pysys tests.
+	"""Class detailing project specific information for a set or PySys tests.
 	
-	Reads and parses the pysys project file if it exists and translates property element 
+	Reads and parses the PySys project file if it exists and translates property element 
 	name/value entries in the project file into data attributes of the class instance. 
 	
-	@ivar root: Full path to the project root, as specified by the first .pysysproject
-				file encountered when walking down the directory tree from the start 
-				directory passed into the launcher (e.g. the working directory)  
+	@ivar root: Full path to the project root, as specified by the first PySys project
+				file encountered when walking down the directory tree from the start directory  
 	@type root: string
 	
 	"""
