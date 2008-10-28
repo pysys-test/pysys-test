@@ -52,13 +52,13 @@ class BaseRunner(ProcessUser):
 	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
 	with a list of L{pysys.xml.descriptor.XMLDescriptorContainer} objects detailing the set of testcases to be run. 
 	The runner iterates through the descriptor list and for each entry imports the L{pysys.basetest.BaseTest}
-	subclass for the testcase, creates an instance of the test class and then calls the setup(), execute(), validate() 
-	and cleanup() methods of the test class instance. The runner is responsible for ensuring the output 
+	subclass for the testcase, creates an instance of the test class and then calls the setup, execute, validate 
+	and cleanup methods of the test class instance. The runner is responsible for ensuring the output 
 	subdirectory of each testcase is purged prior to test execution to remove stale output from a previous run, 
 	detects any core files produced during execution of a testcase from processes started via the L{pysys.process} 
 	module, and performs audit trail logging of the test results on completion of running a set of testcases.
 	
-	The base runner contains the hook functions L{setup()}, L{testComplete()}, L{cycleComplete()} and L{cleanup()} to 
+	The base runner contains the hook functions L{setup}, L{testComplete}, L{cycleComplete} and L{cleanup} to 
 	allow a subclass to perform custom operations prior to the execution of a set of testcases, between the 
 	execution of each testcase in a set, between each cycle of execution of a set of testcases, and on completion 
 	of all testcases respectively. Subclasses are typically used should some global conditions need to be setup 
