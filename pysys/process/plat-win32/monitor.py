@@ -28,7 +28,7 @@ log = logging.getLogger('pysys.process.monitor')
 
 
 class ProcessMonitor:
-	"""Win32 process monitor for the logging of process statistics.
+	"""Process monitor for the logging of process statistics.
 	
 	The win32 process monitor uses the win32pdh module to obtain and log to file statistics on a 
 	given process as determined by the process id. Statistics obtained include the CPU usage (%), 
@@ -40,15 +40,15 @@ class ProcessMonitor:
 	Usage of the class is to create an instance specifying the process id, the logging interval and 
 	the log file. Once created, the process monitor is started and stopped via its L{start()} and 
 	L{stop()} methods. Process monitors are started as a separate thread, so control passes back to 
-	the caller of the C{start()} method immediately. The format of the log file is tab separated, 
+	the caller of the L{start()} method immediately. The format of the log file is tab separated, 
 	with an initial timestamp used to denote the time the statistics were obtained, e.g. ::
 	
-	    Time                 CPU    Working  Virtual  Private  Threads Handles
-	    ----------------------------------------------------------------------                       
-		08/06/08 06:32:44     80    125164   212948   118740   44      327
-		08/06/08 06:32:49     86    125676   213972   120128   44      328
-		08/06/08 06:32:54     84    125520   212948   119116   44	   328
-		08/06/08 06:32:59     78    125244   212948   119132   44	   328
+        Time                  CPU   Working  Virtual  Private  Threads Handles
+        ----------------------------------------------------------------------                       
+        08/06/08 06:32:44     80    125164   212948   118740   44      327
+        08/06/08 06:32:49     86    125676   213972   120128   44      328
+        08/06/08 06:32:54     84    125520   212948   119116   44      328
+        08/06/08 06:32:59     78    125244   212948   119132   44      328
 
 	"""
 	

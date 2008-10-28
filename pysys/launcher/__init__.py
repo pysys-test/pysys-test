@@ -1,3 +1,38 @@
+#!/usr/bin/env python
+# Permission is hereby granted, free of charge, to any person
+# obtaining a copy of this software and any associated documentation
+# files (the "Software"), to deal in the Software without
+# restriction, including without limitation the rights to use, copy,
+# modify, merge, publish, distribute, sublicense, and/or sell copies
+# of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# The software is provided "as is", without warranty of any
+# kind, express or implied, including but not limited to the
+# warranties of merchantability, fitness for a particular purpose
+# and noninfringement. In no event shall the authors or copyright
+# holders be liable for any claim, damages or other liability,
+# whether in an action of contract, tort or otherwise, arising from,
+# out of or in connection with the software or the use or other
+# dealings in the software
+"""
+Contains utilities used by test launchers when running, printing, cleaning or making new tests. 
+
+The module includes the L{pysys.launcher.createDescriptors} method which locates test 
+descriptors based upon a given starting location on the file system, the chosen range 
+of test ids, the test type, the specified requirements, and the include and exclude lists.
+
+Utilities defined in the module can be used by any launchers, either distributed
+with the framework, or created as an extension to it. Currently the framework 
+distributes the console launcher module only - see L{pysys.launcher.console}. This 
+module uses the current working directory in a command shell as the starting location 
+on the file system, and provides utilities for parsing command line arguments in order
+to launch operations against a set of tests etc.  
+
+"""
 __all__ = [ "createDescriptors",
 			"console" ]
 

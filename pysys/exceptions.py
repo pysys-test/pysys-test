@@ -18,7 +18,10 @@
 # whether in an action of contract, tort or otherwise, arising from,
 # out of or in connection with the software or the use or other
 # dealings in the software
+"""
+Defines custom exceptions that can be thrown within the PySys framework. 
 
+"""
 
 class FileNotFoundException:
 	"""Exception raised when a file cannot be found."""

@@ -18,7 +18,17 @@
 # whether in an action of contract, tort or otherwise, arising from,
 # out of or in connection with the software or the use or other
 # dealings in the software
+"""
+Defines global constants that are used throughout the PySys framework. 
 
+The standard convention is to import all contents of the module so that the constants can 
+be referenced directly. The module also contains methods for locating and parsing the PySys 
+project file (L{pysys.constants.loadproject}), and the project class that provides an 
+abstraction over the contents of the file (L{pysys.constants.Project}). For more information 
+about the structure and contents of the project file, see the PySys examples 
+distribution. 
+
+"""
 import sys, re, os, os.path, socket, logging, sets
 
 from pysys import rootLogger
@@ -134,6 +144,8 @@ def loadproject(start):
 	instance, any launching application should first import the loadproject
 	file, and then make a call to it prior to importing all names within the
 	constants module.
+
+	@param start: The initial path to start from when trying to locate the project file
 
 	"""
 
