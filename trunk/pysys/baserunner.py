@@ -18,7 +18,16 @@
 # whether in an action of contract, tort or otherwise, arising from,
 # out of or in connection with the software or the use or other
 # dealings in the software
+"""
+Contains the base class used to perform the execution and audit trail reporting of a set of tests. 
 
+Test selection is by default performed through the pysys.py launch script, which locates and 
+creates a set of class instances representing the tests to be executed. These are passed to the 
+base runner as a list of object references, so that the base runner can then iterate through the 
+list to perform the test execution. For more information see the L{pysys.baserunner.BaseRunner} 
+API documentation. 
+
+"""
 import os, os.path, sys, stat, re, traceback, time, math, logging, string
 
 from pysys import rootLogger
@@ -61,7 +70,7 @@ class BaseRunner(ProcessUser):
 	@ivar outsubdir: The directory name for the output subdirectory 
 	@type outsubdir: string
 	@ivar log: Reference to the logger instance of this class
-	@type log: L{logging.Logger}
+	@type log: logging.Logger
 	@ivar project: Reference to the project details as set on the module load of the launching executable  
 	@type project: L{Project}
 	
@@ -362,7 +371,7 @@ class BaseRunner(ProcessUser):
 				# pass the test object to the test writers is recording
 				if self.record:
 					for writer in self.writers:
-						try: writer.writeResult(testObj, cycle=cycle)
+						try: writer.processResult(testObj, cycle=cycle)
 						except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				
 				# perform cleanup actions

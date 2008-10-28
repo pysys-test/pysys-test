@@ -55,9 +55,9 @@ class NullDevice:
 	
 
 class ProcessWrapper:
-	"""Win32 process wrapper for process execution and management. 
+	"""Process wrapper for process execution and management. 
 	
-	The win32 process wrapper provides the ability to start and stop an external process, setting 
+	The process wrapper provides the ability to start and stop an external process, setting 
 	the process environment, working directory and state i.e. a foreground process in which case 
 	a call to the L{start()} method will not return until the process has exited, or a background 
 	process in which case the process is started in a separate thread allowing concurrent execution 
@@ -349,14 +349,14 @@ class ProcessWrapper:
 			raise ProcessError, "Error stopping process"
 		
 
-	def signal(self):
+	def signal(self, signal):
 		"""Send a signal to a running process. 
-		
-		This method is not implemented for the win32 process wrapper, though is required for 
-		consistency with the unix process wrapper. Calling of this method will raise a 
-		NotImplementedError.
-		
-		@raise NotImplementedError: Raised as it is not possible to send a signal to a win32 process
+	
+		Note that this method is not implemented for win32 processes, and calling this on a 
+		win32 OS will raise a NotImplementedError.
+	
+		@param signal:  The integer signal to send to the process
+		@raise ProcessError: Raised if an error occurred whilst trying to signal the process
 		
 		"""
 		raise NotImplementedError , "Unable to send a signal to a windows process"

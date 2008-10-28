@@ -19,7 +19,32 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-__all__ = []
+"""
+Contains implementations of test output summary writers used to output test results during runtime execution, 
+
+There are currently two implementations of writers distributed with the PySys framework, 
+namely the TextResultsWriter and the XMLResultsWriter. Project configuration of the writers 
+is through the PySys project file using the <writer> tag - multiple writers may 
+be configured and their individual properties set through the nested <property>
+tag. Writer properties are set as attributes to the class through the setattr() 
+function. Custom (site specific) modules can be created and configured by users of 
+the PySys framework (e.g. to output test results into a relational database etc), 
+though they must adhere to the interface demonstrated by the implementations 
+demonstrated here. 
+
+The writers are instantiated and invoked by the L{pysys.baserunner.BaseRunner} class
+instance. This calls the class constructors of all configured test writers, and then 
+the setup (prior to executing the set of tests), processResult (process a test result), 
+and cleanup (upon completion of the execution of all tests). The **kwargs method parameter
+is used for variable argument passing in the interface methods to allow modification of 
+the PySys framework without breaking writer implementations already in existence. Currently 
+the L{pysys.baserunner.BaseRunner} includes numTests in the call to the setup action (the 
+number of tests to be executed), and cycle in the call to the processResult action 
+(the cycle number when iterations through the same set of tests was requested).
+
+"""
+
+__all__ = ["TextResultsWriter", "XMLResultsWriter"]
 
 import logging, time, urlparse
 from pysys import rootLogger
@@ -37,12 +62,25 @@ class TextResultsWriter:
 	
 	"""
 	def __init__(self, logfile):
+		"""Create an instance of the TextResultsWriter class.
+		
+		@param logfile: The filename template for the logging of test results
+		
+		"""	
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.fp = None
 
 
 	def setup(self, **kwargs):
+		"""Implementation of the setup method.
+
+		Creates the file handle to the logfile and logs initial details of the date, 
+		platform and test host. 
+				
+		@param kwargs: Variable argument list
+		
+		"""
 		try:
 			self.fp = open(self.logfile, "w", 0)
 			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
@@ -52,7 +90,14 @@ class TextResultsWriter:
 			pass
 
 
-	def cleanup(self):
+	def cleanup(self, **kwargs):
+		"""Implementation of the cleanup method. 
+		
+		Flushes and closes the file handle to the logfile.  
+
+		@param kwargs: Variable argument list
+				
+		"""
 		try:
 			if self.fp: 
 				self.fp.write('\n\n\n')
@@ -62,7 +107,15 @@ class TextResultsWriter:
 			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 			
-	def writeResult(self, testObj, **kwargs):
+	def processResult(self, testObj, **kwargs):
+		"""Implementation of the processResult method. 
+		
+		Writes the test id and outcome to the logfile. 
+		
+		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		@param kwargs: Variable argument list
+		
+		"""
 		if kwargs.has_key("cycle"): 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
@@ -75,11 +128,25 @@ class TextResultsWriter:
 class XMLResultsWriter:
 	"""Class to log results to logfile in XML format.
 	
+	The class creates a DOM document to represent the test output results and writes the DOM to the 
+	logfile using toprettyxml(). The stylesheet and useFileURL attributes of the class can be over-ridden in the PySys
+	project file using the nested <property> tag on the <writer> tag.
+	 
+	@ivar stylesheet: Path to the XSL stylesheet
+	@type stylesheet: string
+	@ivar useFileURL: Indicates if full file URLs are to be used for local resource references 
+	@type useFileURL: string (true | false)
+	
 	"""
 	stylesheet = DEFAULT_STYLESHEET
 	useFileURL = "false"
 
 	def __init__(self, logfile):
+		"""Create an instance of the TextResultsWriter class.
+		
+		@param logfile: The filename template for the logging of test results
+		
+		"""	
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.numResults = 0
@@ -87,6 +154,13 @@ class XMLResultsWriter:
 
 
 	def setup(self, **kwargs):
+		"""Implementation of the setup method.
+
+		Creates the DOM for the test output summary and writes to logfile. 
+						
+		@param kwargs: Variable argument list
+		
+		"""
 		numTests = 0
 		if kwargs.has_key("numTests"): 
 			self.numTests = kwargs["numTests"]
@@ -126,7 +200,7 @@ class XMLResultsWriter:
 
 			# add the test host node
 			element = self.document.createElement("root")
-			element.appendChild(self.document.createTextNode(self.pathToURL(PROJECT.root)))
+			element.appendChild(self.document.createTextNode(self.__pathToURL(PROJECT.root)))
 			self.rootElement.appendChild(element)
 
 			# write the file out
@@ -135,16 +209,14 @@ class XMLResultsWriter:
 			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 
-	def createResultsNode(self):
-		# create the results entry
-		self.resultsElement = self.document.createElement("results")
-		cycleAttribute = self.document.createAttribute("cycle")
-		cycleAttribute.value="%d"%self.cycle
-		self.resultsElement.setAttributeNode(cycleAttribute)
-		self.rootElement.appendChild(self.resultsElement)
+	def cleanup(self, **kwargs):
+		"""Implementation of the cleanup method. 
+		
+		Updates the test run status in the DOM, and re-writes to logfile.
 
-
-	def cleanup(self):
+		@param kwargs: Variable argument list
+				
+		"""
 		self.fp.seek(0)
 		self.statusAttribute.value="complete"
 		self.fp.write(self.document.toprettyxml(indent="  "))
@@ -156,13 +228,21 @@ class XMLResultsWriter:
 			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 			
-	def writeResult(self, testObj, **kwargs):
+	def processResult(self, testObj, **kwargs):
+		"""Implementation of the processResult method. 
+		
+		Adds the results node to the DOM and re-writes to logfile.
+		
+		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		@param kwargs: Variable argument list
+		
+		"""	
 		self.fp.seek(0)
 		
 		if kwargs.has_key("cycle"): 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
-				self.createResultsNode()
+				self.__createResultsNode()
 		
 		# create the results entry
 		resultElement = self.document.createElement("result")
@@ -178,11 +258,11 @@ class XMLResultsWriter:
 		resultElement.appendChild(element)
 
 		element = self.document.createElement("descriptor")
-		element.appendChild(self.document.createTextNode(self.pathToURL(testObj.descriptor.file)))
+		element.appendChild(self.document.createTextNode(self.__pathToURL(testObj.descriptor.file)))
 		resultElement.appendChild(element)
 
 		element = self.document.createElement("output")
-		element.appendChild(self.document.createTextNode(self.pathToURL(testObj.output)))
+		element.appendChild(self.document.createTextNode(self.__pathToURL(testObj.output)))
 		resultElement.appendChild(element)
 		
 		self.resultsElement.appendChild(resultElement)
@@ -194,8 +274,16 @@ class XMLResultsWriter:
 		# write the file out
 		self.fp.write(self.document.toprettyxml(indent="  "))
     	
+
+	def __createResultsNode(self):
+		self.resultsElement = self.document.createElement("results")
+		cycleAttribute = self.document.createAttribute("cycle")
+		cycleAttribute.value="%d"%self.cycle
+		self.resultsElement.setAttributeNode(cycleAttribute)
+		self.rootElement.appendChild(self.resultsElement)
+
     	
-	def pathToURL(self, path):
+	def __pathToURL(self, path):
 		try: 
 			if self.useFileURL.lower() == "false": return path
 		except:

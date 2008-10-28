@@ -18,7 +18,12 @@
 # whether in an action of contract, tort or otherwise, arising from,
 # out of or in connection with the software or the use or other
 # dealings in the software
+"""
+Contains the base test class for test execution and validation. 
 
+For more information see the L{pysys.basetest.BaseTest} API documentation. 
+
+"""
 import sys, os, os.path, re, string, time, thread, logging, copy
 
 from pysys.constants import *
@@ -49,7 +54,6 @@ class %s(%s):
 	def validate(self):
 		pass
 '''
-
 
 class BaseTest(ProcessUser):
 	"""The base class for all PySys testcases.
@@ -90,7 +94,7 @@ class BaseTest(ProcessUser):
 	            in the testcase descriptor.  
 	@type reference: string
 	@ivar log: Reference to the logger instance of this class
-	@type log: L{logging.Logger}
+	@type log: logging.Logger
 	@ivar project: Reference to the project details as set on the module load of the launching executable  
 	@type project: L{Project}
 		
