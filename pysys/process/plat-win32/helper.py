@@ -59,7 +59,7 @@ class ProcessWrapper:
 	
 	The process wrapper provides the ability to start and stop an external process, setting 
 	the process environment, working directory and state i.e. a foreground process in which case 
-	a call to the L{start()} method will not return until the process has exited, or a background 
+	a call to the L{start} method will not return until the process has exited, or a background 
 	process in which case the process is started in a separate thread allowing concurrent execution 
 	within the testcase. Processes started in the foreground can have a timeout associated with them, such
 	that should the timeout be exceeded, the process will be terminated and control	passed back to the 
@@ -68,8 +68,8 @@ class ProcessWrapper:
 	
 	Usage of the class is to first create an instance, setting all runtime parameters of the process 
 	as data attributes to the class instance via the constructor. The process can then be started 
-	and stopped via the L{start()} and L{stop()} methods of the class, as well as interrogated for 
-	its executing status via the L{running()} method, and waited for its completion via the L{wait()}
+	and stopped via the L{start} and L{stop} methods of the class, as well as interrogated for 
+	its executing status via the L{running} method, and waited for its completion via the L{wait}
 	method. During process execution the C{self.pid} and C{seld.exitStatus} data attributes are set 
 	within the class instance, and these values can be accessed directly via it's object reference.  
 

@@ -60,8 +60,8 @@ class BaseTest(ProcessUser):
 
 	BaseTest is the parent class of all PySys system testcases. The class provides utility functions for 
 	cross-platform process management and manipulation, test timing, and test validation. Any PySys testcase 
-	should inherit from the base test and provide an implementation of the abstract L{execute()} method 
-	defined in this class. Child classes can also overide the L{setup()}, L{cleanup()} and L{validate()} 
+	should inherit from the base test and provide an implementation of the abstract L{execute} method 
+	defined in this class. Child classes can also overide the L{setup}, L{cleanup} and L{validate} 
 	methods of the class to provide custom setup and cleanup actions for a particual test, and to perform 
 	all validation steps in a single method should this prove logically more simple.
 	
@@ -126,7 +126,7 @@ class BaseTest(ProcessUser):
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the test class.
 				
-		Values in the xargs dictionary are set as data attributes using the builtin C{setattr()} method. 
+		Values in the xargs dictionary are set as data attributes using the builtin C{setattr} method. 
 		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
 		form C{self.foo} with C{value bar}. This is used so that subclasses can define default values of 
 		data attributes, which can be overriden on instantiation e.g. using the -X options to the 
@@ -248,7 +248,7 @@ class BaseTest(ProcessUser):
 		the method does not return until the process has completed or a time out occurs, or in the C{BACKGROUND} in which case
 		the method returns immediately to the caller returning a handle to the process to allow manipulation at a later stage. 
 		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process handle are automatically
-		killed on completion of the test via the L{cleanup()} method of the BaseTest. 
+		killed on completion of the test via the L{cleanup} method of the BaseTest. 
 
 		This method uses the L{pysys.process.helper} module to start the process. On failure conditions the method may append 
 		C{BLOCKED} or C{TIMEDOUT} outcomes to the test validation data structure when it was not possible to start the process 
@@ -305,7 +305,7 @@ class BaseTest(ProcessUser):
 		Should the request to stop the running process fail, a C{BLOCKED} outcome will 
 		be added to the test outcome list.
 		
-		@param process: The process handle returned from the L{startProcess()} method
+		@param process: The process handle returned from the L{startProcess} method
 		
 		"""
 		if process.running():
@@ -324,7 +324,7 @@ class BaseTest(ProcessUser):
 		process. Should the request to send the signal to the running process fail, a 
 		C{BLOCKED} outcome will be added to the test outcome list.
 			
-		@param process: The process handle returned from the L{startProcess()} method
+		@param process: The process handle returned from the L{startProcess} method
 		@param signal: The integer value of the signal to send
 		
 		"""
@@ -340,7 +340,7 @@ class BaseTest(ProcessUser):
 	def waitProcess(self, process, timeout):
 		"""Wait for a process to terminate, return on termination or expiry of the timeout.
 	
-		@param process: The process handle returned from the L{startProcess()} method
+		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
 		
 		"""
@@ -358,10 +358,10 @@ class BaseTest(ProcessUser):
 		This method uses the L{pysys.process.monitor} module to perform logging of the process statistics, 
 		starting the monitor as a seperate background thread. Should the request to log the statistics fail 
 		a C{BLOCKED} outcome will be added to the test outcome list. All process monitors not explicitly 
-		stopped using the returned handle are automatically stopped on completion of the test via the L{cleanup()} 
+		stopped using the returned handle are automatically stopped on completion of the test via the L{cleanup} 
 		method of the BaseTest. 
 		
-		@param process: The process handle returned from the L{startProcess()} method
+		@param process: The process handle returned from the L{startProcess} method
 		@param interval: The interval in seconds between collecting and logging the process statistics
 		@param file: The full path to the filename used for logging the process statistics
 		
@@ -384,7 +384,7 @@ class BaseTest(ProcessUser):
 	def stopProcessMonitor(self, monitor):
 		"""Stop a process monitor.
 		
-		@param monitor: The process monitor handle returned from the L{startProcessMonitor()} method
+		@param monitor: The process monitor handle returned from the L{startProcessMonitor} method
 		
 		"""
 		if monitor.running: monitor.stop()
@@ -399,8 +399,8 @@ class BaseTest(ProcessUser):
 		can be run either in the C{FOREGROUND} (method will not return until the UI is closed or the timeout
 		occurs) or in the C{BACKGROUND} (method will return straight away so automated actions may be performed 
 		concurrently). Should the UI be terminated due to expiry of the timeout, a C{TIMEDOUT} outcome will be 
-		added to the outcome list. The UI can be stopped via the L{stopManualTester()} method. An instance of the 
-		UI not explicitly stopped within a test will automatically be stopped via the L{cleanup()} method of the 
+		added to the outcome list. The UI can be stopped via the L{stopManualTester} method. An instance of the 
+		UI not explicitly stopped within a test will automatically be stopped via the L{cleanup} method of the 
 		BaseTest.
 		
 		@param file: The name of the manual test xml input file (see L{pysys.xml.manual} for details on the DTD)
