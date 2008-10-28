@@ -36,6 +36,15 @@ What's new in this release
   may be specified in the PySys project file.  
 - Added exception logging on parsing errors in the PySys project file, e.g. 
   when the file in badly formed due to invalid XML tokens etc.   
+- The win32 process.monitor module has been changed so that on windows systems, the 
+  percentage CPU usage is not normalised by default by the number of available 
+  processors, e.g. on a 4 core processor, if 2 cores were fully utilized the 
+  CPU usage was previously output as 50% (to match that reported by task manager)- 
+  the change means that the reported usage will now be 200%, as a value of 100% 
+  indicates that one core is fully utilitised. This makes the output consistent with 
+  that reported on unix systems. Should the previous behavior be required, set the 
+  property normaliseWin32ProcessCPU to false in the PySys project file; e.g. 
+    <property name="normaliseWin32ProcessCPU" value="false"/>
 - Added comments to the PySys Project file distributed with the example testcases, 
   to detail the possible configuration options.
   
