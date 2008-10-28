@@ -43,12 +43,12 @@ class ProcessMonitor:
 	the caller of the L{start()} method immediately. The format of the log file is tab separated, 
 	with an initial timestamp used to denote the time the statistics were obtained, e.g. ::
 	
-        Time                  CPU   Working  Virtual  Private  Threads Handles
-        ----------------------------------------------------------------------                       
-        08/06/08 06:32:44     80    125164   212948   118740   44      327
-        08/06/08 06:32:49     86    125676   213972   120128   44      328
-        08/06/08 06:32:54     84    125520   212948   119116   44      328
-        08/06/08 06:32:59     78    125244   212948   119132   44      328
+		Time                  CPU   Working  Virtual  Private  Threads Handles
+		----------------------------------------------------------------------                       
+		08/06/08 06:32:44     80    125164   212948   118740   44      327
+		08/06/08 06:32:49     86    125676   213972   120128   44      328
+		08/06/08 06:32:54     84    125520   212948   119116   44      328
+		08/06/08 06:32:59     78    125244   212948   119132   44      328
 
 	"""
 	
