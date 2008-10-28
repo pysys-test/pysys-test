@@ -36,7 +36,9 @@ What's new in this release
   may be specified in the PySys project file.  
 - Added exception logging on parsing errors in the PySys project file, e.g. 
   when the file in badly formed due to invalid XML tokens etc.   
-
+- Added comments to the PySys Project file distributed with the example testcases, 
+  to detail the possible configuration options.
+  
   
 Dependencies
 ------------
