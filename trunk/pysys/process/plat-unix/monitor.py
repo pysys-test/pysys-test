@@ -67,13 +67,14 @@ class ProcessMonitor:
 
 	"""
 		
-	def __init__(self, pid, interval, file=None):
+	def __init__(self, pid, interval, file=None, **kwargs):
 		"""Construct an instance of the process monitor.
 		
 		@param pid: The process id to monitor
 		@param interval:  The interval in seconds to record the process statistics
 		@param file: The full path to the file to log the process statistics
-			
+		@param kwargs: Keyword arguments to allow platform specific configurations
+		
 		"""
 		self.pid = pid
 		self.interval = interval
@@ -82,6 +83,11 @@ class ProcessMonitor:
 		else:	
 			self.file = sys.stdout		
 	
+		# normalise the CPU readings by the supplied factor
+		self.numProcessors=1
+		if kwargs.has_key("numProcessors"): 
+			self.numProcessors = int(kwargs["numProcessors"])
+		
 		
 	def __findChildren(self, psList, parentPid):
 		children = []
@@ -123,7 +129,7 @@ class ProcessMonitor:
 					data[2] = int(string.split(info[i])[3])
 
 			currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
-			file.write( "%s\t%f\t%d\t%d\n" % (currentTime, data[0], data[1], data[2]) )
+			file.write( "%s\t%f\t%d\t%d\n" % (currentTime, data[0]/self.numProcessors, data[1], data[2]) )
 			time.sleep(interval)
 
 
@@ -140,7 +146,7 @@ class ProcessMonitor:
 			except:
 				fp.close()
 			currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
-			file.write( "%s\t%s\t%s\t%s\n" % (currentTime, data[0], data[1], data[2]) )
+			file.write( "%s\t%s\t%s\t%s\n" % (currentTime, data[0]/self.numProcessors, data[1], data[2]) )
 			time.sleep(interval)
 
 

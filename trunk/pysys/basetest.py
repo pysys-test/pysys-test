@@ -352,7 +352,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(TIMEDOUT)
 
 
-	def startProcessMonitor(self, process, interval, file):
+	def startProcessMonitor(self, process, interval, file, **kwargs):
 		"""Start a separate thread to log process statistics to logfile, and return a handle to the process monitor.
 		
 		This method uses the L{pysys.process.monitor} module to perform logging of the process statistics, 
@@ -364,12 +364,14 @@ class BaseTest(ProcessUser):
 		@param process: The process handle returned from the L{startProcess} method
 		@param interval: The interval in seconds between collecting and logging the process statistics
 		@param file: The full path to the filename used for logging the process statistics
-		
+		@param file: The full path to the filename used for logging the process statistics
+		@param kwargs: Keyword arguments to allow platform specific configurations
+				
 		@return: A handle to the process monitor (L{pysys.process.monitor.ProcessMonitor})
 		@rtype: handle
 		
 		"""
-		monitor = ProcessMonitor(process.pid, interval, file)
+		monitor = ProcessMonitor(process.pid, interval, file, **kwargs)
 		try:
 			self.log.info("Starting process monitor on process with id = %d", process.pid)
 			monitor.start()
