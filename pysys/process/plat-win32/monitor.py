@@ -70,13 +70,14 @@ class ProcessMonitor:
 
 	"""
 	
-	def __init__(self, pid, interval, file=None):
+	def __init__(self, pid, interval, file=None, **kwargs):
 		"""Construct an instance of the process monitor.
 		
 		@param pid: The process id to monitor
 		@param interval:  The interval in seconds to record the process statistics
 		@param file: The full path to the file to log the process statistics
-			
+		@param kwargs: Keyword arguments to allow platform specific configurations	
+		
 		"""
 		self.pid = pid
 		self.interval = interval
@@ -84,7 +85,12 @@ class ProcessMonitor:
 			self.file = open(file, 'w', 0)
 		else:	
 			self.file = sys.stdout
-			
+		
+		# normalise the CPU readings by the supplied factor
+		self.numProcessors=1
+		if kwargs.has_key("numProcessors"): 
+			self.numProcessors = int(kwargs["numProcessors"])
+				
 							
 	def __win32GetInstance(self, pid, bRefresh=0):
 		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
@@ -158,7 +164,7 @@ class ProcessMonitor:
 		return value
 
 
-	def __win32LogProfile(self, instance, inum, threads, normaliseFactor, interval, file):
+	def __win32LogProfile(self, instance, inum, threads, interval, file):
 		
 		# create the process performance counters
 		process_counters=[]
@@ -196,7 +202,7 @@ class ProcessMonitor:
 					pass
 	
 			currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
-			file.write( "%s\t%s\t%d\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]/normaliseFactor, float(data[1])/1024,
+			file.write( "%s\t%s\t%d\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]/self.numProcessors, float(data[1])/1024,
 													  float(data[2])/1024, float(data[3])/1024, float(data[4]), float(data[5])))
 			time.sleep(interval)
 
@@ -222,19 +228,8 @@ class ProcessMonitor:
 		# get the instance and instance number for each thread of this process if
 		threads = self.__win32GetThreads(pid=self.pid, bRefresh=1)
 		
-		# determine the number of available CPUs using the environment
-		normaliseFactor=1
-		try:
-			if PROJECT.normaliseWin32ProcessCPU == "true":
-				if not os.environ.has_key("NUMBER_OF_PROCESSORS"):
-					log.error("Unable to determine the number of available processors - assume 1")
-				else:
-					normaliseFactor=int(os.environ["NUMBER_OF_PROCESSORS"])
-		except:
-			pass
-		
 		# log the stats in a seperate thread
-		thread.start_new_thread(self.__win32LogProfile, (instance, inum, threads, normaliseFactor, self.interval, self.file))
+		thread.start_new_thread(self.__win32LogProfile, (instance, inum, threads, self.interval, self.file))
 		
 
 	def stop(self):
