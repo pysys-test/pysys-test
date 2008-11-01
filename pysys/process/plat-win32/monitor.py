@@ -68,6 +68,10 @@ class ProcessMonitor:
 		09/16/08 14:24:40       89.1       102428    1436372
 		09/16/08 14:24:50       94.2       104404    1438420
 
+
+	Both windows and unix operating systems support the numProcessors argument in the variable argument list in order 
+	to normalise the CPU statistics gathered by the number of available CPUs.
+
 	"""
 	
 	def __init__(self, pid, interval, file=None, **kwargs):
