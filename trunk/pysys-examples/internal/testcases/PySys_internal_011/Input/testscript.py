@@ -9,7 +9,12 @@ if __name__ == "__main__":
 	sys.stdout.write("Priniting out the secondt line\n")
 	sys.stdout.flush()
 	time.sleep(0.5)
-	sys.stdout.write("The unique id of 1287998 is this\n")
+	sys.stdout.write("The first unique id is 1287998\n")
 	sys.stdout.flush()
-	
+	sys.stdout.write("The second unique id is 098765\n")
+	sys.stdout.flush()
+	sys.stdout.write("The second unique id is 6754322\n")
+	sys.stdout.flush()
+	sys.stdout.write("The second unique id is 1234398978787\n")
+	sys.stdout.flush()
 	
