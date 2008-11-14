@@ -183,7 +183,7 @@ class ProcessUser:
 			log.info("Unable to wait for process")
 
 
-	def writeProcess(self, process, data, addNewLine=TRUE):
+	def writeProcess(self, process, data, addNewLine=True):
 		"""Write data to the stdin of a process.
 		
 		This method uses the L{pysys.process.helper} module to write a data string to the 
@@ -225,12 +225,12 @@ class ProcessUser:
 		log.debug("  file:       %d" % port)
 		log.debug("  filedir:    %s" % host)
 		
-		exit = FALSE
+		exit = False
 		startTime = time.time()
 		while not exit:
 			try:
 				s.connect((host, port))
-				exit = TRUE
+				exit = True
 			except socket.error:
 				if timeout:
 					currentTime = time.time()
@@ -262,7 +262,7 @@ class ProcessUser:
 		log.debug("  file:       %s" % file)
 		log.debug("  filedir:    %s" % filedir)
 		
-		exit = FALSE
+		exit = False
 		startTime = time.time()
 		while not exit:
 			if timeout:
@@ -301,10 +301,12 @@ class ProcessUser:
 		log.debug("  expression: %s" % expr)
 		log.debug("  condition:  %s" % condition)
 		
+		matches = None
 		startTime = time.time()
 		while 1:
 			if os.path.exists(f):
-				if eval("%d %s" % (linecount(f, expr), condition)):
+				count, matches = linecount(f, expr)
+				if eval("%d %s" % (count, condition)):
 					log.info("Wait for signal in %s completed successfully", file)
 					break
 				
@@ -314,6 +316,7 @@ class ProcessUser:
 				log.info("Number of matches to the expression are %d" % linecount(f, expr))
 				break
 			time.sleep(poll)
+		return matches
 
 
 	def __del__(self):

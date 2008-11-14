@@ -34,7 +34,7 @@ def filegrep(file, expr):
 	
 	@param file: The full path to the input file
 	@param expr: The regular expression (uncompiled) to search for in the input file
-	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
+	@returns: success (True / False)
 	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
@@ -46,8 +46,8 @@ def filegrep(file, expr):
 		logContents("Contents of %s;" % os.path.basename(file), contents)
 		regexpr = re.compile(expr)
 		for line in contents:
-			if regexpr.search(line) != None: return TRUE
-		return FALSE
+			if regexpr.search(line) != None: return True
+		return False
 
 
 def lastgrep(file, expr, ignore=[], include=[]):
@@ -55,7 +55,7 @@ def lastgrep(file, expr, ignore=[], include=[]):
 	
 	@param file: The full path to the input file
 	@param expr: The regular expression (uncompiled) to search for in the last line of the input file
-	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
+	@returns: success (True / False)
 	@param ignore: A list of regular expressions which remove entries in the input file contents before making the grep
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the grep 
 	@rtype: integer
@@ -66,15 +66,15 @@ def lastgrep(file, expr, ignore=[], include=[]):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
 	else:
 		contents = open(file, 'r').readlines()
-		contents = trimContents(contents, ignore, exclude=TRUE)
-		contents = trimContents(contents, include, exclude=FALSE)
+		contents = trimContents(contents, ignore, exclude=True)
+		contents = trimContents(contents, include, exclude=False)
 		
 		logContents("Contents of %s after pre-processing;" % os.path.basename(file), contents)
 		if len(contents) > 0:
 			line = contents[len(contents)-1]
 			regexpr = re.compile(expr)
-			if regexpr.search(line) != None: return TRUE
-		return FALSE
+			if regexpr.search(line) != None: return True
+		return False
 
 
 def orderedgrep(file, exprList):
@@ -95,7 +95,7 @@ def orderedgrep(file, exprList):
 	
 	@param file: The full path to the input file
 	@param exprList: A list of regular expressions (uncompiled) to search for in the input file
-	@returns: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
+	@returns: success (True / False)
 	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
 		
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 			print "caught %s: %s" % (sys.exc_info()[0], value)
 			print "unable to perform grep... exiting"
 		else:
-			if status == TRUE:
+			if status == True:
 				print "Matches found"
 			else:
 				print "No matches found"

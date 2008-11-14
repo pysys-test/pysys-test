@@ -285,7 +285,7 @@ class ProcessWrapper:
 			self.exitStatus = exitStatus
 
 
-	def write(self, data, addNewLine=TRUE):
+	def write(self, data, addNewLine=True):
 		"""Write data to the stdin of the process.
 		
 		Note that when the addNewLine argument is set to true, if a new line does not 
@@ -306,13 +306,13 @@ class ProcessWrapper:
 	def running(self):
 		"""Check to see if a process is running, returning true if running.
 		
-		@return: The running status (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
+		@return: The running status (True / False)
 		@rtype: integer
 		
 		"""
 		self.__setExitStatus()
-		if self.exitStatus != None: return FALSE
-		return TRUE
+		if self.exitStatus != None: return False
+		return True
 
 
 	def wait(self, timeout):

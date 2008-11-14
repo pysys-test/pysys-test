@@ -25,7 +25,7 @@ from pysys.constants import *
 
 
 class SimpleSMTPServer(smtpd.SMTPServer): 
-	def __init__(self, localaddr, remoteaddr, filename='smtpserver.out', logMails=TRUE):
+	def __init__(self, localaddr, remoteaddr, filename='smtpserver.out', logMails=True):
 		smtpd.SMTPServer.__init__(self, localaddr, remoteaddr)
 		try:
 			self.fp = open(filename, 'w')

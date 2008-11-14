@@ -122,11 +122,11 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	if len(excludes) != 0:
 		index = 0
 		while index != len(tests):
-			remove = FALSE
+			remove = False
 
 			for exclude in excludes:
 				if exclude in tests[index].groups:
-					remove = TRUE
+					remove = True
 					break
 
 			if remove:
@@ -137,11 +137,11 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	if includes != []:
 		index = 0
 		while index != len(tests):
-			keep = FALSE
+			keep = False
 				
 			for include in includes:
 				if include in tests[index].groups:
-					keep = TRUE
+					keep = True
 					break
 
 			if not keep:

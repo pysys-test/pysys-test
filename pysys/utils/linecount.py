@@ -36,7 +36,7 @@ def linecount(file, regexpr=None):
 	@param file: The full path to the input file
 	@param regexpr: The regular expression used for counting matches
 	@return: The number of matching lines in the input file
-	@rtype: integer
+	@rtype: integer, 
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
@@ -50,11 +50,14 @@ def linecount(file, regexpr=None):
 		if regexpr == None:
 			count = len(list)
 		else:
+			matches = None
 			rexp = re.compile(regexpr)
 			for i in range(0, len(list)):
-				if rexp.search(list[i]) != None:
+				match = rexp.search(list[i])
+				if match != None:
 					count = count + 1
-		return count
+					matches = match
+		return count, matches
 
 
 

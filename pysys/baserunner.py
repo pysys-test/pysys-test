@@ -123,7 +123,7 @@ class BaseRunner(ProcessUser):
 
 
 	# utility methods
-	def purgeDirectory(self, dir, delTop=FALSE):
+	def purgeDirectory(self, dir, delTop=False):
 		"""Recursively purge a directory removing all files and sub-directories.
 		
 		@param dir: The top level directory to be purged
@@ -142,16 +142,16 @@ class BaseRunner(ProcessUser):
 			if stat.S_ISREG(mode):
 				os.remove(path)
 			elif stat.S_ISDIR(mode):
-			  	self.purgeDirectory(path, delTop=TRUE)				 
+			  	self.purgeDirectory(path, delTop=True)				 
 
 		if delTop: os.rmdir(dir)
 
 
 	def detectCore(self, dir):
-		"""Detect any core files in a directory (unix systems only), returning C{TRUE} if a core is present.
+		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
 		
 		@param dir: The directory to search for core files
-		@return: C{TRUE} if a core detected, None if no core detected
+		@return: C{True} if a core detected, None if no core detected
 		@rtype: integer 
 		"""
 		for file in os.listdir(dir):
@@ -159,7 +159,7 @@ class BaseRunner(ProcessUser):
 			mode = os.stat(path)[stat.ST_MODE]
 
 			if stat.S_ISREG(mode):
-				if re.search('^core', file): return TRUE
+				if re.search('^core', file): return True
 
 	
 	# methods to allow customer actions to be performed before a test run, after a test, after 
@@ -186,13 +186,13 @@ class BaseRunner(ProcessUser):
 				
 		"""
 		if self.purge:
-			removeNonZero = TRUE
+			removeNonZero = True
 			for outcome in testObj.outcome:
 				if outcome != PASSED:
-					removeNonZero = FALSE
+					removeNonZero = False
 					break
 		else:
-			removeNonZero = FALSE
+			removeNonZero = False
 
 		try:
 			for file in os.listdir(dir):
@@ -230,7 +230,7 @@ class BaseRunner(ProcessUser):
 
 
 	# perform a test run
-	def start(self, printSummary=TRUE):
+	def start(self, printSummary=True):
 		"""Start the execution of a set of testcases, returning a dictionary of the testcase outcomes.
 		
 		The start method is the main method for executing the set of requested testcases. The set of testcases 
@@ -263,8 +263,8 @@ class BaseRunner(ProcessUser):
 			# loop through tests for the cycle
 			for descriptor in self.descriptors:
 				startTime = time.time()
-				blocked = FALSE
-				keyboardInterupt = FALSE
+				blocked = False
+				keyboardInterupt = False
 
 				# set the output subdirectory and purge contents
 				try:
@@ -282,7 +282,7 @@ class BaseRunner(ProcessUser):
 				except:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 					outputDirectory = ""
-					blocked = TRUE
+					blocked = True
 
 				# create the logger handler for the run log
 				runLogger = logging.FileHandler(os.path.join(outputDirectory, 'run.log'))
@@ -301,7 +301,7 @@ class BaseRunner(ProcessUser):
 				except:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 					testObj = BaseTest(descriptor, outsubdir, self) 
-					blocked = TRUE
+					blocked = True
 				sys.path.pop()
 				
 				if descriptor.state != 'runnable':
@@ -320,7 +320,7 @@ class BaseRunner(ProcessUser):
 						testObj.setup()
 						testObj.execute()
 					except KeyboardInterrupt:
-						keyboardInterupt = TRUE
+						keyboardInterupt = True
 						log.info("test interrupt from keyboard")
 						testObj.outcome.append(BLOCKED)
 					except:
@@ -330,7 +330,7 @@ class BaseRunner(ProcessUser):
 						try:
 						  	testObj.validate()
 						except KeyboardInterrupt:
-							keyboardInterupt = TRUE
+							keyboardInterupt = True
 							log.info("test interrupt from keyboard")
 							testObj.outcome.append(BLOCKED)
 						except:
@@ -347,7 +347,7 @@ class BaseRunner(ProcessUser):
 					try:
 						testObj.cleanup()
 					except KeyboardInterrupt:
-						keyboardInterupt = TRUE
+						keyboardInterupt = True
 						log.info("test interrupt from keyboard")
 						testObj.outcome.append(BLOCKED)
 					except:
@@ -384,7 +384,7 @@ class BaseRunner(ProcessUser):
 				rootLogger.removeHandler(runLogger)
 
 				# prompt for continuation on control-C
-				if keyboardInterupt == TRUE:
+				if keyboardInterupt == True:
 					while 1:
 						print ""
 						print "Keyboard interupt detected, continue running tests? [yes|no] ... ",

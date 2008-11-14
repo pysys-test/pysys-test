@@ -40,7 +40,7 @@ class ManualTester:
 		self.parentContainer.protocol('WM_DELETE_WINDOW', self.quitPressed)
 		self.parentContainer.wm_geometry("500x400")
 		self.parentContainer.title("PySys Manual Tester - [%s]" % self.owner.descriptor.id)
-		self.parentContainer.resizable(TRUE, TRUE)
+		self.parentContainer.resizable(True, True)
 		
 		self.container = Frame(self.parentContainer)
 		self.containerDetails = Frame(self.container)			

@@ -190,7 +190,7 @@ class ProcessWrapper:
 					retries=0
 
 
-	def write(self, data, addNewLine=TRUE):
+	def write(self, data, addNewLine=True):
 		"""Write data to the stdin of the process.
 		
 		Note that when the addNewLine argument is set to true, if a new line does not 
@@ -211,7 +211,7 @@ class ProcessWrapper:
 	def running(self):
 		"""Check to see if a process is running, returning true if running.
 		
-		@return: The running status (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
+		@return: The running status (True / False)
 		@rtype: integer 
 		
 		"""

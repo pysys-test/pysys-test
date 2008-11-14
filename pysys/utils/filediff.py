@@ -28,7 +28,7 @@ from pysys.exceptions import *
 log = logging.getLogger('pysys.utils.filediff')
 
 
-def trimContents(contents, expressions, exclude=TRUE):
+def trimContents(contents, expressions, exclude=True):
 	"""Reduce a list of strings based by including/excluding lines which match any of a set of regular expressions, returning the processed list.
 	
 	The method reduces an input list of strings based on whether each string matches or does not match a 
@@ -92,7 +92,7 @@ def logContents(message, list):
 
 
 
-def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[]):
+def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[]):
 	"""Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.
 	
 	The method reads in the files and loads the contents of each as a list of strings. The two files are 
@@ -110,7 +110,7 @@ def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[])
 	@param sort: Boolean to sort the input file contents before making the comparison
 	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
-	@return: success (L{pysys.constants.TRUE} / L{pysys.constants.FALSE})
+	@return: success (True / False)
 	@rtype: integer
 	@raises FileNotFoundException: Raised if either of the files do not exist
 
@@ -130,10 +130,10 @@ def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[])
 		for i in f.readlines(): list2.append(string.strip(i))
 		f.close()
 		
-		list1 = trimContents(list1, ignore, exclude=TRUE)
-		list2 = trimContents(list2, ignore, exclude=TRUE)
-		list1 = trimContents(list1, include, exclude=FALSE)
-		list2 = trimContents(list2, include, exclude=FALSE)
+		list1 = trimContents(list1, ignore, exclude=True)
+		list2 = trimContents(list2, ignore, exclude=True)
+		list1 = trimContents(list1, include, exclude=False)
+		list2 = trimContents(list2, include, exclude=False)
 		list1 = replace(list1, replacementList)
 		list2 = replace(list2, replacementList)
 		if sort:
@@ -153,8 +153,8 @@ def filediff(file1, file2, ignore=[], sort=TRUE, replacementList=[], include=[])
 			diff = ''.join(difflib.unified_diff(l1, l2))
 			for line in string.split(diff, '\n'): log.debug("  %s", line)
 
-		if list1 == list2: return TRUE
-		return FALSE
+		if list1 == list2: return True
+		return False
 
 
 
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 			print "caught %s: %s" % (sys.exc_info()[0], value)
 			print "unable to diff files... exiting"
 		else:
-			if status == TRUE:
+			if status == True:
 				print "No differences detected"
 			else:
 				print "Differences detected"

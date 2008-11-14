@@ -65,8 +65,8 @@ elif re.search('linux', sys.platform):
 
 
 # constants used in testing
-FALSE=0
-TRUE=1
+TRUE=True
+FALSE=False
 BACKGROUND = 10
 FOREGROUND = 11
 PASSED = 20
@@ -82,6 +82,8 @@ INFO = 31
 DEBUG = 32
 
 LOOKUP = {}
+LOOKUP[True] = "TRUE"
+LOOKUP[False] = "FALSE"
 LOOKUP[TRUE] = "TRUE"
 LOOKUP[FALSE] = "FALSE"
 LOOKUP[PASSED] = "PASSED"
