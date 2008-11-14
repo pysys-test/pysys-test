@@ -35,8 +35,8 @@ def linecount(file, regexpr=None):
 	
 	@param file: The full path to the input file
 	@param regexpr: The regular expression used for counting matches
-	@return: The number of matching lines in the input file
-	@rtype: integer, 
+	@return: A tuple of the number of matching lines in the input file, and list of the match objects 
+	@rtype: (integer, list)
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
