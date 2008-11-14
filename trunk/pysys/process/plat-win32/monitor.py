@@ -214,7 +214,7 @@ class ProcessMonitor:
 	def running(self):
 		"""Return the running status of the process monitor.
 		
-		@return: The running status (L{pysys.constants.TRUE} | L{pysys.constants.FALSE})
+		@return: The running status (True | False)
 		@rtype: integer
 		"""
 		return self.active

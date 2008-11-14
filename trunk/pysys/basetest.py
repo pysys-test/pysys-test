@@ -481,7 +481,7 @@ class BaseTest(ProcessUser):
 		@param expr: The expression, as a string, to check for the true | false value
 				
 		"""
-		if expr == TRUE:
+		if expr == True:
 			self.addOutcome(PASSED)
 			log.info("Assertion on boolean expression equal to true ... passed")
 		else:
@@ -498,7 +498,7 @@ class BaseTest(ProcessUser):
 		@param expr: The expression to check for the true | false value
 				
 		"""
-		if expr == FALSE:
+		if expr == False:
 			self.addOutcome(PASSED)
 			log.info("Assertion on boolean expression equal to false ... passed")
 		else:
@@ -506,7 +506,7 @@ class BaseTest(ProcessUser):
 			log.info("Assertion on boolean expression equal to false ... failed")
 	
 
-	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=FALSE, replace=[], includes=[]):
+	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[]):
 		"""Perform a validation assert on the comparison of two input text files.
 		
 		This method performs a file comparison on two input files. The files are pre-processed prior to the 
@@ -544,7 +544,7 @@ class BaseTest(ProcessUser):
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
-			if result == TRUE:
+			if result == True:
 				result = PASSED
 			else:
 				result = FAILED
@@ -552,7 +552,7 @@ class BaseTest(ProcessUser):
 			log.info("File comparison between %s and %s ... %s", file1, file2, LOOKUP[result].lower())
 
 
-	def assertGrep(self, file, filedir=None, expr='', contains=TRUE):
+	def assertGrep(self, file, filedir=None, expr='', contains=True):
 		"""Perform a validation assert on a regular expression occurring in a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -588,7 +588,7 @@ class BaseTest(ProcessUser):
 			log.info("Grep on input file %s ... %s", file, LOOKUP[result].lower())
 			
 
-	def assertLastGrep(self, file, filedir=None, expr='', contains=TRUE, ignores=[], includes=[]):
+	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[]):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -627,7 +627,7 @@ class BaseTest(ProcessUser):
 			log.info("Grep on input file %s ... %s", file, LOOKUP[result].lower())
 
 
-	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=TRUE):   
+	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True):   
 		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
 		
 		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome 

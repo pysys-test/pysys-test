@@ -106,7 +106,7 @@ class ProcessMonitor:
 		return children
 
 
-	def __linuxLogProfile(self, pid, interval, file, includeChildren=TRUE):
+	def __linuxLogProfile(self, pid, interval, file, includeChildren=True):
 		# sleep - fixes weird problem of thread hanging?
 		time.sleep(1)
 		
@@ -158,7 +158,7 @@ class ProcessMonitor:
 	def running(self):
 		"""Return the running status of the process monitor.
 		
-		@return: The running status (L{pysys.constants.TRUE} | L{pysys.constants.FALSE})
+		@return: The running status (True | False)
 		@rtype: integer
 		"""
 		return self.active

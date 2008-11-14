@@ -49,9 +49,10 @@ class ConsoleCleanTestHelper:
 		self.arguments = []
 		self.verbosity = INFO
 		self.outsubdir = PLATFORM
+		self.all = False
 		self.name = name
-		self.optionString = 'hv:o:'
-		self.optionList = ["help","verbosity=","outdir="]
+		self.optionString = 'hav:o'
+		self.optionList = ["help","all", "verbosity=","outdir="]
 
 
 	def printUsage(self, printXOptions):
@@ -59,6 +60,7 @@ class ConsoleCleanTestHelper:
 		print "\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name)
 		print "   where [option] includes;"
 		print "       -h | --help                 print this message"
+		print "       -a | --all                  clean all compiled testclass files"
 		print "       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)"
 		print "       -o | --outdir    STRING     set the name of the test output subdirectories to clean"
 		sys.exit()
@@ -74,6 +76,9 @@ class ConsoleCleanTestHelper:
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage(printXOptions)	  
+
+			elif option in ("-a", "--all"):
+				self.all = True
 
 			elif option in ("-v", "--verbosity"):
 				self.verbosity = value
@@ -97,15 +102,26 @@ class ConsoleCleanTestHelper:
 			log.info(strerror)
 		else:
 			for descriptor in descriptors:
+				path = descriptor.module + ".pyc"
+				try:
+					mode = os.stat(path)[stat.ST_MODE]
+					if stat.S_ISLNK(mode):
+						os.unlink(path)
+					if stat.S_ISREG(mode):
+						os.remove(path)
+					log.info("Deleting compiled module: " + path)
+				except:
+					log.debug("Error deleting compiled module: " + path)
+				
 				pathToDelete = os.path.join(descriptor.output, self.outsubdir)
 				if os.path.exists(pathToDelete):
 					log.info("Deleting output directory: " + pathToDelete)
-					self.purgeDirectory(pathToDelete, TRUE)
+					self.purgeDirectory(pathToDelete, True)
 				else:
 					log.debug("Output directory does not exist: " + pathToDelete)
 
 
-	def purgeDirectory(self, dir, delTop=FALSE):
+	def purgeDirectory(self, dir, delTop=False):
 		for file in os.listdir(dir):
 			path = os.path.join(dir, file)
 			if PLATFORM in ['sunos', 'linux']:
@@ -118,7 +134,7 @@ class ConsoleCleanTestHelper:
 			if stat.S_ISREG(mode):
 				os.remove(path)
 			elif stat.S_ISDIR(mode):
-				self.purgeDirectory(path, delTop=TRUE)
+				self.purgeDirectory(path, delTop=True)
 
 		if delTop: os.rmdir(dir)
 
@@ -127,10 +143,10 @@ class ConsolePrintHelper:
 	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
-		self.full = FALSE
-		self.groups = FALSE
-		self.modes = FALSE
-		self.requirements = FALSE
+		self.full = False
+		self.groups = False
+		self.modes = False
+		self.requirements = False
 		self.mode = None
 		self.type = None
 		self.trace = None
@@ -185,16 +201,16 @@ class ConsolePrintHelper:
 				self.printUsage()
 
 			elif option in ("-f", "--full"):
-				self.full = TRUE
+				self.full = True
 				
 			if option in ("-g", "--groups"):
-				self.groups = TRUE
+				self.groups = True
 				
 			if option in ("-d", "--modes"):
-				self.modes = TRUE
+				self.modes = True
 			
 			if option in ("-r", "--requirements"):
-				self.requirements = TRUE
+				self.requirements = True
 				
 			elif option in ("-m", "--mode"):
 				self.mode = value
@@ -222,7 +238,7 @@ class ConsolePrintHelper:
 			log.info(strerror)
 		else:
 			exit = 0
-			if self.groups == TRUE:
+			if self.groups == True:
 				groups = []
 				for descriptor in descriptors:
 					for group in descriptor.groups:
@@ -233,7 +249,7 @@ class ConsolePrintHelper:
 					print "                 %s" % (group)
 				exit = 1
 
-			if self.modes == TRUE:
+			if self.modes == True:
 				modes = []
 				for descriptor in descriptors:
 					for mode in descriptor.modes:
@@ -244,7 +260,7 @@ class ConsolePrintHelper:
 					print "                 %s" % (mode)
 				exit = 1
 
-			if self.requirements == TRUE:
+			if self.requirements == True:
 				requirements = []
 				for descriptor in descriptors:
 					for requirement in descriptor.traceability:
@@ -363,8 +379,8 @@ class ConsoleLaunchHelper:
 	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
-		self.record = FALSE
-		self.purge = FALSE
+		self.record = False
+		self.purge = False
 		self.verbosity = INFO
 		self.type = None
 		self.trace = None
@@ -397,7 +413,7 @@ class ConsoleLaunchHelper:
 		print "       -m | --mode      STRING     set the user defined mode to run the tests"
 		print "       -X               KEY=VALUE  set user defined options to be passed through to the test and "
 		print "                                   runner classes. The left hand side string is the data attribute "
-		print "                                   to set, the right hand side string the value (TRUE of not specified) "
+		print "                                   to set, the right hand side string the value (True of not specified) "
 		if printXOptions: printXOptions()
 		print ""
 		print "   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, "
@@ -429,10 +445,10 @@ class ConsoleLaunchHelper:
 				self.printUsage(printXOptions)	  
 
 			elif option in ("-r", "--record"):
-				self.record = TRUE
+				self.record = True
 
 			elif option in ("-p", "--purge"):
-				self.purge = TRUE		  
+				self.purge = True		  
 
 			elif option in ("-v", "--verbosity"):
 				self.verbosity = value
@@ -477,7 +493,7 @@ class ConsoleLaunchHelper:
 				if EXPR1.search(value) != None:
 				  exec("self.userOptions['%s'] = '%s'" % (value.split('=')[0], value.split('=')[1]) )
 				if EXPR2.search(value) != None:
-					exec("self.userOptions['%s'] = %d" % (value, TRUE))
+					exec("self.userOptions['%s'] = %d" % (value, True))
 		try:
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
 		except Exception, (strerror):

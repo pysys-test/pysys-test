@@ -24,7 +24,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 
 
-def unzipall(path, binary=FALSE):
+def unzipall(path, binary=False):
 	"""Unzip all .gz files in a given directory.
 	
 	@param path: The full path to the directory containing the archive files
@@ -40,7 +40,7 @@ def unzipall(path, binary=FALSE):
 
 
 
-def unzip(zfilename, replace=FALSE, binary=FALSE):
+def unzip(zfilename, replace=False, binary=False):
 	"""Unzip a .gz archive and write the contents to disk.
 	
 	The method will unpack a file of the form C{file.data.gz} to C{file.data}, removing the 
