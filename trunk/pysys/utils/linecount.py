@@ -47,16 +47,16 @@ def linecount(file, regexpr=None):
 	else:
 		list = open(file, 'r').readlines()
 	
+		matches = []
 		if regexpr == None:
 			count = len(list)
-		else:
-			matches = None
+		else:	
 			rexp = re.compile(regexpr)
 			for i in range(0, len(list)):
 				match = rexp.search(list[i])
 				if match != None:
 					count = count + 1
-					matches = match
+					matches.append(match)
 		return count, matches
 
 

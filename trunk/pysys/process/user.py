@@ -313,7 +313,7 @@ class ProcessUser:
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
 				log.info("Wait for signal in %s timedout", file)
-				log.info("Number of matches to the expression are %d" % linecount(f, expr))
+				log.info("Number of matches to the expression are %d" % linecount(f, expr)[0])
 				break
 			time.sleep(poll)
 		return matches
