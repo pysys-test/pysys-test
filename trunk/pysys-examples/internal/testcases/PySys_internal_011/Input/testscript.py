@@ -3,10 +3,10 @@ import time, sys, os.path
 # entry point for running the script as an executable
 if __name__ == "__main__":
 	time.sleep(0.5)
-	sys.stdout.write("Priniting out the first line\n" )
+	sys.stdout.write("Printing out the first line\n" )
 	sys.stdout.flush()
 	time.sleep(0.5)
-	sys.stdout.write("Priniting out the secondt line\n")
+	sys.stdout.write("Printing out the second line\n")
 	sys.stdout.flush()
 	time.sleep(0.5)
 	sys.stdout.write("The first unique id is 1287998\n")
