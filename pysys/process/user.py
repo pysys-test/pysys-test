@@ -22,7 +22,7 @@
 import os, time
 
 from pysys.constants import *
-from pysys.utils.linecount import linecount
+from pysys.utils.filegrep import getmatches
 from pysys.process.helper import ProcessWrapper
 
 log = logging.getLogger('pysys.interfaces.processuser')
@@ -301,19 +301,19 @@ class ProcessUser:
 		log.debug("  expression: %s" % expr)
 		log.debug("  condition:  %s" % condition)
 		
-		matches = None
+		matches = []
 		startTime = time.time()
 		while 1:
 			if os.path.exists(f):
-				count, matches = linecount(f, expr)
-				if eval("%d %s" % (count, condition)):
+				matches = getmatches(f, expr)
+				if eval("%d %s" % (len(matches), condition)):
 					log.info("Wait for signal in %s completed successfully", file)
 					break
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
 				log.info("Wait for signal in %s timedout", file)
-				log.info("Number of matches to the expression are %d" % linecount(f, expr)[0])
+				log.info("Number of matches to the expression are %d" % len(matches))
 				break
 			time.sleep(poll)
 		return matches
