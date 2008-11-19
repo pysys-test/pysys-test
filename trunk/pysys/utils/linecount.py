@@ -22,9 +22,11 @@
 import os, os.path, sys, re, logging
 
 from pysys.exceptions import *
+from pysys.utils.filegrep import getmatches
 
 # create the class logger
 log = logging.getLogger('pysys.utils.linecount')
+
 
 def linecount(file, regexpr=None):
 	"""Count the number of lines in an input file matching a regular expression, return the count.
@@ -35,30 +37,13 @@ def linecount(file, regexpr=None):
 	
 	@param file: The full path to the input file
 	@param regexpr: The regular expression used for counting matches
-	@return: A tuple of the number of matching lines in the input file, and list of the match objects 
-	@rtype: (integer, list)
+	@return: The number of matching lines in the input file 
+	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
-	count = 0
-
-	if not os.path.exists(file):
-		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
-	else:
-		list = open(file, 'r').readlines()
-	
-		matches = []
-		if regexpr == None:
-			count = len(list)
-		else:	
-			rexp = re.compile(regexpr)
-			for i in range(0, len(list)):
-				match = rexp.search(list[i])
-				if match != None:
-					count = count + 1
-					matches.append(match)
-		return count, matches
-
+	matches = getmatches(file, regexpr)
+	return len(matches)
 
 
 # entry point for running the script as an executable
