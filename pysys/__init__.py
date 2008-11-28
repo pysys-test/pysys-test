@@ -56,7 +56,7 @@ __status__  = "alpha"
 __version__ = "0.6.1"
 """The version of this release."""
 
-__date__    = "15 Nov 2008"
+__date__    = "24 Nov 2008"
 """The date of this release."""
 
 __all__     = [ "constants",

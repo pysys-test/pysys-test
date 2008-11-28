@@ -102,17 +102,18 @@ class ConsoleCleanTestHelper:
 			log.info(strerror)
 		else:
 			for descriptor in descriptors:
-				path = descriptor.module + ".pyc"
-				try:
-					mode = os.stat(path)[stat.ST_MODE]
-					if stat.S_ISLNK(mode):
-						os.unlink(path)
-					if stat.S_ISREG(mode):
-						os.remove(path)
-					log.info("Deleting compiled module: " + path)
-				except:
-					log.debug("Error deleting compiled module: " + path)
-				
+				if self.all:
+					path = descriptor.module + ".pyc"
+					try:
+						mode = os.stat(path)[stat.ST_MODE]
+						if stat.S_ISLNK(mode):
+							os.unlink(path)
+						if stat.S_ISREG(mode):
+							os.remove(path)
+						log.info("Deleting compiled module: " + path)
+					except:
+						log.debug("Error deleting compiled module: " + path)
+					
 				pathToDelete = os.path.join(descriptor.output, self.outsubdir)
 				if os.path.exists(pathToDelete):
 					log.info("Deleting output directory: " + pathToDelete)
