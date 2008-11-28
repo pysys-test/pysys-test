@@ -60,6 +60,8 @@ else:
 					'pysys.process', 'pysys.process.plat-win32', 
 					'pysys.process.plat-unix', 'pysys.utils',
 					'pysys.writer', 'pysys.xml']
+		  data_files=[(get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
+			      (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]
 		)
 
 	
