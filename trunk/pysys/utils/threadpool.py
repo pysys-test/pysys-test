@@ -156,7 +156,7 @@ class ThreadPool:
 		self.createWorkers(num_workers, poll_timeout)
 
 
-	def __createWorkers(self, num_workers, poll_timeout=5):
+	def createWorkers(self, num_workers, poll_timeout=5):
 		"""Create additional threads on the workers stack.
 
 		@param num_workers: The number of workers to add to the stack
