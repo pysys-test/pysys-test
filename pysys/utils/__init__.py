@@ -31,7 +31,8 @@ __all__ = [ "filecopy",
 				"filereplace", 
 				"fileunzip",
 				"linecount",
-				"smtpserver" ]
+				"smtpserver",
+				"threadpool" ]
 
 
 
