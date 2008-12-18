@@ -24,7 +24,7 @@ Contains the base test class for test execution and validation.
 For more information see the L{pysys.basetest.BaseTest} API documentation. 
 
 """
-import sys, os, os.path, re, string, time, thread, logging, copy
+import sys, os, os.path, re, string, time, thread, logging, copy, math, stat
 
 from pysys.constants import *
 from pysys.exceptions import *
@@ -122,6 +122,82 @@ class BaseTest(ProcessUser):
 		self.log = log
 		self.project = PROJECT
 		
+	
+	def __call__(self, *args, **kwargs):
+		log.info("==========================================")
+		log.info("		" + self.descriptor.id)
+		log.info("==========================================")
+		
+		startTime = time.time()
+		if self.descriptor.state != 'runnable':
+				self.addOutcome(SKIPPED)
+					
+		elif self.mode and self.mode not in self.descriptor.modes:
+			log.info("Unable to run test in %s mode", self.mode)
+			self.addOutcome(SKIPPED)
+
+		else:
+			try:
+				self.setup()
+				self.execute()
+			except KeyboardInterrupt:
+				keyboardInterupt = True
+				log.info("test interrupt from keyboard")
+				self.outcome.append(BLOCKED)
+			except:
+				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				self.addOutcome(BLOCKED)
+			else:
+				try:
+				  	self.validate()
+				except KeyboardInterrupt:
+					keyboardInterupt = True
+					log.info("test interrupt from keyboard")
+					self.addOutcome(BLOCKED)
+				except:
+				  	log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				  	self.addOutcome(BLOCKED)
+					
+				try:
+					if self.detectCore(self.output):
+						log.info("core detected in output subdirectory")
+						self.addOutcome(DUMPEDCORE)
+				except:
+					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
+			try:
+				self.cleanup()
+			except KeyboardInterrupt:
+				keyboardInterupt = True
+				log.info("test interrupt from keyboard")
+				self.addOutcome(BLOCKED)
+			except:
+				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
+		# get and log the final outcome for the test
+		testTime = math.floor(100*(time.time() - startTime))/100.0
+		log.info("")
+		log.info("Test duration %.2f secs", testTime)
+		log.info("Test final outcome %s", LOOKUP[self.getOutcome()])
+		log.info("")
+		if rootLogger.getEffectiveLevel() == logging._levelNames['CRITICAL']: log.critical("%s: %s", LOOKUP[self.getOutcome()], self.descriptor.id)
+		return testTime
+	
+	
+	def detectCore(self, dir):
+		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
+		
+		@param dir: The directory to search for core files
+		@return: C{True} if a core detected, None if no core detected
+		@rtype: integer 
+		"""
+		for file in os.listdir(dir):
+			path = os.path.join(dir, file)
+			mode = os.stat(path)[stat.ST_MODE]
+
+			if stat.S_ISREG(mode):
+				if re.search('^core', file): return True
+
 		
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the test class.

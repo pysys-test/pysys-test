@@ -1,5 +1,4 @@
- 
- #!/usr/bin/env python
+#!/usr/bin/env python
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and any associated documentation
 # files (the "Software"), to deal in the Software without
@@ -147,21 +146,6 @@ class BaseRunner(ProcessUser):
 
 		if delTop: os.rmdir(dir)
 
-
-	def detectCore(self, dir):
-		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
-		
-		@param dir: The directory to search for core files
-		@return: C{True} if a core detected, None if no core detected
-		@rtype: integer 
-		"""
-		for file in os.listdir(dir):
-			path = os.path.join(dir, file)
-			mode = os.stat(path)[stat.ST_MODE]
-
-			if stat.S_ISREG(mode):
-				if re.search('^core', file): return True
-
 	
 	# methods to allow customer actions to be performed before a test run, after a test, after 
 	# a cycle of all tests, and after all cycles
@@ -292,9 +276,6 @@ class BaseRunner(ProcessUser):
 				rootLogger.addHandler(runLogger)			
 
 				# run the test execute, validate and cleanup methods
-				log.info("==========================================")
-				log.info("		" + descriptor.id)
-				log.info("==========================================")
 				try:
 					sys.path.append(os.path.dirname(descriptor.module))
 					exec( "from %s import %s" % (os.path.basename(descriptor.module), descriptor.classname) )
@@ -305,65 +286,12 @@ class BaseRunner(ProcessUser):
 					blocked = True
 				sys.path.pop()
 				
-				if descriptor.state != 'runnable':
-					testObj.outcome.append(SKIPPED)
-					
-				elif self.mode and self.mode not in descriptor.modes:
-					log.info("Unable to run test in %s mode", self.mode)
-					testObj.outcome.append(SKIPPED)
-
-				elif blocked:
-					log.info("Errors setting up test for execution")
-					testObj.outcome.append(BLOCKED)
-
-				else:
-					try:
-						testObj.setup()
-						testObj.execute()
-					except KeyboardInterrupt:
-						keyboardInterupt = True
-						log.info("test interrupt from keyboard")
-						testObj.outcome.append(BLOCKED)
-					except:
-						log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-						testObj.outcome.append(BLOCKED)
-					else:
-						try:
-						  	testObj.validate()
-						except KeyboardInterrupt:
-							keyboardInterupt = True
-							log.info("test interrupt from keyboard")
-							testObj.outcome.append(BLOCKED)
-						except:
-						  	log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-						  	testObj.outcome.append(BLOCKED)
-					
-						try:
-							if self.detectCore(outputDirectory):
-								log.info("core detected in output subdirectory")
-								testObj.outcome.append(DUMPEDCORE)
-						except:
-							log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
-					try:
-						testObj.cleanup()
-					except KeyboardInterrupt:
-						keyboardInterupt = True
-						log.info("test interrupt from keyboard")
-						testObj.outcome.append(BLOCKED)
-					except:
-						log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
+				testTime = testObj()
+				
 				# get and log the final outcome for the test
-				testTime = math.floor(100*(time.time() - startTime))/100.0
 				totalDuration = totalDuration + testTime
 				outcome = testObj.getOutcome()
 				results[cycle][outcome].append(descriptor.id)
-				log.info("")
-				log.info("Test duration %.2f secs", testTime)
-				log.info("Test final outcome %s", LOOKUP[outcome])
-				log.info("")
-				if rootLogger.getEffectiveLevel() == logging._levelNames['CRITICAL']: log.critical("%s: %s", LOOKUP[outcome], descriptor.id)
 				
 				# call the hook for end of test execution
 				self.testComplete(testObj, outputDirectory)
