@@ -279,7 +279,7 @@ class BaseRunner(ProcessUser):
 				sys.path.pop()
 				
 				# call the test object to run it
-				testTime = testObj(exc_info=exc_info)
+				keyboardInterupt, testTime = testObj(exc_info=exc_info)
 				
 				# get and log the final outcome for the test
 				totalDuration = totalDuration + testTime

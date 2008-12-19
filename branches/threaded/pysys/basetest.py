@@ -142,6 +142,7 @@ class BaseTest(ProcessUser):
 		
 		# execute the test
 		startTime = time.time()
+		keyboardInterupt = False
 		if self.descriptor.state != 'runnable':
 				self.addOutcome(SKIPPED)
 					
@@ -205,7 +206,7 @@ class BaseTest(ProcessUser):
 		del fileHandler
 		
 		# return the overall testime
-		return testTime
+		return keyboardInterupt, testTime
 	
 		
 	def setKeywordArgs(self, xargs):
