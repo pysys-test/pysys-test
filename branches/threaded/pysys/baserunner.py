@@ -247,8 +247,6 @@ class BaseRunner(ProcessUser):
 
 			# loop through tests for the cycle
 			for descriptor in self.descriptors:
-				startTime = time.time()
-				blocked = False
 				keyboardInterupt = False
 
 				# set the output subdirectory and purge contents
@@ -268,25 +266,20 @@ class BaseRunner(ProcessUser):
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 					outputDirectory = ""
 					blocked = True
-
-				# create the logger handler for the run log
-				runLogger = logging.FileHandler(os.path.join(outputDirectory, 'run.log'))
-				runLogger.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
-				runLogger.setLevel(logging.DEBUG)
-				rootLogger.addHandler(runLogger)			
-
+		
 				# run the test execute, validate and cleanup methods
+				exc_info = None
 				try:
 					sys.path.append(os.path.dirname(descriptor.module))
 					exec( "from %s import %s" % (os.path.basename(descriptor.module), descriptor.classname) )
 					exec( "testObj = %s(descriptor, r'%s', self)" % (descriptor.classname, outsubdir) )
 				except:
-					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					exc_info = sys.exc_info()
 					testObj = BaseTest(descriptor, outsubdir, self) 
-					blocked = True
 				sys.path.pop()
 				
-				testTime = testObj()
+				# call the test object to run it
+				testTime = testObj(exc_info=exc_info)
 				
 				# get and log the final outcome for the test
 				totalDuration = totalDuration + testTime
@@ -307,10 +300,6 @@ class BaseRunner(ProcessUser):
 				try: del sys.modules["%s" % os.path.basename(descriptor.module)]
 				except: pass
 				del testObj
-
-				# remove the run logger handler
-				runLogger.close()
-				rootLogger.removeHandler(runLogger)
 
 				# prompt for continuation on control-C
 				if keyboardInterupt == True:

@@ -124,10 +124,23 @@ class BaseTest(ProcessUser):
 		
 	
 	def __call__(self, *args, **kwargs):
+		"""Implementation of the call method to allow direct invocation of the test class. 
+		
+		"""
+		# create a file handler to capture the test output (default level is INFO unless the 
+		# stdoutHandler is set to be in DEBUG)
+		fileHandler = logging.FileHandler(os.path.join(self.output, 'run.log'))
+		fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
+		fileHandler.setLevel(logging.INFO)
+		if stdoutHandler.level == logging.DEBUG: fileHandler.setLevel(logging.DEBUG)
+		rootLogger.addHandler(fileHandler)
+		
+		# log the header
 		log.info("==========================================")
-		log.info("		" + self.descriptor.id)
+		log.info(" " + self.descriptor.id)
 		log.info("==========================================")
 		
+		# execute the test
 		startTime = time.time()
 		if self.descriptor.state != 'runnable':
 				self.addOutcome(SKIPPED)
@@ -135,6 +148,10 @@ class BaseTest(ProcessUser):
 		elif self.mode and self.mode not in self.descriptor.modes:
 			log.info("Unable to run test in %s mode", self.mode)
 			self.addOutcome(SKIPPED)
+		
+		elif kwargs.has_key("exc_info") and kwargs["exc_info"] != None:
+			log.info("caught %s: %s", kwargs["exc_info"][0], kwargs["exc_info"][1], exc_info=kwargs["exc_info"])
+			self.addOutcome(BLOCKED)
 
 		else:
 			try:
@@ -180,24 +197,16 @@ class BaseTest(ProcessUser):
 		log.info("Test duration %.2f secs", testTime)
 		log.info("Test final outcome %s", LOOKUP[self.getOutcome()])
 		log.info("")
-		if rootLogger.getEffectiveLevel() == logging._levelNames['CRITICAL']: log.critical("%s: %s", LOOKUP[self.getOutcome()], self.descriptor.id)
+		if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[self.getOutcome()], self.descriptor.id)
+		
+		# close and delete the fileHandler
+		fileHandler.close()
+		rootLogger.removeHandler(fileHandler)
+		del fileHandler
+		
+		# return the overall testime
 		return testTime
 	
-	
-	def detectCore(self, dir):
-		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
-		
-		@param dir: The directory to search for core files
-		@return: C{True} if a core detected, None if no core detected
-		@rtype: integer 
-		"""
-		for file in os.listdir(dir):
-			path = os.path.join(dir, file)
-			mode = os.stat(path)[stat.ST_MODE]
-
-			if stat.S_ISREG(mode):
-				if re.search('^core', file): return True
-
 		
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the test class.
@@ -426,6 +435,21 @@ class BaseTest(ProcessUser):
 		except ProcessTimeout:
 			log.info("Unable to wait for process")
 			self.addOutcome(TIMEDOUT)
+
+
+	def detectCore(self, dir):
+		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
+		
+		@param dir: The directory to search for core files
+		@return: C{True} if a core detected, None if no core detected
+		@rtype: integer 
+		"""
+		for file in os.listdir(dir):
+			path = os.path.join(dir, file)
+			mode = os.stat(path)[stat.ST_MODE]
+
+			if stat.S_ISREG(mode):
+				if re.search('^core', file): return True
 
 
 	def startProcessMonitor(self, process, interval, file, **kwargs):

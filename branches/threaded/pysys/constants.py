@@ -32,6 +32,7 @@ distribution.
 import sys, re, os, os.path, socket, logging, sets
 
 from pysys import rootLogger
+from pysys import stdoutHandler
 
 # set the platform and platform related constants
 HOSTNAME = socket.getfqdn()
@@ -77,9 +78,6 @@ TIMEDOUT = 24
 DUMPEDCORE = 25
 BLOCKED = 26
 SKIPPED = 27
-WARN = 30
-INFO = 31
-DEBUG = 32
 
 LOOKUP = {}
 LOOKUP[True] = "TRUE"

@@ -22,6 +22,8 @@
 import sys, os, os.path, stat, glob, getopt, sets, re, string, logging
 
 from pysys import rootLogger
+from pysys import stdoutHandler
+
 from pysys import __version__
 from pysys.constants import *
 from pysys.exceptions import *
@@ -33,12 +35,6 @@ EXPR1 = re.compile("^[\w\.]*=.*$")
 EXPR2 = re.compile("^[\w\.]*$")
 EXPR3 = re.compile("^[\w]*_([0-9]+)$")
 
-consoleLogger = logging.StreamHandler(sys.stdout)
-consoleFormatter = logging.Formatter('%(asctime)s %(levelname)-5s %(message)s')
-consoleLogger.setFormatter(consoleFormatter)
-consoleLogger.setLevel(logging.NOTSET)
-rootLogger.addHandler(consoleLogger)
-
 log = logging.getLogger('pysys.launcher.console')
 log.setLevel(logging.NOTSET)
 
@@ -47,7 +43,6 @@ class ConsoleCleanTestHelper:
 	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
-		self.verbosity = INFO
 		self.outsubdir = PLATFORM
 		self.all = False
 		self.name = name
@@ -81,16 +76,15 @@ class ConsoleCleanTestHelper:
 				self.all = True
 
 			elif option in ("-v", "--verbosity"):
-				self.verbosity = value
-				if self.verbosity == "DEBUG":
-					rootLogger.setLevel(logging.DEBUG)
-				elif self.verbosity == "INFO":
-					rootLogger.setLevel(logging.INFO)
-				elif self.verbosity == "WARN":
-					rootLogger.setLevel(logging.WARN)	
-				elif self.verbosity == "CRIT":
-					rootLogger.setLevel(logging.CRITICAL)	
-
+				if value == "DEBUG":
+					stdoutHandler.setLevel(logging.DEBUG)
+				elif value == "INFO":
+					stdoutHandler.setLevel(logging.INFO)
+				elif value == "WARN":
+					stdoutHandler.setLevel(logging.WARN)	
+				elif value == "CRIT":
+					stdoutHandler.setLevel(logging.CRITICAL)
+				
 			elif option in ("-o", "--outdir"):
 				self.outsubdir = value
 
@@ -382,7 +376,6 @@ class ConsoleLaunchHelper:
 		self.arguments = []
 		self.record = False
 		self.purge = False
-		self.verbosity = INFO
 		self.type = None
 		self.trace = None
 		self.includes = []
@@ -454,13 +447,13 @@ class ConsoleLaunchHelper:
 			elif option in ("-v", "--verbosity"):
 				self.verbosity = value
 				if self.verbosity == "DEBUG":
-					rootLogger.setLevel(logging.DEBUG)
+					stdoutHandler.setLevel(logging.DEBUG)
 				elif self.verbosity == "INFO":
-					rootLogger.setLevel(logging.INFO)
+					stdoutHandler.setLevel(logging.INFO)
 				elif self.verbosity == "WARN":
-					rootLogger.setLevel(logging.WARN)	
+					stdoutHandler.setLevel(logging.WARN)	
 				elif self.verbosity == "CRIT":
-					rootLogger.setLevel(logging.CRITICAL)	
+					stdoutHandler.setLevel(logging.CRITICAL)	
 
 			elif option in ("-a", "--type"):
 				self.type = value

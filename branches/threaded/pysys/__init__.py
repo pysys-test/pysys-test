@@ -75,4 +75,12 @@ __all__     = [ "constants",
 rootLogger = logging.getLogger('pysys')
 """The root logger for all logging within PySys."""
 
-rootLogger.setLevel(logging.INFO)
+rootLogger.setLevel(logging.DEBUG)
+
+stdoutHandler = logging.StreamHandler(sys.stdout)
+"""The default stdout logging handler for all logging within PySys."""
+
+stdoutFormatter = logging.Formatter('%(asctime)s %(levelname)-5s %(message)s')
+stdoutHandler.setFormatter(stdoutFormatter)
+stdoutHandler.setLevel(logging.INFO)
+rootLogger.addHandler(stdoutHandler)
