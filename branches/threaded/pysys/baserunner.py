@@ -28,11 +28,12 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os, os.path, sys, stat, re, traceback, time, math, logging, string
+import os, os.path, sys, stat, re, traceback, time, math, logging, string, new
 
 from pysys import rootLogger
 from pysys.constants import *
 from pysys.exceptions import *
+from pysys.utils.threadpool import *
 from pysys.utils.filecopy import filecopy
 from pysys.utils.filegrep import filegrep
 from pysys.utils.filediff import filediff
@@ -240,6 +241,8 @@ class BaseRunner(ProcessUser):
 				try: writer.setup(numTests=self.cycle * len(self.descriptors))
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
+		threadPool = ThreadPool(2)
+
 		# loop through each cycle
 		for cycle in range(self.cycle):
 			results[cycle] = {}
@@ -268,51 +271,12 @@ class BaseRunner(ProcessUser):
 					blocked = True
 		
 				# run the test execute, validate and cleanup methods
-				exc_info = None
-				try:
-					sys.path.append(os.path.dirname(descriptor.module))
-					exec( "from %s import %s" % (os.path.basename(descriptor.module), descriptor.classname) )
-					exec( "testObj = %s(descriptor, r'%s', self)" % (descriptor.classname, outsubdir) )
-				except:
-					exc_info = sys.exc_info()
-					testObj = BaseTest(descriptor, outsubdir, self) 
-				sys.path.pop()
-				
-				# call the test object to run it
-				keyboardInterupt, testTime = testObj(exc_info=exc_info)
-				
-				# get and log the final outcome for the test
-				totalDuration = totalDuration + testTime
-				outcome = testObj.getOutcome()
-				results[cycle][outcome].append(descriptor.id)
-				
-				# call the hook for end of test execution
-				self.testComplete(testObj, outputDirectory)
-				totalExecuted = totalExecuted + 1
-				
-				# pass the test object to the test writers is recording
-				if self.record:
-					for writer in self.writers:
-						try: writer.processResult(testObj, cycle=cycle)
-						except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-				
-				# perform cleanup actions
-				try: del sys.modules["%s" % os.path.basename(descriptor.module)]
-				except: pass
-				del testObj
+				runObj = TestRunner(descriptor, outputDirectory, self.mode, self)
+				request = WorkRequest(runObj, callback=self.foo)
+				threadPool.putRequest(request)
+			
+			threadPool.wait()
 
-				# prompt for continuation on control-C
-				if keyboardInterupt == True:
-					while 1:
-						print ""
-						print "Keyboard interupt detected, continue running tests? [yes|no] ... ",
-						line = string.strip(sys.stdin.readline())
-						if line == "y" or line == "yes":
-							break
-						elif line == "n" or line == "no":
-							self.cycleComplete()
-							self.cleanup()
-							sys.exit(1)
 
 			# call the hook for end of cycle
 			try:
@@ -353,7 +317,119 @@ class BaseRunner(ProcessUser):
 		return results
 
 
+	def foo(self, a, b):
+		pass
 
+
+
+class TestRunner:
+	def __init__ (self, descriptor, outsubdir, mode, runner):
+		self.descriptor = descriptor
+		self.outsubdir = outsubdir
+		self.mode = mode
+		self.runner = runner
+	
+	def __call__(self, *args, **kwargs):
+		exc_info = None
+		try:
+			sys.path.append(os.path.dirname(self.descriptor.module))
+			testModule = __import__(os.path.basename(self.descriptor.module))
+			testObj = getattr(testModule, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
+			try: del sys.modules["%s" % os.path.basename(self.descriptor.module)]
+			except: pass
+		except:
+			exc_info = sys.exc_info()
+			testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
+		sys.path.pop()
+				
+				
+		# create a file handler to capture the test output (default level is INFO unless the 
+		# stdoutHandler is set to be in DEBUG)
+		#fileHandler = logging.FileHandler(os.path.join(self.output, 'run.log'))
+		#fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
+		#fileHandler.setLevel(logging.INFO)
+		#if stdoutHandler.level == logging.DEBUG: fileHandler.setLevel(logging.DEBUG)
+		#log.addHandler(fileHandler)
+		
+		# log the header
+		log.info("==========================================")
+		log.info(" " + self.descriptor.id)
+		log.info("==========================================")
+		
+		# execute the test
+		startTime = time.time()
+		keyboardInterupt = False
+		if self.descriptor.state != 'runnable':
+				testObj.addOutcome(SKIPPED)
+					
+		elif self.mode and self.mode not in self.descriptor.modes:
+			log.info("Unable to run test in %s mode", self.mode)
+			testObj.addOutcome(SKIPPED)
+		
+		elif exc_info != None:
+			log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+			testObj.addOutcome(BLOCKED)
+
+		else:
+			try:
+				testObj.setup()
+				testObj.execute()
+			except KeyboardInterrupt:
+				keyboardInterupt = True
+				log.info("test interrupt from keyboard")
+				self.outcome.append(BLOCKED)
+			except:
+				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				testObj.addOutcome(BLOCKED)
+			else:
+				try:
+				  	testObj.validate()
+				except KeyboardInterrupt:
+					keyboardInterupt = True
+					log.info("test interrupt from keyboard")
+					testObj.addOutcome(BLOCKED)
+				except:
+				  	log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				  	testObj.addOutcome(BLOCKED)
+					
+				try:
+					if self.detectCore(self.outsubdir):
+						log.info("core detected in output subdirectory")
+						self.addOutcome(DUMPEDCORE)
+				except:
+					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
+			try:
+				testObj.cleanup()
+			except KeyboardInterrupt:
+				keyboardInterupt = True
+				log.info("test interrupt from keyboard")
+				testObj.addOutcome(BLOCKED)
+			except:
+				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
+		# get and log the final outcome for the test
+		testTime = math.floor(100*(time.time() - startTime))/100.0
+		log.info("")
+		log.info("Test duration %.2f secs", testTime)
+		log.info("Test final outcome %s", LOOKUP[testObj.getOutcome()])
+		log.info("")
+		if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[testObj.getOutcome()], self.descriptor.id)
+		
+		# close and delete the fileHandler
+		#fileHandler.close()
+		#rootLogger.removeHandler(fileHandler)
+		#del fileHandler
+		
+				
+		# return the overall testime
+		return keyboardInterupt, testTime
 	
 
+	def detectCore(self, dir):
+		for file in os.listdir(dir):
+			path = os.path.join(dir, file)
+			mode = os.stat(path)[stat.ST_MODE]
 
+			if stat.S_ISREG(mode):
+				if re.search('^core', file): return True
