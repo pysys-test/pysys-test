@@ -28,7 +28,7 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os, os.path, sys, stat, re, traceback, time, math, logging, string, new
+import os, os.path, sys, stat, re, traceback, time, math, logging, string, new, threading
 
 from pysys import rootLogger
 from pysys.constants import *
@@ -45,6 +45,8 @@ from pysys.process.user import ProcessUser
 
 log = logging.getLogger('pysys.baserunner')
 log.setLevel(logging.NOTSET)
+
+_global_lock = threading.Lock()
 
 
 class BaseRunner(ProcessUser):
@@ -241,7 +243,7 @@ class BaseRunner(ProcessUser):
 				try: writer.setup(numTests=self.cycle * len(self.descriptors))
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-		threadPool = ThreadPool(2)
+		threadPool = ThreadPool(8)
 
 		# loop through each cycle
 		for cycle in range(self.cycle):
@@ -331,15 +333,19 @@ class TestRunner:
 	
 	def __call__(self, *args, **kwargs):
 		exc_info = None
+		
+		_global_lock.acquire()
 		try:
 			sys.path.append(os.path.dirname(self.descriptor.module))
 			testModule = __import__(os.path.basename(self.descriptor.module))
 			testObj = getattr(testModule, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
 			try: del sys.modules["%s" % os.path.basename(self.descriptor.module)]
-			except: pass
+			except: pass	
 		except:
 			exc_info = sys.exc_info()
 			testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
+		_global_lock.release()	
+		
 		sys.path.pop()
 				
 				
