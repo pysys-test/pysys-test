@@ -82,5 +82,5 @@ stdoutHandler = logging.StreamHandler(sys.stdout)
 
 stdoutFormatter = logging.Formatter('%(asctime)s %(levelname)-5s %(message)s')
 stdoutHandler.setFormatter(stdoutFormatter)
-stdoutHandler.setLevel(logging.INFO)
+stdoutHandler.setLevel(logging.CRITICAL)
 rootLogger.addHandler(stdoutHandler)

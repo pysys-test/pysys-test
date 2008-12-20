@@ -276,10 +276,9 @@ class BaseRunner(ProcessUser):
 				runObj = TestRunner(descriptor, outputDirectory, self.mode, self)
 				request = WorkRequest(runObj, callback=self.foo)
 				threadPool.putRequest(request)
-			
+				
 			threadPool.wait()
-
-
+			
 			# call the hook for end of cycle
 			try:
 				self.cycleComplete()
@@ -319,19 +318,33 @@ class BaseRunner(ProcessUser):
 		return results
 
 
-	def foo(self, a, b):
-		pass
+	def foo(self, request, result):
+		for line in result.buffer: print line
 
 
 class MyFileHandler(logging.FileHandler):
 	def __init__(self, filename):
 		self.threadId = thread.get_ident()
+		self.buffer = []
 		logging.FileHandler.__init__(self, filename, "a")
-		
+				
 	def emit(self, record):
 		if self.threadId != thread.get_ident(): return
+		self.buffer.append(self.format(record))
 		logging.FileHandler.emit(self, record)
+		
+	def getBuffer(self):
+		return self.buffer
 
+
+class TestResult:
+	def __init__(self, id, outcome, buffer, keyboardInterupt, testTime):
+		self.id = id
+		self.outcome = outcome
+		self.buffer = buffer
+		self.keyboardInterupt = keyboardInterupt
+		self.testTime = testTime
+		
 
 class TestRunner:
 	def __init__ (self, descriptor, outsubdir, mode, runner):
@@ -431,15 +444,16 @@ class TestRunner:
 		log.info("Test duration %.2f secs", testTime)
 		log.info("Test final outcome %s", LOOKUP[testObj.getOutcome()])
 		log.info("")
-		if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[testObj.getOutcome()], self.descriptor.id)
+		#if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[testObj.getOutcome()], self.descriptor.id)
 		
 		# close and delete the fileHandler
+		buffer = fileHandler.getBuffer()
 		fileHandler.close()
 		rootLogger.removeHandler(fileHandler)
 		del fileHandler
 				
 		# return the overall testime
-		return keyboardInterupt, testTime
+		return TestResult(self.descriptor.id, testObj.getOutcome(), buffer, keyboardInterupt, testTime)
 	
 
 	def detectCore(self, dir):
