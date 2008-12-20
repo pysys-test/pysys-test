@@ -28,7 +28,7 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os, os.path, sys, stat, re, traceback, time, math, logging, string, new, threading
+import os, os.path, sys, stat, re, traceback, time, math, logging, string, new, thread, threading
 
 from pysys import rootLogger
 from pysys.constants import *
@@ -323,6 +323,15 @@ class BaseRunner(ProcessUser):
 		pass
 
 
+class MyFileHandler(logging.FileHandler):
+	def __init__(self, filename):
+		self.threadId = thread.get_ident()
+		logging.FileHandler.__init__(self, filename, "a")
+		
+	def emit(self, record):
+		if self.threadId != thread.get_ident(): return
+		logging.FileHandler.emit(self, record)
+
 
 class TestRunner:
 	def __init__ (self, descriptor, outsubdir, mode, runner):
@@ -330,7 +339,7 @@ class TestRunner:
 		self.outsubdir = outsubdir
 		self.mode = mode
 		self.runner = runner
-	
+		
 	def __call__(self, *args, **kwargs):
 		exc_info = None
 		
@@ -351,11 +360,13 @@ class TestRunner:
 				
 		# create a file handler to capture the test output (default level is INFO unless the 
 		# stdoutHandler is set to be in DEBUG)
-		#fileHandler = logging.FileHandler(os.path.join(self.output, 'run.log'))
-		#fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
-		#fileHandler.setLevel(logging.INFO)
-		#if stdoutHandler.level == logging.DEBUG: fileHandler.setLevel(logging.DEBUG)
-		#log.addHandler(fileHandler)
+		rootLogger = None
+		rootLogger = logging.getLogger('pysys')
+		fileHandler = MyFileHandler(os.path.join(self.outsubdir, 'run.log'))
+		fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
+		fileHandler.setLevel(logging.INFO)
+		if stdoutHandler.level == logging.DEBUG: fileHandler.setLevel(logging.DEBUG)
+		rootLogger.addHandler(fileHandler)
 		
 		# log the header
 		log.info("==========================================")
@@ -423,10 +434,9 @@ class TestRunner:
 		if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[testObj.getOutcome()], self.descriptor.id)
 		
 		# close and delete the fileHandler
-		#fileHandler.close()
-		#rootLogger.removeHandler(fileHandler)
-		#del fileHandler
-		
+		fileHandler.close()
+		rootLogger.removeHandler(fileHandler)
+		del fileHandler
 				
 		# return the overall testime
 		return keyboardInterupt, testTime
