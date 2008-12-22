@@ -312,7 +312,7 @@ class BaseRunner(ProcessUser):
 			if self.threads > 1: 
 				if spacer: self.log.info(""); spacer = False
 				for line in self.resultsQueue[i].testFileHandler.getBuffer(): self.log.info(line)	
-			if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].id)
+			if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].descriptor.id)
 			
 			# call the hook for end of test execution
 			self.testComplete(self.resultsQueue[i].testObj, self.resultsQueue[i].outsubdir)
