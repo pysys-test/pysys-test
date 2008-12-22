@@ -242,7 +242,7 @@ class BaseRunner(ProcessUser):
 					request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 					threadPool.putRequest(request)
 				else:
-					self.containerCallback(container())
+					self.containerCallback(thread.get_ident(), container())
 				counter = counter + 1
 			
 			# wait for the threads to complete if more than one thread	
@@ -309,13 +309,10 @@ class BaseRunner(ProcessUser):
 			
 		spacer = True
 		for i in range(self.resultsPointer, len(self.resultsQueue)):
-			if self.resultsQueue[i] == None: 
-				break
+			if self.resultsQueue[i] == None: break
 			
 			if self.threads > 1: 
-				if spacer: 
-					self.log.info("")
-					spacer = False
+				if spacer: self.log.info(""); spacer = False
 				for line in self.resultsQueue[i].testFileHandler.getBuffer(): self.log.info(line)	
 			if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].id)
 			
