@@ -383,11 +383,12 @@ class ConsoleLaunchHelper:
 		self.cycle = 1
 		self.outsubdir = PLATFORM
 		self.mode = None
+		self.threads = 1
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpv:a:t:i:e:c:o:m:X:'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode="]
+		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:X:'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads="]
 
 
 	def printUsage(self, printXOptions):
@@ -405,6 +406,7 @@ class ConsoleLaunchHelper:
 		print "       -c | --cycle     INT        set the the number of cycles to run the tests"
 		print "       -o | --outdir    STRING     set the name of the test output subdirectory"
 		print "       -m | --mode      STRING     set the user defined mode to run the tests"
+		print "       -n | --threads   INT        set the number of worker threads to run the tests (default 1)"
 		print "       -X               KEY=VALUE  set user defined options to be passed through to the test and "
 		print "                                   runner classes. The left hand side string is the data attribute "
 		print "                                   to set, the right hand side string the value (True of not specified) "
@@ -483,6 +485,13 @@ class ConsoleLaunchHelper:
 			elif option in ("-m", "--mode"):
 				self.mode = value
 
+			elif option in ("-n", "--threads"):
+				try:
+					self.threads = int(value)
+				except:
+					print "Error parsing command line arguments: A valid integer for the number of threads must be supplied"
+					self.printUsage(printXOptions)
+
 			elif option in ("-X"):
 				if EXPR1.search(value) != None:
 				  exec("self.userOptions['%s'] = '%s'" % (value.split('=')[0], value.split('=')[1]) )
@@ -493,5 +502,5 @@ class ConsoleLaunchHelper:
 		except Exception, (strerror):
 			log.info(strerror)
 			descriptors = []
-		return self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions
+		return self.record, self.purge, self.cycle, self.mode, self.threads, self.outsubdir, descriptors, self.userOptions
 		

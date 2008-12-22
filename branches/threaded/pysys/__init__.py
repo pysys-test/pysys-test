@@ -95,7 +95,7 @@ class ThreadedFileHandler(logging.FileHandler):
 				
 	def emit(self, record):
 		if self.threadId != thread.get_ident(): return
-		self.buffer.append(self.format(record))
+		self.buffer.append(record.getMessage())
 		logging.FileHandler.emit(self, record)
 		
 	def getBuffer(self):
