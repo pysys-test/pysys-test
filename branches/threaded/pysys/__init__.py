@@ -40,7 +40,7 @@ and automated testcases provides a single framework for all test organisation re
 
 """
 
-import sys, logging
+import sys, logging, thread
 logging._levelNames[50] = 'CRIT'
 logging._levelNames[30] = 'WARN'
 
@@ -72,15 +72,48 @@ __all__     = [ "constants",
                 "xml"]
 """The submodules of PySys."""
 
-rootLogger = logging.getLogger('pysys')
+
+class ThreadedStdoutHandler(logging.StreamHandler):
+	"""Stream handler to only log from the creating thread."""
+	
+	def __init__(self, strm):
+		self.threadId = thread.get_ident()
+		logging.StreamHandler.__init__(self, strm)
+				
+	def emit(self, record):
+		if self.threadId != thread.get_ident(): return
+		logging.StreamHandler.emit(self, record)
+		
+		
+class ThreadedFileHandler(logging.FileHandler):
+	"""File handler to only log from the creating thread."""
+	
+	def __init__(self, filename):
+		self.threadId = thread.get_ident()
+		self.buffer = []
+		logging.FileHandler.__init__(self, filename, "a")
+				
+	def emit(self, record):
+		if self.threadId != thread.get_ident(): return
+		self.buffer.append(self.format(record))
+		logging.FileHandler.emit(self, record)
+		
+	def getBuffer(self):
+		return self.buffer
+
+rootLogger = logging.getLogger()
 """The root logger for all logging within PySys."""
 
 rootLogger.setLevel(logging.DEBUG)
+"""The root logger log level (set to DEBUG as all filtering is done by the handlers)."""
 
-stdoutHandler = logging.StreamHandler(sys.stdout)
+stdoutHandler = ThreadedStdoutHandler(sys.stdout)
 """The default stdout logging handler for all logging within PySys."""
 
 stdoutFormatter = logging.Formatter('%(asctime)s %(levelname)-5s %(message)s')
+"""The formatter for output to stdout."""
+
 stdoutHandler.setFormatter(stdoutFormatter)
-stdoutHandler.setLevel(logging.CRITICAL)
+stdoutHandler.setLevel(logging.INFO)
 rootLogger.addHandler(stdoutHandler)
+

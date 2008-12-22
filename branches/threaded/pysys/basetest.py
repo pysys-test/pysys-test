@@ -120,10 +120,12 @@ class BaseTest(ProcessUser):
 		self.monitorList = []
 		self.manualTester = None
 		self.outcome = []
-		self.log = log
+		
+		# tests run in a separate thread and so need their own logger
+		self.log = logging.getLogger('pysys.test.%s' % str(thread.get_ident()))
+		self.log.setLevel(logging.NOTSET)
+		
 		self.project = PROJECT
-
-
 
 
 	def setKeywordArgs(self, xargs):

@@ -30,7 +30,7 @@ API documentation.
 """
 import os, os.path, sys, stat, re, traceback, time, math, logging, string, new, thread, threading
 
-from pysys import rootLogger
+from pysys import rootLogger, ThreadedFileHandler
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
@@ -243,7 +243,7 @@ class BaseRunner(ProcessUser):
 				try: writer.setup(numTests=self.cycle * len(self.descriptors))
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-		threadPool = ThreadPool(8)
+		threadPool = ThreadPool(2)
 
 		# loop through each cycle
 		for cycle in range(self.cycle):
@@ -322,21 +322,6 @@ class BaseRunner(ProcessUser):
 		for line in result.buffer: print line
 
 
-class MyFileHandler(logging.FileHandler):
-	def __init__(self, filename):
-		self.threadId = thread.get_ident()
-		self.buffer = []
-		logging.FileHandler.__init__(self, filename, "a")
-				
-	def emit(self, record):
-		if self.threadId != thread.get_ident(): return
-		self.buffer.append(self.format(record))
-		logging.FileHandler.emit(self, record)
-		
-	def getBuffer(self):
-		return self.buffer
-
-
 class TestResult:
 	def __init__(self, id, outcome, buffer, keyboardInterupt, testTime):
 		self.id = id
@@ -375,7 +360,7 @@ class TestRunner:
 		# stdoutHandler is set to be in DEBUG)
 		rootLogger = None
 		rootLogger = logging.getLogger('pysys')
-		fileHandler = MyFileHandler(os.path.join(self.outsubdir, 'run.log'))
+		fileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
 		fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
 		fileHandler.setLevel(logging.INFO)
 		if stdoutHandler.level == logging.DEBUG: fileHandler.setLevel(logging.DEBUG)
