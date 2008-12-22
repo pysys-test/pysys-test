@@ -112,6 +112,9 @@ class BaseRunner(ProcessUser):
 			for key in properties.keys(): setattr(writer, key, properties[key])
 			self.writers.append(writer)
 
+		self.resultsPointer = 0
+		self.resultsQueue = []
+
 
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the class.
@@ -225,17 +228,22 @@ class BaseRunner(ProcessUser):
 
 		# loop through each cycle
 		for cycle in range(self.cycle):
-			results[cycle] = {}
+			self.resultsPointer = 0
+		  	self.resultsQueue = []
+		  	results[cycle] = {}
 			for outcome in PRECEDENT: results[cycle][outcome] = []
 
 			# loop through tests for the cycle
+			counter = 0
 			for descriptor in self.descriptors:
-				container = TestContainer(descriptor, cycle, self)
+				self.resultsQueue.append(None)
+				container = TestContainer(counter, descriptor, cycle, self)
 				if self.threads > 1:
 					request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 					threadPool.putRequest(request)
 				else:
 					self.containerCallback(container())
+				counter = counter + 1
 			
 			# wait for the threads to complete if more than one thread	
 			if self.threads > 1: 
@@ -285,7 +293,7 @@ class BaseRunner(ProcessUser):
 		return results
 
 
-	def containerCallback(self, container):
+	def containerCallback(self, thread, container):
 		"""Callback method on completion of running a test.
 		
 		@param container: A reference to the container object that ran the test
@@ -296,27 +304,39 @@ class BaseRunner(ProcessUser):
 		of the test result to the result writers, and for deletion of the test container object. 
 		
 		"""
-		if self.threads > 1: 
-			for line in container.testFileHandler.getBuffer(): self.log.info(line)	
-		if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[container.testObj.getOutcome()], container.id)
+		self.resultsQueue[container.counter] = container
+		if self.threads > 1: self.log.info("[%s] Queueing result for test %s" % (thread, container.descriptor.id))
+			
+		spacer = True
+		for i in range(self.resultsPointer, len(self.resultsQueue)):
+			if self.resultsQueue[i] == None: 
+				break
+			
+			if self.threads > 1: 
+				if spacer: 
+					self.log.info("")
+					spacer = False
+				for line in self.resultsQueue[i].testFileHandler.getBuffer(): self.log.info(line)	
+			if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].id)
+			
+			# call the hook for end of test execution
+			self.testComplete(self.resultsQueue[i].testObj, self.resultsQueue[i].outsubdir)
+					
+			# pass the test object to the test writers is recording
+			if self.record:
+				for writer in self.writers:
+					try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle)
+					except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			
+			# prompt for continuation on control-C
+			if self.resultsQueue[i].kbrdInt == True: self.handleKbrdInt()
 		
-		# call the hook for end of test execution
-		self.testComplete(container.testObj, container.outsubdir)
-				
-		# pass the test object to the test writers is recording
-		if self.record:
-			for writer in self.writers:
-				try: writer.processResult(container.testObj, cycle=container.cycle)
-				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-		
-		# prompt for continuation on control-C
-		if container.kbrdInt == True: self.handleKbrdInt()
-	
-		# delete the container
-		del container
-		
-	
-	def containerExceptionCallback(self, exc_info):
+			# delete the container
+			self.resultsQueue[i] = None
+			self.resultsPointer = self.resultsPointer + 1
+
+
+	def containerExceptionCallback(self, thread, exc_info):
 		"""Callback method for unhandled exceptions thrown when running a test.
 		
 		@param exc_info: The tuple of values as created from sys.exc_info()
@@ -347,7 +367,7 @@ class TestContainer:
 	
 	"""
 	
-	def __init__ (self, descriptor, cycle, runner):
+	def __init__ (self, counter, descriptor, cycle, runner):
 		"""Create an instance of the TestContainer class.
 		
 		@param descriptor: A reference to the testcase descriptor
@@ -355,6 +375,7 @@ class TestContainer:
 		@param runner: A reference to the runner that created this class
 
 		"""
+		self.counter = counter
 		self.descriptor = descriptor
 		self.cycle = cycle
 		self.runner = runner
