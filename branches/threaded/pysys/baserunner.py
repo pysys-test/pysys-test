@@ -112,6 +112,8 @@ class BaseRunner(ProcessUser):
 			for key in properties.keys(): setattr(writer, key, properties[key])
 			self.writers.append(writer)
 
+		self.duration = 0
+		self.results = {}
 		self.resultsPointer = 0
 		self.resultsQueue = []
 
@@ -210,10 +212,6 @@ class BaseRunner(ProcessUser):
 		@param printSummary: Indicates if the test results should be reported on test completion
 	
 		"""
-		results = {}
-		totalDuration = 0
-		totalExecuted = 0
-
 		# call the hook to setup prior to running tests
 		self.setup()
 
@@ -230,8 +228,8 @@ class BaseRunner(ProcessUser):
 		for cycle in range(self.cycle):
 			self.resultsPointer = 0
 		  	self.resultsQueue = []
-		  	results[cycle] = {}
-			for outcome in PRECEDENT: results[cycle][outcome] = []
+		  	self.results[cycle] = {}
+			for outcome in PRECEDENT: self.results[cycle][outcome] = []
 
 			# loop through tests for the cycle
 			counter = 0
@@ -269,28 +267,28 @@ class BaseRunner(ProcessUser):
 		# log the summary output to the console
 		if printSummary:
 			log.info("")
-			log.info("Total duration: %.2f (secs)", totalDuration)		
+			log.info("Total duration: %.2f (secs)", self.duration)		
 			log.info("Summary of non passes: ")
 			fails = 0
-			for cycle in results.keys():
-				for outcome in results[cycle].keys():
-					if outcome in FAILS : fails = fails + len(results[cycle][outcome])
+			for cycle in self.results.keys():
+				for outcome in self.results[cycle].keys():
+					if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
 			if fails == 0:
 				log.info("	THERE WERE NO NON PASSES")
 			else:
-				if len(results) == 1:
+				if len(self.results) == 1:
 					for outcome in FAILS:
-						for id in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], id)
+						for id in self.results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], id)
 				else:
-					for key in results.keys():
+					for key in self.results.keys():
 						for outcome in FAILS:
-							for id in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
+							for id in self.results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
 
 		# call the hook to cleanup after running tests
 		self.cleanup()
 
 		# return the results dictionary
-		return results
+		return self.results
 
 
 	def containerCallback(self, thread, container):
@@ -306,7 +304,7 @@ class BaseRunner(ProcessUser):
 		"""
 		self.resultsQueue[container.counter] = container
 		if self.threads > 1: self.log.info("[%s] Queueing result for test %s" % (thread, container.descriptor.id))
-			
+		
 		spacer = True
 		for i in range(self.resultsPointer, len(self.resultsQueue)):
 			if self.resultsQueue[i] == None: break
@@ -327,6 +325,10 @@ class BaseRunner(ProcessUser):
 			
 			# prompt for continuation on control-C
 			if self.resultsQueue[i].kbrdInt == True: self.handleKbrdInt()
+		
+			# store the result
+			self.duration = self.duration + self.resultsQueue[i].testTime
+			self.results[self.resultsQueue[i].cycle][self.resultsQueue[i].testObj.getOutcome()].append(self.resultsQueue[i].descriptor.id)
 		
 			# delete the container
 			self.resultsQueue[i] = None
@@ -388,9 +390,20 @@ class TestContainer:
 		"""Over-ridden call builtin to allow the class instance to be called directly.
 		
 		"""		
-		exc_info = None
+		# create the test summary log file handler
+		self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
+		self.testFileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
+		self.testFileHandler.setLevel(logging.INFO)
+		if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
+		rootLogger.addHandler(self.testFileHandler)
 
+		startTime = time.time()
+		log.info("==========================================")
+		log.info("        " + self.descriptor.id)
+		log.info("==========================================")
+		
 		# set the output subdirectory and purge contents
+		exc_info = None
 		try:
 			outsubdir = self.runner.outsubdir
 			if not os.path.exists(os.path.join(self.descriptor.output, outsubdir)):
@@ -406,7 +419,7 @@ class TestContainer:
 		except:
 			exc_info = sys.exc_info()
 			log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
-		
+			
 		# import the test class
 		_global_lock.acquire()
 		try:
@@ -419,25 +432,12 @@ class TestContainer:
 			exc_info = sys.exc_info()
 			log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 			self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
-			
 		_global_lock.release()	
 		sys.path.pop()
 
-		# create the test summary log file handler
-		self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
-		self.testFileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
-		self.testFileHandler.setLevel(logging.INFO)
-		if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
-		rootLogger.addHandler(self.testFileHandler)
-
-		# execute the test
-		startTime = time.time()
-		log.info("==========================================")
-		log.info("        " + self.descriptor.id)
-		log.info("==========================================")
-		
+		# execute the test if we can
 		if self.descriptor.state != 'runnable':
-				self.testObj.addOutcome(SKIPPED)
+			self.testObj.addOutcome(SKIPPED)
 					
 		elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
 			log.info("Unable to run test in %s mode", self.runner.mode)
