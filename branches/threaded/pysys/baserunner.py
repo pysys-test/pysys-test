@@ -232,10 +232,10 @@ class BaseRunner(ProcessUser):
 			for descriptor in self.descriptors:
 				container = TestContainer(descriptor, cycle, self)
 				if self.threads > 1:
-					request = WorkRequest(container, callback=self.testCallback, exc_callback=self.testExceptionCallback)
+					request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 					threadPool.putRequest(request)
 				else:
-					self.testCallback(container())
+					self.containerCallback(container())
 			
 			# wait for the threads to complete if more than one thread	
 			if self.threads > 1: 
@@ -285,7 +285,7 @@ class BaseRunner(ProcessUser):
 		return results
 
 
-	def testCallback(self, container):
+	def containerCallback(self, container):
 		"""Callback method on completion of running a test.
 		
 		@param container: A reference to the container object that ran the test
@@ -297,10 +297,7 @@ class BaseRunner(ProcessUser):
 		
 		"""
 		if self.threads > 1: 
-			for line in container.testFileHandler.getBuffer(): self.log.info(line)
-		container.testFileHandler.close()
-		rootLogger.removeHandler(container.testFileHandler)
-	
+			for line in container.testFileHandler.getBuffer(): self.log.info(line)	
 		if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[container.testObj.getOutcome()], container.id)
 		
 		# call the hook for end of test execution
@@ -311,21 +308,27 @@ class BaseRunner(ProcessUser):
 			for writer in self.writers:
 				try: writer.processResult(container.testObj, cycle=container.cycle)
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-	
+		
 		# prompt for continuation on control-C
 		if container.kbrdInt == True: self.handleKbrdInt()
-			
-		# cleanup the container class
-		del container
-
-
 	
-	def testExceptionCallback(self, exc_info):
+		# delete the container
+		del container
+		
+	
+	def containerExceptionCallback(self, exc_info):
+		"""Callback method for unhandled exceptions thrown when running a test.
+		
+		@param exc_info: The tuple of values as created from sys.exc_info()
+		 
+		"""
 		log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 
 
-
 	def handleKbrdInt(self):
+		"""Handle a keyboard exception caught during running of a set of testcases.
+		
+		"""
 		while 1:
 			print ""
 			print "Keyboard interupt detected, continue running tests? [yes|no] ... ",
@@ -338,8 +341,20 @@ class BaseRunner(ProcessUser):
 				sys.exit(1)
 
 
+
 class TestContainer:
+	"""Class used for co-ordinating the execution of a single test case.
+	
+	"""
+	
 	def __init__ (self, descriptor, cycle, runner):
+		"""Create an instance of the TestContainer class.
+		
+		@param descriptor: A reference to the testcase descriptor
+		@param cycle: The cycle number of the test
+		@param runner: A reference to the runner that created this class
+
+		"""
 		self.descriptor = descriptor
 		self.cycle = cycle
 		self.runner = runner
@@ -350,7 +365,11 @@ class TestContainer:
 		self.testFileHandler = None
 		self.kbrdInt = False
 		
-	def __call__(self, *args, **kwargs):		
+		
+	def __call__(self, *args, **kwargs):
+		"""Over-ridden call builtin to allow the class instance to be called directly.
+		
+		"""		
 		exc_info = None
 
 		# set the output subdirectory and purge contents
@@ -368,6 +387,7 @@ class TestContainer:
 			self.outsubdir = os.path.join(self.descriptor.output, outsubdir)
 		except:
 			exc_info = sys.exc_info()
+			log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 		
 		# import the test class
 		_global_lock.acquire()
@@ -379,25 +399,25 @@ class TestContainer:
 			except: pass	
 		except:
 			exc_info = sys.exc_info()
+			log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 			self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
+			
 		_global_lock.release()	
 		sys.path.pop()
 
-		# create a file handler to capture the test output (default level is INFO unless the 
-		# stdoutHandler is set to be in DEBUG)
+		# create the test summary log file handler
 		self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
 		self.testFileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
 		self.testFileHandler.setLevel(logging.INFO)
 		if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 		rootLogger.addHandler(self.testFileHandler)
 
-		# log the header
+		# execute the test
+		startTime = time.time()
 		log.info("==========================================")
 		log.info("        " + self.descriptor.id)
 		log.info("==========================================")
 		
-		# execute the test
-		startTime = time.time()
 		if self.descriptor.state != 'runnable':
 				self.testObj.addOutcome(SKIPPED)
 					
@@ -406,37 +426,31 @@ class TestContainer:
 			self.testObj.addOutcome(SKIPPED)
 		
 		elif exc_info != None:
-			log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 			self.testObj.addOutcome(BLOCKED)
 
 		else:
 			try:
 				self.testObj.setup()
 				self.testObj.execute()
+				self.testObj.validate()
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 				log.info("test interrupt from keyboard")
 				self.testObj.addOutcome(BLOCKED)
 			except:
-				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-				self.testObj.addOutcome(BLOCKED)
-			else:
-				try:
-				  	self.testObj.validate()
-				except KeyboardInterrupt:
-					self.kbrdInt = True
-					log.info("test interrupt from keyboard")
-					self.testObj.addOutcome(BLOCKED)
-				except:
-				  	log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-				  	self.testObj.addOutcome(BLOCKED)
+			  	log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			  	self.testObj.addOutcome(BLOCKED)
 					
-				try:
-					if self.__detectCore(self.outsubdir):
-						log.info("core detected in output subdirectory")
-						self.testObj.addOutcome(BLOCKED)	
-				except:
-					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			try:
+				if self.__detectCore(self.outsubdir):
+					log.info("core detected in output subdirectory")
+					self.testObj.addOutcome(DUMPEDCORE)	
+			except KeyboardInterrupt:
+				self.kbrdInt = True
+				log.info("test interrupt from keyboard")
+				self.testObj.addOutcome(BLOCKED)
+			except: 
+				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 			try:
 				self.testObj.cleanup()
@@ -453,7 +467,11 @@ class TestContainer:
 		log.info("Test duration %.2f secs", self.testTime)
 		log.info("Test final outcome %s", LOOKUP[self.testObj.getOutcome()])
 		log.info("")
-	
+
+		# close and remove the file handler
+		self.testFileHandler.close()
+		rootLogger.removeHandler(self.testFileHandler)
+
 		# return a reference to self
 		return self
 	
