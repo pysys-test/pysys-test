@@ -48,9 +48,9 @@ def printUsage():
 	
 def runTest(args):
 	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
-	record, purge, cycle, mode, outsubdir, descriptors, userOptions = launcher.parseArgs(args)
+	record, purge, cycle, mode, threads, outsubdir, descriptors, userOptions = launcher.parseArgs(args)
 	exec( "from %s import %s" % (PROJECT.runnerModule, PROJECT.runnerClassname) )
-	exec( "runner = %s(record, purge, cycle, mode, outsubdir, descriptors, userOptions)" % (PROJECT.runnerClassname))
+	exec( "runner = %s(record, purge, cycle, mode, threads, outsubdir, descriptors, userOptions)" % (PROJECT.runnerClassname))
 	runner.start()
 
 def makeTest(args):
