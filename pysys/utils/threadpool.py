@@ -23,7 +23,9 @@
 # by Christopher Arndt (http://chrisarndt.de/en/software/python/threadpool/)
 # with minor modifications.
  
-import sys, threading, Queue, traceback
+import sys, logging, thread, threading, Queue, traceback
+
+from pysys import log
 
 
 # exceptions
@@ -68,6 +70,7 @@ class WorkerThread(threading.Thread):
 		
 		"""
 		threading.Thread.__init__(self, **kwds)
+		log.info("[%s] Creating thread for test execution" % self.getName())
 		self.setDaemon(1)
 		self._requests_queue = requests_queue
 		self._results_queue = results_queue
@@ -90,10 +93,10 @@ class WorkerThread(threading.Thread):
 					break
 				try:
 					result = request.callable(*request.args, **request.kwds)
-					self._results_queue.put((request, result))
+					self._results_queue.put((request, self.getName(), result))
 				except:
 					request.exception = True
-					self._results_queue.put((request, sys.exc_info()))
+					self._results_queue.put((request, self.getName(), sys.exc_info()))
 
 	def dismiss(self):
 		"""Stop running of the worker thread."""
@@ -231,12 +234,12 @@ class ThreadPool:
 			elif block and not self.workers:
 				raise NoWorkersAvailable
 			try:
-				request, result = self._results_queue.get(block=block)
+				request, name, result = self._results_queue.get(block=block)
 				if request.exception and request.exc_callback:
-					request.exc_callback(request, result)
+					request.exc_callback(name, result)
 				if request.callback and not \
 					   (request.exception and request.exc_callback):
-					request.callback(request, result)
+					request.callback(name, result)
 				del self.workRequests[request.requestID]
 			except Queue.Empty:
 				break

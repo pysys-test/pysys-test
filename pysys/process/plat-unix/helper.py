@@ -21,11 +21,9 @@
 
 import signal, time, copy, logging, Queue, thread, errno
 
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
-
-# create the class logger
-log = logging.getLogger('pysys.process.helper')
 
 # check for new lines on end of a string
 EXPR = re.compile(".*\n$")

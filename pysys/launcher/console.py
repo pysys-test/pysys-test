@@ -21,7 +21,9 @@
 
 import sys, os, os.path, stat, glob, getopt, sets, re, string, logging
 
-from pysys import rootLogger
+from pysys import log
+from pysys import stdoutHandler
+
 from pysys import __version__
 from pysys.constants import *
 from pysys.exceptions import *
@@ -33,21 +35,11 @@ EXPR1 = re.compile("^[\w\.]*=.*$")
 EXPR2 = re.compile("^[\w\.]*$")
 EXPR3 = re.compile("^[\w]*_([0-9]+)$")
 
-consoleLogger = logging.StreamHandler(sys.stdout)
-consoleFormatter = logging.Formatter('%(asctime)s %(levelname)-5s %(message)s')
-consoleLogger.setFormatter(consoleFormatter)
-consoleLogger.setLevel(logging.NOTSET)
-rootLogger.addHandler(consoleLogger)
-
-log = logging.getLogger('pysys.launcher.console')
-log.setLevel(logging.NOTSET)
-
 
 class ConsoleCleanTestHelper:
 	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
-		self.verbosity = INFO
 		self.outsubdir = PLATFORM
 		self.all = False
 		self.name = name
@@ -81,16 +73,15 @@ class ConsoleCleanTestHelper:
 				self.all = True
 
 			elif option in ("-v", "--verbosity"):
-				self.verbosity = value
-				if self.verbosity == "DEBUG":
-					rootLogger.setLevel(logging.DEBUG)
-				elif self.verbosity == "INFO":
-					rootLogger.setLevel(logging.INFO)
-				elif self.verbosity == "WARN":
-					rootLogger.setLevel(logging.WARN)	
-				elif self.verbosity == "CRIT":
-					rootLogger.setLevel(logging.CRITICAL)	
-
+				if value == "DEBUG":
+					stdoutHandler.setLevel(logging.DEBUG)
+				elif value == "INFO":
+					stdoutHandler.setLevel(logging.INFO)
+				elif value == "WARN":
+					stdoutHandler.setLevel(logging.WARN)	
+				elif value == "CRIT":
+					stdoutHandler.setLevel(logging.CRITICAL)
+				
 			elif option in ("-o", "--outdir"):
 				self.outsubdir = value
 
@@ -382,7 +373,6 @@ class ConsoleLaunchHelper:
 		self.arguments = []
 		self.record = False
 		self.purge = False
-		self.verbosity = INFO
 		self.type = None
 		self.trace = None
 		self.includes = []
@@ -390,11 +380,12 @@ class ConsoleLaunchHelper:
 		self.cycle = 1
 		self.outsubdir = PLATFORM
 		self.mode = None
+		self.threads = 1
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpv:a:t:i:e:c:o:m:X:'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode="]
+		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:X:'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads="]
 
 
 	def printUsage(self, printXOptions):
@@ -412,6 +403,7 @@ class ConsoleLaunchHelper:
 		print "       -c | --cycle     INT        set the the number of cycles to run the tests"
 		print "       -o | --outdir    STRING     set the name of the test output subdirectory"
 		print "       -m | --mode      STRING     set the user defined mode to run the tests"
+		print "       -n | --threads   INT        set the number of worker threads to run the tests (default 1)"
 		print "       -X               KEY=VALUE  set user defined options to be passed through to the test and "
 		print "                                   runner classes. The left hand side string is the data attribute "
 		print "                                   to set, the right hand side string the value (True of not specified) "
@@ -454,13 +446,13 @@ class ConsoleLaunchHelper:
 			elif option in ("-v", "--verbosity"):
 				self.verbosity = value
 				if self.verbosity == "DEBUG":
-					rootLogger.setLevel(logging.DEBUG)
+					stdoutHandler.setLevel(logging.DEBUG)
 				elif self.verbosity == "INFO":
-					rootLogger.setLevel(logging.INFO)
+					stdoutHandler.setLevel(logging.INFO)
 				elif self.verbosity == "WARN":
-					rootLogger.setLevel(logging.WARN)	
+					stdoutHandler.setLevel(logging.WARN)	
 				elif self.verbosity == "CRIT":
-					rootLogger.setLevel(logging.CRITICAL)	
+					stdoutHandler.setLevel(logging.CRITICAL)	
 
 			elif option in ("-a", "--type"):
 				self.type = value
@@ -490,6 +482,13 @@ class ConsoleLaunchHelper:
 			elif option in ("-m", "--mode"):
 				self.mode = value
 
+			elif option in ("-n", "--threads"):
+				try:
+					self.threads = int(value)
+				except:
+					print "Error parsing command line arguments: A valid integer for the number of threads must be supplied"
+					self.printUsage(printXOptions)
+
 			elif option in ("-X"):
 				if EXPR1.search(value) != None:
 				  exec("self.userOptions['%s'] = '%s'" % (value.split('=')[0], value.split('=')[1]) )
@@ -500,5 +499,5 @@ class ConsoleLaunchHelper:
 		except Exception, (strerror):
 			log.info(strerror)
 			descriptors = []
-		return self.record, self.purge, self.cycle, self.mode, self.outsubdir, descriptors, self.userOptions
+		return self.record, self.purge, self.cycle, self.mode, self.threads, self.outsubdir, descriptors, self.userOptions
 		

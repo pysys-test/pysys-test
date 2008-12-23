@@ -22,11 +22,9 @@
 import string, os.path, time, thread, logging, Queue
 import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes
 
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
-
-# create the class logger
-log = logging.getLogger('pysys.process.helper')
 
 # check for new lines on end of a string
 EXPR = re.compile(".*\n$")

@@ -28,11 +28,12 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os, os.path, sys, stat, re, traceback, time, math, logging, string
+import os, os.path, sys, stat, re, traceback, time, math, logging, string, thread, threading, imp
 
-from pysys import rootLogger
+from pysys import log, ThreadedFileHandler
 from pysys.constants import *
 from pysys.exceptions import *
+from pysys.utils.threadpool import *
 from pysys.utils.filecopy import filecopy
 from pysys.utils.filegrep import filegrep
 from pysys.utils.filediff import filediff
@@ -41,9 +42,6 @@ from pysys.utils.linecount import linecount
 from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
-
-log = logging.getLogger('pysys.baserunner')
-log.setLevel(logging.NOTSET)
 
 
 class BaseRunner(ProcessUser):
@@ -76,13 +74,14 @@ class BaseRunner(ProcessUser):
 	
 	"""
 	
-	def __init__(self, record, purge, cycle, mode, outsubdir, descriptors, xargs):
+	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
 		"""Create an instance of the BaseRunner class.
 		
 		@param record: Indicates if the test results should be recorded 
 		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
 		@param cycle: The number of times to execute the set of requested testcases
 		@param mode: The user defined mode to run the testcases in
+		@param threads: The number of worker threads to execute the requested testcases
 		@param outsubdir: The name of the output subdirectory
 		@param descriptors: List of XML descriptor containers detailing the set of testcases to be run
 		@param xargs: The dictionary of additional arguments to be set as data attributes to the class
@@ -93,6 +92,7 @@ class BaseRunner(ProcessUser):
 		self.purge = purge
 		self.cycle = cycle
 		self.mode = mode
+		self.threads = threads
 		self.outsubdir = outsubdir
 		self.descriptors = descriptors
 		self.xargs = xargs
@@ -107,6 +107,11 @@ class BaseRunner(ProcessUser):
 			for key in properties.keys(): setattr(writer, key, properties[key])
 			self.writers.append(writer)
 
+		self.duration = 0
+		self.results = {}
+		self.resultsPointer = 0
+		self.resultsQueue = []
+
 
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the class.
@@ -120,46 +125,6 @@ class BaseRunner(ProcessUser):
 		"""
 		for key in xargs.keys():
 			setattr(self, key, xargs[key])
-
-
-	# utility methods
-	def purgeDirectory(self, dir, delTop=False):
-		"""Recursively purge a directory removing all files and sub-directories.
-		
-		@param dir: The top level directory to be purged
-		@param delTop: Indicates if the top level directory should also be deleted
-		
-		"""
-		for file in os.listdir(dir):
-		  	path = os.path.join(dir, file)
-		  	if PLATFORM in ['sunos', 'linux']:
-		  		mode = os.lstat(path)[stat.ST_MODE]
-		  	else:
-		  		mode = os.stat(path)[stat.ST_MODE]
-		
-			if stat.S_ISLNK(mode):
-				os.unlink(path)
-			if stat.S_ISREG(mode):
-				os.remove(path)
-			elif stat.S_ISDIR(mode):
-			  	self.purgeDirectory(path, delTop=True)				 
-
-		if delTop: os.rmdir(dir)
-
-
-	def detectCore(self, dir):
-		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
-		
-		@param dir: The directory to search for core files
-		@return: C{True} if a core detected, None if no core detected
-		@rtype: integer 
-		"""
-		for file in os.listdir(dir):
-			path = os.path.join(dir, file)
-			mode = os.stat(path)[stat.ST_MODE]
-
-			if stat.S_ISREG(mode):
-				if re.search('^core', file): return True
 
 	
 	# methods to allow customer actions to be performed before a test run, after a test, after 
@@ -242,10 +207,6 @@ class BaseRunner(ProcessUser):
 		@param printSummary: Indicates if the test results should be reported on test completion
 	
 		"""
-		results = {}
-		totalDuration = 0
-		totalExecuted = 0
-
 		# call the hook to setup prior to running tests
 		self.setup()
 
@@ -255,146 +216,36 @@ class BaseRunner(ProcessUser):
 				try: writer.setup(numTests=self.cycle * len(self.descriptors))
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
+		# create the thread pool if running with more than one thread
+		if self.threads > 1: threadPool = ThreadPool(self.threads)
+
 		# loop through each cycle
 		for cycle in range(self.cycle):
-			results[cycle] = {}
-			for outcome in PRECEDENT: results[cycle][outcome] = []
+			self.resultsPointer = 0
+		  	self.resultsQueue = []
+		  	self.results[cycle] = {}
+			for outcome in PRECEDENT: self.results[cycle][outcome] = []
 
 			# loop through tests for the cycle
+			counter = 0
 			for descriptor in self.descriptors:
-				startTime = time.time()
-				blocked = False
-				keyboardInterupt = False
-
-				# set the output subdirectory and purge contents
-				try:
-					outsubdir = self.outsubdir
-					if not os.path.exists(os.path.join(descriptor.output, outsubdir)):
-						os.makedirs(os.path.join(descriptor.output, outsubdir))
-					
-					if cycle == 0: self.purgeDirectory(os.path.join(descriptor.output, outsubdir))
-				
-					if self.cycle > 1: 
-						outsubdir = os.path.join(outsubdir, 'cycle%d' % (cycle+1))
-						os.makedirs(os.path.join(descriptor.output, outsubdir))
-
-					outputDirectory = os.path.join(descriptor.output, outsubdir)
-				except:
-					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-					outputDirectory = ""
-					blocked = True
-
-				# create the logger handler for the run log
-				runLogger = logging.FileHandler(os.path.join(outputDirectory, 'run.log'))
-				runLogger.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
-				runLogger.setLevel(logging.DEBUG)
-				rootLogger.addHandler(runLogger)			
-
-				# run the test execute, validate and cleanup methods
-				log.info("==========================================")
-				log.info("		" + descriptor.id)
-				log.info("==========================================")
-				try:
-					sys.path.append(os.path.dirname(descriptor.module))
-					exec( "from %s import %s" % (os.path.basename(descriptor.module), descriptor.classname) )
-					exec( "testObj = %s(descriptor, r'%s', self)" % (descriptor.classname, outsubdir) )
-				except:
-					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-					testObj = BaseTest(descriptor, outsubdir, self) 
-					blocked = True
-				sys.path.pop()
-				
-				if descriptor.state != 'runnable':
-					testObj.outcome.append(SKIPPED)
-					
-				elif self.mode and self.mode not in descriptor.modes:
-					log.info("Unable to run test in %s mode", self.mode)
-					testObj.outcome.append(SKIPPED)
-
-				elif blocked:
-					log.info("Errors setting up test for execution")
-					testObj.outcome.append(BLOCKED)
-
+				self.resultsQueue.append(None)
+				container = TestContainer(counter, descriptor, cycle, self)
+				if self.threads > 1:
+					request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
+					threadPool.putRequest(request)
 				else:
-					try:
-						testObj.setup()
-						testObj.execute()
-					except KeyboardInterrupt:
-						keyboardInterupt = True
-						log.info("test interrupt from keyboard")
-						testObj.outcome.append(BLOCKED)
-					except:
-						log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-						testObj.outcome.append(BLOCKED)
-					else:
-						try:
-						  	testObj.validate()
-						except KeyboardInterrupt:
-							keyboardInterupt = True
-							log.info("test interrupt from keyboard")
-							testObj.outcome.append(BLOCKED)
-						except:
-						  	log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-						  	testObj.outcome.append(BLOCKED)
-					
-						try:
-							if self.detectCore(outputDirectory):
-								log.info("core detected in output subdirectory")
-								testObj.outcome.append(DUMPEDCORE)
-						except:
-							log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
-					try:
-						testObj.cleanup()
-					except KeyboardInterrupt:
-						keyboardInterupt = True
-						log.info("test interrupt from keyboard")
-						testObj.outcome.append(BLOCKED)
-					except:
-						log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
-				# get and log the final outcome for the test
-				testTime = math.floor(100*(time.time() - startTime))/100.0
-				totalDuration = totalDuration + testTime
-				outcome = testObj.getOutcome()
-				results[cycle][outcome].append(descriptor.id)
-				log.info("")
-				log.info("Test duration %.2f secs", testTime)
-				log.info("Test final outcome %s", LOOKUP[outcome])
-				log.info("")
-				if rootLogger.getEffectiveLevel() == logging._levelNames['CRITICAL']: log.critical("%s: %s", LOOKUP[outcome], descriptor.id)
-				
-				# call the hook for end of test execution
-				self.testComplete(testObj, outputDirectory)
-				totalExecuted = totalExecuted + 1
-				
-				# pass the test object to the test writers is recording
-				if self.record:
-					for writer in self.writers:
-						try: writer.processResult(testObj, cycle=cycle)
-						except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-				
-				# perform cleanup actions
-				try: del sys.modules["%s" % os.path.basename(descriptor.module)]
-				except: pass
-				del testObj
-
-				# remove the run logger handler
-				runLogger.close()
-				rootLogger.removeHandler(runLogger)
-
-				# prompt for continuation on control-C
-				if keyboardInterupt == True:
-					while 1:
-						print ""
-						print "Keyboard interupt detected, continue running tests? [yes|no] ... ",
-						line = string.strip(sys.stdin.readline())
-						if line == "y" or line == "yes":
-							break
-						elif line == "n" or line == "no":
-							self.cycleComplete()
-							self.cleanup()
-							sys.exit(1)
+					self.containerCallback(thread.get_ident(), container())
+				counter = counter + 1
+			
+			# wait for the threads to complete if more than one thread	
+			if self.threads > 1: 
+				try:
+					threadPool.wait()
+				except KeyboardInterrupt:
+					log.info("test interrupt from keyboard")
+					threadPool.dismissWorkers(self.threads)
+					self.handleKbrdInt()
 
 			# call the hook for end of cycle
 			try:
@@ -411,31 +262,270 @@ class BaseRunner(ProcessUser):
 		# log the summary output to the console
 		if printSummary:
 			log.info("")
-			log.info("Total duration: %.2f (secs)", totalDuration)		
+			log.info("Total duration: %.2f (secs)", self.duration)		
 			log.info("Summary of non passes: ")
 			fails = 0
-			for cycle in results.keys():
-				for outcome in results[cycle].keys():
-					if outcome in FAILS : fails = fails + len(results[cycle][outcome])
+			for cycle in self.results.keys():
+				for outcome in self.results[cycle].keys():
+					if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
 			if fails == 0:
 				log.info("	THERE WERE NO NON PASSES")
 			else:
-				if len(results) == 1:
+				if len(self.results) == 1:
 					for outcome in FAILS:
-						for id in results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], id)
+						for id in self.results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], id)
 				else:
-					for key in results.keys():
+					for key in self.results.keys():
 						for outcome in FAILS:
-							for id in results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
+							for id in self.results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
 
 		# call the hook to cleanup after running tests
 		self.cleanup()
 
 		# return the results dictionary
-		return results
+		return self.results
+
+
+	def containerCallback(self, thread, container):
+		"""Callback method on completion of running a test.
+		
+		@param container: A reference to the container object that ran the test
+		
+		Called on completion of running a testcase, either directly by the BaseRunner class (or 
+		a sub-class thereof), or from the ThreadPool when running with more than one worker thread. 
+		The method is responsible for calling of the testComplete() method of the runner, recording 
+		of the test result to the result writers, and for deletion of the test container object. 
+		
+		"""
+		self.resultsQueue[container.counter] = container
+		if self.threads > 1: self.log.info("[%s] Queueing result for test %s" % (thread, container.descriptor.id))
+		
+		spacer = True
+		for i in range(self.resultsPointer, len(self.resultsQueue)):
+			if self.resultsQueue[i] == None: break
+			
+			if self.threads > 1: 
+				if spacer: self.log.info(""); spacer = False
+				for line in self.resultsQueue[i].testFileHandler.getBuffer(): self.log.info(line)	
+			if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].descriptor.id)
+			
+			# call the hook for end of test execution
+			self.testComplete(self.resultsQueue[i].testObj, self.resultsQueue[i].outsubdir)
+					
+			# pass the test object to the test writers is recording
+			if self.record:
+				for writer in self.writers:
+					try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle)
+					except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			
+			# prompt for continuation on control-C
+			if self.resultsQueue[i].kbrdInt == True: self.handleKbrdInt()
+		
+			# store the result
+			self.duration = self.duration + self.resultsQueue[i].testTime
+			self.results[self.resultsQueue[i].cycle][self.resultsQueue[i].testObj.getOutcome()].append(self.resultsQueue[i].descriptor.id)
+		
+			# delete the container
+			self.resultsQueue[i] = None
+			self.resultsPointer = self.resultsPointer + 1
+
+
+	def containerExceptionCallback(self, thread, exc_info):
+		"""Callback method for unhandled exceptions thrown when running a test.
+		
+		@param exc_info: The tuple of values as created from sys.exc_info()
+		 
+		"""
+		log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+
+
+	def handleKbrdInt(self):
+		"""Handle a keyboard exception caught during running of a set of testcases.
+		
+		"""
+		while 1:
+			print ""
+			print "Keyboard interupt detected, continue running tests? [yes|no] ... ",
+			line = string.strip(sys.stdin.readline())
+			if line == "y" or line == "yes":
+				break
+			elif line == "n" or line == "no":
+				self.cycleComplete()
+				self.cleanup()
+				sys.exit(1)
 
 
 
+class TestContainer:
+	"""Class used for co-ordinating the execution of a single test case.
 	
+	"""
+	
+	def __init__ (self, counter, descriptor, cycle, runner):
+		"""Create an instance of the TestContainer class.
+		
+		@param descriptor: A reference to the testcase descriptor
+		@param cycle: The cycle number of the test
+		@param runner: A reference to the runner that created this class
+
+		"""
+		self.counter = counter
+		self.descriptor = descriptor
+		self.cycle = cycle
+		self.runner = runner
+		self.outsubdir = ""
+		self.testObj = None
+		self.testTime = None
+		self.testBuffer = []
+		self.testFileHandler = None
+		self.kbrdInt = False
+		
+		
+	def __call__(self, *args, **kwargs):
+		"""Over-ridden call builtin to allow the class instance to be called directly.
+		
+		"""		
+		exc_info = []
+		startTime = time.time()
+		try:
+			# set the output subdirectory and purge contents
+			outsubdir = self.runner.outsubdir
+			if not os.path.exists(os.path.join(self.descriptor.output, outsubdir)):
+				os.makedirs(os.path.join(self.descriptor.output, outsubdir))
+					
+			if self.cycle == 0: self.purgeDirectory(os.path.join(self.descriptor.output, outsubdir))
+				
+			if self.runner.cycle > 1: 
+				outsubdir = os.path.join(outsubdir, 'cycle%d' % (self.cycle+1))
+				os.makedirs(os.path.join(self.descriptor.output, outsubdir))
+
+			self.outsubdir = os.path.join(self.descriptor.output, outsubdir)
+
+			# create the test summary log file handler and log the test header
+			self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
+			self.testFileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
+			self.testFileHandler.setLevel(logging.INFO)
+			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
+			log.addHandler(self.testFileHandler)
+			log.info(42*"="); log.info("%s%s"%(8*" ", self.descriptor.id)); log.info(42*"=")
+		
+		except KeyboardInterrupt:
+			self.kbrdInt = True
+		except:
+			exc_info.append(sys.exc_info())
+			
+		# import the test class
+		try:
+			(file, pathname, description) = imp.find_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)])
+			module = imp.load_module(os.path.basename(self.descriptor.module), file, pathname, description)
+			self.testObj = getattr(module, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
+			file.close()
+		except KeyboardInterrupt:
+			self.kbrdInt = True
+		except:
+			exc_info.append(sys.exc_info())
+			self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
+
+		# execute the test if we can
+		if self.descriptor.state != 'runnable':
+			self.testObj.addOutcome(SKIPPED)
+					
+		elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
+			log.info("Unable to run test in %s mode", self.runner.mode)
+			self.testObj.addOutcome(SKIPPED)
+		
+		elif len(exc_info) > 0:
+			self.testObj.addOutcome(BLOCKED)
+			for info in exc_info:
+				log.info("caught %s: %s", info[0], info[1], exc_info=info)
+				
+		elif self.kbrdInt:
+			log.info("test interrupt from keyboard")
+			self.testObj.addOutcome(BLOCKED)
+		
+		else:
+			try:
+				self.testObj.setup()
+				self.testObj.execute()
+				self.testObj.validate()
+			except KeyboardInterrupt:
+				self.kbrdInt = True
+				log.info("test interrupt from keyboard")
+				self.testObj.addOutcome(BLOCKED)
+			except:
+			  	log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			  	self.testObj.addOutcome(BLOCKED)
+					
+			try:
+				if self.detectCore(self.outsubdir):
+					log.info("core detected in output subdirectory")
+					self.testObj.addOutcome(DUMPEDCORE)	
+			except KeyboardInterrupt:
+				self.kbrdInt = True
+				log.info("test interrupt from keyboard")
+				self.testObj.addOutcome(BLOCKED)
+			except: 
+				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
+			try:
+				self.testObj.cleanup()
+			except KeyboardInterrupt:
+				self.kbrdInt = True
+				log.info("test interrupt from keyboard")
+				self.testObj.addOutcome(BLOCKED)
+			except:
+				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
+		# get and log the final outcome for the test
+		self.testTime = math.floor(100*(time.time() - startTime))/100.0
+		log.info("")
+		log.info("Test duration %.2f secs", self.testTime)
+		log.info("Test final outcome %s", LOOKUP[self.testObj.getOutcome()])
+		log.info("")
+
+		# close and remove the file handler
+		self.testFileHandler.close()
+		log.removeHandler(self.testFileHandler)
+
+		# return a reference to self
+		return self
+	
+	
+	# utility methods
+	def purgeDirectory(self, dir, delTop=False):
+		"""Recursively purge a directory removing all files and sub-directories.
+		
+		@param dir: The top level directory to be purged
+		@param delTop: Indicates if the top level directory should also be deleted
+		
+		"""
+		for file in os.listdir(dir):
+		  	path = os.path.join(dir, file)
+		  	if PLATFORM in ['sunos', 'linux']:
+		  		mode = os.lstat(path)[stat.ST_MODE]
+		  	else:
+		  		mode = os.stat(path)[stat.ST_MODE]
+		
+			if stat.S_ISLNK(mode):
+				os.unlink(path)
+			if stat.S_ISREG(mode):
+				os.remove(path)
+			elif stat.S_ISDIR(mode):
+			  	self.purgeDirectory(path, delTop=True)				 
+
+		if delTop: os.rmdir(dir)
 
 
+	def detectCore(self, dir):
+		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
+		
+		@param dir: The directory to search for core files
+		@return: C{True} if a core detected, None if no core detected
+		@rtype: integer 
+		"""
+		for file in os.listdir(dir):
+			path = os.path.join(dir, file)
+			mode = os.stat(path)[stat.ST_MODE]
+
+			if stat.S_ISREG(mode):
+				if re.search('^core', file): return True
