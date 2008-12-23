@@ -28,7 +28,7 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os, os.path, sys, stat, re, traceback, time, math, logging, string, new, thread, threading
+import os, os.path, sys, stat, re, traceback, time, math, logging, string, thread, threading, imp
 
 from pysys import log, ThreadedFileHandler
 from pysys.constants import *
@@ -42,8 +42,6 @@ from pysys.utils.linecount import linecount
 from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
-
-_global_lock = threading.Lock()
 
 
 class BaseRunner(ProcessUser):
@@ -409,30 +407,24 @@ class TestContainer:
 			self.testFileHandler.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandler)
-			
-			log.info("==========================================")
-			log.info("        " + self.descriptor.id)
-			log.info("==========================================")
+			log.info(42*"="); log.info("%s%s"%(8*" ", self.descriptor.id)); log.info(42*"=")
+		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		except:
 			exc_info.append(sys.exc_info())
 			
 		# import the test class
-		_global_lock.acquire()
 		try:
-			sys.path.append(os.path.dirname(self.descriptor.module))
-			testModule = __import__(os.path.basename(self.descriptor.module))
-			self.testObj = getattr(testModule, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
-			try: del sys.modules["%s" % os.path.basename(self.descriptor.module)]
-			except: pass	
+			(file, pathname, description) = imp.find_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)])
+			module = imp.load_module(os.path.basename(self.descriptor.module), file, pathname, description)
+			self.testObj = getattr(module, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
+			file.close()
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		except:
 			exc_info.append(sys.exc_info())
 			self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
-		_global_lock.release()	
-		sys.path.pop()
 
 		# execute the test if we can
 		if self.descriptor.state != 'runnable':
