@@ -220,6 +220,7 @@ class BaseRunner(ProcessUser):
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
 
 		# loop through each cycle
+		startTime = time.time()
 		for cycle in range(self.cycle):
 			self.resultsPointer = 0
 		  	self.resultsQueue = []
@@ -262,7 +263,12 @@ class BaseRunner(ProcessUser):
 		# log the summary output to the console
 		if printSummary:
 			log.info("")
-			log.info("Total duration: %.2f (secs)", self.duration)		
+			if self.threads > 1: 
+				log.info("Test duration (absolute): %.2f (secs)", time.time() - startTime)		
+				log.info("Test duration (addative): %.2f (secs)", self.duration)
+			else:
+				log.info("Test duration: %.2f (secs)", time.time() - startTime)		
+			log.info("")		
 			log.info("Summary of non passes: ")
 			fails = 0
 			for cycle in self.results.keys():
