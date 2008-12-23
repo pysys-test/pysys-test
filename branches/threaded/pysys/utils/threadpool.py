@@ -25,8 +25,7 @@
  
 import sys, logging, thread, threading, Queue, traceback
 
-# create the class logger
-log = logging.getLogger('pysys.utils.threadpool')
+from pysys import log
 
 
 # exceptions

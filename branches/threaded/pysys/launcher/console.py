@@ -21,7 +21,7 @@
 
 import sys, os, os.path, stat, glob, getopt, sets, re, string, logging
 
-from pysys import rootLogger
+from pysys import log
 from pysys import stdoutHandler
 
 from pysys import __version__
@@ -34,9 +34,6 @@ from pysys.basetest import TEST_TEMPLATE
 EXPR1 = re.compile("^[\w\.]*=.*$")
 EXPR2 = re.compile("^[\w\.]*$")
 EXPR3 = re.compile("^[\w]*_([0-9]+)$")
-
-log = logging.getLogger('pysys.launcher.console')
-log.setLevel(logging.NOTSET)
 
 
 class ConsoleCleanTestHelper:

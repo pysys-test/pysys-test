@@ -41,8 +41,6 @@ and automated testcases provides a single framework for all test organisation re
 """
 
 import sys, logging, thread
-logging._levelNames[50] = 'CRIT'
-logging._levelNames[30] = 'WARN'
 
 __author__  = "Moray Grieve"
 """The author of PySys."""
@@ -72,48 +70,94 @@ __all__     = [ "constants",
                 "xml"]
 """The submodules of PySys."""
 
+# customize the default logging names for display
+logging._levelNames[50] = 'CRIT'
+logging._levelNames[30] = 'WARN'
 
-class ThreadedStdoutHandler(logging.StreamHandler):
-	"""Stream handler to only log from the creating thread."""
+# class extensions for supporting multi-threaded nature
+class ThreadedStreamHandler(logging.StreamHandler):
+	"""Stream handler to only log from the creating thread.
 	
+	Overrides logging.StreamHandler to only allow logging to a stream 
+	from the thread that created the class instance and added to the root 
+	logger via log.addHandler(ThreadedStreamHandler(stream)).
+	
+	"""
 	def __init__(self, strm):
+		"""Overrides logging.StreamHandler.__init__."""
 		self.threadId = thread.get_ident()
 		logging.StreamHandler.__init__(self, strm)
 				
 	def emit(self, record):
+		"""Overrides logging.StreamHandler.emit."""
 		if self.threadId != thread.get_ident(): return
 		logging.StreamHandler.emit(self, record)
 		
 		
 class ThreadedFileHandler(logging.FileHandler):
-	"""File handler to only log from the creating thread."""
+	"""File handler to only log from the creating thread.
 	
+	Overrides logging.FileHandler to only allow logging to file from 
+	the thread than created the class instance and added to the root 
+	logger via log.addHandler(ThreadFileHandler(filename)).
+	
+	"""
 	def __init__(self, filename):
+		"""Overrides logging.ThreadedFileHandler.__init__"""
 		self.threadId = thread.get_ident()
 		self.buffer = []
 		logging.FileHandler.__init__(self, filename, "a")
 				
 	def emit(self, record):
+		"""Overrides logging.ThreadedFileHandler.emit."""
 		if self.threadId != thread.get_ident(): return
 		self.buffer.append(record.getMessage())
+		#print record.getMessage()
 		logging.FileHandler.emit(self, record)
 		
 	def getBuffer(self):
+		"""Return the unformatted messages called by the creating thread."""
 		return self.buffer
 
-rootLogger = logging.getLogger()
+
+class ThreadFilter(logging.Filterer):
+	"""Filter to disallow log records from the current thread.
+	
+	Within pysys, logging to standard output is only enabled from the main thread 
+	of execution (that in which the test runner class executes). When running with
+	more than one test worker thread, logging to file of the test run log is 
+	performed through a file handler, which only allows logging from that thread. 
+	To disable either of these, use an instance of this class from the thread in 
+	question, adding to the root logger via log.addFilter(ThreadFilter()).
+	
+	"""
+	def __init__(self):
+		"""Overrides logging.Filterer.__init__"""
+		self.threadId = thread.get_ident()
+		logging.Filterer.__init__(self)
+		
+	def filter(self, record):
+		"""Implementation of logging.Filterer.filter to block from the creating thread."""
+		if self.threadId != thread.get_ident(): return True
+		return False
+	
+
+rootLogger = logging.getLogger('pysys')
 """The root logger for all logging within PySys."""
 
 rootLogger.setLevel(logging.DEBUG)
 """The root logger log level (set to DEBUG as all filtering is done by the handlers)."""
 
-stdoutHandler = ThreadedStdoutHandler(sys.stdout)
+stdoutHandler = ThreadedStreamHandler(sys.stdout)
 """The default stdout logging handler for all logging within PySys."""
 
 stdoutFormatter = logging.Formatter('%(asctime)s %(levelname)-5s %(message)s')
 """The formatter for output to stdout."""
 
-stdoutHandler.setFormatter(stdoutFormatter)
+# configure the logger
 stdoutHandler.setLevel(logging.INFO)
+stdoutHandler.setFormatter(stdoutFormatter)
 rootLogger.addHandler(stdoutHandler)
 
+# global reference is using log
+log = rootLogger

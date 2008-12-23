@@ -31,7 +31,7 @@ distribution.
 """
 import sys, re, os, os.path, socket, logging, sets
 
-from pysys import rootLogger
+from pysys import log
 from pysys import stdoutHandler
 
 # set the platform and platform related constants

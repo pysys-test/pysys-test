@@ -38,13 +38,10 @@ __all__ = [ "createDescriptors",
 
 import sys, os, os.path, glob, getopt, sets, re, string, logging
 
-from pysys import rootLogger
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.xml.descriptor import XMLDescriptorParser
-
-log = logging.getLogger('pysys.launcher')
-log.setLevel(logging.NOTSET)
 
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):

@@ -26,6 +26,7 @@ For more information see the L{pysys.basetest.BaseTest} API documentation.
 """
 import sys, os, os.path, re, string, time, thread, logging, copy, math, stat
 
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filecopy import filecopy
@@ -39,9 +40,6 @@ from pysys.process.helper import ProcessWrapper
 from pysys.process.monitor import ProcessMonitor
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
-
-log = logging.getLogger('pysys.test')
-log.setLevel(logging.NOTSET)
 
 
 TEST_TEMPLATE = '''%s
@@ -120,11 +118,7 @@ class BaseTest(ProcessUser):
 		self.monitorList = []
 		self.manualTester = None
 		self.outcome = []
-		
-		# tests run in a separate thread and so need their own logger
-		self.log = logging.getLogger('pysys.test.%s' % str(thread.get_ident()))
-		self.log.setLevel(logging.NOTSET)
-		
+		self.log = log
 		self.project = PROJECT
 
 

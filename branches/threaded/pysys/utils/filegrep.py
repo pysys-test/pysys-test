@@ -21,12 +21,10 @@
 
 import os.path, sys, re, string, copy
 
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filediff import trimContents
-
-# create the class logger
-log = logging.getLogger('pysys.utils.filegrep')
 
 
 def getmatches(file, regexpr):

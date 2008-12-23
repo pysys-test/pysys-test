@@ -21,11 +21,9 @@
 
 import os.path, sys, re, string, copy, difflib, logging
 
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
-
-# create the class logger
-log = logging.getLogger('pysys.utils.filediff')
 
 
 def trimContents(contents, expressions, exclude=True):

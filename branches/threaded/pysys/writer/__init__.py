@@ -47,14 +47,12 @@ number of tests to be executed), and cycle in the call to the processResult acti
 __all__ = ["TextResultsWriter", "XMLResultsWriter"]
 
 import logging, time, urlparse
-from pysys import rootLogger
+
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 
 from xml.dom.minidom import getDOMImplementation
-
-log = logging.getLogger('pysys.writer')
-log.setLevel(logging.NOTSET)
 
 
 class TextResultsWriter:

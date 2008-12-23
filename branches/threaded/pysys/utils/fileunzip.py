@@ -20,6 +20,7 @@
 # dealings in the software
 
 import os, os.path, stat, sys, string, glob, gzip
+
 from pysys.constants import *
 from pysys.exceptions import *
 

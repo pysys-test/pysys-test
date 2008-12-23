@@ -30,7 +30,7 @@ API documentation.
 """
 import os, os.path, sys, stat, re, traceback, time, math, logging, string, new, thread, threading
 
-from pysys import rootLogger, ThreadedFileHandler
+from pysys import log, ThreadedFileHandler
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
@@ -42,9 +42,6 @@ from pysys.utils.linecount import linecount
 from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
-
-log = logging.getLogger('pysys.baserunner')
-log.setLevel(logging.NOTSET)
 
 _global_lock = threading.Lock()
 
@@ -390,35 +387,36 @@ class TestContainer:
 		"""Over-ridden call builtin to allow the class instance to be called directly.
 		
 		"""		
-		# create the test summary log file handler
-		self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
-		self.testFileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
-		self.testFileHandler.setLevel(logging.INFO)
-		if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
-		rootLogger.addHandler(self.testFileHandler)
-
+		exc_info = []
 		startTime = time.time()
-		log.info("==========================================")
-		log.info("        " + self.descriptor.id)
-		log.info("==========================================")
-		
-		# set the output subdirectory and purge contents
-		exc_info = None
 		try:
+			# set the output subdirectory and purge contents
 			outsubdir = self.runner.outsubdir
 			if not os.path.exists(os.path.join(self.descriptor.output, outsubdir)):
 				os.makedirs(os.path.join(self.descriptor.output, outsubdir))
 					
-			if self.cycle == 0: self.__purgeDirectory(os.path.join(self.descriptor.output, outsubdir))
+			if self.cycle == 0: self.purgeDirectory(os.path.join(self.descriptor.output, outsubdir))
 				
 			if self.runner.cycle > 1: 
 				outsubdir = os.path.join(outsubdir, 'cycle%d' % (self.cycle+1))
 				os.makedirs(os.path.join(self.descriptor.output, outsubdir))
 
 			self.outsubdir = os.path.join(self.descriptor.output, outsubdir)
+
+			# create the test summary log file handler and log the test header
+			self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
+			self.testFileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
+			self.testFileHandler.setLevel(logging.INFO)
+			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
+			log.addHandler(self.testFileHandler)
+			
+			log.info("==========================================")
+			log.info("        " + self.descriptor.id)
+			log.info("==========================================")
+		except KeyboardInterrupt:
+			self.kbrdInt = True
 		except:
-			exc_info = sys.exc_info()
-			log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+			exc_info.append(sys.exc_info())
 			
 		# import the test class
 		_global_lock.acquire()
@@ -428,9 +426,10 @@ class TestContainer:
 			self.testObj = getattr(testModule, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
 			try: del sys.modules["%s" % os.path.basename(self.descriptor.module)]
 			except: pass	
+		except KeyboardInterrupt:
+			self.kbrdInt = True
 		except:
-			exc_info = sys.exc_info()
-			log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+			exc_info.append(sys.exc_info())
 			self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
 		_global_lock.release()	
 		sys.path.pop()
@@ -443,9 +442,15 @@ class TestContainer:
 			log.info("Unable to run test in %s mode", self.runner.mode)
 			self.testObj.addOutcome(SKIPPED)
 		
-		elif exc_info != None:
+		elif len(exc_info) > 0:
 			self.testObj.addOutcome(BLOCKED)
-
+			for info in exc_info:
+				log.info("caught %s: %s", info[0], info[1], exc_info=info)
+				
+		elif self.kbrdInt:
+			log.info("test interrupt from keyboard")
+			self.testObj.addOutcome(BLOCKED)
+		
 		else:
 			try:
 				self.testObj.setup()
@@ -460,7 +465,7 @@ class TestContainer:
 			  	self.testObj.addOutcome(BLOCKED)
 					
 			try:
-				if self.__detectCore(self.outsubdir):
+				if self.detectCore(self.outsubdir):
 					log.info("core detected in output subdirectory")
 					self.testObj.addOutcome(DUMPEDCORE)	
 			except KeyboardInterrupt:
@@ -488,14 +493,14 @@ class TestContainer:
 
 		# close and remove the file handler
 		self.testFileHandler.close()
-		rootLogger.removeHandler(self.testFileHandler)
+		log.removeHandler(self.testFileHandler)
 
 		# return a reference to self
 		return self
 	
 	
 	# utility methods
-	def __purgeDirectory(self, dir, delTop=False):
+	def purgeDirectory(self, dir, delTop=False):
 		"""Recursively purge a directory removing all files and sub-directories.
 		
 		@param dir: The top level directory to be purged
@@ -514,12 +519,12 @@ class TestContainer:
 			if stat.S_ISREG(mode):
 				os.remove(path)
 			elif stat.S_ISDIR(mode):
-			  	self.__purgeDirectory(path, delTop=True)				 
+			  	self.purgeDirectory(path, delTop=True)				 
 
 		if delTop: os.rmdir(dir)
 
 
-	def __detectCore(self, dir):
+	def detectCore(self, dir):
 		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
 		
 		@param dir: The directory to search for core files
