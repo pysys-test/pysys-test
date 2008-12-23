@@ -265,7 +265,7 @@ class BaseRunner(ProcessUser):
 			log.info("")
 			if self.threads > 1: 
 				log.info("Test duration (absolute): %.2f (secs)", time.time() - startTime)		
-				log.info("Test duration (addative): %.2f (secs)", self.duration)
+				log.info("Test duration (additive): %.2f (secs)", self.duration)
 			else:
 				log.info("Test duration: %.2f (secs)", time.time() - startTime)		
 			log.info("")		
