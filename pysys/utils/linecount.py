@@ -21,11 +21,9 @@
 
 import os, os.path, sys, re, logging
 
+from pysys import log
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
-
-# create the class logger
-log = logging.getLogger('pysys.utils.linecount')
 
 
 def linecount(file, regexpr=None):

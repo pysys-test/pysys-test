@@ -38,13 +38,10 @@ __all__ = [ "createDescriptors",
 
 import sys, os, os.path, glob, getopt, sets, re, string, logging
 
-from pysys import rootLogger
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.xml.descriptor import XMLDescriptorParser
-
-log = logging.getLogger('pysys.launcher')
-log.setLevel(logging.NOTSET)
 
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
@@ -78,7 +75,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 		except Exception, value:
 			print sys.exc_info()[0], sys.exc_info()[1]
 			log.info("Error reading descriptorfile %s" % descriptorfile)
-	descriptors.sort(lambda x, y: cmp(x.id, y.id))
+	descriptors.sort(lambda x, y: cmp(x.file, y.file))
 
 	# trim down the list for those tests in the test specifiers 
 	tests = []

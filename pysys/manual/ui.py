@@ -25,13 +25,10 @@ try:
 except:
 	pass
 
-import logging
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.xml.manual import *
 
-log = logging.getLogger('pysys.manual.ui')
-log.setLevel(logging.NOTSET)
 
 class ManualTester:
 	def __init__(self, owner, filename, logname=None):
