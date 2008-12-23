@@ -21,12 +21,10 @@
 
 import os, time
 
+from pysys import log
 from pysys.constants import *
 from pysys.utils.filegrep import getmatches
 from pysys.process.helper import ProcessWrapper
-
-log = logging.getLogger('pysys.interfaces.processuser')
-log.setLevel(logging.NOTSET)
 
 
 class ProcessUser:

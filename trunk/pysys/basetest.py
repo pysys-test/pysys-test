@@ -24,8 +24,9 @@ Contains the base test class for test execution and validation.
 For more information see the L{pysys.basetest.BaseTest} API documentation. 
 
 """
-import sys, os, os.path, re, string, time, thread, logging, copy
+import sys, os, os.path, re, string, time, thread, logging, copy, math, stat
 
+from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filecopy import filecopy
@@ -40,9 +41,6 @@ from pysys.process.monitor import ProcessMonitor
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 
-log = logging.getLogger('pysys.test')
-log.setLevel(logging.NOTSET)
-
 
 TEST_TEMPLATE = '''%s
 %s
@@ -54,6 +52,7 @@ class %s(%s):
 	def validate(self):
 		pass
 '''
+
 
 class BaseTest(ProcessUser):
 	"""The base class for all PySys testcases.
@@ -121,8 +120,8 @@ class BaseTest(ProcessUser):
 		self.outcome = []
 		self.log = log
 		self.project = PROJECT
-		
-		
+
+
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the test class.
 				

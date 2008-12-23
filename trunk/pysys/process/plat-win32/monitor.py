@@ -21,10 +21,8 @@
 
 import os, sys, string, time, thread, logging, win32api, win32pdh
 
+from pysys import log
 from pysys.constants import *
-
-# create the class logger
-log = logging.getLogger('pysys.process.monitor')
 
 
 class ProcessMonitor:
