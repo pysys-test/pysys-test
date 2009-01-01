@@ -26,13 +26,14 @@ to the framework and all extension modules.
 """
 
 __all__ = [ "filecopy",
-				"filediff",
-				"filegrep",
-				"filereplace", 
-				"fileunzip",
-				"linecount",
-				"smtpserver",
-				"threadpool" ]
+			"filediff",
+			"filegrep",
+			"filereplace", 
+			"fileunzip",
+			"linecount",
+			"loader",
+			"smtpserver",
+			"threadpool" ]
 
 
 

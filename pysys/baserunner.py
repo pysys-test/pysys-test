@@ -422,10 +422,8 @@ class TestContainer:
 			
 		# import the test class
 		try:
-			(file, pathname, description) = imp.find_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)])
-			module = imp.load_module(os.path.basename(self.descriptor.module), file, pathname, description)
+			module = import_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)], True)
 			self.testObj = getattr(module, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
-			file.close()
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		except:
