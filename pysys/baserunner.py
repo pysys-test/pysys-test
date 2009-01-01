@@ -34,6 +34,7 @@ from pysys import log, ThreadedFileHandler
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
+from pysys.utils.loader import import_module
 from pysys.utils.filecopy import filecopy
 from pysys.utils.filegrep import filegrep
 from pysys.utils.filediff import filediff
