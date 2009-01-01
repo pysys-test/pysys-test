@@ -103,8 +103,8 @@ class BaseRunner(ProcessUser):
 	
 		self.writers = []
 		for classname, module, filename, properties in PROJECT.writers:
-			exec( "from %s import %s" % (module, classname) )	
-			exec( "writer = %s(\"%s\")" % (classname, filename) )
+			module = import_module(module, sys.path)
+			writer = getattr(module, classname)(filename)
 			for key in properties.keys(): setattr(writer, key, properties[key])
 			self.writers.append(writer)
 
