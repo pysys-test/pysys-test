@@ -28,6 +28,7 @@ loadproject(os.getcwd())
 
 from pysys import __version__
 from pysys.constants import *
+from pysys.utils.loader import import_module
 from pysys.launcher.console import ConsoleLaunchHelper
 from pysys.launcher.console import ConsoleMakeTestHelper
 from pysys.launcher.console import ConsolePrintHelper
@@ -48,9 +49,9 @@ def printUsage():
 	
 def runTest(args):
 	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
-	record, purge, cycle, mode, threads, outsubdir, descriptors, userOptions = launcher.parseArgs(args)
-	exec( "from %s import %s" % (PROJECT.runnerModule, PROJECT.runnerClassname) )
-	exec( "runner = %s(record, purge, cycle, mode, threads, outsubdir, descriptors, userOptions)" % (PROJECT.runnerClassname))
+	args = launcher.parseArgs(args)
+	module = import_module(PROJECT.runnerModule, sys.path)
+	runner = getattr(module, PROJECT.runnerClassname)(*args)
 	runner.start()
 
 def makeTest(args):
