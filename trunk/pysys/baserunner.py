@@ -44,6 +44,8 @@ from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 
+global_lock = threading.Lock()
+
 
 class BaseRunner(ProcessUser):
 	"""The base class for executing a set of PySys testcases.
@@ -263,28 +265,28 @@ class BaseRunner(ProcessUser):
 			
 		# log the summary output to the console
 		if printSummary:
-			log.info("")
+			log.critical("")
 			if self.threads > 1: 
-				log.info("Test duration (absolute): %.2f (secs)", time.time() - startTime)		
-				log.info("Test duration (additive): %.2f (secs)", self.duration)
+				log.critical("Test duration (absolute): %.2f (secs)", time.time() - startTime)		
+				log.critical("Test duration (additive): %.2f (secs)", self.duration)
 			else:
-				log.info("Test duration: %.2f (secs)", time.time() - startTime)		
-			log.info("")		
-			log.info("Summary of non passes: ")
+				log.critical("Test duration: %.2f (secs)", time.time() - startTime)		
+			log.critical("")		
+			log.critical("Summary of non passes: ")
 			fails = 0
 			for cycle in self.results.keys():
 				for outcome in self.results[cycle].keys():
 					if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
 			if fails == 0:
-				log.info("	THERE WERE NO NON PASSES")
+				log.critical("	THERE WERE NO NON PASSES")
 			else:
 				if len(self.results) == 1:
 					for outcome in FAILS:
-						for id in self.results[0][outcome]: log.info("  %s: %s ", LOOKUP[outcome], id)
+						for id in self.results[0][outcome]: log.critical("  %s: %s ", LOOKUP[outcome], id)
 				else:
 					for key in self.results.keys():
 						for outcome in FAILS:
-							for id in self.results[key][outcome]: log.info(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
+							for id in self.results[key][outcome]: log.critical(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
 
 		# call the hook to cleanup after running tests
 		self.cleanup()
@@ -313,7 +315,10 @@ class BaseRunner(ProcessUser):
 			
 			if self.threads > 1: 
 				if spacer: self.log.info(""); spacer = False
-				for line in self.resultsQueue[i].testFileHandler.getBuffer(): self.log.info(line)	
+				try:
+					for line in self.resultsQueue[i].testFileHandler.getBuffer(): self.log.info(line)	
+				except:
+					pass
 			if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].descriptor.id)
 			
 			# call the hook for end of test execution
@@ -422,6 +427,7 @@ class TestContainer:
 			exc_info.append(sys.exc_info())
 			
 		# import the test class
+		global_lock.acquire()
 		try:
 			module = import_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)], True)
 			self.testObj = getattr(module, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
@@ -430,6 +436,7 @@ class TestContainer:
 		except:
 			exc_info.append(sys.exc_info())
 			self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
+		global_lock.release()
 
 		# execute the test if we can
 		if self.descriptor.state != 'runnable':
@@ -489,9 +496,11 @@ class TestContainer:
 		log.info("")
 
 		# close and remove the file handler
-		self.testFileHandler.close()
-		log.removeHandler(self.testFileHandler)
-
+		try:
+			self.testFileHandler.close()
+			log.removeHandler(self.testFileHandler)
+		except: pass
+		
 		# return a reference to self
 		return self
 	

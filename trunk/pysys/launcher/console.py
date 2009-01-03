@@ -491,9 +491,9 @@ class ConsoleLaunchHelper:
 
 			elif option in ("-X"):
 				if EXPR1.search(value) != None:
-				  exec("self.userOptions['%s'] = '%s'" % (value.split('=')[0], value.split('=')[1]) )
+				  self.userOptions[value.split('=')[0]] = value.split('=')[1]
 				if EXPR2.search(value) != None:
-					exec("self.userOptions['%s'] = %d" % (value, True))
+					self.userOptions[value] = True
 		try:
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
 		except Exception, (strerror):
