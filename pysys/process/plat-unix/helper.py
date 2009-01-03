@@ -216,7 +216,6 @@ class ProcessWrapper:
 		self.__setExitStatus()
 		if self.exitStatus != None: return 0
 		return 1
-
 		
 	def wait(self, timeout):
 		"""Wait for a process to complete execution.
@@ -226,7 +225,7 @@ class ProcessWrapper:
 		exceeded. 
 		
 		@param timeout: The timeout to wait in seconds
-		@raise Process Timeout: Raised if the timeout is exceeded.
+		@raise ProcessTimeout: Raised if the timeout is exceeded.
 		
 		"""
 		startTime = time.time()
@@ -244,7 +243,7 @@ class ProcessWrapper:
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
-		if self.exitStatus !=None: return 
+		if self.exitStatus != None: return 
 		try:
 			os.kill(self.pid, signal.SIGTERM)
 			self.wait(timeout=0.5)

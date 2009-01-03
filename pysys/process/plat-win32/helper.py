@@ -342,7 +342,7 @@ class ProcessWrapper:
 		if self.exitStatus != None: return 
 		try:
 			win32api.TerminateProcess(self.__hProcess,0)
-			self.__setExitStatus()
+			self.wait(timeout=0.5)
 		except:
 			raise ProcessError, "Error stopping process"
 		

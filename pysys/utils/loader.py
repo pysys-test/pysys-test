@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import sys, imp
+import sys, imp, threading
 
 def import_module(name, path, reload=False):
 	"""Import a named module, searching within a list of paths.
@@ -36,25 +36,15 @@ def import_module(name, path, reload=False):
 	"""
 	elements = name.split(".")
 	module = __import_module(elements[0], elements[0], None, path, reload and elements[0] == name)
+	if not module: raise ImportError, "No module named " + name
+
 	if len(elements) > 1:  
 		for element in elements[1:]:
 			fqname = "%s.%s" % (module.__name__, element)
 			module = __import_module(fqname, element, module, module and module.__path__, reload and fqname == name)
 			if not module: raise ImportError, "No module named " + fqname
 	return module
-		
-		
-def remove_module(name):
-	"""Remove a named module from sys.modules.
-	
-	@param name: The module name
-	
-	"""
-	try:
-		del sys.modules[name]
-	except KeyError:
-		pass
-	
+
 
 def __import_module(fqname, qname, parent, path, reload):
 	"""Method to load a module.
