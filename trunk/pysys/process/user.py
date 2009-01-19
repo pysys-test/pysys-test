@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import os, time
+import sys, os, time
 
 from pysys import log
 from pysys.constants import *
@@ -322,6 +322,9 @@ class ProcessUser:
 				
 		"""
 		for process in self.processList:
-			if process.running(): process.stop()
+			try:
+				if process.running(): process.stop()
+			except:
+				 log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 		self.processList = []
 		self.processCount = {}
