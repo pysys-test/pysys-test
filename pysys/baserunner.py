@@ -225,35 +225,42 @@ class BaseRunner(ProcessUser):
 		# loop through each cycle
 		startTime = time.time()
 		for cycle in range(self.cycle):
-			self.resultsPointer = 0
-		  	self.resultsQueue = []
-		  	self.results[cycle] = {}
-			for outcome in PRECEDENT: self.results[cycle][outcome] = []
-
 			# loop through tests for the cycle
-			counter = 0
-			for descriptor in self.descriptors:
-				self.resultsQueue.append(None)
-				container = TestContainer(counter, descriptor, cycle, self)
-				if self.threads > 1:
-					request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
-					threadPool.putRequest(request)
-				else:
-					self.containerCallback(thread.get_ident(), container())
-				counter = counter + 1
+			try:
+				self.resultsPointer = 0
+		 		self.resultsQueue = []
+		 		self.results[cycle] = {}
+				for outcome in PRECEDENT: self.results[cycle][outcome] = []
+		
+				counter = 0
+				for descriptor in self.descriptors:
+					self.resultsQueue.append(None)
+					container = TestContainer(counter, descriptor, cycle, self)
+					if self.threads > 1:
+						request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
+						threadPool.putRequest(request)
+					else:
+						self.containerCallback(thread.get_ident(), container())
+					counter = counter + 1
+			except KeyboardInterrupt:
+				log.info("test interrupt from keyboard")
+				self.handleKbrdInt()
 			
 			# wait for the threads to complete if more than one thread	
 			if self.threads > 1: 
 				try:
 					threadPool.wait()
 				except KeyboardInterrupt:
-					log.info("test interrupt from keyboard")
-					threadPool.dismissWorkers(self.threads)
+					log.info("test interrupt from keyboard - joining threads ... ")
+					threadPool.dismissWorkers(self.threads, True)
 					self.handleKbrdInt()
 
 			# call the hook for end of cycle
 			try:
 				self.cycleComplete()
+			except KeyboardInterrupt:
+				log.info("test interrupt from keyboard")
+				self.handleKbrdInt()
 			except:
 				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
