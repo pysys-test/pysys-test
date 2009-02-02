@@ -43,7 +43,7 @@ class ConsoleCleanTestHelper:
 		self.outsubdir = PLATFORM
 		self.all = False
 		self.name = name
-		self.optionString = 'hav:o'
+		self.optionString = 'hav:o:'
 		self.optionList = ["help","all", "verbosity=","outdir="]
 
 
