@@ -23,7 +23,7 @@
 # by Christopher Arndt (http://chrisarndt.de/en/software/python/threadpool/)
 # with minor modifications.
  
-import sys, logging, thread, threading, Queue, traceback
+import sys, time, logging, thread, threading, Queue, traceback
 
 from pysys import log
 
@@ -97,7 +97,8 @@ class WorkerThread(threading.Thread):
 				except:
 					request.exception = True
 					self._results_queue.put((request, self.getName(), sys.exc_info()))
-
+			time.sleep(0.1)
+					
 	def dismiss(self):
 		"""Stop running of the worker thread."""
 		self._dismissed.set()

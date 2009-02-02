@@ -253,7 +253,7 @@ class BaseRunner(ProcessUser):
 				except KeyboardInterrupt:
 					log.info("test interrupt from keyboard - joining threads ... ")
 					threadPool.dismissWorkers(self.threads, True)
-					self.handleKbrdInt()
+					self.handleKbrdInt(prompt=False)
 
 			# call the hook for end of cycle
 			try:
@@ -358,21 +358,29 @@ class BaseRunner(ProcessUser):
 		log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 
 
-	def handleKbrdInt(self):
+	def handleKbrdInt(self, prompt=True):
 		"""Handle a keyboard exception caught during running of a set of testcases.
 		
 		"""
-		while 1:
-			print ""
-			print "Keyboard interupt detected, continue running tests? [yes|no] ... ",
-			line = string.strip(sys.stdin.readline())
-			if line == "y" or line == "yes":
-				break
-			elif line == "n" or line == "no":
+		try:
+			if not prompt:
+				print "Keyboard interrupt detected, exiting ... "
 				self.cycleComplete()
 				self.cleanup()
 				sys.exit(1)
 
+			while 1:
+				print ""
+				print "Keyboard interrupt detected, continue running tests? [yes|no] ... ",
+				line = string.strip(sys.stdin.readline())
+				if line == "y" or line == "yes":
+					break
+				elif line == "n" or line == "no":
+					self.cycleComplete()
+					self.cleanup()
+					sys.exit(1)
+		except KeyboardInterrupt:
+			self.handleKbrdInt(prompt)
 
 
 class TestContainer:
@@ -398,7 +406,7 @@ class TestContainer:
 		self.testBuffer = []
 		self.testFileHandler = None
 		self.kbrdInt = False
-		
+
 		
 	def __call__(self, *args, **kwargs):
 		"""Over-ridden call builtin to allow the class instance to be called directly.
@@ -430,6 +438,7 @@ class TestContainer:
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
+		
 		except:
 			exc_info.append(sys.exc_info())
 			
@@ -438,75 +447,72 @@ class TestContainer:
 		try:
 			module = import_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)], True)
 			self.testObj = getattr(module, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
+
 		except KeyboardInterrupt:
 			self.kbrdInt = True
+		
 		except:
 			exc_info.append(sys.exc_info())
 			self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
 		global_lock.release()
 
 		# execute the test if we can
-		if self.descriptor.state != 'runnable':
-			self.testObj.addOutcome(SKIPPED)
+		try:
+			if self.descriptor.state != 'runnable':
+				self.testObj.addOutcome(SKIPPED)
+						
+			elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
+				log.info("Unable to run test in %s mode", self.runner.mode)
+				self.testObj.addOutcome(SKIPPED)
+			
+			elif len(exc_info) > 0:
+				self.testObj.addOutcome(BLOCKED)
+				for info in exc_info:
+					log.info("caught %s: %s", info[0], info[1], exc_info=info)
 					
-		elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
-			log.info("Unable to run test in %s mode", self.runner.mode)
-			self.testObj.addOutcome(SKIPPED)
+			elif self.kbrdInt:
+				log.info("test interrupt from keyboard")
+				self.testObj.addOutcome(BLOCKED)
 		
-		elif len(exc_info) > 0:
-			self.testObj.addOutcome(BLOCKED)
-			for info in exc_info:
-				log.info("caught %s: %s", info[0], info[1], exc_info=info)
-				
-		elif self.kbrdInt:
-			log.info("test interrupt from keyboard")
-			self.testObj.addOutcome(BLOCKED)
-		
-		else:
-			try:
+			else:
 				self.testObj.setup()
 				self.testObj.execute()
 				self.testObj.validate()
-			except KeyboardInterrupt:
-				self.kbrdInt = True
-				log.info("test interrupt from keyboard")
-				self.testObj.addOutcome(BLOCKED)
-			except:
-			  	log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			  	self.testObj.addOutcome(BLOCKED)
-					
-			try:
 				if self.detectCore(self.outsubdir):
 					log.info("core detected in output subdirectory")
 					self.testObj.addOutcome(DUMPEDCORE)	
-			except KeyboardInterrupt:
-				self.kbrdInt = True
-				log.info("test interrupt from keyboard")
-				self.testObj.addOutcome(BLOCKED)
-			except: 
-				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		
+		except KeyboardInterrupt:
+			self.kbrdInt = True
+			log.info("test interrupt from keyboard")
+			self.testObj.addOutcome(BLOCKED)
 
-			try:
-				self.testObj.cleanup()
-			except KeyboardInterrupt:
-				self.kbrdInt = True
-				log.info("test interrupt from keyboard")
-				self.testObj.addOutcome(BLOCKED)
-			except:
-				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		except:
+			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			self.testObj.addOutcome(BLOCKED)
+	
 
-		# get and log the final outcome for the test
-		self.testTime = math.floor(100*(time.time() - startTime))/100.0
-		log.info("")
-		log.info("Test duration %.2f secs", self.testTime)
-		log.info("Test final outcome %s", LOOKUP[self.testObj.getOutcome()])
-		log.info("")
-
-		# close and remove the file handler
+		# call the cleanup method to tear down the test
 		try:
+			self.testObj.cleanup()
+		
+		except KeyboardInterrupt:
+			self.kbrdInt = True
+			log.info("test interrupt from keyboard")
+			self.testObj.addOutcome(BLOCKED)
+			
+		# print summary and close file handles
+		try:
+			self.testTime = math.floor(100*(time.time() - startTime))/100.0
+			log.info("")
+			log.info("Test duration %.2f secs", self.testTime)
+			log.info("Test final outcome %s", LOOKUP[self.testObj.getOutcome()])
+			log.info("")
+			
 			self.testFileHandler.close()
 			log.removeHandler(self.testFileHandler)
-		except: pass
+		except: 
+			pass
 		
 		# return a reference to self
 		return self
