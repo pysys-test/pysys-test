@@ -76,6 +76,7 @@
 	-->
 	<target name="deploy.installer.windows" depends="prepare">
  		<exec executable="${python.executable}" dir="..">
+ 			<env key="PYTHONPATH" value=".." /> 
 			<arg value="pysys-dist/setup.py"/>
 			<arg value="bdist_wininst"/>
 			<arg value="--install-script"/>
@@ -96,6 +97,7 @@
 	-->
 	<target name="deploy.installer.unix" depends="prepare">
  		<exec executable="${python.executable}" dir="..">
+ 			<env key="PYTHONPATH" value=".." /> 
 			<arg value="pysys-dist/setup.py"/>
 			<arg value="sdist"/>
   		</exec>
