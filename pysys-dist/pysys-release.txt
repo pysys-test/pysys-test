@@ -1,8 +1,12 @@
-PySys 0.7.0 Release Notes
+PySys 0.7.1 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
 may run on earlier versions no guarantee as to the successful operation can be made. 
+
+NOTE! This release contains a change to the signature of the pysys.baserunner.BaseRunner
+constructor. Any custom runner classes extending the base runner will need to be updated 
+to use the new method signature. For more details see below.
 
 
 What's new in this release
@@ -17,6 +21,14 @@ What's new in this release
   tests in parallel, so as to ensure no shared resources are accessed in a non-atomic 
   way, e.g using direct references to os.environ() in one test when another test 
   modifies the environment directly etc.
+- The constructor to the pysys.baserunner.BaseRunner class was changed to include 
+  the threads parameter, i.e.
+  
+  	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs)
+  	
+  This parameter is required for the runner to create the required threadpool before 
+  running a set of tests in parallel. Any custom runner classes extending the base runner 
+  will need to be updated to incorporate this change. 
 - Removed module specific loggers from pysys in order to support running tests in 
   parallel. There is now a single logger used within the framework, and which can 
   be referenced directly from the pysys.constants module. Attached to this logger are
