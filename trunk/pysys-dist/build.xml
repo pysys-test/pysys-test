@@ -69,6 +69,10 @@
 			<regexp pattern="__date__.*"/>
 			<substitution expression='__date__ = "${date}"'/>
 		</replaceregexp>
+		<replaceregexp byline="true" file="pysys-release.txt">
+			<regexp pattern="^PySys.*Release Notes"/>
+			<substitution expression='PySys ${version} Release Notes'/>
+		</replaceregexp>
 	</target>
 	
 	<!--
