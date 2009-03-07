@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="" default="usage" basedir=".">
+	<description>Build file for the pysys test framework</description>
+
+	<!-- Grab a reference to the environment -->
+	<property environment="env" />
+	
+	<!-- Import the version properties -->
+	<property file="version.properties" />
+	
+	<!-- Set the OS generic name and import properties -->
+	<condition property="os.generic.name" value="windows"> <os family="windows"/> </condition>
+	<condition property="os.generic.name" value="unix"> <os family="unix"/> </condition>
+	<property file="${os.generic.name}.properties" />
+	
+	<!-- The data stamp -->
+	<tstamp> <format property="date" pattern="dd-MMMM-yyyy" locale="en,UK"/> </tstamp>
+	
+	<!-- The name of the examples archive -->
+	<property name="deploy.examples.archive" value="../dist/PySys-examples.${version}" />
+	
+	<!-- Print some information on the date and os -->
+	<echo message="Running build file on ${date} for platform ${os.generic.name}" />
+	
+	<!-- Prepare tasks before running -->
+	<target name="prepare" >
+		<mkdir dir="../dist" />
+	</target>
+	
+	<!--
+	Default usage target
+	-->
+	<target name="usage" >
+		<echo message="PySys build file ..."/>
+		<echo message="   "/>
+		<echo message="   Usage: ant [-Dproperty=value]* target"/>
+		<echo message="   "/>	
+		<echo message="   where target can be;"/>
+		<echo message="      deploy.replace  - replace the version and date values in the source __init__.py"/>
+		<echo message="      deploy.windows  - creates the installer and examples archive for win32"/>
+		<echo message="      deploy.unix     - creates the installer and examples archive for unix"/>
+		<echo message="   "/>
+	</target>
+
+	<!--
+	Target to create the epydoc documentation
+	-->
+	<target name="epydoc">
+ 		<exec executable="${python.executable}" dir="..">
+			<arg value="${python.dir}/Scripts/epydoc.py"/>	
+ 			<arg value="--debug"/>
+			<arg value="--html"/>
+ 			<arg value="--no-private"/>
+			<arg value="-o"/>
+			<arg value="pysys-doc"/>
+			<arg value="pysys"/>
+  		</exec>
+	</target>
+	
+	<!--
+	Target to tailor the init file for the current release version and date
+	-->
+	<target name="deploy.replace">
+		<replaceregexp byline="true" file="../pysys/__init__.py">
+			<regexp pattern="__version__.*"/>
+			<substitution expression='__version__ = "${version}"'/>
+		</replaceregexp>
+		<replaceregexp byline="true" file="../pysys/__init__.py">
+			<regexp pattern="__date__.*"/>
+			<substitution expression='__date__ = "${date}"'/>
+		</replaceregexp>
+		<replaceregexp byline="true" file="pysys-release.txt">
+			<regexp pattern="^PySys.*Release Notes"/>
+			<substitution expression='PySys ${version} Release Notes'/>
+		</replaceregexp>
+	</target>
+	
+	<!--
+	Targets to create the win32 python installer and examples archive
+	-->
+	<target name="deploy.installer.windows" depends="prepare">
+ 		<exec executable="${python.executable}" dir="..">
+ 			<env key="PYTHONPATH" value=".." /> 
+			<arg value="pysys-dist/setup.py"/>
+			<arg value="bdist_wininst"/>
+			<arg value="--install-script"/>
+			<arg value="pysys_postinstall.py"/>
+  		</exec>
+	</target>
+
+	<target name="deploy.examples.windows" depends="prepare">
+		<zip destfile="${deploy.examples.archive}.zip">
+			<zipfileset dir="../pysys-examples/" prefix="pysys-examples" includes="pysysproject.xml"/>
+			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="CVS,*.pyc"/>
+			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="CVS,*.pyc"/>
+		</zip>
+	</target>
+	
+	<!--
+	Target to create the unix python installer and examples archive
+	-->
+	<target name="deploy.installer.unix" depends="prepare">
+		<copy file="setup.py" tofile="../setup.py" />
+		<copy file="MANIFEST.in" tofile="../MANIFEST.in" />
+ 		<exec executable="${python.executable}" dir="..">
+ 			<env key="PYTHONPATH" value=".." /> 
+			<arg value="setup.py"/>
+			<arg value="sdist"/>
+  		</exec>
+	</target>
+	
+	<target name="deploy.examples.unix" depends="prepare">
+		<tar destfile="${deploy.examples.archive}.tar.gz" compression="gzip">
+			<tarfileset dir="../pysys-examples/" prefix="pysys-examples" includes="pysysproject.xml"/>
+			<tarfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="CVS,*.pyc"/>
+			<tarfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="CVS,*.pyc"/>
+		</tar>
+	</target>
+	
+	<!--
+	Target clean all derived files from the base directory
+	-->
+	<target name="clean">
+		<delete file="../MANIFEST.in" />
+		<delete file="../MANIFEST" />
+		<delete file="../setup.py" />
+		<delete dir="../pysys-doc"/>
+		<delete dir="../dist"/>
+		<delete dir="../build"/>
+		<delete>
+			<fileset dir="../pysys" includes="**/*.pyc"/>
+			<fileset dir="../pysys-examples" includes="**/*.pyc"/>
+		</delete>
+	</target>
+	
+	<!--
+	Target to create the deployment deliverables
+	-->
+	<target name="deploy.windows" depends="epydoc, deploy.installer.windows, deploy.examples.windows"/>
+	<target name="deploy.unix" depends="deploy.installer.unix, deploy.examples.unix"/>
+	
+</project>
