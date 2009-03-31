@@ -4,42 +4,11 @@ PySys 0.7.5 Release Notes
 PySys has been written and tested against Python 2.4 and higher. Whilst the package 
 may run on earlier versions no guarantee as to the successful operation can be made. 
 
-NOTE! This release contains a change to the signature of the pysys.baserunner.BaseRunner
-constructor. Any custom runner classes extending the base runner will need to be updated 
-to use the new method signature. For more details see below.
-
 
 What's new in this release
 --------------------------
-- Added the ability to run tests concurrently through the -n | --threads option 
-  to the pysys launcher run target. Tests to be run are placed on a request queue
-  and processed by the designated number of worker threads. The results of each test
-  are then placed on a result queue, collated and displayed in the order in which they 
-  would run serially. Depending on the nature of the application under test, the 
-  recommended number of threads to designate when using this option is no more than
-  two times the number of CPUs. Note also that care needs to be made when running 
-  tests in parallel, so as to ensure no shared resources are accessed in a non-atomic 
-  way, e.g using direct references to os.environ() in one test when another test 
-  modifies the environment directly etc.
-- The constructor to the pysys.baserunner.BaseRunner class was changed to include 
-  the threads parameter, i.e.
-  
-  	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs)
-  	
-  This parameter is required for the runner to create the required threadpool before 
-  running a set of tests in parallel. Any custom runner classes extending the base runner 
-  will need to be updated to incorporate this change. 
-- Removed module specific loggers from pysys in order to support running tests in 
-  parallel. There is now a single logger used within the framework, and which can 
-  be referenced directly from the pysys.constants module. Attached to this logger are
-  two handler types; one for logging to stdout, and one for logging to the run log 
-  file saved in the output subdirectory of each test. The sdtout handler is set to only 
-  log to stdout from the main thread, whilst the run log file handlers are set to log to 
-  the output subdirectory of a test only on the creating thread.
-- Added exception handling to the pysys.process.user module when trying to stop all 
-  processes on destruction. When a background process takes longer to stop than the 
-  default timeout period, the thrown pysys.exceptions.ProcessTimeout exception was 
-  uncaught causing abnormal exit from the test run.  
+- Fixed a defect in the unix process helper module to correct a file handle leak in 
+  the write end of the stdin pipe.
 
 
 Dependencies
@@ -109,6 +78,38 @@ testcases location, perform
 
 Release History
 ---------------
+
+0.6.1 to 0.7.5
+--------------
+- Added the ability to run tests concurrently through the -n | --threads option 
+  to the pysys launcher run target. Tests to be run are placed on a request queue
+  and processed by the designated number of worker threads. The results of each test
+  are then placed on a result queue, collated and displayed in the order in which they 
+  would run serially. Depending on the nature of the application under test, the 
+  recommended number of threads to designate when using this option is no more than
+  two times the number of CPUs. Note also that care needs to be made when running 
+  tests in parallel, so as to ensure no shared resources are accessed in a non-atomic 
+  way, e.g using direct references to os.environ() in one test when another test 
+  modifies the environment directly etc.
+- The constructor to the pysys.baserunner.BaseRunner class was changed to include 
+  the threads parameter, i.e.
+  
+  	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs)
+  	
+  This parameter is required for the runner to create the required threadpool before 
+  running a set of tests in parallel. Any custom runner classes extending the base runner 
+  will need to be updated to incorporate this change. 
+- Removed module specific loggers from pysys in order to support running tests in 
+  parallel. There is now a single logger used within the framework, and which can 
+  be referenced directly from the pysys.constants module. Attached to this logger are
+  two handler types; one for logging to stdout, and one for logging to the run log 
+  file saved in the output subdirectory of each test. The sdtout handler is set to only 
+  log to stdout from the main thread, whilst the run log file handlers are set to log to 
+  the output subdirectory of a test only on the creating thread.
+- Added exception handling to the pysys.process.user module when trying to stop all 
+  processes on destruction. When a background process takes longer to stop than the 
+  default timeout period, the thrown pysys.exceptions.ProcessTimeout exception was 
+  uncaught causing abnormal exit from the test run.  
 
 0.6.0 to 0.6.1
 --------------
