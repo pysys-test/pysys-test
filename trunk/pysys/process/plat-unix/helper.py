@@ -104,7 +104,9 @@ class ProcessWrapper:
 			try:
 				data = self.__outQueue.get(block=True, timeout=0.25)
 			except Queue.Empty:
-				if not self.running(): break
+				if not self.running(): 
+					os.close(fd)
+					break
 			else:
 				os.write(fd, data)	
 	
