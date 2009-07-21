@@ -686,6 +686,7 @@ class BaseTest(ProcessUser):
 
 		try:
 			numberLines = linecount(f, expr)
+			log.debug("Number of matching lines is %d"%numberLines)
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:

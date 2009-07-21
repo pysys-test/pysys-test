@@ -46,7 +46,9 @@ def getmatches(file, regexpr):
 		list = open(file, 'r').readlines()
 		for i in range(0, len(list)):
 			match = rexp.search(list[i])
-			if match != None: matches.append(match)
+			if match != None: 
+				log.debug("Found match for line: %s" % list[i])
+				matches.append(match)
 		return matches
 
 
