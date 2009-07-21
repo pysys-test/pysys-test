@@ -9,7 +9,8 @@ What's new in this release
 --------------------------
 - Added extra debug logging in pysys.utils.filegrep, and pysys.basetest for when 
   performing asserts against a line count in an input file.
-
+- The testcase output summary is now printed on termination of the test run via
+  a keyboard interrupt.
 
 Dependencies
 ------------
