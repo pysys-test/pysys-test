@@ -7,8 +7,8 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- Fixed a defect in the unix process helper module to correct a file handle leak in 
-  the write end of the stdin pipe.
+- Added extra debug logging in pysys.utils.filegrep, and pysys.basetest for when 
+  performing asserts against a line count in an input file.
 
 
 Dependencies
@@ -78,6 +78,10 @@ testcases location, perform
 
 Release History
 ---------------
+0.7.5 to 0.7.6
+--------------
+- Fixed a defect in the unix process helper module to correct a file handle leak in 
+  the write end of the stdin pipe.
 
 0.6.1 to 0.7.5
 --------------
