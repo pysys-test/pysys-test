@@ -40,6 +40,8 @@ def getmatches(file, regexpr):
 	matches = []
 	rexp = re.compile(regexpr)
 	
+	log.debug("Looking for expression \"%s\" in input file %s" %(regexpr, file))
+	
 	if not os.path.exists(file):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
 	else:
@@ -47,7 +49,7 @@ def getmatches(file, regexpr):
 		for i in range(0, len(list)):
 			match = rexp.search(list[i])
 			if match != None: 
-				log.debug("Found match for line: %s" % list[i])
+				log.debug(string.rstrip("Found match for line: %s" % list[i]))
 				matches.append(match)
 		return matches
 
