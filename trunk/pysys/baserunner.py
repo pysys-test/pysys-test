@@ -223,7 +223,7 @@ class BaseRunner(ProcessUser):
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
 
 		# loop through each cycle
-		startTime = time.time()
+		self.startTime = time.time()
 		for cycle in range(self.cycle):
 			# loop through tests for the cycle
 			try:
@@ -271,35 +271,41 @@ class BaseRunner(ProcessUser):
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 		# log the summary output to the console
-		if printSummary:
-			log.critical("")
-			if self.threads > 1: 
-				log.critical("Test duration (absolute): %.2f (secs)", time.time() - startTime)		
-				log.critical("Test duration (additive): %.2f (secs)", self.duration)
-			else:
-				log.critical("Test duration: %.2f (secs)", time.time() - startTime)		
-			log.critical("")		
-			log.critical("Summary of non passes: ")
-			fails = 0
-			for cycle in self.results.keys():
-				for outcome in self.results[cycle].keys():
-					if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
-			if fails == 0:
-				log.critical("	THERE WERE NO NON PASSES")
-			else:
-				if len(self.results) == 1:
-					for outcome in FAILS:
-						for id in self.results[0][outcome]: log.critical("  %s: %s ", LOOKUP[outcome], id)
-				else:
-					for key in self.results.keys():
-						for outcome in FAILS:
-							for id in self.results[key][outcome]: log.critical(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
-
+		if printSummary: self.printSummary()
+		
 		# call the hook to cleanup after running tests
 		self.cleanup()
 
 		# return the results dictionary
 		return self.results
+
+
+	def printSummary(self):
+		"""Print the output summary at the completion of a test run.
+		
+		"""
+		log.critical("")
+		if self.threads > 1: 
+			log.critical("Test duration (absolute): %.2f (secs)", time.time() - self.startTime)		
+			log.critical("Test duration (additive): %.2f (secs)", self.duration)
+		else:
+			log.critical("Test duration: %.2f (secs)", time.time() - self.startTime)		
+		log.critical("")		
+		log.critical("Summary of non passes: ")
+		fails = 0
+		for cycle in self.results.keys():
+			for outcome in self.results[cycle].keys():
+				if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
+		if fails == 0:
+			log.critical("	THERE WERE NO NON PASSES")
+		else:
+			if len(self.results) == 1:
+				for outcome in FAILS:
+					for id in self.results[0][outcome]: log.critical("  %s: %s ", LOOKUP[outcome], id)
+			else:
+				for key in self.results.keys():
+					for outcome in FAILS:
+						for id in self.results[key][outcome]: log.critical(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
 
 
 	def containerCallback(self, thread, container):
@@ -365,6 +371,7 @@ class BaseRunner(ProcessUser):
 		try:
 			if not prompt:
 				print "Keyboard interrupt detected, exiting ... "
+				self.printSummary()
 				self.cycleComplete()
 				self.cleanup()
 				sys.exit(1)
@@ -376,6 +383,7 @@ class BaseRunner(ProcessUser):
 				if line == "y" or line == "yes":
 					break
 				elif line == "n" or line == "no":
+					self.printSummary()
 					self.cycleComplete()
 					self.cleanup()
 					sys.exit(1)
@@ -413,7 +421,7 @@ class TestContainer:
 		
 		"""		
 		exc_info = []
-		startTime = time.time()
+		testTime = time.time()
 		try:
 			# set the output subdirectory and purge contents
 			outsubdir = self.runner.outsubdir
@@ -503,7 +511,7 @@ class TestContainer:
 			
 		# print summary and close file handles
 		try:
-			self.testTime = math.floor(100*(time.time() - startTime))/100.0
+			self.testTime = math.floor(100*(time.time() - testTime))/100.0
 			log.info("")
 			log.info("Test duration %.2f secs", self.testTime)
 			log.info("Test final outcome %s", LOOKUP[self.testObj.getOutcome()])
