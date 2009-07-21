@@ -6,4 +6,4 @@ class PySysTest(BaseTest):
 		pass
 
 	def validate(self):
-		pass
+		self.assertLineCount(file='file1.txt', filedir=self.input, expr='cat', condition='==4')
