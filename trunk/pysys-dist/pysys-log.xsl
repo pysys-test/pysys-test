@@ -43,6 +43,14 @@
 		<p class="header">Host: <b><xsl:value-of select="pysyslog/host"/></b></p>
 		<p class="header">Project root directory: <b><a><xsl:attribute name="href"><xsl:value-of select="normalize-space(pysyslog/root)"/></xsl:attribute>
 		<xsl:value-of select="pysyslog/root"/></a></b></p>
+		<p class="header">-X Arguments: 
+			<b>
+				<xsl:for-each select="pysyslog/xargs/xarg">
+					<xsl:value-of select="@name"/>=<xsl:value-of select="@value"/> <xsl:if test="position()!=last()">, </xsl:if> 
+				</xsl:for-each>
+			</b>
+		</p>
+		
 		<h2>Test Failures:</h2>
 		<body>
 			<table cellspacing="0" cellpadding="4" border="1" class="table">
@@ -56,7 +64,7 @@
 						<xsl:attribute name="class">
 							<xsl:choose><xsl:when test="position() mod 2 = 1">odd</xsl:when></xsl:choose>
 						</xsl:attribute> 
-					    <td><xsl:value-of select="@id"/></td>
+						<td><xsl:value-of select="@id"/></td>
 						<td>
 							<a><xsl:attribute name="href"><xsl:value-of select="normalize-space(descriptor)"/></xsl:attribute>
 							descriptor</a>, 
@@ -81,7 +89,7 @@
 						<xsl:attribute name="class">
 							<xsl:choose><xsl:when test="position() mod 2 = 1">odd</xsl:when></xsl:choose>
 						</xsl:attribute> 
-					    <td><xsl:value-of select="@id"/></td>
+						<td><xsl:value-of select="@id"/></td>
 						<td>
 							<a ><xsl:attribute name="href"><xsl:value-of select="normalize-space(descriptor)"/></xsl:attribute>
 							descriptor</a>, 
