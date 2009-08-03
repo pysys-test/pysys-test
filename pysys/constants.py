@@ -186,7 +186,7 @@ class Project:
 			# parse the project file
 			from pysys.xml.project import XMLProjectParser
 			try:
-				parser = XMLProjectParser(os.path.join(root, projectFile))
+				parser = XMLProjectParser(root, projectFile)
 			except:
 				sys.stderr.write("ERROR: Error parsing project file %s, %s\n" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 				sys.exit(1)

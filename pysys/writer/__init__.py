@@ -201,6 +201,20 @@ class XMLResultsWriter:
 			element.appendChild(self.document.createTextNode(self.__pathToURL(PROJECT.root)))
 			self.rootElement.appendChild(element)
 
+			# add the extra params nodes
+			element = self.document.createElement("xargs")
+			if kwargs.has_key("xargs"): 
+				for key in kwargs["xargs"].keys():
+				   	childelement = self.document.createElement("xarg")
+				   	nameAttribute = self.document.createAttribute("name")
+				   	valueAttribute = self.document.createAttribute("value") 
+				   	nameAttribute.value=key
+				   	valueAttribute.value=kwargs["xargs"][key].__str__()
+				   	childelement.setAttributeNode(nameAttribute)
+				   	childelement.setAttributeNode(valueAttribute)
+				   	element.appendChild(childelement)
+			self.rootElement.appendChild(element)
+				   	
 			# write the file out
 			self.fp.write(self.document.toprettyxml(indent="  "))
 		except:
