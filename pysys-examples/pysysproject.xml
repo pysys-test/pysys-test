@@ -43,9 +43,9 @@
 	<!-- 
 	Get a reference to project root location (the location of this file), which can then be used 
 	as a substitution variable within the project file. Note that this is only for local expansion 
-	within the project file, where the prject root location is required for full paths, e.g. 
-	stylesheets etc. Within a test class, the root location cab referenced using the PROJECT.root 
-	variable
+	within the project file, where the project root location is required for full paths, e.g. 
+	stylesheets etc. Within a test class, the root location can be referenced using the 
+	PROJECT.root class variable.
 	-->
 	<property root="rootdir"/>
 	
