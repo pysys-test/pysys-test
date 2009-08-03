@@ -12,10 +12,11 @@ What's new in this release
 - The testcase output summary is now printed on termination of the test run via
   a keyboard interrupt.
 - The pysys project file now allows assignment of the project root location to 
-  a local variable for later expansion. This allows the creation of other 
-  variables within the project file to include the full path where this is 
-  required, e.g. XSL stylesheets which must use the full path to the file 
-  rather than a relative path etc. 
+  a variable which can then be used for later expansion within the file. This 
+  allows the definition of project variables to include the full path where this 
+  is required, e.g. XSL stylesheets which must use the full path to the file 
+  rather than a relative path etc. Note that modules within pysys can reference 
+  the project root location directly using PROJECT.root (as before). 
 
 Dependencies
 ------------
