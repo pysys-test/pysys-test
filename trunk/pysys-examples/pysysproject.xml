@@ -41,6 +41,16 @@
 
 
 	<!-- 
+	Get a reference to project root location (the location of this file), which can then be used 
+	as a substitution variable within the project file. Note that this is only for local expansion 
+	within the project file, where the prject root location is required for full paths, e.g. 
+	stylesheets etc. Within a test class, the root location cab referenced using the PROJECT.root 
+	variable
+	-->
+	<property root="rootdir"/>
+	
+	
+	<!-- 
 	Set a property on the project class. The property can then be used as a substitution variable 
 	within the project file, and is also set as an attribute to the project class so it's value 
 	can be reference internally within the PySys framework, e.g. in the below example, user would 
