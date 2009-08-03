@@ -216,7 +216,7 @@ class BaseRunner(ProcessUser):
 		# call the hook to setup the test output writers
 		if self.record:
 			for writer in self.writers:
-				try: writer.setup(numTests=self.cycle * len(self.descriptors))
+				try: writer.setup(numTests=self.cycle * len(self.descriptors), xargs=self.xargs)
 				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 		# create the thread pool if running with more than one thread

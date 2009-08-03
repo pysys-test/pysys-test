@@ -33,6 +33,7 @@ DTD='''
 <!ELEMENT runner (#PCDATA)>
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
+<!ATTLIST property root CDATA #IMPLIED>
 <!ATTLIST property environment CDATA #IMPLIED>
 <!ATTLIST property osfamily CDATA #IMPLIED>
 <!ATTLIST property file CDATA #IMPLIED>
@@ -55,18 +56,19 @@ PROPERTY_FILE = "(?P<name>^.*)=(?P<value>.*)$"
 
 
 class XMLProjectParser:
-	def __init__(self, xmlfile):
-		self.dirname = os.path.dirname(xmlfile)
-		self.xmlfile = xmlfile
+	def __init__(self, dirname, file):
+		self.dirname = dirname
+		self.xmlfile = os.path.join(dirname, file)
+		self.rootdir = 'root'
 		self.environment = 'env'
 		self.osfamily = 'osfamily'
-		self.properties = {self.osfamily:OSFAMILY}
+		self.properties = {self.rootdir:self.dirname, self.osfamily:OSFAMILY}
 		
-		if not os.path.exists(xmlfile):
-			raise Exception, "Unable to find supplied project file \"%s\"" % xmlfile
+		if not os.path.exists(self.xmlfile):
+			raise Exception, "Unable to find supplied project file \"%s\"" % self.xmlfile
 		
 		try:
-			self.doc = xml.dom.minidom.parse(xmlfile)
+			self.doc = xml.dom.minidom.parse(self.xmlfile)
 		except:
 			raise Exception, sys.exc_info()[1]
 		else:
@@ -86,6 +88,11 @@ class XMLProjectParser:
 		for propertyNode in propertyNodeList:
 			if propertyNode.hasAttribute("environment"):
 				self.environment = propertyNode.getAttribute("environment")
+
+			elif propertyNode.hasAttribute("root"):
+				self.properties.pop(self.rootdir, "")
+				self.rootdir = propertyNode.getAttribute("root")
+				self.properties[self.rootdir] = self.dirname
 			
 			elif propertyNode.hasAttribute("osfamily"):
 				self.properties.pop(self.osfamily, "")
