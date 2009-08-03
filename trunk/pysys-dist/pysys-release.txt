@@ -17,6 +17,10 @@ What's new in this release
   is required, e.g. XSL stylesheets which must use the full path to the file 
   rather than a relative path etc. Note that modules within pysys can reference 
   the project root location directly using PROJECT.root (as before). 
+- The pysys.baserunner class now passes the -X arguments into the test summary 
+  writer setup action to allow logging of the user supplied extra arguments. 
+  The pysys-log.xsl stylesheet used by the XMLResultsWriter has been updated to
+  display this information in the test summary display. 
 
 Dependencies
 ------------
