@@ -30,28 +30,6 @@ from pysys.exceptions import *
 EXPR = re.compile(".*\n$")
 
 
-class NullDevice:
-	"""Class to implement the write and flush methods of a file descriptor. 
-	
-	Used as a representation of the null device, so that writing to this device
-	produces no output.
-	
-	"""
-	def write(self, str):
-		"""Called to write a string value to the device (no-op).
-		
-		@param str: The string to write to the null device
-		
-		"""
-		pass
-
-	def flush(self):
-		"""Called to flush the device (no-op).
-		
-		"""
-		pass
-	
-
 class ProcessWrapper:
 	"""Process wrapper for process execution and management. 
 	
@@ -98,8 +76,6 @@ class ProcessWrapper:
 		self.workingDir = workingDir
 		self.state = state
 		self.timeout = timeout
-		self.stdout = stdout
-		self.stderr = stderr	
 
 		# 'publicly' available data attributes set on execution
 		self.pid = None
@@ -112,14 +88,14 @@ class ProcessWrapper:
 		self.__outQueue = Queue.Queue()
 		
 		# set the stdout|err file handles
-		self.fStdout = NullDevice()
-		self.fStderr = NullDevice()
+		self.fStdout = 'nul'
+		self.fStderr = 'nul'
 		try:
-			if self.stdout != None: self.fStdout = open(self.stdout, 'w', 0)
+			if stdout != None: self.fStdout = self.__stringToUnicode(stdout)
 		except:
 			log.info("Unable to create file to capture stdout - using the null device")
 		try:
-			if self.stderr != None: self.fStderr = open(self.stderr, 'w', 0)
+			if stderr != None: self.fStderr = self.__stringToUnicode(stderr)
 		except:
 			log.info("Unable to create file to capture stdout - using the null device")
 
@@ -128,8 +104,8 @@ class ProcessWrapper:
 		log.debug("  command      : %s", self.command)
 		for a in self.arguments: log.debug("  argument     : %s", a)
 		log.debug("  working dir  : %s", self.workingDir)
-		log.debug("  stdout       : %s", self.stdout)
-		log.debug("  stdout       : %s", self.stderr)
+		log.debug("  stdout       : %s", stdout)
+		log.debug("  stdout       : %s", stderr)
 		keys=self.environs.keys()
 		keys.sort()
 		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])
@@ -143,44 +119,6 @@ class ProcessWrapper:
 			return s
 		else:
 			return unicode(s, "utf8")
-
-
-	def __collectStdout(self, hStdout, fStdout):	
-		"""Private method to read from the process stdout pipe and write to file.
-		
-		"""
-		buffer = win32file.AllocateReadBuffer(200)
-		while 1:
-			try:
-				res, str = win32file.ReadFile(hStdout, buffer)
-				if res == 0:
-					str = string.replace(str, "\r\n", "\n")
-					self.fStdout.write(str)
-			except:
-				if not self.running(): 
-					if self.fStdout: self.fStdout.flush()
-					if self.fStdout: self.fStdout.close()
-					if self.fStdout: self.fStdout = None
-					break
-
-
-	def __collectStderr(self, hStderr, fStderr):
-		"""Private method to read from the process stderr pipe and write to file.
-		
-		"""
-		buffer = win32file.AllocateReadBuffer(200)
-		while 1:
-			try:
-				res, str = win32file.ReadFile(hStderr, buffer)
-		  		if res == 0: 
-				  	str = string.replace(str, "\r\n", "\n")
-					fStderr.write(str)
-			except:
-				if not self.running():
-					if self.fStderr: self.fStderr.flush() 
-					if self.fStderr: self.fStderr.close()
-					if self.fStderr: self.fStderr = None
-					break
 
 
 	def __writeStdin(self, hStdin):
@@ -217,14 +155,18 @@ class ProcessWrapper:
 	
 		# create pipes for the process to write to
 		hStdin_r, hStdin = win32pipe.CreatePipe(sAttrs, 0)
-		hStdout, hStdout_w = win32pipe.CreatePipe(sAttrs, 0)
-		hStderr, hStderr_w = win32pipe.CreatePipe(sAttrs, 0)
+		hStdout = win32file.CreateFile(self.__stringToUnicode(self.fStdout), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+									   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
+									   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
+		hStderr = win32file.CreateFile(self.__stringToUnicode(self.fStderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+									   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
+									   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
 
 		# set the info structure for the new process.
 		StartupInfo = win32process.STARTUPINFO()
 		StartupInfo.hStdInput  = hStdin_r
-		StartupInfo.hStdOutput = hStdout_w
-		StartupInfo.hStdError  = hStderr_w
+		StartupInfo.hStdOutput = hStdout
+		StartupInfo.hStdError  = hStderr
 		StartupInfo.dwFlags = win32process.STARTF_USESTDHANDLES
 
 		# Create new handles for the thread ends of the pipes. The duplicated handles will
@@ -234,12 +176,6 @@ class ProcessWrapper:
 		tmp = win32api.DuplicateHandle(pid, hStdin, pid, 0, 0, win32con.DUPLICATE_SAME_ACCESS)
 		win32file.CloseHandle(hStdin)
 		hStdin = tmp
-		tmp = win32api.DuplicateHandle(pid, hStdout, pid, 0, 0, win32con.DUPLICATE_SAME_ACCESS)
-		win32file.CloseHandle(hStdout)
-		hStdout = tmp
-		tmp = win32api.DuplicateHandle(pid, hStderr, pid, 0, 0, win32con.DUPLICATE_SAME_ACCESS)
-		win32file.CloseHandle(hStderr)
-		hStderr = tmp
 
 		# start the process, and close down the copies of the process handles
 		# we have open after the process creation (no longer needed here)
@@ -251,17 +187,15 @@ class ProcessWrapper:
 			raise ProcessError, "Error creating process %s" % (old_command)
 
 		win32file.CloseHandle(hStdin_r)
-		win32file.CloseHandle(hStdout_w)
-		win32file.CloseHandle(hStderr_w)
-		
+		win32file.CloseHandle(hStdout)
+		win32file.CloseHandle(hStderr)
+
 		# set the handle to the stdin of the process 
 		self.__stdin = hStdin
 		
 		# check to see if the process is running. If it is kick off the threads to collect
 		# the stdout and stderr
 		if self.running():					
-			thread.start_new_thread(self.__collectStdout, (hStdout, self.fStdout))
-			thread.start_new_thread(self.__collectStderr, (hStderr, self.fStderr))
 			thread.start_new_thread(self.__writeStdin, (hStdin, ))
 
 
