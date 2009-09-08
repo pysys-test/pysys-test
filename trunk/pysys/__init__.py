@@ -112,7 +112,6 @@ class ThreadedFileHandler(logging.FileHandler):
 		"""Overrides logging.ThreadedFileHandler.emit."""
 		if self.threadId != thread.get_ident(): return
 		self.buffer.append(record.getMessage())
-		#print record.getMessage()
 		logging.FileHandler.emit(self, record)
 		
 	def getBuffer(self):

@@ -217,7 +217,7 @@ class BaseRunner(ProcessUser):
 		if self.record:
 			for writer in self.writers:
 				try: writer.setup(numTests=self.cycle * len(self.descriptors), xargs=self.xargs)
-				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				except: log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
@@ -262,13 +262,13 @@ class BaseRunner(ProcessUser):
 				log.info("test interrupt from keyboard")
 				self.handleKbrdInt()
 			except:
-				log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 		# perform cleanup on the test writers
 		if self.record:
 			for writer in self.writers:
 				try: writer.cleanup()
-				except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				except: log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 		# log the summary output to the console
 		if printSummary: self.printSummary()
@@ -341,7 +341,7 @@ class BaseRunner(ProcessUser):
 			if self.record:
 				for writer in self.writers:
 					try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle)
-					except: log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					except: log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 			# prompt for continuation on control-C
 			if self.resultsQueue[i].kbrdInt == True: self.handleKbrdInt()
@@ -361,7 +361,7 @@ class BaseRunner(ProcessUser):
 		@param exc_info: The tuple of values as created from sys.exc_info()
 		 
 		"""
-		log.info("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+		log.warn("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 
 
 	def handleKbrdInt(self, prompt=True):
@@ -470,16 +470,16 @@ class TestContainer:
 				self.testObj.addOutcome(SKIPPED)
 						
 			elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
-				log.info("Unable to run test in %s mode", self.runner.mode)
+				log.warn("Unable to run test in %s mode", self.runner.mode)
 				self.testObj.addOutcome(SKIPPED)
 			
 			elif len(exc_info) > 0:
 				self.testObj.addOutcome(BLOCKED)
 				for info in exc_info:
-					log.info("caught %s: %s", info[0], info[1], exc_info=info)
+					log.warn("caught %s: %s", info[0], info[1], exc_info=info)
 					
 			elif self.kbrdInt:
-				log.info("test interrupt from keyboard")
+				log.warn("test interrupt from keyboard")
 				self.testObj.addOutcome(BLOCKED)
 		
 			else:
@@ -487,16 +487,16 @@ class TestContainer:
 				self.testObj.execute()
 				self.testObj.validate()
 				if self.detectCore(self.outsubdir):
-					log.info("core detected in output subdirectory")
+					log.warn("core detected in output subdirectory")
 					self.testObj.addOutcome(DUMPEDCORE)	
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
-			log.info("test interrupt from keyboard")
+			log.warn("test interrupt from keyboard")
 			self.testObj.addOutcome(BLOCKED)
 
 		except:
-			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.testObj.addOutcome(BLOCKED)
 	
 
@@ -506,7 +506,7 @@ class TestContainer:
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
-			log.info("test interrupt from keyboard")
+			log.warn("test interrupt from keyboard")
 			self.testObj.addOutcome(BLOCKED)
 			
 		# print summary and close file handles
