@@ -7,6 +7,11 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
+- Updated the pysys.process.plat-win32.helper.ProcessWrapper module to eliminate 
+  the use of threads to collect the stdout and stderr from the process via pipes. 
+  The module now directly uses win32file.CreateFile to create file objects to 
+  pass to the call to win32process.CreateProcess. Many thanks to Mark Horsburgh
+  for this recommended change. 
 - Added extra debug logging in pysys.utils.filegrep, and pysys.basetest for when 
   performing asserts against a line count in an input file.
 - The testcase output summary is now printed on termination of the test run via
