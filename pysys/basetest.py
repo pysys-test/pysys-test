@@ -279,10 +279,10 @@ class BaseTest(ProcessUser):
 			elif state == BACKGROUND:
 				log.info("Started %s in background with process id %d", displayName, process.pid)
 		except ProcessError:
-			log.info("%s", sys.exc_info()[1], exc_info=0)
+			log.warn("%s", sys.exc_info()[1], exc_info=0)
 			self.addOutcome(BLOCKED)
 		except ProcessTimeout:
-			log.info("Process timedout after %d seconds, stopping process", timeout)
+			log.warn("Process timedout after %d seconds, stopping process", timeout)
 			process.stop()
 			self.addOutcome(TIMEDOUT)
 		else:
@@ -312,7 +312,7 @@ class BaseTest(ProcessUser):
 				process.stop()
 				log.info("Stopped process with process id %d", process.pid)
 			except ProcessError:
-				log.info("Unable to stop process")
+				log.warn("Unable to stop process")
 				self.addOutcome(BLOCKED)
 
 
@@ -332,7 +332,7 @@ class BaseTest(ProcessUser):
 				process.signal(signal)
 				log.info("Sent %d signal to process with process id %d", signal, process.pid)
 			except ProcessError:
-				log.info("Unable to send signal to process")
+				log.warn("Unable to send signal to process")
 				self.addOutcome(BLOCKED)
 
 
@@ -347,7 +347,7 @@ class BaseTest(ProcessUser):
 			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
 			process.wait(timeout)
 		except ProcessTimeout:
-			log.info("Unable to wait for process")
+			log.warn("Unable to wait for process")
 			self.addOutcome(TIMEDOUT)
 
 
@@ -374,7 +374,7 @@ class BaseTest(ProcessUser):
 			self.log.info("Starting process monitor on process with id = %d", process.pid)
 			monitor.start()
 		except ProcessError:
-			self.log.info("Unable to start process monitor")
+			self.log.warn("Unable to start process monitor")
 			self.addOutcome(BLOCKED)
 		else:
 			self.monitorList.append(monitor)
@@ -485,7 +485,7 @@ class BaseTest(ProcessUser):
 			log.info("Assertion on boolean expression equal to true ... passed")
 		else:
 			self.addOutcome(FAILED)
-			log.info("Assertion on boolean expression equal to true ... failed")
+			log.warn("Assertion on boolean expression equal to true ... failed")
 	
 
 	def assertFalse(self, expr):
@@ -502,7 +502,7 @@ class BaseTest(ProcessUser):
 			log.info("Assertion on boolean expression equal to false ... passed")
 		else:
 			self.addOutcome(FAILED)
-			log.info("Assertion on boolean expression equal to false ... failed")
+			log.warn("Assertion on boolean expression equal to false ... failed")
 	
 
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[]):
@@ -543,12 +543,14 @@ class BaseTest(ProcessUser):
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
+			logOutcome = log.info
 			if result == True:
 				result = PASSED
 			else:
 				result = FAILED
+				logOutcome = log.warn
 			self.outcome.append(result)
-			log.info("File comparison between %s and %s ... %s", file1, file2, LOOKUP[result].lower())
+			logOutcome("File comparison between %s and %s ... %s", file1, file2, LOOKUP[result].lower())
 
 
 	def assertGrep(self, file, filedir=None, expr='', contains=True):
@@ -579,12 +581,14 @@ class BaseTest(ProcessUser):
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
+			logOutcome = log.info
 			if result == contains:
 				result = PASSED
 			else:
 				result = FAILED
+				logOutcome = log.warn
 			self.outcome.append(result)
-			log.info("Grep on input file %s ... %s", file, LOOKUP[result].lower())
+			logOutcome("Grep on input file %s ... %s", file, LOOKUP[result].lower())
 			
 
 	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[]):
@@ -618,12 +622,14 @@ class BaseTest(ProcessUser):
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
+			logOutcome = log.info
 			if result == contains:
 				result = PASSED
 			else:
 				result = FAILED
+				logOutcome = log.warn
 			self.outcome.append(result)
-			log.info("Grep on input file %s ... %s", file, LOOKUP[result].lower())
+			logOutcome("Grep on input file %s ... %s", file, LOOKUP[result].lower())
 
 
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True):   
@@ -655,17 +661,20 @@ class BaseTest(ProcessUser):
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
+			logOutcome = log.info
 			if expr == None and contains:
 				result = PASSED
 			elif expr == None and not contains:
 				result = FAILED
+				logOutcome = log.warn
 			elif expr != None and not contains:
 				result = PASSED
 			else:
 				result = FAILED
+				logOutcome = log.warn
 			self.outcome.append(result)
 			log.info("Ordered grep on input file %s ... %s", file, LOOKUP[result].lower())
-			if result == FAILED: log.info("Ordered grep failed on expression \"%s\"", expr)
+			if result == FAILED: logOutcome("Ordered grep failed on expression \"%s\"", expr)
 
 
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1"):
@@ -690,12 +699,14 @@ class BaseTest(ProcessUser):
 		except IOError, value:
 			self.addOutcome(BLOCKED)
 		else:
+			logOutcome = log.info
 			if (eval("%d %s" % (numberLines, condition))):
 				result = PASSED
 			else:
 				result = FAILED
+				logOutcome = log.warn
 			self.outcome.append(result)
-			log.info("Line count on input file %s ... %s", file, LOOKUP[result].lower())
+			logOutcome("Line count on input file %s ... %s", file, LOOKUP[result].lower())
 
 
 
