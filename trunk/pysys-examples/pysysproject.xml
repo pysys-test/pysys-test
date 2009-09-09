@@ -82,6 +82,8 @@
 	<path value="./src" relative="true" />
 	-->
 	
+	<property name="stdout_formatter" value="%(message)s"/>
+	
 
 	<!--
 	Set the test writers to write the test summary at runtime when the -r option is 
@@ -120,6 +122,23 @@
 		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
 		-->
 	</writers>		
+	
+	
+	<!--
+	Allow setting the message and date format of the python logging handlers for the test output to stdout, 
+	and to the run log of a testcase. The messagefmt atribute allows setting of the message format and 
+	defaults to '%(asctime)s %(levelname)-5s %(message)s' when not specified - see the Python logging module 
+	documentation for more information on the specifiers. The datefmt attribute allows setting of the date 
+	format when the %(asctime)s message format specifier is set - see the Python time.strftime module 
+	documentation for a full description of the time format specifiers.
+	-->
+	<formatters>
+		<!--
+		Example setting the format for the stdout and run log messages. 
+		<formatter name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%Y:%m:%d %H:%M:%S"/>
+		<formatter name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
+		-->
+	</formatters>
 	
 	
 	<!-- 

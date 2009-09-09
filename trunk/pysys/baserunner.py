@@ -438,7 +438,7 @@ class TestContainer:
 
 			# create the test summary log file handler and log the test header
 			self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
-			self.testFileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-5s %(message)s'))
+			self.testFileHandler.setFormatter(PROJECT.formatters.runlog)
 			self.testFileHandler.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandler)

@@ -31,6 +31,8 @@ DTD='''
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
+<!ELEMENT formatters (formatter+) >
+<!ELEMENT formatter (#PCDATA) >
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
 <!ATTLIST property root CDATA #IMPLIED>
@@ -44,6 +46,9 @@ DTD='''
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST formatter name CDATA #REQUIRED>
+<!ATTLIST formatter format CDATA #REQUIRED>
+<!ATTLIST formatter datefmt CDATA #REQUIRED>
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>
 <!ATTLIST writer file CDATA #REQUIRED>
@@ -160,6 +165,27 @@ class XMLProjectParser:
 		except:
 			return DEFAULT_RUNNER
 
+	def setFormatters(self, formatters):
+		formattersNodeList = self.root.getElementsByTagName('formatters')
+		if formattersNodeList == []: return 
+		
+		try:
+			formatterNodeList = formattersNodeList[0].getElementsByTagName('formatter')
+			if formatterNodeList != []:
+				for formatterNode in formatterNodeList:
+					try:
+						datefmt = ''
+						name = formatterNode.getAttribute('name')
+						messagefmt = formatterNode.getAttribute('messagefmt')
+						if formatterNode.hasAttribute('datefmt'): datefmt = formatterNode.getAttribute('datefmt')
+						setattr(formatters, name, logging.Formatter(messagefmt, datefmt))
+					except:
+						pass
+			return
+		except:
+			return
+		
+		
 	def getWriterDetails(self):
 		writersNodeList = self.root.getElementsByTagName('writers')
 		if writersNodeList == []: return [DEFAULT_WRITER]
