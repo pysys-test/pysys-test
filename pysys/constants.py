@@ -29,7 +29,7 @@ about the structure and contents of the project file, see the PySys examples
 distribution. 
 
 """
-import sys, re, os, os.path, socket, logging, sets
+import sys, re, os, os.path, socket, logging, sets, new
 
 from pysys import log
 from pysys import stdoutHandler
@@ -111,6 +111,8 @@ DEFAULT_REFERENCE = 'Reference'
 DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
 DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml', {}]
 DEFAULT_STYLESHEET = os.path.join(SITE_PACKAGES_DIR, 'pysys-log.xsl')
+DEFAULT_FORMAT_STDOUT = '%(asctime)s %(levelname)-5s %(message)s'
+DEFAULT_FORMAT_RUNLOG = '%(asctime)s %(levelname)-5s %(message)s'
 
 # set the directories to not recursively walk when looking for the descriptors
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn' ]
@@ -181,6 +183,8 @@ class Project:
 	
 	def __init__(self, root, projectFile):
 		self.root = root
+		self.formatters=new.classobj('Formatters',(object,),{'stdout':logging.Formatter(DEFAULT_FORMAT_STDOUT),
+															 'runlog':logging.Formatter(DEFAULT_FORMAT_RUNLOG)})
 	
 		if projectFile != None and os.path.exists(os.path.join(root, projectFile)):	
 			# parse the project file
@@ -206,7 +210,12 @@ class Project:
 				# get the loggers to use
 				self.writers = parser.getWriterDetails()
 				
+				# get the stdout and runlog formatters
+				parser.setFormatters(self.formatters)
+				
 				# set the data attributes
 				parser.unlink()	
 		else:
 			sys.stderr.write("WARNING: No project file found, taking project root to be %s \n" % root)
+			
+		stdoutHandler.setFormatter(self.formatters.stdout)

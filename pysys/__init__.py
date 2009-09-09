@@ -150,12 +150,8 @@ rootLogger.setLevel(logging.DEBUG)
 stdoutHandler = ThreadedStreamHandler(sys.stdout)
 """The default stdout logging handler for all logging within PySys."""
 
-stdoutFormatter = logging.Formatter('%(asctime)s %(levelname)-5s %(message)s')
-"""The formatter for output to stdout."""
-
 # configure the logger
 stdoutHandler.setLevel(logging.INFO)
-stdoutHandler.setFormatter(stdoutFormatter)
 rootLogger.addHandler(stdoutHandler)
 
 # global reference is using log
