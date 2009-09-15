@@ -217,5 +217,7 @@ class Project:
 				parser.unlink()	
 		else:
 			sys.stderr.write("WARNING: No project file found, taking project root to be %s \n" % root)
+			self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
+			self.writers = [DEFAULT_WRITER]
 			
 		stdoutHandler.setFormatter(self.formatters.stdout)
