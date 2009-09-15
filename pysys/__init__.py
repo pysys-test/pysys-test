@@ -48,7 +48,7 @@ __author__  = "Moray Grieve"
 __author_email__ = "moraygrieve@users.sourceforge.net"
 """The author's email address."""
 
-__status__  = "alpha"
+__status__  = "beta"
 """The status of this release."""
 
 __version__ = "0.8.1"
