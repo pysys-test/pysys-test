@@ -51,10 +51,10 @@ __author_email__ = "moraygrieve@users.sourceforge.net"
 __status__  = "alpha"
 """The status of this release."""
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 """The version of this release."""
 
-__date__ = "08-September-2009"
+__date__ = "15-September-2009"
 """The date of this release."""
 
 __all__     = [ "constants",
