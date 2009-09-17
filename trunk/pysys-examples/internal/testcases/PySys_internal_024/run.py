@@ -11,6 +11,7 @@ class PySysTest(BaseTest):
 		env["PYSYS-TEST"] = "Test variable"
 		env["EMPTY-ENV"] = ""
 		env["INT-ENV"] = "1"
+		env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
 		
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script],
