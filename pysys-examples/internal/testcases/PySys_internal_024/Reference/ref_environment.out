@@ -3,4 +3,5 @@ EMPTY-ENV           :
 INT-ENV             : 1
 PYSYS-TEST          : Test variable
 PYSYS-USER          : Simon Batty
+SYSTEMROOT          : C:\WINDOWS
 Written process environment
