@@ -7,35 +7,9 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- Updated the pysys.process.plat-win32.helper.ProcessWrapper module to eliminate 
-  the use of threads to collect the stdout and stderr from the process via pipes. 
-  The module now directly uses win32file.CreateFile to create file objects to 
-  pass to the call to win32process.CreateProcess. Many thanks to Mark Horsburgh
-  for this recommended change. 
-- Added the <formatters/> element to the pysysproject file. This allows setting 
-  the format of the test output to stdout and the runlog in accordance to the
-  format specifiers in the python logging and time modules. For examples of the 
-  use of this element, see the pysysproject file included in the PySys examples. 
-- Logging of exceptions and failed asserts has been changed from info to warn 
-  level (tracker #2784251).
-- Added extra debug logging in pysys.utils.filegrep, and pysys.basetest for when 
-  performing asserts against a line count in an input file (tracker #2824758).
-- The testcase output summary is now printed on termination of the test run via
-  a keyboard interrupt (tracker #2816212).
-- The PySys project file now allows assignment of the project root location to 
-  a variable which can then be used for later expansion within the file. This 
-  allows the definition of project variables to include the full path where this 
-  is required, e.g. XSL stylesheets which must use the full path to the file 
-  rather than a relative path etc. Note that modules within PySys can reference 
-  the project root location directly using PROJECT.root (tracker #2795316). 
-- The pysys.baserunner class now passes the -X arguments into the test summary 
-  writer setup action to allow logging of the user supplied extra arguments
-  (tracker #2814499). The pysys-log.xsl stylesheet used by the XMLResultsWriter 
-  has been updated to display this information in the test summary display. 
-- Fixed an issue where when the pysysproject file was missing, defaults for the 
-  runner module and the test output summary writer were not being set.
+- Updates to the framework and example testcases to run with Python 2.6 
 
- 
+
 Dependencies
 ------------
 Running on windows requires installation of the pywin32 extensions written by 
@@ -103,6 +77,36 @@ testcases location, perform
 
 Release History
 ---------------
+0.7.6 to 0.8.1
+--------------
+- Updated the pysys.process.plat-win32.helper.ProcessWrapper module to eliminate 
+  the use of threads to collect the stdout and stderr from the process via pipes. 
+  The module now directly uses win32file.CreateFile to create file objects to 
+  pass to the call to win32process.CreateProcess. Many thanks to Mark Horsburgh
+  for this recommended change. 
+- Added the <formatters/> element to the pysysproject file. This allows setting 
+  the format of the test output to stdout and the runlog in accordance to the
+  format specifiers in the python logging and time modules. For examples of the 
+  use of this element, see the pysysproject file included in the PySys examples. 
+- Logging of exceptions and failed asserts has been changed from info to warn 
+  level (tracker #2784251).
+- Added extra debug logging in pysys.utils.filegrep, and pysys.basetest for when 
+  performing asserts against a line count in an input file (tracker #2824758).
+- The testcase output summary is now printed on termination of the test run via
+  a keyboard interrupt (tracker #2816212).
+- The PySys project file now allows assignment of the project root location to 
+  a variable which can then be used for later expansion within the file. This 
+  allows the definition of project variables to include the full path where this 
+  is required, e.g. XSL stylesheets which must use the full path to the file 
+  rather than a relative path etc. Note that modules within PySys can reference 
+  the project root location directly using PROJECT.root (tracker #2795316). 
+- The pysys.baserunner class now passes the -X arguments into the test summary 
+  writer setup action to allow logging of the user supplied extra arguments
+  (tracker #2814499). The pysys-log.xsl stylesheet used by the XMLResultsWriter 
+  has been updated to display this information in the test summary display. 
+- Fixed an issue where when the pysysproject file was missing, defaults for the 
+  runner module and the test output summary writer were not being set.
+
 0.7.5 to 0.7.6
 --------------
 - Fixed a defect in the unix process helper module to correct a file handle leak in 
