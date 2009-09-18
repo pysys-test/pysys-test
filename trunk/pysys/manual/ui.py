@@ -33,12 +33,21 @@ from pysys.xml.manual import *
 class ManualTester:
 	def __init__(self, owner, filename, logname=None):
 		self.owner = owner
+		self.isRunning = 1
+		self.intToRes = ["FAILED", "PASSED", "N/A"]
+		self.logicMap = {"false" : 0, "true" : 1, "" : 1, 0 : "false", 1 : "true"}
+		self.filename = filename
+		self.steps = self.parseInputXML(self.filename)
+		self.currentStep = -1
+		self.results = {}
+		self.defect = ""
+
+	def build(self):
 		self.parentContainer = Tk()
 		self.parentContainer.protocol('WM_DELETE_WINDOW', self.quitPressed)
 		self.parentContainer.wm_geometry("500x400")
 		self.parentContainer.title("PySys Manual Tester - [%s]" % self.owner.descriptor.id)
 		self.parentContainer.resizable(True, True)
-		
 		self.container = Frame(self.parentContainer)
 		self.containerDetails = Frame(self.container)			
 		self.titleBox = Label(self.containerDetails, text="Test Title Here", font=("Verdana 10 "), anchor=W, wraplength=480)
@@ -63,10 +72,8 @@ class ManualTester:
 		self.containerExpected.pack(fill=BOTH, expand=YES, padx=5, pady=5)
 		self.messageBoxExpected.config(yscrollcommand=self.yscrollbarExpected.set, font=("Helvetica 10"))
 		self.container.pack(fill=BOTH, expand=YES, padx=5, pady=5)			
-		
 		self.separator = Frame(height=2, bd=1, relief=SUNKEN)
 		self.separator.pack(fill=X, pady=2)
-		
 		self.inputContainer = Frame(self.parentContainer, relief=GROOVE)
 		self.quitButton = Button(self.inputContainer, text="Quit", command=self.quitPressed, pady=5, padx=5, font=("Verdana 9 bold"))
 		self.quitButton.pack(side=LEFT, padx=5, pady=5)
@@ -77,15 +84,6 @@ class ManualTester:
 		self.failButton = Button(self.inputContainer, text="Fail", command=self.failPressed, pady=5, padx=5, font=("Verdana 9 bold"))
 		self.failButton.pack(side=RIGHT, padx=5, pady=5)
 		self.inputContainer.pack(fill=X, padx=5, pady=5)
-
-		self.isRunning = 1
-		self.intToRes = ["FAILED", "PASSED", "N/A"]
-		self.logicMap = {"false" : 0, "true" : 1, "" : 1, 0 : "false", 1 : "true"}
-		self.filename = filename
-		self.steps = self.parseInputXML(self.filename)
-		self.currentStep = -1
-		self.results = {}
-		self.defect = ""
 		self.doStep()
 
 	def quitPressed(self):
@@ -178,6 +176,7 @@ class ManualTester:
 		if self.defect != "": self.owner.log.info("Defect - %s recorded with test failure" % self.defect)
 
 	def start(self):
+		self.build()
 		self.parentContainer.mainloop()
 
 	def stop(self):

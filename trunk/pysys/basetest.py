@@ -412,7 +412,7 @@ class BaseTest(ProcessUser):
 		if filedir == None: filedir = self.input
 	
 		if not self.manualTester or self.manualTester.running() == 0:
-			self.manualTester = ManualTester(self, os.path.join(filedir, file), os.path.join(self.output, 'manual.log'))
+			self.manualTester = ManualTester(self, os.path.join(filedir, file))
 			thread.start_new_thread(self.manualTester.start, ())
 		
 			if state == FOREGROUND:
