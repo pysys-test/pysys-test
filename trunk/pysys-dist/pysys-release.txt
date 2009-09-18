@@ -7,7 +7,7 @@ may run on earlier versions no guarantee as to the successful operation can be m
 
 What's new in this release
 --------------------------
-- Updates to the framework and example testcases to run with Python 2.6 
+- Updates to the framework and example testcases to run with Python 2.6.
 
 
 Dependencies
