@@ -29,7 +29,14 @@ about the structure and contents of the project file, see the PySys examples
 distribution. 
 
 """
-import sys, re, os, os.path, socket, logging, sets, new
+import sys, re, os, os.path, socket, logging, new
+
+# if set is not available (>python 2.6) fall back to the sets module
+try:  
+	set  
+except NameError:  
+	import sets
+	from sets import Set as set
 
 from pysys import log
 from pysys import stdoutHandler
@@ -154,12 +161,12 @@ def loadproject(start):
 	global PROJECT
 
 	projectFile = None
-	projectFileSet = sets.Set(DEFAULT_PROJECTFILE)
+	projectFileSet = set(DEFAULT_PROJECTFILE)
 	
 	search = start
 	drive, path = os.path.splitdrive(search)
 	while (not search == drive):
-		intersection =  projectFileSet & sets.Set(os.listdir(search))
+		intersection =  projectFileSet & set(os.listdir(search))
 		if intersection : 
 			projectFile = intersection.pop()
 			break
