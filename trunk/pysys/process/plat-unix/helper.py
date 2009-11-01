@@ -120,6 +120,9 @@ class ProcessWrapper:
 			self.pid = os.fork()
 
 			if self.pid == 0:
+				# change working directory of the child process
+				os.chdir(self.workingDir)
+						
 				# duplicate the read end of the pipe to stdin	
 				os.dup2(stdin_r, 0)
 
@@ -219,6 +222,7 @@ class ProcessWrapper:
 		if self.exitStatus != None: return 0
 		return 1
 		
+
 	def wait(self, timeout):
 		"""Wait for a process to complete execution.
 		
@@ -273,17 +277,11 @@ class ProcessWrapper:
 		@raise ProcessTimeout: Raised in the process timed out (foreground process only)
 		
 		"""
-		oldcwd = os.getcwd()
-		os.chdir(self.workingDir)
-
-		try:
-			if self.state == FOREGROUND:
-				self.__startForegroundProcess()
-			else:
-				self.__startBackgroundProcess()
-		finally:
-			os.chdir(oldcwd)
-
+		if self.state == FOREGROUND:
+			self.__startForegroundProcess()
+		else:
+			self.__startBackgroundProcess()
+		
 
 
 
