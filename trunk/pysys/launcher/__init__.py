@@ -36,7 +36,14 @@ to launch operations against a set of tests etc.
 __all__ = [ "createDescriptors",
 			"console" ]
 
-import sys, os, os.path, glob, getopt, sets, re, string, logging
+import sys, os, os.path, glob, getopt, re, string, logging
+
+# if set is not available (>python 2.6) fall back to the sets module
+try:  
+	set  
+except NameError:  
+	import sets
+	from sets import Set as set
 
 from pysys import log
 from pysys.constants import *
@@ -60,14 +67,14 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	"""
 	descriptors = []
 	descriptorfiles = []
-	ignoreSet = sets.Set(OSWALK_IGNORES)
-	descriptorSet = sets.Set(DEFAULT_DESCRIPTOR)
+	ignoreSet = set(OSWALK_IGNORES)
+	descriptorSet =set(DEFAULT_DESCRIPTOR)
 	
 	if dir == None: dir = os.getcwd()
 	for root, dirs, files in os.walk(dir):
-		intersection =  descriptorSet & sets.Set(files)
+		intersection =  descriptorSet & set(files)
 		if intersection : descriptorfiles.append(os.path.join(root, intersection.pop()))
-		for ignore in (ignoreSet & sets.Set(dirs)): dirs.remove(ignore)
+		for ignore in (ignoreSet & set(dirs)): dirs.remove(ignore)
 
 	for descriptorfile in descriptorfiles:
 		try:

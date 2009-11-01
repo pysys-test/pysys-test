@@ -19,7 +19,7 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 
-import sys, os, os.path, stat, glob, getopt, sets, re, string, logging
+import sys, os, os.path, stat, glob, getopt, re, string, logging
 
 from pysys import log
 from pysys import stdoutHandler
