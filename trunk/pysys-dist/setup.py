@@ -42,7 +42,7 @@ if sys.platform.lower().startswith('win'):
 		  scripts = ['pysys-dist/scripts/pysys.py', 'pysys-dist/scripts/pysys_postinstall.py'],
 		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
 					'pysys.process', 'pysys.process.plat-win32', 
-					'pysys.process.plat-unix', 'pysys.utils',
+					'pysys.process.plat-unix', 'pysys.sccs', 'pysys.utils',
 					'pysys.writer', 'pysys.xml'],
 		  data_files=[('%s/pysys-doc' % get_site_packages_path(), glob.glob('pysys-doc/*.*')),
 					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
@@ -58,7 +58,7 @@ else:
 		  scripts = ['pysys-dist/scripts/pysys.py'],
 		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
 					'pysys.process', 'pysys.process.plat-win32', 
-					'pysys.process.plat-unix', 'pysys.utils',
+					'pysys.process.plat-unix', 'pysys.sccs', 'pysys.utils',
 					'pysys.writer', 'pysys.xml'],
 		  data_files=[(get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
 			      (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]

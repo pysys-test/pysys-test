@@ -116,6 +116,7 @@ DEFAULT_INPUT = 'Input'
 DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
 DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
+DEFAULT_SCCS =  ['SVN', 'pysys.sccs', {}]
 DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml', {}]
 DEFAULT_STYLESHEET = os.path.join(SITE_PACKAGES_DIR, 'pysys-log.xsl')
 DEFAULT_FORMAT_STDOUT = '%(asctime)s %(levelname)-5s %(message)s'
@@ -192,13 +193,13 @@ class Project:
 		self.root = root
 		self.formatters=new.classobj('Formatters',(object,),{'stdout':logging.Formatter(DEFAULT_FORMAT_STDOUT),
 															 'runlog':logging.Formatter(DEFAULT_FORMAT_RUNLOG)})
-	
+
 		if projectFile != None and os.path.exists(os.path.join(root, projectFile)):	
 			# parse the project file
 			from pysys.xml.project import XMLProjectParser
 			try:
 				parser = XMLProjectParser(root, projectFile)
-			except:
+			except: 
 				sys.stderr.write("ERROR: Error parsing project file %s, %s\n" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 				sys.exit(1)
 			else:
@@ -213,6 +214,9 @@ class Project:
 		
 				# get the runner if specified
 				self.runnerClassname, self.runnerModule = parser.getRunnerDetails()
+		
+				# get the sccs if specified
+				self.sccs = parser.getSourceCodeControlDetails()
 		
 				# get the loggers to use
 				self.writers = parser.getWriterDetails()

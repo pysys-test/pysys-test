@@ -1,9 +1,10 @@
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, runner?, writers?, formatters?) >
+<!ELEMENT pysysproject (property*, path*, runner?, sccs?, writers?, formatters?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
+<!ELEMENT sccs (property*)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (#PCDATA) >
 <!ELEMENT writers (writer+) >
@@ -19,6 +20,8 @@
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST sccs classname CDATA #REQUIRED>
+<!ATTLIST sccs module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
 <!ATTLIST formatter messagefmt CDATA #REQUIRED>
 <!ATTLIST formatter datefmt CDATA #REQUIRED>
@@ -51,7 +54,7 @@
 	as a substitution variable within the project file. Note that this is only for local expansion 
 	within the project file, where the project root location is required for full paths, e.g. 
 	stylesheets etc. Within a test class, the root location can be referenced using the 
-	PROJECT.root class variable.
+	PROJECT.root class variable. If not specified, defaults to "root".
 	-->
 	<property root="rootdir"/>
 	
@@ -87,9 +90,30 @@
 	
 	<path value="./src" relative="true" />
 	-->
+
+
+	<!-- 
+	Use a custom runner class that extends the BaseRunner class distributed with PySys. Extensions to 
+	the BaseRunner are used to define custom setup and tear down operations before running the set of 
+	selected tests (e.g. to load test data into a relational database prior to the test runs, and then 
+	clear out the data on completion), as well as to defined operations between the execution of individual 
+	tests and after completion of a cycle of tests. For example, to use the MyRunner class in the 
+	com.company.test module use;
 	
-	<property name="stdout_formatter" value="%(message)s"/>
-	
+	<runner classname="MyRunner" module="com.company.test"/>
+	-->
+
+
+	<!-- 
+	Use a custom source code control module to implement the interface for operations performed within 
+	pysys, e.g. for operation in a continuous integration mode. If not specified defaults to the 
+	SVN module implementation (currently the only module shipped). For example, to use the MySCCS class 
+	in the com.company.test module use;
+	-->	
+	<sccs classname="SVN" module="pysys.sccs">
+		<property name="url" value="http://svn.apama.com/dev"/>
+	</sccs> 		
+
 
 	<!--
 	Set the test writers to write the test summary at runtime when the -r option is 
@@ -148,14 +172,7 @@
 	</formatters>
 	
 	
-	<!-- 
-	Use a custom runner class that extends the BaseRunner class distributed with PySys. Extensions to 
-	the BaseRunner are used to define custom setup and tear down operations before running the set of 
-	selected tests (e.g. to load test data into a relational database prior to the test runs, and then 
-	clear out the data on completion), as well as to defined operations between the execution of individual 
-	tests and after completion of a cycle of tests. For example, to use the MyRunner class in the 
-	com.company.test module use;
+
 	
-	<runner classname="MyRunner" module="com.company.test"/>
-	-->
+		
 </pysysproject>

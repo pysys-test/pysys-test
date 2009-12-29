@@ -27,10 +27,11 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, runner?, writers?, formatters?) >
+<!ELEMENT pysysproject (property*, path*, runner?, sccs?, writers?, formatters?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
+<!ELEMENT sccs (property*)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (#PCDATA) >
 <!ELEMENT writers (writer+) >
@@ -46,6 +47,8 @@ DTD='''
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST sccs classname CDATA #REQUIRED>
+<!ATTLIST sccs module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
 <!ATTLIST formatter messagefmt CDATA #REQUIRED>
 <!ATTLIST formatter datefmt CDATA #REQUIRED>
@@ -165,6 +168,23 @@ class XMLProjectParser:
 		except:
 			return DEFAULT_RUNNER
 
+	def getSourceCodeControlDetails(self):
+		try:
+			sccsNodeList = self.root.getElementsByTagName('sccs')[0]
+			sccs = [sccsNodeList.getAttribute('classname'), sccsNodeList.getAttribute('module'), {}]
+			propertyNodeList = sccsNodeList.getElementsByTagName('property')
+			for propertyNode in propertyNodeList:
+				try:
+					name = propertyNode.getAttribute("name") 
+					value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
+					sccs[2][name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
+					return sccs
+				except:
+					pass
+		except:
+			return DEFAULT_SCCS
+
+
 	def setFormatters(self, formatters):
 		formattersNodeList = self.root.getElementsByTagName('formatters')
 		if formattersNodeList == []: return 
@@ -205,7 +225,7 @@ class XMLProjectParser:
 							try:
 								name = propertyNode.getAttribute("name") 
 								value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
-								writer[3][name] = value
+								writer[3][name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
 							except:
 								pass
 						writers.append(writer)				

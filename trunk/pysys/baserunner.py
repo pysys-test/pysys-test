@@ -110,6 +110,10 @@ class BaseRunner(ProcessUser):
 			for key in properties.keys(): setattr(writer, key, properties[key])
 			self.writers.append(writer)
 
+		module = import_module(PROJECT.sccs[1], sys.path)
+		self.sccs = getattr(module, PROJECT.sccs[0])
+		for key in PROJECT.sccs[2].keys(): setattr(self.sccs, key, PROJECT.sccs[2][key])
+			
 		self.duration = 0
 		self.results = {}
 		self.resultsPointer = 0
