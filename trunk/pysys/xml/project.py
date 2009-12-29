@@ -27,7 +27,7 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, runner?, writers?) >
+<!ELEMENT pysysproject (property*, path*, runner?, writers?, formatters?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
@@ -47,7 +47,7 @@ DTD='''
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
-<!ATTLIST formatter format CDATA #REQUIRED>
+<!ATTLIST formatter messagefmt CDATA #REQUIRED>
 <!ATTLIST formatter datefmt CDATA #REQUIRED>
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>

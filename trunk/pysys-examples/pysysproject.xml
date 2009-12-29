@@ -1,11 +1,14 @@
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, writers?, runner?) >
+<!ELEMENT pysysproject (property*, path*, runner?, writers?, formatters?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
+<!ELEMENT runner (#PCDATA)>
+<!ELEMENT formatters (formatter+) >
+<!ELEMENT formatter (#PCDATA) >
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
-<!ELEMENT runner (#PCDATA)>
+<!ATTLIST property root CDATA #IMPLIED>
 <!ATTLIST property environment CDATA #IMPLIED>
 <!ATTLIST property osfamily CDATA #IMPLIED>
 <!ATTLIST property file CDATA #IMPLIED>
@@ -16,6 +19,9 @@
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST formatter name CDATA #REQUIRED>
+<!ATTLIST formatter messagefmt CDATA #REQUIRED>
+<!ATTLIST formatter datefmt CDATA #REQUIRED>
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>
 <!ATTLIST writer file CDATA #REQUIRED>
@@ -133,9 +139,10 @@
 	documentation for a full description of the time format specifiers.
 	-->
 	<formatters>
+		<formatter name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%Y:%m:%d %H:%M:%S"/>	
+		
 		<!--
-		Example setting the format for the stdout and run log messages. 
-		<formatter name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%Y:%m:%d %H:%M:%S"/>
+		Example setting the format for the run log messages. 
 		<formatter name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 		-->
 	</formatters>
