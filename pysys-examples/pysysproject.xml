@@ -117,9 +117,7 @@
 	where svn_bin_dir can be defined the ${osfamily}.properties file in order to denote the different 
 	location depending on the operating system being used. 
 	-->	
-	<sccs classname="SCCSsvn" module="pysys.sccs">
-		<property name="bindir" value="\Program Files\Subversion\bin"/>  
-	</sccs>
+	
 
 	<!--
 	Set the test writers to write the test summary at runtime when the -r option is 
