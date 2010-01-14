@@ -38,6 +38,22 @@ from xml.dom.minidom import getDOMImplementation
 from xml.dom.minidom import parseString
 
 from pysys import log
+from pysys.constants import *
+from pysys.utils.loader import import_module
+
+
+def getSCCSInstance():
+	"""Return an instance of the SCCS class as configured in the pysys project file. 
+
+	"""
+	try:
+		module = import_module(PROJECT.sccs[1], sys.path)
+		sccsclass = getattr(module, PROJECT.sccs[0])
+		for key in PROJECT.sccs[2].keys(): setattr(sccsclass, key, PROJECT.sccs[2][key])
+		return sccsclass()
+	except:
+		log.warn("Error creating sccs module instance %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
 
 class SCCSInterface:
 	"""Defines the generic interface for source code control operations used within PySys. 
