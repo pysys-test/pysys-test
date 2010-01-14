@@ -80,8 +80,19 @@ class SCCSInterface:
 	 	
 	 	"""
 	 	pass
+	
+	def diff(self, path, current, previous, **kwargs):
+		"""Return a text string denoting the unified diff between two label versions of the specified path.
+		
+	 	@param path: Full path within the local working copy to obtain the diff	
+		@param current: The current label to use in the comparison
+		@param previous: The previous label to use in the comparison
+	 	@param kwargs: Keyword arguments to allow for extension of the interface
 
-
+		"""
+		pass
+	
+	
 class SCCSsvn:
 	"""Implementation of the generic interface for source code control operations for Subversion. 
 
@@ -153,3 +164,15 @@ class SCCSsvn:
 	 	
 	 	"""
 	 	pass
+
+	
+	def diff(self, path, current, previous, **kwargs):
+		"""Return a text string denoting the unified diff between two label versions of the specified path.
+		
+	 	@param path: Full path within the local working copy to obtain the diff	
+		@param current: The current label to use in the comparison
+		@param previous: The previous label to use in the comparison
+	 	@param kwargs: Keyword arguments to allow for extension of the interface
+
+		"""
+		pass
