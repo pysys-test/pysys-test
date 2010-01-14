@@ -109,14 +109,6 @@ class BaseRunner(ProcessUser):
 			writer = getattr(module, classname)(filename)
 			for key in properties.keys(): setattr(writer, key, properties[key])
 			self.writers.append(writer)
-
-		try:
-			module = import_module(PROJECT.sccs[1], sys.path)
-			sccsclass = getattr(module, PROJECT.sccs[0])
-			for key in PROJECT.sccs[2].keys(): setattr(sccsclass, key, PROJECT.sccs[2][key])
-			self.sccs = sccsclass()
-		except:
-			log.warn("Error creating sccs module instance %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 		self.duration = 0
 		self.results = {}
