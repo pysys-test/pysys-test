@@ -52,6 +52,7 @@ class ExecutableNotFoundException:
 	def __str__(self):
 		return self.value
 
+
 class ProcessError:
 	"""Exception raised when creating a process."""
 
