@@ -28,12 +28,14 @@ loadproject(os.getcwd())
 
 from pysys import __version__
 from pysys.constants import *
+from pysys import log
+from pysys.sccs import getSCCSInstance
 from pysys.utils.loader import import_module
 from pysys.launcher.console import ConsoleLaunchHelper
 from pysys.launcher.console import ConsoleMakeTestHelper
 from pysys.launcher.console import ConsolePrintHelper
 from pysys.launcher.console import ConsoleCleanTestHelper
-from pysys.sccs import getSCCSInstance
+
 
 def printUsage():
 	print "\nPySys System Test Framework (version %s)" % __version__ 
@@ -51,9 +53,36 @@ def printUsage():
 def runTest(args):
 	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
 	args = launcher.parseArgs(args)
-	module = import_module(PROJECT.runnerModule, sys.path)
-	runner = getattr(module, PROJECT.runnerClassname)(*args)
-	runner.start()
+	
+	if not launcher.continuous: 
+		module = import_module(PROJECT.runnerModule, sys.path)
+		runner = getattr(module, PROJECT.runnerClassname)(*args)
+		runner.start()
+	else:
+		sccs = getSCCSInstance()
+		previous = sccs.getPersistedLabel(PROJECT.root)
+					
+		while 1:
+			sccs.update(PROJECT.root)
+			current = sccs.getLabel(PROJECT.root)
+			log.info("Current sccs label=%s, previous sccs label=%s"%(current, previous))
+					
+			if sccs.isNewerLabel(current, previous):
+				module = import_module(PROJECT.runnerModule, sys.path)
+				runner = getattr(module, PROJECT.runnerClassname)(*args)
+				runner.start()
+				
+				msg = "\n"
+				failedtests = 0
+				for outcome in FAILS:
+					for id in runner.results[0][outcome]: 
+						failedtests = failedtests + 1
+						msg = msg + "%s %s\n" % (LOOKUP[outcome], failedtests)
+			
+				if failedtests > 0: log.info(msg)
+				
+				previous = current
+				sccs.setPersistedLabel(PROJECT.root, current)
 
 def makeTest(args):
 	maker = ConsoleMakeTestHelper(os.getcwd(), "make")

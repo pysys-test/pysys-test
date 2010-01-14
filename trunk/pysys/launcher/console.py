@@ -383,8 +383,9 @@ class ConsoleLaunchHelper:
 		self.threads = 1
 		self.name=name
 		self.userOptions = {}
+		self.continuous = False
 		self.descriptors = []
-		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:X:'
+		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:X:C'
 		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads="]
 
 
@@ -407,6 +408,9 @@ class ConsoleLaunchHelper:
 		print "       -X               KEY=VALUE  set user defined options to be passed through to the test and "
 		print "                                   runner classes. The left hand side string is the data attribute "
 		print "                                   to set, the right hand side string the value (True of not specified) "
+		print "       -C                          run in the continuous integration mode. When running in this mode"
+		print "                                   the pysys launch executable will run the requested test set continually"
+		print "                                   each time it detects an update to the project sccs revision number" 
 		if printXOptions: printXOptions()
 		print ""
 		print "   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, "
@@ -494,6 +498,10 @@ class ConsoleLaunchHelper:
 				  self.userOptions[value.split('=')[0]] = value.split('=')[1]
 				if EXPR2.search(value) != None:
 					self.userOptions[value] = True
+			
+			elif option in ("-C"):
+				self.continuous = True
+				
 		try:
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
 		except Exception, (strerror):

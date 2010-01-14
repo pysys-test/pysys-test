@@ -67,7 +67,45 @@ class SCCSInterface:
 
 		"""
 		pass
+
 	
+	def getPersistedLabel(self, path, **kwargs):
+		"""Return persisted label in the specified working directory, or None if it does not exist. 
+		
+		The persisted label is stored in a text file named .revision
+	 	
+	 	@param path: Full path within the local working copy to obtain the label from.
+	 	@param kwargs: Keyword arguments to allow for extension of the interface
+	 	
+	 	"""
+	 	try:
+			fp = open(os.path.join(path, '.revision'), 'r')
+			label = fp.readline()
+			fp.close()
+		except:
+			label = None
+		return label
+				
+	
+	def setPersistedLabel(self, path, label, **kwargs):
+		"""Set the persisted label in the specified working directory 
+		
+		The persisted label is stored in a text file named .revision
+	 	
+	 	@param path: Full path within the local working copy to persist the label to.
+	 	@param label: The label to set to the persisted location
+	 	@param kwargs: Keyword arguments to allow for extension of the interface
+	 	
+		"""
+	 	if not os.path.exists(path):
+			 raise Exception, "Requested path does not exist %s" % (path)
+	
+	 	fp = open(os.path.join(path, '.revision'), 'w')
+		fp.write('%s'%label)
+		fp.flush()
+		fp.close()
+	
+		
 	def getLabel(self, path, **kwargs):
 	 	"""Return a label denoting a revision identifier of a local working copy.
 	 	
@@ -76,6 +114,7 @@ class SCCSInterface:
 	 	
 	 	"""
 	 	pass
+	
 	 
 	def isNewerLabel(self, current, previous):
 		"""Return true if the current label indicates an update compared to the previous label.
@@ -86,6 +125,7 @@ class SCCSInterface:
 	 	
 		"""
 		pass
+	
 	 
 	def update(self, path, label=None, **kwargs):
 		"""Perform an update of a local working copy located at a point within the directory tree. 
@@ -96,6 +136,7 @@ class SCCSInterface:
 	 	
 	 	"""
 	 	pass
+	
 	
 	def diff(self, path, current, previous, **kwargs):
 		"""Return a text string denoting the unified diff between two label versions of the specified path.
@@ -109,7 +150,7 @@ class SCCSInterface:
 		pass
 	
 	
-class SCCSsvn:
+class SCCSsvn(SCCSInterface):
 	"""Implementation of the generic interface for source code control operations for Subversion. 
 
 	This implementation of the SVN SCCS class assumes the client svn executable is installed on the 
@@ -148,11 +189,12 @@ class SCCSsvn:
 
 		info = ''	
 	 	cwd = os.getcwd()
-	 	out = os.popen("%s info --xml" % os.path.join(self.bindir, 'svn'))
+	 	os.chdir(path)
+	 	out = os.popen(r'"%s" info --xml' % os.path.join(self.bindir, 'svn'))
 		for line in out.readlines(): info=info+line
 		out.close()
 		os.chdir(cwd)
-		
+			
 		dom = parseString(info)
 		infoElement = dom.getElementsByTagName('info')[0]
 		entryElement = infoElement.getElementsByTagName('entry')[0]			
@@ -168,7 +210,9 @@ class SCCSsvn:
 	 	@param kwargs: Keyword arguments for extending classes
 	 	
 		"""
-		pass
+		if previous == None: return True
+		if int(current) > int(previous): return True
+		return False
 	
 	 
 	def update(self, path, label=None, **kwargs):
@@ -179,8 +223,15 @@ class SCCSsvn:
 	 	@param kwargs: Keyword arguments for extending classes
 	 	
 	 	"""
-	 	pass
-
+	 	if not os.path.exists(path):
+			 raise Exception, "Requested path does not exist %s" % (path)
+		
+		cwd = os.getcwd()
+	 	os.chdir(path)
+		f = os.popen("%s up" % os.path.join(self.bindir, 'svn'))
+		f.close()
+		os.chdir(cwd)
+	
 	
 	def diff(self, path, current, previous, **kwargs):
 		"""Return a text string denoting the unified diff between two label versions of the specified path.
@@ -191,4 +242,13 @@ class SCCSsvn:
 	 	@param kwargs: Keyword arguments to allow for extension of the interface
 
 		"""
-		pass
+		if not os.path.exists(path):
+			 raise Exception, "Requested path does not exist %s" % (path)
+			
+		cwd = os.getcwd()
+		os.chdir(path)
+		out = os.popen("%s log -v -r%s:%s"%(os.path.join(self.bindir, 'svn'), previous+1, current))
+		for line in out.readlines(): diffs=diffs+line
+		out.close()
+		os.chdir(cwd)
+		return diffs
