@@ -49,8 +49,6 @@ def printUsage():
 	sys.exit()
 	
 def runTest(args):
-	sccs = getSCCSInstance()
-	
 	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
 	args = launcher.parseArgs(args)
 	module = import_module(PROJECT.runnerModule, sys.path)
