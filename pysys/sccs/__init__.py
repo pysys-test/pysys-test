@@ -19,11 +19,116 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 """
- 
+Contains implementations of wrappers around source code control systems (sccs).  
+
+Configuration of PySys allows specification of the source code control system being used 
+for the revision control of projects, e.g. svn, cvs etc. Different sccs have an implementation 
+of this interface to perform generic operations such as returning a label to denote the revision 
+identifier of a local working copy checked out from the sccs, or to update the local working 
+directory tree at a certain point within the tree etc. At the moment this is a very simple 
+interface for use within continuous integration, e.g. where cycles of tests are performed when an 
+update on the revision identifier is seen.
 
 """
-__all__ = [ "SVN" ]
+__all__ = [ "SCCSInterface",
+		    "SCCSsvn" ]
+
+import sys
+from pysys import log
+
+class SCCSInterface:
+	"""Defines the generic interface for source code control operations used within PySys. 
+
+	"""
+	
+	def __init__(self, **kwargs):
+		"""Class constructor.
+	
+	 	@param kwargs: Keyword arguments for extending classes
+
+		"""
+		pass
+	
+	def getLabel(self, path, **kwargs):
+	 	"""Return a label denoting a revision identifier of a local working copy.
+	 	
+	 	@param path: Full path within the local working copy to obtain the label from.
+	 	@param kwargs: Keyword arguments for extending classes
+	 	
+	 	"""
+	 	pass
+	 
+	def isNewerLabel(self, current, previous):
+		"""Return true if the current label indicates an update compared to the previous label.
+		
+		@param current: The current label to use in the comparison
+		@param previous: The previous label to use in the comparison
+	 	@param kwargs: Keyword arguments for extending classes
+	 	
+		"""
+		pass
+	 
+	def update(self, path, label=None, **kwargs):
+		"""Perform an update of a local working copy located at a point within the directory tree. 
+	 	
+	 	@param path: Full path within the local working copy to update
+	 	@param path: The label to update to e.g. the head of the repository 
+	 	@param kwargs: Keyword arguments for extending classes
+	 	
+	 	"""
+	 	pass
 
 
-class SVN:
-	pass
+class SCCSsvn:
+	"""Implementation of the generic interface for source code control operations for Subversion. 
+
+	This implementation of the SVN SCCS class assumes the client svn executable is installed on the 
+	host machine. This client is then used to perform operations to obtain the label from a given 
+	path, and to update a working copy etc. Note that whilst pysvn could have been used, no distribution
+	bundles exists at the moment for unix systems. 
+
+	@ivar bindir: The directory containing the svn client executable
+	@type mode: string
+	
+	"""
+	bindir = None
+	
+	def __init__(self, **kwargs):
+		"""Class constructor.
+	
+	 	@param kwargs: Keyword arguments for extending classes
+
+		"""
+		pass	
+	
+	
+	def getLabel(self, path, **kwargs):
+	 	"""Return a label denoting a revision identifier of a local working copy.
+	 	
+	 	@param path: Full path within the local working copy to obtain the label from.
+	 	@param kwargs: Keyword arguments for extending classes
+	 	
+	 	"""
+	 	pass
+	
+	 
+	def isNewerLabel(self, current, previous):
+		"""Return true if the current label indicates an update compared to the previous label.
+		
+		@param current: The current label to use in the comparison
+		@param previous: The previous label to use in the comparison
+	 	@param kwargs: Keyword arguments for extending classes
+	 	
+		"""
+		pass
+	
+	 
+	def update(self, path, label=None, **kwargs):
+		"""Perform an update of a local working copy located at a point within the directory tree. 
+	 	
+	 	@param path: Full path within the local working copy to update
+	 	@param path: The label to update to e.g. the head of the repository 
+	 	@param kwargs: Keyword arguments for extending classes
+	 	
+	 	"""
+	 	pass

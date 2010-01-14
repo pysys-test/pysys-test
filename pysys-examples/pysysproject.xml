@@ -107,12 +107,16 @@
 	<!-- 
 	Use a custom source code control module to implement the interface for operations performed within 
 	pysys, e.g. for operation in a continuous integration mode. If not specified defaults to the 
-	SVN module implementation (currently the only module shipped). For example, to use the MySCCS class 
-	in the com.company.test module use;
-	-->	
-	<sccs classname="SVN" module="pysys.sccs">
-		<property name="url" value="http://svn.apama.com/dev"/>
+	SVN interface implementation. At the moment the only shipped implementation of the interface is 
+	for Subversion, in which case to use;
+	
+	<sccs classname="SCCSsvn" module="pysys.sccs">
+		<property name="bindir" value="${svn_bin_dir}"/>
 	</sccs> 		
+	
+	where svn_bin_dir can be defined the ${osfamily}.properties file in order to denote the different 
+	location depending on the operating system being used. 
+	-->	
 
 
 	<!--
@@ -171,8 +175,4 @@
 		-->
 	</formatters>
 	
-	
-
-	
-		
 </pysysproject>
