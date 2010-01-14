@@ -19,11 +19,11 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 """
-Contains implementations of wrappers around source code control systems (sccs).  
+Contains implementations of wrappers around source code control systems.  
 
-Configuration of PySys allows specification of the source code control system being used 
+Configuration of PySys allows specification of the source code control system (sccs) being used 
 for the revision control of projects, e.g. svn, cvs etc. Different sccs have an implementation 
-of this interface to perform generic operations such as returning a label to denote the revision 
+of the SCCSInterface to perform generic operations such as returning a label to denote the revision 
 identifier of a local working copy checked out from the sccs, or to update the local working 
 directory tree at a certain point within the tree etc. At the moment this is a very simple 
 interface for use within continuous integration, e.g. where cycles of tests are performed when an 
@@ -33,7 +33,10 @@ update on the revision identifier is seen.
 __all__ = [ "SCCSInterface",
 		    "SCCSsvn" ]
 
-import sys
+import os, sys
+from xml.dom.minidom import getDOMImplementation
+from xml.dom.minidom import parseString
+
 from pysys import log
 
 class SCCSInterface:
@@ -44,7 +47,7 @@ class SCCSInterface:
 	def __init__(self, **kwargs):
 		"""Class constructor.
 	
-	 	@param kwargs: Keyword arguments for extending classes
+	 	@param kwargs: Keyword arguments to allow for extension of the interface
 
 		"""
 		pass
@@ -53,7 +56,7 @@ class SCCSInterface:
 	 	"""Return a label denoting a revision identifier of a local working copy.
 	 	
 	 	@param path: Full path within the local working copy to obtain the label from.
-	 	@param kwargs: Keyword arguments for extending classes
+	 	@param kwargs: Keyword arguments to allow for extension of the interface
 	 	
 	 	"""
 	 	pass
@@ -63,7 +66,7 @@ class SCCSInterface:
 		
 		@param current: The current label to use in the comparison
 		@param previous: The previous label to use in the comparison
-	 	@param kwargs: Keyword arguments for extending classes
+	 	@param kwargs: Keyword arguments to allow for extension of the interface
 	 	
 		"""
 		pass
@@ -73,7 +76,7 @@ class SCCSInterface:
 	 	
 	 	@param path: Full path within the local working copy to update
 	 	@param path: The label to update to e.g. the head of the repository 
-	 	@param kwargs: Keyword arguments for extending classes
+	 	@param kwargs: Keyword arguments to allow for extension of the interface
 	 	
 	 	"""
 	 	pass
@@ -99,7 +102,11 @@ class SCCSsvn:
 	 	@param kwargs: Keyword arguments for extending classes
 
 		"""
-		pass	
+		if self.bindir == None:
+			raise Exception, "No svn client binary directory specified"
+		
+		if not os.path.exists(self.bindir):
+			 raise Exception, "Specified binary directory does not exist %s" % (self.bindir)	
 	
 	
 	def getLabel(self, path, **kwargs):
@@ -109,7 +116,21 @@ class SCCSsvn:
 	 	@param kwargs: Keyword arguments for extending classes
 	 	
 	 	"""
-	 	pass
+	 	if not os.path.exists(path):
+			 raise Exception, "Requested path does not exist %s" % (path)
+
+		info = ''	
+	 	cwd = os.getcwd()
+	 	out = os.popen("%s info --xml" % os.path.join(self.bindir, 'svn'))
+		for line in out.readlines(): info=info+line
+		out.close()
+		os.chdir(cwd)
+		
+		dom = parseString(info)
+		infoElement = dom.getElementsByTagName('info')[0]
+		entryElement = infoElement.getElementsByTagName('entry')[0]			
+		commitElement = entryElement.getElementsByTagName('commit')[0]		
+		return commitElement.getAttribute('revision')
 	
 	 
 	def isNewerLabel(self, current, previous):

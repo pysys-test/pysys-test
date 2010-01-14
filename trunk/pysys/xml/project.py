@@ -178,9 +178,9 @@ class XMLProjectParser:
 					name = propertyNode.getAttribute("name") 
 					value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
 					sccs[2][name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
-					return sccs
 				except:
 					pass
+			return sccs
 		except:
 			return DEFAULT_SCCS
 
