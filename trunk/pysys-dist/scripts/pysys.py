@@ -33,6 +33,7 @@ from pysys.launcher.console import ConsoleLaunchHelper
 from pysys.launcher.console import ConsoleMakeTestHelper
 from pysys.launcher.console import ConsolePrintHelper
 from pysys.launcher.console import ConsoleCleanTestHelper
+from pysys.sccs import getSCCSInstance
 
 def printUsage():
 	print "\nPySys System Test Framework (version %s)" % __version__ 
@@ -48,6 +49,8 @@ def printUsage():
 	sys.exit()
 	
 def runTest(args):
+	sccs = getSCCSInstance()
+	
 	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
 	args = launcher.parseArgs(args)
 	module = import_module(PROJECT.runnerModule, sys.path)
