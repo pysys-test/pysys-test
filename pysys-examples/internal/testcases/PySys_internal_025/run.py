@@ -26,4 +26,4 @@ class PySysTest(BaseTest):
 		self.assertGrep("workingdir.err", expr="Current working directory is %s$"%string.replace(os.path.join(self.input, "dir"), "\\", "/"))
 		
 		# validate against the reference file
-		self.assertDiff("workingdir.out", "ref_workingdir.out", ignores=['CVS'])
+		self.assertDiff("workingdir.out", "ref_workingdir.out", ignores=['CVS'], sort=True)
