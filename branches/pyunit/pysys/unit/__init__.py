@@ -19,8 +19,8 @@
 # out of or in connection with the software or the use or other
 # dealings in the software
 """
-Contains classes for running unit tests
-
+Contains classes for running various unit test frameworks, with the underlying
+philosophy being that a suite of unit tests becomes a single pysys test
 """
 __all__ = [
 	"pyunit"
