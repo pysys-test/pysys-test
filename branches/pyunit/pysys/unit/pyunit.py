@@ -57,7 +57,7 @@ class PyUnitTest(BaseTest):
 		logLevel = self.log.level
 		self.log.setLevel(logging.CRITICAL)
 		environ = os.environ.copy()
-		environ['PYTHONPATH'] = os.pathsep.join(sys.path + self.getPythonPath())
+		environ['PYTHONPATH'] = os.pathsep.join(self.getPythonPath() + sys.path)
 		process = self.startProcess(command, arguments, environ, self.output, FOREGROUND, DEFAULT_TIMEOUT, dstdout, dstderr, displayName)
 		self.log.setLevel(logLevel)
 		if process.exitStatus:
@@ -88,7 +88,7 @@ class PyUnitTest(BaseTest):
 			self.runTestMethod(testFile, testClass, method)
 
 	def getPythonPath(self):
-		return []			
+		return []
 
 if __name__ == '__main__':
 
