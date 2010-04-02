@@ -69,23 +69,6 @@ class PyUnitTest(BaseTest):
 		else:
 			self.outcome.append(PASSED)
 #			self.log.info('%s.%s... passed' % (testClass.__name__, testMethod))
-		
-		
-		return
-		execfile(testFile, globals, locals)
-		testClasses = []
-		for k, v in locals.items():
-			if isinstance(v, type(unittest.TestCase)):
-				testClasses.append(v)
-		for testClass in testClasses:
-			self.runTestClass(testFile, testClass)
-
-	def runTestClass(self, testFile, testClass):
-		suite = unittest.TestSuite()
-		loader = unittest.TestLoader()
-		methods = loader.getTestCaseNames(testClass)
-		for method in methods:
-			self.runTestMethod(testFile, testClass, method)
 
 	def getPythonPath(self):
 		return []
