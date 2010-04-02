@@ -29,15 +29,15 @@ import os
 import unittest
 
 class PyUnitTest(BaseTest):
-"""
-Class for running PyUnit tests (standard Python unittest module). The execute
-method will execute all the .py files, find all the unittest.TestCase
-classes within those files and run the test methods within them. A separate
-Python process will be spawned for each input test file. By default child
-Python processes will have the same PYTHONPATH as the python process which
-is running pysys. However, this can be changed by overriding the
-getPythonPath() method.
-"""
+	"""
+	Class for running PyUnit tests (standard Python unittest module). The
+	execute method will execute all the .py files, find all the
+	unittest.TestCase classes within those files and run the test methods
+	within them. A separate Python process will be spawned for each input
+	test file. By default child Python processes will have the same
+	PYTHONPATH as the python process which is running pysys. However,
+	this can be changed by overriding the getPythonPath() method.
+	"""
 	def execute(self):
 		pyfiles = glob.glob(os.path.join(self.input , '*.py'))
 		for pyfile in pyfiles:
