@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Failing PyUnit test</title>    
+    <purpose><![CDATA[Ensure that we catch PyUnit failures and report them by
+provoking a failure and passing the test if we get it,
+failing it otherwise.
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>pyunit</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
