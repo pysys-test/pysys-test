@@ -62,13 +62,10 @@ class PyUnitTest(BaseTest):
 		self.log.setLevel(logLevel)
 		if process.exitStatus:
 			self.outcome.append(FAILED)
-#			self.log.info('%s.%s... failed' % (testClass.__name__, testMethod))
-#			f = open(dstdout)
-#			for line in f:
-#				self.log.info(line.rstrip('\r\n'))
 		else:
 			self.outcome.append(PASSED)
-#			self.log.info('%s.%s... passed' % (testClass.__name__, testMethod))
+		for l in open(dstdout):
+			self.log.info(l.rstrip())
 
 	def getPythonPath(self):
 		return []
@@ -106,6 +103,10 @@ if __name__ == '__main__':
 				suite.addTest(testClass(method))
 		return (suite, globals)
 
+	def getTestName(testcase):
+		name = testcase.id()
+		return name.replace('__builtin__.','')
+
 	testFile = sys.argv[1]
 
 	suite, globals = createTestSuite(testFile)
@@ -115,16 +116,18 @@ if __name__ == '__main__':
 	globals['_results_'] = results
 	
 	eval('_suite_.run(_results_)', globals)
+
+	for r in results.successes:
+		print getTestName(r), '... passed'
+	for r in results.errors:
+		print getTestName(r[0]), '... failed'
+		print r[1].rstrip()
+	for r in results.failures:
+		print getTestName(r[0]), '... failed'
+		print r[1].rstrip()
 	
-	print results.successes
 	if results.wasSuccessful():
 		sys.exit(0)
 	else:
-		for e in results.errors:
-			for line in e[1].split('\n'):
-				print line
-		for e in results.failures:
-			for line in e[1].split('\n'):
-				print line
 		sys.exit(1)
 
