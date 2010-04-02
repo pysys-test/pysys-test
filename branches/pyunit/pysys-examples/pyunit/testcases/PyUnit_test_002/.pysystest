@@ -2,15 +2,16 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title></title>    
-    <purpose><![CDATA[
+    <title>Basic PyUnit test which modifies the PYTHONPATH</title>    
+    <purpose><![CDATA[Demonstrate the overloading of the getPythonPath() method
+in order to test code that is not on the default PYTHONPATH.
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group></group>
+      <group>pyunit</group>
     </groups>
   </classification>
 

@@ -11,7 +11,7 @@ two test classes in two different files
 
   <classification>
     <groups>
-      <group></group>
+      <group>pyunit</group>
     </groups>
   </classification>
 
