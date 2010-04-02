@@ -90,6 +90,7 @@
 	
 	<path value="./src" relative="true" />
 	-->
+	<path value="pyunit/utilities" relative="true"/>
 
 
 	<!-- 
