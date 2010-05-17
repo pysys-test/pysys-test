@@ -10,6 +10,9 @@ What's new in this release
 - Updates to the framework and example testcases to run with Python 2.6.
 - Fix to the unix process helper to correctly set the working directory 
   of child processes in the fork and exec. 
+- Added the ability to run suites of pyunit tests wrapped up as a single
+  PySys test.  This capability is exposed through a test class, PyUnitTest,
+  in the pysys.unit.pyunit. See the pyunit example tests.
 
   
 Dependencies
