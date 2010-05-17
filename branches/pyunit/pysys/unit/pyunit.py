@@ -39,6 +39,10 @@ class PyUnitTest(BaseTest):
 	this can be changed by overriding the getPythonPath() method.
 	"""
 	def execute(self):
+		"""
+		Execute method for running all the PyUnit tests in the Input
+		directory.
+		"""
 		pyfiles = glob.glob(os.path.join(self.input , '*.py'))
 		for pyfile in pyfiles:
 			self.runTestFile(pyfile)
@@ -68,6 +72,10 @@ class PyUnitTest(BaseTest):
 			self.log.info(l.rstrip())
 
 	def getPythonPath(self):
+		"""Override this method to return a sequence of paths to put
+		at the beginning of the PYTHONPATH when running the PyUnit
+		tests. See PyUnit_test_002 for an example of this.
+		"""
 		return []
 
 if __name__ == '__main__':
