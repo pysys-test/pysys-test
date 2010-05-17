@@ -2,9 +2,9 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Exception from PyUnit test</title>    
-    <purpose><![CDATA[Ensure that we catch unexpected exceptions from PyUnit tests
-and report them as failures.]]>
+    <title>Assertion in PyUnit test</title>    
+    <purpose><![CDATA[Ensure that we catch assertions from PyUnit tests and report
+them as failures.]]>
     </purpose>
   </description>
 
