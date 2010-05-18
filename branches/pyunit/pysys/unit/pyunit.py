@@ -38,14 +38,22 @@ class PyUnitTest(BaseTest):
 	PYTHONPATH as the python process which is running pysys. However,
 	this can be changed by overriding the getPythonPath() method.
 	"""
+
 	def execute(self):
 		"""
-		Execute method for running all the PyUnit tests in the Input
-		directory.
+		Implementation of the execute() abstract method which simply
+		calls executePyUnitTests()
+		"""
+		self.executePyUnitTests()
+
+	def executePyUnitTests(self):
+		"""
+		Run all the PyUnit tests in the Input directory.
 		"""
 		pyfiles = glob.glob(os.path.join(self.input , '*.py'))
 		for pyfile in pyfiles:
 			self.runTestFile(pyfile)
+
 
 	def runTestFile(self, testFile):
 		globals = {}
