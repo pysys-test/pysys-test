@@ -50,12 +50,14 @@ class PyUnitTest(BaseTest):
 		"""
 		Run all the PyUnit tests in the Input directory.
 		"""
-		pyfiles = glob.glob(os.path.join(self.input , '*.py'))
+		pyfiles = self._findPythonFiles()
 		for pyfile in pyfiles:
-			self.runTestFile(pyfile)
+			self._runTestFile(pyfile)
 
+	def _findPythonFiles(self):
+		return  glob.glob(os.path.join(self.input , '*.py'))
 
-	def runTestFile(self, testFile):
+	def _runTestFile(self, testFile):
 		globals = {}
 		locals = {}
 		command = sys.executable
