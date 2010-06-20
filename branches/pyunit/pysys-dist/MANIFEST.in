@@ -1,2 +1,0 @@
-recursive-include pysys-dist *.xsl
-recursive-include pysys-dist *.txt
