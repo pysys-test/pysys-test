@@ -46,6 +46,13 @@ from pysys.process.user import ProcessUser
 
 global_lock = threading.Lock()
 
+N_CPUS = 1
+try:
+	# multiprocessing is a new module in 2.6 so we can't assume it
+	import multiprocessing
+	N_CPUS = multiprocessing.cpu_count()
+except ImportError:
+	pass
 
 class BaseRunner(ProcessUser):
 	"""The base class for executing a set of PySys testcases.
@@ -102,6 +109,9 @@ class BaseRunner(ProcessUser):
 		self.setKeywordArgs(xargs)
 		self.log = log
 		self.project = PROJECT
+
+		if self.threads == 0:
+			self.threads = N_CPUS
 	
 		self.writers = []
 		for classname, module, filename, properties in PROJECT.writers:
