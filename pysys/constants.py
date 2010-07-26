@@ -63,7 +63,7 @@ elif re.search('sunos', sys.platform):
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
 elif re.search('linux', sys.platform):
-	PLATFORM='linux'	
+	PLATFORM='linux'
 	OSFAMILY='unix'
 	DEVNULL = '/dev/null'
 	ENVSEPERATOR = ':'
@@ -71,6 +71,15 @@ elif re.search('linux', sys.platform):
 	LD_LIBRARY_PATH = '/usr/lib'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
+else:
+	# Fall back to assumed UNIX-like platform
+	PLATFORM=sys.platform
+	OSFAMILY='unix'
+	DEVNULL = '/dev/null'
+	ENVSEPERATOR = ':'
+	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
+	LD_LIBRARY_PATH = '/usr/lib'
+	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
 # constants used in testing
 TRUE=True
