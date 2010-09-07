@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title></title>    
+    <purpose><![CDATA[Test the basic behaviour of the JUnit pysys extension with
+two test classes
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>junit</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
