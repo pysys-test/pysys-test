@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>pysys.launcher</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="pysys-module.html">Package&nbsp;pysys</a> ::
+        Package&nbsp;launcher
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="pysys.launcher-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="pysys.launcher-module.html">Package pysys.launcher</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno">  1</span>  <span class="py-line"><span class="py-name">__all__</span> <span class="py-op">=</span> <span class="py-op">[</span> <span class="py-string">"console"</span> <span class="py-op">]</span> </span>
+<span class="lineno">  2</span>  <span class="py-line"> </span>
+<span class="lineno">  3</span>  <span class="py-line"><span class="py-keyword">import</span> <span class="py-name">sys</span><span class="py-op">,</span> <span class="py-name">os</span><span class="py-op">,</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">,</span> <span class="py-name">glob</span><span class="py-op">,</span> <span class="py-name">getopt</span><span class="py-op">,</span> <span class="py-name">sets</span><span class="py-op">,</span> <span class="py-name">re</span><span class="py-op">,</span> <span class="py-name">string</span><span class="py-op">,</span> <span class="py-name">logging</span> </span>
+<span class="lineno">  4</span>  <span class="py-line"> </span>
+<span class="lineno">  5</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a> <span class="py-keyword">import</span> <a title="pysys.rootLogger" class="py-name" href="pysys-module.html#rootLogger">rootLogger</a> </span>
+<span class="lineno">  6</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a><span class="py-op">.</span><a title="pysys.constants" class="py-name" href="pysys.constants-module.html">constants</a> <span class="py-keyword">import</span> <span class="py-op">*</span> </span>
+<span class="lineno">  7</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a><span class="py-op">.</span><a title="pysys.exceptions" class="py-name" href="pysys.exceptions-module.html">exceptions</a> <span class="py-keyword">import</span> <span class="py-op">*</span> </span>
+<span class="lineno">  8</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="pysys" class="py-name" href="pysys-module.html">pysys</a><span class="py-op">.</span><a title="pysys.xml" class="py-name" href="pysys.xml-module.html">xml</a><span class="py-op">.</span><a title="pysys.xml.descriptor" class="py-name" href="pysys.xml.descriptor-module.html">descriptor</a> <span class="py-keyword">import</span> <a class="py-name" href="pysys.xml.descriptor.XMLDescriptorParser-class.html">XMLDescriptorParser</a> </span>
+<span class="lineno">  9</span>  <span class="py-line"> </span>
+<span class="lineno"> 10</span>  <span class="py-line"><a class="py-name" href="pysys.launcher-module.html#log">log</a> <span class="py-op">=</span> <span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">getLogger</span><span class="py-op">(</span><span class="py-string">'pysys.launcher'</span><span class="py-op">)</span> </span>
+<span class="lineno"> 11</span>  <span class="py-line"><a class="py-name" href="pysys.launcher-module.html#log">log</a><span class="py-op">.</span><span class="py-name">setLevel</span><span class="py-op">(</span><span class="py-name">logging</span><span class="py-op">.</span><span class="py-name">NOTSET</span><span class="py-op">)</span> </span>
+<span class="lineno"> 12</span>  <span class="py-line"> </span>
+<span class="lineno"> 13</span>  <span class="py-line"> </span>
+<a name="createDescriptors"></a><div id="createDescriptors-def"><span class="lineno"> 14</span> <a class="pysrc-toggle" href="#" id="createDescriptors-toggle" onclick="toggle('createDescriptors'); return false;">-</a><span class="py-line"><span class="py-keyword">def</span> <a class="py-def-name" href="pysys.launcher-module.html#createDescriptors">createDescriptors</a><span class="py-op">(</span><span class="py-param">testIdSpecs</span><span class="py-op">,</span> <span class="py-param">type</span><span class="py-op">,</span> <span class="py-param">includes</span><span class="py-op">,</span> <span class="py-param">excludes</span><span class="py-op">,</span> <span class="py-param">trace</span><span class="py-op">,</span> <span class="py-param">dir</span><span class="py-op">=</span><span class="py-name">None</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="createDescriptors-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="createDescriptors-expanded"><span class="lineno"> 15</span>  <span class="py-line">        <span class="py-name">descriptors</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno"> 16</span>  <span class="py-line">        <span class="py-name">descriptorfiles</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno"> 17</span>  <span class="py-line">        <span class="py-name">ignoreSet</span> <span class="py-op">=</span> <span class="py-name">sets</span><span class="py-op">.</span><span class="py-name">Set</span><span class="py-op">(</span><a title="pysys.constants.OSWALK_IGNORES" class="py-name" href="pysys.constants-module.html#OSWALK_IGNORES">OSWALK_IGNORES</a><span class="py-op">)</span> </span>
+<span class="lineno"> 18</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-name">dir</span> <span class="py-op">==</span> <span class="py-name">None</span><span class="py-op">:</span> <span class="py-name">dir</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">getcwd</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno"> 19</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">root</span><span class="py-op">,</span> <span class="py-name">dirs</span><span class="py-op">,</span> <span class="py-name">files</span> <span class="py-keyword">in</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">walk</span><span class="py-op">(</span><span class="py-name">dir</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 20</span>  <span class="py-line">                <span class="py-keyword">if</span> <a title="pysys.constants.DEFAULT_DESCRIPTOR" class="py-name" href="pysys.constants-module.html#DEFAULT_DESCRIPTOR">DEFAULT_DESCRIPTOR</a> <span class="py-keyword">in</span> <span class="py-name">files</span><span class="py-op">:</span> <span class="py-name">descriptorfiles</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">root</span><span class="py-op">,</span> <a title="pysys.constants.DEFAULT_DESCRIPTOR" class="py-name" href="pysys.constants-module.html#DEFAULT_DESCRIPTOR">DEFAULT_DESCRIPTOR</a><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 21</span>  <span class="py-line">                <span class="py-keyword">for</span> <a title="pysys.utils.filediff.ignore" class="py-name" href="pysys.utils.filediff-module.html#ignore">ignore</a> <span class="py-keyword">in</span> <span class="py-op">(</span><span class="py-name">ignoreSet</span> <span class="py-op">&amp;</span> <span class="py-name">sets</span><span class="py-op">.</span><span class="py-name">Set</span><span class="py-op">(</span><span class="py-name">dirs</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> <span class="py-name">dirs</span><span class="py-op">.</span><span class="py-name">remove</span><span class="py-op">(</span><a title="pysys.utils.filediff.ignore" class="py-name" href="pysys.utils.filediff-module.html#ignore">ignore</a><span class="py-op">)</span> </span>
+<span class="lineno"> 22</span>  <span class="py-line"> </span>
+<span class="lineno"> 23</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">descriptorfile</span> <span class="py-keyword">in</span> <span class="py-name">descriptorfiles</span><span class="py-op">:</span> </span>
+<span class="lineno"> 24</span>  <span class="py-line">                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 25</span>  <span class="py-line">                        <span class="py-name">descriptors</span><span class="py-op">.</span><span class="py-name">append</span><span class="py-op">(</span><a title="pysys.xml.descriptor.XMLDescriptorParser" class="py-name" href="pysys.xml.descriptor.XMLDescriptorParser-class.html">XMLDescriptorParser</a><span class="py-op">(</span><span class="py-name">descriptorfile</span><span class="py-op">)</span><span class="py-op">.</span><a title="pysys.xml.descriptor.XMLDescriptorParser.getContainer" class="py-name" href="pysys.xml.descriptor.XMLDescriptorParser-class.html#getContainer">getContainer</a><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 26</span>  <span class="py-line">                <span class="py-keyword">except</span> <span class="py-name">Exception</span><span class="py-op">,</span> <span class="py-name">value</span><span class="py-op">:</span> </span>
+<span class="lineno"> 27</span>  <span class="py-line">                        <span class="py-keyword">print</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">exc_info</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span> </span>
+<span class="lineno"> 28</span>  <span class="py-line">                        <span id="link-0" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.launcher.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-0', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.launcher.log=pysys.launcher-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"Error reading descriptorfile %s"</span> <span class="py-op">%</span> <span class="py-name">descriptorfile</span><span class="py-op">)</span> </span>
+<span class="lineno"> 29</span>  <span class="py-line">        <span class="py-name">descriptors</span><span class="py-op">.</span><span class="py-name">sort</span><span class="py-op">(</span><span class="py-keyword">lambda</span> <span class="py-name">x</span><span class="py-op">,</span> <span class="py-name">y</span><span class="py-op">:</span> <span class="py-name">cmp</span><span class="py-op">(</span><span class="py-name">x</span><span class="py-op">.</span><span class="py-name">id</span><span class="py-op">,</span> <span class="py-name">y</span><span class="py-op">.</span><span class="py-name">id</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 30</span>  <span class="py-line"> </span>
+<span class="lineno"> 31</span>  <span class="py-line">        <span class="py-comment"># trim down the list for those tests in the test specifiers </span> </span>
+<span class="lineno"> 32</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">tests</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno"> 33</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-name">testIdSpecs</span> <span class="py-op">==</span> <span class="py-op">[</span><span class="py-op">]</span><span class="py-op">:</span> </span>
+<span class="lineno"> 34</span>  <span class="py-line">                <span class="py-name">tests</span> <span class="py-op">=</span> <span class="py-name">descriptors</span> </span>
+<span class="lineno"> 35</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 36</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">testIdSpec</span> <span class="py-keyword">in</span> <span class="py-name">testIdSpecs</span><span class="py-op">:</span> </span>
+<span class="lineno"> 37</span>  <span class="py-line">                        <span class="py-keyword">try</span><span class="py-op">:</span>     </span>
+<span class="lineno"> 38</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-name">re</span><span class="py-op">.</span><span class="py-name">search</span><span class="py-op">(</span><span class="py-string">'^[\w_]*$'</span><span class="py-op">,</span> <span class="py-name">testIdSpec</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 39</span>  <span class="py-line">                                        <span class="py-keyword">for</span> <span class="py-name">i</span> <span class="py-keyword">in</span> <span class="py-name">range</span><span class="py-op">(</span><span class="py-number">0</span><span class="py-op">,</span><span class="py-name">len</span><span class="py-op">(</span><span class="py-name">descriptors</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 40</span>  <span class="py-line">                                                <span class="py-keyword">if</span> <span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">id</span> <span class="py-op">==</span> <span class="py-name">testIdSpec</span><span class="py-op">:</span> <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-name">i</span> </span>
+<span class="lineno"> 41</span>  <span class="py-line">                                        <span class="py-name">tests</span><span class="py-op">.</span><span class="py-name">extend</span><span class="py-op">(</span><span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-name">index</span><span class="py-op">:</span><span class="py-name">index</span><span class="py-op">+</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 42</span>  <span class="py-line">                                <span class="py-keyword">elif</span> <span class="py-name">re</span><span class="py-op">.</span><span class="py-name">search</span><span class="py-op">(</span><span class="py-string">'^:[\w_]*'</span><span class="py-op">,</span> <span class="py-name">testIdSpec</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 43</span>  <span class="py-line">                                        <span class="py-keyword">for</span> <span class="py-name">i</span> <span class="py-keyword">in</span> <span class="py-name">range</span><span class="py-op">(</span><span class="py-number">0</span><span class="py-op">,</span><span class="py-name">len</span><span class="py-op">(</span><span class="py-name">descriptors</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 44</span>  <span class="py-line">                                                <span class="py-keyword">if</span> <span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">id</span> <span class="py-op">==</span> <span class="py-name">string</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-name">testIdSpec</span><span class="py-op">,</span> <span class="py-string">':'</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">:</span> <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-name">i</span> </span>
+<span class="lineno"> 45</span>  <span class="py-line">                                        <span class="py-name">tests</span><span class="py-op">.</span><span class="py-name">extend</span><span class="py-op">(</span><span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-op">:</span><span class="py-name">index</span><span class="py-op">+</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 46</span>  <span class="py-line"> </span>
+<span class="lineno"> 47</span>  <span class="py-line">                                <span class="py-keyword">elif</span> <span class="py-name">re</span><span class="py-op">.</span><span class="py-name">search</span><span class="py-op">(</span><span class="py-string">'^[\w_]*:$'</span><span class="py-op">,</span> <span class="py-name">testIdSpec</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 48</span>  <span class="py-line">                                        <span class="py-keyword">for</span> <span class="py-name">i</span> <span class="py-keyword">in</span> <span class="py-name">range</span><span class="py-op">(</span><span class="py-number">0</span><span class="py-op">,</span><span class="py-name">len</span><span class="py-op">(</span><span class="py-name">descriptors</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 49</span>  <span class="py-line">                                                <span class="py-keyword">if</span> <span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">id</span> <span class="py-op">==</span> <span class="py-name">string</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-name">testIdSpec</span><span class="py-op">,</span> <span class="py-string">':'</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">:</span> <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-name">i</span> </span>
+<span class="lineno"> 50</span>  <span class="py-line">                                        <span class="py-name">tests</span><span class="py-op">.</span><span class="py-name">extend</span><span class="py-op">(</span><span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-name">index</span><span class="py-op">:</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 51</span>  <span class="py-line"> </span>
+<span class="lineno"> 52</span>  <span class="py-line">                                <span class="py-keyword">elif</span> <span class="py-name">re</span><span class="py-op">.</span><span class="py-name">search</span><span class="py-op">(</span><span class="py-string">'^[\w_]*:[\w_]*$'</span><span class="py-op">,</span> <span class="py-name">testIdSpec</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 53</span>  <span class="py-line">                                        <span class="py-keyword">for</span> <span class="py-name">i</span> <span class="py-keyword">in</span> <span class="py-name">range</span><span class="py-op">(</span><span class="py-number">0</span><span class="py-op">,</span><span class="py-name">len</span><span class="py-op">(</span><span class="py-name">descriptors</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 54</span>  <span class="py-line">                                                <span class="py-keyword">if</span> <span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">id</span> <span class="py-op">==</span> <span class="py-name">string</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-name">testIdSpec</span><span class="py-op">,</span> <span class="py-string">':'</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">:</span> <span class="py-name">index1</span> <span class="py-op">=</span> <span class="py-name">i</span> </span>
+<span class="lineno"> 55</span>  <span class="py-line">                                                <span class="py-keyword">if</span> <span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-name">i</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">id</span> <span class="py-op">==</span> <span class="py-name">string</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-name">testIdSpec</span><span class="py-op">,</span> <span class="py-string">':'</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">:</span> <span class="py-name">index2</span> <span class="py-op">=</span> <span class="py-name">i</span> </span>
+<span class="lineno"> 56</span>  <span class="py-line">                                        <span class="py-name">tests</span><span class="py-op">.</span><span class="py-name">extend</span><span class="py-op">(</span><span class="py-name">descriptors</span><span class="py-op">[</span><span class="py-name">index1</span><span class="py-op">:</span><span class="py-name">index2</span><span class="py-op">+</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 57</span>  <span class="py-line">                        <span class="py-keyword">except</span> <span class="py-op">:</span> </span>
+<span class="lineno"> 58</span>  <span class="py-line">                                <span id="link-1" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.launcher.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-1', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.launcher.log=pysys.launcher-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"Unable to locate requested testcase(s)"</span><span class="py-op">)</span> </span>
+<span class="lineno"> 59</span>  <span class="py-line">                                <span class="py-keyword">raise</span> <span class="py-name">Exception</span><span class="py-op">(</span><span class="py-string">"Unable to locate requested testcase(s)"</span><span class="py-op">)</span> </span>
+<span class="lineno"> 60</span>  <span class="py-line">                                 </span>
+<span class="lineno"> 61</span>  <span class="py-line">        <span class="py-comment"># trim down the list based on the type</span> </span>
+<span class="lineno"> 62</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">if</span> <span class="py-name">type</span><span class="py-op">:</span> </span>
+<span class="lineno"> 63</span>  <span class="py-line">                <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno"> 64</span>  <span class="py-line">                <span class="py-keyword">while</span> <span class="py-name">index</span> <span class="py-op">!=</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">tests</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 65</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">type</span> <span class="py-op">!=</span> <span class="py-name">tests</span><span class="py-op">[</span><span class="py-name">index</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">type</span><span class="py-op">:</span> </span>
+<span class="lineno"> 66</span>  <span class="py-line">                                <span class="py-name">tests</span><span class="py-op">.</span><span class="py-name">pop</span><span class="py-op">(</span><span class="py-name">index</span><span class="py-op">)</span> </span>
+<span class="lineno"> 67</span>  <span class="py-line">                        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 68</span>  <span class="py-line">                                <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-name">index</span> <span class="py-op">+</span> <span class="py-number">1</span> </span>
+<span class="lineno"> 69</span>  <span class="py-line">                         </span>
+<span class="lineno"> 70</span>  <span class="py-line">        <span class="py-comment"># trim down the list based on the include and exclude suites</span> </span>
+<span class="lineno"> 71</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">if</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">excludes</span><span class="py-op">)</span> <span class="py-op">!=</span> <span class="py-number">0</span><span class="py-op">:</span> </span>
+<span class="lineno"> 72</span>  <span class="py-line">                <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno"> 73</span>  <span class="py-line">                <span class="py-keyword">while</span> <span class="py-name">index</span> <span class="py-op">!=</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">tests</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 74</span>  <span class="py-line">                        <span class="py-name">remove</span> <span class="py-op">=</span> <a title="pysys.constants.FALSE" class="py-name" href="pysys.constants-module.html#FALSE">FALSE</a> </span>
+<span class="lineno"> 75</span>  <span class="py-line"> </span>
+<span class="lineno"> 76</span>  <span class="py-line">                        <span class="py-keyword">for</span> <span class="py-name">exclude</span> <span class="py-keyword">in</span> <span class="py-name">excludes</span><span class="py-op">:</span> </span>
+<span class="lineno"> 77</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-name">exclude</span> <span class="py-keyword">in</span> <span class="py-name">tests</span><span class="py-op">[</span><span class="py-name">index</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">suites</span><span class="py-op">:</span> </span>
+<span class="lineno"> 78</span>  <span class="py-line">                                        <span class="py-name">remove</span> <span class="py-op">=</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+<span class="lineno"> 79</span>  <span class="py-line">                                        <span class="py-keyword">break</span> </span>
+<span class="lineno"> 80</span>  <span class="py-line"> </span>
+<span class="lineno"> 81</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">remove</span><span class="py-op">:</span> </span>
+<span class="lineno"> 82</span>  <span class="py-line">                                <span class="py-name">tests</span><span class="py-op">.</span><span class="py-name">pop</span><span class="py-op">(</span><span class="py-name">index</span><span class="py-op">)</span> </span>
+<span class="lineno"> 83</span>  <span class="py-line">                        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 84</span>  <span class="py-line">                                <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-name">index</span> <span class="py-op">+</span><span class="py-number">1</span> </span>
+<span class="lineno"> 85</span>  <span class="py-line">                                 </span>
+<span class="lineno"> 86</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-name">includes</span> <span class="py-op">!=</span> <span class="py-op">[</span><span class="py-op">]</span><span class="py-op">:</span> </span>
+<span class="lineno"> 87</span>  <span class="py-line">                <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno"> 88</span>  <span class="py-line">                <span class="py-keyword">while</span> <span class="py-name">index</span> <span class="py-op">!=</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">tests</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 89</span>  <span class="py-line">                        <span class="py-name">keep</span> <span class="py-op">=</span> <a title="pysys.constants.FALSE" class="py-name" href="pysys.constants-module.html#FALSE">FALSE</a> </span>
+<span class="lineno"> 90</span>  <span class="py-line">                                 </span>
+<span class="lineno"> 91</span>  <span class="py-line">                        <span class="py-keyword">for</span> <span class="py-name">include</span> <span class="py-keyword">in</span> <span class="py-name">includes</span><span class="py-op">:</span> </span>
+<span class="lineno"> 92</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-name">include</span> <span class="py-keyword">in</span> <span class="py-name">tests</span><span class="py-op">[</span><span class="py-name">index</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">suites</span><span class="py-op">:</span> </span>
+<span class="lineno"> 93</span>  <span class="py-line">                                        <span class="py-name">keep</span> <span class="py-op">=</span> <a title="pysys.constants.TRUE" class="py-name" href="pysys.constants-module.html#TRUE">TRUE</a> </span>
+<span class="lineno"> 94</span>  <span class="py-line">                                        <span class="py-keyword">break</span> </span>
+<span class="lineno"> 95</span>  <span class="py-line"> </span>
+<span class="lineno"> 96</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-keyword">not</span> <span class="py-name">keep</span><span class="py-op">:</span> </span>
+<span class="lineno"> 97</span>  <span class="py-line">                                <span class="py-name">tests</span><span class="py-op">.</span><span class="py-name">pop</span><span class="py-op">(</span><span class="py-name">index</span><span class="py-op">)</span> </span>
+<span class="lineno"> 98</span>  <span class="py-line">                        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 99</span>  <span class="py-line">                                <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-name">index</span> <span class="py-op">+</span><span class="py-number">1</span> </span>
+<span class="lineno">100</span>  <span class="py-line"> </span>
+<span class="lineno">101</span>  <span class="py-line"> </span>
+<span class="lineno">102</span>  <span class="py-line">        <span class="py-comment"># trim down the list based on the traceability</span> </span>
+<span class="lineno">103</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">if</span> <span class="py-name">trace</span><span class="py-op">:</span> </span>
+<span class="lineno">104</span>  <span class="py-line">                <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno">105</span>  <span class="py-line">                <span class="py-keyword">while</span> <span class="py-name">index</span> <span class="py-op">!=</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">tests</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">106</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">trace</span> <span class="py-keyword">not</span> <span class="py-keyword">in</span> <span class="py-name">tests</span><span class="py-op">[</span><span class="py-name">index</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">traceability</span> <span class="py-op">:</span> </span>
+<span class="lineno">107</span>  <span class="py-line">                                <span class="py-name">tests</span><span class="py-op">.</span><span class="py-name">pop</span><span class="py-op">(</span><span class="py-name">index</span><span class="py-op">)</span> </span>
+<span class="lineno">108</span>  <span class="py-line">                        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">109</span>  <span class="py-line">                                <span class="py-name">index</span> <span class="py-op">=</span> <span class="py-name">index</span> <span class="py-op">+</span> <span class="py-number">1</span> </span>
+<span class="lineno">110</span>  <span class="py-line">         </span>
+<span class="lineno">111</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-name">len</span><span class="py-op">(</span><span class="py-name">tests</span><span class="py-op">)</span> <span class="py-op">==</span> <span class="py-number">0</span><span class="py-op">:</span> </span>
+<span class="lineno">112</span>  <span class="py-line">                <span id="link-2" class="py-name"><a title="pysys.baserunner.log
+pysys.basetest.log
+pysys.launcher.console.log
+pysys.launcher.log
+pysys.manual.ui.log
+pysys.process.helper.log
+pysys.utils.filediff.log
+pysys.writer.log
+pysys.xml.descriptor.log
+pysys.xml.manual.log" class="py-name" href="#" onclick="doclink('link-2', 'log', 'Variable pysys.baserunner.log=pysys.baserunner-module.html#log,Variable pysys.basetest.log=pysys.basetest-module.html#log,Variable pysys.launcher.console.log=pysys.launcher.console-module.html#log,Variable pysys.launcher.log=pysys.launcher-module.html#log,Variable pysys.manual.ui.log=pysys.manual.ui-module.html#log,Variable pysys.process.helper.log=pysys.process.helper-module.html#log,Variable pysys.utils.filediff.log=pysys.utils.filediff-module.html#log,Variable pysys.writer.log=pysys.writer-module.html#log,Variable pysys.xml.descriptor.log=pysys.xml.descriptor-module.html#log,Variable pysys.xml.manual.log=pysys.xml.manual-module.html#log'); return false;">log</a></span></span><span class="py-op">.</span><span class="py-name">info</span><span class="py-op">(</span><span class="py-string">"The supplied options and subset of tests did not result in any tests being selected to run"</span><span class="py-op">)</span> </span>
+<span class="lineno">113</span>  <span class="py-line">                <span class="py-keyword">raise</span> <span class="py-name">Exception</span><span class="py-op">(</span><span class="py-string">"The supplied options and subset of tests did not result in any tests being selected to run"</span><span class="py-op">)</span> </span>
+<span class="lineno">114</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">115</span>  <span class="py-line">                <span class="py-keyword">return</span> <span class="py-name">tests</span> </span>
+</div><span class="lineno">116</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="pysys-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Fri Oct 06 16:05:50 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
