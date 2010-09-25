@@ -2,16 +2,15 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Basic JUnit tests</title>    
-    <purpose><![CDATA[Test the basic behaviour of the JUnit pysys extension with
-two test classes
+    <title>Failing JUnit test</title>    
+    <purpose><![CDATA[Ensure pysys captures failing JUnit tests and reports them
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group>junit</group>
+      <group></group>
     </groups>
   </classification>
 
