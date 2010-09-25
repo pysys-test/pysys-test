@@ -47,7 +47,7 @@ class JUnitTest(BaseTest):
 		Run all the JUnit tests in the Input directory.
 		"""
 		jfiles = self.findJavaFiles()
-		self.compileJavaFiles(jfiles)
+		self.compileJavaFiles(self.input, jfiles)
 		classes = map(self.javaPathToClass, jfiles)
 		self.runTests(classes)
 
@@ -61,7 +61,7 @@ class JUnitTest(BaseTest):
 					jfiles.append(os.path.relpath(os.path.join(root, f), self.input))
 		return jfiles
 
-	def compileJavaFiles(self, jfiles):
+	def compileJavaFiles(self, workingDir, jfiles):
 		command = '/usr/bin/javac'
 		displayName = 'JavaC'
 		instance = self.getInstanceCount(displayName)
@@ -69,9 +69,11 @@ class JUnitTest(BaseTest):
 		dstderr = os.path.join(self.output, 'javac.err')
                 if instance: dstdout  = "%s.%d" % (dstdout, instance)
                 if instance: dstderr  = "%s.%d" % (dstderr, instance)
-		arguments = ['-d', self.output, '-cp', '/home/mark/dev/junit-4.8.2.jar']
+		arguments = ['-d', self.output, '-cp', '/home/mark/dev/junit-4.8.2.jar:%s' % (self.output)]
 		arguments.extend(jfiles)
-		self.startProcess('/usr/bin/javac', arguments, workingDir=self.input, stdout=dstdout, stderr=dstderr, timeout=DEFAULT_TIMEOUT)
+		process = self.startProcess('/usr/bin/javac', arguments, workingDir=workingDir, stdout=dstdout, stderr=dstderr, timeout=DEFAULT_TIMEOUT, displayName=displayName)
+		if process.exitStatus:
+                        self.outcome.append(BLOCKED)
 
 	def javaPathToClass(self, jfile):
 		classfile = os.path.splitext(jfile)[0]
