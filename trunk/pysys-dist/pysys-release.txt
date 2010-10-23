@@ -13,7 +13,9 @@ What's new in this release
 - Added the ability to run suites of pyunit tests wrapped up as a single
   PySys test.  This capability is exposed through a test class, PyUnitTest,
   in the pysys.unit.pyunit. See the pyunit example tests.
-
+- When running tests in parallel, a value of zero given for the -n|--threads 
+  option to the run task of the pysys.py launcher, will set the number of 
+  threads to the number of available CPUs.
   
 Dependencies
 ------------
