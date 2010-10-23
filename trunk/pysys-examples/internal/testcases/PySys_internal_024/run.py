@@ -12,12 +12,16 @@ class PySysTest(BaseTest):
 		env["EMPTY-ENV"] = ""
 		env["INT-ENV"] = "1"
 		
+		# on win32, minimal environment must have SYSTEMROOT set
+		if PLATFORM=='win32': env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+		
+		# create the process
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script],
 						  environs = env,
 						  workingDir = self.output,
-						  stdout = "%s/environment.out" % self.output,
-						  stderr = "%s/environment.err" % self.output,
+						  stdout = os.path.join(self.output, 'environment.out'),
+						  stderr = os.path.join(self.output, 'environment.err'),
 						  state=FOREGROUND)
 
 		# wait for the strings to be writen to sdtout
@@ -25,4 +29,4 @@ class PySysTest(BaseTest):
 			
 	def validate(self):
 		# validate against the reference file
-		self.assertDiff("environment.out", "ref_environment.out")
+		self.assertDiff("environment.out", "ref_environment.out", ignores=['SYSTEMROOT'])
