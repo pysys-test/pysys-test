@@ -125,7 +125,6 @@ DEFAULT_INPUT = 'Input'
 DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
 DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
-DEFAULT_SCCS =  ['SCCSInterface', 'pysys.sccs', {}]
 DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml', {}]
 DEFAULT_STYLESHEET = os.path.join(SITE_PACKAGES_DIR, 'pysys-log.xsl')
 DEFAULT_FORMAT_STDOUT = '%(asctime)s %(levelname)-5s %(message)s'
@@ -223,9 +222,6 @@ class Project:
 		
 				# get the runner if specified
 				self.runnerClassname, self.runnerModule = parser.getRunnerDetails()
-		
-				# get the sccs if specified
-				self.sccs = parser.getSourceCodeControlDetails()
 		
 				# get the loggers to use
 				self.writers = parser.getWriterDetails()
