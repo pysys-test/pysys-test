@@ -708,7 +708,7 @@ class BaseTest(ProcessUser):
 				appender = "[%d%s]" % (numberLines, condition)
 				logOutcome = log.warn
 			self.outcome.append(result)
-			logOutcome("%s ... %s %s", self.__assertMsg(xargs, 'Line count on input file %s'%file), LOOKUP[result].lower(), appender)
+			logOutcome("%s ... %s %s", self.__assertMsg(xargs, 'Line count on input file %s' % file), LOOKUP[result].lower(), appender)
 
 
 	def __assertMsg(self, xargs, default):
