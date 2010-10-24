@@ -471,7 +471,7 @@ class BaseTest(ProcessUser):
 	# test validation methods. These methods provide means to validate the outcome of
 	# a test based on the occurrence of regular expressions in text files. All methods
 	# directly append to the test outcome list
-	def assertTrue(self, expr):
+	def assertTrue(self, expr, **xargs):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
@@ -488,7 +488,7 @@ class BaseTest(ProcessUser):
 			log.warn("Assertion on boolean expression equal to true ... failed")
 	
 
-	def assertFalse(self, expr):
+	def assertFalse(self, expr, **xargs):
 		"""Perform a validation assert on the supplied expression evaluating to false.
 		
 		If the supplied expression evaluates to false a C{PASSED} outcome is added to the 
@@ -499,13 +499,13 @@ class BaseTest(ProcessUser):
 		"""
 		if expr == False:
 			self.addOutcome(PASSED)
-			log.info("Assertion on boolean expression equal to false ... passed")
+			log.info('%s ... passed' % self.__assertMsg(xargs, 'Assertion on boolean expression equal to false'))
 		else:
 			self.addOutcome(FAILED)
-			log.warn("Assertion on boolean expression equal to false ... failed")
-	
+			log.info('%s ... failed' % self.__assertMsg(xargs, 'Assertion on boolean expression equal to false'))
 
-	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[]):
+
+	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], **xargs):
 		"""Perform a validation assert on the comparison of two input text files.
 		
 		This method performs a file comparison on two input files. The files are pre-processed prior to the 
@@ -550,10 +550,10 @@ class BaseTest(ProcessUser):
 				result = FAILED
 				logOutcome = log.warn
 			self.outcome.append(result)
-			logOutcome("File comparison between %s and %s ... %s", file1, file2, LOOKUP[result].lower())
+			logOutcome("%s ... %s", self.__assertMsg(xargs, 'File comparison between %s and %s' % (file1, file2)), LOOKUP[result].lower())
 
 
-	def assertGrep(self, file, filedir=None, expr='', contains=True):
+	def assertGrep(self, file, filedir=None, expr='', contains=True, **xargs):
 		"""Perform a validation assert on a regular expression occurring in a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -588,10 +588,10 @@ class BaseTest(ProcessUser):
 				result = FAILED
 				logOutcome = log.warn
 			self.outcome.append(result)
-			logOutcome("Grep on input file %s ... %s", file, LOOKUP[result].lower())
+			logOutcome("%s ... %s", self.__assertMsg(xargs, 'Grep on input file %s' % file), LOOKUP[result].lower())
 			
 
-	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[]):
+	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], **xargs):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -629,10 +629,10 @@ class BaseTest(ProcessUser):
 				result = FAILED
 				logOutcome = log.warn
 			self.outcome.append(result)
-			logOutcome("Grep on input file %s ... %s", file, LOOKUP[result].lower())
+			logOutcome("%s ... %s", self.__assertMsg(xargs, 'Grep on input file %s' % file), LOOKUP[result].lower())
 
 
-	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True):   
+	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, **xargs):   
 		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
 		
 		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome 
@@ -677,7 +677,7 @@ class BaseTest(ProcessUser):
 			if result == FAILED: logOutcome("Ordered grep failed on expression \"%s\"", expr)
 
 
-	def assertLineCount(self, file, filedir=None, expr='', condition=">=1"):
+	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", **xargs):
 		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -708,8 +708,14 @@ class BaseTest(ProcessUser):
 				appender = "[%d%s]" % (numberLines, condition)
 				logOutcome = log.warn
 			self.outcome.append(result)
-			logOutcome("Line count on input file %s ... %s %s", file, LOOKUP[result].lower(), appender)
+			logOutcome("%s ... %s %s", self.__assertMsg(xargs, 'Line count on input file %s'%file), LOOKUP[result].lower(), appender)
 
 
-
-	
+	def __assertMsg(self, xargs, default):
+		"""Return an assert statement requested to override the default value.
+		
+		@param xargs: Variable argument list to an assert method
+		@param default: Default assert statement to return if a parameter is not supplied
+		"""
+		if xargs.has_key('assertMessage'): return xargs['assertMessage']
+		return default
