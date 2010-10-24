@@ -73,7 +73,9 @@ class BaseTest(ProcessUser):
 	to an internal data structure thus building up a record of the individual validation outcomes. Several 
 	potential outcomes are supported by the PySys framework (C{SKIPPED}, C{BLOCKED}, C{DUMPEDCORE}, C{TIMEDOUT}, 
 	C{FAILED}, C{NOTVERIFIED}, and C{PASSED}) and the overall outcome of the testcase is determined using a
-	precedence order of the individual outcomes.
+	precedence order of the individual outcomes. All C{assert*} methods support variable argument lists for 
+	common non-default parameters. Currently this only includes the C{assertMessage} parameter, to override the 
+	default statement logged by the framework to stdout and the run log. 
 
 	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks 
 	           to modify the test execution based upon the mode.
@@ -478,7 +480,8 @@ class BaseTest(ProcessUser):
 		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
 		
 		@param expr: The expression, as a string, to check for the true | false value
-				
+		@param xargs: Variable argument list (see class description for supported parameters)
+		
 		"""
 		if expr == True:
 			self.addOutcome(PASSED)
@@ -495,7 +498,8 @@ class BaseTest(ProcessUser):
 		outcome list. Should the expression evaluate to true, a C{FAILED} outcome is added.
 		
 		@param expr: The expression to check for the true | false value
-				
+		@param xargs: Variable argument list (see class description for supported parameters)
+						
 		"""
 		if expr == False:
 			self.addOutcome(PASSED)
@@ -525,7 +529,8 @@ class BaseTest(ProcessUser):
 			carried out. This is often useful to replace timestamps in logfiles etc.
 		@param includes: A list of regular expressions used to denote lines in the files which should be used in the 
 			comparison. Only lines which match an expression in the list are used for the comparison
-		
+		@param xargs: Variable argument list (see class description for supported parameters)
+				
 		"""
 		if filedir1 == None: filedir1 = self.output
 		if filedir2 == None: filedir2 = self.reference
@@ -565,7 +570,8 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression to check for in the file
 		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
-		
+		@param xargs: Variable argument list (see class description for supported parameters)
+				
 		"""
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
@@ -604,9 +610,9 @@ class BaseTest(ProcessUser):
 		@param expr: The regular expression to check for in the last line of the file
 		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
 		@param ignores: A list of regular expressions used to denote lines in the file which should be ignored
-		@param includes: A list of regular expressions used to denote lines in the file which should be used in the 
-			assertion.
-		
+		@param includes: A list of regular expressions used to denote lines in the file which should be used in the assertion.
+		@param xargs: Variable argument list (see class description for supported parameters)
+				
 		"""
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
@@ -645,7 +651,8 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param exprList: A list of regular expressions which should occur in the file in the order they appear in the list
 		@param contains: Boolean flag to denote if the expressions should or should not be seen in the file in the order specified
-		
+		@param xargs: Variable argument list (see class description for supported parameters)
+				
 		"""
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
@@ -688,7 +695,8 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression used to match a line of the input file
 		@param condition: The condition to be met for the number of lines matching the regular expression
-		
+		@param xargs: Variable argument list (see class description for supported parameters)
+				
 		"""	
 		if filedir == None: filedir = self.output
 		f = os.path.join(filedir, file)
@@ -716,6 +724,7 @@ class BaseTest(ProcessUser):
 		
 		@param xargs: Variable argument list to an assert method
 		@param default: Default assert statement to return if a parameter is not supplied
+		
 		"""
 		if xargs.has_key('assertMessage'): return xargs['assertMessage']
 		return default
