@@ -482,10 +482,10 @@ class BaseTest(ProcessUser):
 		"""
 		if expr == True:
 			self.addOutcome(PASSED)
-			log.info("Assertion on boolean expression equal to true ... passed")
+			log.info('%s ... passed' % self.__assertMsg(xargs, 'Assertion on boolean expression equal to true'))
 		else:
 			self.addOutcome(FAILED)
-			log.warn("Assertion on boolean expression equal to true ... failed")
+			log.info('%s ... failed' % self.__assertMsg(xargs, 'Assertion on boolean expression equal to true'))
 	
 
 	def assertFalse(self, expr, **xargs):
@@ -673,7 +673,7 @@ class BaseTest(ProcessUser):
 				result = FAILED
 				logOutcome = log.warn
 			self.outcome.append(result)
-			log.info("Ordered grep on input file %s ... %s", file, LOOKUP[result].lower())
+			log.info('%s ... %s' % (self.__assertMsg(xargs, 'Ordered grep on input file %s' % file), LOOKUP[result].lower()))
 			if result == FAILED: logOutcome("Ordered grep failed on expression \"%s\"", expr)
 
 
