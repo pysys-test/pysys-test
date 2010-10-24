@@ -702,11 +702,13 @@ class BaseTest(ProcessUser):
 			logOutcome = log.info
 			if (eval("%d %s" % (numberLines, condition))):
 				result = PASSED
+				appender = ""
 			else:
 				result = FAILED
+				appender = "[%d%s]" % (numberLines, condition)
 				logOutcome = log.warn
 			self.outcome.append(result)
-			logOutcome("Line count on input file %s ... %s", file, LOOKUP[result].lower())
+			logOutcome("Line count on input file %s ... %s %s", file, LOOKUP[result].lower(), appender)
 
 
 
