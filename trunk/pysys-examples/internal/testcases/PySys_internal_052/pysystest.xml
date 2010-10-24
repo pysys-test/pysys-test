@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Assertions - Check assertLineCount</title>    
+    <title>Assertions - check assertLineCount</title>    
     <purpose><![CDATA[
 Checks a variety of input into the assertLastGrep method of the BaseTest]]>
     </purpose>
@@ -10,7 +10,7 @@ Checks a variety of input into the assertLastGrep method of the BaseTest]]>
 
   <classification>
     <groups>
-      <group></group>
+      <group>asserts</group>
     </groups>
   </classification>
 

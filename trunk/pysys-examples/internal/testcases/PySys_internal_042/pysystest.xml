@@ -2,9 +2,9 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Assertions - check assertLineCount assert message</title>    
+    <title>Assertions - check assertFalse</title>    
     <purpose><![CDATA[
-Checks overriding the assert message of the assertLineCount method]]>
+]]>
     </purpose>
   </description>
 
