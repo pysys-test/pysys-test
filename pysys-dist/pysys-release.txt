@@ -16,6 +16,9 @@ What's new in this release
 - When running tests in parallel, a value of zero given for the -n|--threads 
   option to the run task of the pysys.py launcher, will set the number of 
   threads to the number of available CPUs.
+- Fix to feature request 3045931 "Failed assertLineCount to return right number"
+  On a failure of the assertLineCount method, the log output of the failed 
+  assertion now contains the returned number and requested condition.  
   
 Dependencies
 ------------
