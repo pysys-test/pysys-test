@@ -152,7 +152,7 @@ def logContents(message, list):
 	log.debug(message)
 	for line in list:
 		count = count + 1
-		log.debug("  Line %-5d:  %s" % (count, line))
+		log.debug(string.rstrip("  Line %-5d:  %s" % (count, line)))
 
 		
 
