@@ -6,4 +6,16 @@ class PySysTest(BaseTest):
 		pass
 
 	def validate(self):
-		pass
+		self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines bright')
+		self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines right')
+		self.checkForFailedOutcome()
+		self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines right', contains=False)
+		self.assertGrep(file='file.txt', filedir=self.input, expr='(?P<tag>moon) shines bright')
+		self.assertGrep(file='file.txt', filedir=self.input, expr='moon.*bright')
+		self.assertGrep(file='file.txt', filedir=self.input, expr='Now eastlin|westlin winds')
+		
+	def checkForFailedOutcome(self):
+		outcome = self.outcome.pop()
+		if outcome == FAILED: self.addOutcome(PASSED)
+		else: self.addOutcome(FAILED)
+		
