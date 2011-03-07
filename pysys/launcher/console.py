@@ -383,7 +383,7 @@ class ConsoleLaunchHelper:
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:X'
+		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:X:'
 		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads="]
 
 
