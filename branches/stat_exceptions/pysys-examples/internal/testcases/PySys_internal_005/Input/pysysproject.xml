@@ -1,0 +1,5 @@
+<pysysproject>
+	<!-- Example properties to be set in the project -->
+	<property root="rootdirectory" />
+	<property name="loc" value="${rootdirectory}" />
+</pysysproject>
