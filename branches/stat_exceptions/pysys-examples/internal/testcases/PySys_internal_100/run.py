@@ -2,7 +2,9 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.process.helper import ProcessWrapper
 
-NUM_FILES = 10000
+# May need to increase this on fast machines/filesystems
+# if no warnings are logged after validate() finishes.
+NUM_FILES = 25000
 
 class PySysTest(BaseTest):
 	
@@ -16,6 +18,10 @@ class PySysTest(BaseTest):
 		self.proc.start()
 		
 	def validate(self):
+		# I don't like doing this but we are trying to provoke a
+		# race condition, so give the delete script time to start.
+		self.wait(0.5)
+
 		# Test should pass unless an exception is thrown and not
 		# ignored when scanning/cleaning the output directory. 
 		self.addOutcome(PASSED)
