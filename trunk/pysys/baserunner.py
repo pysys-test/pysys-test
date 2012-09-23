@@ -189,9 +189,11 @@ class BaseRunner(ProcessUser):
 						except:
 							time.sleep(0.1)
 							count = count + 1
-		except OSError:
-			pass
 
+		except OSError as ex:
+			log.warning("Caught OSError while cleaning output directory:")
+			log.warning(ex)
+			log.warning("Output directory may not be completely clean")
 
 	def cycleComplete(self):
 		"""Cycle complete method which may optionally be overridden to perform custom operations between the repeated execution of a set of testcases.
@@ -544,21 +546,26 @@ class TestContainer:
 		@param delTop: Indicates if the top level directory should also be deleted
 		
 		"""
-		for file in os.listdir(dir):
-		  	path = os.path.join(dir, file)
-		  	if PLATFORM in ['sunos', 'linux']:
-		  		mode = os.lstat(path)[stat.ST_MODE]
-		  	else:
-		  		mode = os.stat(path)[stat.ST_MODE]
-		
-			if stat.S_ISLNK(mode):
-				os.unlink(path)
-			if stat.S_ISREG(mode):
-				os.remove(path)
-			elif stat.S_ISDIR(mode):
-			  	self.purgeDirectory(path, delTop=True)				 
+		try:
+			for file in os.listdir(dir):
+			  	path = os.path.join(dir, file)
+			  	if PLATFORM in ['sunos', 'linux']:
+			  		mode = os.lstat(path)[stat.ST_MODE]
+			  	else:
+			  		mode = os.stat(path)[stat.ST_MODE]
+			
+				if stat.S_ISLNK(mode):
+					os.unlink(path)
+				if stat.S_ISREG(mode):
+					os.remove(path)
+				elif stat.S_ISDIR(mode):
+				  	self.purgeDirectory(path, delTop=True)
+			if delTop: os.rmdir(dir)
 
-		if delTop: os.rmdir(dir)
+		except OSError as ex:
+			log.warning("Caught OSError in purgeDirectory():")
+			log.warning(ex)
+			log.warning("Directory %s may not be completely purged" % dir)
 
 
 	def detectCore(self, dir):
@@ -568,9 +575,13 @@ class TestContainer:
 		@return: C{True} if a core detected, None if no core detected
 		@rtype: integer 
 		"""
-		for file in os.listdir(dir):
-			path = os.path.join(dir, file)
-			mode = os.stat(path)[stat.ST_MODE]
+		try:
+			for file in os.listdir(dir):
+				path = os.path.join(dir, file)
+				mode = os.stat(path)[stat.ST_MODE]
+				if stat.S_ISREG(mode):
+					if re.search('^core', file): return True
 
-			if stat.S_ISREG(mode):
-				if re.search('^core', file): return True
+		except OSError as ex:
+			log.warning("Caught OSError in detectCore():")
+			log.warning(ex)
