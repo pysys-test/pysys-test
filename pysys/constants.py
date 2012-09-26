@@ -29,7 +29,7 @@ about the structure and contents of the project file, see the PySys examples
 distribution. 
 
 """
-import sys, re, os, os.path, socket, logging, new
+import sys, re, os, os.path, socket, logging
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -199,8 +199,8 @@ class Project:
 	
 	def __init__(self, root, projectFile):
 		self.root = root
-		self.formatters=new.classobj('Formatters',(object,),{'stdout':logging.Formatter(DEFAULT_FORMAT_STDOUT),
-															 'runlog':logging.Formatter(DEFAULT_FORMAT_RUNLOG)})
+		self.formatters=type('Formatters',(object,),{'stdout':logging.Formatter(DEFAULT_FORMAT_STDOUT),
+													 'runlog':logging.Formatter(DEFAULT_FORMAT_RUNLOG)})
 
 		if projectFile != None and os.path.exists(os.path.join(root, projectFile)):	
 			# parse the project file
