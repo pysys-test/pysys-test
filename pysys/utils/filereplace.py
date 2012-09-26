@@ -55,7 +55,7 @@ def replace(input, output, dict={}, marker=''):
 		fo = open(output, 'w')
 		for line in fi.readlines():
 			for key in dict.keys():
-				line = string.replace(line, '%s%s%s'%(marker, key, marker), "%s" % (dict[key]))
+				line = line.replace('%s%s%s'%(marker, key, marker), "%s" % (dict[key]))
 			fo.write(line)
 		fi.close()
 		fo.close()

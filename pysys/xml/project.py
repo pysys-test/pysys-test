@@ -141,7 +141,7 @@ class XMLProjectParser:
 					insert = os.environ[m[1]]
 				except :
 					insert = default
-				value = string.replace(value, m[0], insert)
+				value = value.replace(m[0], insert)
 		return value		
 
 
@@ -154,7 +154,7 @@ class XMLProjectParser:
 					insert = self.properties[m[1]]
 				except :
 					insert = default
-				value = string.replace(value, m[0], insert)
+				value = value.replace(m[0], insert)
 		return value
 
 
