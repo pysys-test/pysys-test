@@ -184,7 +184,7 @@ class BaseTest(ProcessUser):
 		"""	
 		if len(self.outcome) == 0: return NOTVERIFIED
 		list = copy.copy(self.outcome)
-		list.sort(lambda x, y: cmp(PRECEDENT.index(x), PRECEDENT.index(y)))
+		sorted(list, key=lambda x: PRECEDENT.index(x))
 		return list[0]
 		
 
