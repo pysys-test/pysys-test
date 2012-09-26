@@ -23,7 +23,7 @@ class PySysTest(BaseTest):
 		
 	def validate(self):
 		# validate the working directory of the process
-		self.assertGrep("workingdir.err", expr="Current working directory is %s$"%string.replace(os.path.join(self.input, "dir"), "\\", "/"))
+		self.assertGrep("workingdir.err", expr="Current working directory is %s$"%os.path.join(self.input, "dir").replace("\\", "/"))
 		
 		# validate against the reference file
 		self.assertDiff("workingdir.out", "ref_workingdir.out", ignores=['.svn'], sort=True)
