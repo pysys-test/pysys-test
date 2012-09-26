@@ -240,8 +240,8 @@ class BaseRunner(ProcessUser):
 			# loop through tests for the cycle
 			try:
 				self.resultsPointer = 0
-		 		self.resultsQueue = []
-		 		self.results[cycle] = {}
+				self.resultsQueue = []
+				self.results[cycle] = {}
 				for outcome in PRECEDENT: self.results[cycle][outcome] = []
 		
 				counter = 0
@@ -548,11 +548,11 @@ class TestContainer:
 		"""
 		try:
 			for file in os.listdir(dir):
-			  	path = os.path.join(dir, file)
-			  	if PLATFORM in ['sunos', 'linux']:
-			  		mode = os.lstat(path)[stat.ST_MODE]
-			  	else:
-			  		mode = os.stat(path)[stat.ST_MODE]
+				path = os.path.join(dir, file)
+				if PLATFORM in ['sunos', 'linux']:
+					mode = os.lstat(path)[stat.ST_MODE]
+				else:
+					mode = os.stat(path)[stat.ST_MODE]
 			
 				if stat.S_ISLNK(mode):
 					os.unlink(path)
