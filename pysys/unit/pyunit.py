@@ -24,9 +24,7 @@ Contains the test class used to run pyunit tests
 
 from pysys.constants import *
 from pysys.basetest import BaseTest
-import glob
-import os
-import unittest
+import glob, os, unittest
 
 class PyUnitTest(BaseTest):
 	"""
@@ -65,8 +63,8 @@ class PyUnitTest(BaseTest):
 		instance = self.getInstanceCount(displayName)
 		dstdout = os.path.join(self.output, 'pyunit.out')
 		dstderr = os.path.join(self.output, 'pyunit.err')
-                if instance: dstdout  = "%s.%d" % (dstdout, instance)
-                if instance: dstderr  = "%s.%d" % (dstderr, instance)
+		if instance: dstdout  = "%s.%d" % (dstdout, instance)
+		if instance: dstderr  = "%s.%d" % (dstderr, instance)
 		arguments = [__file__, testFile]
 		logLevel = self.log.level
 		self.log.setLevel(logging.CRITICAL)
