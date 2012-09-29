@@ -23,7 +23,7 @@ Defines custom exceptions that can be thrown within the PySys framework.
 
 """
 
-class FileNotFoundException:
+class FileNotFoundException(Exception):
 	"""Exception raised when a file cannot be found."""
 
 	def __init__(self,value):
@@ -32,8 +32,7 @@ class FileNotFoundException:
 	def __str__(self):
 		return self.value
 
-
-class IncorrectFileTypeException:
+class IncorrectFileTypeException(Exception):
 	"""Exception raised when the extension of a file is incorrect."""
 
 	def __init__(self,value):
@@ -42,8 +41,7 @@ class IncorrectFileTypeException:
 	def __str__(self):
 		return self.value
 
-
-class ExecutableNotFoundException:
+class ExecutableNotFoundException(Exception):
 	"""Exception raised when an executable cannot be found."""
 
 	def __init__(self,value):
@@ -52,8 +50,7 @@ class ExecutableNotFoundException:
 	def __str__(self):
 		return self.value
 
-
-class ProcessError:
+class ProcessError(Exception):
 	"""Exception raised when creating a process."""
 
 	def __init__(self,value):
@@ -62,7 +59,7 @@ class ProcessError:
 	def __str__(self):
 		return self.value
 
-class ProcessTimeout:
+class ProcessTimeout(Exception):
 	"""Exception raised when a process times out."""
 
 	def __init__(self,value):
@@ -71,7 +68,7 @@ class ProcessTimeout:
 	def __str__(self):
 		return self.value
 
-class InvalidDescriptorException:
+class InvalidDescriptorException(Exception):
 	"""Exception raised when a testcase descriptor is invalid."""
 
 	def __init__(self,value):
@@ -80,7 +77,7 @@ class InvalidDescriptorException:
 	def __str__(self):
 		return self.value
 
-class InvalidXMLException:
+class InvalidXMLException(Exception):
 	"""Exception raised when an input XML file is invalid."""
 
 	def __init__(self,value):
