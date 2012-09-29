@@ -391,7 +391,7 @@ class BaseRunner(ProcessUser):
 			while 1:
 				print ""
 				print "Keyboard interrupt detected, continue running tests? [yes|no] ... ",
-				line = string.strip(sys.stdin.readline())
+				line = sys.stdin.readline().strip()
 				if line == "y" or line == "yes":
 					break
 				elif line == "n" or line == "no":

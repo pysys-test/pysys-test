@@ -49,7 +49,7 @@ def getmatches(file, regexpr):
 		for i in range(0, len(list)):
 			match = rexp.search(list[i])
 			if match != None: 
-				log.debug(string.rstrip("Found match for line: %s" % list[i]))
+				log.debug(("Found match for line: %s" % list[i]).rstrip())
 				matches.append(match)
 		return matches
 
@@ -152,7 +152,7 @@ def logContents(message, list):
 	log.debug(message)
 	for line in list:
 		count = count + 1
-		log.debug(string.rstrip("  Line %-5d:  %s" % (count, line)))
+		log.debug(("  Line %-5d:  %s" % (count, line)).rstrip())
 
 		
 
