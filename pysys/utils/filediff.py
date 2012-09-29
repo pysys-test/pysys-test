@@ -149,7 +149,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[])
 			for i in list2: l2.append("%s\n"%i)
 
 			diff = ''.join(difflib.unified_diff(l1, l2))
-			for line in string.split(diff, '\n'): log.debug("  %s", line)
+			for line in diff.split('\n'): log.debug("  %s", line)
 
 		if list1 == list2: return True
 		return False
