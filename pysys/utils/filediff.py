@@ -121,11 +121,11 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[])
 		list2 = []
 
 		f = open(file1, 'r')
-		for i in f.readlines(): list1.append(string.strip(i))
+		for i in f.readlines(): list1.append(i.strip())
 		f.close()
 
 		f = open(file2, 'r')
-		for i in f.readlines(): list2.append(string.strip(i))
+		for i in f.readlines(): list2.append(i.strip())
 		f.close()
 		
 		list1 = trimContents(list1, ignore, exclude=True)
