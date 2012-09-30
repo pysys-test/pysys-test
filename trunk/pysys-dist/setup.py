@@ -23,6 +23,11 @@ import pysys, glob, sys, os
 import distutils.sysconfig
 from distutils.core import setup
 
+try:  # Python 3
+  from distutils.command.build_py import build_py_2to3 as build_py
+except ImportError:  # Python 2
+  from distutils.command.build_py import build_py
+
 lib_dir = distutils.sysconfig.get_python_lib(plat_specific=1)
 
 def get_site_packages_path():
@@ -33,7 +38,8 @@ def get_site_packages_path():
 
 		
 if sys.platform.lower().startswith('win'):
-	setup(name='PySys',
+	setup(cmdclass = {'build_py': build_py},
+		  name='PySys',
 		  version=pysys.__version__,
 		  author=pysys.__author__,
 		  author_email=pysys.__author_email__,
@@ -49,7 +55,8 @@ if sys.platform.lower().startswith('win'):
 					  (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]
 		)
 else:
-	setup(name='PySys',
+	setup(cmdclass = {'build_py': build_py},
+		  name='PySys',
 		  version=pysys.__version__,
 		  author=pysys.__author__,
 		  author_email=pysys.__author_email__,
