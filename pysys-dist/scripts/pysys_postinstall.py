@@ -76,11 +76,10 @@ def install():
 	
 	
 def printUsage():
-	print "\nUsage: %s [option]" % os.path.basename(sys.argv[0])
-	print "    where option is one of;"
-	print " 	  -install		   perform the post install steps"
-	print " 	  -remove		   perform the post uninstall steps"
-	print ""
+	sys.stdout.write("\nUsage: %s [option]\n" % os.path.basename(sys.argv[0]))
+	sys.stdout.write("    where option is one of;\n")
+	sys.stdout.write(" 	  -install		   perform the post install steps\n")
+	sys.stdout.write(" 	  -remove		   perform the post uninstall steps\n\n")
 	sys.exit()
 
 
@@ -98,6 +97,6 @@ if __name__=='__main__':
 		elif arg == "-remove":
 			pass
 		else:
-			print "Unknown option:", arg
+			sys.stderr.write("Unknown option: %s\n"%arg)
 			sys.exit(0)
 		arg_index += 1
