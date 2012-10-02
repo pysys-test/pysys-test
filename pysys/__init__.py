@@ -42,9 +42,9 @@ testcases provides a single framework for all test organisation requirements.
 
 import sys, logging
 if sys.version_info >= (3,):
-	from _thread import get_ident as get_ident
+	from _thread import get_ident as threadId
 else:
-	from thread import get_ident as get_ident
+	from thread import get_ident as threadId
 
 __author__  = "Moray Grieve"
 """The author of PySys."""
@@ -90,12 +90,12 @@ class ThreadedStreamHandler(logging.StreamHandler):
 	"""
 	def __init__(self, strm):
 		"""Overrides logging.StreamHandler.__init__."""
-		self.threadId = thread.get_ident()
+		self.threadId = threadId()
 		logging.StreamHandler.__init__(self, strm)
 				
 	def emit(self, record):
 		"""Overrides logging.StreamHandler.emit."""
-		if self.threadId != thread.get_ident(): return
+		if self.threadId != threadId(): return
 		logging.StreamHandler.emit(self, record)
 		
 		
@@ -109,13 +109,13 @@ class ThreadedFileHandler(logging.FileHandler):
 	"""
 	def __init__(self, filename):
 		"""Overrides logging.ThreadedFileHandler.__init__"""
-		self.threadId = thread.get_ident()
+		self.threadId = threadId()
 		self.buffer = []
 		logging.FileHandler.__init__(self, filename, "a")
 				
 	def emit(self, record):
 		"""Overrides logging.ThreadedFileHandler.emit."""
-		if self.threadId != thread.get_ident(): return
+		if self.threadId != threadId(): return
 		self.buffer.append(record.getMessage())
 		logging.FileHandler.emit(self, record)
 		
@@ -137,12 +137,12 @@ class ThreadFilter(logging.Filterer):
 	"""
 	def __init__(self):
 		"""Overrides logging.Filterer.__init__"""
-		self.threadId = thread.get_ident()
+		self.threadId = threadId()
 		logging.Filterer.__init__(self)
 		
 	def filter(self, record):
 		"""Implementation of logging.Filterer.filter to block from the creating thread."""
-		if self.threadId != thread.get_ident(): return True
+		if self.threadId != threadId(): return True
 		return False
 	
 
