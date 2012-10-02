@@ -40,7 +40,11 @@ testcases provides a single framework for all test organisation requirements.
 
 """
 
-import sys, logging, thread
+import sys, logging
+if sys.version_info >= (3,):
+	from _thread import get_ident as get_ident
+else:
+	from thread import get_ident as get_ident
 
 __author__  = "Moray Grieve"
 """The author of PySys."""
