@@ -9,16 +9,16 @@ can be made.
 What's new in this release
 --------------------------
 - The PySys framework has been updated to be compliant with conversion to 
-  Python 3 with the 2to3.py conversion script. Installation on Python 3 is
+  Python 3.x with the 2to3.py conversion script. Installation on Python 3.x is
   now supported via the source distribution bundle, where the 2to3.py script
   is run automatically at install time. See details below for installing the 
   source distribution. A binary distribution installer for windows will be 
   included in a later release. 
-- There are now separate 32 and 64 bit binary distribution installerts for 
+- There are now separate 32 and 64 bit binary distribution installers for 
   windows. 
 - On failure of the assertLineCount method, the log output now contains the 
   returned number and requested condition (tracker #3045931)  
-- Each assert method now takes an "assertMessage" parameter to be writted to 
+- Each assert method now takes an "assertMessage" parameter to be written to 
   the log output on execution (tracker #3045924). See test PySys_internal_053 
   in the example testcases for example usage.
 - Added the ability to run suites of pyunit tests wrapped up as a single PySys 
@@ -39,12 +39,26 @@ tester on unix systems requires the tcl/tk libraries to be installed on the
 host machine and the Python version to be compiled with tcl/tk support.
 
 
-Installation
-------------
+Windows Binary Installation
+---------------------------
 Installation on windows via the binary distribution bundle is performed by 
-downloading the PySys-X.Y.Z.win32.exe installer executable and running. To install 
-from source on unix or windows systems you should download the source tar.gz archive 
-and perform the following;
+downloading the PySys-X.Y.Z.win32.exe installer executable and running. Note 
+that a common error on windows is in the execution of the post-install script, 
+where an error of the form below is report;
+
+close failed in file object destructor:
+sys.excepthook is missing
+lost sys.stderr
+
+If obtained, right click the installer executable in an explorer window, and 
+select "Troubleshoot Compatability". Select "Try recommended settings", and 
+then "Start the program ...".  
+
+
+Windows/Unix Source Installation
+--------------------------------
+To install from source on unix or windows systems you should download the source 
+archive and perform the following (use winrar or winzip to unpack on windows);
 
  $ tar zxvpf PySys-X.Y.Z.tar.gz
  $ cd PySys-X.Y.Z
