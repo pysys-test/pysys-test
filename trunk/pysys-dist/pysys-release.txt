@@ -1,25 +1,36 @@
 PySys 0.9.0 Release Notes
 =========================
 
-PySys has been written and tested against Python 2.4 and higher. Whilst the package 
-may run on earlier versions no guarantee as to the successful operation can be made. 
+PySys has been written and tested against Python 2.7 and higher. Whilst the 
+package may run on earlier versions no guarantee as to the successful operation 
+can be made. 
 
 
 What's new in this release
 --------------------------
-- Updates to the framework and example testcases to run with Python 2.6.
-- Fix to the unix process helper to correctly set the working directory 
-  of child processes in the fork and exec. 
-- Added the ability to run suites of pyunit tests wrapped up as a single
-  PySys test.  This capability is exposed through a test class, PyUnitTest,
-  in the pysys.unit.pyunit. See the pyunit example tests.
+- The PySys framework has been updated to be compliant with conversion to 
+  Python 3 with the 2to3.py conversion script. Installation on Python 3 is
+  now supported via the source distribution bundle, where the 2to3.py script
+  is run automatically at install time. See details below for installing the 
+  source distribution. A binary distribution installer for windows will be 
+  included in a later release. 
+- There are now separate 32 and 64 bit binary distribution installerts for 
+  windows. 
+- On failure of the assertLineCount method, the log output now contains the 
+  returned number and requested condition (tracker #3045931)  
+- Each assert method now takes an "assertMessage" parameter to be writted to 
+  the log output on execution (tracker #3045924). See test PySys_internal_053 
+  in the example testcases for example usage.
+- Added the ability to run suites of pyunit tests wrapped up as a single PySys 
+  test. This capability is exposed through the PyUnitTest class contained in 
+  the pysys.unit.pyunit module. See the pyunit example tests for example usage.
+- Fix to the unix process helper to correctly set the working directory of 
+  child processes in the fork and exec. 
 - When running tests in parallel, a value of zero given for the -n|--threads 
-  option to the run task of the pysys.py launcher, will set the number of 
-  threads to the number of available CPUs.
-- Fix to feature request 3045931 "Failed assertLineCount to return right number"
-  On a failure of the assertLineCount method, the log output of the failed 
-  assertion now contains the returned number and requested condition.  
+  option to the run task of the pysys.py launcher, will set the number of threads 
+  to the number of available CPUs.
   
+ 
 Dependencies
 ------------
 Running on windows requires installation of the pywin32 extensions written by 
@@ -30,18 +41,18 @@ host machine and the Python version to be compiled with tcl/tk support.
 
 Installation
 ------------
-Installation on windows is performed by downloading the PySys-X.Y.Z.win32.exe 
-installer executable and running. To install on unix systems you should download
-the source tar.gz archive and perform the following
+Installation on windows via the binary distribution bundle is performed by 
+downloading the PySys-X.Y.Z.win32.exe installer executable and running. To install 
+from source on unix or windows systems you should download the source tar.gz archive 
+and perform the following;
 
  $ tar zxvpf PySys-X.Y.Z.tar.gz
  $ cd PySys-X.Y.Z
  $ python setup.py build
  $ python setup.py install
  
-To install on both windows and unix systems you may need to have root privileges 
-on the machine. Installation will install the PySys modules into the site-packages 
-area of the default Python. 
+To install on both windows and unix systems you may need to have root privileges on 
+the machine. 
 
 
 The 'pysys.py' launcher 
