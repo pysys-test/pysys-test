@@ -36,9 +36,9 @@
 		<echo message="   Usage: ant [-Dproperty=value]* target"/>
 		<echo message="   "/>	
 		<echo message="   where target can be;"/>
-		<echo message="      deploy.replace  - replace the version and date values in the source __init__.py"/>
-		<echo message="      deploy.windows  - creates the installer and examples archive for win32"/>
-		<echo message="      deploy.unix     - creates the installer and examples archive for unix"/>
+		<echo message="      deploy.replace        - replace the version and date values in the source __init__.py"/>
+		<echo message="      deploy.bdist_wininst  - creates the binary installer for windows"/>
+		<echo message="      deploy.sdist          - creates the source distribution package"/>
 		<echo message="   "/>
 	</target>
 
@@ -78,7 +78,7 @@
 	<!--
 	Targets to create the win32 python installer and examples archive
 	-->
-	<target name="deploy.installer.windows" depends="prepare">
+	<target name="deploy.installer.bdist_wininst" depends="prepare">
  		<exec executable="${python.executable}" dir="..">
  			<env key="PYTHONPATH" value="./" /> 
 			<arg value="pysys-dist/setup.py"/>
@@ -88,7 +88,7 @@
   		</exec>
 	</target>
 
-	<target name="deploy.examples.windows" depends="prepare">
+	<target name="deploy.examples.bdist_wininst" depends="prepare">
 		<zip destfile="${deploy.examples.archive}.zip">
 			<zipfileset dir="../pysys-examples/" prefix="pysys-examples" includes="pysysproject.xml"/>
 			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="CVS,*.pyc"/>
@@ -99,7 +99,7 @@
 	<!--
 	Target to create the unix python installer and examples archive
 	-->
-	<target name="deploy.installer.unix" depends="prepare">
+	<target name="deploy.installer.sdist" depends="prepare">
 		<copy file="setup.py" tofile="../setup.py" />
 		<copy file="MANIFEST.in" tofile="../MANIFEST.in" />
  		<exec executable="${python.executable}" dir="..">
@@ -109,7 +109,7 @@
   		</exec>
 	</target>
 	
-	<target name="deploy.examples.unix" depends="prepare">
+	<target name="deploy.examples.sdist" depends="prepare">
 		<tar destfile="${deploy.examples.archive}.tar.gz" compression="gzip">
 			<tarfileset dir="../pysys-examples/" prefix="pysys-examples" includes="pysysproject.xml"/>
 			<tarfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="CVS,*.pyc"/>
@@ -136,7 +136,7 @@
 	<!--
 	Target to create the deployment deliverables
 	-->
-	<target name="deploy.windows" depends="epydoc, deploy.installer.windows, deploy.examples.windows"/>
-	<target name="deploy.unix" depends="deploy.installer.unix, deploy.examples.unix"/>
+	<target name="deploy.bdist_wininst" depends="epydoc, deploy.installer.bdist_wininst, deploy.examples.bdist_wininst"/>
+	<target name="deploy.sdist" depends="deploy.installer.sdist, deploy.examples.sdist"/>
 	
 </project>
