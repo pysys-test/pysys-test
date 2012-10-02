@@ -37,16 +37,16 @@ from pysys.launcher.console import ConsoleCleanTestHelper
 
 
 def printUsage():
-	print "\nPySys System Test Framework (version %s)" % __version__ 
-	print "\nUsage: %s [mode] [option]* { [tests]* | [testId] }" % os.path.basename(sys.argv[0])
-	print "    where [mode] can be;"
-	print "       run    - run a set of tests rooted from the current working directory"
-	print "       make   - make a new testcase directory structure in the current working directory"
-	print "       print  - print details of a set of tests rooted from the current working directory"
-	print "       clean  - clean the output subdirectories of tests rooted from the current working directory"
-	print ""
-	print "    For more information on the options available to each mode, use the -h | --help option, e.g. "
-	print "       %s run --help " % os.path.basename(sys.argv[0])
+	sys.stdout.write("\nPySys System Test Framework (version %s)\n" % __version__)
+	sys.stdout.write("\nUsage: %s [mode] [option]* { [tests]* | [testId] }\n" % os.path.basename(sys.argv[0]))
+	sys.stdout.write("    where [mode] can be;\n")
+	sys.stdout.write("       run    - run a set of tests rooted from the current working directory\n")
+	sys.stdout.write("       make   - make a new testcase directory structure in the current working directory\n")
+	sys.stdout.write("       print  - print details of a set of tests rooted from the current working directory\n")
+	sys.stdout.write("       clean  - clean the output subdirectories of tests rooted from the current working directory\n")
+	sys.stdout.write("\n")
+	sys.stdout.write("    For more information on the options available to each mode, use the -h | --help option, e.g.\n")
+	sys.stdout.write("       %s run --help\n" % os.path.basename(sys.argv[0]))
 	sys.exit()
 	
 def runTest(args):
