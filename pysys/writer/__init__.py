@@ -20,14 +20,14 @@
 """
 Contains implementations of test output summary writers used to output test results during runtime execution, 
 
-There are currently two implementations of writers distributed with the PySys framework, 
-namely the TextResultsWriter and the XMLResultsWriter. Project configuration of the writers 
-is through the PySys project file using the <writer> tag - multiple writers may 
-be configured and their individual properties set through the nested <property>
-tag. Writer properties are set as attributes to the class through the setattr() 
-function. Custom (site specific) modules can be created and configured by users of 
-the PySys framework (e.g. to output test results into a relational database etc), 
-though they must adhere to the interface demonstrated by the implementations 
+There are currently three implementations of writers distributed with the PySys framework, 
+namely the L{writer.TextResultsWriter}, the L{writer.XMLResultsWriter} and the 
+L{writer.JUnitXMLResultsWriter). Project configuration of the writers is through the PySys 
+project file using the <writer> tag - multiple writers may be configured and their individual 
+properties set through the nested <property> tag. Writer properties are set as attributes to 
+the class through the setattr() function. Custom (site specific) modules can be created and 
+configured by users of the PySys framework (e.g. to output test results into a relational 
+database etc), though they must adhere to the interface demonstrated by the implementations 
 demonstrated here. 
 
 The writers are instantiated and invoked by the L{pysys.baserunner.BaseRunner} class
@@ -51,6 +51,32 @@ from pysys.constants import *
 from pysys.exceptions import *
 
 from xml.dom.minidom import getDOMImplementation
+
+class flushfile(file): 
+	"""Class to flush on each write operation.  
+	
+	"""
+	fp=None 
+	
+	def __init__(self, fp): 
+		"""Create an instance of the class. 
+		
+		@param fp: The file object
+		"""
+		self.fp = file
+	
+	def write(self, msg) 
+		"""Perform a write to the file object.
+		
+		@param msg: The string message to write. 
+		"""
+		if self.fp != None:
+			self.fp.write(msg) 
+			self.fp.flush() 
+		
+	def close(self)
+		"""Close the file objet."""
+		if self.fp != None: self.fp.close()
 
 
 class TextResultsWriter:
@@ -78,7 +104,7 @@ class TextResultsWriter:
 		
 		"""
 		try:
-			self.fp = open(self.logfile, "w", 0)
+			self.fp = flushfile(open(self.logfile, "w")
 			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
 			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
@@ -97,7 +123,6 @@ class TextResultsWriter:
 		try:
 			if self.fp: 
 				self.fp.write('\n\n\n')
-				self.fp.flush()
 				self.fp.close()
 		except:
 			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
@@ -162,7 +187,7 @@ class XMLResultsWriter:
 			self.numTests = kwargs["numTests"]
 
 		try:
-			self.fp = open(self.logfile, "w", 0)
+			self.fp = flushfile(open(self.logfile, "w", 0))
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
@@ -231,9 +256,7 @@ class XMLResultsWriter:
 		self.statusAttribute.value="complete"
 		self.fp.write(self.document.toprettyxml(indent="  "))
 		try:
-			if self.fp: 
-				self.fp.flush()
-				self.fp.close()
+			if self.fp: self.fp.close()
 		except:
 			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
@@ -301,3 +324,87 @@ class XMLResultsWriter:
 		else:
 			return urlparse.urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])
 	
+	
+class JUnitXMLResultsWriter:
+	def __init__(self, logfile):
+		self.cycle = -1
+		self.reports = os.path.join(PROJECT.root, 'target','pysys-reports')
+
+	def setup(self, **kwargs):		
+		if os.path.exists(self.reports): self.purgeDirectory(self.reports, True)
+		os.makedirs(self.reports)
+
+	def cleanup(self, **kwargs):
+		pass
+			
+	def processResult(self, testObj, **kwargs):
+		if kwargs.has_key("cycle"): 
+			if self.cycle != kwargs["cycle"]:
+				self.cycle = kwargs["cycle"]
+		
+		impl = getDOMImplementation()		
+		document = impl.createDocument(None, 'testsuite', None)		
+		rootElement = document.documentElement
+		attr1 = document.createAttribute('name')
+		attr1.value = testObj.descriptor.id
+		attr2 = document.createAttribute('tests')
+		attr2.value='1'
+		attr3 = document.createAttribute('failures')
+		attr3.value = '%d'%(int)(testObj.getOutcome() in FAILS)	
+		attr4 = document.createAttribute('skipped')	
+		attr4.value = '%d'%(int)(testObj.getOutcome() == SKIPPED)		
+		rootElement.setAttributeNode(attr1)
+		rootElement.setAttributeNode(attr2)
+		rootElement.setAttributeNode(attr3)
+		rootElement.setAttributeNode(attr4)
+		
+		# add the testcase information
+		testcase = document.createElement('testcase')
+ 		attr1 = document.createAttribute('classname')
+		attr1.value = testObj.descriptor.classname
+ 		attr2 = document.createAttribute('name')
+		attr2.value = testObj.descriptor.id		   	
+		testcase.setAttributeNode(attr1)
+		testcase.setAttributeNode(attr2)
+		
+		# add in failure information if the test has failed
+		if (testObj.getOutcome() in FAILS):
+			failure = document.createElement('failure')
+			attr1 = document.createAttribute('message')
+			attr1.value = LOOKUP[testObj.getOutcome()]
+			failure.setAttributeNode(attr1)		
+						
+			stdout = document.createElement('system-out')
+			fp = open(os.path.join(testObj.output, 'run.log'))
+			stdout.appendChild(document.createTextNode(fp.read()))
+			fp.close()
+			
+			testcase.appendChild(failure)
+			testcase.appendChild(stdout)
+		rootElement.appendChild(testcase)
+		
+		# write out the test result
+		if self.cycle > 0:
+			fp = open(os.path.join(self.reports,'TEST-%s.%s.xml'%(testObj.descriptor.id, self.cycle)), 'w')
+		else:
+			fp = open(os.path.join(self.reports,'TEST-%s.xml'%(testObj.descriptor.id)), 'w')
+		fp.write(document.toprettyxml(indent='	'))
+		fp.close()
+		
+	def purgeDirectory(self, dir, delTop=False):
+		for file in os.listdir(dir):
+		  	path = os.path.join(dir, file)
+		  	if PLATFORM in ['sunos', 'linux']:
+		  		mode = os.lstat(path)[stat.ST_MODE]
+		  	else:
+		  		mode = os.stat(path)[stat.ST_MODE]
+		
+			if stat.S_ISLNK(mode):
+				os.unlink(path)
+			if stat.S_ISREG(mode):
+				os.remove(path)
+			elif stat.S_ISDIR(mode):
+			  	self.purgeDirectory(path, delTop=True)				 
+
+		if delTop: os.rmdir(dir)
+		
