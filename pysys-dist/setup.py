@@ -50,6 +50,7 @@ if sys.platform.lower().startswith('win'):
 					'pysys.writer', 'pysys.xml'],
 		  data_files=[('%s/pysys-doc' % get_site_packages_path(), glob.glob('pysys-doc/*.*')),
 					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
+					  (get_site_packages_path(), ['pysys-dist/pysys-licence.txt']),
 					  (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]
 		)
 else:
@@ -66,7 +67,8 @@ else:
 					'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
 					'pysys.writer', 'pysys.xml'],
 		  data_files=[(get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
-			      (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]
+					  (get_site_packages_path(), ['pysys-dist/pysys-licence.txt']),
+					  (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]
 		)
 
 	
