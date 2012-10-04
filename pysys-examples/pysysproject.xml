@@ -104,36 +104,22 @@
 	-->
 
 
-	<!-- 
-	Use a custom source code control module to implement the interface for operations performed within 
-	pysys, e.g. for operation in a continuous integration mode. If not specified defaults to the 
-	SVN interface implementation. At the moment the only shipped implementation of the interface is 
-	for Subversion, in which case to use;
-	
-	<sccs classname="SCCSsvn" module="pysys.sccs">
-		<property name="bindir" value="${svn_bin_dir}"/>
-	</sccs> 		
-	
-	where svn_bin_dir can be defined the ${osfamily}.properties file in order to denote the different 
-	location depending on the operating system being used. 
-	-->	
-
-
 	<!--
 	Set the test writers to write the test summary at runtime when the -r option is 
 	passed to the run mode of the pysys launcher. Multiple test writers can be configured
 	and properties can be set on the writers using a nested property tag; these are then set 
-	as attributes of the class. PySys ships the XMLResultsWriter and TextResultsWriter as two 
-	example writers, though custom writers can be created e.g. to output directly in HTML, 
-	insert into a relational database etc (see pysys.writers.__init__.py for the source code 
-	for the distributed writers). If no writer is specified in the project file, the 
+	as attributes of the class. PySys ships the XMLResultsWriter, TextResultsWriter and 
+	JUnitXMLResultsWriter class as three example writers, though custom writers can be created 
+	e.g. to insert into a relational database etc (see pysys.writers.__init__.py for the source 
+	code for the distributed writers). If no writer is specified in the project file, the 
 	XMLResultsWriter is used. 
 	
 	The writer tag details the classname (which should be added to the pythonpath using the 
-	path tag), the module of the writer class, and the filename template to use for the logging. 
-	The filename template is processed through time.strftime so that time information can be set 
-	into the filename, e.g. a filename template of 'testsummary-%Y%m%d%H%M%S.xml' will result in 
-	a file created with a name of  testsummary-20081025213308.xml etc.
+	path tag) and the module of the writer class. Where single file output is produced by the 
+	writer, the optional filename attribute is used to denote the filename template for the output 
+	logging. The filename template is processed through time.strftime so that time information can 
+	be set into the filename, e.g. a filename template of 'testsummary-%Y%m%d%H%M%S.xml' will result 
+	in a file created with a name of  testsummary-20081025213308.xml etc.
 	-->
 	<writers>
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.xml">
