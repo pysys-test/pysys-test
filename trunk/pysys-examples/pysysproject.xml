@@ -20,8 +20,6 @@
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
-<!ATTLIST sccs classname CDATA #REQUIRED>
-<!ATTLIST sccs module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
 <!ATTLIST formatter messagefmt CDATA #REQUIRED>
 <!ATTLIST formatter datefmt CDATA #REQUIRED>
