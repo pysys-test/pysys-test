@@ -49,7 +49,7 @@ DTD='''
 <!ATTLIST formatter datefmt CDATA #REQUIRED>
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>
-<!ATTLIST writer file CDATA #REQUIRED>
+<!ATTLIST writer file CDATA #IMPLIED>
 ]>
 '''
 
@@ -195,7 +195,8 @@ class XMLProjectParser:
 			if writerNodeList != []:
 				for writerNode in writerNodeList:
 					try:
-						writer = [writerNode.getAttribute('classname'), writerNode.getAttribute('module'), writerNode.getAttribute('file'), {}]
+						file = writerNode.getAttribute('file') if writeNote.hasAttribute('file') else None
+						writer = [writerNode.getAttribute('classname'), writerNode.getAttribute('module'), file, {}]
 					except:
 						pass
 					else:
