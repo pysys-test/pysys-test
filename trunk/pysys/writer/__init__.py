@@ -42,7 +42,7 @@ number of tests to be executed), and cycle in the call to the processResult acti
 
 """
 
-__all__ = ["TextResultsWriter", "XMLResultsWriter"]
+__all__ = ["TextResultsWriter", "XMLResultsWriter", "JUnitXMLResultsWriter"]
 
 import logging, time, urlparse
 
