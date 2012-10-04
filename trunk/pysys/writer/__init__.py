@@ -18,11 +18,11 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 """
-Contains implementations of test output summary writers used to output test results during runtime execution, 
+Contains implementations of test output summary writers used to output test results during runtime execution. 
 
 There are currently three implementations of writers distributed with the PySys framework, 
 namely the L{writer.TextResultsWriter}, the L{writer.XMLResultsWriter} and the 
-L{writer.JUnitXMLResultsWriter). Project configuration of the writers is through the PySys 
+L{writer.JUnitXMLResultsWriter}. Project configuration of the writers is through the PySys 
 project file using the <writer> tag - multiple writers may be configured and their individual 
 properties set through the nested <property> tag. Writer properties are set as attributes to 
 the class through the setattr() function. Custom (site specific) modules can be created and 
