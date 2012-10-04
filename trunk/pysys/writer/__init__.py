@@ -187,7 +187,7 @@ class XMLResultsWriter:
 			self.numTests = kwargs["numTests"]
 
 		try:
-			self.fp = flushfile(open(self.logfile, "w", 0))
+			self.fp = flushfile(open(self.logfile, "w"))
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
@@ -326,18 +326,54 @@ class XMLResultsWriter:
 	
 	
 class JUnitXMLResultsWriter:
+	"""Class to log test results in Apache Ant JUnit XML format (one output file per test per cycle). 
+	
+	@ivar outputDir: Path to output directory to write the test summary files
+	@type outputDir: string
+	
+	"""
+	outputDir = os.path.join(PROJECT.root, 'target','pysys-reports')
+	
 	def __init__(self, logfile):
+		"""Create an instance of the TextResultsWriter class.
+		
+		@param logfile: The (optional) filename template for the logging of test results
+		
+		"""	
 		self.cycle = -1
-		self.reports = os.path.join(PROJECT.root, 'target','pysys-reports')
 
-	def setup(self, **kwargs):		
-		if os.path.exists(self.reports): self.purgeDirectory(self.reports, True)
-		os.makedirs(self.reports)
 
+	def setup(self, **kwargs):	
+		"""Implementation of the setup method.
+
+		Creates the output directory for the writing of the test summary files.  
+						
+		@param kwargs: Variable argument list
+		
+		"""	
+		if kwargs.has_key("outputDir"): self.outputDir = kwargs["outputDir"]
+		if os.path.exists(self.outputDir): self.purgeDirectory(self.outputDir, True)
+		os.makedirs(self.outputDir)
+
+		
 	def cleanup(self, **kwargs):
+		"""Implementation of the cleanup method. 
+
+		@param kwargs: Variable argument list
+				
+		"""
 		pass
 			
+
 	def processResult(self, testObj, **kwargs):
+		"""Implementation of the processResult method. 
+		
+		Creates a test summary file in the Apache Ant Junit XML format. 
+		
+		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		@param kwargs: Variable argument list
+		
+		"""	
 		if kwargs.has_key("cycle"): 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
@@ -385,12 +421,13 @@ class JUnitXMLResultsWriter:
 		
 		# write out the test result
 		if self.cycle > 0:
-			fp = open(os.path.join(self.reports,'TEST-%s.%s.xml'%(testObj.descriptor.id, self.cycle)), 'w')
+			fp = open(os.path.join(self.outputDir,'TEST-%s.%s.xml'%(testObj.descriptor.id, self.cycle)), 'w')
 		else:
-			fp = open(os.path.join(self.reports,'TEST-%s.xml'%(testObj.descriptor.id)), 'w')
+			fp = open(os.path.join(self.outputDir,'TEST-%s.xml'%(testObj.descriptor.id)), 'w')
 		fp.write(document.toprettyxml(indent='	'))
 		fp.close()
 		
+
 	def purgeDirectory(self, dir, delTop=False):
 		for file in os.listdir(dir):
 		  	path = os.path.join(dir, file)
