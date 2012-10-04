@@ -62,20 +62,24 @@ class flushfile(file):
 		"""Create an instance of the class. 
 		
 		@param fp: The file object
+		
 		"""
 		self.fp = file
 	
-	def write(self, msg) 
+	def write(self, msg):
 		"""Perform a write to the file object.
 		
 		@param msg: The string message to write. 
+		
 		"""
 		if self.fp != None:
 			self.fp.write(msg) 
 			self.fp.flush() 
 		
-	def close(self)
-		"""Close the file objet."""
+	def close(self):
+		"""Close the file objet.
+		
+		"""
 		if self.fp != None: self.fp.close()
 
 
@@ -104,7 +108,7 @@ class TextResultsWriter:
 		
 		"""
 		try:
-			self.fp = flushfile(open(self.logfile, "w")
+			self.fp = flushfile(open(self.logfile, "w"))
 			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
 			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
@@ -332,7 +336,7 @@ class JUnitXMLResultsWriter:
 	@type outputDir: string
 	
 	"""
-	outputDir = os.path.join(PROJECT.root, 'target','pysys-reports')
+	outputDir = None
 	
 	def __init__(self, logfile):
 		"""Create an instance of the TextResultsWriter class.
@@ -351,6 +355,7 @@ class JUnitXMLResultsWriter:
 		@param kwargs: Variable argument list
 		
 		"""	
+		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports')
 		if kwargs.has_key("outputDir"): self.outputDir = kwargs["outputDir"]
 		if os.path.exists(self.outputDir): self.purgeDirectory(self.outputDir, True)
 		os.makedirs(self.outputDir)
@@ -430,18 +435,18 @@ class JUnitXMLResultsWriter:
 
 	def purgeDirectory(self, dir, delTop=False):
 		for file in os.listdir(dir):
-		  	path = os.path.join(dir, file)
-		  	if PLATFORM in ['sunos', 'linux']:
-		  		mode = os.lstat(path)[stat.ST_MODE]
-		  	else:
-		  		mode = os.stat(path)[stat.ST_MODE]
+			path = os.path.join(dir, file)
+			if PLATFORM in ['sunos', 'linux']:
+				mode = os.lstat(path)[stat.ST_MODE]
+			else:
+				mode = os.stat(path)[stat.ST_MODE]
 		
 			if stat.S_ISLNK(mode):
 				os.unlink(path)
 			if stat.S_ISREG(mode):
 				os.remove(path)
 			elif stat.S_ISDIR(mode):
-			  	self.purgeDirectory(path, delTop=True)				 
+				self.purgeDirectory(path, delTop=True)
 
-		if delTop: os.rmdir(dir)
-		
+		if delTop: 
+			os.rmdir(dir)
