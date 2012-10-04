@@ -143,9 +143,9 @@
 		-->
 		
 		<!--
-		Add in the JUnit results writer if output in the JUnit XML schema is required. Use the outputDir 
-		property to define the output directory for the JUnit test summary files (the output will produce 
-		one file per test into this output directory). 
+		Add in the JUnit results writer if output in the Apache Ant JUnit XML format is required. Use the 
+		outputDir property to define the output directory for the JUnit test summary files (the output 
+		will produce one file per test into this output directory). 
 		
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
 			<property name="outputDir" value="${root}/target/pysys-reports"/>
