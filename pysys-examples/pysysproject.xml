@@ -27,7 +27,7 @@
 <!ATTLIST formatter datefmt CDATA #REQUIRED>
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>
-<!ATTLIST writer file CDATA #REQUIRED>
+<!ATTLIST writer file CDATA #IMPLIED>
 ]>
 
 
