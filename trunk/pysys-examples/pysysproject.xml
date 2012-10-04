@@ -130,7 +130,7 @@
 			stylesheet to be located next to the XML file when loading the file, and all references
 			to local resources must be as file URLs. Internet Explorer and Chrome can load the 
 			stylesheet from any location on the local disk, but cannot load resources when referenced 
-			by a file URL - go figure. 
+			by a file URL. 
 			
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
@@ -139,7 +139,17 @@
 		<!--
 		Add in the test results writer if straight text output is required 
 		
-		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
+		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log"/>
+		-->
+		
+		<!--
+		Add in the JUnit results writer if output in the JUnit XML schema is required. Use the outputDir 
+		property to define the output directory for the JUnit test summary files (the output will produce 
+		one file per test into this output directory). 
+		
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${root}/target/pysys-reports"/>
+		</writer>
 		-->
 	</writers>		
 	
