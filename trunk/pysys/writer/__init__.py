@@ -75,7 +75,13 @@ class flushfile(file):
 		if self.fp != None:
 			self.fp.write(msg) 
 			self.fp.flush() 
+	
+	def seek(self, index):
+		"""Perform a seek on the file objet.
 		
+		"""
+		if self.fp != None: self.fp.seek(index)
+	
 	def close(self):
 		"""Close the file objet.
 		
