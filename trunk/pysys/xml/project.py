@@ -195,7 +195,7 @@ class XMLProjectParser:
 			if writerNodeList != []:
 				for writerNode in writerNodeList:
 					try:
-						file = writerNode.getAttribute('file') if writeNote.hasAttribute('file') else None
+						file = writerNode.getAttribute('file') if writerNode.hasAttribute('file') else None
 						writer = [writerNode.getAttribute('classname'), writerNode.getAttribute('module'), file, {}]
 					except:
 						pass
