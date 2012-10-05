@@ -44,7 +44,7 @@ number of tests to be executed), and cycle in the call to the processResult acti
 
 __all__ = ["TextResultsWriter", "XMLResultsWriter", "JUnitXMLResultsWriter"]
 
-import logging, time, urlparse
+import logging, time, urlparse, os, stat
 
 from pysys import log
 from pysys.constants import *
@@ -64,7 +64,7 @@ class flushfile(file):
 		@param fp: The file object
 		
 		"""
-		self.fp = file
+		self.fp = fp
 	
 	def write(self, msg):
 		"""Perform a write to the file object.
