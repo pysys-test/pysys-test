@@ -200,7 +200,7 @@ class Project:
 		self.formatters=type('Formatters',(object,),{'stdout':logging.Formatter(DEFAULT_FORMAT_STDOUT),
 													 'runlog':logging.Formatter(DEFAULT_FORMAT_RUNLOG)})
 
-		if projectFile != None and os.path.exists(os.path.join(root, projectFile)):	
+		if projectFile is not None and os.path.exists(os.path.join(root, projectFile)):
 			# parse the project file
 			from pysys.xml.project import XMLProjectParser
 			try:

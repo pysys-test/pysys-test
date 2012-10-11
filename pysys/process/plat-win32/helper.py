@@ -209,7 +209,7 @@ class ProcessWrapper:
 		"""Private method to set the exit status of the process.
 		
 		"""
-		if self.exitStatus != None: return 
+		if self.exitStatus is not None: return 
 		exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
 		if exitStatus != win32con.STILL_ACTIVE:
 			self.exitStatus = exitStatus
@@ -241,7 +241,7 @@ class ProcessWrapper:
 		
 		"""
 		self.__setExitStatus()
-		if self.exitStatus != None: return False
+		if self.exitStatus is not None: return False
 		return True
 
 
@@ -271,7 +271,7 @@ class ProcessWrapper:
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
-		if self.exitStatus != None: return 
+		if self.exitStatus is not None: return 
 		try:
 			win32api.TerminateProcess(self.__hProcess,0)
 			self.wait(timeout=0.5)

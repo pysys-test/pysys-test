@@ -69,7 +69,7 @@ def filegrep(file, expr):
 		logContents("Contents of %s;" % os.path.basename(file), contents)
 		regexpr = re.compile(expr)
 		for line in contents:
-			if regexpr.search(line) != None: return True
+			if regexpr.search(line) is not None: return True
 		return False
 
 
@@ -96,7 +96,7 @@ def lastgrep(file, expr, ignore=[], include=[]):
 		if len(contents) > 0:
 			line = contents[len(contents)-1]
 			regexpr = re.compile(expr)
-			if regexpr.search(line) != None: return True
+			if regexpr.search(line) is not None: return True
 		return False
 
 

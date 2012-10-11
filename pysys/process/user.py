@@ -104,8 +104,8 @@ class ProcessUser:
 		@rtype: handle
 
 		"""
-		if workingDir == None: workingDir = r'%s' % self.output
-		if displayName == None: displayName = os.path.basename(command)
+		if workingDir is None: workingDir = r'%s' % self.output
+		if displayName is None: displayName = os.path.basename(command)
 		
 		try:
 			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
@@ -251,7 +251,7 @@ class ProcessUser:
 		@param timeout: The timeout in seconds to wait for the file to be created
 		
 		"""
-		if filedir == None: filedir = self.output
+		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
 		log.debug("Performing wait for file creation:")
@@ -288,7 +288,7 @@ class ProcessUser:
 		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		"""
-		if filedir == None: filedir = self.output
+		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
 		log.debug("Performing wait for signal in file:")
