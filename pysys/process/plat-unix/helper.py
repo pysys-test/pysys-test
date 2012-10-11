@@ -72,8 +72,17 @@ class ProcessWrapper:
 		self.workingDir = workingDir
 		self.state = state
 		self.timeout = timeout
-		self.stdout = stdout
-		self.stderr = stderr	
+
+		self.stdout = '/dev/null'
+		self.stderr = '/dev/null'
+		try:
+			if stdout != None: self.stdout = stdout
+		except:
+			log.info('Unable to create file to capture stdout - using the null device')
+		try:
+			if stderr != None: self.stderr = stderr
+		except:
+			log.info('Unable to create file to capture stdout - using the null device')
 		
 		# 'publicly' available data attributes set on execution
 		self.pid = None
