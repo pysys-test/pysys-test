@@ -123,7 +123,7 @@ class XMLProjectParser:
 			else:
 				for line in fp.readlines():
 					regex = re.compile(PROPERTY_FILE, re.M)
-					if regex.search(line) != None:
+					if regex.search(line) is not None:
 						name = re.match(regex, line).group('name')
 						value = re.match(regex, line).group('value')					
 						value = self.expandFromProperty(value, "")				
@@ -145,7 +145,7 @@ class XMLProjectParser:
 
 	def expandFromProperty(self, value, default):
 		regex = re.compile(PROPERTY_EXPAND, re.M)
-		while regex.search(value) != None:
+		while regex.search(value) is not None:
 			matches = regex.findall(value)
 			for m in matches:
 				try:

@@ -178,7 +178,7 @@ class ProcessWrapper:
 		"""Private method to set the exit status of the process.
 		
 		"""
-		if self.exitStatus != None: return
+		if self.exitStatus is not None: return
 
 		retries = 3
 		while retries > 0:	
@@ -226,7 +226,7 @@ class ProcessWrapper:
 		
 		"""
 		self.__setExitStatus()
-		if self.exitStatus != None: return 0
+		if self.exitStatus is not None: return 0
 		return 1
 		
 
@@ -256,7 +256,7 @@ class ProcessWrapper:
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
-		if self.exitStatus != None: return 
+		if self.exitStatus is not None: return 
 		try:
 			os.kill(self.pid, signal.SIGTERM)
 			self.wait(timeout=0.5)

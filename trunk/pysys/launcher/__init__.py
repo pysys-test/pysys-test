@@ -68,7 +68,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	ignoreSet = set(OSWALK_IGNORES)
 	descriptorSet =set(DEFAULT_DESCRIPTOR)
 	
-	if dir == None: dir = os.getcwd()
+	if dir is None: dir = os.getcwd()
 	for root, dirs, files in os.walk(dir):
 		intersection =  descriptorSet & set(files)
 		if intersection : descriptorfiles.append(os.path.join(root, intersection.pop()))

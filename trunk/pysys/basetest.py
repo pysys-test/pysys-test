@@ -267,9 +267,9 @@ class BaseTest(ProcessUser):
 		@rtype: handle
 
 		"""
-		if workingDir == None: workingDir = r'%s' % self.output
-		if displayName == None: displayName = os.path.basename(command)
-		if environs == None: environs = {}
+		if workingDir is None: workingDir = r'%s' % self.output
+		if displayName is None: displayName = os.path.basename(command)
+		if environs is None: environs = {}
 		
 		try:
 			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
@@ -409,7 +409,7 @@ class BaseTest(ProcessUser):
 		@param timeout: The timeout period after which to termintate a manual tester running in the C{FOREGROUND}
 		
 		"""
-		if filedir == None: filedir = self.input
+		if filedir is None: filedir = self.input
 	
 		if not self.manualTester or self.manualTester.running() == 0:
 			self.manualTester = ManualTester(self, os.path.join(filedir, file))
@@ -530,8 +530,8 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
-		if filedir1 == None: filedir1 = self.output
-		if filedir2 == None: filedir2 = self.reference
+		if filedir1 is None: filedir1 = self.output
+		if filedir2 is None: filedir2 = self.reference
 		f1 = os.path.join(filedir1, file1)
 		f2 = os.path.join(filedir2, file2)
 
@@ -571,7 +571,7 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
-		if filedir == None: filedir = self.output
+		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
 		log.debug("Performing grep on file:")
@@ -612,7 +612,7 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
-		if filedir == None: filedir = self.output
+		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
 		log.debug("Performing grep on file:")
@@ -652,7 +652,7 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
-		if filedir == None: filedir = self.output
+		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 	
 		log.debug("Performing ordered grep on file:")
@@ -667,12 +667,12 @@ class BaseTest(ProcessUser):
 			self.addOutcome(BLOCKED)
 		else:
 			logOutcome = log.info
-			if expr == None and contains:
+			if expr is None and contains:
 				result = PASSED
-			elif expr == None and not contains:
+			elif expr is None and not contains:
 				result = FAILED
 				logOutcome = log.warn
-			elif expr != None and not contains:
+			elif expr is not None and not contains:
 				result = PASSED
 			else:
 				result = FAILED
@@ -696,7 +696,7 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""	
-		if filedir == None: filedir = self.output
+		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
 		try:

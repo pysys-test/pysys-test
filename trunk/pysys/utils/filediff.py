@@ -46,7 +46,7 @@ def trimContents(contents, expressions, exclude=True):
 	list = copy.deepcopy(contents)
 	for i in range(0, len(contents)):
 		for j in range(0, len(regexp)):
-			if (exclude and regexp[j].search(contents[i]) != None) or (not exclude and regexp[j].search(contents[i]) == None):
+			if (exclude and regexp[j].search(contents[i]) is not None) or (not exclude and regexp[j].search(contents[i]) is None):
 				list.remove(contents[i])
 				break
 

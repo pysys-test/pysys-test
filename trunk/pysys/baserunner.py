@@ -334,7 +334,7 @@ class BaseRunner(ProcessUser):
 		
 		spacer = True
 		for i in range(self.resultsPointer, len(self.resultsQueue)):
-			if self.resultsQueue[i] == None: break
+			if self.resultsQueue[i] is None: break
 			
 			if self.threads > 1: 
 				if spacer: self.log.info(""); spacer = False
