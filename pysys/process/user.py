@@ -132,7 +132,7 @@ class ProcessUser:
 
 
 	def stopProcess(self, process):
-		"""Send a soft or hard kill to a running process to stop it's execution.
+		"""Send a soft or hard kill to a running process to stop its execution.
 	
 		This method uses the L{pysys.process.helper} module to stop a running process. 
 		

@@ -78,17 +78,17 @@ class BaseTest(ProcessUser):
 	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks 
 	           to modify the test execution based upon the mode.
 	@type mode: string
-	@ivar input: Full path to the input directory of the testcase. This is used both by the class and it's 
+	@ivar input: Full path to the input directory of the testcase. This is used both by the class and its 
 	            subclasses to locate the default directory containing all input data to the testcase, as defined
 	            in the testcase descriptor.  
 	@type input: string
-	@ivar output: Full path to the output sub-directory of the testcase. This is used both by the class and it's 
+	@ivar output: Full path to the output sub-directory of the testcase. This is used both by the class and its 
 				subclasses to locate the default directory for output produced by the testcase. Note that this 
 				is the actual directory where all output is written, as modified from that defined in the testcase 
 				descriptor to accomodate for the sub-directory used within this location to sandbox concurrent 
 				execution of the test, and/or to denote the run number. 
 	@type output: string
-	@ivar reference: Full path to the reference directory of the testcase. This is used both by the class and it's 
+	@ivar reference: Full path to the reference directory of the testcase. This is used both by the class and its 
 	            subclasses to locate the default directory containing all reference data to the testcase, as defined
 	            in the testcase descriptor.  
 	@type reference: string
@@ -298,7 +298,7 @@ class BaseTest(ProcessUser):
 
 
 	def stopProcess(self, process):
-		"""Send a soft or hard kill to a running process to stop it's execution.
+		"""Send a soft or hard kill to a running process to stop its execution.
 	
 		This method uses the L{pysys.process.helper} module to stop a running process. 
 		Should the request to stop the running process fail, a C{BLOCKED} outcome will 
