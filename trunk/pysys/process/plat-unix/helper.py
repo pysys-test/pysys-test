@@ -44,7 +44,7 @@ class ProcessWrapper:
 	and stopped via the L{start()} and L{stop()} methods of the class, as well as interrogated for 
 	its executing status via the L{running()} method, and waited for its completion via the L{wait()}
 	method. During process execution the C{self.pid} and C{seld.exitStatus} data attributes are set 
-	within the class instance, and these values can be accessed directly via it's object reference.  
+	within the class instance, and these values can be accessed directly via its object reference.  
 
 	@ivar pid: The process id for a running or complete process (as set by the OS)
 	@type pid: integer
