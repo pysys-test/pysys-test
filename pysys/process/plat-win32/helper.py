@@ -89,11 +89,11 @@ class ProcessWrapper:
 		self.fStdout = 'nul'
 		self.fStderr = 'nul'
 		try:
-			if stdout != None: self.fStdout = self.__stringToUnicode(stdout)
+			if stdout is not None: self.fStdout = self.__stringToUnicode(stdout)
 		except:
 			log.info("Unable to create file to capture stdout - using the null device")
 		try:
-			if stderr != None: self.fStderr = self.__stringToUnicode(stderr)
+			if stderr is not None: self.fStderr = self.__stringToUnicode(stderr)
 		except:
 			log.info("Unable to create file to capture stdout - using the null device")
 

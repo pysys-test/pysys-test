@@ -46,7 +46,7 @@ def getmatches(file, regexpr):
 		list = open(file, 'r').readlines()
 		for i in range(0, len(list)):
 			match = rexp.search(list[i])
-			if match != None: 
+			if match is not None: 
 				log.debug(("Found match for line: %s" % list[i]).rstrip())
 				matches.append(match)
 		return matches
@@ -133,7 +133,7 @@ def orderedgrep(file, exprList):
 		contents = open(file, 'r').readlines()	  
 		for i in range(len(contents)):
 			regexpr = re.compile(expr)
-			if regexpr.search(r"%s"%contents[i]) != None:
+			if regexpr.search(r"%s"%contents[i]) is not None:
 				try:
 					expr = list.pop();
 				except:

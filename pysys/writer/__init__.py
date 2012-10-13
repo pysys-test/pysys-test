@@ -72,7 +72,7 @@ class flushfile(file):
 		@param msg: The string message to write. 
 		
 		"""
-		if self.fp != None:
+		if self.fp is not None:
 			self.fp.write(msg) 
 			self.fp.flush() 
 	
@@ -80,13 +80,13 @@ class flushfile(file):
 		"""Perform a seek on the file objet.
 		
 		"""
-		if self.fp != None: self.fp.seek(index)
+		if self.fp is not None: self.fp.seek(index)
 	
 	def close(self):
 		"""Close the file objet.
 		
 		"""
-		if self.fp != None: self.fp.close()
+		if self.fp is not None: self.fp.close()
 
 
 class TextResultsWriter:

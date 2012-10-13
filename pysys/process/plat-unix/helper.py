@@ -76,11 +76,11 @@ class ProcessWrapper:
 		self.stdout = '/dev/null'
 		self.stderr = '/dev/null'
 		try:
-			if stdout != None: self.stdout = stdout
+			if stdout is not None: self.stdout = stdout
 		except:
 			log.info('Unable to create file to capture stdout - using the null device')
 		try:
-			if stderr != None: self.stderr = stderr
+			if stderr is not None: self.stderr = stderr
 		except:
 			log.info('Unable to create file to capture stdout - using the null device')
 		
