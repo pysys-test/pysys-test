@@ -4,7 +4,6 @@
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
-<!ELEMENT sccs (property*)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (#PCDATA) >
 <!ELEMENT writers (writer+) >
