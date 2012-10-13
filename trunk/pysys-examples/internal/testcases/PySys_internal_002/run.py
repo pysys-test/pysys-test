@@ -1,3 +1,4 @@
+from pysys import stdoutHandler
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.constants import Project 
@@ -10,7 +11,8 @@ class PySysTest(BaseTest):
 		for attr in dir(self.proj):
 			if attr in ['lib', 'library', 'version', 'user']:
 				self.log.info("%s = %s", attr, eval("self.proj.%s" % attr))
-			
+		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
+		
 	def validate(self):
 		self.assertTrue(self.proj.lib == 'lib_%s_1.0.so'%OSFAMILY)
 		self.assertTrue(self.proj.library == 'jstore1.0.jar')
