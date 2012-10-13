@@ -1,3 +1,4 @@
+from pysys import stdoutHandler
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.constants import Project 
@@ -7,6 +8,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		os.environ["TEST_USER"] = "Felicity Kendal"
 		self.proj = Project(self.input, 'pysysproject.xml')
+		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
 	
 	def validate(self):
 		self.assertTrue(self.proj.env_user == "Felicity Kendal")
