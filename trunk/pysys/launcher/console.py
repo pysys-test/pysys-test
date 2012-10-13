@@ -493,9 +493,9 @@ class ConsoleLaunchHelper:
 					self.printUsage(printXOptions)
 
 			elif option in ("-X"):
-				if EXPR1.search(value) != None:
+				if EXPR1.search(value) is not None:
 				  self.userOptions[value.split('=')[0]] = value.split('=')[1]
-				if EXPR2.search(value) != None:
+				if EXPR2.search(value) is not None:
 					self.userOptions[value] = True
 				
 		try:

@@ -132,7 +132,7 @@ class XMLProjectParser:
 
 	def expandFromEnvironent(self, value, default):
 		regex = re.compile(PROPERTY_EXPAND_ENV%self.environment, re.M)
-		while regex.search(value) != None:
+		while regex.search(value) is not None:
 			matches = regex.findall(value)				
 			for m in matches:
 				try:
