@@ -454,7 +454,8 @@ class ConsoleLaunchHelper:
 				elif self.verbosity == "INFO":
 					stdoutHandler.setLevel(logging.INFO)
 				elif self.verbosity == "WARN":
-					stdoutHandler.setLevel(logging.WARN)	
+					stdoutHandler.setLevel(logging.WARN)
+				elif self.verbosity == "CRIT":					
 					stdoutHandler.setLevel(logging.CRITICAL)	
 
 			elif option in ("-a", "--type"):
