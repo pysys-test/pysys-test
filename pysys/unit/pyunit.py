@@ -19,6 +19,7 @@
 Contains the test class used to run pyunit tests
 """
 
+from pysys import ThreadFilter
 from pysys.constants import *
 from pysys.basetest import BaseTest
 import glob, os, unittest
@@ -62,13 +63,13 @@ class PyUnitTest(BaseTest):
 		dstderr = os.path.join(self.output, 'pyunit.err')
 		if instance: dstdout  = "%s.%d" % (dstdout, instance)
 		if instance: dstderr  = "%s.%d" % (dstderr, instance)
-		arguments = [__file__, testFile]
-		logLevel = self.log.level
-		self.log.setLevel(logging.CRITICAL)
+		arguments = [__file__, testFile]		
+		filter = ThreadFilter()
+		self.log.addFilter(filter)
 		environ = os.environ.copy()
 		environ['PYTHONPATH'] = os.pathsep.join(self.getPythonPath() + sys.path)
 		process = self.startProcess(command, arguments, environ, self.output, FOREGROUND, DEFAULT_TIMEOUT, dstdout, dstderr, displayName)
-		self.log.setLevel(logLevel)
+		self.log.removeFilter(filter)		
 		if process.exitStatus:
 			self.outcome.append(FAILED)
 		else:
