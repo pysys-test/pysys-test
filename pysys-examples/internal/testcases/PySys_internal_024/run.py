@@ -12,8 +12,12 @@ class PySysTest(BaseTest):
 		env["EMPTY-ENV"] = ""
 		env["INT-ENV"] = "1"
 		
-		# on win32, minimal environment must have SYSTEMROOT set
-		if PLATFORM=='win32': env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+		if PLATFORM=='win32':
+			# on win32, minimal environment must have SYSTEMROOT set
+			env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+		else:
+			# On UNIX we may need the python shared libraries on the LD_LIBRARY_PATH
+			env["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]
 		
 		# create the process
 		self.hprocess = self.startProcess(command=sys.executable,
@@ -29,4 +33,4 @@ class PySysTest(BaseTest):
 			
 	def validate(self):
 		# validate against the reference file
-		self.assertDiff("environment.out", "ref_environment.out", ignores=['SYSTEMROOT'])
+		self.assertDiff("environment.out", "ref_environment.out", ignores=['SYSTEMROOT','LD_LIBRARY_PATH'])
