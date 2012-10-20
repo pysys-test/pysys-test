@@ -52,7 +52,7 @@ from pysys.exceptions import *
 
 from xml.dom.minidom import getDOMImplementation
 
-class flushfile(file): 
+class flushfile(): 
 	"""Class to flush on each write operation.  
 	
 	"""
@@ -203,7 +203,8 @@ class XMLResultsWriter:
 		@param kwargs: Variable argument list
 		
 		"""
-		self.numTests = kwargs["numTests"] if kwargs.has_key("numTests") else numTests = 0
+		numTests = 0
+		if kwargs.has_key("numTests"): numTests = kwargs["numTests"] 
 		
 		try:
 			self.fp = flushfile(open(os.path.join(self.outputDir, self.logfile), "w"))
@@ -247,16 +248,16 @@ class XMLResultsWriter:
 			element = self.document.createElement("xargs")
 			if kwargs.has_key("xargs"): 
 				for key in kwargs["xargs"].keys():
-				   	childelement = self.document.createElement("xarg")
-				   	nameAttribute = self.document.createAttribute("name")
-				   	valueAttribute = self.document.createAttribute("value") 
-				   	nameAttribute.value=key
-				   	valueAttribute.value=kwargs["xargs"][key].__str__()
-				   	childelement.setAttributeNode(nameAttribute)
-				   	childelement.setAttributeNode(valueAttribute)
-				   	element.appendChild(childelement)
+					childelement = self.document.createElement("xarg")
+					nameAttribute = self.document.createAttribute("name")
+					valueAttribute = self.document.createAttribute("value") 
+					nameAttribute.value=key
+					valueAttribute.value=kwargs["xargs"][key].__str__()
+					childelement.setAttributeNode(nameAttribute)
+					childelement.setAttributeNode(valueAttribute)
+					element.appendChild(childelement)
 			self.rootElement.appendChild(element)
-				   	
+				
 			# write the file out
 			self.fp.write(self.document.toprettyxml(indent="  "))
 		except:
@@ -416,9 +417,9 @@ class JUnitXMLResultsWriter:
 		
 		# add the testcase information
 		testcase = document.createElement('testcase')
- 		attr1 = document.createAttribute('classname')
+		attr1 = document.createAttribute('classname')
 		attr1.value = testObj.descriptor.classname
- 		attr2 = document.createAttribute('name')
+		attr2 = document.createAttribute('name')
 		attr2.value = testObj.descriptor.id		   	
 		testcase.setAttributeNode(attr1)
 		testcase.setAttributeNode(attr2)
