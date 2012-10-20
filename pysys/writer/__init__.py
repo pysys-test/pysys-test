@@ -108,6 +108,7 @@ class TextResultsWriter:
 		
 		"""	
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		self.cycle = -1
 		self.fp = None
 
@@ -122,7 +123,7 @@ class TextResultsWriter:
 		
 		"""		
 		try:
-			self.fp = flushfile(open(os.path.join(self.outputDir, self.logfile), "w"))
+			self.fp = flushfile(open(self.logfile, "w"))
 			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
 			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
@@ -190,6 +191,7 @@ class XMLResultsWriter:
 		
 		"""
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		self.cycle = -1
 		self.numResults = 0
 		self.fp = None
@@ -203,11 +205,10 @@ class XMLResultsWriter:
 		@param kwargs: Variable argument list
 		
 		"""
-		numTests = 0
-		if kwargs.has_key("numTests"): numTests = kwargs["numTests"] 
+		self.numTests = kwargs["numTests"] if kwargs.has_key("numTests") else 0 
 		
 		try:
-			self.fp = flushfile(open(os.path.join(self.outputDir, self.logfile), "w"))
+			self.fp = flushfile(open(self.logfile, "w"))
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
