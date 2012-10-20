@@ -122,13 +122,15 @@
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
-			can be set are the stylesheet location, and whether to use file URLs in all 
-			references to resources on the local disk. Note that Mozilla Firefox requires the 
-			stylesheet to be located next to the XML file when loading the file, and all references
-			to local resources must be as file URLs. Internet Explorer and Chrome can load the 
-			stylesheet from any location on the local disk, but cannot load resources when referenced 
-			by a file URL. 
-			
+			can be set are the stylesheet location, whether to use file URLs in all references 
+			to resources on the local disk, and the directory to write the output file (defaults 
+			to the current working directory). Note that Mozilla Firefox requires the stylesheet
+			to be located next to the XML file when loading the file, and all references to local
+			resources must be as file URLs. Internet Explorer and Chrome can load the stylesheet
+			from any location on the local disk, but cannot load resources when referenced by a
+			file URL. 
+
+			<property name="outputDir" value="${root}"/>			
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
 			-->
@@ -136,13 +138,16 @@
 		<!--
 		Add in the test results writer if straight text output is required 
 		
-		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log"/>
+		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
+			<property name="outputDir" value="${root}"/>			
+		</writer>	
 		-->
 		
 		<!--
 		Add in the JUnit results writer if output in the Apache Ant JUnit XML format is required. Use the 
 		outputDir property to define the output directory for the JUnit test summary files (the writer will 
-		produce one file per test into this output directory). 
+		produce one file per test into this output directory). If not specified this defaults to the current 
+		working directory.
 		
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
 			<property name="outputDir" value="${root}/target/pysys-reports"/>
