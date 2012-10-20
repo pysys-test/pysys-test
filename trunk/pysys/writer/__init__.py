@@ -44,7 +44,7 @@ number of tests to be executed), and cycle in the call to the processResult acti
 
 __all__ = ["TextResultsWriter", "XMLResultsWriter", "JUnitXMLResultsWriter"]
 
-import logging, time, urllib.parse, os, stat
+import logging, time, urlparse, os, stat
 
 from pysys import log
 from pysys.constants import *
@@ -52,7 +52,7 @@ from pysys.exceptions import *
 
 from xml.dom.minidom import getDOMImplementation
 
-class flushfile(): 
+class flushfile(file): 
 	"""Class to flush on each write operation.  
 	
 	"""
@@ -155,7 +155,7 @@ class TextResultsWriter:
 		@param kwargs: Variable argument list
 		
 		"""
-		if "cycle" in kwargs: 
+		if kwargs.has_key("cycle"): 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
 				self.fp.write('\n[Cycle %d]:\n'%self.cycle)	
@@ -203,9 +203,7 @@ class XMLResultsWriter:
 		@param kwargs: Variable argument list
 		
 		"""
-		numTests = 0
-		if kwargs.has_key("numTests"): 
-			self.numTests = kwargs["numTests"]
+		self.numTests = kwargs["numTests"] if kwargs.has_key("numTests") else numTests = 0
 		
 		try:
 			self.fp = flushfile(open(os.path.join(self.outputDir, self.logfile), "w"))
@@ -247,8 +245,8 @@ class XMLResultsWriter:
 
 			# add the extra params nodes
 			element = self.document.createElement("xargs")
-			if "xargs" in kwargs: 
-				for key in list(kwargs["xargs"].keys()):
+			if kwargs.has_key("xargs"): 
+				for key in kwargs["xargs"].keys():
 				   	childelement = self.document.createElement("xarg")
 				   	nameAttribute = self.document.createAttribute("name")
 				   	valueAttribute = self.document.createAttribute("value") 
@@ -293,7 +291,7 @@ class XMLResultsWriter:
 		"""	
 		self.fp.seek(0)
 		
-		if "cycle" in kwargs: 
+		if kwargs.has_key("cycle"): 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
 				self.__createResultsNode()
@@ -343,7 +341,7 @@ class XMLResultsWriter:
 		except:
 			return path
 		else:
-			return urllib.parse.urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])
+			return urlparse.urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])
 	
 	
 class JUnitXMLResultsWriter:
@@ -373,7 +371,7 @@ class JUnitXMLResultsWriter:
 		
 		"""	
 		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports')
-		if "outputDir" in kwargs: self.outputDir = kwargs["outputDir"]
+		if kwargs.has_key("outputDir"): self.outputDir = kwargs["outputDir"]
 		if os.path.exists(self.outputDir): self.purgeDirectory(self.outputDir, True)
 		os.makedirs(self.outputDir)
 
@@ -396,7 +394,7 @@ class JUnitXMLResultsWriter:
 		@param kwargs: Variable argument list
 		
 		"""	
-		if "cycle" in kwargs: 
+		if kwargs.has_key("cycle"): 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
 		
@@ -418,9 +416,9 @@ class JUnitXMLResultsWriter:
 		
 		# add the testcase information
 		testcase = document.createElement('testcase')
-		attr1 = document.createAttribute('classname')
+ 		attr1 = document.createAttribute('classname')
 		attr1.value = testObj.descriptor.classname
-		attr2 = document.createAttribute('name')
+ 		attr2 = document.createAttribute('name')
 		attr2.value = testObj.descriptor.id		   	
 		testcase.setAttributeNode(attr1)
 		testcase.setAttributeNode(attr2)
