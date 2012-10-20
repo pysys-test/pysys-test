@@ -130,17 +130,18 @@
 			from any location on the local disk, but cannot load resources when referenced by a
 			file URL. 
 
-			<property name="outputDir" value="${root}"/>			
+			<property name="outputDir" value="${rootdir}"/>
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
 			-->
 		</writer>	
+		
 		<!--
 		Add in the test results writer if straight text output is required 
 		
 		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
-			<property name="outputDir" value="${root}"/>			
-		</writer>	
+			<property name="outputDir" value="${rootdir}"/>
+		</writer>
 		-->
 		
 		<!--
@@ -150,7 +151,7 @@
 		working directory.
 		
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${root}/target/pysys-reports"/>
+			<property name="outputDir" value="${rootdir}/target/pysys-reports"/>
 		</writer>
 		-->
 	</writers>		
