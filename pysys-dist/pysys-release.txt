@@ -21,9 +21,16 @@ What's new in this release
 - Each assert method now takes an "assertMessage" parameter to be written to 
   the log output on execution (tracker #3045924). See test PySys_internal_053 
   in the example testcases for example usage.
+- Added the JUnitXMLResultsWriter to log test results in Apache Ant JUnit XML 
+  format (one output file per test per cycle). This is useful for integration 
+  into Continuous Integration build systems, e.g. TeamCity. The TextResultsWriter 
+  and XMLResultsWriter now support the outputDir property to specify the location 
+  to write the output files. See the pysys-examples pysysproject.xml file for 
+  more details.
 - Added the ability to run suites of pyunit tests wrapped up as a single PySys 
   test. This capability is exposed through the PyUnitTest class contained in 
-  the pysys.unit.pyunit module. See the pyunit example tests for example usage.
+  the pysys.unit.pyunit module. See the pysys-examples pyunit tests for example 
+  usage.
 - Fix to the unix process helper to correctly set the working directory of 
   child processes in the fork and exec. 
 - When running tests in parallel, a value of zero given for the -n|--threads 
