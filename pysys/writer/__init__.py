@@ -92,7 +92,15 @@ class flushfile(file):
 class TextResultsWriter:
 	"""Class to log results to logfile in text format.
 	
+	Writing of the test summary file defaults to the working directory. This can be be over-ridden in the PySys 
+	project file using the nested <property> tag on the <writer> tag.
+	 
+	@ivar outputDir: Path to output directory to write the test summary files
+	@type outputDir: string
+	
 	"""
+	outputDir = None
+	
 	def __init__(self, logfile):
 		"""Create an instance of the TextResultsWriter class.
 		
@@ -112,9 +120,9 @@ class TextResultsWriter:
 				
 		@param kwargs: Variable argument list
 		
-		"""
+		"""		
 		try:
-			self.fp = flushfile(open(self.logfile, "w"))
+			self.fp = flushfile(open(os.path.join(self.outputDir, self.logfile), "w"))
 			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
 			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
@@ -160,15 +168,18 @@ class XMLResultsWriter:
 	"""Class to log results to logfile in XML format.
 	
 	The class creates a DOM document to represent the test output results and writes the DOM to the 
-	logfile using toprettyxml(). The stylesheet and useFileURL attributes of the class can be over-ridden in the PySys
-	project file using the nested <property> tag on the <writer> tag.
+	logfile using toprettyxml(). The outputDir, stylesheet, useFileURL attributes of the class can 
+	be over-ridden in the PySys project file using the nested <property> tag on the <writer> tag.
 	 
+	@ivar outputDir: Path to output directory to write the test summary files
+	@type outputDir: string
 	@ivar stylesheet: Path to the XSL stylesheet
 	@type stylesheet: string
 	@ivar useFileURL: Indicates if full file URLs are to be used for local resource references 
 	@type useFileURL: string (true | false)
 	
 	"""
+	outputDir = None
 	stylesheet = DEFAULT_STYLESHEET
 	useFileURL = "false"
 
@@ -177,7 +188,7 @@ class XMLResultsWriter:
 		
 		@param logfile: The filename template for the logging of test results
 		
-		"""	
+		"""
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.numResults = 0
@@ -192,12 +203,10 @@ class XMLResultsWriter:
 		@param kwargs: Variable argument list
 		
 		"""
-		numTests = 0
-		if kwargs.has_key("numTests"): 
-			self.numTests = kwargs["numTests"]
-
+		self.numTests = kwargs["numTests"] if kwargs.has_key("numTests") else numTests = 0
+		
 		try:
-			self.fp = flushfile(open(self.logfile, "w"))
+			self.fp = flushfile(open(os.path.join(self.outputDir, self.logfile), "w"))
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
