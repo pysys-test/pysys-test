@@ -51,7 +51,7 @@ Windows Binary Installation
 Installation on windows via the binary distribution bundle is performed by 
 downloading the PySys-X.Y.Z.win32.exe installer executable and running. Note 
 that a common error on windows is in the execution of the post-install 
-script, where an error of the form below is report;
+script, where an error of the form below is reported;
 
 close failed in file object destructor:
 sys.excepthook is missing
@@ -86,8 +86,8 @@ systems the script is installed into the Python binary directory, e.g.
 the script is installed into the Scripts directory of the Python 
 installation, e.g. c:\Python24\Scripts\pysys.py, which is not by default on 
 the user's path. To run on windows systems the Scripts directory of the 
-Python installation should be added to the user's path, and all .py files 
-associated with the Python binary to allow direct execution of the script. 
+Python installation should be added to the user's path to allow direct 
+execution of the script. 
 
 After installation, to see the available options to the pysys.py script use 
 
