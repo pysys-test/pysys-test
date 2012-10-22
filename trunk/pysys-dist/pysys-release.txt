@@ -1,9 +1,7 @@
 PySys 0.9.0 Release Notes
 =========================
 
-PySys has been written and tested against Python 2.7 and higher. Whilst the 
-package may run on earlier versions no guarantee as to the successful 
-operation can be made. 
+PySys has been written and tested against Python 2.7 and higher.
 
 
 What's new in this release
@@ -53,9 +51,9 @@ downloading the PySys-X.Y.Z.win32.exe installer executable and running. Note
 that a common error on windows is in the execution of the post-install 
 script, where an error of the form below is reported;
 
-close failed in file object destructor:
-sys.excepthook is missing
-lost sys.stderr
+  close failed in file object destructor:
+  sys.excepthook is missing
+  lost sys.stderr
 
 If obtained, right click the installer executable in an explorer window, and 
 select "Troubleshoot Compatability". Select "Try recommended settings", and 
@@ -93,12 +91,11 @@ After installation, to see the available options to the pysys.py script use
 
   $ pysys.py --help
   
-The script takes three main top level command line options to it, namely 
-'run', 'print' and 'make', which are used to run a set of testcases, print 
-the meta datafor a set of testcases, or to make a new testcase directory 
-structure respectively. For more information on the further options available 
-to each add --help after the top level option, e.g. for more information on 
-running a set of testcases use
+The script takes four main top level command line options to it, namely 
+'run', 'print', 'make' and 'clean', which are used to run a set of testcases, 
+print the meta data for a set of testcases, make a new testcase directory 
+structure, or clean all testcase output. For more information on the further 
+options available to each add --help after the top level option, e.g. 
 
   $ pysys.py run --help
 
@@ -111,10 +108,10 @@ ending friendly tar.gz archive, and a windows line ending friendly zip file.
 To unpack the tests on unix systems use
 
  $ tar zxvpf PySys-examples.X.Y.Z.tar.gz
- $ cd pysys-examples/fibonacci/testcases
+ $ cd pysys-examples
 
-To run the testcases in the fibonacci area, after changing directory to the 
-testcases location, perform 
+To run the testcases, after changing directory to the testcases location, 
+perform 
  
  $ pysys.py run  
 
