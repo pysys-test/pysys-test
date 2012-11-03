@@ -1,41 +1,22 @@
-PySys 0.9.0 Release Notes
+PySys 0.9.1 Release Notes
 =========================
 
-PySys has been written and tested against Python 2.7 and higher.
+PySys has been written and tested against Python 2.7 and higher. Support 
+for Python 3.x is included, where the 2to3.py script is run on install 
+time. See installation notes below for more details.
 
 
 What's new in this release
 --------------------------
-- The PySys framework has been updated to be compliant with conversion to 
-  Python 3.x with the 2to3.py conversion script. Installation on Python 3.x 
-  is now supported via the source distribution bundle, where the 2to3.py 
-  script is run automatically at install time. See details below for 
-  installing the source distribution. A binary distribution installer for 
-  windows will be included in a later release. 
-- There are now separate 32 and 64 bit binary distribution installers for 
-  windows. 
-- On failure of the assertLineCount method, the log output now contains the 
-  returned number and requested condition (tracker #3045931)  
-- Each assert method now takes an "assertMessage" parameter to be written to 
-  the log output on execution (tracker #3045924). See test PySys_internal_053 
-  in the example testcases for example usage.
-- Added the JUnitXMLResultsWriter to log test results in Apache Ant JUnit XML 
-  format (one output file per test per cycle). This is useful for integration 
-  into Continuous Integration build systems, e.g. TeamCity. The 
-  TextResultsWriter and XMLResultsWriter now support the outputDir property 
-  to specify the location to write the output files. See the pysys-examples 
-  pysysproject.xml file for more details.
-- Added the ability to run suites of pyunit tests wrapped up as a single 
-  PySys test. This capability is exposed through the PyUnitTest class 
-  contained in the pysys.unit.pyunit module. See the pysys-examples pyunit
-  tests for example usage.
-- Fix to the unix process helper to correctly set the working directory of 
-  child processes in the fork and exec. 
-- When running tests in parallel, a value of zero given for the -n|--threads 
-  option to the run task of the pysys.py launcher, will set the number of 
-  threads to the number of available CPUs.
-  
- 
+- Fixed issue with the determination of the overall test outcome due to the 
+  incorrect use of the inbuilt sorted() function. The issue meant the test
+  outcome list was not correctly sorted based on precedent, leading to the 
+  incorrect determination of the overall test outcome. 
+- Fixed issue in the pysys.basetest on handling FileNotFoundExceptions in the
+  assert* methods. The exception was not being caught, leading to subsequent
+  asserts in the test class not being performed. 
+
+
 Dependencies
 ------------
 Running on windows requires installation of the pywin32 extensions written by 
@@ -118,6 +99,38 @@ perform
 
 Release History
 ---------------
+
+0.8.1 to 0.9.0
+--------------
+- The PySys framework has been updated to be compliant with conversion to 
+  Python 3.x with the 2to3.py conversion script. Installation on Python 3.x 
+  is now supported via the source distribution bundle, where the 2to3.py 
+  script is run automatically at install time. See details below for 
+  installing the source distribution. A binary distribution installer for 
+  windows will be included in a later release. 
+- There are now separate 32 and 64 bit binary distribution installers for 
+  windows. 
+- On failure of the assertLineCount method, the log output now contains the 
+  returned number and requested condition (tracker #3045931)  
+- Each assert method now takes an "assertMessage" parameter to be written to 
+  the log output on execution (tracker #3045924). See test PySys_internal_053 
+  in the example testcases for example usage.
+- Added the JUnitXMLResultsWriter to log test results in Apache Ant JUnit XML 
+  format (one output file per test per cycle). This is useful for integration 
+  into Continuous Integration build systems, e.g. TeamCity. The 
+  TextResultsWriter and XMLResultsWriter now support the outputDir property 
+  to specify the location to write the output files. See the pysys-examples 
+  pysysproject.xml file for more details.
+- Added the ability to run suites of pyunit tests wrapped up as a single 
+  PySys test. This capability is exposed through the PyUnitTest class 
+  contained in the pysys.unit.pyunit module. See the pysys-examples pyunit
+  tests for example usage.
+- Fix to the unix process helper to correctly set the working directory of 
+  child processes in the fork and exec. 
+- When running tests in parallel, a value of zero given for the -n|--threads 
+  option to the run task of the pysys.py launcher, will set the number of 
+  threads to the number of available CPUs.
+
 0.7.6 to 0.8.1
 --------------
 - Updated the pysys.process.plat-win32.helper.ProcessWrapper module to eliminate 
