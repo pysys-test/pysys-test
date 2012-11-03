@@ -21,7 +21,9 @@ class PySysTest(BaseTest):
 		
 	def checkOutcome(self):
 		outcome = self.getOutcome()
+		self.log.info('Outcome is %s' % self.outcome)
 		self.log.info('Outcome is %s' % LOOKUP[outcome])
+		
 		self.outcome = [] 
 		if outcome == BLOCKED: self.addOutcome(PASSED)
 		else: self.addOutcome(FAILED)
