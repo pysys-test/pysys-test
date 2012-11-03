@@ -176,7 +176,7 @@ class ProcessUser:
 			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
 			process.wait(timeout)
 		except ProcessTimeout:
-			log.info("Unable to wait for process")
+			log.warn("Timedout waiting for process")
 
 
 	def writeProcess(self, process, data, addNewLine=True):
@@ -207,8 +207,8 @@ class ProcessUser:
 		This is useful for test timing where a component under test creates a socket for client 
 		server interaction - calling of this method ensures that on return of the method call 
 		the server process is running and a client is able to create connections to it. If a 
-		connection cannot be made within the specified timeout interval, a C{TIMEDOUT} outcome 
-		is written to the outcome list, and the method returns to the caller.
+		connection cannot be made within the specified timeout interval, the method returns 
+		to the caller.
 		
 		@param port: The port value in the socket host:port pair
 		@param host: The host value in the socket host:port pair
@@ -243,8 +243,7 @@ class ProcessUser:
 		This method blocks until a file is created on disk. This is useful for test timing where 
 		a component under test creates a file (e.g. for logging) indicating it has performed all 
 		initialisation actions and is ready for the test execution steps. If a file is not created 
-		on disk within the specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome 
-		list, and the method returns to the caller.
+		on disk within the specified timeout interval, the method returns to the caller.
 		
 		@param file: The basename of the file used to wait to be created
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
@@ -278,8 +277,7 @@ class ProcessUser:
 		number of lines. The number of lines which should match the regular expression is given by 
 		the C{condition} argument in textual form i.e. for a match on more than 2 lines use condition =\">2\".
 		If the regular expression is not seen in the file matching the supplied condition within the 
-		specified timeout interval, a C{TIMEDOUT} outcome is written to the outcome list, and the method 
-		returns to the caller.
+		specified timeout interval, the method returns to the caller.
 		
 		@param file: The basename of the file used to wait for the signal
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
