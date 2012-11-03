@@ -181,9 +181,7 @@ class BaseTest(ProcessUser):
 
 		"""	
 		if len(self.outcome) == 0: return NOTVERIFIED
-		list = copy.copy(self.outcome)
-		sorted(list, key=lambda x: PRECEDENT.index(x))
-		return list[0]
+		return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
 		
 
 	# test methods for execution, validation and cleanup. The execute method is
@@ -347,7 +345,7 @@ class BaseTest(ProcessUser):
 			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
 			process.wait(timeout)
 		except ProcessTimeout:
-			log.warn("Unable to wait for process")
+			log.warn("Timedout waiting for process")
 			self.addOutcome(TIMEDOUT)
 
 
@@ -543,7 +541,8 @@ class BaseTest(ProcessUser):
 		
 		try:
 			result = filediff(f1, f2, ignores, sort, replace, includes)
-		except IOError, value:
+		except:
+			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED)
 		else:
 			logOutcome = log.info
@@ -582,7 +581,8 @@ class BaseTest(ProcessUser):
 		
 		try:
 			result = filegrep(f, expr)
-		except IOError, value:
+		except:
+			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED)
 		else:
 			logOutcome = log.info
@@ -623,7 +623,8 @@ class BaseTest(ProcessUser):
 		
 		try:
 			result = lastgrep(f, expr, ignores, includes)
-		except IOError, value:
+		except:
+			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED)
 		else:
 			logOutcome = log.info
@@ -663,7 +664,8 @@ class BaseTest(ProcessUser):
 		
 		try:
 			expr = orderedgrep(f, exprList)
-		except IOError, value:
+		except:
+			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED)
 		else:
 			logOutcome = log.info
@@ -702,7 +704,8 @@ class BaseTest(ProcessUser):
 		try:
 			numberLines = linecount(f, expr)
 			log.debug("Number of matching lines is %d"%numberLines)
-		except IOError, value:
+		except:
+			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED)
 		else:
 			logOutcome = log.info
