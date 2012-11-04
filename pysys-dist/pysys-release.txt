@@ -146,7 +146,8 @@ Release History
 - Logging of exceptions and failed asserts has been changed from info to 
   warn level (tracker #2784251).
 - Added extra debug logging in pysys.utils.filegrep, and pysys.basetest 
-  for when performing asserts against a line count in an input file (tracker #2824758).
+  for when performing asserts against a line count in an input file 
+  (tracker #2824758).
 - The testcase output summary is now printed on termination of the test 
   run via a keyboard interrupt (tracker #2816212).
 - The PySys project file now allows assignment of the project root 
@@ -154,7 +155,8 @@ Release History
   the file. This allows the definition of project variables to include the 
   full path where this is required, e.g. XSL stylesheets which must use 
   the full path to the file rather than a relative path etc. Note that 
-  modules within PySys can reference the project root location directly using PROJECT.root (tracker #2795316). 
+  modules within PySys can reference the project root location directly 
+  using PROJECT.root (tracker #2795316). 
 - The pysys.baserunner class now passes the -X arguments into the test 
   summary writer setup action to allow logging of the user supplied extra 
   arguments(tracker #2814499). The pysys-log.xsl stylesheet used by the 
@@ -203,7 +205,8 @@ Release History
 - Added exception handling to the pysys.process.user module when trying to 
   stop all processes on destruction. When a background process takes 
   longer to stop than the default timeout period, the thrown 
-  pysys.exceptions.ProcessTimeout exception was uncaught causing abnormal exit from the test run.  
+  pysys.exceptions.ProcessTimeout exception was uncaught causing abnormal 
+  exit from the test run.  
 
 0.6.0 to 0.6.1
 --------------
@@ -272,7 +275,8 @@ Release History
   previous behavior be required the numProcessors argument can be passed 
   to the pysys.basetest.BaseTest.startProcessMonitor method in order to 
   normalise the CPU usage statistics by the number of processors. On 
-  windows systems the number of processors can be obtained from the NUM_PROCESSORS environment variable.
+  windows systems the number of processors can be obtained from the 
+  NUM_PROCESSORS environment variable.
 - Added comments to the PySys Project file distributed with the example 
   testcases, to detail the possible configuration options.
 
@@ -387,7 +391,8 @@ Release History
   created with the 'pysys.py make' command will have the new naming 
   convention used.
 - The windows installer has been updated to add shortcuts to the 
-  uninstaller, and to create a separate directory for the inclusion of project extensions. 
+  uninstaller, and to create a separate directory for the inclusion of 
+  project extensions. 
 - The getInstanceCount method has been added to the 
   pysys.basetest.BaseTest class to reference count the number of named 
   processes started during a test run. The startProcess method of the 
@@ -467,7 +472,8 @@ Release History
 - Added the setup() method to the BaseTest class to allow custom setup 
   actions to be performed prior to execution of a particular test case
 - Fixed a bug where if the --type option was not supplied to 
-  ConsoleMakeTestHelper as a command line option, the resulting descriptor had type="None"
+  ConsoleMakeTestHelper as a command line option, the resulting descriptor 
+  had type="None"
 
 0.1.6 to 0.1.7
 --------------
