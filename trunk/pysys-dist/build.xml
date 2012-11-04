@@ -115,6 +115,7 @@
 			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn"/>
 			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn"/>
 			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn"/>
+			<zipfileset file="../pysys-examples/pysysproject.xml" prefix="pysys-examples"/>
 		</tar>
 	</target>
 	
