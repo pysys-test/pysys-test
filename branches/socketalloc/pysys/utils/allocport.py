@@ -138,6 +138,12 @@ def allocateTCPPort():
 		else:
 			return port
 
+class TCPPortOwner:
+	def __init__(self):
+		self.port = allocateTCPPort()
+
+	def __del__(self):
+		tcpServerPortPool.append(self.port)
 
 # Initialize the TCP port pool
 initializePortPool()
