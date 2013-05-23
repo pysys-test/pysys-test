@@ -120,6 +120,7 @@ class BaseTest(ProcessUser):
 		self.outcome = []
 		self.log = log
 		self.project = PROJECT
+		self.resources = []
 
 
 	def setKeywordArgs(self, xargs):
@@ -233,6 +234,15 @@ class BaseTest(ProcessUser):
 	
 		for monitor in self.monitorList:
 			if monitor.running(): monitor.stop()
+
+		while len(self.resources) > 0:
+			self.resources.pop()
+
+	def addResource(self, resource):
+		"""Add a resource which is owned by the test and is therefore
+		cleaned up (deleted) when the test is cleaned up
+		"""
+		self.resources.append(resource)
 
 
 	# process manipulation methods of ProcessUser
