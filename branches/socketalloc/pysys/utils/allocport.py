@@ -19,7 +19,9 @@
 # out of or in connection with the software or the use or other
 # dealings in the software.
 
-import collections, random, sys, subprocess
+import collections, random, socket, sys, subprocess
+from pysys import process_lock
+from pysys.constants import *
 
 # LRU queue of server TCP ports for allocation to tests which need to
 # start TCP servers. Initialized to None since it might not actually be used.
@@ -84,6 +86,50 @@ def initializePortPool():
 
 	# Convert to an LRU queue of ports
 	tcpServerPortPool = collections.deque(tcpServerPortPool)
+
+def portIsInUse(port):
+	# Try to bind to it to see if anyone else is using it
+	with process_lock:
+		s = None
+		try:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		
+			# Set SO_LINGER since we don't want any accidentally
+			# connecting clients to cause the socket to hang
+			# around
+			if OSFAMILY == 'windows':
+				s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, 0)
+
+			# Set non-blocking since we want to fail fast rather
+			# than block
+			s.setblocking(0)
+
+			# Bind to empty host i.e wildcard interface
+			try:
+				s.bind(("", port))
+			except Exception:
+				# If we get any exception assume it is because
+				# the port is in use
+				s.close()
+				return True
+
+			# Listen may not be necessary, but on unix it seems to
+			# help do a more complete shutdown if listen is called
+			s.listen(1)
+			try:
+				s.shutdown(socket.SHUT_RDWR)
+			except Exception:
+				# Do nothing - on windows shutdown sometimes
+				# fails even after listen
+				pass
+			s.close()
+			return False
+		except Exception, e:
+			# Don't expect this but just in case
+			print 'Here', e
+			if s != None:
+				s.close()
+			return True
 
 # Initialize the TCP port pool
 initializePortPool()
