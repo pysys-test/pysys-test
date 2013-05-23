@@ -35,19 +35,19 @@ def getEphemeralTCPPortRange():
 	(ephemeral_low, ephemeral_high) or raises exception on error. 
 	"""
 	# Find the smallest and largest ephemeral port
-	if sys.platform.find('linux') != -1:
+	if PLATFORM == 'linux':
 		f = open('/proc/sys/net/ipv4/ip_local_port_range')
 		s = f.readline().split()
 		ephemeral_low  = int(s[0])
 		ephemeral_high = int(s[1])
 		del f
-	elif sys.platform.find('sunos') != -1:
+	elif PLATFORM == 'sunos':
 		def runNdd(driver, parameter):
 			p = subprocess.Popen(['/usr/sbin/ndd', driver, parameter], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			return int(p.communicate()[0].strip())
 		ephemeral_low = runNdd('/dev/tcp', 'tcp_smallest_anon_port')
 		ephemeral_high = runNdd('/dev/tcp', 'tcp_largest_anon_port')
-	elif sys.platform.find('win') != -1:
+	elif PLATFORM == 'windows':
 		ephemeral_low = 1025
 		ephemeral_high = 5000 # The default
 		import _winreg
