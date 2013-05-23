@@ -75,8 +75,6 @@ def initializePortPool():
 
 	ephemeral_low, ephemeral_high = getEphemeralTCPPortRange()
 
-	print ephemeral_low, ephemeral_high
-
 	# Allocate server ports from all non-privileged, non-ephemeral ports
 	tcpServerPortPool = range(1024, ephemeral_low) + range(ephemeral_high,65536)
 
