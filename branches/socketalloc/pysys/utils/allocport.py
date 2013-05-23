@@ -129,5 +129,15 @@ def portIsInUse(port):
 				s.close()
 			return True
 
+def allocateTCPPort():
+	while True:
+		port = tcpServerPortPool.popleft()
+		if portIsInUse(port):
+			# Toss the port back at the end of the queue
+			tcpServerPortPool.append(port)
+		else:
+			return port
+
+
 # Initialize the TCP port pool
 initializePortPool()
