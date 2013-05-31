@@ -134,6 +134,9 @@ class ProcessMonitor:
 			file.write( "%s\t%f\t%d\t%d\n" % (currentTime, data[0]/self.numProcessors, data[1], data[2]) )
 			time.sleep(interval)
 
+		# clean up			
+		if file != sys.stdout: file.close()
+
 
 	def __solarisLogProfile(self, pid, interval, file):	
 		# perform the repeated collection of data for the profile. 
