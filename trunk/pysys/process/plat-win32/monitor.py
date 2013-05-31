@@ -233,10 +233,10 @@ class ProcessMonitor:
 		# get the instance and instance number for this process id
 		instance, inum = self.__win32GetInstance(pid=self.pid, bRefresh=1)
 
-		# get the instance and instance number for each thread of this process if
+		# get the instance and instance number for each thread of this process id
 		threads = self.__win32GetThreads(pid=self.pid, bRefresh=1)
 		
-		# log the stats in a seperate thread
+		# log the stats in a separate thread
 		thread.start_new_thread(self.__win32LogProfile, (instance, inum, threads, self.interval, self.file))
 		
 
