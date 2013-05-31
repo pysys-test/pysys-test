@@ -206,6 +206,14 @@ class ProcessMonitor:
 													  float(data[2])/1024, float(data[3])/1024, float(data[4]), float(data[5])))
 			time.sleep(interval)
 
+		# clean up
+		for c in process_counters:
+			win32pdh.RemoveCounter(c)
+		win32pdh.CloseQuery(process_query)
+		for c in thread_counters:
+			win32pdh.RemoveCounter(c)
+		win32pdh.CloseQuery(thread_query)
+		if file != sys.stdout: file.close()
 
 	def running(self):
 		"""Return the running status of the process monitor.
