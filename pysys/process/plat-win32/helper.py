@@ -21,6 +21,7 @@ import string, os.path, time, thread, logging, Queue
 import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes
 
 from pysys import log
+from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 
@@ -149,54 +150,55 @@ class ProcessWrapper:
 		"""Private method to start a process running in the background. 
 		
 		"""	
-		# security attributes for pipes
-		sAttrs = win32security.SECURITY_ATTRIBUTES()
-		sAttrs.bInheritHandle = 1
+		with process_lock:
+			# security attributes for pipes
+			sAttrs = win32security.SECURITY_ATTRIBUTES()
+			sAttrs.bInheritHandle = 1
 	
-		# create pipes for the process to write to
-		hStdin_r, hStdin = win32pipe.CreatePipe(sAttrs, 0)
-		hStdout = win32file.CreateFile(self.__stringToUnicode(self.fStdout), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
-									   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
-									   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
-		hStderr = win32file.CreateFile(self.__stringToUnicode(self.fStderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
-									   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
-									   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
+			# create pipes for the process to write to
+			hStdin_r, hStdin = win32pipe.CreatePipe(sAttrs, 0)
+			hStdout = win32file.CreateFile(self.__stringToUnicode(self.fStdout), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
+			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
+			hStderr = win32file.CreateFile(self.__stringToUnicode(self.fStderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
+			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
 
-		# set the info structure for the new process.
-		StartupInfo = win32process.STARTUPINFO()
-		StartupInfo.hStdInput  = hStdin_r
-		StartupInfo.hStdOutput = hStdout
-		StartupInfo.hStdError  = hStderr
-		StartupInfo.dwFlags = win32process.STARTF_USESTDHANDLES
+			# set the info structure for the new process.
+			StartupInfo = win32process.STARTUPINFO()
+			StartupInfo.hStdInput  = hStdin_r
+			StartupInfo.hStdOutput = hStdout
+			StartupInfo.hStdError  = hStderr
+			StartupInfo.dwFlags = win32process.STARTF_USESTDHANDLES
 
-		# Create new handles for the thread ends of the pipes. The duplicated handles will
-		# have their inheritence properties set to false so that any children inheriting these
-		# handles will not have non-closeable handles to the pipes
-		pid = win32api.GetCurrentProcess()
-		tmp = win32api.DuplicateHandle(pid, hStdin, pid, 0, 0, win32con.DUPLICATE_SAME_ACCESS)
-		win32file.CloseHandle(hStdin)
-		hStdin = tmp
+			# Create new handles for the thread ends of the pipes. The duplicated handles will
+			# have their inheritence properties set to false so that any children inheriting these
+			# handles will not have non-closeable handles to the pipes
+			pid = win32api.GetCurrentProcess()
+			tmp = win32api.DuplicateHandle(pid, hStdin, pid, 0, 0, win32con.DUPLICATE_SAME_ACCESS)
+			win32file.CloseHandle(hStdin)
+			hStdin = tmp
 
-		# start the process, and close down the copies of the process handles
-		# we have open after the process creation (no longer needed here)
-		old_command = command = self.__quotePath(self.command)
-		for arg in self.arguments: command = '%s %s' % (command, self.__quotePath(arg))
-		try:
-			self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command, None, None, 1, 0, self.environs, os.path.normpath(self.workingDir), StartupInfo)
-		except pywintypes.error:
-			raise ProcessError, "Error creating process %s" % (old_command)
+			# start the process, and close down the copies of the process handles
+			# we have open after the process creation (no longer needed here)
+			old_command = command = self.__quotePath(self.command)
+			for arg in self.arguments: command = '%s %s' % (command, self.__quotePath(arg))
+			try:
+				self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command, None, None, 1, 0, self.environs, os.path.normpath(self.workingDir), StartupInfo)
+			except pywintypes.error:
+				raise ProcessError, "Error creating process %s" % (old_command)
 
-		win32file.CloseHandle(hStdin_r)
-		win32file.CloseHandle(hStdout)
-		win32file.CloseHandle(hStderr)
+			win32file.CloseHandle(hStdin_r)
+			win32file.CloseHandle(hStdout)
+			win32file.CloseHandle(hStderr)
 
-		# set the handle to the stdin of the process 
-		self.__stdin = hStdin
+			# set the handle to the stdin of the process 
+			self.__stdin = hStdin
 		
-		# check to see if the process is running. If it is kick off the threads to collect
-		# the stdout and stderr
-		if self.running():					
-			thread.start_new_thread(self.__writeStdin, (hStdin, ))
+			# check to see if the process is running. If it is kick off the threads to collect
+			# the stdout and stderr
+			if self.running():					
+				thread.start_new_thread(self.__writeStdin, (hStdin, ))
 
 
 	def __startForegroundProcess(self):
