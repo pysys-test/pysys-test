@@ -127,7 +127,9 @@ class ProcessWrapper:
 			try:
 				data = self.__outQueue.get(block=True, timeout=0.25)
 			except Queue.Empty:
-				if not self.running(): break
+				if not self.running():
+					win32file.CloseHandle(hStdin)
+					break
 			else:
 				win32file.WriteFile(hStdin, data, None)
 
@@ -212,6 +214,8 @@ class ProcessWrapper:
 		if self.exitStatus is not None: return 
 		exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
 		if exitStatus != win32con.STILL_ACTIVE:
+			win32file.CloseHandle(self.__hProcess)
+			win32file.CloseHandle(self.__hThread)
 			self.exitStatus = exitStatus
 
 
