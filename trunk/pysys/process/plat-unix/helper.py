@@ -191,6 +191,7 @@ class ProcessWrapper:
 					  	self.exitStatus = os.WTERMSIG(status)
 					else:
 					  	self.exitStatus = status
+					self.__outQueue = None
 				retries=0
 	  		except OSError, e:
 				if e.errno == errno.ECHILD:

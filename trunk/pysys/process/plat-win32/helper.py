@@ -216,6 +216,7 @@ class ProcessWrapper:
 		if exitStatus != win32con.STILL_ACTIVE:
 			win32file.CloseHandle(self.__hProcess)
 			win32file.CloseHandle(self.__hThread)
+			self.__outQueue = None
 			self.exitStatus = exitStatus
 
 
