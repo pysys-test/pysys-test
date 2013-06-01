@@ -20,6 +20,7 @@
 import signal, time, copy, logging, Queue, thread, errno
 
 from pysys import log
+from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 
@@ -122,45 +123,47 @@ class ProcessWrapper:
 		"""Private method to start a process running in the background. 
 		
 		"""
-		try:
-			stdin_r, stdin_w = os.pipe()
-			self.pid = os.fork()
+		with process_lock:
 
-			if self.pid == 0:
-				# change working directory of the child process
-				os.chdir(self.workingDir)
+			try:
+				stdin_r, stdin_w = os.pipe()
+				self.pid = os.fork()
+
+				if self.pid == 0:
+					# change working directory of the child process
+					os.chdir(self.workingDir)
 						
-				# duplicate the read end of the pipe to stdin	
-				os.dup2(stdin_r, 0)
+					# duplicate the read end of the pipe to stdin	
+					os.dup2(stdin_r, 0)
 
-				# create and duplicate stdout and stderr to open file handles
-				stdout_w = os.open(self.stdout, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
-				stderr_w = os.open(self.stderr, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
-				os.dup2(stdout_w, 1)
-				os.dup2(stderr_w, 2)
+					# create and duplicate stdout and stderr to open file handles
+					stdout_w = os.open(self.stdout, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
+					stderr_w = os.open(self.stderr, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
+					os.dup2(stdout_w, 1)
+					os.dup2(stderr_w, 2)
 
-				# close any stray file descriptors (within reason)
-				try:
-					maxfd = os.sysconf("SC_OPEN_MAX")
-				except:
-					maxfd=256
-				for fd in range(3, maxfd):
+					# close any stray file descriptors (within reason)
 					try:
-						os.close(fd)
+						maxfd = os.sysconf("SC_OPEN_MAX")
 					except:
-						pass
+						maxfd=256
+					for fd in range(3, maxfd):
+						try:
+							os.close(fd)
+						except:
+							pass
 				
-				# execve the process to start it
-				arguments = copy.copy(self.arguments)
-				arguments.insert(0, os.path.basename(self.command))
-				os.execve(self.command, arguments, self.environs)
-			else:
-				# close the read end of the pipe in the parent
-				# and start a thread to write to the write end
-				os.close(stdin_r)
-				thread.start_new_thread(self.__writeStdin, (stdin_w, ))
-		except:
-			if self.pid == 0: os._exit(os.EX_OSERR)	
+					# execve the process to start it
+					arguments = copy.copy(self.arguments)
+					arguments.insert(0, os.path.basename(self.command))
+					os.execve(self.command, arguments, self.environs)
+				else:
+					# close the read end of the pipe in the parent
+					# and start a thread to write to the write end
+					os.close(stdin_r)
+					thread.start_new_thread(self.__writeStdin, (stdin_w, ))
+			except:
+				if self.pid == 0: os._exit(os.EX_OSERR)	
 
 		if not self.running() and self.exitStatus == os.EX_OSERR:
 			raise ProcessError, "Error creating process %s" % (self.command)

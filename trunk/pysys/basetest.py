@@ -33,6 +33,7 @@ from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
+from pysys.utils.allocport import TCPPortOwner
 from pysys.process.user import ProcessUser
 from pysys.process.helper import ProcessWrapper
 from pysys.process.monitor import ProcessMonitor
@@ -120,6 +121,7 @@ class BaseTest(ProcessUser):
 		self.outcome = []
 		self.log = log
 		self.project = PROJECT
+		self.resources = []
 
 
 	def setKeywordArgs(self, xargs):
@@ -233,6 +235,15 @@ class BaseTest(ProcessUser):
 	
 		for monitor in self.monitorList:
 			if monitor.running(): monitor.stop()
+
+		while len(self.resources) > 0:
+			self.resources.pop()
+
+	def addResource(self, resource):
+		"""Add a resource which is owned by the test and is therefore
+		cleaned up (deleted) when the test is cleaned up
+		"""
+		self.resources.append(resource)
 
 
 	# process manipulation methods of ProcessUser
@@ -719,6 +730,13 @@ class BaseTest(ProcessUser):
 			self.outcome.append(result)
 			logOutcome("%s ... %s %s", self.__assertMsg(xargs, 'Line count on input file %s' % file), LOOKUP[result].lower(), appender)
 
+	def getNextAvailableTCPPort(self):
+		"""Allocate a TCP port which is available for a server to be
+		started on. Take ownership of it for the duration of the test
+		"""
+		o = TCPPortOwner()
+		self.addResource(o)
+		return o.port
 
 	def __assertMsg(self, xargs, default):
 		"""Return an assert statement requested to override the default value.

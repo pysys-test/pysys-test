@@ -38,7 +38,7 @@ testcases provides a single framework for all test organisation requirements.
 
 """
 
-import sys, logging
+import sys, logging, threading
 if sys.version_info >= (3,):
 	from _thread import get_ident as threadId
 else:
@@ -72,6 +72,10 @@ __all__     = [ "constants",
                 "writer",
                 "xml"]
 """The submodules of PySys."""
+
+# Lock to be held when creating processes also while holding any resources
+# we don't want being passed to child processes e.g. sockets, files
+process_lock = threading.Lock()
 
 # customize the default logging names for display
 logging._levelNames[50] = 'CRIT'
