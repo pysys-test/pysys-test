@@ -138,6 +138,7 @@ TIMEOUTS = {}
 TIMEOUTS['WaitForSocket'] = 60
 TIMEOUTS['WaitForFile'] = 30
 TIMEOUTS['WaitForSignal'] = 60
+TIMEOUTS['WaitForProcessStop'] = 10
 TIMEOUTS['ManualTester'] = 1800
 
 
