@@ -272,7 +272,7 @@ class ProcessWrapper:
 			time.sleep(0.1)
 		
 
-	def stop(self): 
+	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']): 
 		"""Stop a process running.
 		
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
@@ -281,7 +281,7 @@ class ProcessWrapper:
 		if self.exitStatus is not None: return 
 		try:
 			win32api.TerminateProcess(self.__hProcess,0)
-			self.wait(timeout=0.5)
+			self.wait(timeout=timeout)
 		except:
 			raise ProcessError, "Error stopping process"
 		
