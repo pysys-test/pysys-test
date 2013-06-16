@@ -47,7 +47,7 @@ def getEphemeralTCPPortRange():
 			return int(p.communicate()[0].strip())
 		ephemeral_low = runNdd('/dev/tcp', 'tcp_smallest_anon_port')
 		ephemeral_high = runNdd('/dev/tcp', 'tcp_largest_anon_port')
-	elif PLATFORM == 'windows':
+	elif PLATFORM == 'win32':
 		ephemeral_low = 1025
 		ephemeral_high = 5000 # The default
 		import _winreg
