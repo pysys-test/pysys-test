@@ -1,4 +1,4 @@
-PySys 0.9.1 Release Notes
+PySys 0.9.2 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.7 and higher. Support 
@@ -8,14 +8,7 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
-- Fixed issue with the determination of the overall test outcome due to the 
-  incorrect use of the inbuilt sorted() function. The issue meant the test
-  outcome list was not correctly sorted based on precedent, leading to the 
-  incorrect determination of the overall test outcome. 
-- Fixed issue in the pysys.basetest on handling FileNotFoundExceptions in 
-  the assert* methods. The exception was not being caught, leading to 
-  subsequent asserts in the test class not being performed. 
-
+ 
 
 Dependencies
 ------------
@@ -100,6 +93,16 @@ perform
 
 Release History
 ---------------
+
+0.9.0 to 0.9.1
+--------------
+- Fixed issue with the determination of the overall test outcome due to the 
+  incorrect use of the inbuilt sorted() function. The issue meant the test
+  outcome list was not correctly sorted based on precedent, leading to the 
+  incorrect determination of the overall test outcome. 
+- Fixed issue in the pysys.basetest on handling FileNotFoundExceptions in 
+  the assert* methods. The exception was not being caught, leading to 
+  subsequent asserts in the test class not being performed. 
 
 0.8.1 to 0.9.0
 --------------
