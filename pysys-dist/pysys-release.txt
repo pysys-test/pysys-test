@@ -8,7 +8,13 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
- 
+- The method getNextAvailableTCPPort has been added to the 
+  pysys.basetest.BaseTest class to allow users to allocate server TCP ports 
+  in a robust manner.
+- The unix and windows process helpers have been updated to fix handle leaks 
+  (defect #11 "ProcessMonitor leaks file handles"), and to delete the stdin 
+  queue when processes go away. 
+
 
 Dependencies
 ------------
