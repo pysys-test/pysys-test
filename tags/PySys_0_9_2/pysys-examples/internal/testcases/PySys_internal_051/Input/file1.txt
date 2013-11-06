@@ -1,0 +1,5 @@
+Foo a line
+Line is a foo
+Bar humbug 
+Bar foo humbug
+Bar
