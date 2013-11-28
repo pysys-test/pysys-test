@@ -41,7 +41,7 @@ __all__ = [ "helper",
 
 # add to the __path__ to import the platform specific helper class
 dirname = __path__[0]
-if PLATFORM in [ "sunos", "linux" ]:
+if PLATFORM in [ "sunos", "linux","darwin" ]:
 	__path__.append(os.path.join(dirname, "plat-unix"))
 else:
 	__path__.append(os.path.join(dirname, "plat-win32"))
