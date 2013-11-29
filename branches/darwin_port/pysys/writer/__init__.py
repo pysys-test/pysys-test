@@ -373,8 +373,7 @@ class JUnitXMLResultsWriter:
 		@param kwargs: Variable argument list
 		
 		"""	
-		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports')
-		if kwargs.has_key("outputDir"): self.outputDir = kwargs["outputDir"]
+		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports') if self.outputDir is None else self.outputDir
 		if os.path.exists(self.outputDir): self.purgeDirectory(self.outputDir, True)
 		os.makedirs(self.outputDir)
 
