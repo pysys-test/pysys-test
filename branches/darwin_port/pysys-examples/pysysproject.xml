@@ -108,7 +108,7 @@
 	ConsoleMakeTestHelper class in order to create templated run.py scripts e.g. when a test module has
 	a repeatable pattern for running or validating etc. 
 	
-	<runner classname="MyMaker" module="com.company.test"/>
+	<maker classname="MyMaker" module="com.company.test"/>
 	-->
 
 
