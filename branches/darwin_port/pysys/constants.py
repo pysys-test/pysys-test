@@ -137,6 +137,7 @@ DEFAULT_INPUT = 'Input'
 DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
 DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
+DEFAULT_MAKER =  ['ConsoleMakeTestHelper', 'pysys.launcher.console']
 DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml', {}]
 DEFAULT_STYLESHEET = os.path.join(SITE_PACKAGES_DIR, 'pysys-log.xsl')
 DEFAULT_FORMAT_STDOUT = '%(asctime)s %(levelname)-5s %(message)s'
@@ -236,9 +237,12 @@ class Project:
 				# get the runner if specified
 				self.runnerClassname, self.runnerModule = parser.getRunnerDetails()
 		
+				# get the maker if specified
+				self.makerClassname, self.makerModule = parser.getMakerDetails()
+
 				# get the loggers to use
 				self.writers = parser.getWriterDetails()
-				
+
 				# get the stdout and runlog formatters
 				parser.setFormatters(self.formatters)
 				
