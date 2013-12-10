@@ -56,7 +56,7 @@ def runTest(args):
 	
 def makeTest(args):
 	module = import_module(PROJECT.makerModule, sys.path)
-	maker = getattr(module, PROJECT.makerClassname)(*args)
+	maker = getattr(module, PROJECT.makerClassname)("make")
 	maker.parseArgs(args)
 	maker.makeTest()
 	
