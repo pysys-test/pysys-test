@@ -216,6 +216,10 @@ class Project:
 		self.formatters=type('Formatters',(object,),{'stdout':logging.Formatter(DEFAULT_FORMAT_STDOUT),
 													 'runlog':logging.Formatter(DEFAULT_FORMAT_RUNLOG)})
 
+		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
+		self.makerClassname, self.makerModule = DEFAULT_MAKER
+		self.writers = [DEFAULT_WRITER]
+
 		if projectFile is not None and os.path.exists(os.path.join(root, projectFile)):
 			# parse the project file
 			from pysys.xml.project import XMLProjectParser
@@ -250,7 +254,5 @@ class Project:
 				parser.unlink()	
 		else:
 			sys.stderr.write("WARNING: No project file found, taking project root to be %s \n" % root)
-			self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
-			self.writers = [DEFAULT_WRITER]
 			
 		stdoutHandler.setFormatter(self.formatters.stdout)
