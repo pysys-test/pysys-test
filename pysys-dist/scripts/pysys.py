@@ -55,7 +55,8 @@ def runTest(args):
 	runner.start()
 	
 def makeTest(args):
-	maker = ConsoleMakeTestHelper(os.getcwd(), "make")
+	module = import_module(PROJECT.makerModule, sys.path)
+	maker = getattr(module, PROJECT.makerClassname)("make")
 	maker.parseArgs(args)
 	maker.makeTest()
 	

@@ -45,6 +45,12 @@ def getEphemeralTCPPortRange():
 			return int(p.communicate()[0].strip())
 		ephemeral_low = runNdd('/dev/tcp', 'tcp_smallest_anon_port')
 		ephemeral_high = runNdd('/dev/tcp', 'tcp_largest_anon_port')
+	elif PLATFORM == 'darwin':
+		def runSysctl(parameter):
+			p = subprocess.Popen(['/usr/sbin/sysctl', '-n', parameter], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			return int(p.communicate()[0].strip())
+		ephemeral_low = runSysctl('net.inet.ip.portrange.first')
+		ephemeral_high = runSysctl('net.inet.ip.portrange.last')
 	elif PLATFORM == 'win32':
 		ephemeral_low = 1025
 		ephemeral_high = 5000 # The default

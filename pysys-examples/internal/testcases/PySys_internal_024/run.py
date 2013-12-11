@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 		if PLATFORM=='win32':
 			# on win32, minimal environment must have SYSTEMROOT set
 			env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
-		else:
+		elif PLATFORM=='linux' or PLATFORM=='solaris':
 			# On UNIX we may need the python shared libraries on the LD_LIBRARY_PATH
 			env["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]
 		
@@ -33,4 +33,10 @@ class PySysTest(BaseTest):
 			
 	def validate(self):
 		# validate against the reference file
-		self.assertDiff("environment.out", "ref_environment.out", ignores=['SYSTEMROOT','LD_LIBRARY_PATH'])
+
+		ignores=['SYSTEMROOT','LD_LIBRARY_PATH']
+		if PLATFORM=='darwin':
+			ignores.append('VERSIONER_PYTHON')
+			ignores.append('__CF_USER_TEXT_ENCODING: 0x510:0:0')
+
+		self.assertDiff("environment.out", "ref_environment.out", ignores=ignores)

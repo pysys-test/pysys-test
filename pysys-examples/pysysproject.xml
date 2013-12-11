@@ -1,9 +1,10 @@
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, runner?, sccs?, writers?, formatters?) >
+<!ELEMENT pysysproject (property*, path*, runner?, maker?, writers?, formatters?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
+<!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (#PCDATA) >
 <!ELEMENT writers (writer+) >
@@ -19,6 +20,8 @@
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST maker classname CDATA #REQUIRED>
+<!ATTLIST maker module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
 <!ATTLIST formatter messagefmt CDATA #REQUIRED>
 <!ATTLIST formatter datefmt CDATA #REQUIRED>
@@ -26,7 +29,6 @@
 <!ATTLIST writer module CDATA #REQUIRED>
 <!ATTLIST writer file CDATA #IMPLIED>
 ]>
-
 
 <pysysproject>
 
@@ -98,6 +100,15 @@
 	com.company.test module use;
 	
 	<runner classname="MyRunner" module="com.company.test"/>
+	-->
+
+
+	<!-- 
+	Use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
+	ConsoleMakeTestHelper class in order to create templated run.py scripts e.g. when a test module has
+	a repeatable pattern for running or validating etc. 
+	
+	<maker classname="MyMaker" module="com.company.test"/>
 	-->
 
 
