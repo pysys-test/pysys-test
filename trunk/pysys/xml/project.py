@@ -25,10 +25,11 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, runner?, writers?, formatters?) >
+<!ELEMENT pysysproject (property*, path*, runner?, maker?, writers?, formatters?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
+<!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (#PCDATA) >
 <!ELEMENT writers (writer+) >
@@ -44,6 +45,8 @@ DTD='''
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST maker classname CDATA #REQUIRED>
+<!ATTLIST maker module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
 <!ATTLIST formatter messagefmt CDATA #REQUIRED>
 <!ATTLIST formatter datefmt CDATA #REQUIRED>
@@ -162,6 +165,14 @@ class XMLProjectParser:
 			return [runnerNodeList.getAttribute('classname'), runnerNodeList.getAttribute('module')]
 		except:
 			return DEFAULT_RUNNER
+
+
+	def getMakerDetails(self):
+		try:
+			makerNodeList = self.root.getElementsByTagName('maker')[0]
+			return [makerNodeList.getAttribute('classname'), makerNodeList.getAttribute('module')]
+		except:
+			return DEFAULT_MAKER
 
 
 	def setFormatters(self, formatters):

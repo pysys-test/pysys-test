@@ -172,7 +172,7 @@ class ProcessMonitor:
 		self.active = 1
 		if PLATFORM == 'sunos':
 			thread.start_new_thread(self.__solarisLogProfile, (self.pid, self.interval, self.file))
-		elif PLATFORM == 'linux':
+		elif PLATFORM in ['linux','darwin']:
 			thread.start_new_thread(self.__linuxLogProfile, (self.pid, self.interval, self.file))
 
 

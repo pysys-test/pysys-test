@@ -53,10 +53,10 @@ __author_email__ = "moraygrieve@users.sourceforge.net"
 __status__  = "beta"
 """The status of this release."""
 
-__version__ = "0.9.2"
+__version__ = "0.9.3_darwin"
 """The version of this release."""
 
-__date__ = "16-June-2013"
+__date__ = "10-December-2013"
 """The date of this release."""
 
 __all__     = [ "constants",
