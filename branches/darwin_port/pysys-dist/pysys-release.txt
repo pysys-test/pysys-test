@@ -9,8 +9,11 @@ time. See installation notes below for more details.
 What's new in this release
 --------------------------
 - Added Darwin as a supported platform. 
+- Added the maker tag to the pysysproject file to allow specifiying a 
+  custom test maker class, e.g. to create specific run templates etc.
+  See the pysysproject.xml file in pysys-examples for more information.
 - The make option to pysys.py now accepts the testcase directory to be 
-  specified to a location other than the current working directory.;
+  specified to a location other than the current working directory.
 
 
 Dependencies
