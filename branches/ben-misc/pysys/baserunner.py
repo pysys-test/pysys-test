@@ -434,17 +434,19 @@ class TestContainer:
 		testTime = time.time()
 		try:
 			# set the output subdirectory and purge contents
-			outsubdir = self.runner.outsubdir
-			if not os.path.exists(os.path.join(self.descriptor.output, outsubdir)):
-				os.makedirs(os.path.join(self.descriptor.output, outsubdir))
+			if os.path.isabs(self.runner.outsubdir):
+				self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
+			else:
+				self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
+
+			if not os.path.exists(self.outsubdir):
+				os.makedirs(self.outsubdir)
 					
-			if self.cycle == 0: self.purgeDirectory(os.path.join(self.descriptor.output, outsubdir))
+			if self.cycle == 0: self.purgeDirectory(self.outsubdir)
 				
 			if self.runner.cycle > 1: 
-				outsubdir = os.path.join(outsubdir, 'cycle%d' % (self.cycle+1))
-				os.makedirs(os.path.join(self.descriptor.output, outsubdir))
-
-			self.outsubdir = os.path.join(self.descriptor.output, outsubdir)
+				self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
+				os.makedirs(self.outsubdir)
 
 			# create the test summary log file handler and log the test header
 			self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
@@ -453,7 +455,6 @@ class TestContainer:
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandler)
 			log.info(42*"="); log.info("%s%s"%(8*" ", self.descriptor.id)); log.info(42*"=")
-		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		
@@ -486,7 +487,7 @@ class TestContainer:
 			elif len(exc_info) > 0:
 				self.testObj.addOutcome(BLOCKED)
 				for info in exc_info:
-					log.warn("caught %s: %s", info[0], info[1], exc_info=info)
+					log.warn("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
 					
 			elif self.kbrdInt:
 				log.warn("test interrupt from keyboard")
@@ -506,7 +507,7 @@ class TestContainer:
 			self.testObj.addOutcome(BLOCKED)
 
 		except:
-			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warn("TestContainer caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.testObj.addOutcome(BLOCKED)
 	
 
