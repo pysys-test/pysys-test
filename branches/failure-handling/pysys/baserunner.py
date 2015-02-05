@@ -493,9 +493,16 @@ class TestContainer:
 				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
 		
 			else:
-				self.testObj.setup()
-				self.testObj.execute()
-				self.testObj.validate()
+				try:
+					self.testObj.setup()
+					self.testObj.execute()
+					self.testObj.validate()
+				except AbortExecution, e:
+					# typically used to abort with blocked outcome or to skip
+					log.info('Test aborted:')
+					del self.testObj.outcome[:] # override all existing outcomes
+					self.testObj.addOutcome(e.outcome, e.value)
+					
 				if self.detectCore(self.outsubdir):
 					self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory')	
 		

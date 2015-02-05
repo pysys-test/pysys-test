@@ -140,10 +140,12 @@ class BaseTest(ProcessUser):
 		for key in xargs.keys():
 			setattr(self, key, xargs[key])
 
-
 	# methods to add to and obtain the test outcome
 	def addOutcome(self, outcome, outcomeReason='', printReason=True):
 		"""Add a test validation outcome (and if possible, reason string) to the validation list.
+		
+		See also abort(), which should be used instead of this method for cases where 
+		it doesn't make sense to continue running the test. 
 		
 		The method provides the ability to add a validation outcome to the internal data structure 
 		storing the list of test validation outcomes. In a single test run multiple validations may 
@@ -188,7 +190,26 @@ class BaseTest(ProcessUser):
 			else:
 				log.info('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
 
-
+	def abort(self, outcome, outcomeReason):
+		"""Immediately terminate execution of the current test (both execute and validate) 
+		and report the specified outcome and outcomeReason string. 
+		
+		This method works by raising an AbortExecution exeception, so 
+		do not add a try...except block around the abort call unless that is 
+		really what is intended. 
+		
+		See addOutcome for the list of permissible outcome values. 
+		
+		@param outcome: The test outcome, which will override any existing 
+			outcomes previously reported. The most common outcomes are 
+			BLOCKED, TIMEDOUT or SKIPPED. 
+		@param outcomeReason: A string summarizing the reason for the outcome 
+			to help anyone triaging test failures. 
+			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
+		
+		"""	
+		raise AbortExecution(outcome, outcomeReason)
+	
 	def getOutcome(self):
 		"""Get the overall outcome of the test based on the precedence order.
 				

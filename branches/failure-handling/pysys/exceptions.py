@@ -83,3 +83,14 @@ class InvalidXMLException(Exception):
 		
 	def __str__(self):
 		return self.value
+
+class AbortExecution(Exception):
+	"""Raised by a test that should not continue executing its execute or 
+	validate method, specifying the outcome that the test should have 
+	(overrides any existing outcomes)."""
+
+	def __init__(self,outcome, outcomeReason):
+		self.outcome, self.value = outcome, outcomeReason
+		
+	def __str__(self):
+		return self.value
