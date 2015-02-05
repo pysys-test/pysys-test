@@ -478,37 +478,34 @@ class TestContainer:
 		# execute the test if we can
 		try:
 			if self.descriptor.state != 'runnable':
-				self.testObj.addOutcome(SKIPPED)
+				self.testObj.addOutcome(SKIPPED, 'Not runnable')
 						
 			elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
-				log.warn("Unable to run test in %s mode", self.runner.mode)
-				self.testObj.addOutcome(SKIPPED)
+				self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode)
 			
 			elif len(exc_info) > 0:
-				self.testObj.addOutcome(BLOCKED)
+				self.testObj.addOutcome(BLOCKED, 'Failed to set up test')
 				for info in exc_info:
 					log.warn("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
 					
 			elif self.kbrdInt:
 				log.warn("test interrupt from keyboard")
-				self.testObj.addOutcome(BLOCKED)
+				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
 		
 			else:
 				self.testObj.setup()
 				self.testObj.execute()
 				self.testObj.validate()
 				if self.detectCore(self.outsubdir):
-					log.warn("core detected in output subdirectory")
-					self.testObj.addOutcome(DUMPEDCORE)	
+					self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory')	
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
-			log.warn("test interrupt from keyboard")
-			self.testObj.addOutcome(BLOCKED)
+			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
 
 		except:
 			log.warn("TestContainer caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.testObj.addOutcome(BLOCKED)
+			self.testObj.addOutcome(BLOCKED, 'Caught exception: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]))
 	
 
 		# call the cleanup method to tear down the test
@@ -517,8 +514,7 @@ class TestContainer:
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
-			log.warn("test interrupt from keyboard")
-			self.testObj.addOutcome(BLOCKED)
+			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
 			
 		# print summary and close file handles
 		try:
