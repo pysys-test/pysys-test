@@ -84,16 +84,16 @@ class PyUnitTest(BaseTest):
 		"""
 		return []
 
-if __name__ == '__main__':
-
-	class PysysTestResult(unittest.TestResult):
-		
-		def __init__(self):
-			unittest.TestResult.__init__(self)
-			self.successes = []
+class __PysysTestResult(unittest.TestResult):
 	
-		def addSuccess(self, test):
-			self.successes.append(test)
+	def __init__(self):
+		unittest.TestResult.__init__(self)
+		self.successes = []
+
+	def addSuccess(self, test):
+		self.successes.append(test)
+
+if __name__ == '__main__':
 
 	def getTestClasses(testFile):
 		globals = {}
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 	testFile = sys.argv[1]
 
 	suite, globals = createTestSuite(testFile)
-	results = PysysTestResult()
+	results = __PysysTestResult()
 	
 	globals['_suite_'] = suite
 	globals['_results_'] = results
