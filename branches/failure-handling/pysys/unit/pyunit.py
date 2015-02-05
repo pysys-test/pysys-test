@@ -71,9 +71,9 @@ class PyUnitTest(BaseTest):
 		process = self.startProcess(command, arguments, environ, self.output, FOREGROUND, DEFAULT_TIMEOUT, dstdout, dstderr, displayName)
 		self.log.removeFilter(filter)		
 		if process.exitStatus:
-			self.outcome.append(FAILED)
+			self.addOutcome(FAILED, 'Non-zero exit code from %s'%os.path.basename(testFile), printReason=False)
 		else:
-			self.outcome.append(PASSED)
+			self.addOutcome(PASSED)
 		for l in open(dstdout):
 			self.log.info(l.rstrip())
 

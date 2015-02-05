@@ -524,8 +524,10 @@ class TestContainer:
 		try:
 			self.testTime = math.floor(100*(time.time() - testTime))/100.0
 			log.info("")
-			log.info("Test duration %.2f secs", self.testTime)
-			log.info("Test final outcome %s", LOOKUP[self.testObj.getOutcome()])
+			log.info("Test duration: %.2f secs", self.testTime)
+			log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()])
+			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
+				log.info("Test failure reason: %s", self.testObj.getOutcomeReason())
 			log.info("")
 			
 			self.testFileHandler.close()
