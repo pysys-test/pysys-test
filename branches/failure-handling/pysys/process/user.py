@@ -21,6 +21,7 @@ import sys, os, time
 
 from pysys import log
 from pysys.constants import *
+from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 from pysys.process.helper import ProcessWrapper
 
