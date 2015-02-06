@@ -54,7 +54,7 @@ class ProcessWrapper:
 	
 	"""
 
-	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=displayName):
+	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None):
 		"""Create an instance of the process wrapper.
 		
 		@param command:  The full path to the command to execute
