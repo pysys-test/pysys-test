@@ -1,6 +1,6 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.process.helper import ProcessWrapper
+
 
 class PySysTest(BaseTest):
 
@@ -37,6 +37,6 @@ class PySysTest(BaseTest):
 		ignores=['SYSTEMROOT','LD_LIBRARY_PATH']
 		if PLATFORM=='darwin':
 			ignores.append('VERSIONER_PYTHON')
-			ignores.append('__CF_USER_TEXT_ENCODING: 0x510:0:0')
+			ignores.append('__CF_USER_TEXT_ENCODING')
 
 		self.assertDiff("environment.out", "ref_environment.out", ignores=ignores)
