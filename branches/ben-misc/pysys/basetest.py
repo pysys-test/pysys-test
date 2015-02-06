@@ -566,7 +566,7 @@ class BaseTest(ProcessUser):
 			logOutcome("%s ... %s", self.__assertMsg(xargs, 'File comparison between %s and %s' % (file1, file2)), LOOKUP[result].lower())
 
 
-	def assertGrep(self, file, filedir=None, expr='', contains=True, **xargs):
+	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, **xargs):
 		"""Perform a validation assert on a regular expression occurring in a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -578,6 +578,8 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression to check for in the file
 		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
+		@param ignores: Optional list of regular expressions that will be 
+			ignored when reading the file. 
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
@@ -591,7 +593,7 @@ class BaseTest(ProcessUser):
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
 		try:
-			result = filegrep(f, expr)
+			result = filegrep(f, expr, ignores=ignores)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED)
