@@ -538,11 +538,9 @@ class BaseTest(ProcessUser):
 		"""
 		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to true')
 		if expr == True:
-			self.addOutcome(PASSED)
-			log.info('%s ... passed' % msg)
+			self.addOutcome(PASSED, msg)
 		else:
-			self.addOutcome(FAILED, 'Assertion failed: %s'%msg, printReason=False)
-			log.info('%s ... failed' % msg)
+			self.addOutcome(FAILED, 'Assertion failed: %s'%msg)
 	
 
 	def assertFalse(self, expr, **xargs):
@@ -557,11 +555,9 @@ class BaseTest(ProcessUser):
 		"""
 		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to false')
 		if expr == False:
-			self.addOutcome(PASSED)
-			log.info('%s ... passed' % msg)
+			self.addOutcome(PASSED, msg)
 		else:
-			self.addOutcome(FAILED, 'Assertion failed: %s'%msg, printReason=False)
-			log.info('%s ... failed' % msg)
+			self.addOutcome(FAILED, 'Assertion failed: %s'%msg)
 
 
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], **xargs):
@@ -605,7 +601,7 @@ class BaseTest(ProcessUser):
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, ' failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
 		else:
-			self.addOutcome(PASSED if result else FAILED, '%s ... %s'%(msg, 'passed' if result else 'failed'))
+			self.addOutcome(PASSED if result else FAILED, msg)
 
 
 	def assertGrep(self, file, filedir=None, expr='', contains=True, **xargs):
@@ -640,8 +636,7 @@ class BaseTest(ProcessUser):
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
 		else:
-			self.addOutcome(PASSED if result else FAILED, '%s ... %s'%(
-				msg, 'passed' if result else 'failed'))
+			self.addOutcome(PASSED if result else FAILED, msg)
 		
 
 	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], **xargs):
@@ -679,7 +674,7 @@ class BaseTest(ProcessUser):
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
 		else:
-			self.addOutcome(PASSED if result else FAILED, '%s ... %s'%(msg, 'passed' if result else 'failed'))
+			self.addOutcome(PASSED if result else FAILED, msg)
 
 
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, **xargs):   
@@ -723,7 +718,7 @@ class BaseTest(ProcessUser):
 			else:
 				result = FAILED
 
-			self.addOutcome(result, '%s ... %s'%(msg, 'passed' if result else 'failed'))
+			self.addOutcome(result, msg) 
 			if result == FAILED: log.warn("Ordered grep failed on expression \"%s\"", expr)
 
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", **xargs):
@@ -757,7 +752,7 @@ class BaseTest(ProcessUser):
 			else:
 				result = FAILED
 				appender = " [ %d%s ]" % (numberLines, condition)
-			self.addOutcome(result, '%s ... %s%s'%(msg, 'passed' if result==PASSED else 'failed', appender))
+			self.addOutcome(result, msg+appender) 
 
 	def getNextAvailableTCPPort(self):
 		"""Allocate a TCP port which is available for a server to be

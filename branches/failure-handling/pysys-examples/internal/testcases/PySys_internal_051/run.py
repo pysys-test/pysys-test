@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 	
 	def validate(self):
 		del self.outcome[:]
-		self.assertGrep('run.log.proc', expr='Looking for Bar ... passed')
-		self.assertGrep('run.log.proc', expr='Looking for Foo ... passed')
-		self.assertGrep('run.log.proc', expr='Looking for Foo again ... passed')
+		self.assertGrep('run.log.proc', expr='PASSED: Looking for Bar')
+		self.assertGrep('run.log.proc', expr='PASSED: Looking for Foo')
+		self.assertGrep('run.log.proc', expr='PASSED: Looking for Foo again')
 			
