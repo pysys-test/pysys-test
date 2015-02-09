@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2013  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2015  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -80,6 +80,17 @@ class InvalidXMLException(Exception):
 
 	def __init__(self,value):
 		self.value=value
+		
+	def __str__(self):
+		return self.value
+
+class AbortExecution(Exception):
+	"""Raised by a test that should not continue executing its execute or 
+	validate method, specifying the outcome that the test should have 
+	(overrides any existing outcomes)."""
+
+	def __init__(self,outcome, outcomeReason):
+		self.outcome, self.value = outcome, outcomeReason
 		
 	def __str__(self):
 		return self.value

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2013  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2015  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,7 @@ import sys, os, time
 
 from pysys import log
 from pysys.constants import *
+from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 from pysys.process.helper import ProcessWrapper
 
@@ -108,7 +109,7 @@ class ProcessUser:
 		if displayName is None: displayName = os.path.basename(command)
 		
 		try:
-			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
+			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
 			process.start()
 			if state == FOREGROUND:
 				log.info("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
@@ -297,6 +298,7 @@ class ProcessUser:
 		
 		matches = []
 		startTime = time.time()
+		log.info("Wait for signal \"%s\" %s in %s", expr, condition, file)
 		while 1:
 			if os.path.exists(f):
 				matches = getmatches(f, expr)
@@ -306,7 +308,7 @@ class ProcessUser:
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
-				log.info("Wait for signal in %s timedout", file)
+				log.info("Wait for signal in %s timed out after %d secs", file, timeout)
 				log.info("Number of matches to the expression are %d" % len(matches))
 				break
 			time.sleep(poll)

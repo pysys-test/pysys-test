@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2013  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2015  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -55,7 +55,7 @@ class ProcessWrapper:
 	
 	"""
 
-	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None):
+	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None):
 		"""Create an instance of the process wrapper.
 		
 		@param command:  The full path to the command to execute
@@ -66,8 +66,10 @@ class ProcessWrapper:
 		@param timeout:  The timeout in seconds to be applied to the process
 		@param stdout:  The full path to the filename to write the stdout of the process
 		@param stderr:  The full path to the filename to write the sdterr of the process
+		@param displayName: Display name for this process
 
 		"""
+		self.displayName = displayName if displayName else os.path.basename(command)
 		self.command = command
 		self.arguments = arguments
 		self.environs = {}
@@ -109,7 +111,9 @@ class ProcessWrapper:
 		keys.sort()
 		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])
 
-
+	def __str__(self): return self.displayName
+	def __repr__(self): return '%s(pid %s)'%(self.displayName, self.pid)
+		
 	def __stringToUnicode(self, s):
 		""" Converts a unicode string or a utf-8 bit string into a unicode string. 
 		

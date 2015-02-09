@@ -1,6 +1,7 @@
 # Print out the process environment
 #
-import time, sys, os.path
+import sys
+import os.path
 
 # entry point for running the script as an executable
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2013  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2015  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -434,17 +434,19 @@ class TestContainer:
 		testTime = time.time()
 		try:
 			# set the output subdirectory and purge contents
-			outsubdir = self.runner.outsubdir
-			if not os.path.exists(os.path.join(self.descriptor.output, outsubdir)):
-				os.makedirs(os.path.join(self.descriptor.output, outsubdir))
+			if os.path.isabs(self.runner.outsubdir):
+				self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
+			else:
+				self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
+
+			if not os.path.exists(self.outsubdir):
+				os.makedirs(self.outsubdir)
 					
-			if self.cycle == 0: self.purgeDirectory(os.path.join(self.descriptor.output, outsubdir))
+			if self.cycle == 0: self.purgeDirectory(self.outsubdir)
 				
 			if self.runner.cycle > 1: 
-				outsubdir = os.path.join(outsubdir, 'cycle%d' % (self.cycle+1))
-				os.makedirs(os.path.join(self.descriptor.output, outsubdir))
-
-			self.outsubdir = os.path.join(self.descriptor.output, outsubdir)
+				self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
+				os.makedirs(self.outsubdir)
 
 			# create the test summary log file handler and log the test header
 			self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
@@ -453,7 +455,6 @@ class TestContainer:
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandler)
 			log.info(42*"="); log.info("%s%s"%(8*" ", self.descriptor.id)); log.info(42*"=")
-		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		
@@ -477,37 +478,41 @@ class TestContainer:
 		# execute the test if we can
 		try:
 			if self.descriptor.state != 'runnable':
-				self.testObj.addOutcome(SKIPPED)
+				self.testObj.addOutcome(SKIPPED, 'Not runnable')
 						
 			elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
-				log.warn("Unable to run test in %s mode", self.runner.mode)
-				self.testObj.addOutcome(SKIPPED)
+				self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode)
 			
 			elif len(exc_info) > 0:
-				self.testObj.addOutcome(BLOCKED)
+				self.testObj.addOutcome(BLOCKED, 'Failed to set up test')
 				for info in exc_info:
-					log.warn("caught %s: %s", info[0], info[1], exc_info=info)
+					log.warn("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
 					
 			elif self.kbrdInt:
 				log.warn("test interrupt from keyboard")
-				self.testObj.addOutcome(BLOCKED)
+				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
 		
 			else:
-				self.testObj.setup()
-				self.testObj.execute()
-				self.testObj.validate()
+				try:
+					self.testObj.setup()
+					self.testObj.execute()
+					self.testObj.validate()
+				except AbortExecution, e:
+					# typically used to abort with blocked outcome or to skip
+					log.info('Test aborted:')
+					del self.testObj.outcome[:] # override all existing outcomes
+					self.testObj.addOutcome(e.outcome, e.value)
+					
 				if self.detectCore(self.outsubdir):
-					log.warn("core detected in output subdirectory")
-					self.testObj.addOutcome(DUMPEDCORE)	
+					self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory')	
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
-			log.warn("test interrupt from keyboard")
-			self.testObj.addOutcome(BLOCKED)
+			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
 
 		except:
-			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.testObj.addOutcome(BLOCKED)
+			log.warn("TestContainer caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			self.testObj.addOutcome(BLOCKED, 'Caught exception: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]))
 	
 
 		# call the cleanup method to tear down the test
@@ -516,15 +521,16 @@ class TestContainer:
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
-			log.warn("test interrupt from keyboard")
-			self.testObj.addOutcome(BLOCKED)
+			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
 			
 		# print summary and close file handles
 		try:
 			self.testTime = math.floor(100*(time.time() - testTime))/100.0
 			log.info("")
-			log.info("Test duration %.2f secs", self.testTime)
-			log.info("Test final outcome %s", LOOKUP[self.testObj.getOutcome()])
+			log.info("Test duration: %.2f secs", self.testTime)
+			log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()])
+			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
+				log.info("Test failure reason: %s", self.testObj.getOutcomeReason())
 			log.info("")
 			
 			self.testFileHandler.close()
