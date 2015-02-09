@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2013  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2015  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -118,7 +118,8 @@ class BaseTest(ProcessUser):
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
 		self.manualTester = None
-		self.outcome = []
+		self.outcome = [] # please use addOutcome instead of manipulating this directly
+		self.__outcomeReason = ''
 		self.log = log
 		self.project = PROJECT
 		self.resources = []
@@ -139,14 +140,16 @@ class BaseTest(ProcessUser):
 		for key in xargs.keys():
 			setattr(self, key, xargs[key])
 
-
 	# methods to add to and obtain the test outcome
-	def addOutcome(self, outcome):
-		"""Add a test validation outcome to the validation list.
+	def addOutcome(self, outcome, outcomeReason='', printReason=True):
+		"""Add a test validation outcome (and if possible, reason string) to the validation list.
+		
+		See also abort(), which should be used instead of this method for cases where 
+		it doesn't make sense to continue running the test. 
 		
 		The method provides the ability to add a validation outcome to the internal data structure 
 		storing the list of test validation outcomes. In a single test run multiple validations may 
-		be performed. The currently supported validation outcomes are::
+		be performed. The currently supported validation outcomes are:
 				
 		  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
 		  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
@@ -162,11 +165,51 @@ class BaseTest(ProcessUser):
 		in L{pysys.constants}. 
 		
 		@param outcome: The outcome to add
+		@param outcomeReason: A string summarizing the reason for the outcome 
+			to help anyone triaging test failures. 
+			Callers are strongly recommended to specify this if at all possible 
+			when reporting failure outcomes. 
+			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
+		@param printReason: if True the specified outcomeReason will be printed 
+			at INFO/WARN (whether or not this outcome reason is taking priority). 
+			In most cases this is useful, but can be disabled if more specific 
+			logging is already implemented. 
 		
 		"""
+		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
+		outcomeReason = outcomeReason.strip() if outcomeReason else ''
+		
+		old = self.getOutcome()
 		self.outcome.append(outcome)
+		if self.getOutcome() != old:
+			self.__outcomeReason = outcomeReason
 
+		if outcomeReason and printReason:
+			if outcome in FAILS:
+				log.warn('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
+			else:
+				log.info('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
 
+	def abort(self, outcome, outcomeReason):
+		"""Immediately terminate execution of the current test (both execute and validate) 
+		and report the specified outcome and outcomeReason string. 
+		
+		This method works by raising an AbortExecution exeception, so 
+		do not add a try...except block around the abort call unless that is 
+		really what is intended. 
+		
+		See addOutcome for the list of permissible outcome values. 
+		
+		@param outcome: The test outcome, which will override any existing 
+			outcomes previously reported. The most common outcomes are 
+			BLOCKED, TIMEDOUT or SKIPPED. 
+		@param outcomeReason: A string summarizing the reason for the outcome 
+			to help anyone triaging test failures. 
+			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
+		
+		"""	
+		raise AbortExecution(outcome, outcomeReason)
+	
 	def getOutcome(self):
 		"""Get the overall outcome of the test based on the precedence order.
 				
@@ -185,7 +228,15 @@ class BaseTest(ProcessUser):
 		if len(self.outcome) == 0: return NOTVERIFIED
 		return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
 		
+	def getOutcomeReason(self):
+		"""Get the reason string for the current overall test outcome (if specified).
+				
+		@return: The overall test outcome reason or '' if not specified
+		@rtype:  string
 
+		"""	
+		return self.__outcomeReason
+			
 	# test methods for execution, validation and cleanup. The execute method is
 	# abstract and must be implemented by a subclass. 
 	def setup(self):
@@ -287,13 +338,12 @@ class BaseTest(ProcessUser):
 				log.info("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
 			elif state == BACKGROUND:
 				log.info("Started %s in background with process id %d", displayName, process.pid)
-		except ProcessError:
-			log.warn("%s", sys.exc_info()[1], exc_info=0)
-			self.addOutcome(BLOCKED)
+		except ProcessError, e:
+			self.addOutcome(BLOCKED, '%s failed to run: %s'%(process, e))
 		except ProcessTimeout:
-			log.warn("Process timedout after %d seconds, stopping process", timeout)
+			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False)
+			log.warn("Process timed out after %d seconds, stopping process", timeout)
 			process.stop()
-			self.addOutcome(TIMEDOUT)
 		else:
 			self.processList.append(process) 	
 			try:
@@ -320,9 +370,8 @@ class BaseTest(ProcessUser):
 			try:
 				process.stop()
 				log.info("Stopped process with process id %d", process.pid)
-			except ProcessError:
-				log.warn("Unable to stop process")
-				self.addOutcome(BLOCKED)
+			except ProcessError, e:
+				self.addOutcome(BLOCKED, 'Unable to stop %s process: %s'%(process, e))
 
 
 	def signalProcess(self, process, signal):
@@ -340,9 +389,8 @@ class BaseTest(ProcessUser):
 			try:
 				process.signal(signal)
 				log.info("Sent %d signal to process with process id %d", signal, process.pid)
-			except ProcessError:
-				log.warn("Unable to send signal to process")
-				self.addOutcome(BLOCKED)
+			except ProcessError, e:
+				self.addOutcome(BLOCKED, 'Unable to send signal to process %s: %s'%(process, e))
 
 
 	def waitProcess(self, process, timeout):
@@ -353,11 +401,10 @@ class BaseTest(ProcessUser):
 		
 		"""
 		try:
-			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
+			log.info("Waiting %d secs for process %r", timeout, process)
 			process.wait(timeout)
 		except ProcessTimeout:
-			log.warn("Timedout waiting for process")
-			self.addOutcome(TIMEDOUT)
+			self.addOutcome(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
 
 
 	def startProcessMonitor(self, process, interval, file, **kwargs):
@@ -382,9 +429,8 @@ class BaseTest(ProcessUser):
 		try:
 			self.log.info("Starting process monitor on process with id = %d", process.pid)
 			monitor.start()
-		except ProcessError:
-			self.log.warn("Unable to start process monitor")
-			self.addOutcome(BLOCKED)
+		except ProcessError, e:
+			self.addOutcome(BLOCKED, 'Unable to start process monitor for %s: %s'%(process, e))
 		else:
 			self.monitorList.append(monitor)
 			return monitor
@@ -429,14 +475,14 @@ class BaseTest(ProcessUser):
 				while self.manualTester.running() == 1:
 					currentTime = time.time()
 					if currentTime > startTime + timeout:
-						self.addOutcome(TIMEDOUT)
+						self.addOutcome(TIMEDOUT, 'Manual tester timed out')
 						self.manualTester.stop()
 						return
 					time.sleep(1)
 			else:
 				time.sleep(1)
 		else:
-			self.addOutcome(BLOCKED)	
+			self.addOutcome(BLOCKED, 'Manual tester failed')
 
 
 	def stopManualTester(self):
@@ -447,7 +493,7 @@ class BaseTest(ProcessUser):
 			self.manualTester.stop()
 			time.sleep(1)
 		else:
-			self.addOutcome(BLOCKED)	
+			self.addOutcome(BLOCKED, 'Manual tester could not be stopped')
 
 
 	def waitManualTester(self, timeout=TIMEOUTS['ManualTester']):
@@ -459,7 +505,7 @@ class BaseTest(ProcessUser):
 			while self.manualTester.running() == 1:
 				currentTime = time.time()
 				if currentTime > startTime + timeout:
-					self.addOutcome(TIMEDOUT)
+					self.addOutcome(TIMEDOUT, 'Timed out waiting for manual tester')
 					self.manualTester.stop()
 					return
 				time.sleep(1)
@@ -474,28 +520,27 @@ class BaseTest(ProcessUser):
 		@param interval: The time interval in seconds to wait
 		
 		"""
+		log.info('Waiting for %0.1f seconds'%interval)
 		time.sleep(interval)
 
 
-	# test validation methods. These methods provide means to validate the outcome of
-	# a test based on the occurrence of regular expressions in text files. All methods
-	# directly append to the test outcome list
+	# test validation methods. 
+	
 	def assertTrue(self, expr, **xargs):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
 		
-		@param expr: The expression, as a string, to check for the true | false value
+		@param expr: The expression, as a boolean, to check for the True | False value
 		@param xargs: Variable argument list (see class description for supported parameters)
 		
 		"""
+		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to true')
 		if expr == True:
-			self.addOutcome(PASSED)
-			log.info('%s ... passed' % self.__assertMsg(xargs, 'Assertion on boolean expression equal to true'))
+			self.addOutcome(PASSED, msg)
 		else:
-			self.addOutcome(FAILED)
-			log.info('%s ... failed' % self.__assertMsg(xargs, 'Assertion on boolean expression equal to true'))
+			self.addOutcome(FAILED, 'Assertion failed: %s'%msg)
 	
 
 	def assertFalse(self, expr, **xargs):
@@ -508,12 +553,11 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 						
 		"""
+		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to false')
 		if expr == False:
-			self.addOutcome(PASSED)
-			log.info('%s ... passed' % self.__assertMsg(xargs, 'Assertion on boolean expression equal to false'))
+			self.addOutcome(PASSED, msg)
 		else:
-			self.addOutcome(FAILED)
-			log.info('%s ... failed' % self.__assertMsg(xargs, 'Assertion on boolean expression equal to false'))
+			self.addOutcome(FAILED, 'Assertion failed: %s'%msg)
 
 
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], **xargs):
@@ -550,20 +594,14 @@ class BaseTest(ProcessUser):
 		log.debug("  file2:       %s" % file2)
 		log.debug("  filedir2:    %s" % filedir2)
 		
+		msg = self.__assertMsg(xargs, 'File comparison (%s, %s)'%(file1, file2))
 		try:
 			result = filediff(f1, f2, ignores, sort, replace, includes)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED)
+			self.addOutcome(BLOCKED, ' failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
 		else:
-			logOutcome = log.info
-			if result == True:
-				result = PASSED
-			else:
-				result = FAILED
-				logOutcome = log.warn
-			self.outcome.append(result)
-			logOutcome("%s ... %s", self.__assertMsg(xargs, 'File comparison between %s and %s' % (file1, file2)), LOOKUP[result].lower())
+			self.addOutcome(PASSED if result else FAILED, msg)
 
 
 	def assertGrep(self, file, filedir=None, expr='', contains=True, **xargs):
@@ -590,21 +628,16 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
+		msg = self.__assertMsg(xargs, 'Grep on input file %s %s "%s"'%(
+				file, 'contains' if contains else '<not> contains', expr))
 		try:
-			result = filegrep(f, expr)
+			result = filegrep(f, expr) == contains
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED)
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
 		else:
-			logOutcome = log.info
-			if result == contains:
-				result = PASSED
-			else:
-				result = FAILED
-				logOutcome = log.warn
-			self.outcome.append(result)
-			logOutcome("%s ... %s", self.__assertMsg(xargs, 'Grep on input file %s' % file), LOOKUP[result].lower())
-			
+			self.addOutcome(PASSED if result else FAILED, msg)
+		
 
 	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], **xargs):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
@@ -632,20 +665,16 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
+		msg = self.__assertMsg(xargs, 'Grep on last line of input file %s %s "%s"'%(
+				file, 'contains' if contains else '<not> contains', expr))
+				
 		try:
-			result = lastgrep(f, expr, ignores, includes)
+			result = lastgrep(f, expr, ignores, includes) == contains
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED)
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
 		else:
-			logOutcome = log.info
-			if result == contains:
-				result = PASSED
-			else:
-				result = FAILED
-				logOutcome = log.warn
-			self.outcome.append(result)
-			logOutcome("%s ... %s", self.__assertMsg(xargs, 'Grep on input file %s' % file), LOOKUP[result].lower())
+			self.addOutcome(PASSED if result else FAILED, msg)
 
 
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, **xargs):   
@@ -673,27 +702,24 @@ class BaseTest(ProcessUser):
 		for expr in exprList: log.debug("  exprList:   %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
+		msg = self.__assertMsg(xargs, 'Ordered grep on input file %s' % file)
 		try:
 			expr = orderedgrep(f, exprList)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED)
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
 		else:
-			logOutcome = log.info
 			if expr is None and contains:
 				result = PASSED
 			elif expr is None and not contains:
 				result = FAILED
-				logOutcome = log.warn
 			elif expr is not None and not contains:
 				result = PASSED
 			else:
 				result = FAILED
-				logOutcome = log.warn
-			self.outcome.append(result)
-			log.info('%s ... %s' % (self.__assertMsg(xargs, 'Ordered grep on input file %s' % file), LOOKUP[result].lower()))
-			if result == FAILED: logOutcome("Ordered grep failed on expression \"%s\"", expr)
 
+			self.addOutcome(result, msg) 
+			if result == FAILED: log.warn("Ordered grep failed on expression \"%s\"", expr)
 
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", **xargs):
 		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
@@ -712,23 +738,21 @@ class BaseTest(ProcessUser):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
+		msg = self.__assertMsg(xargs, 'Line count on input file %s' % file)
 		try:
 			numberLines = linecount(f, expr)
 			log.debug("Number of matching lines is %d"%numberLines)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED)
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
 		else:
-			logOutcome = log.info
 			if (eval("%d %s" % (numberLines, condition))):
 				result = PASSED
 				appender = ""
 			else:
 				result = FAILED
-				appender = "[%d%s]" % (numberLines, condition)
-				logOutcome = log.warn
-			self.outcome.append(result)
-			logOutcome("%s ... %s %s", self.__assertMsg(xargs, 'Line count on input file %s' % file), LOOKUP[result].lower(), appender)
+				appender = " [ %d%s ]" % (numberLines, condition)
+			self.addOutcome(result, msg+appender) 
 
 	def getNextAvailableTCPPort(self):
 		"""Allocate a TCP port which is available for a server to be

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2013  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2015  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -52,7 +52,7 @@ from pysys.xml.descriptor import XMLDescriptorParser
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	"""Create a list of descriptor objects representing a set of tests to run, returning the list.
 	
-	@param testIdSpecs: A string specifier for a set of testcase identifiers
+	@param testIdSpecs: A list of strings specifying the set of testcase identifiers
 	@param type: The type of the tests to run (manual | auto)
 	@param includes: A list of test groups to include in the returned set
 	@param excludes: A list of test groups to exclude in the returned set
@@ -87,26 +87,30 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	if testIdSpecs == []:
 		tests = descriptors
 	else:
+		def idMatch(descriptorId, specId):
+			# simplify common case by matching _numeric suffixes
+			return specId==descriptorId or (specId.isdigit() and re.match('.+_0*%s$'%specId, descriptorId))
+		
 		for testIdSpec in testIdSpecs:
 			try:	
 				if re.search('^[\w_]*$', testIdSpec):
 					for i in range(0,len(descriptors)):
-						if descriptors[i].id == testIdSpec: index = i
+						if idMatch(descriptors[i].id, testIdSpec): index = i
 					tests.extend(descriptors[index:index+1])
 				elif re.search('^:[\w_]*', testIdSpec):
 					for i in range(0,len(descriptors)):
-						if descriptors[i].id == string.split(testIdSpec, ':')[1]: index = i
+						if idMatch(descriptors[i].id, string.split(testIdSpec, ':')[1]): index = i
 					tests.extend(descriptors[:index+1])
 
 				elif re.search('^[\w_]*:$', testIdSpec):
 					for i in range(0,len(descriptors)):
-					  	if descriptors[i].id == string.split(testIdSpec, ':')[0]: index = i
+					  	if idMatch(descriptors[i].id, string.split(testIdSpec, ':')[0]): index = i
 					tests.extend(descriptors[index:])
 
 				elif re.search('^[\w_]*:[\w_]*$', testIdSpec):
 					for i in range(0,len(descriptors)):
-					  	if descriptors[i].id == string.split(testIdSpec, ':')[0]: index1 = i
-					  	if descriptors[i].id == string.split(testIdSpec, ':')[1]: index2 = i
+					  	if idMatch(descriptors[i].id, string.split(testIdSpec, ':')[0]): index1 = i
+					  	if idMatch(descriptors[i].id, string.split(testIdSpec, ':')[1]): index2 = i
 					tests.extend(descriptors[index1:index2+1])
 			except :
 				raise Exception("Unable to locate requested testcase(s)")

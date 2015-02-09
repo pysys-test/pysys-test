@@ -1,4 +1,4 @@
-# PySys System Test Framework, Copyright (C) 2006-2013  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2015  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -71,9 +71,9 @@ class PyUnitTest(BaseTest):
 		process = self.startProcess(command, arguments, environ, self.output, FOREGROUND, DEFAULT_TIMEOUT, dstdout, dstderr, displayName)
 		self.log.removeFilter(filter)		
 		if process.exitStatus:
-			self.outcome.append(FAILED)
+			self.addOutcome(FAILED, 'Non-zero exit code from %s'%os.path.basename(testFile), printReason=False)
 		else:
-			self.outcome.append(PASSED)
+			self.addOutcome(PASSED)
 		for l in open(dstdout):
 			self.log.info(l.rstrip())
 
@@ -84,16 +84,16 @@ class PyUnitTest(BaseTest):
 		"""
 		return []
 
-if __name__ == '__main__':
-
-	class PysysTestResult(unittest.TestResult):
-		
-		def __init__(self):
-			unittest.TestResult.__init__(self)
-			self.successes = []
+class __PysysTestResult(unittest.TestResult):
 	
-		def addSuccess(self, test):
-			self.successes.append(test)
+	def __init__(self):
+		unittest.TestResult.__init__(self)
+		self.successes = []
+
+	def addSuccess(self, test):
+		self.successes.append(test)
+
+if __name__ == '__main__':
 
 	def getTestClasses(testFile):
 		globals = {}
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 	testFile = sys.argv[1]
 
 	suite, globals = createTestSuite(testFile)
-	results = PysysTestResult()
+	results = __PysysTestResult()
 	
 	globals['_suite_'] = suite
 	globals['_results_'] = results
