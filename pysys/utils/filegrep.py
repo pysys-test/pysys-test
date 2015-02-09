@@ -52,11 +52,12 @@ def getmatches(file, regexpr):
 		return matches
 
 
-def filegrep(file, expr):
+def filegrep(file, expr, ignores=None):
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
 	
 	@param file: The full path to the input file
 	@param expr: The regular expression (uncompiled) to search for in the input file
+	@param ignores: Optional list of regular expression strings to ignore when searching file. 
 	@returns: success (True / False)
 	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
@@ -65,12 +66,24 @@ def filegrep(file, expr):
 	if not os.path.exists(file):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
 	else:
-		contents = open(file, 'r').readlines()
-		logContents("Contents of %s;" % os.path.basename(file), contents)
-		regexpr = re.compile(expr)
-		for line in contents:
-			if regexpr.search(line) is not None: return True
-		return False
+		f = open(file, 'r')
+		try:
+			if log.isEnabledFor(logging.DEBUG):
+				contents = f.readlines()
+				logContents("Contents of %s;" % os.path.basename(file), contents)
+			else:
+				contents = f
+			
+			ignores = [re.compile(i) for i in (ignores or [])]
+			
+			regexpr = re.compile(expr)
+			for line in contents:
+				if regexpr.search(line) is not None: 
+					if not any([i.search(line) for i in ignores]): 
+						return True
+			return False
+		finally:
+			f.close()
 
 
 def lastgrep(file, expr, ignore=[], include=[]):

@@ -220,8 +220,12 @@ class ProcessWrapper:
 		if self.exitStatus is not None: return 
 		exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
 		if exitStatus != win32con.STILL_ACTIVE:
-			win32file.CloseHandle(self.__hProcess)
-			win32file.CloseHandle(self.__hThread)
+			try:
+				win32file.CloseHandle(self.__hProcess)
+				win32file.CloseHandle(self.__hThread)
+			except Exception, e:
+				# for some reason these do fail sometimes with 'handle is invalid'
+				log.warning('Could not close process and thread handles for process %s: %s', self.pid, e)
 			self.__outQueue = None
 			self.exitStatus = exitStatus
 
