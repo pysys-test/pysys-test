@@ -48,6 +48,7 @@ class ProcessUser:
 		"""
 		self.processList = []
 		self.processCount = {}
+		self.__cleanupFunctions = []
 
 
 	def __getattr__(self, name):
@@ -90,7 +91,7 @@ class ProcessUser:
 		the method does not return until the process has completed or a time out occurs, or in the C{BACKGROUND} in which case
 		the method returns immediately to the caller returning a handle to the process to allow manipulation at a later stage. 
 		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process handle are automatically
-		killed on completion of the test via the L{__del__()} destructor. 
+		killed on completion of the test via the L{cleanup()} destructor. 
 
 		@param command: The command to start the process (should include the full path)
 		@param arguments: A list of arguments to pass to the command
@@ -314,15 +315,42 @@ class ProcessUser:
 			time.sleep(poll)
 		return matches
 
-
-	def __del__(self):
-		"""Class destructor which stops any running processes started by the class instance. 
-				
+	def addCleanupFunction(self, fn):
+		""" Registers a zero-arg function that will be called as part of the 
+		cleanup of this object, to provide a way to cleanly free associated 
+		resources. 
+		
+		Cleanup functions are invoked in reverse order with the most recently 
+		added first (LIFO), and before the automatic termination of any 
+		remaining processes associated with this object.
+		
+		e.g. self.addCleanupFunction(lambda: self.cleanlyShutdownProcessX(params))
+		
 		"""
-		for process in self.processList:
-			try:
-				if process.running(): process.stop()
-			except:
-				 log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-		self.processList = []
-		self.processCount = {}
+		if fn and fn not in self.__cleanupFunctions: 
+			self.__cleanupFunctions.append(fn)
+
+	def cleanup(self):
+		""" Cleanup function that frees resources managed by this object. 
+		Should be called exactly once when this object is no longer needed. 
+		
+		"""
+		try:
+			for fn in reversed(self.__cleanupFunctions):
+				try:
+					log.debug('Running registered cleanup function: %r'%fn)
+					fn()
+				except Exception, e:
+					log.error('Error while running cleanup function: %s'%e)
+			self.__cleanupFunctions = []
+		finally:
+			for process in self.processList:
+				try:
+					if process.running(): process.stop()
+				except:
+					 log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			self.processList = []
+			self.processCount = {}
+			
+			log.debug('ProcessUser cleanup function done.')
+		

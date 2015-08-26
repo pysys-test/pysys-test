@@ -200,13 +200,6 @@ class BaseRunner(ProcessUser):
 		pass
 
 
-	def cleanup(self):
-		"""Cleanup method which may optionally be overridden to perform custom cleanup operations after execution of all testcases.
-		
-		"""
-		ProcessUser.__del__(self)
-
-
 	# perform a test run
 	def start(self, printSummary=True):
 		"""Start the execution of a set of testcases, returning a dictionary of the testcase outcomes.

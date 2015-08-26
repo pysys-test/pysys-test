@@ -267,32 +267,38 @@ class BaseTest(ProcessUser):
 		The cleanup method performs actions to stop all processes started in the background and not 
 		explicitly killed during the test execution. It also stops all process monitors running in 
 		seperate threads, and any instances of the manual tester user interface. Should a custom cleanup 
-		for a subclass be required, the BaseTest cleanup method should first be called. e.g. ::
+		for a subclass be required, the BaseTest cleanup method should first be last, from a finally block. e.g.:
 		
 		  class MyTest(BaseTest):
 		  
 		    def cleanup(self):
 		      # call base test cleanup first
-		      BaseTest.cleanup(self)
-				
-		      # perform custom cleanup actions
-		      ...
+		      try:
+		        # perform custom cleanup actions
+		        ...
+		      finally:
+		        BaseTest.cleanup(self)
 				
 		"""
-		ProcessUser.__del__(self)
+		try:
+			if self.manualTester and self.manualTester.running():
+				self.stopManualTester()
 		
-		if self.manualTester and self.manualTester.running():
-			self.stopManualTester()
+			for monitor in self.monitorList:
+				if monitor.running(): monitor.stop()
 	
-		for monitor in self.monitorList:
-			if monitor.running(): monitor.stop()
+			while len(self.resources) > 0:
+				# legacy cleanup mechanism based on resource objects implementing __del__
+				self.resources.pop()
+		finally:
+			ProcessUser.cleanup(self)
 
-		while len(self.resources) > 0:
-			self.resources.pop()
 
 	def addResource(self, resource):
 		"""Add a resource which is owned by the test and is therefore
-		cleaned up (deleted) when the test is cleaned up
+		cleaned up (deleted) when the test is cleaned up. 
+		
+		Deprecated - please use addCleanupFunction instead of this function. 
 		"""
 		self.resources.append(resource)
 
@@ -335,7 +341,7 @@ class BaseTest(ProcessUser):
 			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
 			process.start()
 			if state == FOREGROUND:
-				log.info("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
+				(log.info if process.exitStatus == 0 else log.warn)("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
 			elif state == BACKGROUND:
 				log.info("Started %s in background with process id %d", displayName, process.pid)
 		except ProcessError, e:
@@ -761,7 +767,7 @@ class BaseTest(ProcessUser):
 		started on. Take ownership of it for the duration of the test
 		"""
 		o = TCPPortOwner()
-		self.addResource(o)
+		self.addCleanupFunction(lambda: o.cleanup())
 		return o.port
 
 	def __assertMsg(self, xargs, default):
