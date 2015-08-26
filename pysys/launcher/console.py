@@ -70,13 +70,13 @@ class ConsoleCleanTestHelper:
 				self.all = True
 
 			elif option in ("-v", "--verbosity"):
-				if value == "DEBUG":
+				if value.upper() == "DEBUG":
 					stdoutHandler.setLevel(logging.DEBUG)
-				elif value == "INFO":
+				elif value.upper() == "INFO":
 					stdoutHandler.setLevel(logging.INFO)
-				elif value == "WARN":
+				elif value.upper() == "WARN":
 					stdoutHandler.setLevel(logging.WARN)	
-				elif value == "CRIT":
+				elif value.upper() == "CRIT":
 					stdoutHandler.setLevel(logging.CRITICAL)
 				
 			elif option in ("-o", "--outdir"):
@@ -454,13 +454,13 @@ class ConsoleLaunchHelper:
 
 			elif option in ("-v", "--verbosity"):
 				self.verbosity = value
-				if self.verbosity == "DEBUG":
+				if self.verbosity.upper() == "DEBUG":
 					stdoutHandler.setLevel(logging.DEBUG)
-				elif self.verbosity == "INFO":
+				elif self.verbosity.upper() == "INFO":
 					stdoutHandler.setLevel(logging.INFO)
-				elif self.verbosity == "WARN":
+				elif self.verbosity.upper() == "WARN":
 					stdoutHandler.setLevel(logging.WARN)
-				elif self.verbosity == "CRIT":					
+				elif self.verbosity.upper() == "CRIT":					
 					stdoutHandler.setLevel(logging.CRITICAL)	
 
 			elif option in ("-a", "--type"):
