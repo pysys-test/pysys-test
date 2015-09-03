@@ -489,6 +489,7 @@ class TestContainer:
 				try:
 					self.testObj.setup()
 					self.testObj.execute()
+					log.info('--- validate ---')
 					self.testObj.validate()
 				except AbortExecution, e:
 					# typically used to abort with blocked outcome or to skip
@@ -507,7 +508,6 @@ class TestContainer:
 			log.warn("TestContainer caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.testObj.addOutcome(BLOCKED, 'Caught exception: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]))
 	
-
 		# call the cleanup method to tear down the test
 		try:
 			self.testObj.cleanup()
