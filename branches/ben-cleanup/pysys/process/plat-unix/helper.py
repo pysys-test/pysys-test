@@ -100,7 +100,7 @@ class ProcessWrapper:
 		for a in self.arguments: log.debug("  argument     : %s", a)
 		log.debug("  working dir  : %s", self.workingDir)
 		log.debug("  stdout       : %s", self.stdout)
-		log.debug("  stdout       : %s", self.stderr)
+		log.debug("  stderr       : %s", self.stderr)
 		keys=self.environs.keys()
 		keys.sort()
 		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])		
