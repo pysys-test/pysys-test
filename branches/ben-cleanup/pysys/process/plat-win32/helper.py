@@ -18,7 +18,7 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 import string, os.path, time, thread, logging, Queue
-import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes
+import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, threading
 
 from pysys import log
 from pysys import process_lock
@@ -87,6 +87,8 @@ class ProcessWrapper:
 		self.__hThread = None
 		self.__tid = None
 		self.__outQueue = Queue.Queue()
+		
+		self.__lock = threading.Lock() # to protect access to the fields that get updated
 		
 		# set the stdout|err file handles
 		self.fStdout = 'nul'
@@ -217,17 +219,20 @@ class ProcessWrapper:
 		"""Private method to set the exit status of the process.
 		
 		"""
-		if self.exitStatus is not None: return 
-		exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
-		if exitStatus != win32con.STILL_ACTIVE:
-			try:
-				win32file.CloseHandle(self.__hProcess)
-				win32file.CloseHandle(self.__hThread)
-			except Exception, e:
-				# for some reason these do fail sometimes with 'handle is invalid'
-				log.warning('Could not close process and thread handles for process %s: %s', self.pid, e)
-			self.__outQueue = None
-			self.exitStatus = exitStatus
+		with self.__lock:
+			if self.exitStatus is not None: return self.exitStatus
+			exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
+			if exitStatus != win32con.STILL_ACTIVE:
+				try:
+					win32file.CloseHandle(self.__hProcess)
+					win32file.CloseHandle(self.__hThread)
+				except Exception, e:
+					# for some reason these do fail sometimes with 'handle is invalid'
+					log.warning('Could not close process and thread handles for process %s: %s', self.pid, e)
+				self.__outQueue = None
+				self.exitStatus = exitStatus
+			
+			return self.exitStatus
 
 
 	def write(self, data, addNewLine=True):
@@ -255,9 +260,7 @@ class ProcessWrapper:
 		@rtype: integer
 		
 		"""
-		self.__setExitStatus()
-		if self.exitStatus is not None: return False
-		return True
+		return self.__setExitStatus() is None
 
 
 	def wait(self, timeout):
@@ -286,9 +289,11 @@ class ProcessWrapper:
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
-		if self.exitStatus is not None: return 
 		try:
-			win32api.TerminateProcess(self.__hProcess,0)
+			with self.__lock:
+				if self.exitStatus is not None: return 
+				win32api.TerminateProcess(self.__hProcess,0)
+			
 			self.wait(timeout=timeout)
 		except:
 			raise ProcessError, "Error stopping process"
@@ -320,7 +325,3 @@ class ProcessWrapper:
 			self.__startBackgroundProcess()
 			time.sleep(1)
 
-
-
-
-					   

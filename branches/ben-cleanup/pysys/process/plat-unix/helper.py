@@ -94,6 +94,8 @@ class ProcessWrapper:
 		# private instance variables
 		self.__outQueue = Queue.Queue()		
 		
+		self.__lock = threading.Lock() # to protect access to the fields that get updated while process is running
+		
 		# print process debug information
 		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
 		log.debug("  command      : %s", self.command)
@@ -184,28 +186,33 @@ class ProcessWrapper:
 	def __setExitStatus(self):
 		"""Private method to set the exit status of the process.
 		
+		Returns the new value
+		
 		"""
-		if self.exitStatus is not None: return
-
-		retries = 3
-		while retries > 0:	
-			try:
-				pid, status = os.waitpid(self.pid, os.WNOHANG)
-				if pid == self.pid:
-					if os.WIFEXITED(status):
-					  	self.exitStatus = os.WEXITSTATUS(status)
-					elif os.WIFSIGNALED(status):
-					  	self.exitStatus = os.WTERMSIG(status)
-					else:
-					  	self.exitStatus = status
-					self.__outQueue = None
-				retries=0
-	  		except OSError, e:
-				if e.errno == errno.ECHILD:
-		  			time.sleep(0.01)
-					retries=retries-1
-				else:
+		with self.__lock:
+			if self.exitStatus is not None: return self.exitStatus
+	
+			retries = 3
+			while retries > 0:	
+				try:
+					pid, status = os.waitpid(self.pid, os.WNOHANG)
+					if pid == self.pid:
+						if os.WIFEXITED(status):
+						  	self.exitStatus = os.WEXITSTATUS(status)
+						elif os.WIFSIGNALED(status):
+						  	self.exitStatus = os.WTERMSIG(status)
+						else:
+						  	self.exitStatus = status
+						self.__outQueue = None
 					retries=0
+		  		except OSError, e:
+					if e.errno == errno.ECHILD:
+			  			time.sleep(0.01)
+						retries=retries-1
+					else:
+						retries=0
+			
+			return self.exitStatus
 
 
 	def write(self, data, addNewLine=True):
@@ -233,9 +240,7 @@ class ProcessWrapper:
 		@rtype: integer 
 		
 		"""
-		self.__setExitStatus()
-		if self.exitStatus is not None: return 0
-		return 1
+		return self.__setExitStatus() is None
 		
 
 	def wait(self, timeout):
@@ -264,9 +269,11 @@ class ProcessWrapper:
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
-		if self.exitStatus is not None: return 
 		try:
-			os.kill(self.pid, signal.SIGTERM)
+			with self.__lock:
+				if self.exitStatus is not None: return 
+				os.kill(self.pid, signal.SIGTERM)
+			
 			self.wait(timeout=timeout)
 		except:
 			raise ProcessError, "Error stopping process"
