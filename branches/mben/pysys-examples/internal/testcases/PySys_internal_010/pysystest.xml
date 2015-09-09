@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Utils Module - filereplace for text file tailoring</title>    
+    <purpose><![CDATA[
+Checks the tailoring of an input file based on an input dictionary of keys denoting
+string patterns to replace in the file, and the key values for the value to be used
+in the replacement.
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>utils</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
