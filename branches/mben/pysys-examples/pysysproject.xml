@@ -165,7 +165,16 @@
 			<property name="outputDir" value="${rootdir}/target/pysys-reports"/>
 		</writer>
 		-->
-	</writers>		
+		
+		<!--
+		Add in the test results writer if TeamCity formatted output is required 
+
+		<writer classname="TeamCityResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
+			<property name="publishArtifacts" value="true"/>
+			<property name="suiteName" value="testSuite"/>
+		</writer>
+		-->
+	</writers>
 	
 	
 	<!--

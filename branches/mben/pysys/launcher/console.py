@@ -415,7 +415,7 @@ class ConsoleLaunchHelper:
 		print "                                   A value of 0 sets to the number of available CPUs"
 		print "       -X               KEY=VALUE  set user defined options to be passed through to the test and "
 		print "                                   runner classes. The left hand side string is the data attribute "
-		print "                                   to set, the right hand side string the value (True of not specified) "
+		print "                                   to set, the right hand side string the value (True if not specified) "
 		if printXOptions: printXOptions()
 		print ""
 		print "   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, "

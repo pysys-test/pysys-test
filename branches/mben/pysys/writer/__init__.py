@@ -42,7 +42,7 @@ number of tests to be executed), and cycle in the call to the processResult acti
 
 """
 
-__all__ = ["TextResultsWriter", "XMLResultsWriter", "JUnitXMLResultsWriter"]
+__all__ = ["TextResultsWriter", "XMLResultsWriter", "JUnitXMLResultsWriter", "TeamCityResultsWriter"]
 
 import logging, time, urlparse, os, stat
 
@@ -467,3 +467,117 @@ class JUnitXMLResultsWriter:
 
 		if delTop: 
 			os.rmdir(dir)
+
+
+class TeamCityResultsWriter:
+	"""Class to log test results in TeamCity format. 
+	
+	@ivar publishArtifacts: Config to toggle publishing test artifacts to TeamCity
+	@type publishArtifacts: string (true | false)
+	@ivar suiteName: Suite name - default 'Suite'
+	@type suiteName: string
+	
+	"""
+	publishArtifacts = None
+	suiteName = None
+	TEAMCITY_SERVICE_TAG_PREFIX = "##teamcity["
+	TEAMCITY_SERVICE_TAG_SUFFIX = "]"
+	
+	def __init__(self, logfile):
+		"""Create an instance of the TextResultsWriter class.
+		
+		@param logfile: The (optional) filename template for the logging of test results
+		
+		"""
+		self.doneCycles = 1
+		self.totalTests = 10#len(descriptors)
+		self.testsRun = 0
+		self.cycle = -1
+		self.suiteName = 'Suite' if self.suiteName is None else self.suiteName
+		self.publishArtifacts = 'True' if self.publishArtifacts is None else self.publishArtifacts
+
+	def setup(self, **kwargs):
+		"""Implementation of the setup method.
+
+		Logs the start of a test suite  
+		
+		@param kwargs: Variable argument list
+		
+		"""
+		self.logTeamCityServiceTag("testSuiteStarted", {"name":self.suiteName})
+		if kwargs.has_key("numTests"): 
+			if self.totalTests != kwargs["numTests"]:
+				self.totalTests = kwargs["numTests"]
+
+
+	def cleanup(self, **kwargs):
+		"""Implementation of the cleanup method.
+		
+		Logs the end of a test suite  
+		
+		@param kwargs: Variable argument list
+		
+		"""
+		self.logTeamCityServiceTag("testSuiteFinished", {"name":self.suiteName})
+		
+
+	def processResult(self, testObj, **kwargs):
+		"""Implementation of the processResult method. 
+		
+		Logs the test result in TeamCity format, and publishes artifacts to TeamCity if test failed
+		
+		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		@param kwargs: Variable argument list
+		
+		"""
+		if kwargs.has_key("cycle"): 
+			if self.cycle != kwargs["cycle"]:
+				self.cycle = kwargs["cycle"] + 1
+
+		self.testsRun += 1
+		copyArtifacts = False
+		outcome = testObj.getOutcome()
+		if outcome == SKIPPED:
+			self.logTeamCityServiceTag("testIgnored", {"name":testObj.descriptor.id, "message":LOOKUP[outcome]})
+		elif outcome == PASSED:
+			pass
+		elif outcome == INSPECT or outcome == NOTVERIFIED:
+			copyArtifacts = True
+		else:
+			self.logTeamCityServiceTag("testFailed", {"name":testObj.descriptor.id, "message":LOOKUP[outcome]})
+			copyArtifacts = True
+		self.logTeamCityServiceTag("testFinished", {"name":testObj.descriptor.id})
+		if copyArtifacts:
+			self.copyTeamCityArtifacts(testObj, testObj.output)
+		self.logTeamCityServiceTag("progressMessage '%.0f%% complete; just finished %s'" % (100.0*self.testsRun/self.totalTests, testObj.descriptor.id))
+
+
+	def logTeamCityServiceTag(self, tag, props={}):
+		"""Helper method to add a TeamCity service tag to the test output
+		
+		@param tag: The tag name
+		@param props: Dictionary of name/value pairs to include in tag
+		
+		"""
+		tctag = self.TEAMCITY_SERVICE_TAG_PREFIX + tag
+		for key in props.keys():
+			tctag = tctag + " " + key + "='" + props[key] + "'"
+		tctag = tctag + self.TEAMCITY_SERVICE_TAG_SUFFIX
+		log.critical(tctag)
+
+
+	def copyTeamCityArtifacts(self, testObj, dir):
+		"""Helper method to zip and upload test results as a TeamCity artifact
+		
+		@param testObj: The test object (usually BaseTest or some subclass)
+		@param dir: Directory where the test output can be found
+		
+		"""
+		if self.publishArtifacts.lower() == "true":
+			if self.cycle > 0:
+				filename = "testResults_%s_%s_%05d.zip" % (testObj.descriptor.id, PLATFORM, self.cycle)
+				path = "/%s_%s_%05d/" % (testObj.descriptor.id, PLATFORM, self.cycle)
+			else:
+				filename = "testResults_%s_%s.zip" % (testObj.descriptor.id, PLATFORM)
+				path = "/%s_%s/" % (testObj.descriptor.id, PLATFORM)
+			self.logTeamCityServiceTag("publishArtifacts '%s => %s!%s'" % (dir, filename, path), {})
