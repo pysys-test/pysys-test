@@ -23,12 +23,10 @@ from pysys import log
 from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
-
-# check for new lines on end of a string
-EXPR = re.compile(".*\n$")
+from pysys.process.commonwrapper import CommonProcessWrapper, _stringToUnicode
 
 
-class ProcessWrapper:
+class ProcessWrapper(CommonProcessWrapper):
 	"""Unix process wrapper for process execution and management. 
 	
 	The unix process wrapper provides the ability to start and stop an external process, setting 
@@ -54,7 +52,7 @@ class ProcessWrapper:
 	
 	"""
 
-	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None):
+	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None, **kwargs):
 		"""Create an instance of the process wrapper.
 		
 		@param command:  The full path to the command to execute
@@ -68,14 +66,9 @@ class ProcessWrapper:
 		@param displayName: Display name for this process
 
 		"""
-		self.displayName = displayName if displayName else os.path.basename(command)
-		self.command = command
-		self.arguments = arguments
-		self.environs = environs
-		self.workingDir = workingDir
-		self.state = state
-		self.timeout = timeout
-
+		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
+			state, timeout, stdout, stderr, displayName, **kwargs)
+		
 		self.stdout = '/dev/null'
 		self.stderr = '/dev/null'
 		try:
@@ -87,36 +80,19 @@ class ProcessWrapper:
 		except:
 			log.info('Unable to create file to capture stdout - using the null device')
 		
-		# 'publicly' available data attributes set on execution
-		self.pid = None
-		self.exitStatus = None
 
 		# private instance variables
-		self.__outQueue = Queue.Queue()		
 		
 		self.__lock = threading.Lock() # to protect access to the fields that get updated while process is running
 		
-		# print process debug information
-		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
-		log.debug("  command      : %s", self.command)
-		for a in self.arguments: log.debug("  argument     : %s", a)
-		log.debug("  working dir  : %s", self.workingDir)
-		log.debug("  stdout       : %s", self.stdout)
-		log.debug("  stderr       : %s", self.stderr)
-		keys=self.environs.keys()
-		keys.sort()
-		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])		
 
-	def __str__(self): return self.displayName
-	def __repr__(self): return '%s(pid %s)'%(self.displayName, self.pid)
-
-	def __writeStdin(self, fd):
+	def _writeStdin(self, fd):
 		"""Private method to write to the process stdin pipe.
 		
 		"""
-		while 1:
+		while self._outQueue:
 			try:
-				data = self.__outQueue.get(block=True, timeout=0.25)
+				data = self._outQueue.get(block=True, timeout=0.25)
 			except Queue.Empty:
 				if not self.running(): 
 					os.close(fd)
@@ -125,7 +101,7 @@ class ProcessWrapper:
 				os.write(fd, data)	
 	
 
-	def __startBackgroundProcess(self):
+	def _startBackgroundProcess(self):
 		"""Private method to start a process running in the background. 
 		
 		"""
@@ -167,7 +143,7 @@ class ProcessWrapper:
 					# close the read end of the pipe in the parent
 					# and start a thread to write to the write end
 					os.close(stdin_r)
-					thread.start_new_thread(self.__writeStdin, (stdin_w, ))
+					thread.start_new_thread(self._writeStdin, (stdin_w, ))
 			except:
 				if self.pid == 0: os._exit(os.EX_OSERR)	
 
@@ -175,15 +151,7 @@ class ProcessWrapper:
 			raise ProcessError, "Error creating process %s" % (self.command)
 
 
-	def __startForegroundProcess(self):
-		"""Private method to start a process running in the foreground.
-
-		"""
-		self.__startBackgroundProcess()
-		self.wait(self.timeout)
-
-
-	def __setExitStatus(self):
+	def _setExitStatus(self):
 		"""Private method to set the exit status of the process.
 		
 		Returns the new value
@@ -198,69 +166,21 @@ class ProcessWrapper:
 					pid, status = os.waitpid(self.pid, os.WNOHANG)
 					if pid == self.pid:
 						if os.WIFEXITED(status):
-						  	self.exitStatus = os.WEXITSTATUS(status)
+							self.exitStatus = os.WEXITSTATUS(status)
 						elif os.WIFSIGNALED(status):
-						  	self.exitStatus = os.WTERMSIG(status)
+							self.exitStatus = os.WTERMSIG(status)
 						else:
-						  	self.exitStatus = status
-						self.__outQueue = None
+							self.exitStatus = status
+						self._outQueue = None
 					retries=0
-		  		except OSError, e:
+				except OSError, e:
 					if e.errno == errno.ECHILD:
-			  			time.sleep(0.01)
+						time.sleep(0.01)
 						retries=retries-1
 					else:
 						retries=0
 			
 			return self.exitStatus
-
-
-	def write(self, data, addNewLine=True):
-		"""Write data to the stdin of the process.
-		
-		Note that when the addNewLine argument is set to true, if a new line does not 
-		terminate the input data string, a newline character will be added. If one 
-		already exists a new line character will not be added. Should you explicitly 
-		require to add data without the method appending a new line charater set 
-		addNewLine to false.
-		
-		@param data:       The data to write to the process stdout
-		@param addNewLine: True if a new line character is to be added to the end of 
-		                   the data string
-		
-		"""
-		if addNewLine and not EXPR.search(data): data = "%s\n" % data
-		self.__outQueue.put(data)
-
-
-	def running(self):
-		"""Check to see if a process is running, returning true if running.
-		
-		@return: The running status (True / False)
-		@rtype: integer 
-		
-		"""
-		return self.__setExitStatus() is None
-		
-
-	def wait(self, timeout):
-		"""Wait for a process to complete execution.
-		
-		The method will block until either the process is no longer running, or the timeout 
-		is exceeded. Note that the method will not terminate the process if the timeout is 
-		exceeded. 
-		
-		@param timeout: The timeout to wait in seconds
-		@raise ProcessTimeout: Raised if the timeout is exceeded.
-		
-		"""
-		startTime = time.time()
-		while self.running():
-			if timeout:
-				currentTime = time.time()
-				if currentTime > startTime + timeout:
-					raise ProcessTimeout, "Process timedout"
-			time.sleep(0.1)
 
 
 	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']):
@@ -290,21 +210,6 @@ class ProcessWrapper:
 			os.kill(self.pid, signal)
 		except:
 			raise ProcessError, "Error signaling process"
-
-
-	def start(self):
-		"""Start a process using the runtime parameters set at instantiation.
-		
-		@raise ProcessError: Raised if there is an error creating the process
-		@raise ProcessTimeout: Raised in the process timed out (foreground process only)
-		
-		"""
-		if self.state == FOREGROUND:
-			self.__startForegroundProcess()
-		else:
-			self.__startBackgroundProcess()
-		
-
 
 
 
