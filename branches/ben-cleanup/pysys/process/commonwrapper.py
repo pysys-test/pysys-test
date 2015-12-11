@@ -156,7 +156,8 @@ class CommonProcessWrapper(object):
 		is exceeded. Note that the method will not terminate the process if the timeout is 
 		exceeded. 
 		
-		@param timeout: The timeout to wait in seconds
+		@param timeout: The timeout to wait in seconds. Always provide a 
+			timeout, otherwise your test may block indefinitely!
 		@raise ProcessTimeout: Raised if the timeout is exceeded.
 		
 		"""

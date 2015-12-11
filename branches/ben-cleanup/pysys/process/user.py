@@ -60,7 +60,7 @@ class ProcessUser(object):
 
 		self.outcome = [] # please use addOutcome instead of manipulating this directly
 		self.__outcomeReason = ''
-
+		
 
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
@@ -93,7 +93,7 @@ class ProcessUser(object):
 		
 	
 	# process manipulation methods of ProcessUserInterface
-	def startProcess(self, command, arguments, environs={}, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
+	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None):
 		"""Start a process running in the foreground or background, and return the process handle.
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments, environment and 
@@ -121,17 +121,17 @@ class ProcessUser(object):
 		if not displayName: displayName = os.path.basename(command)
 		
 		try:
-			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
+			process = ProcessWrapper(command, arguments, environs or {}, workingDir, state, timeout, stdout, stderr)
 			process.start()
 			if state == FOREGROUND:
-				(log.info if process.exitStatus == 0 else log.warn)("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
+				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, returned exit status %d", displayName, process.exitStatus)
 			elif state == BACKGROUND:
-				log.info("Started %s in background with process id %d", displayName, process.pid)
+				log.info("Started %s with pid %d", displayName, process.pid)
 		except ProcessError, e:
 			self.addOutcome(BLOCKED, '%s failed to run: %s'%(process, e))
 		except ProcessTimeout:
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False)
-			log.warn("Process timed out after %d seconds, stopping process", timeout)
+			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout)
 			process.stop()
 		else:
 			self.processList.append(process) 	
@@ -158,7 +158,7 @@ class ProcessUser(object):
 		if process.running():
 			try:
 				process.stop()
-				log.info("Stopped process with process id %d", process.pid)
+				log.info("Stopped process %r", process)
 			except ProcessError, e:
 				self.addOutcome(BLOCKED, 'Unable to stop %s process: %s'%(process, e))
 
@@ -177,21 +177,25 @@ class ProcessUser(object):
 		if process.running():
 			try:
 				process.signal(signal)
-				log.info("Sent %d signal to process with process id %d", signal, process.pid)
+				log.info("Sent %d signal to process %r", signal, process)
 			except ProcessError, e:
 				self.addOutcome(BLOCKED, 'Unable to send signal to process %s: %s'%(process, e))
 
 
 	def waitProcess(self, process, timeout):
-		"""Wait for a process to terminate, return on termination or expiry of the timeout.
+		"""Wait for a background process to terminate, return on termination or expiry of the timeout.
 	
 		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
 		
 		"""
+		assert timeout > 0 # must always specify this otherwise your test may block forever
 		try:
-			log.info("Waiting %d secs for process %r", timeout, process)
+			log.info("Waiting up to %d secs for process %r", timeout, process)
+			t = time.time()
 			process.wait(timeout)
+			if time.time()-t > 10:
+				log.info("Process %s terminated after %d secs", process, time.time()-t)
 		except ProcessTimeout:
 			self.addOutcome(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
 
@@ -211,10 +215,10 @@ class ProcessUser(object):
 		"""
 		if process.running():
 			process.write(data, addNewLine)
-			log.info("Written to stdin of process with process id %d", process.pid)
+			log.info("Written to stdin of process %r", process)
 			log.debug("  %s" % data)
 		else:
-			log.info("Write to process with process id %d stdin not performed as process is not running", process.pid)
+			raise Exception("Write to process %r stdin not performed as process is not running", process)
 
 
 	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket']):
@@ -248,7 +252,7 @@ class ProcessUser(object):
 				if timeout:
 					currentTime = time.time()
 					if currentTime > startTime + timeout:
-						log.info("Timedout waiting for creation of socket")
+						log.info("Timed out waiting for creation of socket")
 						break
 			time.sleep(0.01)
 		if exit: log.debug("Wait for socket creation completed successfully")
@@ -280,7 +284,7 @@ class ProcessUser(object):
 			if timeout:
 				currentTime = time.time()
 				if currentTime > startTime + timeout:
-					log.info("Timedout waiting for creation of file %s" % file)
+					log.info("Timed out waiting for creation of file %s" % file)
 					break
 			time.sleep(0.01)
 			exit = os.path.exists(f)
@@ -319,7 +323,7 @@ class ProcessUser(object):
 			if os.path.exists(f):
 				matches = getmatches(f, expr)
 				if eval("%d %s" % (len(matches), condition)):
-					log.info("Wait for signal in %s completed successfully", file)
+					log.info("Wait for signal in %s completed successfully (%d secs)", file, time.time()-startTime)
 					break
 				
 			currentTime = time.time()
