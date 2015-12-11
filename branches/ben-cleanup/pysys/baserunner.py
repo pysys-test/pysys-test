@@ -461,7 +461,9 @@ class TestContainer:
 			self.testFileHandler.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandler)
-			log.info(42*"="); log.info("%s%s"%(8*" ", self.descriptor.id)); log.info(42*"=")
+			log.info(42*"=")
+			log.info("%s%s : %s"%(3*" ", self.descriptor.id, self.descriptor.title.replace('\n','').strip()))
+			log.info(42*"=")
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		
