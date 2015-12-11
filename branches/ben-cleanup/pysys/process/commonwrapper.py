@@ -102,7 +102,7 @@ class CommonProcessWrapper(object):
 		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])
 
 		# private
-		self._outQueue = Queue.Queue()		
+		self._outQueue = None
 
 
 	def __str__(self): return self.displayName
@@ -111,7 +111,7 @@ class CommonProcessWrapper(object):
 	# these abstract methods msut be implemented by subclasses
 	def _setExitStatus(self): raise Exception('Not implemented')
 	def _startBackgroundProcess(self): raise Exception('Not implemented')
-	def _writeStdin(self, fd): raise Exception('Not implemented')
+	def _writeStdin(self): raise Exception('Not implemented')
 	def stop(self): raise Exception('Not implemented')
 	def signal(self): raise Exception('Not implemented')
 
@@ -129,7 +129,14 @@ class CommonProcessWrapper(object):
 		                   the data string
 		
 		"""
+		if not self.running(): raise Exception('Cannot write to process stdin when it is not running')
 		if addNewLine and not EXPR.search(data): data = "%s\n" % data
+			
+		if self._outQueue == None:
+			# start thread on demand
+			self._outQueue = Queue.Queue()
+			thread.start_new_thread(self._writeStdin, ())
+			
 		self._outQueue.put(data)
 		
 	def running(self):
@@ -170,6 +177,7 @@ class CommonProcessWrapper(object):
 		@raise ProcessTimeout: Raised in the process timed out (foreground process only)
 		
 		"""
+		self._outQueue = None # always reset
 		if self.state == FOREGROUND:
 			self._startBackgroundProcess()
 			self.wait(self.timeout)
