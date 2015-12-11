@@ -25,6 +25,6 @@ class PySysTest(BaseTest):
 
 		self.outcome = [] 
 		if outcome == TIMEDOUT: self.addOutcome(PASSED)
-		else: self.addOutcome(FAILED)
+		else: self.addOutcome(FAILED, 'was expecting TIMEDOUT outcome but got %s'%LOOKUP[outcome])
 		
 		
