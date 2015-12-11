@@ -26,14 +26,21 @@ from pysys.utils.filegrep import getmatches
 from pysys.process.helper import ProcessWrapper
 
 
-class ProcessUser:
+class ProcessUser(object):
 	"""Class providing basic operations over interacting with processes.
 	
 	The ProcessUser class provides the mimimum set of operations for managing and interacting with 
 	processes. The class is designed to be extended by the L{pysys.baserunner.BaseRunner} and 
 	L{pysys.basetest.BaseTest} classes so that they prescribe a common set of process operations 
 	that any application helper classes can use, i.e. where an application helper class is 
-	instantiated with a call back reference to the runner or base test for the process operations. 
+	instantiated with a callback reference to the runner or base test for the process operations. 
+	
+	This class has the ability to recored one or more 'outcomes', and many of 
+	the methods on this class will append outcomes when errors occur, such as 
+	an unsuccessful attempt to launch a process. Some subclasses may make 
+	no use of the outcome, but it is used by BaseTest - see that class for 
+	more details. 
+	
 	
 	@ivar input: Location for input to any processes (defaults to current working directory) 
 	@type input: string
@@ -49,6 +56,9 @@ class ProcessUser:
 		self.processList = []
 		self.processCount = {}
 		self.__cleanupFunctions = []
+
+		self.outcome = [] # please use addOutcome instead of manipulating this directly
+		self.__outcomeReason = ''
 
 
 	def __getattr__(self, name):
@@ -106,20 +116,21 @@ class ProcessUser:
 		@rtype: handle
 
 		"""
-		if workingDir is None: workingDir = r'%s' % self.output
-		if displayName is None: displayName = os.path.basename(command)
+		if not workingDir: workingDir = r'%s' % self.output
+		if not displayName: displayName = os.path.basename(command)
 		
 		try:
-			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
+			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
 			process.start()
 			if state == FOREGROUND:
-				log.info("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
+				(log.info if process.exitStatus == 0 else log.warn)("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
 			elif state == BACKGROUND:
 				log.info("Started %s in background with process id %d", displayName, process.pid)
-		except ProcessError:
-			log.info("%s", sys.exc_info()[1], exc_info=0)
+		except ProcessError, e:
+			self.addOutcome(BLOCKED, '%s failed to run: %s'%(process, e))
 		except ProcessTimeout:
-			log.info("Process timedout after %d seconds, stopping process", timeout)
+			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False)
+			log.warn("Process timed out after %d seconds, stopping process", timeout)
 			process.stop()
 		else:
 			self.processList.append(process) 	
@@ -137,25 +148,28 @@ class ProcessUser:
 		"""Send a soft or hard kill to a running process to stop its execution.
 	
 		This method uses the L{pysys.process.helper} module to stop a running process. 
+		Should the request to stop the running process fail, a C{BLOCKED} outcome will 
+		be added to the outcome list.
 		
-		@param process: The process handle returned from the L{startProcess()} method
+		@param process: The process handle returned from the L{startProcess} method
 		
 		"""
 		if process.running():
 			try:
 				process.stop()
 				log.info("Stopped process with process id %d", process.pid)
-			except ProcessError:
-				log.info("Unable to stop process")
+			except ProcessError, e:
+				self.addOutcome(BLOCKED, 'Unable to stop %s process: %s'%(process, e))
 
 
 	def signalProcess(self, process, signal):
 		"""Send a signal to a running process (Unix only).
 	
 		This method uses the L{pysys.process.helper} module to send a signal to a running 
-		process. 
-		
-		@param process: The process handle returned from the L{startProcess()} method
+		process. Should the request to send the signal to the running process fail, a 
+		C{BLOCKED} outcome will be added to the outcome list.
+			
+		@param process: The process handle returned from the L{startProcess} method
 		@param signal: The integer value of the signal to send
 		
 		"""
@@ -163,22 +177,22 @@ class ProcessUser:
 			try:
 				process.signal(signal)
 				log.info("Sent %d signal to process with process id %d", signal, process.pid)
-			except ProcessError:
-				log.info("Unable to send signal to process")
+			except ProcessError, e:
+				self.addOutcome(BLOCKED, 'Unable to send signal to process %s: %s'%(process, e))
 
 
 	def waitProcess(self, process, timeout):
 		"""Wait for a process to terminate, return on termination or expiry of the timeout.
 	
-		@param process: The process handle returned from the L{startProcess()} method
+		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
 		
 		"""
 		try:
-			log.info("Waiting %d secs for process with process id %d", timeout, process.pid)
+			log.info("Waiting %d secs for process %r", timeout, process)
 			process.wait(timeout)
 		except ProcessTimeout:
-			log.warn("Timedout waiting for process")
+			self.addOutcome(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
 
 
 	def writeProcess(self, process, data, addNewLine=True):
@@ -334,6 +348,8 @@ class ProcessUser:
 		""" Cleanup function that frees resources managed by this object. 
 		Should be called exactly once when this object is no longer needed. 
 		
+		Instead of overriding this function, use addCleanupFunction.  
+		
 		"""
 		try:
 			for fn in reversed(self.__cleanupFunctions):
@@ -354,3 +370,100 @@ class ProcessUser:
 			
 			log.debug('ProcessUser cleanup function done.')
 		
+	# methods to add to and obtain the outcome, used by BaseTest
+	
+	def addOutcome(self, outcome, outcomeReason='', printReason=True):
+		"""Add a test validation outcome (and if possible, reason string) to the validation list.
+		
+		See also abort(), which should be used instead of this method for cases where 
+		it doesn't make sense to continue running the test. 
+		
+		The method provides the ability to add a validation outcome to the internal data structure 
+		storing the list of test validation outcomes. In a single test run multiple validations may 
+		be performed. The currently supported validation outcomes are:
+				
+		  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
+		  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
+		  DUMPEDCORE:  A process started by the test produced a core file (unix only)
+		  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
+		  FAILED:      A validation step of the test failed
+		  NOTVERIFIED: No validation steps were performed
+		  INSPECT:     A validation step of the test requires manual inspection
+		  PASSED:      A validation step of the test passed 
+		
+		The outcomes are considered to have a precedence order, as defined by the order of the outcomes listed
+		above. Thus a C{BLOCKED} outcome has a higher precedence than a C{PASSED} outcome. The outcomes are defined 
+		in L{pysys.constants}. 
+		
+		@param outcome: The outcome to add
+		@param outcomeReason: A string summarizing the reason for the outcome 
+			to help anyone triaging test failures. 
+			Callers are strongly recommended to specify this if at all possible 
+			when reporting failure outcomes. 
+			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
+		@param printReason: if True the specified outcomeReason will be printed 
+			at INFO/WARN (whether or not this outcome reason is taking priority). 
+			In most cases this is useful, but can be disabled if more specific 
+			logging is already implemented. 
+		
+		"""
+		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
+		outcomeReason = outcomeReason.strip() if outcomeReason else ''
+		
+		old = self.getOutcome()
+		self.outcome.append(outcome)
+		if self.getOutcome() != old:
+			self.__outcomeReason = outcomeReason
+
+		if outcomeReason and printReason:
+			if outcome in FAILS:
+				log.warn('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
+			else:
+				log.info('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
+
+	def abort(self, outcome, outcomeReason):
+		"""Immediately terminate execution of the current test (both execute and validate) 
+		and report the specified outcome and outcomeReason string. 
+		
+		This method works by raising an AbortExecution exeception, so 
+		do not add a try...except block around the abort call unless that is 
+		really what is intended. 
+		
+		See addOutcome for the list of permissible outcome values. 
+		
+		@param outcome: The outcome, which will override any existing 
+			outcomes previously reported. The most common outcomes are 
+			BLOCKED, TIMEDOUT or SKIPPED. 
+		@param outcomeReason: A string summarizing the reason for the outcome 
+			to help anyone triaging test failures. 
+			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
+		
+		"""	
+		raise AbortExecution(outcome, outcomeReason)
+	
+	def getOutcome(self):
+		"""Get the overall outcome of the test based on the precedence order.
+				
+		The method returns the overal outcome of the test based on the outcomes stored in the internal data 
+		structure. The precedence order of the possible outcomes is used to determined the overall outcome 
+		of the test, e.g. if C{PASSED}, C{BLOCKED} and C{FAILED} were recorded during the execution of the test, 
+		the overall outcome would be C{BLOCKED}. 
+		
+		The method returns the integer value of the outcome as defined in L{pysys.constants}. To convert this 
+		to a string representation use the C{LOOKUP} dictionary i.e. C{LOOKUP}[test.getOutcome()]
+		
+		@return: The overall outcome
+		@rtype:  integer
+
+		"""	
+		if len(self.outcome) == 0: return NOTVERIFIED
+		return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
+		
+	def getOutcomeReason(self):
+		"""Get the reason string for the current overall outcome (if specified).
+				
+		@return: The overall test outcome reason or '' if not specified
+		@rtype:  string
+
+		"""	
+		return self.__outcomeReason
