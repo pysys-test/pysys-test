@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import sys, os, time
+import sys, os, time, collections
 
 from pysys import log
 from pysys.constants import *
@@ -26,6 +26,7 @@ from pysys.utils.filegrep import getmatches
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 
+STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 
 class ProcessUser(object):
 	"""Class providing basic operations over interacting with processes.
@@ -98,13 +99,12 @@ class ProcessUser(object):
 			return 0
 		
 	
-	
 	def allocateUniqueStdOutErr(self, processKey):
 		""" Allocate filenames of the form processKey[.n].out (similarly for .err) 
 		for a process that is about to be started, such that the names are not 
 		repeated within the specified parent's lifetime. 
 		
-		Returns a tuple of (stdout, stderr).
+		Returns a STDOUTERR_TUPLE named tuple of (stdout, stderr).
 		
 		@param processKey A user-defined identifier that will form the prefix 
 			onto which [.n].out is appended
@@ -114,7 +114,7 @@ class ProcessUser(object):
 		
 		suffix = '.%d'%(newval) if newval > 1 else ''
 		
-		return (
+		return STDOUTERR_TUPLE(
 			os.path.join(self.output, processKey+suffix+'.out'), 
 			os.path.join(self.output, processKey+suffix+'.err'), 
 			)	
@@ -359,7 +359,7 @@ class ProcessUser(object):
 				return
 
 			
-	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25):
+	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, process=None):
 		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
 		
 		This method blocks until a particular regular expression is seen in a text file on a set
@@ -370,12 +370,14 @@ class ProcessUser(object):
 		
 		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
 		
-		@param file: The basename of the file used to wait for the signal
+		@param file: The absolute or relative name of the file used to wait for the signal
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression to search for in the text file
 		@param condition: The condition to be met for the number of lines matching the regular expression
 		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
+		@param process: If a handle to the process object producing output is specified, the wait will abort if 
+			the process dies before the expected signal appears. 
 		"""
 			
 		if filedir is None: filedir = self.output
@@ -389,22 +391,25 @@ class ProcessUser(object):
 		
 		matches = []
 		startTime = time.time()
-		log.info("Wait for signal \"%s\" %s in %s", expr, condition, file)
+		log.info("Wait for signal \"%s\" %s in %s", expr, condition, os.path.basename(file))
 		while 1:
 			if os.path.exists(f):
 				matches = getmatches(f, expr)
 				if eval("%d %s" % (len(matches), condition)):
-					log.info("Wait for signal in %s completed successfully (%d secs)", file, time.time()-startTime)
+					log.info("Wait for signal in '%s' completed successfully (%d secs)", os.path.basename(file), time.time()-startTime)
 					break
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
-				msg = "Wait for signal in %s timed out after %d secs, with %d matches"%(file, timeout, len(matches))
+				msg = "Wait for signal in '%s' timed out after %d secs, with %d matches"%(os.path.basename(file), timeout, len(matches))
 				if self.defaultAbortOnError:
 					self.abort(TIMEDOUT, msg)
 				else:
 					log.warn(msg)
 				break
+			
+			if process and not process.running():
+				self.abort(BLOCKED, "Wait for signal in '%s' aborted due to unexpected termination of process %s"%(os.path.basename(file), process))
 			time.sleep(poll)
 		return matches
 
