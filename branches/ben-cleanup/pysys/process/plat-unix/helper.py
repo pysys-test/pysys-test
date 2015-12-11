@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import signal, time, copy, logging, Queue, thread, errno
+import signal, time, copy, logging, Queue, thread, errno, threading
 
 from pysys import log
 from pysys import process_lock

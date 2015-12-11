@@ -18,7 +18,6 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 import string, os.path, time, thread, logging, Queue
-import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, threading
 
 from pysys import log
 from pysys import process_lock
