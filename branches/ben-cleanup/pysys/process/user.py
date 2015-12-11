@@ -61,7 +61,7 @@ class ProcessUser(object):
 		self.outcome = [] # please use addOutcome instead of manipulating this directly
 		self.__outcomeReason = ''
 		
-		self.defaultAbortOnError = PROJECT.defaultAbortOnError if hasattr(PROJECT, 'defaultAbortOnError') else True
+		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else True
 
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
