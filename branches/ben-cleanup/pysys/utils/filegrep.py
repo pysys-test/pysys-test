@@ -25,11 +25,12 @@ from pysys.exceptions import *
 from pysys.utils.filediff import trimContents
 
 
-def getmatches(file, regexpr):
+def getmatches(file, regexpr, ignores=None):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches.
 	
 	@param file: The full path to the input file
 	@param regexpr: The regular expression used to search for matches
+	@param ignores: A list of regexes which will cause matches to be discarded
 	@return: A list of the match objects 
 	@rtype: list
 	@raises FileNotFoundException: Raised if the input file does not exist
@@ -43,12 +44,20 @@ def getmatches(file, regexpr):
 	if not os.path.exists(file):
 		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
 	else:
-		list = open(file, 'r').readlines()
-		for i in range(0, len(list)):
-			match = rexp.search(list[i])
-			if match is not None: 
-				log.debug(("Found match for line: %s" % list[i]).rstrip())
-				matches.append(match)
+		with open(file, 'r') as f:
+			for l in f:
+				match = rexp.search(l)
+				if match is not None: 
+					shouldignore = False
+					if ignores:
+						for i in ignores:
+							if re.search(i, l):
+								shouldignore = True
+								break
+					if shouldignore: continue
+					
+					log.debug(("Found match for line: %s" % l).rstrip())
+					matches.append(match)
 		return matches
 
 

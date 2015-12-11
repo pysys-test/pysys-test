@@ -544,7 +544,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(result, msg) 
 			if result == FAILED: log.warn("Ordered grep failed on expression \"%s\"", expr)
 
-	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", **xargs):
+	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, **xargs):
 		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -555,15 +555,16 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression used to match a line of the input file
 		@param condition: The condition to be met for the number of lines matching the regular expression
+		@param ignores: A list of regular expressions that will cause lines to be excluded from the count
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""	
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
-		msg = self.__assertMsg(xargs, 'Line count on input file %s' % file)
+		msg = self.__assertMsg(xargs, 'Line count on input file \'%s\'' % file)
 		try:
-			numberLines = linecount(f, expr)
+			numberLines = linecount(f, expr, ignores=ignores)
 			log.debug("Number of matching lines is %d"%numberLines)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
@@ -574,7 +575,7 @@ class BaseTest(ProcessUser):
 				appender = ""
 			else:
 				result = FAILED
-				appender = " [ %d%s ]" % (numberLines, condition)
+				appender = " '%d' does not match condition: '%s'" % (numberLines, condition)
 			self.addOutcome(result, msg+appender) 
 
 
