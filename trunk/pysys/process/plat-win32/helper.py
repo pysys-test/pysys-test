@@ -18,19 +18,20 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 import string, os.path, time, thread, logging, Queue
-import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes
+import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, threading
 
 from pysys import log
 from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
+from pysys.process.commonwrapper import CommonProcessWrapper, _stringToUnicode
 
 # check for new lines on end of a string
 EXPR = re.compile(".*\n$")
 
 
-class ProcessWrapper:
-	"""Process wrapper for process execution and management. 
+class ProcessWrapper(CommonProcessWrapper):
+	"""Windows Process wrapper for process execution and management. 
 	
 	The process wrapper provides the ability to start and stop an external process, setting 
 	the process environment, working directory and state i.e. a foreground process in which case 
@@ -55,7 +56,7 @@ class ProcessWrapper:
 	
 	"""
 
-	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None):
+	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None, **kwargs):
 		"""Create an instance of the process wrapper.
 		
 		@param command:  The full path to the command to execute
@@ -69,74 +70,44 @@ class ProcessWrapper:
 		@param displayName: Display name for this process
 
 		"""
-		self.displayName = displayName if displayName else os.path.basename(command)
-		self.command = command
-		self.arguments = arguments
-		self.environs = {}
-		for key in environs: self.environs[self.__stringToUnicode(key)] = self.__stringToUnicode(environs[key])
-		self.workingDir = workingDir
-		self.state = state
-		self.timeout = timeout
-
-		# 'publicly' available data attributes set on execution
-		self.pid = None
-		self.exitStatus = None
+		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
+			state, timeout, stdout, stderr, displayName, **kwargs)
 
 		# private instance variables
 		self.__hProcess = None
 		self.__hThread = None
 		self.__tid = None
-		self.__outQueue = Queue.Queue()
+		
+		self.__lock = threading.Lock() # to protect access to the fields that get updated
 		
 		# set the stdout|err file handles
 		self.fStdout = 'nul'
 		self.fStderr = 'nul'
 		try:
-			if stdout is not None: self.fStdout = self.__stringToUnicode(stdout)
+			if stdout is not None: self.fStdout = _stringToUnicode(stdout)
 		except:
 			log.info("Unable to create file to capture stdout - using the null device")
 		try:
-			if stderr is not None: self.fStderr = self.__stringToUnicode(stderr)
+			if stderr is not None: self.fStderr = _stringToUnicode(stderr)
 		except:
 			log.info("Unable to create file to capture stdout - using the null device")
 
-		# print process debug information
-		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
-		log.debug("  command      : %s", self.command)
-		for a in self.arguments: log.debug("  argument     : %s", a)
-		log.debug("  working dir  : %s", self.workingDir)
-		log.debug("  stdout       : %s", stdout)
-		log.debug("  stdout       : %s", stderr)
-		keys=self.environs.keys()
-		keys.sort()
-		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])
-
-	def __str__(self): return self.displayName
-	def __repr__(self): return '%s(pid %s)'%(self.displayName, self.pid)
 		
-	def __stringToUnicode(self, s):
-		""" Converts a unicode string or a utf-8 bit string into a unicode string. 
-		
-		"""
-		if isinstance(s, unicode):
-			return s
-		else:
-			return unicode(s, "utf8")
 
 
-	def __writeStdin(self, hStdin):
+	def _writeStdin(self):
 		"""Private method to write to the process stdin pipe.
 		
 		"""
-		while 1:
+		while self._outQueue:
 			try:
-				data = self.__outQueue.get(block=True, timeout=0.25)
+				data = self._outQueue.get(block=True, timeout=0.25)
 			except Queue.Empty:
 				if not self.running():
-					win32file.CloseHandle(hStdin)
+					win32file.CloseHandle(self.__stdin)
 					break
 			else:
-				win32file.WriteFile(hStdin, data, None)
+				win32file.WriteFile(self.__stdin, data, None)
 
 
 	def __quotePath(self, input):
@@ -150,7 +121,7 @@ class ProcessWrapper:
 			return i
 
 
-	def __startBackgroundProcess(self):
+	def _startBackgroundProcess(self):
 		"""Private method to start a process running in the background. 
 		
 		"""	
@@ -161,10 +132,10 @@ class ProcessWrapper:
 	
 			# create pipes for the process to write to
 			hStdin_r, hStdin = win32pipe.CreatePipe(sAttrs, 0)
-			hStdout = win32file.CreateFile(self.__stringToUnicode(self.fStdout), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+			hStdout = win32file.CreateFile(_stringToUnicode(self.fStdout), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
 			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
 			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
-			hStderr = win32file.CreateFile(self.__stringToUnicode(self.fStderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+			hStderr = win32file.CreateFile(_stringToUnicode(self.fStderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
 			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
 			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
 
@@ -199,86 +170,27 @@ class ProcessWrapper:
 			# set the handle to the stdin of the process 
 			self.__stdin = hStdin
 		
-			# check to see if the process is running. If it is kick off the threads to collect
-			# the stdout and stderr
-			if self.running():					
-				thread.start_new_thread(self.__writeStdin, (hStdin, ))
 
 
-	def __startForegroundProcess(self):
-		"""Private method to start a process running in the foreground.
-		
-		"""
-		self.__startBackgroundProcess()
-		self.wait(self.timeout)
-
-
-	def __setExitStatus(self):
+	def _setExitStatus(self):
 		"""Private method to set the exit status of the process.
 		
 		"""
-		if self.exitStatus is not None: return 
-		exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
-		if exitStatus != win32con.STILL_ACTIVE:
-			try:
-				win32file.CloseHandle(self.__hProcess)
-				win32file.CloseHandle(self.__hThread)
-			except Exception, e:
-				# for some reason these do fail sometimes with 'handle is invalid'
-				log.warning('Could not close process and thread handles for process %s: %s', self.pid, e)
-			self.__outQueue = None
-			self.exitStatus = exitStatus
-
-
-	def write(self, data, addNewLine=True):
-		"""Write data to the stdin of the process.
-		
-		Note that when the addNewLine argument is set to true, if a new line does not 
-		terminate the input data string, a newline character will be added. If one 
-		already exists a new line character will not be added. Should you explicitly 
-		require to add data without the method appending a new line charater set 
-		addNewLine to false.
-		
-		@param data:       The data to write to the process stdout
-		@param addNewLine: True if a new line character is to be added to the end of 
-		                   the data string
-		
-		"""
-		if addNewLine and not EXPR.search(data): data = "%s\n" % data
-		self.__outQueue.put(data)
-
-
-	def running(self):
-		"""Check to see if a process is running, returning true if running.
-		
-		@return: The running status (True / False)
-		@rtype: integer
-		
-		"""
-		self.__setExitStatus()
-		if self.exitStatus is not None: return False
-		return True
-
-
-	def wait(self, timeout):
-		"""Wait for a process to complete execution.
-		
-		The method will block until either the process is no longer running, or the timeout 
-		is exceeded. Note that the method will not terminate the process if the timeout is 
-		exceeded. 
-		
-		@param timeout: The timeout to wait in seconds
-		@raise ProcessTimeout: Raised if the timeout is exceeded.
-		
-		"""
-		startTime = time.time()
-		while self.running():
-			if timeout:
-				currentTime = time.time()
-				if currentTime > startTime + timeout:
-					raise ProcessTimeout, "Process timedout"
-			time.sleep(0.1)
-		
+		with self.__lock:
+			if self.exitStatus is not None: return self.exitStatus
+			exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
+			if exitStatus != win32con.STILL_ACTIVE:
+				try:
+					win32file.CloseHandle(self.__hProcess)
+					win32file.CloseHandle(self.__hThread)
+					win32file.CloseHandle(self.__stdin)
+				except Exception, e:
+					# these failed sometimes with 'handle is invalid', probably due to interference of stdin writer thread
+					log.warning('Could not close process and thread handles for process %s: %s', self.pid, e)
+				self._outQueue = None
+				self.exitStatus = exitStatus
+			
+			return self.exitStatus
 
 	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']): 
 		"""Stop a process running.
@@ -286,9 +198,11 @@ class ProcessWrapper:
 		@raise ProcessError: Raised if an error occurred whilst trying to stop the process
 		
 		"""
-		if self.exitStatus is not None: return 
 		try:
-			win32api.TerminateProcess(self.__hProcess,0)
+			with self.__lock:
+				if self.exitStatus is not None: return 
+				win32api.TerminateProcess(self.__hProcess,0)
+			
 			self.wait(timeout=timeout)
 		except:
 			raise ProcessError, "Error stopping process"
@@ -307,20 +221,3 @@ class ProcessWrapper:
 		raise NotImplementedError , "Unable to send a signal to a windows process"
 
 
-	def start(self):
-		"""Start a process using the runtime parameters set at instantiation.
-		
-		@raise ProcessError: Raised if there is an error creating the process
-		@raise ProcessTimeout: Raised in the process timed out (foreground process only)
-		
-		"""
-		if self.state == FOREGROUND:
-			self.__startForegroundProcess()
-		else:
-			self.__startBackgroundProcess()
-			time.sleep(1)
-
-
-
-
-					   

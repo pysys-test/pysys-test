@@ -13,6 +13,6 @@ class PySysTest(BaseTest):
 		
 	def validate(self):
 		del self.outcome[:]
-		self.assertGrep('run.log.proc', expr='PASSED: Line count on input file file1.txt')
-		self.assertGrep('run.log.proc', expr='FAILED: Line count on input file file1.txt \[ *1>=15 *\]')
+		self.assertGrep('run.log.proc', expr='PASSED: Line count on input file \'file1.txt\'')
+		self.assertGrep('run.log.proc', expr="FAILED: Line count on input file 'file1.txt' .*is '1'.*condition: '>=15'")
 		

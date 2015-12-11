@@ -178,7 +178,7 @@ class BaseRunner(ProcessUser):
 				else:
 					size = os.stat(path)[stat.ST_SIZE]
 
-				if (size == 0) or (removeNonZero and not re.search('run.log', file)):
+				if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
 					count = 0
 					while count < 3:
 						try:
@@ -193,18 +193,25 @@ class BaseRunner(ProcessUser):
 			log.warning(ex)
 			log.warning("Output directory may not be completely clean")
 
+	def isPurgableFile(self, path):
+		"""
+		This method is called by testComplete to provide runners with the 
+		ability to veto deletion of non-empty files that should always be left 
+		in a test's output directory even when the test has passed, 
+		by returning False from this method. For example this could be used to 
+		avoid deleting code coverage files. 
+		
+		By default this will return True. 
+		
+		@param path: The absolute path of the file to be purged
+		"""
+		return True
+
 	def cycleComplete(self):
 		"""Cycle complete method which may optionally be overridden to perform custom operations between the repeated execution of a set of testcases.
 		
 		"""
 		pass
-
-
-	def cleanup(self):
-		"""Cleanup method which may optionally be overridden to perform custom cleanup operations after execution of all testcases.
-		
-		"""
-		ProcessUser.__del__(self)
 
 
 	# perform a test run
@@ -454,7 +461,9 @@ class TestContainer:
 			self.testFileHandler.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandler)
-			log.info(42*"="); log.info("%s%s"%(8*" ", self.descriptor.id)); log.info(42*"=")
+			log.info(42*"=")
+			log.info("%s%s : %s"%(3*" ", self.descriptor.id, self.descriptor.title.replace('\n','').strip()))
+			log.info(42*"=")
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		
@@ -496,6 +505,7 @@ class TestContainer:
 				try:
 					self.testObj.setup()
 					self.testObj.execute()
+					log.info('--- validate ---')
 					self.testObj.validate()
 				except AbortExecution, e:
 					# typically used to abort with blocked outcome or to skip
@@ -514,7 +524,6 @@ class TestContainer:
 			log.warn("TestContainer caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.testObj.addOutcome(BLOCKED, 'Caught exception: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]))
 	
-
 		# call the cleanup method to tear down the test
 		try:
 			self.testObj.cleanup()
@@ -563,7 +572,7 @@ class TestContainer:
 				if stat.S_ISREG(mode):
 					os.remove(path)
 				elif stat.S_ISDIR(mode):
-				  	self.purgeDirectory(path, delTop=True)
+					self.purgeDirectory(path, delTop=True)
 			if delTop: os.rmdir(dir)
 
 		except OSError as ex:

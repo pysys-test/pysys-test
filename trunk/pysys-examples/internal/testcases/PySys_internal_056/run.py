@@ -3,18 +3,11 @@ from pysys.basetest import BaseTest
 
 class PySysTest(BaseTest):
 	def execute(self):
-		self.phandle = self.startProcess(command=sys.executable,
-										arguments = ["%s/wait.py" % self.input],
-						  				environs = os.environ,
-						  				workingDir = self.input,
-						  				stdout = "%s/wait.out" % self.output,
-						  				stderr = "%s/wait.err" % self.output,
-						  				state=BACKGROUND)
-
+		pass
 	def validate(self):
 		self.assertTrue(True)
 		self.assertTrue(False)
-		self.waitProcess(self.phandle, timeout=1)
+		self.addOutcome(TIMEDOUT, 'simulated timeout')
 		self.assertTrue(True)
 		self.assertGrep('not_there', expr="")
 		self.checkOutcome()

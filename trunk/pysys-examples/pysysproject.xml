@@ -69,6 +69,13 @@
 	 -->
 	<property name="user" value="${env.USERNAME}" default="guest"/>	
 
+	<!-- 
+	Controls whether tests will abort when operations such as startProcess and waitForSignal 
+	time out. We recommend using "true" which is the default but "false" can be used to return 
+	to the legacy behaviour which permitted tests to succeed despite some errors occurring. 
+	-->
+	<property name="defaultAbortOnError" value="true" default="true"/>	
+
 	
 	<!-- 
 	Import properties from file (fails silently if the file does not exist). The imported 
