@@ -178,7 +178,7 @@ class BaseRunner(ProcessUser):
 				else:
 					size = os.stat(path)[stat.ST_SIZE]
 
-				if (size == 0) or (removeNonZero and not re.search('run.log', file)):
+				if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
 					count = 0
 					while count < 3:
 						try:
@@ -192,6 +192,20 @@ class BaseRunner(ProcessUser):
 			log.warning("Caught OSError while cleaning output directory:")
 			log.warning(ex)
 			log.warning("Output directory may not be completely clean")
+
+	def isPurgableFile(self, path):
+		"""
+		This method is called by testComplete to provide runners with the 
+		ability to veto deletion of non-empty files that should always be left 
+		in a test's output directory even when the test has passed, 
+		by returning False from this method. For example this could be used to 
+		avoid deleting code coverage files. 
+		
+		By default this will return True. 
+		
+		@param path: The absolute path of the file to be purged
+		"""
+		return True
 
 	def cycleComplete(self):
 		"""Cycle complete method which may optionally be overridden to perform custom operations between the repeated execution of a set of testcases.
