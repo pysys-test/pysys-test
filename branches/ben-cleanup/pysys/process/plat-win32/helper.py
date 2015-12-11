@@ -280,7 +280,7 @@ class ProcessWrapper:
 				currentTime = time.time()
 				if currentTime > startTime + timeout:
 					raise ProcessTimeout, "Process timedout"
-			time.sleep(0.1)
+			time.sleep(0.05)
 		
 
 	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']): 
@@ -323,5 +323,3 @@ class ProcessWrapper:
 			self.__startForegroundProcess()
 		else:
 			self.__startBackgroundProcess()
-			time.sleep(1)
-
