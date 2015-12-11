@@ -33,7 +33,6 @@ from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
-from pysys.utils.allocport import TCPPortOwner
 from pysys.process.user import ProcessUser
 from pysys.process.helper import ProcessWrapper
 from pysys.process.monitor import ProcessMonitor
@@ -556,13 +555,6 @@ class BaseTest(ProcessUser):
 				appender = " [ %d%s ]" % (numberLines, condition)
 			self.addOutcome(result, msg+appender) 
 
-	def getNextAvailableTCPPort(self):
-		"""Allocate a TCP port which is available for a server to be
-		started on. Take ownership of it for the duration of the test
-		"""
-		o = TCPPortOwner()
-		self.addCleanupFunction(lambda: o.cleanup())
-		return o.port
 
 	def __assertMsg(self, xargs, default):
 		"""Return an assert statement requested to override the default value.

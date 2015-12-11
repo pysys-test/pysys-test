@@ -24,6 +24,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 from pysys.process.helper import ProcessWrapper
+from pysys.utils.allocport import TCPPortOwner
 
 
 class ProcessUser(object):
@@ -467,3 +468,11 @@ class ProcessUser(object):
 
 		"""	
 		return self.__outcomeReason
+
+	def getNextAvailableTCPPort(self):
+		"""Allocate a TCP port which is available for a server to be
+		started on. Take ownership of it for the duration of the test
+		"""
+		o = TCPPortOwner()
+		self.addCleanupFunction(lambda: o.cleanup())
+		return o.port
