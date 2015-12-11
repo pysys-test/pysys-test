@@ -61,6 +61,7 @@ class ProcessUser(object):
 		self.outcome = [] # please use addOutcome instead of manipulating this directly
 		self.__outcomeReason = ''
 		
+		self.defaultAbortOnError = PROJECT.defaultAbortOnError if hasattr(PROJECT, 'defaultAbortOnError') else True
 
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
@@ -93,7 +94,9 @@ class ProcessUser(object):
 		
 	
 	# process manipulation methods of ProcessUserInterface
-	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None):
+	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
+			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
+			abortOnError=None, ignoreExitStatus=True):
 		"""Start a process running in the foreground or background, and return the process handle.
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments, environment and 
@@ -113,24 +116,35 @@ class ProcessUser(object):
 		@param stdout: The filename used to capture the stdout of the process
 		@param stderr: The filename user to capture the stderr of the process
 		@param displayName: Logical name of the process used for display and reference counting (defaults to the basename of the command)
+		@param abortOnError: If True, failures will always result in an exception, 
+			if False they will just add a failure outcome, 
+			if None the default value is taken from the "defaultAbortOnError" property on the project (True by default)
+		@param ignoreExitStatus: If False, non-zero exit codes are reported as an error outcome (and will also cause 
+			an abort if the abortOnError flag is set), if True non-zero exit codes are ignored
 		@return: The process handle of the process (L{pysys.process.helper.ProcessWrapper})
 		@rtype: handle
 
 		"""
 		if not workingDir: workingDir = r'%s' % self.output
 		if not displayName: displayName = os.path.basename(command)
+		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		
 		try:
+			starttime = time.time()
 			process = ProcessWrapper(command, arguments, environs or {}, workingDir, state, timeout, stdout, stderr)
 			process.start()
 			if state == FOREGROUND:
-				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, returned exit status %d", displayName, process.exitStatus)
+				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, returned exit status %d (%d secs)", displayName, process.exitStatus, time.time()-starttime)
+				
+				if not ignoreExitStatus and process.exitStatus != 0:
+					self.addOutcome(BLOCKED, '%s returned non-zero exit code %d'%(process, process.exitStatus), abortOnError=abortOnError)
+				
 			elif state == BACKGROUND:
 				log.info("Started %s with pid %d", displayName, process.pid)
 		except ProcessError, e:
-			self.addOutcome(BLOCKED, '%s failed to run: %s'%(process, e))
+			self.addOutcome(BLOCKED, '%s failed to run: %s'%(process, e), abortOnError=abortOnError)
 		except ProcessTimeout:
-			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False)
+			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
 			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout)
 			process.stop()
 		else:
@@ -152,15 +166,19 @@ class ProcessUser(object):
 		Should the request to stop the running process fail, a C{BLOCKED} outcome will 
 		be added to the outcome list.
 		
-		@param process: The process handle returned from the L{startProcess} method
+		Failures will result in an exception unless the project property defaultAbortOnError=False. 
 		
+		@param process: The process handle returned from the L{startProcess} method
 		"""
 		if process.running():
 			try:
 				process.stop()
 				log.info("Stopped process %r", process)
 			except ProcessError, e:
-				self.addOutcome(BLOCKED, 'Unable to stop %s process: %s'%(process, e))
+				if not self.defaultAbortOnError:
+					log.warn("Ignoring failure to stop process %r due to: %s", process, e)
+				else:
+					raise
 
 
 	def signalProcess(self, process, signal):
@@ -169,7 +187,9 @@ class ProcessUser(object):
 		This method uses the L{pysys.process.helper} module to send a signal to a running 
 		process. Should the request to send the signal to the running process fail, a 
 		C{BLOCKED} outcome will be added to the outcome list.
-			
+		
+		Failures will result in an exception unless the project property defaultAbortOnError=False. 
+		
 		@param process: The process handle returned from the L{startProcess} method
 		@param signal: The integer value of the signal to send
 		
@@ -179,11 +199,16 @@ class ProcessUser(object):
 				process.signal(signal)
 				log.info("Sent %d signal to process %r", signal, process)
 			except ProcessError, e:
-				self.addOutcome(BLOCKED, 'Unable to send signal to process %s: %s'%(process, e))
+				if not self.defaultAbortOnError:
+					log.warn("Ignoring failure to signal process %r due to: %s", process, e)
+				else:
+					raise
 
 
 	def waitProcess(self, process, timeout):
 		"""Wait for a background process to terminate, return on termination or expiry of the timeout.
+	
+		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
 	
 		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
@@ -197,7 +222,10 @@ class ProcessUser(object):
 			if time.time()-t > 10:
 				log.info("Process %s terminated after %d secs", process, time.time()-t)
 		except ProcessTimeout:
-			self.addOutcome(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
+			if not self.defaultAbortOnError:
+				log.warn("Ignoring timeout waiting for process %r: %s", process, e)
+			else:
+				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
 
 
 	def writeProcess(self, process, data, addNewLine=True):
@@ -221,7 +249,7 @@ class ProcessUser(object):
 			raise Exception("Write to process %r stdin not performed as process is not running", process)
 
 
-	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket']):
+	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], process=None):
 		"""Wait for a socket connection to be established.
 		
 		This method blocks until connection to a particular host:port pair can be established. 
@@ -230,6 +258,8 @@ class ProcessUser(object):
 		the server process is running and a client is able to create connections to it. If a 
 		connection cannot be made within the specified timeout interval, the method returns 
 		to the caller.
+		
+		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
 		
 		@param port: The port value in the socket host:port pair
 		@param host: The host value in the socket host:port pair
@@ -242,29 +272,35 @@ class ProcessUser(object):
 		log.debug("  file:       %d" % port)
 		log.debug("  filedir:    %s" % host)
 		
-		exit = False
 		startTime = time.time()
 		while not exit:
 			try:
 				s.connect((host, port))
-				exit = True
+				log.debug("Wait for socket creation completed successfully")
+				if time.time()-startTime>10:
+					log.info("Wait for socket creation completed (%d secs)", time.time()-startTime)
 			except socket.error:
 				if timeout:
 					currentTime = time.time()
 					if currentTime > startTime + timeout:
-						log.info("Timed out waiting for creation of socket")
+						msg = "Timed out waiting for creation of socket after %d secs"%(time.time()-startTime)
+						if self.defaultAbortOnError:
+							self.abort(TIMEDOUT, msg)
+						else:
+							log.warn(msg)
 						break
 			time.sleep(0.01)
-		if exit: log.debug("Wait for socket creation completed successfully")
 	
 
 	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile']):
-		"""Wait for a file to be written to disk.
+		"""Wait for a file to exist on disk.
 		
 		This method blocks until a file is created on disk. This is useful for test timing where 
 		a component under test creates a file (e.g. for logging) indicating it has performed all 
 		initialisation actions and is ready for the test execution steps. If a file is not created 
 		on disk within the specified timeout interval, the method returns to the caller.
+		
+		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
 		
 		@param file: The basename of the file used to wait to be created
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
@@ -278,17 +314,23 @@ class ProcessUser(object):
 		log.debug("  file:       %s" % file)
 		log.debug("  filedir:    %s" % filedir)
 		
-		exit = False
 		startTime = time.time()
-		while not exit:
+		while True:
 			if timeout:
 				currentTime = time.time()
 				if currentTime > startTime + timeout:
-					log.info("Timed out waiting for creation of file %s" % file)
+
+					msg = "Timed out waiting for creation of file %s (%d secs)" % (file, time.time()-startTime)
+					if self.defaultAbortOnError:
+						self.abort(TIMEDOUT, msg)
+					else:
+						log.warn(msg)
 					break
+					
 			time.sleep(0.01)
-			exit = os.path.exists(f)
-		if exit: log.debug("Wait for file creation completed successfully")
+			if os.path.exists(f):
+				log.info("Wait for '%s' file creation completed successfully (%d secs)", file, time.time()-startTime)
+				return
 
 			
 	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25):
@@ -300,6 +342,8 @@ class ProcessUser(object):
 		If the regular expression is not seen in the file matching the supplied condition within the 
 		specified timeout interval, the method returns to the caller.
 		
+		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
+		
 		@param file: The basename of the file used to wait for the signal
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression to search for in the text file
@@ -307,6 +351,7 @@ class ProcessUser(object):
 		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		"""
+			
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
@@ -328,8 +373,11 @@ class ProcessUser(object):
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
-				log.info("Wait for signal in %s timed out after %d secs", file, timeout)
-				log.info("Number of matches to the expression are %d" % len(matches))
+				msg = "Wait for signal in %s timed out after %d secs, with %d matches"%(file, timeout, len(matches))
+				if self.defaultAbortOnError:
+					self.abort(TIMEDOUT, msg)
+				else:
+					log.warn(msg)
 				break
 			time.sleep(poll)
 		return matches
@@ -377,7 +425,7 @@ class ProcessUser(object):
 		
 	# methods to add to and obtain the outcome, used by BaseTest
 	
-	def addOutcome(self, outcome, outcomeReason='', printReason=True):
+	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False):
 		"""Add a test validation outcome (and if possible, reason string) to the validation list.
 		
 		See also abort(), which should be used instead of this method for cases where 
@@ -410,6 +458,8 @@ class ProcessUser(object):
 			at INFO/WARN (whether or not this outcome reason is taking priority). 
 			In most cases this is useful, but can be disabled if more specific 
 			logging is already implemented. 
+		@param abortOnError: if True, an exception will be thrown if a failure 
+			outcome is reported
 		
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
@@ -419,6 +469,9 @@ class ProcessUser(object):
 		self.outcome.append(outcome)
 		if self.getOutcome() != old:
 			self.__outcomeReason = outcomeReason
+
+		if outcome in FAILS and abortOnError:
+			self.abort(outcome, outcomeReason)
 
 		if outcomeReason and printReason:
 			if outcome in FAILS:

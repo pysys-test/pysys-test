@@ -34,14 +34,28 @@ class PySysTest(BaseTest):
 		except: pass
 		self.log.info("The second id is %d" % self.id2)
 
-		# wait for a match that does not occur
-		self.matches1 = self.waitForSignal("testscript.out", expr="This wont match", condition=">=2", timeout=2)
+		if self.getOutcome() not in [PASSED,NOTVERIFIED]: self.abort(FAILED, 'expected passed outcome but got: %s %s'%(self.getOutcome(), self.getOutcomeReason()))
 
+		# wait for a match that does not occur
+		aborted=False
+		try:
+			self.matches1 = self.waitForSignal("testscript.out", expr="This wont match", condition=">=2", timeout=2)
+		except Exception, e:
+			print 'got expected abort: ', e
+			aborted = True
+		if not aborted: self.abort(FAILED, 'test should have aborted')
+			
 		# do a wa it on a file that does not exist
-		self.waitForSignal("foobar.out", expr="This wont match", condition=">=2", timeout=2)
+		aborted=False
+		try:
+			self.waitForSignal("foobar.out", expr="This wont match", condition=">=2", timeout=2)
+		except Exception, e:
+			print 'got expected abort: ', e
+			aborted = True
+		if not aborted: self.abort(FAILED, 'test should have aborted')
+		
 
 				
 	def validate(self):
 		self.assertTrue(int(self.id1) == 1287998)
 		self.assertTrue(int(self.id2) == 6754322)
-		self.assertTrue(self.matches1 == [])

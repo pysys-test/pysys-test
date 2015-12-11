@@ -11,10 +11,19 @@ class PySysTest(BaseTest):
 						  				stderr = "%s/wait.err" % self.output,
 						  				state=BACKGROUND)
 
+		if self.getOutcome() !=NOTVERIFIED: self.abort(FAILED, 'Test should not have failed at this point')
+
 	def validate(self):
 		self.assertTrue(True)
 		self.assertTrue(False)
-		self.waitProcess(self.phandle, timeout=1)
+		try:
+			self.waitProcess(self.phandle, timeout=1)
+			self.addOutcome(BLOCKED, 'unexpected error - should have aborted')
+		except Exception, e:
+			print 'got abort as expected: ', e
+			self.outcome=[]
+			self.addOutcome(TIMEDOUT, 'simulated timeout')
+		self.assertTrue(False)
 		self.assertTrue(True)
 		self.checkOutcome()
 		

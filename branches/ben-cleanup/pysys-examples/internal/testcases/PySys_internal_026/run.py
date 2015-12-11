@@ -13,7 +13,7 @@ class PySysTest(BaseTest):
 						  stdout = "%s/timeout.out" % self.output,
 						  stderr = "%s/timeout.err" % self.output,
 						  state=FOREGROUND,
-						  timeout=5)
+						  timeout=5, abortOnError=False)
 			
 	def validate(self):
 		if self.getOutcome() == TIMEDOUT:
