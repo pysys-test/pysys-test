@@ -570,7 +570,7 @@ class TestContainer:
 				if stat.S_ISREG(mode):
 					os.remove(path)
 				elif stat.S_ISDIR(mode):
-				  	self.purgeDirectory(path, delTop=True)
+					self.purgeDirectory(path, delTop=True)
 			if delTop: os.rmdir(dir)
 
 		except OSError as ex:
