@@ -62,6 +62,7 @@ class ProcessUser(object):
 		self.__outcomeReason = ''
 		
 		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else True
+		self.__uniqueProcessKeys = {}
 
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
@@ -76,7 +77,11 @@ class ProcessUser(object):
 	def getInstanceCount(self, displayName):
 		"""Return the number of processes started within the testcase matching the supplied displayName.
 
-		The ProcessUserInterface class maintains a reference count of processes started within the class instance 
+		DEPRECATED - the recommended way to allocate unique names for a process's stdout/err is now 
+		L{allocateUniqueStdOutErr} which is easier to use and decouples the process displayName 
+		shownn in log messages from the filename used to represent stdout/err. 
+
+		The ProcessUser class maintains a reference count of processes started within the class instance 
 		via the L{startProcess()} method. The reference count is maintained against a logical name for 
 		the process, which is the displayName used in the method call to L{startProcess()}, or the 
 		basename of the command if no displayName was supplied. The method returns the number of 
@@ -93,7 +98,27 @@ class ProcessUser(object):
 			return 0
 		
 	
-	# process manipulation methods of ProcessUserInterface
+	
+	def allocateUniqueStdOutErr(self, processKey):
+		""" Allocate filenames of the form processKey[.n].out (similarly for .err) 
+		for a process that is about to be started, such that the names are not 
+		repeated within the specified parent's lifetime. 
+		
+		Returns a tuple of (stdout, stderr).
+		
+		@param processKey A user-defined identifier that will form the prefix 
+			onto which [.n].out is appended
+		"""
+		newval = self.__uniqueProcessKeys.get(processKey, 0)+1
+		self.__uniqueProcessKeys[processKey] = newval
+		
+		suffix = '.%d'%(newval) if newval > 1 else ''
+		
+		return (
+			os.path.join(self.output, processKey+suffix+'.out'), 
+			os.path.join(self.output, processKey+suffix+'.err'), 
+			)	
+
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
 			abortOnError=None, ignoreExitStatus=True):
@@ -113,8 +138,8 @@ class ProcessUser(object):
 		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
 		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
 		@param timeout: The timeout period after which to termintate processes running in the C{FOREGROUND}
-		@param stdout: The filename used to capture the stdout of the process
-		@param stderr: The filename user to capture the stderr of the process
+		@param stdout: The filename used to capture the stdout of the process. Consider using L{allocateUniqueStdOutErr} to get this. 
+		@param stderr: The filename user to capture the stderr of the process. Consider using L{allocateUniqueStdOutErr} to get this. 
 		@param displayName: Logical name of the process used for display and reference counting (defaults to the basename of the command)
 		@param abortOnError: If True, failures will always result in an exception, 
 			if False they will just add a failure outcome, 
@@ -150,6 +175,7 @@ class ProcessUser(object):
 		else:
 			self.processList.append(process) 	
 			try:
+				# this is for the legacy getInstanceCount method
 				if self.processCount.has_key(displayName):
 					self.processCount[displayName] = self.processCount[displayName] + 1
 				else:

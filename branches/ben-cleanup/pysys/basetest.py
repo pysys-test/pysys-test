@@ -317,6 +317,36 @@ class BaseTest(ProcessUser):
 
 	# test validation methods. 
 	
+	def assertThat(self, conditionstring, *args):
+		"""Perform a validation of a python eval string, specified as a format 
+		string, with zero or more %s-style arguments. This provides an easy way to 
+		check conditions that also produces clear outcome messages. 
+		
+		e.g. self.assertThat('%d >= 5 or "%s"==foobar', myvalue, myothervalue)
+		
+		
+		@param conditionstring: A string will have any following args 
+			substituted into it and then be evaluated as a boolean python 
+			expression
+		@param args: Zero or more arguments to be substituted into the format 
+			string
+		
+		"""
+		try:
+			expr = conditionstring
+			if args:
+				expr = expr % args
+			
+			result = bool(eval(expr))
+		except Exception, e:
+			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" with args %r: %s'%(conditionstring, args, e))
+			return
+		
+		if result:
+			self.addOutcome(PASSED, 'Assertion succeeded: %s'%expr)
+		else:
+			self.addOutcome(FAILED, 'Assertion failed: %s'%expr)
+	
 	def assertTrue(self, expr, **xargs):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
