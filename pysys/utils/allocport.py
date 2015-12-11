@@ -146,7 +146,7 @@ class TCPPortOwner:
 	def __init__(self):
 		self.port = allocateTCPPort()
 
-	def __del__(self):
+	def cleanup(self):
 		tcpServerPortPool.append(self.port)
 
 # Initialize the TCP port pool

@@ -24,7 +24,7 @@ from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 
 
-def linecount(file, regexpr=None):
+def linecount(file, regexpr=None, ignores=None):
 	"""Count the number of lines in an input file matching a regular expression, return the count.
 	
 	If the input regular expression is set to None, the method returns a count of the 
@@ -33,12 +33,13 @@ def linecount(file, regexpr=None):
 	
 	@param file: The full path to the input file
 	@param regexpr: The regular expression used for counting matches
+	@param ignores: A list of regular expressions that will cause lines to be excluded from the count
 	@return: The number of matching lines in the input file 
 	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
-	matches = getmatches(file, regexpr)
+	matches = getmatches(file, regexpr, ignores=ignores)
 	return len(matches)
 
 

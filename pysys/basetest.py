@@ -33,7 +33,6 @@ from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
-from pysys.utils.allocport import TCPPortOwner
 from pysys.process.user import ProcessUser
 from pysys.process.helper import ProcessWrapper
 from pysys.process.monitor import ProcessMonitor
@@ -68,13 +67,15 @@ class BaseTest(ProcessUser):
 	the C{setup}, C{execute}, C{validate} and C{cleanup} methods of the instance. All processes started during 
 	the test execution are reference counted within the base test, and terminated within the C{cleanup} method.
 	
-	Validation of the testcase is through the C{assert*} methods. Execution of each method appends an outcome
-	to an internal data structure thus building up a record of the individual validation outcomes. Several 
-	potential outcomes are supported by the PySys framework (C{SKIPPED}, C{BLOCKED}, C{DUMPEDCORE}, C{TIMEDOUT}, 
-	C{FAILED}, C{NOTVERIFIED}, and C{PASSED}) and the overall outcome of the testcase is determined using a
-	precedence order of the individual outcomes. All C{assert*} methods support variable argument lists for 
-	common non-default parameters. Currently this only includes the C{assertMessage} parameter, to override the 
-	default statement logged by the framework to stdout and the run log. 
+	Validation of the testcase is through the C{assert*} methods. Execution of many methods appends an outcome 
+	to the outcome data structure maintained by the ProcessUser base class, thus building up a record of the 
+	individual validation outcomes. Several potential outcomes are supported by the PySys framework 
+	(C{SKIPPED}, C{BLOCKED}, C{DUMPEDCORE}, C{TIMEDOUT}, C{FAILED}, C{NOTVERIFIED}, and C{PASSED}) and the 
+	overall outcome of the testcase is determined using aprecedence order of the individual outcomes. 
+	
+	All C{assert*} methods support variable argument lists for common non-default parameters. Currently this 
+	only includes the C{assertMessage} parameter, to override the default statement logged by the framework to 
+	stdout and the run log. 
 
 	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks 
 	           to modify the test execution based upon the mode.
@@ -118,8 +119,6 @@ class BaseTest(ProcessUser):
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
 		self.manualTester = None
-		self.outcome = [] # please use addOutcome instead of manipulating this directly
-		self.__outcomeReason = ''
 		self.log = log
 		self.project = PROJECT
 		self.resources = []
@@ -140,102 +139,6 @@ class BaseTest(ProcessUser):
 		for key in xargs.keys():
 			setattr(self, key, xargs[key])
 
-	# methods to add to and obtain the test outcome
-	def addOutcome(self, outcome, outcomeReason='', printReason=True):
-		"""Add a test validation outcome (and if possible, reason string) to the validation list.
-		
-		See also abort(), which should be used instead of this method for cases where 
-		it doesn't make sense to continue running the test. 
-		
-		The method provides the ability to add a validation outcome to the internal data structure 
-		storing the list of test validation outcomes. In a single test run multiple validations may 
-		be performed. The currently supported validation outcomes are:
-				
-		  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
-		  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
-		  DUMPEDCORE:  A process started by the test produced a core file (unix only)
-		  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
-		  FAILED:      A validation step of the test failed
-		  NOTVERIFIED: No validation steps were performed
-		  INSPECT:     A validation step of the test requires manual inspection
-		  PASSED:      A validation step of the test passed 
-		
-		The outcomes are considered to have a precedence order, as defined by the order of the outcomes listed
-		above. Thus a C{BLOCKED} outcome has a higher precedence than a C{PASSED} outcome. The outcomes are defined 
-		in L{pysys.constants}. 
-		
-		@param outcome: The outcome to add
-		@param outcomeReason: A string summarizing the reason for the outcome 
-			to help anyone triaging test failures. 
-			Callers are strongly recommended to specify this if at all possible 
-			when reporting failure outcomes. 
-			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
-		@param printReason: if True the specified outcomeReason will be printed 
-			at INFO/WARN (whether or not this outcome reason is taking priority). 
-			In most cases this is useful, but can be disabled if more specific 
-			logging is already implemented. 
-		
-		"""
-		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
-		outcomeReason = outcomeReason.strip() if outcomeReason else ''
-		
-		old = self.getOutcome()
-		self.outcome.append(outcome)
-		if self.getOutcome() != old:
-			self.__outcomeReason = outcomeReason
-
-		if outcomeReason and printReason:
-			if outcome in FAILS:
-				log.warn('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
-			else:
-				log.info('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
-
-	def abort(self, outcome, outcomeReason):
-		"""Immediately terminate execution of the current test (both execute and validate) 
-		and report the specified outcome and outcomeReason string. 
-		
-		This method works by raising an AbortExecution exeception, so 
-		do not add a try...except block around the abort call unless that is 
-		really what is intended. 
-		
-		See addOutcome for the list of permissible outcome values. 
-		
-		@param outcome: The test outcome, which will override any existing 
-			outcomes previously reported. The most common outcomes are 
-			BLOCKED, TIMEDOUT or SKIPPED. 
-		@param outcomeReason: A string summarizing the reason for the outcome 
-			to help anyone triaging test failures. 
-			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
-		
-		"""	
-		raise AbortExecution(outcome, outcomeReason)
-	
-	def getOutcome(self):
-		"""Get the overall outcome of the test based on the precedence order.
-				
-		The method returns the overal outcome of the test based on the outcomes stored in the internal data 
-		structure. The precedence order of the possible outcomes is used to determined the overall outcome 
-		of the test, e.g. if C{PASSED}, C{BLOCKED} and C{FAILED} were recorded during the execution of the test, 
-		the overall outcome would be C{BLOCKED}. 
-		
-		The method returns the integer value of the outcome as defined in L{pysys.constants}. To convert this 
-		to a string representation use the C{LOOKUP} dictionary i.e. C{LOOKUP}[test.getOutcome()]
-		
-		@return: The overall test outcome
-		@rtype:  integer
-
-		"""	
-		if len(self.outcome) == 0: return NOTVERIFIED
-		return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
-		
-	def getOutcomeReason(self):
-		"""Get the reason string for the current overall test outcome (if specified).
-				
-		@return: The overall test outcome reason or '' if not specified
-		@rtype:  string
-
-		"""	
-		return self.__outcomeReason
 			
 	# test methods for execution, validation and cleanup. The execute method is
 	# abstract and must be implemented by a subclass. 
@@ -266,145 +169,33 @@ class BaseTest(ProcessUser):
 		
 		The cleanup method performs actions to stop all processes started in the background and not 
 		explicitly killed during the test execution. It also stops all process monitors running in 
-		seperate threads, and any instances of the manual tester user interface. Should a custom cleanup 
-		for a subclass be required, the BaseTest cleanup method should first be called. e.g. ::
+		seperate threads, and any instances of the manual tester user interface. 
 		
-		  class MyTest(BaseTest):
-		  
-		    def cleanup(self):
-		      # call base test cleanup first
-		      BaseTest.cleanup(self)
-				
-		      # perform custom cleanup actions
-		      ...
+		Should a custom cleanup for a subclass be required, use 
+		L{addCleanupFunction} instead of overriding this method. 
 				
 		"""
-		ProcessUser.__del__(self)
+		try:
+			if self.manualTester and self.manualTester.running():
+				self.stopManualTester()
 		
-		if self.manualTester and self.manualTester.running():
-			self.stopManualTester()
+			for monitor in self.monitorList:
+				if monitor.running(): monitor.stop()
 	
-		for monitor in self.monitorList:
-			if monitor.running(): monitor.stop()
+			while len(self.resources) > 0:
+				# legacy cleanup mechanism based on resource objects implementing __del__
+				self.resources.pop()
+		finally:
+			ProcessUser.cleanup(self)
 
-		while len(self.resources) > 0:
-			self.resources.pop()
 
 	def addResource(self, resource):
 		"""Add a resource which is owned by the test and is therefore
-		cleaned up (deleted) when the test is cleaned up
+		cleaned up (deleted) when the test is cleaned up. 
+		
+		Deprecated - please use addCleanupFunction instead of this function. 
 		"""
 		self.resources.append(resource)
-
-
-	# process manipulation methods of ProcessUser
-	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, timeout=None, stdout=None, stderr=None, displayName=None):
-		"""Start a process running in the foreground or background, and return the process handle.
-
-		The method allows spawning of new processes in a platform independent way. The command, arguments, environment and 
-		working directory to run the process in can all be specified in the arguments to the method, along with the filenames
-		used for capturing the stdout and stderr of the process. Processes may be started in the C{FOREGROUND}, in which case 
-		the method does not return until the process has completed or a time out occurs, or in the C{BACKGROUND} in which case
-		the method returns immediately to the caller returning a handle to the process to allow manipulation at a later stage. 
-		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process handle are automatically
-		killed on completion of the test via the L{cleanup} method of the BaseTest. 
-
-		This method uses the L{pysys.process.helper} module to start the process. On failure conditions the method may append 
-		C{BLOCKED} or C{TIMEDOUT} outcomes to the test validation data structure when it was not possible to start the process 
-		(e.g. command does not exist etc), or the timeout period expired (indicating a potential deadlock or livelock in the 
-		process).
-						
-		@param command: The command to start the process (should include the full path)
-		@param arguments: A list of arguments to pass to the command
-		@param environs: A dictionary of the environment to run the process in (defaults to clean environment)
-		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
-		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
-		@param timeout: The timeout period after which to termintate processes running in the C{FOREGROUND}
-		@param stdout: The filename used to capture the stdout of the process
-		@param stderr: The filename user to capture the stderr of the process
-		@param displayName: Logical name of the process used for display and reference counting (defaults to the basename of the command)
-		@return: The process handle of the process (L{pysys.process.helper.ProcessWrapper})
-		@rtype: handle
-
-		"""
-		if workingDir is None: workingDir = r'%s' % self.output
-		if displayName is None: displayName = os.path.basename(command)
-		if environs is None: environs = {}
-		
-		try:
-			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr)
-			process.start()
-			if state == FOREGROUND:
-				log.info("Executed %s in foreground with exit status = %d", displayName, process.exitStatus)
-			elif state == BACKGROUND:
-				log.info("Started %s in background with process id %d", displayName, process.pid)
-		except ProcessError, e:
-			self.addOutcome(BLOCKED, '%s failed to run: %s'%(process, e))
-		except ProcessTimeout:
-			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False)
-			log.warn("Process timed out after %d seconds, stopping process", timeout)
-			process.stop()
-		else:
-			self.processList.append(process) 	
-			try:
-				if self.processCount.has_key(displayName):
-					self.processCount[displayName] = self.processCount[displayName] + 1
-				else:
-			 		self.processCount[displayName] = 1
-			except:
-				pass
-		return process
-
-
-	def stopProcess(self, process):
-		"""Send a soft or hard kill to a running process to stop its execution.
-	
-		This method uses the L{pysys.process.helper} module to stop a running process. 
-		Should the request to stop the running process fail, a C{BLOCKED} outcome will 
-		be added to the test outcome list.
-		
-		@param process: The process handle returned from the L{startProcess} method
-		
-		"""
-		if process.running():
-			try:
-				process.stop()
-				log.info("Stopped process with process id %d", process.pid)
-			except ProcessError, e:
-				self.addOutcome(BLOCKED, 'Unable to stop %s process: %s'%(process, e))
-
-
-	def signalProcess(self, process, signal):
-		"""Send a signal to a running process (Unix only).
-	
-		This method uses the L{pysys.process.helper} module to send a signal to a running 
-		process. Should the request to send the signal to the running process fail, a 
-		C{BLOCKED} outcome will be added to the test outcome list.
-			
-		@param process: The process handle returned from the L{startProcess} method
-		@param signal: The integer value of the signal to send
-		
-		"""
-		if process.running():
-			try:
-				process.signal(signal)
-				log.info("Sent %d signal to process with process id %d", signal, process.pid)
-			except ProcessError, e:
-				self.addOutcome(BLOCKED, 'Unable to send signal to process %s: %s'%(process, e))
-
-
-	def waitProcess(self, process, timeout):
-		"""Wait for a process to terminate, return on termination or expiry of the timeout.
-	
-		@param process: The process handle returned from the L{startProcess} method
-		@param timeout: The timeout value in seconds to wait before returning
-		
-		"""
-		try:
-			log.info("Waiting %d secs for process %r", timeout, process)
-			process.wait(timeout)
-		except ProcessTimeout:
-			self.addOutcome(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
 
 
 	def startProcessMonitor(self, process, interval, file, **kwargs):
@@ -525,6 +316,36 @@ class BaseTest(ProcessUser):
 
 
 	# test validation methods. 
+	
+	def assertThat(self, conditionstring, *args):
+		"""Perform a validation of a python eval string, specified as a format 
+		string, with zero or more %s-style arguments. This provides an easy way to 
+		check conditions that also produces clear outcome messages. 
+		
+		e.g. self.assertThat('%d >= 5 or "%s"==foobar', myvalue, myothervalue)
+		
+		
+		@param conditionstring: A string will have any following args 
+			substituted into it and then be evaluated as a boolean python 
+			expression
+		@param args: Zero or more arguments to be substituted into the format 
+			string
+		
+		"""
+		try:
+			expr = conditionstring
+			if args:
+				expr = expr % args
+			
+			result = bool(eval(expr))
+		except Exception, e:
+			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" with args %r: %s'%(conditionstring, args, e))
+			return
+		
+		if result:
+			self.addOutcome(PASSED, 'Assertion succeeded: %s'%expr)
+		else:
+			self.addOutcome(FAILED, 'Assertion failed: %s'%expr)
 	
 	def assertTrue(self, expr, **xargs):
 		"""Perform a validation assert on the supplied expression evaluating to true.
@@ -723,7 +544,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(result, msg) 
 			if result == FAILED: log.warn("Ordered grep failed on expression \"%s\"", expr)
 
-	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", **xargs):
+	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, **xargs):
 		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -734,15 +555,16 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression used to match a line of the input file
 		@param condition: The condition to be met for the number of lines matching the regular expression
+		@param ignores: A list of regular expressions that will cause lines to be excluded from the count
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""	
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
-		msg = self.__assertMsg(xargs, 'Line count on input file %s' % file)
+		msg = self.__assertMsg(xargs, 'Line count on input file \'%s\'' % file)
 		try:
-			numberLines = linecount(f, expr)
+			numberLines = linecount(f, expr, ignores=ignores)
 			log.debug("Number of matching lines is %d"%numberLines)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
@@ -753,16 +575,9 @@ class BaseTest(ProcessUser):
 				appender = ""
 			else:
 				result = FAILED
-				appender = " [ %d%s ]" % (numberLines, condition)
+				appender = " is '%d', does not match condition: '%s'" % (numberLines, condition)
 			self.addOutcome(result, msg+appender) 
 
-	def getNextAvailableTCPPort(self):
-		"""Allocate a TCP port which is available for a server to be
-		started on. Take ownership of it for the duration of the test
-		"""
-		o = TCPPortOwner()
-		self.addResource(o)
-		return o.port
 
 	def __assertMsg(self, xargs, default):
 		"""Return an assert statement requested to override the default value.
