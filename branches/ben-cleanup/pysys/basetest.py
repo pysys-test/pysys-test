@@ -575,7 +575,7 @@ class BaseTest(ProcessUser):
 				appender = ""
 			else:
 				result = FAILED
-				appender = " '%d' does not match condition: '%s'" % (numberLines, condition)
+				appender = " is '%d', does not match condition: '%s'" % (numberLines, condition)
 			self.addOutcome(result, msg+appender) 
 
 
