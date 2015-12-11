@@ -169,18 +169,10 @@ class BaseTest(ProcessUser):
 		
 		The cleanup method performs actions to stop all processes started in the background and not 
 		explicitly killed during the test execution. It also stops all process monitors running in 
-		seperate threads, and any instances of the manual tester user interface. Should a custom cleanup 
-		for a subclass be required, the BaseTest cleanup method should first be last, from a finally block. e.g.:
+		seperate threads, and any instances of the manual tester user interface. 
 		
-		  class MyTest(BaseTest):
-		  
-		    def cleanup(self):
-		      # call base test cleanup first
-		      try:
-		        # perform custom cleanup actions
-		        ...
-		      finally:
-		        BaseTest.cleanup(self)
+		Should a custom cleanup for a subclass be required, use 
+		L{addCleanupFunction} instead of overriding this method. 
 				
 		"""
 		try:

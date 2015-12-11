@@ -349,7 +349,7 @@ class ProcessUser(object):
 		""" Cleanup function that frees resources managed by this object. 
 		Should be called exactly once when this object is no longer needed. 
 		
-		Instead of overriding this function, use addCleanupFunction.  
+		Instead of overriding this function, use L{addCleanupFunction}.  
 		
 		"""
 		try:
