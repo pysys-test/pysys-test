@@ -32,4 +32,4 @@ class PySysTest(BaseTest):
 			with open(os.path.join(self.output, "%d.txt" % i), "w") as f:
 				f.write(str(i))
 				f.close()
-		log.info("   ...done")
+		log.info("Completed creation of files")
