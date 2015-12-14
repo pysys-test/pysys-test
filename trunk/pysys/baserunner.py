@@ -504,8 +504,9 @@ class TestContainer:
 			else:
 				try:
 					self.testObj.setup()
+					log.info('---- Test execution ----')
 					self.testObj.execute()
-					log.info('--- validate ---')
+					log.info('---- Test validation ----')
 					self.testObj.validate()
 				except AbortExecution, e:
 					# typically used to abort with blocked outcome or to skip
