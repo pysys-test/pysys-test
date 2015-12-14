@@ -461,9 +461,11 @@ class TestContainer:
 			self.testFileHandler.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandler)
-			log.info(42*"=")
-			log.info("%s%s : %s"%(3*" ", self.descriptor.id, self.descriptor.title.replace('\n','').strip()))
-			log.info(42*"=")
+			log.info(56*"=")
+			log.info("%s%s"%("ID   : ", self.descriptor.id))
+			log.info("%s%s"%("TITLE: ", self.descriptor.title.replace('\n','').strip()))
+
+			log.info(56*"=")
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		
@@ -504,9 +506,9 @@ class TestContainer:
 			else:
 				try:
 					self.testObj.setup()
-					log.info('---- Test execution ----')
+					log.info('EXECUTION: ')
 					self.testObj.execute()
-					log.info('---- Test validation ----')
+					log.info(''); log.info('VALIDATION: ')
 					self.testObj.validate()
 				except AbortExecution, e:
 					# typically used to abort with blocked outcome or to skip
