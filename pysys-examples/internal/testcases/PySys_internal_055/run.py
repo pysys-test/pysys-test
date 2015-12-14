@@ -20,7 +20,7 @@ class PySysTest(BaseTest):
 			self.waitProcess(self.phandle, timeout=1)
 			self.addOutcome(BLOCKED, 'unexpected error - should have aborted')
 		except Exception, e:
-			print 'got abort as expected: ', e
+			self.log.info('Got abort as expected')
 			self.outcome=[]
 			self.addOutcome(TIMEDOUT, 'simulated timeout')
 		self.assertTrue(False)
