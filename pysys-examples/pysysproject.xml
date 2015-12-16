@@ -73,7 +73,7 @@
 	<!-- 
 	Controls whether tests will abort when operations such as startProcess and waitForSignal 
 	time out. The default is "true", use "false" to allow the test to run to completion when
-	the overall outcome of the test will then be the outcome result with the higher precedence. 
+	the overall outcome of the test will then be the outcome result with the higher precedence.
 	-->
 	<property name="defaultAbortOnError" value="true" default="true"/>	
 
