@@ -65,6 +65,7 @@ class ProcessUser(object):
 		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else True
 		self.__uniqueProcessKeys = {}
 
+
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
 		
@@ -109,10 +110,10 @@ class ProcessUser(object):
 		@param processKey A user-defined identifier that will form the prefix 
 			onto which [.n].out is appended
 		"""
-		newval = self.__uniqueProcessKeys.get(processKey, 0)+1
+		newval = self.__uniqueProcessKeys.get(processKey, -1)+1
 		self.__uniqueProcessKeys[processKey] = newval
 		
-		suffix = '.%d'%(newval) if newval > 1 else ''
+		suffix = '.%d'%(newval) if newval > 0 else ''
 		
 		return STDOUTERR_TUPLE(
 			os.path.join(self.output, processKey+suffix+'.out'), 
@@ -455,7 +456,8 @@ class ProcessUser(object):
 			log.debug('ProcessUser cleanup function done.')
 		
 	# methods to add to and obtain the outcome, used by BaseTest
-	
+
+
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False):
 		"""Add a test validation outcome (and if possible, reason string) to the validation list.
 		
@@ -510,6 +512,7 @@ class ProcessUser(object):
 			else:
 				log.info('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
 
+
 	def abort(self, outcome, outcomeReason):
 		"""Immediately terminate execution of the current test (both execute and validate) 
 		and report the specified outcome and outcomeReason string. 
@@ -529,7 +532,8 @@ class ProcessUser(object):
 		
 		"""	
 		raise AbortExecution(outcome, outcomeReason)
-	
+
+
 	def getOutcome(self):
 		"""Get the overall outcome of the test based on the precedence order.
 				
@@ -547,7 +551,8 @@ class ProcessUser(object):
 		"""	
 		if len(self.outcome) == 0: return NOTVERIFIED
 		return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
-		
+
+
 	def getOutcomeReason(self):
 		"""Get the reason string for the current overall outcome (if specified).
 				
@@ -556,6 +561,7 @@ class ProcessUser(object):
 
 		"""	
 		return self.__outcomeReason
+
 
 	def getNextAvailableTCPPort(self):
 		"""Allocate a TCP port which is available for a server to be
