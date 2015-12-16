@@ -92,8 +92,6 @@ class ProcessWrapper(CommonProcessWrapper):
 		except:
 			log.info("Unable to create file to capture stdout - using the null device")
 
-		
-
 
 	def _writeStdin(self):
 		"""Private method to write to the process stdin pipe.
@@ -171,7 +169,6 @@ class ProcessWrapper(CommonProcessWrapper):
 			self.__stdin = hStdin
 		
 
-
 	def _setExitStatus(self):
 		"""Private method to set the exit status of the process.
 		
@@ -191,6 +188,7 @@ class ProcessWrapper(CommonProcessWrapper):
 				self.exitStatus = exitStatus
 			
 			return self.exitStatus
+
 
 	def stop(self, timeout=TIMEOUTS['WaitForProcessStop']): 
 		"""Stop a process running.
