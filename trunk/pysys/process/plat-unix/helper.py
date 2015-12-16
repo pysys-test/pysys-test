@@ -79,12 +79,10 @@ class ProcessWrapper(CommonProcessWrapper):
 			if stderr is not None: self.stderr = stderr
 		except:
 			log.info('Unable to create file to capture stdout - using the null device')
-		
 
 		# private instance variables
-		
 		self.__lock = threading.Lock() # to protect access to the fields that get updated while process is running
-		
+
 
 	def _writeStdin(self):
 		"""Private thread method to write to the process stdin pipe.

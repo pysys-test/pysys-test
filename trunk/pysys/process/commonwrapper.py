@@ -37,23 +37,10 @@ def _stringToUnicode(s):
 		return unicode(s, "utf8")
 
 class CommonProcessWrapper(object):
-	"""Common process wrapper superclass for process execution and management. 
+	"""Abstract base process wrapper class for process execution and management.
 	
-	The process wrapper provides the ability to start and stop an external process, setting 
-	the process environment, working directory and state i.e. a foreground process in which case 
-	a call to the L{start} method will not return until the process has exited, or a background 
-	process in which case the process is started in a separate thread allowing concurrent execution 
-	within the testcase. Processes started in the foreground can have a timeout associated with them, such
-	that should the timeout be exceeded, the process will be terminated and control	passed back to the 
-	caller of the method. The wrapper additionally allows control over logging of the process stdout 
-	and stderr to file, and writing to the process stdin.
-	
-	Usage of the class is to first create an instance, setting all runtime parameters of the process 
-	as data attributes to the class instance via the constructor. The process can then be started 
-	and stopped via the L{start} and L{stop} methods of the class, as well as interrogated for 
-	its executing status via the L{running} method, and waited for its completion via the L{wait}
-	method. During process execution the C{self.pid} and C{seld.exitStatus} data attributes are set 
-	within the class instance, and these values can be accessed directly via it's object reference.  
+	A base implementation of common process related operations, which should be extended
+	by the OS specific wrapper classes.
 
 	@ivar pid: The process id for a running or complete process (as set by the OS)
 	@type pid: integer
@@ -107,7 +94,7 @@ class CommonProcessWrapper(object):
 	def __str__(self): return self.displayName
 	def __repr__(self): return '%s(pid %s)'%(self.displayName, self.pid)
 
-	# these abstract methods msut be implemented by subclasses
+	# these abstract methods must be implemented by subclasses
 	def _setExitStatus(self): raise Exception('Not implemented')
 	def _startBackgroundProcess(self): raise Exception('Not implemented')
 	def _writeStdin(self): raise Exception('Not implemented')
