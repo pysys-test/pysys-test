@@ -315,16 +315,16 @@ class BaseTest(ProcessUser):
 		time.sleep(interval)
 
 
-	# test validation methods. 
-	
+	# test validation methods.
 	def assertThat(self, conditionstring, *args):
-		"""Perform a validation of a python eval string, specified as a format 
-		string, with zero or more %s-style arguments. This provides an easy way to 
-		check conditions that also produces clear outcome messages. 
+		"""Perform a validation based on a python eval string.
+
+		The eval string should be specified as a format string, with zero or more %s-style
+		arguments. This provides an easy way to check conditions that also produces clear
+		outcome messages.
 		
 		e.g. self.assertThat('%d >= 5 or "%s"==foobar', myvalue, myothervalue)
-		
-		
+
 		@param conditionstring: A string will have any following args 
 			substituted into it and then be evaluated as a boolean python 
 			expression
@@ -346,7 +346,8 @@ class BaseTest(ProcessUser):
 			self.addOutcome(PASSED, 'Assertion succeeded: %s'%expr)
 		else:
 			self.addOutcome(FAILED, 'Assertion failed: %s'%expr)
-	
+
+
 	def assertTrue(self, expr, **xargs):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
@@ -543,6 +544,7 @@ class BaseTest(ProcessUser):
 
 			self.addOutcome(result, msg) 
 			if result == FAILED: log.warn("Ordered grep failed on expression \"%s\"", expr)
+
 
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, **xargs):
 		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
