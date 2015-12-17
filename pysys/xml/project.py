@@ -232,7 +232,7 @@ class XMLProjectParser:
 
 		for pathNode in pathNodeList:
 			try:
-				value = pathNode.getAttribute("value") 
+				value = self.expandFromEnvironent(pathNode.getAttribute("value"), "")
 				relative = pathNode.getAttribute("relative")
 		
 				if relative == "true": value = os.path.join(self.dirname, value)

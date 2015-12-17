@@ -17,7 +17,7 @@ class PySysTest(BaseTest):
 			self.addOutcome(FAILED, 'Expected abort')
 		except AbortExecution, e:
 			self.assertThat('%s == %s', e.outcome, BLOCKED)
-			self.assertThat('"due to unexpected termination of process python" in "%s"', e.value)
+			self.assertThat('"due to process python termination" in "%s"', e.value)
 
 	def validate(self):
 		pass

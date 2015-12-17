@@ -28,6 +28,7 @@ from pysys.utils.allocport import TCPPortOwner
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 
+
 class ProcessUser(object):
 	"""Class providing basic operations over interacting with processes.
 	
@@ -79,16 +80,13 @@ class ProcessUser(object):
 	def getInstanceCount(self, displayName):
 		"""Return the number of processes started within the testcase matching the supplied displayName.
 
-		DEPRECATED - the recommended way to allocate unique names for a process's stdout/err is now 
-		L{allocateUniqueStdOutErr} which is easier to use and decouples the process displayName 
-		shownn in log messages from the filename used to represent stdout/err. 
-
 		The ProcessUser class maintains a reference count of processes started within the class instance 
 		via the L{startProcess()} method. The reference count is maintained against a logical name for 
 		the process, which is the displayName used in the method call to L{startProcess()}, or the 
 		basename of the command if no displayName was supplied. The method returns the number of 
 		processes started with the supplied logical name, or 0 if no processes have been started. 
-		
+
+		@deprecated: The recommended way to allocate unique names is now L{allocateUniqueStdOutErr}
 		@param displayName: The process display name
 		@return: The number of processes started matching the command basename
 		@rtype:  integer
@@ -119,6 +117,7 @@ class ProcessUser(object):
 			os.path.join(self.output, processKey+suffix+'.out'), 
 			os.path.join(self.output, processKey+suffix+'.err'), 
 			)	
+
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
@@ -160,11 +159,11 @@ class ProcessUser(object):
 			process = ProcessWrapper(command, arguments, environs or {}, workingDir, state, timeout, stdout, stderr)
 			process.start()
 			if state == FOREGROUND:
-				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, returned exit status %d (%d secs)", displayName, process.exitStatus, time.time()-starttime)
+				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, exit status %d, duration %d secs", displayName, process.exitStatus, time.time()-starttime)
 				
 				if not ignoreExitStatus and process.exitStatus != 0:
 					self.addOutcome(BLOCKED, '%s returned non-zero exit code %d'%(process, process.exitStatus), abortOnError=abortOnError)
-				
+
 			elif state == BACKGROUND:
 				log.info("Started %s with pid %d", displayName, process.pid)
 		except ProcessError, e:
@@ -176,7 +175,6 @@ class ProcessUser(object):
 		else:
 			self.processList.append(process) 	
 			try:
-				# this is for the legacy getInstanceCount method
 				if self.processCount.has_key(displayName):
 					self.processCount[displayName] = self.processCount[displayName] + 1
 				else:
@@ -317,7 +315,7 @@ class ProcessUser(object):
 							log.warn(msg)
 						break
 			time.sleep(0.01)
-	
+
 
 	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile']):
 		"""Wait for a file to exist on disk.
@@ -392,17 +390,17 @@ class ProcessUser(object):
 		
 		matches = []
 		startTime = time.time()
-		log.info("Wait for signal \"%s\" %s in %s", expr, condition, os.path.basename(file))
+		msg = "Wait for signal \"%s\" %s in %s" % (expr, condition, os.path.basename(file))
 		while 1:
 			if os.path.exists(f):
 				matches = getmatches(f, expr)
 				if eval("%d %s" % (len(matches), condition)):
-					log.info("Wait for signal in '%s' completed successfully (%d secs)", os.path.basename(file), time.time()-startTime)
+					log.info("%s completed successfully (%d secs)", msg, time.time()-startTime)
 					break
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
-				msg = "Wait for signal in '%s' timed out after %d secs, with %d matches"%(os.path.basename(file), timeout, len(matches))
+				msg = "%s timed out after %d secs, with %d matches"%(msg, timeout, len(matches))
 				if self.defaultAbortOnError:
 					self.abort(TIMEDOUT, msg)
 				else:
@@ -410,9 +408,10 @@ class ProcessUser(object):
 				break
 			
 			if process and not process.running():
-				self.abort(BLOCKED, "Wait for signal in '%s' aborted due to unexpected termination of process %s"%(os.path.basename(file), process))
+				self.abort(BLOCKED, "%s aborted due to process %s termination"%(msg, process))
 			time.sleep(poll)
 		return matches
+
 
 	def addCleanupFunction(self, fn):
 		""" Registers a zero-arg function that will be called as part of the 
@@ -428,6 +427,7 @@ class ProcessUser(object):
 		"""
 		if fn and fn not in self.__cleanupFunctions: 
 			self.__cleanupFunctions.append(fn)
+
 
 	def cleanup(self):
 		""" Cleanup function that frees resources managed by this object. 
