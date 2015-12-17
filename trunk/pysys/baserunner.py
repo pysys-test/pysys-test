@@ -26,7 +26,7 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os, os.path, sys, stat, re, traceback, time, math, logging, string, thread, threading, imp
+import os, os.path, sys, stat, re, traceback, time, math, logging, string, thread, threading, imp, textwrap
 
 from pysys import log, ThreadedFileHandler
 from pysys.constants import *
@@ -193,6 +193,7 @@ class BaseRunner(ProcessUser):
 			log.warning(ex)
 			log.warning("Output directory may not be completely clean")
 
+
 	def isPurgableFile(self, path):
 		"""
 		This method is called by testComplete to provide runners with the 
@@ -206,6 +207,7 @@ class BaseRunner(ProcessUser):
 		@param path: The absolute path of the file to be purged
 		"""
 		return True
+
 
 	def cycleComplete(self):
 		"""Cycle complete method which may optionally be overridden to perform custom operations between the repeated execution of a set of testcases.
@@ -461,11 +463,12 @@ class TestContainer:
 			self.testFileHandler.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandler)
-			log.info(56*"=")
-			log.info("%s%s"%("ID   : ", self.descriptor.id))
-			log.info("%s%s"%("TITLE: ", self.descriptor.title.replace('\n','').strip()))
-
-			log.info(56*"=")
+			log.info(62*"=")
+			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
+			log.info("%s%s"%("Id   : ", self.descriptor.id))
+			log.info("%s%s"%("Title: ", title[0]))
+			for l in title[1:]: log.info("%s%s"%("       ", l))
+			log.info(62*"=")
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		
@@ -506,13 +509,10 @@ class TestContainer:
 			else:
 				try:
 					self.testObj.setup()
-					log.info('EXECUTION: ')
 					self.testObj.execute()
-					log.info(''); log.info('VALIDATION: ')
 					self.testObj.validate()
 				except AbortExecution, e:
-					# typically used to abort with blocked outcome or to skip
-					log.info('Test aborted:')
+					log.info('Aborting test due to abortOnError set to true')
 					del self.testObj.outcome[:] # override all existing outcomes
 					self.testObj.addOutcome(e.outcome, e.value)
 					
