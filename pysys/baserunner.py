@@ -466,7 +466,7 @@ class TestContainer:
 			log.info(62*"=")
 			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
 			log.info("%s%s"%("Id   : ", self.descriptor.id))
-			log.info("%s%s"%("Title: ", title[0]))
+			if len(title)>0: log.info("%s%s"%("Title: ", title[0]))
 			for l in title[1:]: log.info("%s%s"%("       ", l))
 			log.info(62*"=")
 		except KeyboardInterrupt:
@@ -525,7 +525,7 @@ class TestContainer:
 
 		except:
 			log.warn("TestContainer caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.testObj.addOutcome(BLOCKED, 'Caught exception: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]))
+			self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]))
 	
 		# call the cleanup method to tear down the test
 		try:
@@ -599,4 +599,4 @@ class TestContainer:
 					if re.search('^core', file): return True
 
 		except OSError as ex:
-			log.warning("Caught OSError in detectCore(): %s %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("DetectCore caught %s %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
