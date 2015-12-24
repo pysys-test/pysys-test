@@ -39,18 +39,18 @@ class PySysTest(BaseTest):
 		# wait for a match that does not occur
 		aborted=False
 		try:
-			self.matches1 = self.waitForSignal("testscript.out", expr="This wont match", condition=">=2", timeout=2)
+			self.matches1 = self.waitForSignal("testscript.out", expr="This wont match", condition=">=2", timeout=2, abortOnError=True)
 		except Exception, e:
-			print 'got expected abort: ', e
+			self.log.info('Got expected abort %s', sys.exc_info()[0], exc_info=1)
 			aborted = True
 		if not aborted: self.abort(FAILED, 'test should have aborted')
 			
 		# do a wa it on a file that does not exist
 		aborted=False
 		try:
-			self.waitForSignal("foobar.out", expr="This wont match", condition=">=2", timeout=2)
+			self.waitForSignal("foobar.out", expr="This wont match", condition=">=2", timeout=2, abortOnError=True)
 		except Exception, e:
-			print 'got expected abort: ', e
+			self.log.info('Got expected abort %s', sys.exc_info()[0], exc_info=1)
 			aborted = True
 		if not aborted: self.abort(FAILED, 'test should have aborted')
 		
