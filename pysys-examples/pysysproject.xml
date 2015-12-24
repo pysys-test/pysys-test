@@ -71,11 +71,11 @@
 
 
 	<!-- 
-	Controls whether tests will abort when operations such as startProcess and waitForSignal 
-	time out. The default is "true", use "false" to allow the test to run to completion when
-	the overall outcome of the test will then be the outcome result with the higher precedence.
+	Controls whether tests will abort as a fail as soon as an assert, process, or wait operation
+	completes with errors. The default value as specified below will be used when the abortOnError 
+	parameter to the function is not specified. 
 	-->
-	<property name="defaultAbortOnError" value="true" default="true"/>	
+	<property name="defaultAbortOnError" value="false"/>	
 
 	
 	<!-- 
