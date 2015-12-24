@@ -142,6 +142,7 @@ DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S
 DEFAULT_STYLESHEET = os.path.join(SITE_PACKAGES_DIR, 'pysys-log.xsl')
 DEFAULT_FORMAT_STDOUT = '%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_FORMAT_RUNLOG = '%(asctime)s %(levelname)-5s %(message)s'
+DEFAULT_ABORT_ON_ERROR=False
 
 # set the directories to not recursively walk when looking for the descriptors
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn' ]

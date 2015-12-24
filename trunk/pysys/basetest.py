@@ -74,8 +74,9 @@ class BaseTest(ProcessUser):
 	overall outcome of the testcase is determined using aprecedence order of the individual outcomes. 
 	
 	All C{assert*} methods support variable argument lists for common non-default parameters. Currently this 
-	only includes the C{assertMessage} parameter, to override the default statement logged by the framework to 
-	stdout and the run log. 
+	includes the C{assertMessage} parameter, to override the default statement logged by the framework to
+	stdout and the run log, and the C{abortOnError} parameter, to override the defaultAbortOnError project
+    setting.
 
 	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks 
 	           to modify the test execution based upon the mode.
@@ -343,9 +344,9 @@ class BaseTest(ProcessUser):
 			return
 		
 		if result:
-			self.addOutcome(PASSED, 'Assertion succeeded: %s'%expr)
+			self.addOutcome(PASSED, 'Assertion on %s passed'%expr)
 		else:
-			self.addOutcome(FAILED, 'Assertion failed: %s'%expr)
+			self.addOutcome(FAILED, 'Assertion on %s failed'%expr)
 
 
 	def assertTrue(self, expr, **xargs):
@@ -360,9 +361,9 @@ class BaseTest(ProcessUser):
 		"""
 		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to true')
 		if expr == True:
-			self.addOutcome(PASSED, msg)
+			self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 		else:
-			self.addOutcome(FAILED, 'Assertion failed: %s'%msg)
+			self.addOutcome(FAILED, '%s failed'%msg, abortOnError=self.__abortOnError(xargs))
 	
 
 	def assertFalse(self, expr, **xargs):
@@ -377,9 +378,9 @@ class BaseTest(ProcessUser):
 		"""
 		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to false')
 		if expr == False:
-			self.addOutcome(PASSED, msg)
+			self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 		else:
-			self.addOutcome(FAILED, 'Assertion failed: %s'%msg)
+			self.addOutcome(FAILED, '%s failed'%msg, abortOnError=self.__abortOnError(xargs))
 
 
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], **xargs):
@@ -421,9 +422,9 @@ class BaseTest(ProcessUser):
 			result = filediff(f1, f2, ignores, sort, replace, includes)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, ' failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
+			self.addOutcome(BLOCKED, ' failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
-			self.addOutcome(PASSED if result else FAILED, msg)
+			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 
 	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, **xargs):
@@ -458,9 +459,9 @@ class BaseTest(ProcessUser):
 			result = filegrep(f, expr, ignores=ignores) == contains
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
-			self.addOutcome(PASSED if result else FAILED, msg)
+			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
 		
 
 	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], **xargs):
@@ -496,9 +497,9 @@ class BaseTest(ProcessUser):
 			result = lastgrep(f, expr, ignores, includes) == contains
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
-			self.addOutcome(PASSED if result else FAILED, msg)
+			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, **xargs):   
@@ -531,7 +532,7 @@ class BaseTest(ProcessUser):
 			expr = orderedgrep(f, exprList)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
 			if expr is None and contains:
 				result = PASSED
@@ -542,7 +543,7 @@ class BaseTest(ProcessUser):
 			else:
 				result = FAILED
 
-			self.addOutcome(result, msg) 
+			self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
 			if result == FAILED: log.warn("Ordered grep failed on expression \"%s\"", expr)
 
 
@@ -570,7 +571,7 @@ class BaseTest(ProcessUser):
 			log.debug("Number of matching lines is %d"%numberLines)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
 			if (eval("%d %s" % (numberLines, condition))):
 				result = PASSED
@@ -578,7 +579,7 @@ class BaseTest(ProcessUser):
 			else:
 				result = FAILED
 				appender = " is '%d', does not match condition: '%s'" % (numberLines, condition)
-			self.addOutcome(result, msg+appender) 
+			self.addOutcome(result, msg+appender, abortOnError=self.__abortOnError(xargs))
 
 
 	def __assertMsg(self, xargs, default):
@@ -590,3 +591,13 @@ class BaseTest(ProcessUser):
 		"""
 		if xargs.has_key('assertMessage'): return xargs['assertMessage']
 		return default
+
+
+	def __abortOnError(self, xargs):
+		"""Return an assert statement requested to override the default value.
+
+		@param xargs: Variable argument list to an assert method
+
+		"""
+		if xargs.has_key('abortOnError'): return xargs['abortOnError']
+		return PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
