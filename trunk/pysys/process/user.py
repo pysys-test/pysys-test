@@ -317,7 +317,7 @@ class ProcessUser(object):
 				s.connect((host, port))
 				log.debug("Wait for socket creation completed successfully")
 				if time.time()-startTime>10:
-					log.info("Wait for socket creation completed (%d secs)", time.time()-startTime)
+					log.info("Wait for socket creation completed")
 			except socket.error:
 				if timeout:
 					currentTime = time.time()
@@ -371,7 +371,7 @@ class ProcessUser(object):
 					
 			time.sleep(0.01)
 			if os.path.exists(f):
-				log.info("Wait for '%s' file creation completed successfully (%d secs)", file, time.time()-startTime)
+				log.info("Wait for '%s' file creation completed successfully", file)
 				return
 
 			
@@ -413,7 +413,7 @@ class ProcessUser(object):
 			if os.path.exists(f):
 				matches = getmatches(f, expr)
 				if eval("%d %s" % (len(matches), condition)):
-					log.info("%s completed successfully (%d secs)", msg, time.time()-startTime)
+					log.info("%s completed successfully", msg)
 					break
 				
 			currentTime = time.time()
@@ -517,17 +517,18 @@ class ProcessUser(object):
 		
 		old = self.getOutcome()
 		self.outcome.append(outcome)
-		if self.getOutcome() != old:
-			self.__outcomeReason = outcomeReason
+
+        #store the reason of the highest precedent outcome
+		if self.getOutcome() != old: self.__outcomeReason = outcomeReason
 
 		if outcome in FAILS and abortOnError:
 			self.abort(outcome, outcomeReason)
 
 		if outcomeReason and printReason:
 			if outcome in FAILS:
-				log.warn('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
+				log.warn('Adding outcome %s for %s', LOOKUP[outcome], outcomeReason)
 			else:
-				log.info('Adding outcome %s: %s', LOOKUP[outcome], outcomeReason)
+				log.info('Adding outcome %s for %s', LOOKUP[outcome], outcomeReason)
 
 
 	def abort(self, outcome, outcomeReason):

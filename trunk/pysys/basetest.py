@@ -359,11 +359,11 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 		
 		"""
-		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to true')
+		msg = self.__assertMsg(xargs, 'assertion on boolean expression equal to true')
 		if expr == True:
 			self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 		else:
-			self.addOutcome(FAILED, '%s failed'%msg, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
 	
 
 	def assertFalse(self, expr, **xargs):
@@ -376,11 +376,11 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 						
 		"""
-		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to false')
+		msg = self.__assertMsg(xargs, 'assertion on boolean expression equal to false')
 		if expr == False:
 			self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 		else:
-			self.addOutcome(FAILED, '%s failed'%msg, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 
 	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], **xargs):
@@ -417,7 +417,7 @@ class BaseTest(ProcessUser):
 		log.debug("  file2:       %s" % file2)
 		log.debug("  filedir2:    %s" % filedir2)
 		
-		msg = self.__assertMsg(xargs, 'File comparison (%s, %s)'%(file1, file2))
+		msg = self.__assertMsg(xargs, 'file comparison (%s, %s)'%(file1, file2))
 		try:
 			result = filediff(f1, f2, ignores, sort, replace, includes)
 		except:
@@ -453,7 +453,7 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'Grep on input file %s %s "%s"'%(
+		msg = self.__assertMsg(xargs, 'grep on input file %s %s "%s"'%(
 				file, 'contains' if contains else '<not> contains', expr))
 		try:
 			result = filegrep(f, expr, ignores=ignores) == contains
@@ -490,7 +490,7 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'Grep on last line of input file %s %s "%s"'%(
+		msg = self.__assertMsg(xargs, 'grep on last line of input file %s %s "%s"'%(
 				file, 'contains' if contains else '<not> contains', expr))
 				
 		try:
@@ -527,7 +527,7 @@ class BaseTest(ProcessUser):
 		for expr in exprList: log.debug("  exprList:   %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'Ordered grep on input file %s' % file)
+		msg = self.__assertMsg(xargs, 'ordered grep on input file %s' % file)
 		try:
 			expr = orderedgrep(f, exprList)
 		except:
@@ -565,7 +565,7 @@ class BaseTest(ProcessUser):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
-		msg = self.__assertMsg(xargs, 'Line count on input file \'%s\'' % file)
+		msg = self.__assertMsg(xargs, 'line count on input file \'%s\'' % file)
 		try:
 			numberLines = linecount(f, expr, ignores=ignores)
 			log.debug("Number of matching lines is %d"%numberLines)
@@ -575,11 +575,10 @@ class BaseTest(ProcessUser):
 		else:
 			if (eval("%d %s" % (numberLines, condition))):
 				result = PASSED
-				appender = ""
 			else:
 				result = FAILED
-				appender = " is '%d', does not match condition: '%s'" % (numberLines, condition)
-			self.addOutcome(result, msg+appender, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
+			self.log.warn("Line count is '%d', does not match condition: '%s'" % (numberLines, condition))
 
 
 	def __assertMsg(self, xargs, default):
