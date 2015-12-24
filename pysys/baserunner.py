@@ -599,5 +599,4 @@ class TestContainer:
 					if re.search('^core', file): return True
 
 		except OSError as ex:
-			log.warning("Caught OSError in detectCore():")
-			log.warning(ex)
+			log.warning("Caught OSError in detectCore(): %s %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)

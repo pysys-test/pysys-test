@@ -60,10 +60,10 @@ class ProcessUser(object):
 		self.processCount = {}
 		self.__cleanupFunctions = []
 
-		self.outcome = [] # please use addOutcome instead of manipulating this directly
+		self.outcome = []
 		self.__outcomeReason = ''
 		
-		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else True
+		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 		self.__uniqueProcessKeys = {}
 
 
@@ -184,7 +184,7 @@ class ProcessUser(object):
 		return process
 
 
-	def stopProcess(self, process):
+	def stopProcess(self, process, abortOnError=None):
 		"""Send a soft or hard kill to a running process to stop its execution.
 	
 		This method uses the L{pysys.process.helper} module to stop a running process. 
@@ -194,19 +194,24 @@ class ProcessUser(object):
 		Failures will result in an exception unless the project property defaultAbortOnError=False. 
 		
 		@param process: The process handle returned from the L{startProcess} method
+        @param abortOnError: If true abort the test on any error outcome (defaults to the
+            defaultAbortOnError project setting)
+
 		"""
+		if abortOnError == None: abortOnError = self.defaultAbortOnError
+
 		if process.running():
 			try:
 				process.stop()
 				log.info("Stopped process %r", process)
 			except ProcessError, e:
-				if not self.defaultAbortOnError:
+				if not abortOnError:
 					log.warn("Ignoring failure to stop process %r due to: %s", process, e)
 				else:
 					raise
 
 
-	def signalProcess(self, process, signal):
+	def signalProcess(self, process, signal, abortOnError=None):
 		"""Send a signal to a running process (Unix only).
 	
 		This method uses the L{pysys.process.helper} module to send a signal to a running 
@@ -217,29 +222,35 @@ class ProcessUser(object):
 		
 		@param process: The process handle returned from the L{startProcess} method
 		@param signal: The integer value of the signal to send
-		
+		@param abortOnError: If true abort the test on any error outcome (defaults to the
+            defaultAbortOnError project setting)
+
 		"""
+		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if process.running():
 			try:
 				process.signal(signal)
 				log.info("Sent %d signal to process %r", signal, process)
 			except ProcessError, e:
-				if not self.defaultAbortOnError:
+				if not abortOnError:
 					log.warn("Ignoring failure to signal process %r due to: %s", process, e)
 				else:
 					raise
 
 
-	def waitProcess(self, process, timeout):
+	def waitProcess(self, process, timeout, abortOnError=None):
 		"""Wait for a background process to terminate, return on termination or expiry of the timeout.
 	
 		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
 	
 		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
-		
+	    @param abortOnError: If true abort the test on any error outcome (defaults to the
+            defaultAbortOnError project setting)
+
 		"""
-		assert timeout > 0 # must always specify this otherwise your test may block forever
+		if abortOnError == None: abortOnError = self.defaultAbortOnError
+		assert timeout > 0
 		try:
 			log.info("Waiting up to %d secs for process %r", timeout, process)
 			t = time.time()
@@ -247,7 +258,7 @@ class ProcessUser(object):
 			if time.time()-t > 10:
 				log.info("Process %s terminated after %d secs", process, time.time()-t)
 		except ProcessTimeout:
-			if not self.defaultAbortOnError:
+			if not abortOnError:
 				log.warn("Ignoring timeout waiting for process %r: %s", process, e)
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
@@ -274,7 +285,7 @@ class ProcessUser(object):
 			raise Exception("Write to process %r stdin not performed as process is not running", process)
 
 
-	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], process=None):
+	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], process=None, abortOnError=None):
 		"""Wait for a socket connection to be established.
 		
 		This method blocks until connection to a particular host:port pair can be established. 
@@ -289,8 +300,11 @@ class ProcessUser(object):
 		@param port: The port value in the socket host:port pair
 		@param host: The host value in the socket host:port pair
 		@param timeout: The timeout in seconds to wait for connection to the socket
-		
+	    @param abortOnError: If true abort the test on any error outcome (defaults to the
+            defaultAbortOnError project setting)
+
 		"""
+		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
 		log.debug("Performing wait for socket creation:")
@@ -309,7 +323,7 @@ class ProcessUser(object):
 					currentTime = time.time()
 					if currentTime > startTime + timeout:
 						msg = "Timed out waiting for creation of socket after %d secs"%(time.time()-startTime)
-						if self.defaultAbortOnError:
+						if abortOnError:
 							self.abort(TIMEDOUT, msg)
 						else:
 							log.warn(msg)
@@ -317,7 +331,7 @@ class ProcessUser(object):
 			time.sleep(0.01)
 
 
-	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile']):
+	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile'], abortOnError=None):
 		"""Wait for a file to exist on disk.
 		
 		This method blocks until a file is created on disk. This is useful for test timing where 
@@ -330,8 +344,11 @@ class ProcessUser(object):
 		@param file: The basename of the file used to wait to be created
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param timeout: The timeout in seconds to wait for the file to be created
-		
+        @param abortOnError: If true abort the test on any error outcome (defaults to the
+            defaultAbortOnError project setting)
+
 		"""
+		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
@@ -346,7 +363,7 @@ class ProcessUser(object):
 				if currentTime > startTime + timeout:
 
 					msg = "Timed out waiting for creation of file %s (%d secs)" % (file, time.time()-startTime)
-					if self.defaultAbortOnError:
+					if abortOnError:
 						self.abort(TIMEDOUT, msg)
 					else:
 						log.warn(msg)
@@ -358,7 +375,7 @@ class ProcessUser(object):
 				return
 
 			
-	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, process=None):
+	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, process=None, abortOnError=None):
 		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
 		
 		This method blocks until a particular regular expression is seen in a text file on a set
@@ -366,9 +383,7 @@ class ProcessUser(object):
 		the C{condition} argument in textual form i.e. for a match on more than 2 lines use condition =\">2\".
 		If the regular expression is not seen in the file matching the supplied condition within the 
 		specified timeout interval, the method returns to the caller.
-		
-		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
-		
+
 		@param file: The absolute or relative name of the file used to wait for the signal
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param expr: The regular expression to search for in the text file
@@ -376,9 +391,12 @@ class ProcessUser(object):
 		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		@param process: If a handle to the process object producing output is specified, the wait will abort if 
-			the process dies before the expected signal appears. 
+			the process dies before the expected signal appears.
+        @param abortOnError: If true abort the test on any error outcome (defaults to the
+            defaultAbortOnError project setting)
+
 		"""
-			
+		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
@@ -401,7 +419,7 @@ class ProcessUser(object):
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
 				msg = "%s timed out after %d secs, with %d matches"%(msg, timeout, len(matches))
-				if self.defaultAbortOnError:
+				if abortOnError:
 					self.abort(TIMEDOUT, msg)
 				else:
 					log.warn(msg)
@@ -414,9 +432,7 @@ class ProcessUser(object):
 
 
 	def addCleanupFunction(self, fn):
-		""" Registers a zero-arg function that will be called as part of the 
-		cleanup of this object, to provide a way to cleanly free associated 
-		resources. 
+		""" Registers a zero-arg function that will be called as part of the cleanup of this object.
 		
 		Cleanup functions are invoked in reverse order with the most recently 
 		added first (LIFO), and before the automatic termination of any 
@@ -431,9 +447,9 @@ class ProcessUser(object):
 
 	def cleanup(self):
 		""" Cleanup function that frees resources managed by this object. 
-		Should be called exactly once when this object is no longer needed. 
-		
-		Instead of overriding this function, use L{addCleanupFunction}.  
+
+		Should be called exactly once when this object is no longer needed. Instead of overriding
+		this function, use L{addCleanupFunction}.
 		
 		"""
 		try:
@@ -458,7 +474,7 @@ class ProcessUser(object):
 	# methods to add to and obtain the outcome, used by BaseTest
 
 
-	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False):
+	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=None):
 		"""Add a test validation outcome (and if possible, reason string) to the validation list.
 		
 		See also abort(), which should be used instead of this method for cases where 
@@ -491,11 +507,12 @@ class ProcessUser(object):
 			at INFO/WARN (whether or not this outcome reason is taking priority). 
 			In most cases this is useful, but can be disabled if more specific 
 			logging is already implemented. 
-		@param abortOnError: if True, an exception will be thrown if a failure 
-			outcome is reported
+        @param abortOnError: If true abort the test on any error outcome (defaults to the
+            defaultAbortOnError project setting)
 		
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
+		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		outcomeReason = outcomeReason.strip() if outcomeReason else ''
 		
 		old = self.getOutcome()
