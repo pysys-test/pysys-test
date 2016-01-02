@@ -17,10 +17,9 @@ class PySysTest(BaseTest):
 		self.assertTrue(True)
 		self.assertTrue(False)
 		try:
-			self.waitProcess(self.phandle, timeout=1)
+			self.waitProcess(self.phandle, timeout=1, abortOnError=True)
 			self.addOutcome(BLOCKED, 'unexpected error - should have aborted')
 		except Exception, e:
-			self.log.info('Got abort as expected')
 			self.outcome=[]
 			self.addOutcome(TIMEDOUT, 'simulated timeout')
 		self.assertTrue(False)
