@@ -99,14 +99,11 @@ class ProcessUser(object):
 		
 	
 	def allocateUniqueStdOutErr(self, processKey):
-		""" Allocate filenames of the form processKey[.n].out (similarly for .err) 
-		for a process that is about to be started, such that the names are not 
-		repeated within the specified parent's lifetime. 
+		"""Allocate filenames of the form processKey[.n].out (similarly for .err).
 		
-		Returns a STDOUTERR_TUPLE named tuple of (stdout, stderr).
-		
-		@param processKey A user-defined identifier that will form the prefix 
-			onto which [.n].out is appended
+		@param processKey: A user-defined identifier that will form the prefix onto which [.n].out is appended
+		@return: A STDOUTERR_TUPLE named tuple of (stdout, stderr)
+		@rtype:  tuple
 		"""
 		newval = self.__uniqueProcessKeys.get(processKey, -1)+1
 		self.__uniqueProcessKeys[processKey] = newval
@@ -186,16 +183,14 @@ class ProcessUser(object):
 
 	def stopProcess(self, process, abortOnError=None):
 		"""Send a soft or hard kill to a running process to stop its execution.
-	
-		This method uses the L{pysys.process.helper} module to stop a running process. 
-		Should the request to stop the running process fail, a C{BLOCKED} outcome will 
-		be added to the outcome list.
-		
-		Failures will result in an exception unless the project property defaultAbortOnError=False. 
+
+		This method uses the L{pysys.process.helper} module to stop a running process.
+		Should the request to stop the running process fail, a C{BLOCKED} outcome will
+		be added to the outcome list. Failures will result in an exception unless the
+		project property defaultAbortOnError=False.
 		
 		@param process: The process handle returned from the L{startProcess} method
-        @param abortOnError: If true abort the test on any error outcome (defaults to the
-            defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -222,8 +217,7 @@ class ProcessUser(object):
 		
 		@param process: The process handle returned from the L{startProcess} method
 		@param signal: The integer value of the signal to send
-		@param abortOnError: If true abort the test on any error outcome (defaults to the
-            defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -245,8 +239,7 @@ class ProcessUser(object):
 	
 		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
-	    @param abortOnError: If true abort the test on any error outcome (defaults to the
-            defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -259,7 +252,7 @@ class ProcessUser(object):
 				log.info("Process %s terminated after %d secs", process, time.time()-t)
 		except ProcessTimeout:
 			if not abortOnError:
-				log.warn("Ignoring timeout waiting for process %r: %s", process, e)
+				log.warn("Ignoring timeout waiting for process %r: %s", process, ProcessTimeout)
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
 
@@ -300,8 +293,7 @@ class ProcessUser(object):
 		@param port: The port value in the socket host:port pair
 		@param host: The host value in the socket host:port pair
 		@param timeout: The timeout in seconds to wait for connection to the socket
-	    @param abortOnError: If true abort the test on any error outcome (defaults to the
-            defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -344,8 +336,7 @@ class ProcessUser(object):
 		@param file: The basename of the file used to wait to be created
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param timeout: The timeout in seconds to wait for the file to be created
-        @param abortOnError: If true abort the test on any error outcome (defaults to the
-            defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -392,8 +383,7 @@ class ProcessUser(object):
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		@param process: If a handle to the process object producing output is specified, the wait will abort if 
 			the process dies before the expected signal appears.
-        @param abortOnError: If true abort the test on any error outcome (defaults to the
-            defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -477,21 +467,21 @@ class ProcessUser(object):
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=None):
 		"""Add a test validation outcome (and if possible, reason string) to the validation list.
 		
-		See also abort(), which should be used instead of this method for cases where 
-		it doesn't make sense to continue running the test. 
+		See also abort(), which should be used instead of this method for cases where
+		it doesn't make sense to continue running the test.
 		
 		The method provides the ability to add a validation outcome to the internal data structure 
 		storing the list of test validation outcomes. In a single test run multiple validations may 
 		be performed. The currently supported validation outcomes are:
 				
-		  SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
-		  BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
-		  DUMPEDCORE:  A process started by the test produced a core file (unix only)
-		  TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
-		  FAILED:      A validation step of the test failed
-		  NOTVERIFIED: No validation steps were performed
-		  INSPECT:     A validation step of the test requires manual inspection
-		  PASSED:      A validation step of the test passed 
+		SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
+		BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
+		DUMPEDCORE:  A process started by the test produced a core file (unix only)
+		TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
+		FAILED:      A validation step of the test failed
+		NOTVERIFIED: No validation steps were performed
+		INSPECT:     A validation step of the test requires manual inspection
+		PASSED:      A validation step of the test passed
 		
 		The outcomes are considered to have a precedence order, as defined by the order of the outcomes listed
 		above. Thus a C{BLOCKED} outcome has a higher precedence than a C{PASSED} outcome. The outcomes are defined 
@@ -507,8 +497,7 @@ class ProcessUser(object):
 			at INFO/WARN (whether or not this outcome reason is taking priority). 
 			In most cases this is useful, but can be disabled if more specific 
 			logging is already implemented. 
-        @param abortOnError: If true abort the test on any error outcome (defaults to the
-            defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
 		
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 

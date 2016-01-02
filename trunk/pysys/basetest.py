@@ -76,9 +76,9 @@ class BaseTest(ProcessUser):
 	All C{assert*} methods support variable argument lists for common non-default parameters. Currently this 
 	includes the C{assertMessage} parameter, to override the default statement logged by the framework to
 	stdout and the run log, and the C{abortOnError} parameter, to override the defaultAbortOnError project
-    setting.
+	setting.
 
-	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks 
+	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks
 	           to modify the test execution based upon the mode.
 	@type mode: string
 	@ivar input: Full path to the input directory of the testcase. This is used both by the class and its 
