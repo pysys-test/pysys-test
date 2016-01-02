@@ -6,13 +6,13 @@ class PySysTest(BaseTest):
 	def execute(self):
 		self.assertLineCount('file1.txt', filedir=self.input, expr='Foo', condition='==1')
 		self.assertLineCount('file1.txt', filedir=self.input, expr='Fi', condition='>=15')
-		self.waitForSignal('run.log', expr='FAILED for line count on input file file1.txt', condition='>=1', timeout=5)
+		self.waitForSignal('run.log', expr='Adding FAILED for line count on file1.txt for "Fi">=15', timeout=5)
 		
 		self.log.info('Copying run.log for later verification')
 		filecopy(os.path.join(self.output, 'run.log'), os.path.join(self.output, 'run.log.proc'))
 		
 	def validate(self):
 		del self.outcome[:]
-		self.assertGrep('run.log.proc', expr='PASSED for line count on input file \'file1.txt\'')
-		self.assertGrep('run.log.proc', expr="FAILED for line count on input file 'file1.txt' .*is '1'.*condition: '>=15'")
+		self.assertGrep('run.log.proc', expr='PASSED for line count on file1.txt')
+		self.assertGrep('run.log.proc', expr="FAILED for line count on file1.txt for \"Fi\">=15")
 		
