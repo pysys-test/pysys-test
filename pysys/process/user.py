@@ -170,7 +170,7 @@ class ProcessUser(object):
 			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout)
 			process.stop()
 		else:
-			self.processList.append(process) 	
+			self.processList.append(process)
 			try:
 				if self.processCount.has_key(displayName):
 					self.processCount[displayName] = self.processCount[displayName] + 1
@@ -188,7 +188,7 @@ class ProcessUser(object):
 		Should the request to stop the running process fail, a C{BLOCKED} outcome will
 		be added to the outcome list. Failures will result in an exception unless the
 		project property defaultAbortOnError=False.
-		
+
 		@param process: The process handle returned from the L{startProcess} method
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
 
@@ -198,23 +198,20 @@ class ProcessUser(object):
 		if process.running():
 			try:
 				process.stop()
-				log.info("Stopped process %r", process)
-			except ProcessError, e:
-				if not abortOnError:
-					log.warn("Ignoring failure to stop process %r due to: %s", process, e)
-				else:
-					raise
+				log.info("Stopped process with process id %d", process.pid)
+			except ProcessError:
+				log.info("Unable to stop process")
 
 
 	def signalProcess(self, process, signal, abortOnError=None):
 		"""Send a signal to a running process (Unix only).
-	
-		This method uses the L{pysys.process.helper} module to send a signal to a running 
-		process. Should the request to send the signal to the running process fail, a 
+
+		This method uses the L{pysys.process.helper} module to send a signal to a running
+		process. Should the request to send the signal to the running process fail, a
 		C{BLOCKED} outcome will be added to the outcome list.
-		
-		Failures will result in an exception unless the project property defaultAbortOnError=False. 
-		
+
+		Failures will result in an exception unless the project property defaultAbortOnError=False.
+
 		@param process: The process handle returned from the L{startProcess} method
 		@param signal: The integer value of the signal to send
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
@@ -234,9 +231,9 @@ class ProcessUser(object):
 
 	def waitProcess(self, process, timeout, abortOnError=None):
 		"""Wait for a background process to terminate, return on termination or expiry of the timeout.
-	
-		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
-	
+
+		Timeouts will result in an exception unless the project property defaultAbortOnError=False.
+
 		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
@@ -259,16 +256,16 @@ class ProcessUser(object):
 
 	def writeProcess(self, process, data, addNewLine=True):
 		"""Write data to the stdin of a process.
-		
-		This method uses the L{pysys.process.helper} module to write a data string to the 
-		stdin of a process. This wrapper around the write method of the process helper only 
-		adds checking of the process running status prior to the write being performed, and 
+
+		This method uses the L{pysys.process.helper} module to write a data string to the
+		stdin of a process. This wrapper around the write method of the process helper only
+		adds checking of the process running status prior to the write being performed, and
 		logging to the testcase run log to detail the write.
-		
+
 		@param process: The process handle returned from the L{startProcess()} method
-		@param data: The data to write to the process		
+		@param data: The data to write to the process
 		@param addNewLine: True if a new line character is to be added to the end of the data string
-		
+
 		"""
 		if process.running():
 			process.write(data, addNewLine)
@@ -287,8 +284,6 @@ class ProcessUser(object):
 		the server process is running and a client is able to create connections to it. If a 
 		connection cannot be made within the specified timeout interval, the method returns 
 		to the caller.
-		
-		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
 		
 		@param port: The port value in the socket host:port pair
 		@param host: The host value in the socket host:port pair
@@ -330,9 +325,7 @@ class ProcessUser(object):
 		a component under test creates a file (e.g. for logging) indicating it has performed all 
 		initialisation actions and is ready for the test execution steps. If a file is not created 
 		on disk within the specified timeout interval, the method returns to the caller.
-		
-		Timeouts will result in an exception unless the project property defaultAbortOnError=False. 
-		
+
 		@param file: The basename of the file used to wait to be created
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param timeout: The timeout in seconds to wait for the file to be created
@@ -362,7 +355,7 @@ class ProcessUser(object):
 					
 			time.sleep(0.01)
 			if os.path.exists(f):
-				log.info("Wait for '%s' file creation completed successfully", file)
+				log.debug("Wait for '%s' file creation completed successfully", file)
 				return
 
 			
@@ -403,7 +396,7 @@ class ProcessUser(object):
 			if os.path.exists(f):
 				matches = getmatches(f, expr)
 				if eval("%d %s" % (len(matches), condition)):
-					log.info("%s completed successfully", msg)
+					log.info("Wait for signal in %s completed successfully", file)
 					break
 				
 			currentTime = time.time()
@@ -455,7 +448,7 @@ class ProcessUser(object):
 				try:
 					if process.running(): process.stop()
 				except:
-					 log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.processList = []
 			self.processCount = {}
 			
@@ -507,7 +500,7 @@ class ProcessUser(object):
 		old = self.getOutcome()
 		self.outcome.append(outcome)
 
-        #store the reason of the highest precedent outcome
+		#store the reason of the highest precedent outcome
 		if self.getOutcome() != old: self.__outcomeReason = outcomeReason
 
 		if outcome in FAILS and abortOnError:
@@ -515,9 +508,9 @@ class ProcessUser(object):
 
 		if outcomeReason and printReason:
 			if outcome in FAILS:
-				log.warn('Adding outcome %s for %s', LOOKUP[outcome], outcomeReason)
+				log.warn('Adding %s for %s', LOOKUP[outcome], outcomeReason)
 			else:
-				log.info('Adding outcome %s for %s', LOOKUP[outcome], outcomeReason)
+				log.info('Adding %s for %s', LOOKUP[outcome], outcomeReason)
 
 
 	def abort(self, outcome, outcomeReason):

@@ -92,7 +92,7 @@ class CommonProcessWrapper(object):
 
 
 	def __str__(self): return self.displayName
-	def __repr__(self): return '%s(pid %s)'%(self.displayName, self.pid)
+	def __repr__(self): return '%s (pid %s)'%(self.displayName, self.pid)
 
 	# these abstract methods must be implemented by subclasses
 	def _setExitStatus(self): raise Exception('Not implemented')
