@@ -85,9 +85,7 @@ class InvalidXMLException(Exception):
 		return self.value
 
 class AbortExecution(Exception):
-	"""Raised by a test that should not continue executing its execute or 
-	validate method, specifying the outcome that the test should have 
-	(overrides any existing outcomes)."""
+	"""Raised to abort execution of a test."""
 
 	def __init__(self,outcome, outcomeReason):
 		self.outcome, self.value = outcome, outcomeReason

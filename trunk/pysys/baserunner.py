@@ -524,7 +524,7 @@ class TestContainer:
 			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
 
 		except:
-			log.warn("TestContainer caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]))
 	
 		# call the cleanup method to tear down the test
@@ -599,4 +599,5 @@ class TestContainer:
 					if re.search('^core', file): return True
 
 		except OSError as ex:
-			log.warning("DetectCore caught %s %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("Caught OSError in detectCore():")
+			log.warning(ex)

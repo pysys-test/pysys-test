@@ -246,4 +246,4 @@ class XMLProjectParser:
 		f = open(self.xmlfile, 'w')
 		f.write(self.doc.toxml())
 		f.close()
-		
+

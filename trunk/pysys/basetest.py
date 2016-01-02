@@ -344,9 +344,9 @@ class BaseTest(ProcessUser):
 			return
 		
 		if result:
-			self.addOutcome(PASSED, 'Assertion on %s passed'%expr)
+			self.addOutcome(PASSED, 'assertion on %s'%expr)
 		else:
-			self.addOutcome(FAILED, 'Assertion on %s failed'%expr)
+			self.addOutcome(FAILED, 'assertion on %s'%expr)
 
 
 	def assertTrue(self, expr, **xargs):
@@ -453,8 +453,8 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'grep on input file %s %s "%s"'%(
-				file, 'contains' if contains else '<not> contains', expr))
+		msg = self.__assertMsg(xargs, 'grep on %s %s "%s"'%(
+				file, 'contains' if contains else 'not contains', expr))
 		try:
 			result = filegrep(f, expr, ignores=ignores) == contains
 		except:
@@ -490,7 +490,7 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'grep on last line of input file %s %s "%s"'%(
+		msg = self.__assertMsg(xargs, 'grep on last line of %s %s "%s"'%(
 				file, 'contains' if contains else '<not> contains', expr))
 				
 		try:
@@ -527,7 +527,7 @@ class BaseTest(ProcessUser):
 		for expr in exprList: log.debug("  exprList:   %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'ordered grep on input file %s' % file)
+		msg = self.__assertMsg(xargs, 'ordered grep on %s' % file)
 		try:
 			expr = orderedgrep(f, exprList)
 		except:
@@ -565,7 +565,7 @@ class BaseTest(ProcessUser):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
-		msg = self.__assertMsg(xargs, 'line count on input file \'%s\'' % file)
+		msg = self.__assertMsg(xargs, 'line count on %s for "%s"%s '%(file, expr, condition))
 		try:
 			numberLines = linecount(f, expr, ignores=ignores)
 			log.debug("Number of matching lines is %d"%numberLines)
@@ -575,10 +575,10 @@ class BaseTest(ProcessUser):
 		else:
 			if (eval("%d %s" % (numberLines, condition))):
 				result = PASSED
+				self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
 			else:
 				result = FAILED
-			self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
-			self.log.warn("Line count is '%d', does not match condition: '%s'" % (numberLines, condition))
+				self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
 
 
 	def __assertMsg(self, xargs, default):
