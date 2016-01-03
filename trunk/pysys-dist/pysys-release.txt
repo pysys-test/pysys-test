@@ -8,6 +8,19 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
+- Added isPurgableFile to the base runner class ...
+- Start, stop, signal, wait for process moved out of base test into 
+  the process user class, means available to base runner extensions ...
+- Added assertThat method to the base test class ...
+- base test setup, execute and validate can throw abort exception which 
+  will fast abort the test 
+- on test failure, the failure reason will be printed ...
+- project setting defaultAbortOnError, means process and assert related
+  actions will abort the test on the first failure ... 
+- process and assert method calls now take the optional abortOnError
+  parameter to override the default project setting, allows finer 
+  grained control on where a test should abort ... all except assertThat
+
 
 
 Dependencies
