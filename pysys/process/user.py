@@ -32,18 +32,12 @@ STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 class ProcessUser(object):
 	"""Class providing basic operations over interacting with processes.
 	
-	The ProcessUser class provides the mimimum set of operations for managing and interacting with 
+	The ProcessUser class provides the minimum set of operations for managing and interacting with
 	processes. The class is designed to be extended by the L{pysys.baserunner.BaseRunner} and 
 	L{pysys.basetest.BaseTest} classes so that they prescribe a common set of process operations 
-	that any application helper classes can use, i.e. where an application helper class is 
-	instantiated with a callback reference to the runner or base test for the process operations. 
-	
-	This class has the ability to recored one or more 'outcomes', and many of 
-	the methods on this class will append outcomes when errors occur, such as 
-	an unsuccessful attempt to launch a process. Some subclasses may make 
-	no use of the outcome, but it is used by BaseTest - see that class for 
-	more details. 
-	
+	that any child test can use. Process operations have associated potential outcomes in their
+	execution, e.g. C{BLOCKED}, C{TIMEDOUT}, C{DUMPEDCORE} etc. As such the class additionally acts
+	as the container for storing the list of outcomes from all child test related actions.
 	
 	@ivar input: Location for input to any processes (defaults to current working directory) 
 	@type input: string
@@ -104,6 +98,7 @@ class ProcessUser(object):
 		@param processKey: A user-defined identifier that will form the prefix onto which [.n].out is appended
 		@return: A STDOUTERR_TUPLE named tuple of (stdout, stderr)
 		@rtype:  tuple
+
 		"""
 		newval = self.__uniqueProcessKeys.get(processKey, -1)+1
 		self.__uniqueProcessKeys[processKey] = newval
@@ -121,13 +116,14 @@ class ProcessUser(object):
 			abortOnError=None, ignoreExitStatus=True):
 		"""Start a process running in the foreground or background, and return the process handle.
 
-		The method allows spawning of new processes in a platform independent way. The command, arguments, environment and 
-		working directory to run the process in can all be specified in the arguments to the method, along with the filenames
-		used for capturing the stdout and stderr of the process. Processes may be started in the C{FOREGROUND}, in which case 
-		the method does not return until the process has completed or a time out occurs, or in the C{BACKGROUND} in which case
-		the method returns immediately to the caller returning a handle to the process to allow manipulation at a later stage. 
-		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process handle are automatically
-		killed on completion of the test via the L{cleanup()} destructor. 
+		The method allows spawning of new processes in a platform independent way. The command, arguments,
+		environment and working directory to run the process in can all be specified in the arguments to the
+		method, along with the filenames used for capturing the stdout and stderr of the process. Processes may
+		be started in the C{FOREGROUND}, in which case the method does not return until the process has completed
+		or a time out occurs, or in the C{BACKGROUND} in which case the method returns immediately to the caller
+		returning a handle to the process to allow manipulation at a later stage. All processes started in the
+		C{BACKGROUND} and not explicitly killed using the returned process handle are automatically killed on
+		completion of the test via the L{cleanup()} destructor.
 
 		@param command: The command to start the process (should include the full path)
 		@param arguments: A list of arguments to pass to the command
@@ -138,11 +134,9 @@ class ProcessUser(object):
 		@param stdout: The filename used to capture the stdout of the process. Consider using L{allocateUniqueStdOutErr} to get this. 
 		@param stderr: The filename user to capture the stderr of the process. Consider using L{allocateUniqueStdOutErr} to get this. 
 		@param displayName: Logical name of the process used for display and reference counting (defaults to the basename of the command)
-		@param abortOnError: If True, failures will always result in an exception, 
-			if False they will just add a failure outcome, 
-			if None the default value is taken from the "defaultAbortOnError" property on the project (True by default)
-		@param ignoreExitStatus: If False, non-zero exit codes are reported as an error outcome (and will also cause 
-			an abort if the abortOnError flag is set), if True non-zero exit codes are ignored
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting)
+		@param ignoreExitStatus: If False, non-zero exit codes are reported as an error outcome
 		@return: The process handle of the process (L{pysys.process.helper.ProcessWrapper})
 		@rtype: handle
 
@@ -152,19 +146,20 @@ class ProcessUser(object):
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		
 		try:
-			starttime = time.time()
+			startTime = time.time()
 			process = ProcessWrapper(command, arguments, environs or {}, workingDir, state, timeout, stdout, stderr)
 			process.start()
 			if state == FOREGROUND:
-				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, exit status %d, duration %d secs", displayName, process.exitStatus, time.time()-starttime)
+				(log.info if process.exitStatus == 0 else log.warn)("Executed %s in foreground, exit status %d%s", displayName, process.exitStatus,
+																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
 				
 				if not ignoreExitStatus and process.exitStatus != 0:
 					self.addOutcome(BLOCKED, '%s returned non-zero exit code %d'%(process, process.exitStatus), abortOnError=abortOnError)
 
 			elif state == BACKGROUND:
-				log.info("Started %s with pid %d", displayName, process.pid)
-		except ProcessError, e:
-			self.addOutcome(BLOCKED, '%s failed to run: %s'%(process, e), abortOnError=abortOnError)
+				log.info("Started %s in background with process id %d", displayName, process.pid)
+		except ProcessError:
+			log.info("%s", sys.exc_info()[1], exc_info=0)
 		except ProcessTimeout:
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
 			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout)
@@ -184,37 +179,38 @@ class ProcessUser(object):
 	def stopProcess(self, process, abortOnError=None):
 		"""Send a soft or hard kill to a running process to stop its execution.
 
-		This method uses the L{pysys.process.helper} module to stop a running process.
-		Should the request to stop the running process fail, a C{BLOCKED} outcome will
-		be added to the outcome list. Failures will result in an exception unless the
-		project property defaultAbortOnError=False.
+		This method uses the L{pysys.process.helper} module to stop a running process. Should the request to
+		stop the running process fail, a C{BLOCKED} outcome will be added to the outcome list. Failures will
+		result in an exception unless the project property defaultAbortOnError=False.
 
 		@param process: The process handle returned from the L{startProcess} method
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
-
 		if process.running():
 			try:
 				process.stop()
 				log.info("Stopped process with process id %d", process.pid)
-			except ProcessError:
-				log.info("Unable to stop process")
+			except ProcessError, e:
+				if not abortOnError:
+					log.warn("Ignoring failure to stop process %r due to: %s", process, e)
+				else:
+					self.abort(BLOCKED, 'Unable to stop process %r'%(process))
 
 
 	def signalProcess(self, process, signal, abortOnError=None):
 		"""Send a signal to a running process (Unix only).
 
-		This method uses the L{pysys.process.helper} module to send a signal to a running
-		process. Should the request to send the signal to the running process fail, a
-		C{BLOCKED} outcome will be added to the outcome list.
-
-		Failures will result in an exception unless the project property defaultAbortOnError=False.
+		This method uses the L{pysys.process.helper} module to send a signal to a running process. Should the
+		request to send the signal to the running process fail, a C{BLOCKED} outcome will be added to the
+		outcome list.
 
 		@param process: The process handle returned from the L{startProcess} method
 		@param signal: The integer value of the signal to send
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -226,7 +222,7 @@ class ProcessUser(object):
 				if not abortOnError:
 					log.warn("Ignoring failure to signal process %r due to: %s", process, e)
 				else:
-					raise
+					self.abort(BLOCKED, 'Unable to signal process %r'%(process))
 
 
 	def waitProcess(self, process, timeout, abortOnError=None):
@@ -236,7 +232,8 @@ class ProcessUser(object):
 
 		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -257,10 +254,9 @@ class ProcessUser(object):
 	def writeProcess(self, process, data, addNewLine=True):
 		"""Write data to the stdin of a process.
 
-		This method uses the L{pysys.process.helper} module to write a data string to the
-		stdin of a process. This wrapper around the write method of the process helper only
-		adds checking of the process running status prior to the write being performed, and
-		logging to the testcase run log to detail the write.
+		This method uses the L{pysys.process.helper} module to write a data string to the stdin of a process. This
+		wrapper around the write method of the process helper only adds checking of the process running status prior
+		to the write being performed, and logging to the testcase run log to detail the write.
 
 		@param process: The process handle returned from the L{startProcess()} method
 		@param data: The data to write to the process
@@ -275,20 +271,20 @@ class ProcessUser(object):
 			raise Exception("Write to process %r stdin not performed as process is not running", process)
 
 
-	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], process=None, abortOnError=None):
+	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], abortOnError=None):
 		"""Wait for a socket connection to be established.
 		
-		This method blocks until connection to a particular host:port pair can be established. 
-		This is useful for test timing where a component under test creates a socket for client 
-		server interaction - calling of this method ensures that on return of the method call 
-		the server process is running and a client is able to create connections to it. If a 
-		connection cannot be made within the specified timeout interval, the method returns 
-		to the caller.
+		This method blocks until connection to a particular host:port pair can be established. This is useful for
+		test timing where a component under test creates a socket for client server interaction - calling of this
+		method ensures that on return of the method call the server process is running and a client is able to
+		create connections to it. If a connection cannot be made within the specified timeout interval, the method
+		returns to the caller.
 		
 		@param port: The port value in the socket host:port pair
 		@param host: The host value in the socket host:port pair
 		@param timeout: The timeout in seconds to wait for connection to the socket
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -329,7 +325,8 @@ class ProcessUser(object):
 		@param file: The basename of the file used to wait to be created
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param timeout: The timeout in seconds to wait for the file to be created
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -346,7 +343,7 @@ class ProcessUser(object):
 				currentTime = time.time()
 				if currentTime > startTime + timeout:
 
-					msg = "Timed out waiting for creation of file %s (%d secs)" % (file, time.time()-startTime)
+					msg = "Timed out waiting for creation of file %s after %d secs" % (file, time.time()-startTime)
 					if abortOnError:
 						self.abort(TIMEDOUT, msg)
 					else:
@@ -376,7 +373,8 @@ class ProcessUser(object):
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		@param process: If a handle to the process object producing output is specified, the wait will abort if 
 			the process dies before the expected signal appears.
-		@param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError project setting)
+		@param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
+			project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -409,7 +407,13 @@ class ProcessUser(object):
 				break
 			
 			if process and not process.running():
-				self.abort(BLOCKED, "%s aborted due to process %s termination"%(msg, process))
+				msg = "%s aborted due to process %s termination"%(msg, process)
+				if abortOnError:
+					self.abort(BLOCKED, msg)
+				else:
+					log.warn(msg)
+				break
+
 			time.sleep(poll)
 		return matches
 
@@ -417,9 +421,8 @@ class ProcessUser(object):
 	def addCleanupFunction(self, fn):
 		""" Registers a zero-arg function that will be called as part of the cleanup of this object.
 		
-		Cleanup functions are invoked in reverse order with the most recently 
-		added first (LIFO), and before the automatic termination of any 
-		remaining processes associated with this object.
+		Cleanup functions are invoked in reverse order with the most recently added first (LIFO), and
+		before the automatic termination of any remaining processes associated with this object.
 		
 		e.g. self.addCleanupFunction(lambda: self.cleanlyShutdownProcessX(params))
 		
@@ -454,18 +457,13 @@ class ProcessUser(object):
 			
 			log.debug('ProcessUser cleanup function done.')
 		
-	# methods to add to and obtain the outcome, used by BaseTest
-
 
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=None):
-		"""Add a test validation outcome (and if possible, reason string) to the validation list.
-		
-		See also abort(), which should be used instead of this method for cases where
-		it doesn't make sense to continue running the test.
+		"""Add a validation outcome (and optionally a reason string) to the validation list.
 		
 		The method provides the ability to add a validation outcome to the internal data structure 
-		storing the list of test validation outcomes. In a single test run multiple validations may 
-		be performed. The currently supported validation outcomes are:
+		storing the list of validation outcomes. Multiple validations may be performed, the current
+		supported validation outcomes of which are:
 				
 		SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
 		BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
@@ -481,16 +479,10 @@ class ProcessUser(object):
 		in L{pysys.constants}. 
 		
 		@param outcome: The outcome to add
-		@param outcomeReason: A string summarizing the reason for the outcome 
-			to help anyone triaging test failures. 
-			Callers are strongly recommended to specify this if at all possible 
-			when reporting failure outcomes. 
-			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
-		@param printReason: if True the specified outcomeReason will be printed 
-			at INFO/WARN (whether or not this outcome reason is taking priority). 
-			In most cases this is useful, but can be disabled if more specific 
-			logging is already implemented. 
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError project setting)
+		@param outcomeReason: A string summarizing the reason for the outcome
+		@param printReason: if True the specified outcomeReason will be printed
+		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting)
 		
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
@@ -514,30 +506,19 @@ class ProcessUser(object):
 
 
 	def abort(self, outcome, outcomeReason):
-		"""Immediately terminate execution of the current test (both execute and validate) 
-		and report the specified outcome and outcomeReason string. 
-		
-		This method works by raising an AbortExecution exeception, so 
-		do not add a try...except block around the abort call unless that is 
-		really what is intended. 
-		
-		See addOutcome for the list of permissible outcome values. 
-		
-		@param outcome: The outcome, which will override any existing 
-			outcomes previously reported. The most common outcomes are 
-			BLOCKED, TIMEDOUT or SKIPPED. 
-		@param outcomeReason: A string summarizing the reason for the outcome 
-			to help anyone triaging test failures. 
-			e.g. outcomeReason='Timed out running myprocess after 60 seconds'
+		"""Raise an AbortException.
+
+		@param outcome: The outcome, which will override any existing outcomes previously recorded.
+		@param outcomeReason: A string summarizing the reason for the outcome
 		
 		"""	
 		raise AbortExecution(outcome, outcomeReason)
 
 
 	def getOutcome(self):
-		"""Get the overall outcome of the test based on the precedence order.
+		"""Get the overall outcome based on the precedence order.
 				
-		The method returns the overal outcome of the test based on the outcomes stored in the internal data 
+		The method returns the overall outcome of the test based on the outcomes stored in the internal data
 		structure. The precedence order of the possible outcomes is used to determined the overall outcome 
 		of the test, e.g. if C{PASSED}, C{BLOCKED} and C{FAILED} were recorded during the execution of the test, 
 		the overall outcome would be C{BLOCKED}. 
@@ -564,8 +545,8 @@ class ProcessUser(object):
 
 
 	def getNextAvailableTCPPort(self):
-		"""Allocate a TCP port which is available for a server to be
-		started on. Take ownership of it for the duration of the test
+		"""Allocate a TCP port.
+
 		"""
 		o = TCPPortOwner()
 		self.addCleanupFunction(lambda: o.cleanup())

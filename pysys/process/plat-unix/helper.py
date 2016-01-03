@@ -84,8 +84,8 @@ class ProcessWrapper(CommonProcessWrapper):
 		self.__lock = threading.Lock() # to protect access to the fields that get updated while process is running
 
 
-	def _writeStdin(self):
-		"""Private thread method to write to the process stdin pipe.
+	def writeStdin(self):
+		"""Thread method to write to the process stdin pipe.
 		
 		"""
 		while self._outQueue:
@@ -93,14 +93,15 @@ class ProcessWrapper(CommonProcessWrapper):
 				data = self._outQueue.get(block=True, timeout=0.25)
 			except Queue.Empty:
 				if not self.running(): 
-					os.close(self.__stdin)
+					try: os.close(self.__stdin)
+					except: pass
 					break
 			else:
 				os.write(self.__stdin, data)	
 	
 
-	def _startBackgroundProcess(self):
-		"""Private method to start a process running in the background. 
+	def startBackgroundProcess(self):
+		"""Method to start a process running in the background.
 		
 		"""
 		with process_lock:
@@ -149,8 +150,8 @@ class ProcessWrapper(CommonProcessWrapper):
 			raise ProcessError, "Error creating process %s" % (self.command)
 
 
-	def _setExitStatus(self):
-		"""Private method to set the exit status of the process.
+	def setExitStatus(self):
+		"""Method to set the exit status of the process.
 		
 		Returns the new value
 		
