@@ -95,9 +95,9 @@ class CommonProcessWrapper(object):
 	def __repr__(self): return '%s (pid %s)'%(self.displayName, self.pid)
 
 	# these abstract methods must be implemented by subclasses
-	def _setExitStatus(self): raise Exception('Not implemented')
-	def _startBackgroundProcess(self): raise Exception('Not implemented')
-	def _writeStdin(self): raise Exception('Not implemented')
+	def setExitStatus(self): raise Exception('Not implemented')
+	def startBackgroundProcess(self): raise Exception('Not implemented')
+	def writeStdin(self): raise Exception('Not implemented')
 	def stop(self): raise Exception('Not implemented')
 	def signal(self): raise Exception('Not implemented')
 
@@ -121,7 +121,7 @@ class CommonProcessWrapper(object):
 		if self._outQueue == None:
 			# start thread on demand
 			self._outQueue = Queue.Queue()
-			thread.start_new_thread(self._writeStdin, ())
+			thread.start_new_thread(self.writeStdin, ())
 			
 		self._outQueue.put(data)
 		
@@ -132,7 +132,7 @@ class CommonProcessWrapper(object):
 		@rtype: integer
 		
 		"""
-		return self._setExitStatus() is None
+		return self.setExitStatus() is None
 
 
 	def wait(self, timeout):
@@ -166,7 +166,7 @@ class CommonProcessWrapper(object):
 		"""
 		self._outQueue = None # always reset
 		if self.state == FOREGROUND:
-			self._startBackgroundProcess()
+			self.startBackgroundProcess()
 			self.wait(self.timeout)
 		else:
-			self._startBackgroundProcess()
+			self.startBackgroundProcess()
