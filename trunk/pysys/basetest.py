@@ -73,9 +73,9 @@ class BaseTest(ProcessUser):
 	(C{SKIPPED}, C{BLOCKED}, C{DUMPEDCORE}, C{TIMEDOUT}, C{FAILED}, C{NOTVERIFIED}, and C{PASSED}) and the 
 	overall outcome of the testcase is determined using aprecedence order of the individual outcomes. 
 	
-	All C{assert*} methods support variable argument lists for common non-default parameters. Currently this 
-	includes the C{assertMessage} parameter, to override the default statement logged by the framework to
-	stdout and the run log, and the C{abortOnError} parameter, to override the defaultAbortOnError project
+	All C{assert*} methods except for C{assertThat} support variable argument lists for common non-default parameters.
+	Currently this includes the C{assertMessage} parameter, to override the default statement logged by the framework
+	to stdout and the run log, and the C{abortOnError} parameter, to override the defaultAbortOnError project
 	setting.
 
 	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks
@@ -344,9 +344,9 @@ class BaseTest(ProcessUser):
 			return
 		
 		if result:
-			self.addOutcome(PASSED, 'assertion on %s'%expr)
+			self.addOutcome(PASSED, 'Assertion on %s'%expr)
 		else:
-			self.addOutcome(FAILED, 'assertion on %s'%expr)
+			self.addOutcome(FAILED, 'Assertion on %s'%expr)
 
 
 	def assertTrue(self, expr, **xargs):
@@ -359,7 +359,7 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 		
 		"""
-		msg = self.__assertMsg(xargs, 'assertion on boolean expression equal to true')
+		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to true')
 		if expr == True:
 			self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 		else:
@@ -376,7 +376,7 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 						
 		"""
-		msg = self.__assertMsg(xargs, 'assertion on boolean expression equal to false')
+		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to false')
 		if expr == False:
 			self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 		else:
@@ -417,7 +417,7 @@ class BaseTest(ProcessUser):
 		log.debug("  file2:       %s" % file2)
 		log.debug("  filedir2:    %s" % filedir2)
 		
-		msg = self.__assertMsg(xargs, 'file comparison (%s, %s)'%(file1, file2))
+		msg = self.__assertMsg(xargs, 'File comparison between %s and %s'%(file1, file2))
 		try:
 			result = filediff(f1, f2, ignores, sort, replace, includes)
 		except:
@@ -453,14 +453,14 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'grep on %s %s "%s"'%(
-				file, 'contains' if contains else 'not contains', expr))
+		msg = self.__assertMsg(xargs, 'Grep on %s %s "%s"'%(file, 'contains' if contains else 'not contains', expr))
 		try:
 			result = filegrep(f, expr, ignores=ignores) == contains
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
+			if result: msg = self.__assertMsg(xargs, 'Grep on input file %s' % file)
 			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
 		
 
@@ -489,16 +489,15 @@ class BaseTest(ProcessUser):
 		log.debug("  filedir:    %s" % filedir)
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
-		
-		msg = self.__assertMsg(xargs, 'grep on last line of %s %s "%s"'%(
-				file, 'contains' if contains else '<not> contains', expr))
-				
+
+		msg = self.__assertMsg(xargs, 'Grep on last line of %s %s "%s"'%(file, 'contains' if contains else 'not contains', expr))
 		try:
 			result = lastgrep(f, expr, ignores, includes) == contains
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
+			if result: msg = self.__assertMsg(xargs, 'Grep on input file %s' % file)
 			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 
@@ -527,7 +526,7 @@ class BaseTest(ProcessUser):
 		for expr in exprList: log.debug("  exprList:   %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'ordered grep on %s' % file)
+		msg = self.__assertMsg(xargs, 'Ordered grep on input file %s' % file)
 		try:
 			expr = orderedgrep(f, exprList)
 		except:
@@ -565,7 +564,6 @@ class BaseTest(ProcessUser):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
-		msg = self.__assertMsg(xargs, 'line count on %s for "%s"%s '%(file, expr, condition))
 		try:
 			numberLines = linecount(f, expr, ignores=ignores)
 			log.debug("Number of matching lines is %d"%numberLines)
@@ -574,11 +572,11 @@ class BaseTest(ProcessUser):
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
 			if (eval("%d %s" % (numberLines, condition))):
-				result = PASSED
-				self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
+				msg = self.__assertMsg(xargs, 'Line count on input file %s' % file)
+				self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 			else:
-				result = FAILED
-				self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
+				msg = self.__assertMsg(xargs, 'Line count on %s for "%s"%s '%(file, expr, condition))
+				self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 
 	def __assertMsg(self, xargs, default):

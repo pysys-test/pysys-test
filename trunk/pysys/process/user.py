@@ -508,9 +508,9 @@ class ProcessUser(object):
 
 		if outcomeReason and printReason:
 			if outcome in FAILS:
-				log.warn('Adding %s for %s', LOOKUP[outcome], outcomeReason)
+				log.warn('%s ... %s',  outcomeReason, LOOKUP[outcome].lower())
 			else:
-				log.info('Adding %s for %s', LOOKUP[outcome], outcomeReason)
+				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower())
 
 
 	def abort(self, outcome, outcomeReason):
