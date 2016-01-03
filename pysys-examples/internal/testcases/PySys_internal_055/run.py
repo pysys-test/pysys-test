@@ -21,7 +21,7 @@ class PySysTest(BaseTest):
 			self.addOutcome(BLOCKED, 'unexpected error - should have aborted')
 		except Exception, e:
 			self.outcome=[]
-			self.addOutcome(TIMEDOUT, 'simulated timeout')
+			self.addOutcome(TIMEDOUT, 'Simulated timeout')
 		self.assertTrue(False)
 		self.assertTrue(True)
 		self.checkOutcome()
