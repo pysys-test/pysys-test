@@ -47,8 +47,9 @@
 	-->
 	<target name="epydoc">
  		<exec executable="${python.executable}" dir="..">
-			<arg value="${python.dir}/Scripts/epydoc.py"/>	
+			<arg value="/usr/local/bin/epydoc"/>	
  			<arg value="--debug"/>
+			<arg value="-v"/>
 			<arg value="--html"/>
  			<arg value="--no-private"/>
 			<arg value="-o"/>
