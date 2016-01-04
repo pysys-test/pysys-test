@@ -512,10 +512,10 @@ class TestContainer:
 					self.testObj.execute()
 					self.testObj.validate()
 				except AbortExecution, e:
-					log.info('Aborting test due to abortOnError set to true')
-					del self.testObj.outcome[:] # override all existing outcomes
-					self.testObj.addOutcome(e.outcome, e.value)
-					
+					del self.testObj.outcome[:]
+					self.testObj.addOutcome(e.outcome, e.value, abortOnError=False)
+					log.info('Aborting test due to abortOnError set to true ...')
+
 				if self.detectCore(self.outsubdir):
 					self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory')	
 		

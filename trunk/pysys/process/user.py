@@ -513,7 +513,7 @@ class ProcessUser(object):
 		@param outcome: The outcome, which will override any existing outcomes previously recorded.
 		@param outcomeReason: A string summarizing the reason for the outcome
 		
-		"""	
+		"""
 		raise AbortExecution(outcome, outcomeReason)
 
 
