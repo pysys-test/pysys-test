@@ -600,9 +600,9 @@ class BaseTest(ProcessUser):
 		return PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 
 
-	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=None):
+	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=None, callRecord=None):
 		if outcome in FAILS:
-			ProcessUser.addOutcome(self, outcome, outcomeReason, printReason, abortOnError, self.__callRecord())
+			ProcessUser.addOutcome(self, outcome, outcomeReason, printReason, abortOnError, callRecord if callRecord != None else self.__callRecord())
 		else:
 			ProcessUser.addOutcome(self, outcome, outcomeReason, printReason, abortOnError)
 

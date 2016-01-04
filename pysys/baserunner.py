@@ -513,7 +513,7 @@ class TestContainer:
 					self.testObj.validate()
 				except AbortExecution, e:
 					del self.testObj.outcome[:]
-					self.testObj.addOutcome(e.outcome, e.value, abortOnError=False)
+					self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
 					log.info('Aborting test due to abortOnError set to true ...')
 
 				if self.detectCore(self.outsubdir):
