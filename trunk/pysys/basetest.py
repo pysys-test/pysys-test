@@ -616,5 +616,5 @@ class BaseTest(ProcessUser):
 			info = inspect.getframeinfo(record[0])
 			if (info.filename == inspect.getfile(inspect.currentframe()) ): continue
 			stack.append( '%s:%s' % (os.path.basename(info.filename).strip(), info.lineno) )
-			if (info.filename == self.descriptor.module+'.py' and (info.function == 'execute' or info.function == 'validate')): break
-		return stack
+			if (info.filename == self.descriptor.module+'.py' and (info.function == 'execute' or info.function == 'validate')): return stack
+		return None

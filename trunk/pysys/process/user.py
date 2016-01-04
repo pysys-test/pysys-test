@@ -484,7 +484,7 @@ class ProcessUser(object):
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
 			project setting if not specified)
 		@param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
-			to the log output for better test triage. 
+			to the log output for better test triage.
 		
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 

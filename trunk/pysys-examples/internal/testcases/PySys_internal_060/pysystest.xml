@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>assertLineCount with ignores</title>    
+    <title>Assertions - assertLineCount with ignores</title>    
     <purpose><![CDATA[
 Check ignores is handled correctly by assertLineCount
 ]]>
