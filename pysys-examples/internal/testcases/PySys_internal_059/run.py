@@ -13,7 +13,7 @@ class PySysTest(BaseTest):
 						  				stderr = test.stderr,
 						  				state=BACKGROUND, abortOnError=False)
 		try:
-			self.waitForSignal(test.stdout, 'foo', process=p)
+			self.waitForSignal(test.stdout, 'foo', process=p, abortOnError=True)
 			self.addOutcome(FAILED, 'Expected abort')
 		except AbortExecution, e:
 			self.assertThat('%s == %s', e.outcome, BLOCKED)

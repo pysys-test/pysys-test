@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Check allocateUniqueStdOutErr and assertThat</title>    
+    <title>Assertions - on failure print out the call stack in summary form</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
