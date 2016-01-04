@@ -498,7 +498,7 @@ class ProcessUser(object):
 		if self.getOutcome() != old: self.__outcomeReason = outcomeReason
 
 		if outcome in FAILS and abortOnError:
-			self.abort(outcome, outcomeReason)
+			self.abort(outcome, outcomeReason, callRecord)
 
 		if outcomeReason and printReason:
 			if outcome in FAILS:
@@ -507,14 +507,14 @@ class ProcessUser(object):
 				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower())
 
 
-	def abort(self, outcome, outcomeReason):
+	def abort(self, outcome, outcomeReason, callRecord=None):
 		"""Raise an AbortException.
 
 		@param outcome: The outcome, which will override any existing outcomes previously recorded.
 		@param outcomeReason: A string summarizing the reason for the outcome
 		
 		"""
-		raise AbortExecution(outcome, outcomeReason)
+		raise AbortExecution(outcome, outcomeReason, callRecord)
 
 
 	def getOutcome(self):

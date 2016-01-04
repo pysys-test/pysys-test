@@ -87,8 +87,8 @@ class InvalidXMLException(Exception):
 class AbortExecution(Exception):
 	"""Raised to abort execution of a test."""
 
-	def __init__(self,outcome, outcomeReason):
-		self.outcome, self.value = outcome, outcomeReason
+	def __init__(self, outcome, outcomeReason, callRecord=None):
+		self.outcome, self.value, self.callRecord = outcome, outcomeReason, callRecord
 		
 	def __str__(self):
 		return self.value
