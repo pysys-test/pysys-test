@@ -492,19 +492,19 @@ class TestContainer:
 		# execute the test if we can
 		try:
 			if self.descriptor.state != 'runnable':
-				self.testObj.addOutcome(SKIPPED, 'Not runnable')
+				self.testObj.addOutcome(SKIPPED, 'Not runnable', abortOnError=False)
 						
 			elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
-				self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode)
+				self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode, abortOnError=False)
 			
 			elif len(exc_info) > 0:
-				self.testObj.addOutcome(BLOCKED, 'Failed to set up test')
+				self.testObj.addOutcome(BLOCKED, 'Failed to set up test', abortOnError=False)
 				for info in exc_info:
 					log.warn("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
 					
 			elif self.kbrdInt:
 				log.warn("test interrupt from keyboard")
-				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
+				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 		
 			else:
 				try:
@@ -517,15 +517,15 @@ class TestContainer:
 					log.info('Aborting test due to abortOnError set to true ...')
 
 				if self.detectCore(self.outsubdir):
-					self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory')	
+					self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory', abortOnError=False)
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
-			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
+			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]))
+			self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
 	
 		# call the cleanup method to tear down the test
 		try:
@@ -533,7 +533,7 @@ class TestContainer:
 		
 		except KeyboardInterrupt:
 			self.kbrdInt = True
-			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard')
+			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 			
 		# print summary and close file handles
 		try:
