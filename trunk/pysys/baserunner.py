@@ -351,7 +351,8 @@ class BaseRunner(ProcessUser):
 					for line in self.resultsQueue[i].testFileHandler.getBuffer(): self.log.info(line)	
 				except:
 					pass
-			if stdoutHandler.level >= logging.WARN: log.critical("%s: %s", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].descriptor.id)
+			if stdoutHandler.level >= logging.WARN:
+				log.critical("%s: %s (%s)", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].descriptor.id,  self.resultsQueue[i].descriptor.title)
 			
 			# call the hook for end of test execution
 			self.testComplete(self.resultsQueue[i].testObj, self.resultsQueue[i].outsubdir)
