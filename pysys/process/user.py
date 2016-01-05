@@ -498,6 +498,7 @@ class ProcessUser(object):
 		if self.getOutcome() != old: self.__outcomeReason = outcomeReason
 
 		if outcome in FAILS and abortOnError:
+			if callRecord==None: callRecord = self.__callRecord()
 			self.abort(outcome, outcomeReason, callRecord)
 
 		if outcomeReason and printReason:
