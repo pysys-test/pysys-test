@@ -8,19 +8,22 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
-- Added isPurgableFile to the base runner class ...
-- Start, stop, signal, wait for process moved out of base test into 
-  the process user class, means available to base runner extensions ...
-- Added assertThat method to the base test class ...
-- base test setup, execute and validate can throw abort exception which 
-  will fast abort the test 
-- on test failure, the failure reason will be printed ...
-- project setting defaultAbortOnError, means process and assert related
-  actions will abort the test on the first failure ... 
-- process and assert method calls now take the optional abortOnError
-  parameter to override the default project setting, allows finer 
-  grained control on where a test should abort ... all except assertThat
-
+- This release introduces optional fail fast semantics at a macro and micro
+  level. At a macro level this is either through the "defaultAbortOnError"
+  project property, or through the "-b|--abort" option to the pysys launcher
+  run task. See the pysysproject.xml file in pysys-examples, and the run task
+  help usage respectively for more details. At a micro level, all assert and
+  process related methods now take an optional "abortOnError" parameter to
+  override any macro setting. When enabled any error will cause the test to
+  immediately fail, reporting the failure reason.
+- Outcomes which are considered a fail now log information as to the cause
+  of the failure. Additionally a call record is reported, giving a comma
+  separated list of "module:lineno" entries detailing the call stack up to
+  the test class instance. This is to aid diagnosing test failure causes.
+- The test title is now output to console when running the test.
+- The BaseRunner class now contains an isPurgableFile() method. This method
+  can be overridden by any extensions to denote if a zero length file should
+  be purged from the output subdirectory after running of the test.
 
 
 Dependencies
