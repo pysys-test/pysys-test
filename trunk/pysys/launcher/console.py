@@ -392,8 +392,8 @@ class ConsoleLaunchHelper:
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:X:'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads="]
+		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:b:X:'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort="]
 
 
 	def printUsage(self, printXOptions):
@@ -413,6 +413,8 @@ class ConsoleLaunchHelper:
 		print "       -m | --mode      STRING     set the user defined mode to run the tests"
 		print "       -n | --threads   INT        set the number of worker threads to run the tests (defaults to 1). "
 		print "                                   A value of 0 sets to the number of available CPUs"
+		print "       -b | --abort     STRING     set the default abort on error property (true|false, overrides "
+		print "                                   that specified in the project properties)"
 		print "       -X               KEY=VALUE  set user defined options to be passed through to the test and "
 		print "                                   runner classes. The left hand side string is the data attribute "
 		print "                                   to set, the right hand side string the value (True of not specified) "
@@ -497,6 +499,9 @@ class ConsoleLaunchHelper:
 				except:
 					print "Error parsing command line arguments: A valid integer for the number of threads must be supplied"
 					self.printUsage(printXOptions)
+
+			elif option in ("-b", "--abort"):
+				setattr(PROJECT, 'defaultAbortOnError', str(value.lower()=='true'))
 
 			elif option in ("-X"):
 				if EXPR1.search(value) is not None:
