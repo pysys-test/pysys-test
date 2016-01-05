@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import sys, os, time, collections
+import sys, os, time, collections, inspect
 
 from pysys import log
 from pysys.constants import *
@@ -197,7 +197,7 @@ class ProcessUser(object):
 				if not abortOnError:
 					log.warn("Ignoring failure to stop process %r due to: %s", process, e)
 				else:
-					self.abort(BLOCKED, 'Unable to stop process %r'%(process))
+					self.abort(BLOCKED, 'Unable to stop process %r'%(process), self.__callRecord())
 
 
 	def signalProcess(self, process, signal, abortOnError=None):
@@ -222,7 +222,7 @@ class ProcessUser(object):
 				if not abortOnError:
 					log.warn("Ignoring failure to signal process %r due to: %s", process, e)
 				else:
-					self.abort(BLOCKED, 'Unable to signal process %r'%(process))
+					self.abort(BLOCKED, 'Unable to signal process %r'%(process), self.__callRecord())
 
 
 	def waitProcess(self, process, timeout, abortOnError=None):
@@ -248,7 +248,7 @@ class ProcessUser(object):
 			if not abortOnError:
 				log.warn("Ignoring timeout waiting for process %r: %s", process, ProcessTimeout)
 			else:
-				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout))
+				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout), self.__callRecord())
 
 
 	def writeProcess(self, process, data, addNewLine=True):
@@ -307,7 +307,7 @@ class ProcessUser(object):
 					if currentTime > startTime + timeout:
 						msg = "Timed out waiting for creation of socket after %d secs"%(time.time()-startTime)
 						if abortOnError:
-							self.abort(TIMEDOUT, msg)
+							self.abort(TIMEDOUT, msg, self.__callRecord())
 						else:
 							log.warn(msg)
 						break
@@ -345,7 +345,7 @@ class ProcessUser(object):
 
 					msg = "Timed out waiting for creation of file %s after %d secs" % (file, time.time()-startTime)
 					if abortOnError:
-						self.abort(TIMEDOUT, msg)
+						self.abort(TIMEDOUT, msg, self.__callRecord())
 					else:
 						log.warn(msg)
 					break
@@ -401,7 +401,7 @@ class ProcessUser(object):
 			if currentTime > startTime + timeout:
 				msg = "%s timed out after %d secs, with %d matches"%(msg, timeout, len(matches))
 				if abortOnError:
-					self.abort(TIMEDOUT, msg)
+					self.abort(TIMEDOUT, msg, self.__callRecord())
 				else:
 					log.warn(msg)
 				break
@@ -409,7 +409,7 @@ class ProcessUser(object):
 			if process and not process.running():
 				msg = "%s aborted due to process %s termination"%(msg, process)
 				if abortOnError:
-					self.abort(BLOCKED, msg)
+					self.abort(BLOCKED, msg, self.__callRecord())
 				else:
 					log.warn(msg)
 				break
@@ -502,6 +502,7 @@ class ProcessUser(object):
 
 		if outcomeReason and printReason:
 			if outcome in FAILS:
+				if callRecord==None: callRecord = self.__callRecord()
 				log.warn('%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), '[%s]'%','.join(callRecord) if callRecord!=None else '')
 			else:
 				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower())
@@ -553,3 +554,29 @@ class ProcessUser(object):
 		o = TCPPortOwner()
 		self.addCleanupFunction(lambda: o.cleanup())
 		return o.port
+
+
+	def __callRecord(self):
+		"""Retrieve a call record outside of this module, up to the execute or validate method of the test case.
+
+		"""
+		stack=[]
+		from pysys.basetest import BaseTest
+		if isinstance(self, BaseTest):
+			for record in inspect.stack():
+				info = inspect.getframeinfo(record[0])
+				if (self.__skipFrame(info.filename, ProcessUser) ): continue
+				if (self.__skipFrame(info.filename, BaseTest) ): continue
+				stack.append( '%s:%s' % (os.path.basename(info.filename).strip(), info.lineno) )
+				if (os.path.splitext(info.filename)[0] == os.path.splitext(self.descriptor.module)[0] and (info.function == 'execute' or info.function == 'validate')): return stack
+		return None
+
+
+	def __skipFrame(self, file, clazz):
+		"""Private method to check if a file is that for a particular class.
+
+		@param file: The filepatch to check
+		@param clazz: The class to check against
+
+		"""
+		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]

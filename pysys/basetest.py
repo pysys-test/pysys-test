@@ -599,22 +599,3 @@ class BaseTest(ProcessUser):
 		if xargs.has_key('abortOnError'): return xargs['abortOnError']
 		return PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 
-
-	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=None, callRecord=None):
-		if outcome in FAILS:
-			ProcessUser.addOutcome(self, outcome, outcomeReason, printReason, abortOnError, callRecord if callRecord != None else self.__callRecord())
-		else:
-			ProcessUser.addOutcome(self, outcome, outcomeReason, printReason, abortOnError)
-
-
-	def __callRecord(self):
-		"""Retrieve a call record outside of this module, up to the execute or validate method of the test case.
-
-		"""
-		stack=[]
-		for record in inspect.stack():
-			info = inspect.getframeinfo(record[0])
-			if (info.filename == inspect.getfile(inspect.currentframe()) ): continue
-			stack.append( '%s:%s' % (os.path.basename(info.filename).strip(), info.lineno) )
-			if (info.filename == self.descriptor.module+'.py' and (info.function == 'execute' or info.function == 'validate')): return stack
-		return None
