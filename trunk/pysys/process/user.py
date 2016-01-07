@@ -150,14 +150,14 @@ class ProcessUser(object):
 			process = ProcessWrapper(command, arguments, environs or {}, workingDir, state, timeout, stdout, stderr)
 			process.start()
 			if state == FOREGROUND:
-				(log.info if process.exitStatus == 0 else log.warn)("Executed %s in foreground, exit status %d%s", displayName, process.exitStatus,
+				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, exit status %d%s", displayName, process.exitStatus,
 																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
 				
 				if not ignoreExitStatus and process.exitStatus != 0:
 					self.addOutcome(BLOCKED, '%s returned non-zero exit code %d'%(process, process.exitStatus), abortOnError=abortOnError)
 
 			elif state == BACKGROUND:
-				log.info("Started %s in background with process id %d", displayName, process.pid)
+				log.info("Started %s with process id %d", displayName, process.pid)
 		except ProcessError:
 			log.info("%s", sys.exc_info()[1], exc_info=0)
 		except ProcessTimeout:
@@ -394,7 +394,10 @@ class ProcessUser(object):
 			if os.path.exists(f):
 				matches = getmatches(f, expr)
 				if eval("%d %s" % (len(matches), condition)):
-					log.info("Wait for signal in %s completed successfully", file)
+					if PROJECT.verboseWaitForSignal.lower()=='true' if hasattr(PROJECT, 'verboseWaitForSignal') else False:
+						log.info("%s completed successfully", msg)
+					else:
+						log.info("Wait for signal in %s completed successfully", file)
 					break
 				
 			currentTime = time.time()
@@ -439,6 +442,9 @@ class ProcessUser(object):
 		
 		"""
 		try:
+			if self.__cleanupFunctions:
+				log.info('')
+				log.info('cleanup:')
 			for fn in reversed(self.__cleanupFunctions):
 				try:
 					log.debug('Running registered cleanup function: %r'%fn)
