@@ -184,7 +184,6 @@ class BaseTest(ProcessUser):
 				if monitor.running(): monitor.stop()
 	
 			while len(self.resources) > 0:
-				# legacy cleanup mechanism based on resource objects implementing __del__
 				self.resources.pop()
 		finally:
 			ProcessUser.cleanup(self)
