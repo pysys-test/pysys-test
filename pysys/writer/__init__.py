@@ -307,6 +307,10 @@ class XMLResultsWriter:
 		outcomeAttribute.value=LOOKUP[testObj.getOutcome()]
 		resultElement.setAttributeNode(nameAttribute)
 		resultElement.setAttributeNode(outcomeAttribute)
+
+		element = self.document.createElement("outcomeReason")
+		element.appendChild(self.document.createTextNode( testObj.getOutcomeReason() ))
+		resultElement.appendChild(element)
 		
 		element = self.document.createElement("timestamp")
 		element.appendChild(self.document.createTextNode(time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
@@ -430,7 +434,8 @@ class JUnitXMLResultsWriter:
 			failure = document.createElement('failure')
 			attr1 = document.createAttribute('message')
 			attr1.value = LOOKUP[testObj.getOutcome()]
-			failure.setAttributeNode(attr1)		
+			failure.setAttributeNode(attr1)
+			failure.appendChild(document.createTextNode( testObj.getOutcomeReason() ))		
 						
 			stdout = document.createElement('system-out')
 			fp = open(os.path.join(testObj.output, 'run.log'))
