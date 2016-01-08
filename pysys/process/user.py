@@ -147,7 +147,7 @@ class ProcessUser(object):
 		
 		try:
 			startTime = time.time()
-			process = ProcessWrapper(command, arguments, environs or {}, workingDir, state, timeout, stdout, stderr)
+			process = ProcessWrapper(command, arguments, environs or {}, workingDir, state, timeout, stdout, stderr, displayName=displayName)
 			process.start()
 			if state == FOREGROUND:
 				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, exit status %d%s", displayName, process.exitStatus,
