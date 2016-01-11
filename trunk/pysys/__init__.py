@@ -56,7 +56,7 @@ __status__  = "beta"
 __version__ = "1.1.0"
 """The version of this release."""
 
-__date__ = "02-January-2016"
+__date__ = "11-January-2016"
 """The date of this release."""
 
 __all__     = [ "constants",
