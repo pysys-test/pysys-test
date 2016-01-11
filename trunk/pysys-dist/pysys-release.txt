@@ -24,6 +24,10 @@ What's new in this release
 - The BaseRunner class now contains an isPurgableFile() method. This method
   can be overridden by any extensions to denote if a zero length file should
   be purged from the output subdirectory after running of the test.
+- It is now possible to register cleanup functions in the BaseTest to negate
+  the need to override the cleanup() action where a call to
+  BaseTest.cleanup(self) must specifically be made. See the epydoc for the
+  addCleanupFunction() in the ProcessUser module.
 
 
 Dependencies
