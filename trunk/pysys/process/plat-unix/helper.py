@@ -93,11 +93,12 @@ class ProcessWrapper(CommonProcessWrapper):
 				data = self._outQueue.get(block=True, timeout=0.25)
 			except Queue.Empty:
 				if not self.running(): 
-					try: os.close(self.__stdin)
-					except: pass
+					# no need to close stdin here, as previous call's setExitCode() method will do it
 					break
 			else:
-				os.write(self.__stdin, data)	
+				with self.__lock:
+					if self.__stdin:
+						os.write(self.__stdin, data)	
 	
 
 	def startBackgroundProcess(self):
@@ -180,10 +181,11 @@ class ProcessWrapper(CommonProcessWrapper):
 						retries=0
 			
 			if self.exitStatus != None:
-				try:
-					os.close(self.__stdin)
-				except Exception:
-					pass # might have been closed by the stdin writer thread
+				if self.__stdin:
+					try: os.close(self.__stdin)
+					except: pass # just being conservative, should never happen
+					self.__stdin = None # MUST not close this more than once
+
 			
 			return self.exitStatus
 
