@@ -467,6 +467,8 @@ class TestContainer:
 			log.info(62*"=")
 			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
 			log.info("%s%s"%("Id   : ", self.descriptor.id))
+			if self.runner.cycle > 1: 
+				log.info("Cycle: %d", self.cycle+1)
 			if len(title)>0: log.info("%s%s"%("Title: ", title[0]))
 			for l in title[1:]: log.info("%s%s"%("       ", l))
 			log.info(62*"=")
