@@ -102,10 +102,11 @@ class ProcessWrapper(CommonProcessWrapper):
 				data = self._outQueue.get(block=True, timeout=0.25)
 			except Queue.Empty:
 				if not self.running():
-					win32file.CloseHandle(self.__stdin)
 					break
 			else:
-				win32file.WriteFile(self.__stdin, data, None)
+				with self.__lock:
+					if self.__stdin:
+						win32file.WriteFile(self.__stdin, data, None)
 
 
 	def __quotePath(self, input):
@@ -178,12 +179,13 @@ class ProcessWrapper(CommonProcessWrapper):
 			exitStatus = win32process.GetExitCodeProcess(self.__hProcess)
 			if exitStatus != win32con.STILL_ACTIVE:
 				try:
-					win32file.CloseHandle(self.__hProcess)
-					win32file.CloseHandle(self.__hThread)
-					win32file.CloseHandle(self.__stdin)
+					if self.__hProcess: win32file.CloseHandle(self.__hProcess)
+					if self.__hThread: win32file.CloseHandle(self.__hThread)
+					if self.__stdin: win32file.CloseHandle(self.__stdin)
 				except Exception, e:
 					# these failed sometimes with 'handle is invalid', probably due to interference of stdin writer thread
 					log.warning('Could not close process and thread handles for process %s: %s', self.pid, e)
+				self.__stdin = self.__hThread = self.__hProcess = None
 				self._outQueue = None
 				self.exitStatus = exitStatus
 			
