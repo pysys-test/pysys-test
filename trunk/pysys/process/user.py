@@ -246,7 +246,7 @@ class ProcessUser(object):
 				log.info("Process %s terminated after %d secs", process, time.time()-t)
 		except ProcessTimeout:
 			if not abortOnError:
-				log.warn("Ignoring timeout waiting for process %r: %s", process, ProcessTimeout)
+				log.warn("Ignoring timeout waiting for process %r after %d secs", process, time.time()-t)
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout), self.__callRecord())
 
