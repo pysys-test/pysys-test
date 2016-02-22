@@ -421,7 +421,7 @@ class BaseTest(ProcessUser):
 			result = filediff(f1, f2, ignores, sort, replace, includes)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, ' failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
 			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
