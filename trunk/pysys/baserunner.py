@@ -104,6 +104,7 @@ class BaseRunner(ProcessUser):
 		self.outsubdir = outsubdir
 		self.descriptors = descriptors
 		self.xargs = xargs
+		self.validateOnly = False
 		self.setKeywordArgs(xargs)
 		self.log = log
 		self.project = PROJECT
@@ -452,7 +453,8 @@ class TestContainer:
 			if not os.path.exists(self.outsubdir):
 				os.makedirs(self.outsubdir)
 					
-			if self.cycle == 0: self.purgeDirectory(self.outsubdir)
+			if self.cycle == 0 and not self.runner.validateOnly: 
+				self.purgeDirectory(self.outsubdir)
 				
 			if self.runner.cycle > 1: 
 				self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
@@ -511,8 +513,9 @@ class TestContainer:
 		
 			else:
 				try:
-					self.testObj.setup()
-					self.testObj.execute()
+					if not self.runner.validateOnly:
+						self.testObj.setup()
+						self.testObj.execute()
 					self.testObj.validate()
 				except AbortExecution, e:
 					del self.testObj.outcome[:]
