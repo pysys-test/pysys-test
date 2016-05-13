@@ -574,7 +574,7 @@ class BaseTest(ProcessUser):
 				msg = self.__assertMsg(xargs, 'Line count on input file %s' % file)
 				self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 			else:
-				msg = self.__assertMsg(xargs, 'Line count on %s for "%s"%s '%(file, expr, condition))
+				msg = self.__assertMsg(xargs, 'Line count on %s for "%s"%s (actual =%d) '%(file, expr, condition, numberLines))
 				self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 
