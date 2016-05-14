@@ -541,7 +541,7 @@ class CSVResultsWriter:
 		@param kwargs: Variable argument list
 
 		"""
-		testStart = kwargs["testStart"] if kwargs.has_key("testStart") else 0
+		testStart = kwargs["testStart"] if kwargs.has_key("testStart") else time.time()
 		testTime = kwargs["testTime"] if kwargs.has_key("testTime") else 0
 		cycle = kwargs["cycle"] if kwargs.has_key("cycle") else 0
 
