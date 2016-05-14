@@ -162,7 +162,16 @@
 			<property name="outputDir" value="${rootdir}"/>
 		</writer>
 		-->
-		
+
+        <!--
+		Add in the CSV results writer if CSV text output is required. This outputs the test results
+		in a column separated list, with headings title, description, cycle, startTime, duration, outcome
+
+		<writer classname="CSVResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.csv">
+			<property name="outputDir" value="${rootdir}"/>
+		</writer>
+		-->
+
 		<!--
 		Add in the JUnit results writer if output in the Apache Ant JUnit XML format is required. Use the 
 		outputDir property to define the output directory for the JUnit test summary files (the writer will 
