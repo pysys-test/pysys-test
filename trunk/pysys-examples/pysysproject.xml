@@ -163,7 +163,7 @@
 		</writer>
 		-->
 
-        <!--
+        	<!--
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
