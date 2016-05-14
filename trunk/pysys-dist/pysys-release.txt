@@ -8,6 +8,16 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
+- The validateOnly option has been added to the pysys.py run launcher
+  task. When set the purge output subdirectory, setup and execute methods
+  on the test will not be invoked. This makes it easier to fix validation
+  errors in the test without the need to re-run the entire test.
+- The logFileContents() method has been added to the pysys.basetest.BaseTest
+  class to allow logging of file contents to the run.log. This can be used
+  to provide additional diagnostic information to the run.log to assist
+  the triage of test failures.
+- The CSVResultsWriter has been added to the set of test summary writers.
+  See the pysysproject.xml file in pysys-examples for more details.
 
 
 Dependencies
