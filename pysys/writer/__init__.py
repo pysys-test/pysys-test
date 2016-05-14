@@ -42,7 +42,7 @@ number of tests to be executed), and cycle in the call to the processResult acti
 
 """
 
-__all__ = ["TextResultsWriter", "XMLResultsWriter", "JUnitXMLResultsWriter"]
+__all__ = ["TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter"]
 
 import logging, time, urlparse, os, stat
 
@@ -125,7 +125,7 @@ class TextResultsWriter:
 
 		try:
 			self.fp = flushfile(open(self.logfile, "w"))
-			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
+			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
 			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
 		except:
@@ -228,7 +228,7 @@ class XMLResultsWriter:
 	
 			# add the data node
 			element = self.document.createElement("timestamp")
-			element.appendChild(self.document.createTextNode(time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+			element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
 			self.rootElement.appendChild(element)
 
 			# add the platform node
@@ -313,7 +313,7 @@ class XMLResultsWriter:
 		resultElement.appendChild(element)
 		
 		element = self.document.createElement("timestamp")
-		element.appendChild(self.document.createTextNode(time.strftime('%y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+		element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
 		resultElement.appendChild(element)
 
 		element = self.document.createElement("descriptor")
@@ -472,3 +472,84 @@ class JUnitXMLResultsWriter:
 
 		if delTop: 
 			os.rmdir(dir)
+
+
+class CSVResultsWriter:
+	"""Class to log results to logfile in CSV format.
+
+	Writing of the test summary file defaults to the working directory. This can be be over-ridden in the PySys
+	project file using the nested <property> tag on the <writer> tag. The CSV column output is in the form;
+
+	title, description, cycle, startTime, duration, outcome
+
+	@ivar outputDir: Path to output directory to write the test summary files
+	@type outputDir: string
+
+	"""
+	outputDir = None
+
+	def __init__(self, logfile):
+		"""Create an instance of the TextResultsWriter class.
+
+		@param logfile: The filename template for the logging of test results
+
+		"""
+		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.fp = None
+
+
+	def setup(self, **kwargs):
+		"""Implementation of the setup method.
+
+		Creates the file handle to the logfile and logs initial details of the date,
+		platform and test host.
+
+		@param kwargs: Variable argument list
+
+		"""
+		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
+
+		try:
+			self.fp = flushfile(open(self.logfile, "w"))
+			self.fp.write('title, description, cycle, startTime, duration, outcome\n')
+		except:
+			pass
+
+
+	def cleanup(self, **kwargs):
+		"""Implementation of the cleanup method.
+
+		Flushes and closes the file handle to the logfile.
+
+		@param kwargs: Variable argument list
+
+		"""
+		try:
+			if self.fp:
+				self.fp.write('\n\n\n')
+				self.fp.close()
+		except:
+			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
+
+	def processResult(self, testObj, **kwargs):
+		"""Implementation of the processResult method.
+
+		Writes the test id and outcome to the logfile.
+
+		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		@param kwargs: Variable argument list
+
+		"""
+		testStart = kwargs["testStart"] if kwargs.has_key("testStart") else 0
+		testTime = kwargs["testTime"] if kwargs.has_key("testTime") else 0
+		cycle = kwargs["cycle"] if kwargs.has_key("cycle") else 0
+
+		csv = []
+		csv.append(testObj.descriptor.id)
+		csv.append('\"%s\"'%testObj.descriptor.title)
+		csv.append(str(cycle))
+		csv.append((time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(testStart))))
+		csv.append(str(testTime))
+		csv.append(LOOKUP[testObj.getOutcome()])
+		self.fp.write('%s \n' % ','.join(csv))
