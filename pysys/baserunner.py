@@ -361,7 +361,8 @@ class BaseRunner(ProcessUser):
 			# pass the test object to the test writers is recording
 			if self.record:
 				for writer in self.writers:
-					try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle)
+					try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle,
+											  testStart=self.resultsQueue[i].testStart, testTime=self.resultsQueue[i].testTime)
 					except: log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 			# prompt for continuation on control-C
@@ -431,6 +432,7 @@ class TestContainer:
 		self.runner = runner
 		self.outsubdir = ""
 		self.testObj = None
+		self.testStart = None
 		self.testTime = None
 		self.testBuffer = []
 		self.testFileHandler = None
@@ -442,7 +444,7 @@ class TestContainer:
 		
 		"""		
 		exc_info = []
-		testTime = time.time()
+		testStart = time.time()
 		try:
 			# set the output subdirectory and purge contents
 			if os.path.isabs(self.runner.outsubdir):
@@ -543,7 +545,7 @@ class TestContainer:
 			
 		# print summary and close file handles
 		try:
-			self.testTime = math.floor(100*(time.time() - testTime))/100.0
+			self.testTime = math.floor(100*(time.time() - testStart))/100.0
 			log.info("")
 			log.info("Test duration: %.2f secs", self.testTime)
 			log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()])
