@@ -480,7 +480,7 @@ class CSVResultsWriter:
 	Writing of the test summary file defaults to the working directory. This can be be over-ridden in the PySys
 	project file using the nested <property> tag on the <writer> tag. The CSV column output is in the form;
 
-	title, description, cycle, startTime, duration, outcome
+	id, title, cycle, startTime, duration, outcome
 
 	@ivar outputDir: Path to output directory to write the test summary files
 	@type outputDir: string
@@ -511,7 +511,7 @@ class CSVResultsWriter:
 
 		try:
 			self.fp = flushfile(open(self.logfile, "w"))
-			self.fp.write('title, description, cycle, startTime, duration, outcome\n')
+			self.fp.write('id, title, cycle, startTime, duration, outcome\n')
 		except:
 			pass
 
