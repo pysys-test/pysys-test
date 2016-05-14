@@ -1,4 +1,4 @@
-PySys 1.1.0 Release Notes
+PySys 1.1.1 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.7 and higher. Support 
@@ -8,26 +8,6 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
-- This release introduces optional fail fast semantics at a macro and micro
-  level. At a macro level this is either through the "defaultAbortOnError"
-  project property, or through the "-b|--abort" option to the pysys launcher
-  run task. See the pysysproject.xml file in pysys-examples, and the run task
-  help usage respectively for more details. At a micro level, all assert and
-  process related methods now take an optional "abortOnError" parameter to
-  override any macro setting. When enabled any error will cause the test to
-  immediately fail, reporting the failure reason.
-- Outcomes which are considered a fail now log information as to the cause
-  of the failure. Additionally a call record is reported, giving a comma
-  separated list of "module:lineno" entries detailing the call stack up to
-  the test class instance. This is to aid diagnosing test failure causes.
-- The test title is now output to console when running the test.
-- The BaseRunner class now contains an isPurgableFile() method. This method
-  can be overridden by any extensions to denote if a zero length file should
-  be purged from the output subdirectory after running of the test.
-- It is now possible to register cleanup functions in the BaseTest to negate
-  the need to override the cleanup() action where a call to
-  BaseTest.cleanup(self) must specifically be made. See the epydoc for the
-  addCleanupFunction() in the ProcessUser module.
 
 
 Dependencies
@@ -113,6 +93,29 @@ perform
 
 Release History
 ---------------
+
+0.9.3 to 1.1.0
+--------------
+- This release introduces optional fail fast semantics at a macro and micro
+  level. At a macro level this is either through the "defaultAbortOnError"
+  project property, or through the "-b|--abort" option to the pysys launcher
+  run task. See the pysysproject.xml file in pysys-examples, and the run task
+  help usage respectively for more details. At a micro level, all assert and
+  process related methods now take an optional "abortOnError" parameter to
+  override any macro setting. When enabled any error will cause the test to
+  immediately fail, reporting the failure reason.
+- Outcomes which are considered a fail now log information as to the cause
+  of the failure. Additionally a call record is reported, giving a comma
+  separated list of "module:lineno" entries detailing the call stack up to
+  the test class instance. This is to aid diagnosing test failure causes.
+- The test title is now output to console when running the test.
+- The BaseRunner class now contains an isPurgableFile() method. This method
+  can be overridden by any extensions to denote if a zero length file should
+  be purged from the output subdirectory after running of the test.
+- It is now possible to register cleanup functions in the BaseTest to negate
+  the need to override the cleanup() action where a call to
+  BaseTest.cleanup(self) must specifically be made. See the epydoc for the
+  addCleanupFunction() in the ProcessUser module.
 
 0.9.2 to 0.9.3
 --------------
