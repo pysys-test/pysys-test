@@ -88,30 +88,34 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 		tests = descriptors
 	else:
 		def idMatch(descriptorId, specId):
-			# simplify common case by matching _numeric suffixes
 			return specId==descriptorId or (specId.isdigit() and re.match('.+_0*%s$'%specId, descriptorId))
-		
-		for testIdSpec in testIdSpecs:
-			try:	
-				if re.search('^[\w_]*$', testIdSpec):
+
+		for t in testIdSpecs:
+			try:
+				if re.search('^[\w_]*$', t):
 					for i in range(0,len(descriptors)):
-						if idMatch(descriptors[i].id, testIdSpec): index = i
+						if idMatch(descriptors[i].id, t): index = i
 					tests.extend(descriptors[index:index+1])
-				elif re.search('^:[\w_]*', testIdSpec):
+
+				elif re.search('^:[\w_]*', t):
 					for i in range(0,len(descriptors)):
-						if idMatch(descriptors[i].id, string.split(testIdSpec, ':')[1]): index = i
+						if idMatch(descriptors[i].id, string.split(t, ':')[1]): index = i
 					tests.extend(descriptors[:index+1])
 
-				elif re.search('^[\w_]*:$', testIdSpec):
+				elif re.search('^[\w_]*:$', t):
 					for i in range(0,len(descriptors)):
-					  	if idMatch(descriptors[i].id, string.split(testIdSpec, ':')[0]): index = i
+					  	if idMatch(descriptors[i].id, string.split(t, ':')[0]): index = i
 					tests.extend(descriptors[index:])
 
-				elif re.search('^[\w_]*:[\w_]*$', testIdSpec):
+				elif re.search('^[\w_]*:[\w_]*$', t):
 					for i in range(0,len(descriptors)):
-					  	if idMatch(descriptors[i].id, string.split(testIdSpec, ':')[0]): index1 = i
-					  	if idMatch(descriptors[i].id, string.split(testIdSpec, ':')[1]): index2 = i
+					  	if idMatch(descriptors[i].id, string.split(t, ':')[0]): index1 = i
+					  	if idMatch(descriptors[i].id, string.split(t, ':')[1]): index2 = i
 					tests.extend(descriptors[index1:index2+1])
+
+				else:
+					tests.extend([descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)])
+
 			except :
 				raise Exception("Unable to locate requested testcase(s)")
 				
