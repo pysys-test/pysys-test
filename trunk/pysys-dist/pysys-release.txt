@@ -18,6 +18,8 @@ What's new in this release
   the triage of test failures.
 - The CSVResultsWriter has been added to the set of test summary writers.
   See the pysysproject.xml file in pysys-examples for more details.
+- It is now possible to specify a regex for matching in the test selection.
+  See the run usage for more details (pysys.py run -h).
 
 
 Dependencies
