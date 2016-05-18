@@ -1,6 +1,7 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.exceptions import *
+import os
 
 class PySysTest(BaseTest):
 	def execute(self):
@@ -17,7 +18,7 @@ class PySysTest(BaseTest):
 			self.addOutcome(FAILED, 'Expected abort')
 		except AbortExecution, e:
 			self.assertThat('%s == %s', e.outcome, BLOCKED)
-			self.assertThat('"due to process python termination" in "%s"', e.value)
+			self.assertThat('"due to process '+os.path.basename(sys.executable)+' termination" in "%s"', e.value)
 
 	def validate(self):
 		pass
