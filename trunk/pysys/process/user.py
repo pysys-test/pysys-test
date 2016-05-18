@@ -356,7 +356,8 @@ class ProcessUser(object):
 				return
 
 			
-	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, process=None, abortOnError=None):
+	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
+			process=None, errorExpr=[], abortOnError=None):
 		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
 		
 		This method blocks until a particular regular expression is seen in a text file on a set
@@ -373,6 +374,10 @@ class ProcessUser(object):
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		@param process: If a handle to the process object producing output is specified, the wait will abort if 
 			the process dies before the expected signal appears.
+		@param errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
+			for the main expression to be aborted with an error outcome. This is useful to avoid waiting a long time for 
+			the expected expression when an ERROR is logged that means it will never happen, and also provides 
+			much clearer test failure messages in this case. 
 		@param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
 			project setting)
 
@@ -387,6 +392,8 @@ class ProcessUser(object):
 		log.debug("  expression: %s" % expr)
 		log.debug("  condition:  %s" % condition)
 		
+		if errorExpr: assert not isinstance(errorExpr, basestring), 'errorExpr must be a list of strings not a string'
+		
 		matches = []
 		startTime = time.time()
 		msg = "Wait for signal \"%s\" %s in %s" % (expr, condition, os.path.basename(file))
@@ -399,6 +406,16 @@ class ProcessUser(object):
 					else:
 						log.info("Wait for signal in %s completed successfully", file)
 					break
+				
+				if errorExpr:
+					for err in errorExpr:
+						errmatches = getmatches(f, err+'.*') # add .* to capture entire err msg for a better outcome reason
+						if errmatches:
+							err = errmatches[0].group(0).strip()
+							msg = '"%s" found during %s'%(err, msg)
+							# always report outcome for this case; additionally abort if requested to
+							self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
+							return matches
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
