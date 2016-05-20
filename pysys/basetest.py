@@ -435,7 +435,8 @@ class BaseTest(ProcessUser):
 		
 		@param file: The basename of the file used in the grep
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param expr: The regular expression to check for in the file
+		@param expr: The regular expression to check for in the file. If the match fails, the 
+			matching regex will be reported as the test outcome
 		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
 		@param ignores: Optional list of regular expressions that will be 
 			ignored when reading the file. 
@@ -450,16 +451,22 @@ class BaseTest(ProcessUser):
 		log.debug("  filedir:    %s" % filedir)
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
-		
-		msg = self.__assertMsg(xargs, 'Grep on %s %s "%s"'%(file, 'contains' if contains else 'not contains', expr))
 		try:
-			result = filegrep(f, expr, ignores=ignores) == contains
+			result = filegrep(f, expr, ignores=ignores, returnMatch=True)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			msg = self.__assertMsg(xargs, 'Grep on %s %s "%s"'%(file, 'contains' if contains else 'does not contain', expr))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
-			if result: msg = self.__assertMsg(xargs, 'Grep on input file %s' % file)
-			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
+			# short message if it succeeded, more verbose one if it failed to help you understand why, 
+			# including the expression it found that should not have been there
+			outcome = PASSED if (result!=None) == contains else FAILED
+			if outcome == PASSED: 
+				msg = self.__assertMsg(xargs, 'Grep on input file %s' % file)
+			else:
+				msg = self.__assertMsg(xargs, 'Grep on %s %s "%s"'%(file, 'contains' if contains else 'does not contain', 
+					result.group(0) if result else expr))
+			self.addOutcome(outcome, msg, abortOnError=self.__abortOnError(xargs))
 		
 
 	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], **xargs):

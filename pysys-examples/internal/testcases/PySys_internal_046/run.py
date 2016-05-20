@@ -9,6 +9,12 @@ class PySysTest(BaseTest):
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines bright')
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines right')
 		self.checkForFailedOutcome()
+
+		self.assertGrep(file='file.txt', filedir=self.input, expr='moon [^ ]*', contains=False)
+		self.checkForFailedOutcome()
+		
+		# check for correct message
+		self.assertGrep(file='run.log', expr='Grep on file.txt does not contain "moon shines" ... failed')
 		
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines right', contains=False)
 		self.assertGrep(file='file.txt', filedir=self.input, expr='(?P<tag>moon) shines bright')
