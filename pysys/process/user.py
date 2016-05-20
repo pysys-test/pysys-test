@@ -636,7 +636,7 @@ class ProcessUser(object):
 		try:
 			f = open(actualpath, 'r')
 		except Exception, e:
-			log.debug('Cannot open file "%s": %s', actualpath, e)
+			self.log.debug('Cannot open file "%s": %s', actualpath, e)
 			return False
 		try:
 			lineno = 0
@@ -669,9 +669,9 @@ class ProcessUser(object):
 		if not tolog:
 			return False
 			
-		log.info('Contents of %s: ', path)
+		self.log.info('Contents of %s: ', path)
 		for l in tolog:
-			log.info('  %s', l)
-		log.info('  -----')
-		log.info('')
+			self.log.info('  %s', l)
+		self.log.info('  -----')
+		self.log.info('')
 		return True
