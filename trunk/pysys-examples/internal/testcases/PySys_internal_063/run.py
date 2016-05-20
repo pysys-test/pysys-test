@@ -12,9 +12,11 @@ class PySysTest(BaseTest):
 			for i in range(5):
 				print >>f, 'f2 line %03d'%(i+1)
 		
-		self.logFileContents('does not exist.txt')#
+		result = self.logFileContents('does not exist.txt')#
+		assert not result
 		
-		self.logFileContents('f1.txt', includes=['.*2\d.*', '.*3\d.*'], excludes=['\d1'])
+		result = self.logFileContents('f1.txt', includes=['.*2\d.*', '.*3\d.*'], excludes=['\d1'])
+		assert result
 		self.logFileContents(self.output+'/f2.txt', maxLines=2, tail=True, excludes=['\d5'])
 		
 	def validate(self):
