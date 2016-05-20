@@ -660,6 +660,7 @@ class ProcessUser(object):
 				tolog.append(l)
 				if maxLines:
 					if not tail and len(tolog) == maxLines:
+						tolog.append('...')
 						break
 					if tail and len(tolog)==maxLines+1:
 						del tolog[0]
