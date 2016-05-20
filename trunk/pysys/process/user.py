@@ -669,7 +669,7 @@ class ProcessUser(object):
 		if not tolog:
 			return False
 			
-		self.log.info('Contents of %s: ', path)
+		self.log.info('Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '')
 		for l in tolog:
 			self.log.info('  %s', l)
 		self.log.info('  -----')
