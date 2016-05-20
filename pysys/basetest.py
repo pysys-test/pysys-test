@@ -120,8 +120,6 @@ class BaseTest(ProcessUser):
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
 		self.manualTester = None
-		self.log = log
-		self.project = PROJECT
 		self.resources = []
 
 

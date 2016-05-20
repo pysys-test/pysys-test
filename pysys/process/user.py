@@ -50,6 +50,9 @@ class ProcessUser(object):
 		"""Default constructor.
 		
 		"""
+		self.log = log
+		self.project = PROJECT
+		
 		self.processList = []
 		self.processCount = {}
 		self.__cleanupFunctions = []

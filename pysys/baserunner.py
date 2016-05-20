@@ -106,8 +106,6 @@ class BaseRunner(ProcessUser):
 		self.xargs = xargs
 		self.validateOnly = False
 		self.setKeywordArgs(xargs)
-		self.log = log
-		self.project = PROJECT
 
 		if self.threads == 0:
 			self.threads = N_CPUS
