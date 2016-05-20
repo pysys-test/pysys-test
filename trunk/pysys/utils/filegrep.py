@@ -61,13 +61,15 @@ def getmatches(file, regexpr, ignores=None):
 		return matches
 
 
-def filegrep(file, expr, ignores=None):
+def filegrep(file, expr, ignores=None, returnMatch=False):
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
 	
 	@param file: The full path to the input file
 	@param expr: The regular expression (uncompiled) to search for in the input file
 	@param ignores: Optional list of regular expression strings to ignore when searching file. 
-	@returns: success (True / False)
+	@param returnMatch: return the regex match object instead of a simple boolean
+	@returns: success (True / False), unless returnMatch=True in which case it returns the regex match 
+		object (or None if not matched)
 	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
@@ -87,9 +89,12 @@ def filegrep(file, expr, ignores=None):
 			
 			regexpr = re.compile(expr)
 			for line in contents:
-				if regexpr.search(line) is not None: 
+				m = regexpr.search(line)
+				if m is not None: 
 					if not any([i.search(line) for i in ignores]): 
+						if returnMatch: return m
 						return True
+			if returnMatch: return None
 			return False
 		finally:
 			f.close()
