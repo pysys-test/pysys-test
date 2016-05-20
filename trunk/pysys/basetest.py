@@ -391,7 +391,7 @@ class BaseTest(ProcessUser):
 		a C{FAILED} outcome is added.
 		
 		@param file1: The basename of the first file used in the file comparison
-		@param file2: The basename of the second file used in the file comparison
+		@param file2: The basename of the second file used in the file comparison (often a reference file)
 		@param filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
 		@param filedir2: The dirname of the second file (defaults to the testcase reference directory)
 		@param ignores: A list of regular expressions used to denote lines in the files which should be ignored
@@ -416,13 +416,19 @@ class BaseTest(ProcessUser):
 		log.debug("  filedir2:    %s" % filedir2)
 		
 		msg = self.__assertMsg(xargs, 'File comparison between %s and %s'%(file1, file2))
+		unifiedDiffOutput=self.output+'/'+os.path.basename(f1)+'.diff'
 		try:
-			result = filediff(f1, f2, ignores, sort, replace, includes)
+			result = filediff(f1, f2, ignores, sort, replace, includes, 
+				# this is really useful for tracking down what cause the diff to fail
+				unifiedDiffOutput=unifiedDiffOutput
+				)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
 			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
+			if not result:
+				self.logFileContents(unifiedDiffOutput)
 
 
 	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, **xargs):

@@ -88,7 +88,7 @@ def logContents(message, list):
 
 
 
-def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[]):
+def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None):
 	"""Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.
 	
 	The method reads in the files and loads the contents of each as a list of strings. The two files are 
@@ -101,13 +101,15 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[])
 	processed lists prior to the comparison being performed.  
 	
 	@param file1: The full path to the first file to use in the comparison
-	@param file2: The full path to the second file to use in the comparison
+	@param file2: The full path to the second file to use in the comparison, typically a reference file
 	@param ignore: A list of regular expressions which remove entries in the input file contents before making the comparison
 	@param sort: Boolean to sort the input file contents before making the comparison
 	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
+	@param unifiedDiffOutput: If specified, indicates the full path of a file to which unified diff output will be written, 
+		if the diff fails. 
 	@return: success (True / False)
-	@rtype: integer
+	@rtype: boolean
 	@raises FileNotFoundException: Raised if either of the files do not exist
 
 	"""
@@ -118,13 +120,11 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[])
 		list1 = []
 		list2 = []
 
-		f = open(file1, 'r')
-		for i in f.readlines(): list1.append(i.strip())
-		f.close()
+		with open(file1, 'r') as f:
+			for i in f: list1.append(i.strip())
 
-		f = open(file2, 'r')
-		for i in f.readlines(): list2.append(i.strip())
-		f.close()
+		with open(file2, 'r') as f:
+			for i in f: list2.append(i.strip())
 		
 		list1 = trimContents(list1, ignore, exclude=True)
 		list2 = trimContents(list2, ignore, exclude=True)
@@ -146,7 +146,14 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[])
 			for i in list1: l1.append("%s\n"%i)
 			for i in list2: l2.append("%s\n"%i)
 
-			diff = ''.join(difflib.unified_diff(l1, l2))
+			# nb: have to switch 1 and 2 around to get the right diff for a typical output,ref file pair
+			diff = ''.join(difflib.unified_diff(l2, l1, 
+				fromfile='%s (%d lines)'%(os.path.basename(file2), len(l2)),
+				tofile='%s (%d lines)'%(os.path.basename(file1), len(l1)),
+				))
+			if unifiedDiffOutput:
+				with open(unifiedDiffOutput, 'w') as f:
+					f.write(diff)
 			for line in diff.split('\n'): log.debug("  %s", line)
 
 		if list1 == list2: return True

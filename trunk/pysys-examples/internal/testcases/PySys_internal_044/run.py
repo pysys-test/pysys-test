@@ -24,6 +24,7 @@ class PySysTest(BaseTest):
 		# use a replace
 		self.assertDiff(file1='file4.txt', filedir1=self.input, file2='ref_file.txt', replace=[('navel','charmer')])
 
+		self.assertGrep('file2.txt.diff', expr='\\+.on my Vespa 300 GTS')
 
 	def checkForFailedOutcome(self):
 		outcome = self.outcome.pop()
