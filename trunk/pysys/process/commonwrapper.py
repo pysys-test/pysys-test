@@ -165,6 +165,10 @@ class CommonProcessWrapper(object):
 		
 		"""
 		self._outQueue = None # always reset
+		
+		if self.workingDir and not os.path.isdir(self.workingDir):
+			raise Exception('Cannot start process %s as workingDir "%s" does not exist'% (self, self.workingDir))
+		
 		if self.state == FOREGROUND:
 			self.startBackgroundProcess()
 			self.wait(self.timeout)
