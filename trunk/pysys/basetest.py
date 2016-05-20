@@ -431,7 +431,7 @@ class BaseTest(ProcessUser):
 				self.logFileContents(unifiedDiffOutput)
 
 
-	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, **xargs):
+	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, **xargs):
 		"""Perform a validation assert on a regular expression occurring in a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -441,16 +441,33 @@ class BaseTest(ProcessUser):
 		
 		@param file: The basename of the file used in the grep
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param expr: The regular expression to check for in the file. If the match fails, the 
-			matching regex will be reported as the test outcome
+		@param expr: The regular expression to check for in the file (or a string literal if literal=True). 
+			If the match fails, the matching regex will be reported as the test outcome
 		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
 		@param ignores: Optional list of regular expressions that will be 
 			ignored when reading the file. 
+		@param literal: By default expr is treated as a regex, but set this to True to pass in 
+			a string literal instead
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
+
+		if literal:
+			def escapeRegex(expr):
+				# use our own escaping as re.escape makes the string unreadable
+				regex = expr
+				expr = ''
+				for c in regex:
+					if c in '\\{}[]+?^$':
+						expr += '\\'+c
+					elif c in '().*/':
+						expr += '['+c+']' # more readable
+					else:
+						expr += c
+				return expr
+			expr = escapeRegex(expr)
 
 		log.debug("Performing grep on file:")
 		log.debug("  file:       %s" % file)
