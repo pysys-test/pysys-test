@@ -198,11 +198,20 @@ def loadproject(start):
 		else:
 			search, drop = os.path.split(search)
 			if not drop: search = drive
-	PROJECT = Project(search, projectFile)
+
+	if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))):
+		sys.stderr.write("WARNING: No project file found, taking project root to be %s \n" % search)
+
+	try:
+		PROJECT = Project(search, projectFile)
+	except Exception, e:
+		sys.stderr.write("ERROR: %s\n", e)
+		sys.exit(1)
+
 
 
 class Project:
-	"""Class detailing project specific information for a set or PySys tests.
+	"""Class detailing project specific information for a set of PySys tests.
 	
 	Reads and parses the PySys project file if it exists and translates property element 
 	name/value entries in the project file into data attributes of the class instance. 
@@ -210,6 +219,8 @@ class Project:
 	@ivar root: Full path to the project root, as specified by the first PySys project
 				file encountered when walking down the directory tree from the start directory  
 	@type root: string
+	@ivar projectFile: Full path to the project file. May be None, though providing a file is recommended. 
+	@type projectFile: string
 	
 	"""
 	
@@ -227,9 +238,8 @@ class Project:
 			from pysys.xml.project import XMLProjectParser
 			try:
 				parser = XMLProjectParser(root, projectFile)
-			except: 
-				sys.stderr.write("ERROR: Error parsing project file %s, %s\n" % (os.path.join(root, projectFile),sys.exc_info()[1]))
-				sys.exit(1)
+			except Exception, e: 
+				raise Exception("Error parsing project file %s, %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 			else:
 				# get the properties
 				properties = parser.getProperties()
@@ -254,7 +264,5 @@ class Project:
 				
 				# set the data attributes
 				parser.unlink()	
-		else:
-			sys.stderr.write("WARNING: No project file found, taking project root to be %s \n" % root)
 			
 		stdoutHandler.setFormatter(self.formatters.stdout)
