@@ -607,3 +607,71 @@ class ProcessUser(object):
 
 		"""
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
+		
+	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False):
+		""" Logs some or all the lines in the specified file. 
+		
+		If the file does not exist or cannot be opened, does nothing. 
+		
+		This method is useful for providing key diagnostic information 
+		(e.g. error messages from tools executed by the test) directly in run.log, 
+		to make test failures easier to triage quickly. 
+		
+		@param path: May be an absolute path, or relative to the 
+			test output directory. If None or cannot be opened, this is a no-op. 
+		@param includes: Optional list of regex strings, for example [' ERROR.*', ' WARN.*']. 
+			If specified, only matches of these regexes will be logged. 
+		@param excludes: Optional list of regex strings. If specified, 
+			no line containing these will be logged. 
+		@param maxLines: Upper limit on the number of lines from the file 
+			that will be logged. Set to zero for unlimited. 
+		@param tail: Prints the _last_ 'maxLines' in the file rather than 
+			the first 'maxLines'.
+			
+		@return: True if anything was logged, False if not
+		
+		"""
+		if not path: return False
+		actualpath= os.path.join(self.output, path)
+		try:
+			f = open(actualpath, 'r')
+		except Exception, e:
+			log.debug('Cannot open file "%s": %s', actualpath, e)
+			return False
+		try:
+			lineno = 0
+			def matchesany(s, regexes):
+				assert not isinstance(regexes, basestring), 'must be a list of strings not a string'
+				for x in regexes:
+					m = re.search(x, s)
+					if m: return m.group(0)
+				return None
+			
+			tolog = []
+			
+			for l in f:
+				l = l.strip()
+				if not l: continue
+				if includes:
+					l = matchesany(l, includes)
+					if not l: continue
+				if excludes and matchesany(l, excludes): continue
+				lineno +=1
+				tolog.append(l)
+				if maxLines:
+					if not tail and len(tolog) == maxLines:
+						break
+					if tail and len(tolog)==maxLines+1:
+						del tolog[0]
+		finally:
+			f.close()
+			
+		if not tolog:
+			return False
+			
+		log.info('Contents of %s: ', path)
+		for l in tolog:
+			log.info('  %s', l)
+		log.info('  -----')
+		log.info('')
+		return True
