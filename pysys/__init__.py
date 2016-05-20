@@ -157,9 +157,7 @@ rootLogger.setLevel(logging.DEBUG)
 stdoutHandler = ThreadedStreamHandler(sys.stdout)
 """The default stdout logging handler for all logging within PySys."""
 
-# configure the logger
-stdoutHandler.setLevel(logging.INFO)
-rootLogger.addHandler(stdoutHandler)
+# see also pysys.py for logging configuration
 
 # global reference is using log
 log = rootLogger
