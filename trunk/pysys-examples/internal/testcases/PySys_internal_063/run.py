@@ -14,11 +14,11 @@ class PySysTest(BaseTest):
 		
 		self.logFileContents('does not exist.txt')#
 		
-		self.logFileContents('f1.txt', includes=['2\d', '3\d'], excludes=['\d1'])
+		self.logFileContents('f1.txt', includes=['.*2\d.*', '.*3\d.*'], excludes=['\d1'])
 		self.logFileContents(self.output+'/f2.txt', maxLines=2, tail=True, excludes=['\d5'])
 		
 	def validate(self):
-		self.assertGrep('run.log', expr='Contents of f1.txt:')
+		self.assertGrep('run.log', expr='Contents of f1.txt')
 		self.assertGrep('run.log', expr='f1 line 020')
 		self.assertGrep('run.log', expr='f1 line 021', contains=False)
 		self.assertGrep('run.log', expr='f1 line 039')
