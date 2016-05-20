@@ -204,6 +204,7 @@ def loadproject(start):
 
 	try:
 		PROJECT = Project(search, projectFile)
+		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
 	except Exception, e:
 		sys.stderr.write("ERROR: %s\n", e)
 		sys.exit(1)
@@ -265,4 +266,4 @@ class Project:
 				# set the data attributes
 				parser.unlink()	
 			
-		stdoutHandler.setFormatter(self.formatters.stdout)
+
