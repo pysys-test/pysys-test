@@ -416,12 +416,9 @@ class BaseTest(ProcessUser):
 		log.debug("  filedir2:    %s" % filedir2)
 		
 		msg = self.__assertMsg(xargs, 'File comparison between %s and %s'%(file1, file2))
-		unifiedDiffOutput=self.output+'/'+os.path.basename(f1)+'.diff'
+		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
 		try:
-			result = filediff(f1, f2, ignores, sort, replace, includes, 
-				# this is really useful for tracking down what cause the diff to fail
-				unifiedDiffOutput=unifiedDiffOutput
-				)
+			result = filediff(f1, f2, ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
