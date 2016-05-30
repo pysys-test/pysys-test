@@ -616,12 +616,11 @@ class BaseTest(ProcessUser):
 
 
 	def __abortOnError(self, xargs):
-		"""Checks whether to abort an assert statement
+		"""Return an assert statement requested to override the default value.
 
 		@param xargs: Variable argument list to an assert method
 
 		"""
-		# default to False NOT DEFAULT_ABORT_ON_ERROR since for assertions False is usually the 
-		# behaviour you want, even if you have enabled defaultAbortOnError behaviour for your 
-		# process starting/waiting/waitforsignal/etc
-		return xargs.get('abortOnError', False)
+		if xargs.has_key('abortOnError'): return xargs['abortOnError']
+		return PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
+
