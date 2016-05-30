@@ -1,4 +1,4 @@
-PySys 1.1.1 Release Notes
+PySys 1.2.0 Release Notes
 =========================
 
 PySys has been written and tested against Python 2.7 and higher. Support 
@@ -8,19 +8,17 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
-- The validateOnly option has been added to the pysys.py run launcher
-  task. When set the purge output subdirectory, setup and execute methods
-  on the test will not be invoked. This makes it easier to fix validation
-  errors in the test without the need to re-run the entire test.
-- The logFileContents() method has been added to the pysys.basetest.BaseTest
-  class to allow logging of file contents to the run.log. This can be used
-  to provide additional diagnostic information to the run.log to assist
-  the triage of test failures.
-- The CSVResultsWriter has been added to the set of test summary writers.
-  See the pysysproject.xml file in pysys-examples for more details.
-- It is now possible to specify a regex for matching in the test selection.
-  See the run usage for more details (pysys.py run -h).
-
+- Added the errorExpr argument to the waitForSignal method. Occurrence of any
+  matches to expressions in this argument will terminate the waitForSignal
+  loop, allowing early exit prior to the timeout.
+- Refactored reconfiguration of global logging out of the pysys __init__.py
+  class into the pysys.py launcher. This allows other applications making
+  use of the PySys framework to make their own logging decisions.
+- Improved useability of the assertDiff method by writing out the unified
+  diff to a file in the output subdirectory so failures are easier to triage.
+- Added the literal argument to the assertGrep method to avoid having to
+  escape regular expressions.
+- Added the utils.fileutils module for miscellaneous file related utilities.
 
 Dependencies
 ------------
@@ -105,6 +103,21 @@ perform
 
 Release History
 ---------------
+1.1.0 to 1.1.1
+--------------
+- The validateOnly option has been added to the pysys.py run launcher
+  task. When set the purge output subdirectory, setup and execute methods
+  on the test will not be invoked. This makes it easier to fix validation
+  errors in the test without the need to re-run the entire test.
+- The logFileContents() method has been added to the pysys.basetest.BaseTest
+  class to allow logging of file contents to the run.log. This can be used
+  to provide additional diagnostic information to the run.log to assist
+  the triage of test failures.
+- The CSVResultsWriter has been added to the set of test summary writers.
+  See the pysysproject.xml file in pysys-examples for more details.
+- It is now possible to specify a regex for matching in the test selection.
+  See the run usage for more details (pysys.py run -h).
+
 
 0.9.3 to 1.1.0
 --------------
