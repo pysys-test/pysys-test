@@ -392,7 +392,7 @@ class ConsoleLaunchHelper:
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpv:a:t:i:e:c:o:m:n:b:X:'
+		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:'
 		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly']
 
 
@@ -415,7 +415,7 @@ class ConsoleLaunchHelper:
 		print "                                   A value of 0 sets to the number of available CPUs"
 		print "       -b | --abort     STRING     set the default abort on error property (true|false, overrides "
 		print "                                   that specified in the project properties)"
-		print "       --validateOnly              test the validate() method without re-running execute()"
+		print "       -y | --validateOnly         test the validate() method without re-running execute()"
 		print "       -X               KEY=VALUE  set user defined options to be passed through to the test and "
 		print "                                   runner classes. The left hand side string is the data attribute "
 		print "                                   to set, the right hand side string the value (True of not specified) "
@@ -513,7 +513,7 @@ class ConsoleLaunchHelper:
 				if EXPR2.search(value) is not None:
 					self.userOptions[value] = True
 			
-			elif option in ['--validateOnly']:
+			elif option in ("-y", "--validateOnly"):
 				self.userOptions['validateOnly'] = True
 		try:
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
