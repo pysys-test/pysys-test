@@ -20,6 +20,7 @@ What's new in this release
   escape regular expressions.
 - Added the utils.fileutils module for miscellaneous file related utilities.
 
+ 
 Dependencies
 ------------
 Running on windows requires installation of the pywin32 extensions written 
