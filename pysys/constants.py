@@ -206,7 +206,7 @@ def loadproject(start):
 		PROJECT = Project(search, projectFile)
 		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
 	except Exception, e:
-		sys.stderr.write("ERROR: %s\n", e)
+		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
 		sys.exit(1)
 
 
