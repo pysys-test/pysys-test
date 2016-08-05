@@ -140,8 +140,12 @@ class XMLProjectParser:
 			for m in matches:
 				try:
 					insert = os.environ[m[1]]
-				except :
-					insert = default
+				except Exception: # presumably a KeyError
+					if default==value: # if even default can't be resolved avoid infinite loop and tell user
+						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
+					# fall back to default, which we will then try to expand if necessary
+					value = default
+					break
 				value = value.replace(m[0], insert)
 		return value		
 
@@ -153,8 +157,12 @@ class XMLProjectParser:
 			for m in matches:
 				try:
 					insert = self.properties[m[1]]
-				except :
-					insert = default
+				except Exception: # presumably a KeyError
+					if default==value: # if even default can't be resolved avoid infinite loop and tell user
+						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
+					# fall back to default, which we will then try to expand if necessary
+					value = default
+					break
 				value = value.replace(m[0], insert)
 		return value
 
