@@ -422,7 +422,9 @@ class ProcessUser(object):
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
-				msg = "%s timed out after %d secs, with %d matches"%(msg, timeout, len(matches))
+				msg = "%s timed out after %d secs, %s"%(msg, timeout, 
+					("with %d matches"%len(matches)) if os.path.exists(f) else 'file does not exist')
+				
 				if abortOnError:
 					self.abort(TIMEDOUT, msg, self.__callRecord())
 				else:
