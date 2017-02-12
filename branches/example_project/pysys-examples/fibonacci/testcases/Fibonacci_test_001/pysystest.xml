@@ -1,0 +1,34 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Python to calculate the fibonacci series - validate in memory</title>
+    <purpose><![CDATA[
+In this example testcase, the first ten values of the fibonacci series are calculated 
+in memory and stored in a data attribute list. The validate method checks that the 
+tenth entry is equal to 34.
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>examples</group>
+    </groups>
+    <modes>
+        <mode>mode1</mode>
+    </modes>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>  
+      <requirement id="AL1" />    
+      <requirement id="AL2" />    
+    </requirements>
+  </traceability>
+</pysystest>
+
