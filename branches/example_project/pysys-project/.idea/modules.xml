@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/rpn.iml" filepath="$PROJECT_DIR$/rpn.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pysys-project.iml" filepath="$PROJECT_DIR$/pysys-project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/restapi-java/restapi.iml" filepath="$PROJECT_DIR$/restapi-java/restapi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/restapi-python/restapi-python.iml" filepath="$PROJECT_DIR$/restapi-python/restapi-python.iml" />
+      <module fileurl="file://$PROJECT_DIR$/test/test.iml" filepath="$PROJECT_DIR$/test/test.iml" />
     </modules>
   </component>
 </project>
