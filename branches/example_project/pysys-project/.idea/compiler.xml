@@ -23,7 +23,11 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="pysys-project" />
+        <module name="rpn" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="rpn" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
