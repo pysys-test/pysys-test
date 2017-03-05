@@ -17,12 +17,21 @@ public class RestApiController {
 
     public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
 
+    @Value("${app.name}")
+    private String appName;
+
     @Value("${app.version}")
-    private String version;
+    private String appVersion;
+
+    @Value("${app.groupId}")
+    private String appGroupId;
+
+    @Value("${app.artifactId}")
+    private String appArtifactId;
 
     @RequestMapping(value = "/getVersion", method = RequestMethod.GET)
     public ResponseEntity<?> printVersion() {
         logger.info("Received get request for version");
-        return new ResponseEntity<String>(version, HttpStatus.OK);
+        return new ResponseEntity<String>(appVersion, HttpStatus.OK);
     }
 }

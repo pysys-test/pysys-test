@@ -4,7 +4,8 @@
 	<!-- set properties -->
 	<property environment="env"/>
 	<property root="rootdir"/>
-	<property name="defaultAbortOnError" value="false"/>	
+	<property name="defaultAbortOnError" value="false"/>
+	<property name="JAVA_HOME" value="${env.JAVA_HOME}"/>
 
 	<!-- add python src to the path -->
 	<path value="./src/main/python" relative="true" />
