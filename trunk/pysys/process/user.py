@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2016  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2017  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -147,6 +147,10 @@ class ProcessUser(object):
 		if not workingDir: workingDir = r'%s' % self.output
 		if not displayName: displayName = os.path.basename(command)
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
+		
+		# in case stdout/err were given as non-absolute paths, make sure they go to the output dir not the cwd
+		if stdout: stdout = os.path.join(self.output, stdout)
+		if stderr: stderr = os.path.join(self.output, stderr)
 		
 		try:
 			startTime = time.time()
