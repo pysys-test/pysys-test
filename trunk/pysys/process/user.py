@@ -199,7 +199,7 @@ class ProcessUser(object):
 		if process.running():
 			try:
 				process.stop()
-				log.info("Stopped process with process id %d", process.pid)
+				log.info("Stopped process %r", process)
 			except ProcessError, e:
 				if not abortOnError:
 					log.warn("Ignoring failure to stop process %r due to: %s", process, e)
