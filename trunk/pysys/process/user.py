@@ -642,7 +642,7 @@ class ProcessUser(object):
 		try:
 			f = open(actualpath, 'r')
 		except Exception, e:
-			self.log.debug('Cannot open file "%s": %s', actualpath, e)
+			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False
 		try:
 			lineno = 0
