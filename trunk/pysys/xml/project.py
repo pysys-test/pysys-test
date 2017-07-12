@@ -20,14 +20,15 @@
 import os, os.path, sys, string, logging, time, xml.dom.minidom
 
 from pysys.constants import *
-
+from pysys import __version__
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, runner?, maker?, writers?, formatters?) >
+<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
+<!ELEMENT requiresversion (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
@@ -82,7 +83,16 @@ class XMLProjectParser:
 				raise Exception, "No <pysysproject> element supplied in project file"
 			else:
 				self.root = self.doc.getElementsByTagName('pysysproject')[0]
-
+		
+		# fail fast and clearly if user has said they need a more recent PySys 
+		# than this one
+		requiresversion = self.root.getElementsByTagName('requiresversion')
+		if requiresversion and requiresversion[0].firstChild: 
+			requiresversion = requiresversion[0].firstChild.nodeValue
+			if requiresversion: # ignore if empty
+				thisversion = __version__
+				if map(int, thisversion.split('.')) < map(int, requiresversion.split('.')):
+					raise Exception('This test project requires PySys version %s or greater, but this is version %s'%(requiresversion, thisversion))
 				
 	def unlink(self):
 		if self.doc: self.doc.unlink()	

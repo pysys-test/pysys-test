@@ -1,8 +1,9 @@
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, runner?, maker?, writers?, formatters?) >
+<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
+<!ELEMENT requiresversion (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
@@ -87,7 +88,6 @@
 	 -->
 	<property file="${osfamily}.properties" />
 	
-
 	<!-- 
 	Add a path to the python path to allow importing custom modules, e.g. extensions to the 
 	BaseTest or BaseRunner classes, or customer test output writers. If the relative attribute 
@@ -98,7 +98,11 @@
 	<path value="./src" relative="true" />
 	-->
 
-
+	<!-- 
+	Can specify a minimum required pysys version to run these tests
+	-->
+	<requiresversion>1.2.0</requiresversion>
+	
 	<!-- 
 	Use a custom runner class that extends the BaseRunner class distributed with PySys. Extensions to 
 	the BaseRunner are used to define custom setup and tear down operations before running the set of 
