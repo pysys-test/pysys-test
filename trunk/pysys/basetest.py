@@ -417,15 +417,18 @@ class BaseTest(ProcessUser):
 		
 		msg = self.__assertMsg(xargs, 'File comparison between %s and %s'%(file1, file2))
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
+		result = False
 		try:
 			result = filediff(f1, f2, ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput)
 		except:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
-			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
-			if not result:
-				self.logFileContents(unifiedDiffOutput)
+			try:
+				self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
+			finally:
+				if not result:
+					self.logFileContents(unifiedDiffOutput)
 
 
 	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, **xargs):
