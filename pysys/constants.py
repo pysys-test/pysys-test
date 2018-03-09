@@ -200,7 +200,7 @@ def loadproject(start):
 			if not drop: search = drive
 
 	if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))):
-		sys.stderr.write("WARNING: No project file found, taking project root to be %s \n" % search)
+		sys.stderr.write("WARNING: No project file found, taking project root to be '%s' \n" % (search or '.'))
 
 	try:
 		PROJECT = Project(search, projectFile)
