@@ -515,10 +515,10 @@ class ConsoleLaunchHelper:
 			
 			elif option in ("-y", "--validateOnly"):
 				self.userOptions['validateOnly'] = True
-		try:
-			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
-		except Exception, (strerror):
-			log.info(strerror)
-			descriptors = []
+				
+		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
+		# No exception handler above, as any createDescriptors failure is really a fatal problem that should cause us to 
+		# terminate with a non-zero exit code; we don't want to run no tests without realizing it and return success
+		
 		return self.record, self.purge, self.cycle, self.mode, self.threads, self.outsubdir, descriptors, self.userOptions
 		
