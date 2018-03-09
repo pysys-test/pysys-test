@@ -93,6 +93,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 		for t in testIdSpecs:
 			try:
 				index = index1 = index2 = -1
+				t = t.rstrip('/\\') # ignore trailing directory separators which can be added by shell completion and are harmless
 				if re.search('^[\w_]*$', t):
 					for i in range(0,len(descriptors)):
 						if idMatch(descriptors[i].id, t): index = i
