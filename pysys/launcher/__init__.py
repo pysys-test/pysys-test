@@ -92,32 +92,36 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 
 		for t in testIdSpecs:
 			try:
+				index = index1 = index2 = -1
 				if re.search('^[\w_]*$', t):
 					for i in range(0,len(descriptors)):
 						if idMatch(descriptors[i].id, t): index = i
-					tests.extend(descriptors[index:index+1])
+					matches = descriptors[index:index+1]
 
 				elif re.search('^:[\w_]*', t):
 					for i in range(0,len(descriptors)):
 						if idMatch(descriptors[i].id, string.split(t, ':')[1]): index = i
-					tests.extend(descriptors[:index+1])
+					matches = descriptors[:index+1]
 
 				elif re.search('^[\w_]*:$', t):
 					for i in range(0,len(descriptors)):
 					  	if idMatch(descriptors[i].id, string.split(t, ':')[0]): index = i
-					tests.extend(descriptors[index:])
+					matches = descriptors[index:]
 
 				elif re.search('^[\w_]*:[\w_]*$', t):
 					for i in range(0,len(descriptors)):
 					  	if idMatch(descriptors[i].id, string.split(t, ':')[0]): index1 = i
 					  	if idMatch(descriptors[i].id, string.split(t, ':')[1]): index2 = i
-					tests.extend(descriptors[index1:index2+1])
+					matches = descriptors[index1:index2+1]
 
 				else:
-					tests.extend([descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)])
+					matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
 
+				# each specified test patten must match something, else probably user made a typo
+				if not matches: raise Exception("No matches for: '%s'", t)
+				tests.extend(matches)
 			except :
-				raise Exception("Unable to locate requested testcase(s)")
+				raise Exception("Unable to locate requested testcase(s): '%s'"%t)
 				
 	# trim down the list based on the type
 	if type:
