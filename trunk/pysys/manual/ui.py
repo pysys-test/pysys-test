@@ -30,6 +30,7 @@ from pysys.xml.manual import *
 
 class ManualTester:
 	def __init__(self, owner, filename, logname=None):
+		self.parentContainer = None
 		self.owner = owner
 		self.isRunning = 1
 		self.intToRes = ["FAILED", "PASSED", "N/A"]
@@ -86,7 +87,7 @@ class ManualTester:
 
 	def quitPressed(self):
 		self.owner.log.critical("Application terminated by user (BLOCKED)")
-		self.owner.outcome.append(BLOCKED)
+		self.owner.addOutcome(BLOCKED, 'Manual tester failed: Application terminated by user')
 		self.stop()
 
 	def backPressed(self):
@@ -174,14 +175,23 @@ class ManualTester:
 		if self.defect != "": self.owner.log.info("Defect - %s recorded with test failure" % self.defect)
 
 	def start(self):
-		self.build()
-		self.parentContainer.mainloop()
+		# this runs on a background thread
+		try:
+			self.build()
+			self.parentContainer.mainloop()
+		except Exception, e:
+			self.owner.addOutcome(BLOCKED, 'Manual tester failed: %s'%e)
+			self.isRunning = 0
+			# can't log the exception here since pysys logger suppresses messages from other threads
+			# but at least let the traceback go to stderr
+			raise
 
 	def stop(self):
 		self.logResults()
 		self.isRunning = 0
-		self.parentContainer.quit()
-		self.parentContainer.destroy()
+		if self.parentContainer != None:
+			self.parentContainer.quit()
+			self.parentContainer.destroy()
 
 	def running(self):
 		return self.isRunning
