@@ -88,6 +88,10 @@ class ThreadedStreamHandler(logging.StreamHandler):
 	Overrides logging.StreamHandler to only allow logging to a stream 
 	from the thread that created the class instance and added to the root 
 	logger via log.addHandler(ThreadedStreamHandler(stream)).
+
+	This is used to pass log output from the specific test that creates this 
+	handler to stdout, either immediately or (when multiple threads are in use) 
+	at the end of each test's execution. 
 	
 	"""
 	def __init__(self, strm):
@@ -108,23 +112,22 @@ class ThreadedFileHandler(logging.FileHandler):
 	the thread than created the class instance and added to the root 
 	logger via log.addHandler(ThreadFileHandler(filename)).
 	
+	This is used to pass log output from the specific test 
+	that creates this handler to the associated run.log. 
+
 	"""
 	def __init__(self, filename):
-		"""Overrides logging.ThreadedFileHandler.__init__"""
+		"""Overrides logging.FileHandler.__init__"""
 		self.threadId = threadId()
-		self.buffer = []
 		logging.FileHandler.__init__(self, filename, "a")
 				
 	def emit(self, record):
-		"""Overrides logging.ThreadedFileHandler.emit."""
+		"""Overrides logging.FileHandler.emit."""
 		if self.threadId != threadId(): return
-		self.buffer.append(record.getMessage())
+		# must put formatted messages into the buffer otherwise we lose log level 
+		# and (critically) exception tracebacks from the output
 		logging.FileHandler.emit(self, record)
 		
-	def getBuffer(self):
-		"""Return the unformatted messages called by the creating thread."""
-		return self.buffer
-
 
 class ThreadFilter(logging.Filterer):
 	"""Filter to disallow log records from the current thread.

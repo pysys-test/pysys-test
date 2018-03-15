@@ -26,9 +26,9 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os, os.path, sys, stat, re, traceback, time, math, logging, string, thread, threading, imp, textwrap
+import os, os.path, sys, stat, re, traceback, time, math, logging, string, thread, threading, imp, textwrap, StringIO
 
-from pysys import log, ThreadedFileHandler
+from pysys import log, ThreadedFileHandler, ThreadedStreamHandler
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
@@ -121,7 +121,7 @@ class BaseRunner(ProcessUser):
 		self.results = {}
 		self.resultsPointer = 0
 		self.resultsQueue = []
-
+		
 
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the class.
@@ -346,10 +346,8 @@ class BaseRunner(ProcessUser):
 			
 			if self.threads > 1: 
 				if spacer: self.log.info(""); spacer = False
-				try:
-					for line in self.resultsQueue[i].testFileHandler.getBuffer(): self.log.info(line)	
-				except:
-					pass
+				# write out cached messages from the worker thread
+				sys.stdout.write(self.resultsQueue[i].testFileHandlerStdout.stream.getvalue())
 			if stdoutHandler.level >= logging.WARN:
 				log.critical("%s: %s (%s)", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].descriptor.id,  self.resultsQueue[i].descriptor.title)
 			
@@ -361,7 +359,7 @@ class BaseRunner(ProcessUser):
 				for writer in self.writers:
 					try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle,
 											  testStart=self.resultsQueue[i].testStart, testTime=self.resultsQueue[i].testTime)
-					except: log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					except: log.warn("caught %s processing test result: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 			# prompt for continuation on control-C
 			if self.resultsQueue[i].kbrdInt == True: self.handleKbrdInt()
@@ -433,13 +431,15 @@ class TestContainer:
 		self.testStart = None
 		self.testTime = None
 		self.testBuffer = []
-		self.testFileHandler = None
+		self.testFileHandlerRunLog = None
+		self.testFileHandlerStdout = None
 		self.kbrdInt = False
 
 		
 	def __call__(self, *args, **kwargs):
 		"""Over-ridden call builtin to allow the class instance to be called directly.
 		
+		Invoked by thread pool when using multiple worker threads. 
 		"""		
 		exc_info = []
 		self.testStart = time.time()
@@ -460,12 +460,19 @@ class TestContainer:
 				self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
 				os.makedirs(self.outsubdir)
 
-			# create the test summary log file handler and log the test header
-			self.testFileHandler = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
-			self.testFileHandler.setFormatter(PROJECT.formatters.runlog)
-			self.testFileHandler.setLevel(logging.INFO)
-			if stdoutHandler.level == logging.DEBUG: self.testFileHandler.setLevel(logging.DEBUG)
-			log.addHandler(self.testFileHandler)
+			# run.log handler
+			self.testFileHandlerRunLog = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
+			self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
+			self.testFileHandlerRunLog.setLevel(logging.INFO)
+			if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
+			log.addHandler(self.testFileHandlerRunLog)
+			
+			# stdout
+			self.testFileHandlerStdout = ThreadedStreamHandler(StringIO.StringIO())
+			self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
+			self.testFileHandlerStdout.setLevel(stdoutHandler.level)
+			log.addHandler(self.testFileHandlerStdout)
+			
 			log.info(62*"=")
 			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
 			log.info("%s%s"%("Id   : ", self.descriptor.id))
@@ -530,7 +537,7 @@ class TestContainer:
 			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 
 		except:
-			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warn("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
 	
 		# call the cleanup method to tear down the test
@@ -551,8 +558,9 @@ class TestContainer:
 				log.info("Test failure reason: %s", self.testObj.getOutcomeReason())
 			log.info("")
 			
-			self.testFileHandler.close()
-			log.removeHandler(self.testFileHandler)
+			self.testFileHandlerRunLog.close()
+			log.removeHandler(self.testFileHandlerRunLog)
+			log.removeHandler(self.testFileHandlerStdout)
 		except: 
 			pass
 		
