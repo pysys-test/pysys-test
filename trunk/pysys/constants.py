@@ -27,7 +27,7 @@ about the structure and contents of the project file, see the PySys examples
 distribution. 
 
 """
-import sys, re, os, os.path, socket, logging
+import sys, re, os, os.path, socket, logging, traceback
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -205,6 +205,11 @@ def loadproject(start):
 	try:
 		PROJECT = Project(search, projectFile)
 		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
+	except StandardError, e:
+		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
+		# need a traceback if it's an unexpected error like this
+		traceback.print_exc()
+		sys.exit(1)
 	except Exception, e:
 		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
 		sys.exit(1)
