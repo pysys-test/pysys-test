@@ -19,6 +19,9 @@
 
 import os, sys, time, logging
 script_path = os.path.abspath(sys.path[0])
+# the sys.path starts with the directory containing pysys.py which we want to remove as 
+# that dir might be anywhere and could contain anything; it's not needed for locating 
+# the pysys modules since those will be in site-packages once pysys is installed
 sys.path = [p for p in sys.path if os.path.abspath(p) != script_path]
 
 # before anything else, configure the logger
