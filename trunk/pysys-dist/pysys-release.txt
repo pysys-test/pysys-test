@@ -12,6 +12,9 @@ What's new in this release
   of retrieving some text from a file, for example to capture information 
   such as a process identifier from a log file, or to extract some 
   performance results that were logged. 
+- Fix startProcess to use the test output directory (rather than the current 
+  working directory) as the root when a relative path is specified 
+  for the workingDir argument. 
 
  
 Dependencies
