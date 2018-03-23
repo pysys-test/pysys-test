@@ -8,7 +8,10 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
-XXX
+- Added ProcessUser.getExprFromFile helper method to automate the common task 
+  of retrieving some text from a file, for example to capture information 
+  such as a process identifier from a log file, or to extract some 
+  performance results that were logged. 
 
  
 Dependencies
