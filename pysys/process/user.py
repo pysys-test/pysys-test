@@ -144,7 +144,7 @@ class ProcessUser(object):
 		@rtype: handle
 
 		"""
-		if not workingDir: workingDir = r'%s' % self.output
+		workingDir = os.path.join(self.output, workingDir or '')
 		if not displayName: displayName = os.path.basename(command)
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		
