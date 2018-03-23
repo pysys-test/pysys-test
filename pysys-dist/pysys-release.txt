@@ -23,9 +23,23 @@ What's new in this release
   recording mechanism if desired (e.g. writing directly to a database or 
   other file format). Fibonacci_test_005 demonstrates how performance 
   results can be reported using this framework. 
+- Changed pysys.py to ignore trailing slash characters on test ids, which 
+  makes it easier to use shell tab completion to select a specific test. 
+- Fixed pysys.py command line parser to give a clear error if requested to 
+  execute a non-existent test id, or if the test descriptor XML could 
+  not be parsed. Previously invalid test ids would be either silently 
+  ignored without an error, or would result in other test ids being 
+  executed more than once. 
 - Fix startProcess to use the test output directory (rather than the current 
   working directory) as the root when a relative path is specified 
   for the workingDir argument. 
+- Fix bug in which log level and exception tracebacks were being 
+  inadvertently suppressed from the stdout console output when executing 
+  from multiple threads. 
+- Fix manual tester thread to report a BLOCKED outcome instead of hanging 
+  if a fatal error occurs (e.g. Tck does not load due to DISPLAY not being 
+  configured correctly). 
+
 
  
 Dependencies
