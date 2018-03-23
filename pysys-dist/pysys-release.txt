@@ -12,6 +12,17 @@ What's new in this release
   of retrieving some text from a file, for example to capture information 
   such as a process identifier from a log file, or to extract some 
   performance results that were logged. 
+- Added BaseTest.reportPerformanceResult() and a flexible framework for 
+  recording performance results (e.g. throughput, latency etc) measured 
+  by PySys tests, including storage of results in a human-readable and 
+  machine-parseable CSV file together with run-specific information 
+  such as the host where the test was executed. The CSV files can be 
+  aggregated across multiple test runs and/or cycles and imported into 
+  any spreadsheet for comparisons and more detailed analysis. The standard 
+  CSVPerformanceReporter can be subclassed and replaced with an alternative 
+  recording mechanism if desired (e.g. writing directly to a database or 
+  other file format). Fibonacci_test_005 demonstrates how performance 
+  results can be reported using this framework. 
 - Fix startProcess to use the test output directory (rather than the current 
   working directory) as the root when a relative path is specified 
   for the workingDir argument. 

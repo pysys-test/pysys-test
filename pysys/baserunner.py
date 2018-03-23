@@ -122,6 +122,7 @@ class BaseRunner(ProcessUser):
 		self.resultsPointer = 0
 		self.resultsQueue = []
 		
+		self.performanceReporters = PROJECT._createPerformanceReporters(self.outsubdir)
 
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the class.
@@ -287,7 +288,12 @@ class BaseRunner(ProcessUser):
 			for writer in self.writers:
 				try: writer.cleanup()
 				except: log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		
+		for perfreporter in self.performanceReporters:
+				try: perfreporter.cleanup()
+				except Exception as e: log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
+		
 		# log the summary output to the console
 		if printSummary: self.printSummary()
 		
