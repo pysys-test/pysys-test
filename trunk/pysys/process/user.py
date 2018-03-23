@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import sys, os, time, collections, inspect
+import sys, os, time, collections, inspect, re
 
 from pysys import log
 from pysys.constants import *
@@ -613,6 +613,49 @@ class ProcessUser(object):
 
 		"""
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
+
+	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False):
+		""" Searches for a regular expression in the specified file, and returns it. 
+
+		If the regex contains groups, the specified group is returned. 
+		
+		If the expression is not found, an exception is raised, 
+		unless getAll=True or returnNoneIfMissing=True. 
+		
+		e.g. 
+		self.getExprFromFile('test.txt', 'myKey="(.*)"') on a file containing 'myKey="foobar"' would return "foobar"
+		self.getExprFromFile('test.txt', 'foo') on a file containing 'myKey=foobar' would return "foo"
+		
+		@param path: file to search (located in the output dir unless an absolute path is specified)
+		@param expr: the regular expression, optionally containing the regex group operator (...) to specify what will be 
+		returned
+		@param groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ['1'] meaning 
+		the first group. If more than one group is specified, the result will be a tuple of group values, otherwise the
+		result will be the value of the group at the specified index.
+		@param returnAll: returns all matching lines if True, the first matching line otherwise.
+		@param returnNoneIfMissing: set this to return None instead of throwing an exception
+		if the regex is not found in the file
+		"""
+		with open(os.path.join(self.output, path), 'r') as f:
+			matches = []
+			for l in f:
+				match = re.search(expr, l)
+				if not match: continue
+				if match.groups():
+					if returnAll: 
+						matches.append(match.group(*groups))
+					else: 
+						return match.group(*groups) 
+				else:
+					if returnAll: 
+						matches.append(match.group(0))
+					else: 
+						return match.group(0)
+			if returnAll: 
+				return matches
+			if returnNoneIfMissing: return None
+			# throw an easy to understand error, since it's likely subsequent steps would fail anyway in this case
+			raise Exception('Could not find expression "%s" in %s'%(expr, os.path.basename(path)))
 		
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False):
 		""" Logs some or all the lines in the specified file. 
