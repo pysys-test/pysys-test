@@ -167,7 +167,8 @@ class XMLProjectParser:
 			for m in matches:
 				try:
 					insert = self.properties[m[1]]
-				except Exception: # presumably a KeyError
+				except Exception as e: # presumably a KeyError
+					log.debug('Failed to expand properties in "%s" - %s: %s', value, e.__class__.__name__, e)
 					if default==value: # if even default can't be resolved avoid infinite loop and tell user
 						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
 					# fall back to default, which we will then try to expand if necessary
