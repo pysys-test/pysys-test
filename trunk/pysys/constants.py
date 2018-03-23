@@ -238,6 +238,7 @@ class Project:
 		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
 		self.makerClassname, self.makerModule = DEFAULT_MAKER
 		self.writers = [DEFAULT_WRITER]
+		self._createPerformanceReporters = lambda outdir: [] # no-op if there is no project XML file
 
 		if projectFile is not None and os.path.exists(os.path.join(root, projectFile)):
 			# parse the project file
@@ -264,6 +265,9 @@ class Project:
 
 				# get the loggers to use
 				self.writers = parser.getWriterDetails()
+
+				perfReporterDetails = parser.getPerformanceReporterDetails()
+				self._createPerformanceReporters = lambda testoutdir: [perfReporterDetails[0](self, perfReporterDetails[1], testoutdir)]
 
 				# get the stdout and runlog formatters
 				parser.setFormatters(self.formatters)

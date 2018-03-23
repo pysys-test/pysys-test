@@ -21,15 +21,17 @@ import os, os.path, sys, string, logging, time, xml.dom.minidom
 
 from pysys.constants import *
 from pysys import __version__
+from pysys.utils.loader import import_module
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?) >
+<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?, performancereporter?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requiresversion (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
+<!ELEMENT performancereporter (#PCDATA)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (#PCDATA) >
@@ -46,6 +48,9 @@ DTD='''
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST performancereporter classname CDATA #REQUIRED>
+<!ATTLIST performancereporter module CDATA #REQUIRED>
+<!ATTLIST performancereporter summaryfile CDATA #REQUIRED>
 <!ATTLIST maker classname CDATA #REQUIRED>
 <!ATTLIST maker module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
@@ -185,6 +190,20 @@ class XMLProjectParser:
 		except:
 			return DEFAULT_RUNNER
 
+	def getPerformanceReporterDetails(self):
+		summaryfile = None
+		try:
+			nodeList = self.root.getElementsByTagName('performancereporter')[0]
+			cls, mod = nodeList.getAttribute('classname'), nodeList.getAttribute('module')
+			summaryfile = nodeList.getAttribute('summaryfile') or ''
+			summaryfile = self.expandFromProperty(summaryfile, summaryfile)
+		except Exception:
+			cls = 'CSVPerformanceReporter'
+			mod = 'pysys.utils.perfreporter'
+
+		module = import_module(mod, sys.path)
+		return getattr(module, cls), summaryfile
+
 
 	def getMakerDetails(self):
 		try:
@@ -250,16 +269,21 @@ class XMLProjectParser:
 		pathNodeList = self.root.getElementsByTagName('path')
 
 		for pathNode in pathNodeList:
-			try:
-				value = self.expandFromEnvironent(pathNode.getAttribute("value"), "")
-				value = self.expandFromProperty(value, "")
+				raw = self.expandFromEnvironent(pathNode.getAttribute("value"), "")
+				value = self.expandFromProperty(raw, "")
 				relative = pathNode.getAttribute("relative")
-		
-				if relative == "true": value = os.path.join(self.dirname, value)
-				sys.path.append(os.path.normpath(value))
+				if not value: 
+					# this probably suggests a malformed project XML 
+					log.warn('Cannot add directory to the python <path>: "%s"', raw)
+					continue
 
-			except:
-				pass
+				if relative == "true": value = os.path.join(self.dirname, value)
+				value = os.path.normpath(value)
+				if not os.path.isdir(value): 
+					log.warn('Cannot add non-existent directory to the python <path>: "%s"', value)
+				else:
+					log.debug('Adding value to path ')
+					sys.path.append(value)
 
 
 	def writeXml(self):
