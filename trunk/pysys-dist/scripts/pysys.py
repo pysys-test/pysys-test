@@ -24,6 +24,10 @@ script_path = os.path.abspath(sys.path[0])
 # the pysys modules since those will be in site-packages once pysys is installed
 sys.path = [p for p in sys.path if os.path.abspath(p) != script_path]
 
+if os.path.basename(os.path.dirname(script_path)) == 'pysys-dist':
+	# allows running pysys.py from source without installing it
+	sys.path.append(os.path.dirname(os.path.dirname(script_path)))
+
 # before anything else, configure the logger
 from pysys import log, stdoutHandler
 stdoutHandler.setLevel(logging.INFO)
