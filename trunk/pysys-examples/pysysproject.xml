@@ -1,10 +1,11 @@
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?) >
+<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?, performancereporter?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requiresversion (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
+<!ELEMENT performancereporter (#PCDATA)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (#PCDATA) >
@@ -21,11 +22,16 @@
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
+<!ATTLIST performancereporter classname CDATA #REQUIRED>
+<!ATTLIST performancereporter module CDATA #REQUIRED>
+<!ATTLIST performancereporter summaryfile CDATA #REQUIRED>
 <!ATTLIST maker classname CDATA #REQUIRED>
 <!ATTLIST maker module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
-<!ATTLIST formatter messagefmt CDATA #REQUIRED>
-<!ATTLIST formatter datefmt CDATA #REQUIRED>
+<!ATTLIST formatter messagefmt CDATA #OPTIONAL>
+<!ATTLIST formatter datefmt CDATA #OPTIONAL>
+<!ATTLIST formatter classname CDATA #OPTIONAL>
+<!ATTLIST formatter module CDATA #OPTIONAL>
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>
 <!ATTLIST writer file CDATA #IMPLIED>
