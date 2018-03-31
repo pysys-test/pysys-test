@@ -22,6 +22,7 @@ import os, os.path, sys, string, logging, time, xml.dom.minidom
 from pysys.constants import *
 from pysys import __version__
 from pysys.utils.loader import import_module
+from pysys.utils.logutils import DefaultPySysLoggingFormatter
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
@@ -54,8 +55,10 @@ DTD='''
 <!ATTLIST maker classname CDATA #REQUIRED>
 <!ATTLIST maker module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
-<!ATTLIST formatter messagefmt CDATA #REQUIRED>
-<!ATTLIST formatter datefmt CDATA #REQUIRED>
+<!ATTLIST formatter messagefmt CDATA #OPTIONAL>
+<!ATTLIST formatter datefmt CDATA #OPTIONAL>
+<!ATTLIST formatter classname CDATA #OPTIONAL>
+<!ATTLIST formatter module CDATA #OPTIONAL>
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>
 <!ATTLIST writer file CDATA #IMPLIED>
@@ -190,20 +193,41 @@ class XMLProjectParser:
 		except:
 			return DEFAULT_RUNNER
 
+	def _parseClassAndConfigDict(self, node, defaultClass):
+		"""
+		Parses a dictionary of arbitrary options and a python class out of 
+		the specified XML node. 
+		
+		The node may optionally contain classname and module (if not specified 
+		as a separate attribute, module will be extracted from the first part of classname); 
+		any other attributes will be returned in the optionsDict. 
+		
+		@param node: The node, may be None
+		@param defaultClass: a string specifying the default fully-qualified class
+		"""
+		optionsDict = {}
+		if node:
+			for att in range(node.attributes.length):
+				optionsDict[node.attributes.item(att).name] = node.attributes.item(att).value
+		
+		classname = optionsDict.pop('classname', defaultClass)
+		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
+		classname = classname.split('.')[-1]
+		module = import_module(mod, sys.path)
+		cls = getattr(module, classname)
+		
+		return cls, optionsDict
+
 	def getPerformanceReporterDetails(self):
 		summaryfile = None
-		try:
-			nodeList = self.root.getElementsByTagName('performancereporter')[0]
-			cls, mod = nodeList.getAttribute('classname'), nodeList.getAttribute('module')
-			summaryfile = nodeList.getAttribute('summaryfile') or ''
-			summaryfile = self.expandFromProperty(summaryfile, summaryfile)
-		except Exception:
-			cls = 'CSVPerformanceReporter'
-			mod = 'pysys.utils.perfreporter'
-
-		module = import_module(mod, sys.path)
-		return getattr(module, cls), summaryfile
-
+		nodeList = self.root.getElementsByTagName('performancereporter')
+		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.utils.perfreporter.CSVPerformanceReporter')
+			
+		summaryfile = optionsDict.pop('summaryfile', '')
+		summaryfile = self.expandFromProperty(summaryfile, summaryfile)
+		if optionsDict: raise Exception('Unexpected performancereporter attribute(s): '+', '.join(optionsDict.keys()))
+		
+		return cls, summaryfile
 
 	def getMakerDetails(self):
 		try:
@@ -213,26 +237,24 @@ class XMLProjectParser:
 			return DEFAULT_MAKER
 
 
-	def setFormatters(self, formatters):
+	def createFormatters(self):
+		stdout = runlog = None
+		
 		formattersNodeList = self.root.getElementsByTagName('formatters')
-		if formattersNodeList == []: return 
-		
-		try:
-			formatterNodeList = formattersNodeList[0].getElementsByTagName('formatter')
-			if formatterNodeList != []:
-				for formatterNode in formatterNodeList:
-					try:
-						datefmt = ''
-						name = formatterNode.getAttribute('name')
-						messagefmt = formatterNode.getAttribute('messagefmt')
-						if formatterNode.hasAttribute('datefmt'): datefmt = formatterNode.getAttribute('datefmt')
-						setattr(formatters, name, logging.Formatter(messagefmt, datefmt))
-					except:
-						pass
-			return
-		except:
-			return
-		
+		if formattersNodeList:
+			formattersNodeList = formattersNodeList[0].getElementsByTagName('formatter')
+		if formattersNodeList:
+			for formatterNode in formattersNodeList:
+				cls, optionsDict = self._parseClassAndConfigDict(formatterNode, 'pysys.utils.logutils.DefaultPySysLoggingFormatter')
+				
+				fname = optionsDict.pop('name', None) # every formatter must have a name
+				if fname not in ['stdout', 'runlog']: raise Exception('Formatter name "%s" is invalid - must be stdout or runlog'%fname)
+				f = cls(optionsDict, isStdOut=fname=='stdout')
+				if fname == 'stdout':
+					stdout = f
+				else:
+					runlog = f
+		return stdout, runlog
 		
 	def getWriterDetails(self):
 		writersNodeList = self.root.getElementsByTagName('writers')

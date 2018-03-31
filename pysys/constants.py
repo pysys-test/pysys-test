@@ -27,7 +27,7 @@ about the structure and contents of the project file, see the PySys examples
 distribution. 
 
 """
-import sys, re, os, os.path, socket, logging, traceback
+import sys, re, os, os.path, socket, logging, traceback, collections
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -232,13 +232,14 @@ class Project:
 	
 	def __init__(self, root, projectFile):
 		self.root = root
-		self.formatters=type('Formatters',(object,),{'stdout':logging.Formatter(DEFAULT_FORMAT_STDOUT),
-													 'runlog':logging.Formatter(DEFAULT_FORMAT_RUNLOG)})
 
 		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
 		self.makerClassname, self.makerModule = DEFAULT_MAKER
 		self.writers = [DEFAULT_WRITER]
 		self._createPerformanceReporters = lambda outdir: [] # no-op if there is no project XML file
+
+		from pysys.utils.logutils import DefaultPySysLoggingFormatter # added here to avoid circular reference
+		stdoutformatter, runlogformatter = None, None
 
 		if projectFile is not None and os.path.exists(os.path.join(root, projectFile)):
 			# parse the project file
@@ -270,9 +271,13 @@ class Project:
 				self._createPerformanceReporters = lambda testoutdir: [perfReporterDetails[0](self, perfReporterDetails[1], testoutdir)]
 
 				# get the stdout and runlog formatters
-				parser.setFormatters(self.formatters)
+				stdoutformatter, runlogformatter = parser.createFormatters()
 				
 				# set the data attributes
 				parser.unlink()	
+		if not stdoutformatter: stdoutformatter = DefaultPySysLoggingFormatter({}, isStdOut=True)
+		if not runlogformatter: runlogformatter = DefaultPySysLoggingFormatter({}, isStdOut=False)
+		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
+		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
 			
 

@@ -23,6 +23,9 @@ What's new in this release
   recording mechanism if desired (e.g. writing directly to a database or 
   other file format). Fibonacci_test_005 demonstrates how performance 
   results can be reported using this framework. 
+- Added support for providing a custom class to implement formatting of 
+  log messages, for both run.log and stdout. Errors in the <formatters> XML 
+  node will now be treated as errors rather than being silently ignored. 
 - Changed pysys.py to ignore trailing slash characters on test ids, which 
   makes it easier to use shell tab completion to select a specific test. 
 - Fixed pysys.py command line parser to give a clear error if requested to 
