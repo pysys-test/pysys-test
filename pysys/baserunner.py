@@ -309,11 +309,12 @@ class BaseRunner(ProcessUser):
 		
 		"""
 		log.critical("")
+		log.critical(  "Completed test run at:  %s", time.strftime('%A %Y-%m-%d %H:%M:%S %Z', time.localtime(time.time())))
 		if self.threads > 1: 
-			log.critical("Test duration (absolute): %.2f (secs)", time.time() - self.startTime)		
-			log.critical("Test duration (additive): %.2f (secs)", self.duration)
+			log.critical("Total test duration (absolute): %.2f secs", time.time() - self.startTime)		
+			log.critical("Total test duration (additive): %.2f secs", self.duration)
 		else:
-			log.critical("Test duration: %.2f (secs)", time.time() - self.startTime)		
+			log.critical("Total test duration:    %.2f secs", time.time() - self.startTime)		
 		log.critical("")		
 		log.critical("Summary of non passes: ")
 		fails = 0
