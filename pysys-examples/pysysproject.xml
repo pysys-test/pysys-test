@@ -198,7 +198,7 @@
 	documentation for a full description of the time format specifiers.
 	-->
 	<formatters>
-		<formatter name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%Y:%m:%d %H:%M:%S"/>	
+		<formatter name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S"/>
 		
 		<!--
 		Example setting the format for the run log messages. 
