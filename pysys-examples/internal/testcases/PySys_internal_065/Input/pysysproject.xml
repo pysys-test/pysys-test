@@ -4,7 +4,6 @@
 
 	<property osfamily="osfamily"/>
 
-	<property name="shutdownApamaComponentsAfterTest" value="true"/>
 	<property name="verboseWaitForSignal" value="true"/>
 	<property name="defaultAbortOnError" value="true"/>
 
