@@ -28,10 +28,10 @@
 <!ATTLIST maker classname CDATA #REQUIRED>
 <!ATTLIST maker module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
-<!ATTLIST formatter messagefmt CDATA #OPTIONAL>
-<!ATTLIST formatter datefmt CDATA #OPTIONAL>
-<!ATTLIST formatter classname CDATA #OPTIONAL>
-<!ATTLIST formatter module CDATA #OPTIONAL>
+<!ATTLIST formatter messagefmt CDATA #IMPLIED>
+<!ATTLIST formatter datefmt CDATA #IMPLIED>
+<!ATTLIST formatter classname CDATA #IMPLIED>
+<!ATTLIST formatter module CDATA #IMPLIED>
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>
 <!ATTLIST writer file CDATA #IMPLIED>
