@@ -15,6 +15,18 @@ What's new in this release
   being filtered out before the comparison. There is also now a message 
   logged at warn level when every line in a file comparison is filtered 
   out, since in most cases this is not desirable behaviour. 
+- Added support for coloring console output to highlight passes, fails, 
+  warnings and more. To enable this, set the PYSYS_COLOR=true environment 
+  variable (since it's a per-user and per-machine/terminal type preference 
+  rather than per-project). This will enable colored output on any terminal 
+  that supports ANSI escape sequences (e.g. most Unix terminals). On Windows, 
+  which does not, it is possible to get colored output by installing a 
+  package such as "colorama", which PySys will load if it is present on the 
+  python path. If is possible to customize the colors used and to use 
+  alternative libraries for coloring on windows by providing a custom subclass 
+  of the DefaultPySysLoggingFormatter class. The colors used for each category 
+  of log messages can be customized in the project configuration file, e.g. 
+  <formatter><option name="color:dumped core">YELLOW</option></formatter>
 - Added ProcessUser.getExprFromFile helper method to automate the common task 
   of retrieving some text from a file, for example to capture information 
   such as a process identifier from a log file, or to extract some 
@@ -40,13 +52,13 @@ What's new in this release
   not be parsed. Previously invalid test ids would be either silently 
   ignored without an error, or would result in other test ids being 
   executed more than once. 
-- Fix startProcess to use the test output directory (rather than the current 
+- Fixed startProcess to use the test output directory (rather than the current 
   working directory) as the root when a relative path is specified 
   for the workingDir argument. 
-- Fix bug in which log level and exception tracebacks were being 
+- Fixed bug in which log level and exception tracebacks were being 
   inadvertently suppressed from the stdout console output when executing 
   from multiple threads. 
-- Fix manual tester thread to report a BLOCKED outcome instead of hanging 
+- Fixed manual tester thread to report a BLOCKED outcome instead of hanging 
   if a fatal error occurs (e.g. Tck does not load due to DISPLAY not being 
   configured correctly). 
 

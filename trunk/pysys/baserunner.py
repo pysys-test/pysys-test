@@ -41,6 +41,7 @@ from pysys.utils.linecount import linecount
 from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
+from pysys.utils.logutils import DefaultPySysLoggingFormatter
 
 global_lock = threading.Lock()
 
@@ -317,20 +318,21 @@ class BaseRunner(ProcessUser):
 			log.critical("Total test duration:    %.2f secs", time.time() - self.startTime)		
 		log.critical("")		
 		log.critical("Summary of non passes: ")
+		
 		fails = 0
 		for cycle in self.results.keys():
 			for outcome in self.results[cycle].keys():
 				if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
 		if fails == 0:
-			log.critical("	THERE WERE NO NON PASSES")
+			log.critical("	THERE WERE NO NON PASSES", extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'passed'})
 		else:
 			if len(self.results) == 1:
 				for outcome in FAILS:
-					for id in self.results[0][outcome]: log.critical("  %s: %s ", LOOKUP[outcome], id)
+					for id in self.results[0][outcome]: log.critical("  %s: %s ", LOOKUP[outcome], id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower()})
 			else:
 				for key in self.results.keys():
 					for outcome in FAILS:
-						for id in self.results[key][outcome]: log.critical(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id)
+						for id in self.results[key][outcome]: log.critical(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower()})
 
 
 	def containerCallback(self, thread, container):
@@ -482,11 +484,11 @@ class TestContainer:
 			
 			log.info(62*"=")
 			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
-			log.info("%s%s"%("Id   : ", self.descriptor.id))
+			log.info("Id   : %s", self.descriptor.id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
 			if self.runner.cycle > 1: 
-				log.info("Cycle: %d", self.cycle+1)
-			if len(title)>0: log.info("%s%s"%("Title: ", title[0]))
-			for l in title[1:]: log.info("%s%s"%("       ", l))
+				log.info("Cycle: %d", str(self.cycle+1), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
+			if len(title)>0: log.info("Title: %s", str(title[0]), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
+			for l in title[1:]: log.info("       %s", l)
 			log.info(62*"=")
 		except KeyboardInterrupt:
 			self.kbrdInt = True
@@ -534,7 +536,7 @@ class TestContainer:
 				except AbortExecution, e:
 					del self.testObj.outcome[:]
 					self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
-					log.info('Aborting test due to abortOnError set to true ...')
+					log.warn('Aborted test due to abortOnError set to true')
 
 				if self.detectCore(self.outsubdir):
 					self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory', abortOnError=False)
@@ -559,10 +561,10 @@ class TestContainer:
 		try:
 			self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
 			log.info("")
-			log.info("Test duration: %.2f secs", self.testTime)
-			log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()])
+			log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'debug', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
+			log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[self.testObj.getOutcome()].lower(), DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
 			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
-				log.info("Test failure reason: %s", self.testObj.getOutcomeReason())
+				log.info("Test failure reason: %s", self.testObj.getOutcomeReason(), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'outcomereason', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
 			log.info("")
 			
 			self.testFileHandlerRunLog.close()

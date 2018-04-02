@@ -23,6 +23,7 @@ from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
+from pysys.utils.logutils import DefaultPySysLoggingFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 
@@ -169,7 +170,8 @@ class ProcessUser(object):
 			log.info("%s", sys.exc_info()[1], exc_info=0)
 		except ProcessTimeout:
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
-			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout)
+			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout, extra={
+				DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'timed out'})
 			process.stop()
 		else:
 			self.processList.append(process)
@@ -253,7 +255,8 @@ class ProcessUser(object):
 				log.info("Process %s terminated after %d secs", process, time.time()-t)
 		except ProcessTimeout:
 			if not abortOnError:
-				log.warn("Ignoring timeout waiting for process %r after %d secs", process, time.time()-t)
+				log.warn("Ignoring timeout waiting for process %r after %d secs", process, time.time()-t, extra={
+					DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'timed out'})
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout), self.__callRecord())
 
@@ -432,7 +435,8 @@ class ProcessUser(object):
 				if abortOnError:
 					self.abort(TIMEDOUT, msg, self.__callRecord())
 				else:
-					log.warn(msg)
+					log.warn(msg, extra={
+						DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'timed out'})
 				break
 			
 			if process and not process.running():
@@ -536,9 +540,11 @@ class ProcessUser(object):
 		if outcomeReason and printReason:
 			if outcome in FAILS:
 				if callRecord==None: callRecord = self.__callRecord()
-				log.warn('%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), '[%s]'%','.join(callRecord) if callRecord!=None else '')
+				log.warn('%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), '[%s]'%','.join(callRecord) if callRecord!=None else '', extra={
+					DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower(), DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:1})
 			else:
-				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower())
+				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra={
+					DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower(), DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:1})
 
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
@@ -719,9 +725,10 @@ class ProcessUser(object):
 		if not tolog:
 			return False
 			
-		self.log.info('Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '')
+		logextra = {DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'filecontents'}
+		self.log.info('Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
-			self.log.info('  %s', l)
-		self.log.info('  -----')
-		self.log.info('')
+			self.log.info('  %s', l, extra=logextra)
+		self.log.info('  -----', extra=logextra)
+		self.log.info('', extra=logextra)
 		return True
