@@ -32,12 +32,14 @@ DTD='''
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requiresversion (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
-<!ELEMENT performancereporter (#PCDATA)>
+<!ELEMENT performancereporter (option+)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
-<!ELEMENT formatter (#PCDATA) >
+<!ELEMENT formatter (option*) >
+<!ELEMENT option (#PCDATA) >
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
+<!ATTLIST option name CDATA #REQUIRED>
 <!ATTLIST property root CDATA #IMPLIED>
 <!ATTLIST property environment CDATA #IMPLIED>
 <!ATTLIST property osfamily CDATA #IMPLIED>
@@ -200,7 +202,7 @@ class XMLProjectParser:
 		
 		The node may optionally contain classname and module (if not specified 
 		as a separate attribute, module will be extracted from the first part of classname); 
-		any other attributes will be returned in the optionsDict. 
+		any other attributes will be returned in the optionsDict, as will <option name=""></option> child elements. 
 		
 		@param node: The node, may be None
 		@param defaultClass: a string specifying the default fully-qualified class
@@ -209,6 +211,10 @@ class XMLProjectParser:
 		if node:
 			for att in range(node.attributes.length):
 				optionsDict[node.attributes.item(att).name] = node.attributes.item(att).value
+			for tag in node.getElementsByTagName('option'):
+				assert tag.getAttribute('name')
+				optionsDict[tag.getAttribute('name')] = tag.firstChild.nodeValue
+		
 		
 		classname = optionsDict.pop('classname', defaultClass)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))

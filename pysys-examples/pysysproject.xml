@@ -5,12 +5,14 @@
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requiresversion (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
-<!ELEMENT performancereporter (#PCDATA)>
+<!ELEMENT performancereporter (option+)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
-<!ELEMENT formatter (#PCDATA) >
+<!ELEMENT formatter (option*) >
+<!ELEMENT option (#PCDATA) >
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
+<!ATTLIST option name CDATA #REQUIRED>
 <!ATTLIST property root CDATA #IMPLIED>
 <!ATTLIST property environment CDATA #IMPLIED>
 <!ATTLIST property osfamily CDATA #IMPLIED>
