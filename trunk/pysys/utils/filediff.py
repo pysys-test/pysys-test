@@ -32,7 +32,7 @@ def trimContents(contents, expressions, exclude=True):
 	
 	@param contents: The input list of strings to trim based on matches to regular expressions
 	@param expressions: The input list of regular expressions
-	@param exclude: If true matches to the regular expressions exclude the line, if false matches include the line
+	@param exclude: If true any matches to the regular expressions exclude the line, if false any matches include the line
 	@return: The processed list
 	@rtype: list
 	"""
@@ -45,10 +45,14 @@ def trimContents(contents, expressions, exclude=True):
 	
 	list = copy.deepcopy(contents)
 	for i in range(0, len(contents)):
-		for j in range(0, len(regexp)):
-			if (exclude and regexp[j].search(contents[i]) is not None) or (not exclude and regexp[j].search(contents[i]) is None):
-				list.remove(contents[i])
+		anymatch = False
+		for e in regexp:
+			if e.search(contents[i]): 
+				anymatch = True
 				break
+		
+		if (exclude and anymatch) or (not exclude and not anymatch):
+			list.remove(contents[i])
 
 	return list
 
@@ -138,6 +142,9 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 
 		logContents("Contents of %s after pre-processing;" % os.path.basename(file1), list1)
 		logContents("Contents of %s after pre-processing;" % os.path.basename(file2), list2)		
+		if not list1 and not list2:
+			# maybe this should be an exception... it's probably not what was intended
+			log.warn('File comparison pre-processing has filtered out all lines from the files to be diffed, please check if this is intended: %s, %s', os.path.basename(file1), os.path.basename(file2))
 			
 		if list1 != list2:
 			log.debug("Unified diff between pre-processed input files;")
