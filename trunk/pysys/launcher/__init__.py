@@ -69,10 +69,16 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	descriptorSet =set(DEFAULT_DESCRIPTOR)
 	
 	if dir is None: dir = os.getcwd()
+	projectfound = PROJECT.projectFile != None
 	for root, dirs, files in os.walk(dir):
 		intersection =  descriptorSet & set(files)
 		if intersection : descriptorfiles.append(os.path.join(root, intersection.pop()))
 		for ignore in (ignoreSet & set(dirs)): dirs.remove(ignore)
+		if not projectfound:
+			for p in DEFAULT_PROJECTFILE:
+				if p in files:
+					projectfound = True
+					sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
 
 	for descriptorfile in descriptorfiles:
 		try:
