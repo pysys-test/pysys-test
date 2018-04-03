@@ -1,11 +1,11 @@
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?, performancereporter?) >
+<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?, performance-reporter?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requiresversion (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
-<!ELEMENT performancereporter (option+)>
+<!ELEMENT performance-reporter (option+)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (option*) >
@@ -24,9 +24,9 @@
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
-<!ATTLIST performancereporter classname CDATA #REQUIRED>
-<!ATTLIST performancereporter module CDATA #REQUIRED>
-<!ATTLIST performancereporter summaryfile CDATA #REQUIRED>
+<!ATTLIST performance-reporter classname CDATA #REQUIRED>
+<!ATTLIST performance-reporter module CDATA #REQUIRED>
+<!ATTLIST performance-reporter summaryfile CDATA #REQUIRED>
 <!ATTLIST maker classname CDATA #REQUIRED>
 <!ATTLIST maker module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
