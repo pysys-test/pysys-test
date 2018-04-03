@@ -27,10 +27,11 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?, performance-reporter?) >
+<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, formatters?, performance-reporter?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
-<!ELEMENT requiresversion (#PCDATA)>
+<!ELEMENT requires-python (#PCDATA)>
+<!ELEMENT requires-pysys (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
 <!ELEMENT performance-reporter (option+)>
 <!ELEMENT maker (#PCDATA)>
@@ -94,16 +95,25 @@ class XMLProjectParser:
 			else:
 				self.root = self.doc.getElementsByTagName('pysysproject')[0]
 		
+	def checkVersions(self):
 		# fail fast and clearly if user has said they need a more recent PySys 
 		# than this one
-		requiresversion = self.root.getElementsByTagName('requiresversion') # todo: requires-python, requires-pysys
-		if requiresversion and requiresversion[0].firstChild: 
-			requiresversion = requiresversion[0].firstChild.nodeValue
-			if requiresversion: # ignore if empty
+		requirespython = self.root.getElementsByTagName('requires-python')
+		if requirespython and requirespython[0].firstChild: 
+			requirespython = requirespython[0].firstChild.nodeValue
+			if requirespython: # ignore if empty
+				thisversion = sys.version_info
+				if list(sys.version_info) < map(int, requirespython.split('.')):
+					raise Exception('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join(map(str, sys.version_info[:3])), sys.executable))
+
+		requirespysys = self.root.getElementsByTagName('requires-pysys')
+		if requirespysys and requirespysys[0].firstChild: 
+			requirespysys = requirespysys[0].firstChild.nodeValue
+			if requirespysys: # ignore if empty
 				thisversion = __version__
-				if map(int, thisversion.split('.')) < map(int, requiresversion.split('.')):
-					raise Exception('This test project requires PySys version %s or greater, but this is version %s'%(requiresversion, thisversion))
-				
+				if map(int, thisversion.split('.')) < map(int, requirespysys.split('.')):
+					raise Exception('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
+		
 	def unlink(self):
 		if self.doc: self.doc.unlink()	
 

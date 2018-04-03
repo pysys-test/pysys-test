@@ -247,8 +247,10 @@ class Project:
 			try:
 				parser = XMLProjectParser(root, projectFile)
 			except Exception, e: 
-				raise Exception("Error parsing project file %s, %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
+				raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 			else:
+				parser.checkVersions()
+				
 				# get the properties
 				properties = parser.getProperties()
 				keys = properties.keys()
