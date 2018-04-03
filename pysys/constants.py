@@ -241,6 +241,7 @@ class Project:
 		from pysys.utils.logutils import DefaultPySysLoggingFormatter # added here to avoid circular reference
 		stdoutformatter, runlogformatter = None, None
 
+		self.projectFile = None
 		if projectFile is not None and os.path.exists(os.path.join(root, projectFile)):
 			# parse the project file
 			from pysys.xml.project import XMLProjectParser
@@ -250,6 +251,8 @@ class Project:
 				raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 			else:
 				parser.checkVersions()
+
+				self.projectFile = os.path.join(root, projectFile)
 				
 				# get the properties
 				properties = parser.getProperties()
