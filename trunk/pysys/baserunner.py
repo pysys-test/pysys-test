@@ -486,7 +486,7 @@ class TestContainer:
 			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
 			log.info("Id   : %s", self.descriptor.id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
 			if self.runner.cycle > 1: 
-				log.info("Cycle: %d", str(self.cycle+1), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
+				log.info("Cycle: %s", str(self.cycle+1), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
 			if len(title)>0: log.info("Title: %s", str(title[0]), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
 			for l in title[1:]: log.info("       %s", l)
 			log.info(62*"=")
