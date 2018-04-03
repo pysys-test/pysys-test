@@ -9,12 +9,16 @@ time. See installation notes below for more details.
 What's new in this release
 --------------------------
 - Fixed assertDiff (and filediff) handling of "include" expressions list to 
-  filtered out lines if no include expressions match (as documented) rather 
+  filter out lines if no include expressions match (as documented) rather 
   than if any include expressions match. This fix may cause tests to fail 
   that had previously - and incorrectly - passed as a result of all lines 
   being filtered out before the comparison. There is also now a message 
   logged at warn level when every line in a file comparison is filtered 
   out, since in most cases this is not desirable behaviour. 
+- Added requires-python and requires-pysys elements to the project XML 
+  file which allow checking for the specified minimum python or pysys 
+  version, resulting in a clear error if attempting to use the wrong 
+  version. 
 - Added support for coloring console output to highlight passes, fails, 
   warnings and more. To enable this, set the PYSYS_COLOR=true environment 
   variable (since it's a per-user and per-machine/terminal type preference 

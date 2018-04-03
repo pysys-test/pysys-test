@@ -1,9 +1,10 @@
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?, performance-reporter?) >
+<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, formatters?, performance-reporter?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
-<!ELEMENT requiresversion (#PCDATA)>
+<!ELEMENT requires-python (#PCDATA)>
+<!ELEMENT requires-pysys (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
 <!ELEMENT performance-reporter (option+)>
 <!ELEMENT maker (#PCDATA)>
@@ -109,7 +110,12 @@
 	<!-- 
 	Can specify a minimum required pysys version to run these tests
 	-->
-	<requiresversion>1.2.0</requiresversion>
+	<requires-pysys>1.3.0</requires-pysys>
+
+	<!-- 
+	Can specify a minimum required python version to run these tests
+	-->
+	<requires-python>2.7.0</requires-python>
 	
 	<!-- 
 	Use a custom runner class that extends the BaseRunner class distributed with PySys. Extensions to 
