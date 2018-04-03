@@ -163,6 +163,7 @@ TIMEOUTS['ManualTester'] = 1800
 # pysys project
 PROJECT = None
 
+from pysys.xml.project import Project 
 
 # load the project specific details
 def loadproject(start):
@@ -213,76 +214,4 @@ def loadproject(start):
 	except Exception, e:
 		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
 		sys.exit(1)
-
-
-
-class Project:
-	"""Class detailing project specific information for a set of PySys tests.
-	
-	Reads and parses the PySys project file if it exists and translates property element 
-	name/value entries in the project file into data attributes of the class instance. 
-	
-	@ivar root: Full path to the project root, as specified by the first PySys project
-				file encountered when walking down the directory tree from the start directory  
-	@type root: string
-	@ivar projectFile: Full path to the project file. May be None, though providing a file is recommended. 
-	@type projectFile: string
-	
-	"""
-	
-	def __init__(self, root, projectFile):
-		self.root = root
-
-		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
-		self.makerClassname, self.makerModule = DEFAULT_MAKER
-		self.writers = [DEFAULT_WRITER]
-		self._createPerformanceReporters = lambda outdir: [] # no-op if there is no project XML file
-
-		from pysys.utils.logutils import DefaultPySysLoggingFormatter # added here to avoid circular reference
-		stdoutformatter, runlogformatter = None, None
-
-		self.projectFile = None
-		if projectFile is not None and os.path.exists(os.path.join(root, projectFile)):
-			# parse the project file
-			from pysys.xml.project import XMLProjectParser
-			try:
-				parser = XMLProjectParser(root, projectFile)
-			except Exception, e: 
-				raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
-			else:
-				parser.checkVersions()
-
-				self.projectFile = os.path.join(root, projectFile)
-				
-				# get the properties
-				properties = parser.getProperties()
-				keys = properties.keys()
-				keys.sort()
-				for key in keys: setattr(self, key, properties[key])
-				
-				# add to the python path
-				parser.addToPath()
-		
-				# get the runner if specified
-				self.runnerClassname, self.runnerModule = parser.getRunnerDetails()
-		
-				# get the maker if specified
-				self.makerClassname, self.makerModule = parser.getMakerDetails()
-
-				# get the loggers to use
-				self.writers = parser.getWriterDetails()
-
-				perfReporterDetails = parser.getPerformanceReporterDetails()
-				self._createPerformanceReporters = lambda testoutdir: [perfReporterDetails[0](self, perfReporterDetails[1], testoutdir)]
-
-				# get the stdout and runlog formatters
-				stdoutformatter, runlogformatter = parser.createFormatters()
-				
-				# set the data attributes
-				parser.unlink()	
-		if not stdoutformatter: stdoutformatter = DefaultPySysLoggingFormatter({}, isStdOut=True)
-		if not runlogformatter: runlogformatter = DefaultPySysLoggingFormatter({}, isStdOut=False)
-		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
-		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
-			
 
