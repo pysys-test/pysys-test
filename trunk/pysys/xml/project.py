@@ -27,12 +27,12 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?, performancereporter?) >
+<!ELEMENT pysysproject (property*, path*, requiresversion?, runner?, maker?, writers?, formatters?, performance-reporter?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requiresversion (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
-<!ELEMENT performancereporter (option+)>
+<!ELEMENT performance-reporter (option+)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (option*) >
@@ -51,9 +51,9 @@ DTD='''
 <!ATTLIST path relative CDATA #IMPLIED>
 <!ATTLIST runner classname CDATA #REQUIRED>
 <!ATTLIST runner module CDATA #REQUIRED>
-<!ATTLIST performancereporter classname CDATA #REQUIRED>
-<!ATTLIST performancereporter module CDATA #REQUIRED>
-<!ATTLIST performancereporter summaryfile CDATA #REQUIRED>
+<!ATTLIST performance-reporter classname CDATA #REQUIRED>
+<!ATTLIST performance-reporter module CDATA #REQUIRED>
+<!ATTLIST performance-reporter summaryfile CDATA #REQUIRED>
 <!ATTLIST maker classname CDATA #REQUIRED>
 <!ATTLIST maker module CDATA #REQUIRED>
 <!ATTLIST formatter name CDATA #REQUIRED>
@@ -96,7 +96,7 @@ class XMLProjectParser:
 		
 		# fail fast and clearly if user has said they need a more recent PySys 
 		# than this one
-		requiresversion = self.root.getElementsByTagName('requiresversion')
+		requiresversion = self.root.getElementsByTagName('requiresversion') # todo: requires-python, requires-pysys
 		if requiresversion and requiresversion[0].firstChild: 
 			requiresversion = requiresversion[0].firstChild.nodeValue
 			if requiresversion: # ignore if empty
@@ -226,7 +226,7 @@ class XMLProjectParser:
 
 	def getPerformanceReporterDetails(self):
 		summaryfile = None
-		nodeList = self.root.getElementsByTagName('performancereporter')
+		nodeList = self.root.getElementsByTagName('performance-reporter')
 		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.utils.perfreporter.CSVPerformanceReporter')
 			
 		summaryfile = optionsDict.pop('summaryfile', '')
