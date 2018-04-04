@@ -13,8 +13,8 @@ class PySysTest(BaseTest):
 		p = self.startProcess(command=sys.executable,
 			arguments = [[a for a in sys.argv if a.endswith('pysys.py')][0], 'run', '-o', 'myoutdir'],
 			environs = os.environ, workingDir='test',
-			stdout = 'pysys.out', stderr = 'pysys.err', 
-			ignoreExitStatus=False)
+			stdout = 'pysys.out', stderr = 'pysys.err', displayName='pysys', 
+			ignoreExitStatus=False, abortOnError=True)
 		self.logFileContents('pysys.out', maxLines=0)
 		self.logFileContents('pysys.err')
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)

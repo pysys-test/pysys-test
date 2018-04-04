@@ -34,26 +34,27 @@ class BasePySysLoggingFormatter(logging.Formatter):
 	can be registered by specifying classname= in the formatter node 
 	of the project configuration file. 
 	"""
-	def __init__(self, optionsDict, isStdOut):
+	def __init__(self, propertiesDict, isStdOut):
 		"""
 		Constructs a formatter. 
 		
-		@param optionsDict: dictionary of formatter-specific options which can be customized; 
-		these are configured by providing attributes on the formatter node of the 
-		project configuration file. 
-		Any options handled by a subclass should be removed (popped) before passing the 
-		remaining optionsDict to the super class, which will throw an exception 
+		@param propertiesDict: dictionary of formatter-specific options which can be customized; 
+		these are configured by providing <property name="..." value="..."/> elements or attributes 
+		on the formatter node of the project configuration file. 
+		Any properties handled by a subclass should be removed (popped) before passing the 
+		remaining propertiesDict to the super class, which will throw an exception 
 		if any unexpected options are present. 
 		
 		@param isStdOut: True if this formatter is producing output for stdout i.e. the console. 
+		Some formatters may treat console output differently to output to a file. 
 		"""
 		self.isStdOut = isStdOut
 		super(BasePySysLoggingFormatter, self).__init__(
-			optionsDict.pop('messagefmt', DEFAULT_FORMAT_STDOUT if isStdOut else DEFAULT_FORMAT_RUNLOG),
-			optionsDict.pop('datefmt', None)
+			propertiesDict.pop('messagefmt', DEFAULT_FORMAT_STDOUT if isStdOut else DEFAULT_FORMAT_RUNLOG),
+			propertiesDict.pop('datefmt', None)
 			)
 		
-		if optionsDict: raise Exception('Unknown formatter option(s) specified: %s'%', '.join(optionsDict.keys()))
+		if propertiesDict: raise Exception('Unknown formatter option(s) specified: %s'%', '.join(propertiesDict.keys()))
 	
 class DefaultPySysLoggingFormatter(BasePySysLoggingFormatter):
 	"""
@@ -63,7 +64,7 @@ class DefaultPySysLoggingFormatter(BasePySysLoggingFormatter):
 	variable is set, or the "color" option is set to true on the formatter. 
 	The colors used for each colorable category defined by this class 
 	can be overridden by specifying "color:XXX" options, e.g. 
-	<formatter><option name="color:dumped core">YELLOW</option></formatter>
+	<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
 	"""
 	
 	KEY_COLOR_CATEGORY = 'pysys_color_category' # the key to add to the extra={} dict of a logger call to specify what kind of color to give it
@@ -105,20 +106,20 @@ class DefaultPySysLoggingFormatter(BasePySysLoggingFormatter):
 		'END':'\033[0m',
 	}
 	
-	def __init__(self, optionsDict, isStdOut):
+	def __init__(self, propertiesDict, isStdOut):
 		# whether to color console output should usually be configured in the environment 
 		# rather than the pysys project, since it depends on the preference of the 
 		# person running the tests, and to what OS and shell/terminal type they are using
 		
 		# allow color:XXX prefixes to specify the color for particular categories
-		for o in list(optionsDict.keys()):
+		for o in list(propertiesDict.keys()):
 			if o.startswith('color:'):
-				self.COLOR_CATEGORIES[o[len('color:'):].lower()] = optionsDict.pop(o).upper()
+				self.COLOR_CATEGORIES[o[len('color:'):].lower()] = propertiesDict.pop(o).upper()
 		
-		self.color = optionsDict.pop('color','')=='true'
+		self.color = propertiesDict.pop('color','')=='true'
 		self.color = isStdOut and (os.getenv('PYSYS_COLOR', 'false').lower() == 'true' or self.color)
 		if self.color: self.initColoringLibrary()
-		super(DefaultPySysLoggingFormatter, self).__init__(optionsDict, isStdOut)
+		super(DefaultPySysLoggingFormatter, self).__init__(propertiesDict, isStdOut)
 
 		# ensure all outcomes are permitted as possible precedents		
 		for outcome in PRECEDENT:
