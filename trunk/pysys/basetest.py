@@ -555,6 +555,7 @@ class BaseTest(ProcessUser):
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
 		msg = self.__assertMsg(xargs, 'Ordered grep on input file %s' % file)
+		expr = None
 		try:
 			expr = orderedgrep(f, exprList)
 		except:
@@ -570,8 +571,9 @@ class BaseTest(ProcessUser):
 			else:
 				result = FAILED
 
+			if result == FAILED and expr: 
+				msg += ' failed on expression \"%s\"'% expr
 			self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
-			if result == FAILED: log.warn("Ordered grep failed on expression \"%s\"", expr)
 
 
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, **xargs):
