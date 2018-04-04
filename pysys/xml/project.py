@@ -33,14 +33,12 @@ DTD='''
 <!ELEMENT requires-python (#PCDATA)>
 <!ELEMENT requires-pysys (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
-<!ELEMENT performance-reporter (option+)>
+<!ELEMENT performance-reporter (property*)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
-<!ELEMENT formatter (option*) >
-<!ELEMENT option (#PCDATA) >
+<!ELEMENT formatter (property*) >
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
-<!ATTLIST option name CDATA #REQUIRED>
 <!ATTLIST property root CDATA #IMPLIED>
 <!ATTLIST property environment CDATA #IMPLIED>
 <!ATTLIST property osfamily CDATA #IMPLIED>
@@ -216,15 +214,17 @@ class XMLProjectParser:
 		
 		@param node: The node, may be None
 		@param defaultClass: a string specifying the default fully-qualified class
+		@return: a tuple of (pythonclass, propertiesdict)
 		"""
 		optionsDict = {}
 		if node:
 			for att in range(node.attributes.length):
-				optionsDict[node.attributes.item(att).name] = node.attributes.item(att).value
-			for tag in node.getElementsByTagName('option'):
+				value = self.expandFromEnvironent(node.attributes.item(att).value, None)
+				optionsDict[node.attributes.item(att).name] = self.expandFromProperty(value, None)
+			for tag in node.getElementsByTagName('property'):
 				assert tag.getAttribute('name')
-				optionsDict[tag.getAttribute('name')] = tag.firstChild.nodeValue
-		
+				value = self.expandFromEnvironent(tag.getAttribute("value"), tag.getAttribute("default"))
+				optionsDict[tag.getAttribute('name')] = self.expandFromProperty(value, tag.getAttribute("default"))
 		
 		classname = optionsDict.pop('classname', defaultClass)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))

@@ -30,7 +30,7 @@ What's new in this release
   alternative libraries for coloring on windows by providing a custom subclass 
   of the DefaultPySysLoggingFormatter class. The colors used for each category 
   of log messages can be customized in the project configuration file, e.g. 
-  <formatter><option name="color:dumped core">YELLOW</option></formatter>
+  <formatter><property name="color:dumped core" value="YELLOW"/></formatter>
 - Added ProcessUser.getExprFromFile helper method to automate the common task 
   of retrieving some text from a file, for example to capture information 
   such as a process identifier from a log file, or to extract some 

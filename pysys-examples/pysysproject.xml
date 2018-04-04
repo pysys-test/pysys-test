@@ -6,14 +6,12 @@
 <!ELEMENT requires-python (#PCDATA)>
 <!ELEMENT requires-pysys (#PCDATA)>
 <!ELEMENT runner (#PCDATA)>
-<!ELEMENT performance-reporter (option+)>
+<!ELEMENT performance-reporter (property*)>
 <!ELEMENT maker (#PCDATA)>
 <!ELEMENT formatters (formatter+) >
-<!ELEMENT formatter (option*) >
-<!ELEMENT option (#PCDATA) >
+<!ELEMENT formatter (property*) >
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
-<!ATTLIST option name CDATA #REQUIRED>
 <!ATTLIST property root CDATA #IMPLIED>
 <!ATTLIST property environment CDATA #IMPLIED>
 <!ATTLIST property osfamily CDATA #IMPLIED>
