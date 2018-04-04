@@ -13,6 +13,7 @@ class PySysTest(BaseTest):
 
 		env = dict(os.environ)
 		env.pop('PYSYS_COLOR','')
+		env.pop('PYSYS_PROGRESS','')
 		p = self.startProcess(command=sys.executable,
 			arguments = [[a for a in sys.argv if a.endswith('pysys.py')][0], 'run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'],
 			environs = env, workingDir='test',
@@ -22,7 +23,10 @@ class PySysTest(BaseTest):
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			
 	def validate(self):
-		self.assertGrep('pysys.out', expr='(Traceback|caught )', contains=False)
+		self.assertGrep('pysys.out', expr='(Traceback.*|caught .*)', contains=False)
+		
+		# we didn't enable progress writers so there should be none here
+		self.assertGrep('pysys.out', expr='--- Progress', contains=False)
 
 		self.assertGrep('testsummary.csv', expr='id, title, cycle, startTime, duration, outcome')
 		self.assertGrep('testsummary.csv', expr='NestedPass,"Nested testcase",1,[^,]+,[^,]+,PASSED')
@@ -55,10 +59,11 @@ class PySysTest(BaseTest):
 		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
 		if len(datedtestsum) != 1: self.addOutcome(FAILED, 'Did not find testsummary-<year>.log')
 
-		
+		self.assertLineCount('pysys.out', expr='Summary of non passes', condition='==1')
 		self.assertOrderedGrep('pysys.out', exprList=[
 			'Summary of non passes: ',
 			'CYCLE 1.*TIMED OUT.*NestedTimedout',
+			'Reason for timed out outcome is general tardiness',
 			'CYCLE 1.*FAILED.*NestedFail',
 			'CYCLE 2.*TIMED OUT.*NestedTimedout',
 		])

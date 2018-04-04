@@ -70,6 +70,37 @@ What's new in this release
 - Changed standard record writers to report the number of cycles starting 
   from 1 rather than from 0 (which is consistent with how cycles are 
   displayed by the rest of PySys).
+- Extended the concept of "writers" to include not just "record" writers 
+  (which are enabled only when --record is specified) but also "summary" 
+  writers which are always enabled and log a summary at the end of test 
+  execution (if none is explicitly configured a default 
+  ConsoleSummaryResultsWriter is instantiated), and "progress" writers 
+  which are enabled only when --progress is specified and log progress 
+  information throughout a run. 
+- The monolithic logic for writing a summary to the console at the end of 
+  test execution has been refactored out of baserunner and into 
+  the configurable and separately extendable ConsoleSummaryResultsWriter class. 
+  Any baserunner subclasses that are currently overriding the summary printing 
+  functionality and/or making use of the results dictionary returned by start() 
+  should now switch to using "summary" writers instead. This functionality 
+  will be removed in a future release and is now deprecated.
+- The default summary results writer now has a configuration parameter 
+  showOutcomeReason which causes the outcome reason string to be included 
+  underneath each failure outcome, to provide a quick summary of what went 
+  wrong. 
+- The default summary results writer now has a configuration parameter 
+  showOutputDir which causes the path to the test's output directory 
+  to be printed underneath each failure outcome, to make it easy to quickly 
+  find and open the relevant files to debug the failure. 
+- Added a --progress command line option (can also be switched on using 
+	the PYSYS_PROGRESS=true environment variable), which logs a summary of 
+	how many test have executed, outcomes, a list of most recent failure 
+	reasons and a list of what other tests are currently executing. This 
+	provides very helpful feedback to the user while executing a long 
+	test run. The progress reporting is implemented in a fully extensible 
+	way using a new kind of 'progress' result writer. A custom progress 
+	result writer class can be configured for a project; if none is 
+	specified the default ConsoleProgressResultsWriter is added automatically. 
 
 
  
