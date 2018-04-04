@@ -82,6 +82,7 @@ class DefaultPySysLoggingFormatter(BasePySysLoggingFormatter):
 		'filecontents':'BLUE', # these are effectively debug lines
 		'details':'CYAN', # details such as test id that are worth highlighting
 		'outcomereason':'CYAN', # this is key info so make it stand out in a different color
+		'progress':'CYAN', # this is key info so make it stand out in a different color
 		
 		# pick colors to make it easy to see at a glance whether it passed/failed/skipped; 
 		# timedout often indicates a loaded machine or mis-sized test so merits a distinct color

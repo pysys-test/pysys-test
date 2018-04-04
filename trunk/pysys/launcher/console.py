@@ -383,6 +383,7 @@ class ConsoleLaunchHelper:
 		self.purge = False
 		self.type = None
 		self.trace = None
+		self.progress = False
 		self.includes = []
 		self.excludes = []
 		self.cycle = 1
@@ -392,8 +393,8 @@ class ConsoleLaunchHelper:
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly']
+		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:g'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly', 'progress']
 
 
 	def printUsage(self, printXOptions):
@@ -413,6 +414,8 @@ class ConsoleLaunchHelper:
 		print "       -m | --mode      STRING     set the user defined mode to run the tests"
 		print "       -n | --threads   INT        set the number of worker threads to run the tests (defaults to 1). "
 		print "                                   A value of 0 sets to the number of available CPUs"
+		print "       -g | --progress             print progress updates after completion of each test"
+		print "                                   (or set PYSYS_PROGRESS=true environment variable"
 		print "       -b | --abort     STRING     set the default abort on error property (true|false, overrides "
 		print "                                   that specified in the project properties)"
 		print "       -y | --validateOnly         test the validate() method without re-running execute()"
@@ -507,6 +510,9 @@ class ConsoleLaunchHelper:
 			elif option in ("-b", "--abort"):
 				setattr(PROJECT, 'defaultAbortOnError', str(value.lower()=='true'))
 
+			elif option in ["-g", "--progress"]:
+				self.progress = True
+
 			elif option in ["-X"]:
 				if EXPR1.search(value) is not None:
 				  self.userOptions[value.split('=')[0]] = value.split('=')[1]
@@ -515,6 +521,9 @@ class ConsoleLaunchHelper:
 			
 			elif option in ("-y", "--validateOnly"):
 				self.userOptions['validateOnly'] = True
+			
+		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True
+		self.userOptions['__progressWritersEnabled'] = self.progress
 				
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
 		# No exception handler above, as any createDescriptors failure is really a fatal problem that should cause us to 

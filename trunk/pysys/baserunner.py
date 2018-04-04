@@ -42,6 +42,7 @@ from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import DefaultPySysLoggingFormatter
+from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
 global_lock = threading.Lock()
 
@@ -112,16 +113,38 @@ class BaseRunner(ProcessUser):
 			self.threads = N_CPUS
 	
 		self.writers = []
+		summarywriters = []
+		progresswriters = []
 		for classname, module, filename, properties in PROJECT.writers:
 			module = import_module(module, sys.path)
 			writer = getattr(module, classname)(filename)
 			for key in properties.keys(): setattr(writer, key, properties[key])
 			
-			if self.record:
+			if isinstance(writer, BaseSummaryResultsWriter):
+				summarywriters.append(writer)
+			elif isinstance(writer, BaseProgressResultsWriter):
+				progresswriters.append(writer)
+			elif self.record: # assume everything else is a record result writer (for compatibility reasons)
 				self.writers.append(writer)
-			
-		self.duration = 0
+		
+		# summary writes are always enabled regardless of record mode. 
+		# allow user to provide their own summary writer in the config, or if not, supply our own
+		if summarywriters: 
+			self.writers.extend(summarywriters)
+		else:
+			self.writers.append(ConsoleSummaryResultsWriter())
+		if xargs.get('__progressWritersEnabled', False):
+			if progresswriters: 
+				self.writers.extend(progresswriters)
+			else:
+				self.writers.append(ConsoleProgressResultsWriter())
+		
+		# duration and results used to be used for printing summary info, now (in 1.3.0) replaced by 
+		# more extensible ConsoleSummaryResultsWriter implementation. Keeping these around for 
+		# a bit to allow overlap before removal
+		self.duration = 0 # no longer needed
 		self.results = {}
+		
 		self.resultsPointer = 0
 		self.resultsQueue = []
 		
@@ -221,7 +244,7 @@ class BaseRunner(ProcessUser):
 
 	# perform a test run
 	def start(self, printSummary=True):
-		"""Start the execution of a set of testcases, returning a dictionary of the testcase outcomes.
+		"""Start the execution of a set of testcases.
 		
 		The start method is the main method for executing the set of requested testcases. The set of testcases 
 		are executed a number of times determined by the C{self.cycle} attribute. When executing a testcase 
@@ -229,16 +252,22 @@ class BaseRunner(ProcessUser):
 		set to more than 1, the output subdirectory is further split into cycle[n] directories to sandbox the 
 		output from each iteration.
 		
-		@param printSummary: Indicates if the test results should be reported on test completion
-	
+		@param printSummary: Ignored, exists only for compatibility reasons. To provide a custom summary printing 
+		implementation, specify a BaseSummaryResultsWriter subclass in the <writers> section of your project XML file. 
+		@return: Use of this value is deprecated as of 1.3.0. This method returns a dictionary of testcase outcomes, and 
+		for compatibility reasons this will continue in the short term, but will be removed in a future release. Please ignore 
+		the return value of start() and use a custom BaseSummaryResultsWriter if you need to customize summarization of 
+		results. 
 		"""
 		# call the hook to setup prior to running tests
 		self.setup()
 
 		# call the hook to setup the test output writers
-		for writer in self.writers:
-			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs)
-			except: log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+		for writer in list(self.writers):
+			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads)
+			except: 
+				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				self.writers.remove(writer) # if setup fails, nothing else is going to work
 
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
@@ -286,54 +315,22 @@ class BaseRunner(ProcessUser):
 			except:
 				log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-		# perform cleanup on the test writers
+		# perform cleanup on the test writers - this also takes care of logging summary results
 		for writer in self.writers:
 			try: writer.cleanup()
 			except: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+		del self.writers[:]
 		
 		for perfreporter in self.performanceReporters:
 				try: perfreporter.cleanup()
 				except Exception as e: log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 		
-		# log the summary output to the console
-		if printSummary: self.printSummary()
-		
 		# call the hook to cleanup after running tests
 		self.cleanup()
 
 		# return the results dictionary
 		return self.results
-
-
-	def printSummary(self):
-		"""Print the output summary at the completion of a test run.
-		
-		"""
-		log.critical("")
-		log.critical(  "Completed test run at:  %s", time.strftime('%A %Y-%m-%d %H:%M:%S %Z', time.localtime(time.time())))
-		if self.threads > 1: 
-			log.critical("Total test duration (absolute): %.2f secs", time.time() - self.startTime)		
-			log.critical("Total test duration (additive): %.2f secs", self.duration)
-		else:
-			log.critical("Total test duration:    %.2f secs", time.time() - self.startTime)		
-		log.critical("")		
-		log.critical("Summary of non passes: ")
-		
-		fails = 0
-		for cycle in self.results.keys():
-			for outcome in self.results[cycle].keys():
-				if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
-		if fails == 0:
-			log.critical("	THERE WERE NO NON PASSES", extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'passed'})
-		else:
-			if len(self.results) == 1:
-				for outcome in FAILS:
-					for id in self.results[0][outcome]: log.critical("  %s: %s ", LOOKUP[outcome], id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower()})
-			else:
-				for key in self.results.keys():
-					for outcome in FAILS:
-						for id in self.results[key][outcome]: log.critical(" [CYCLE %d] %s: %s ", key+1, LOOKUP[outcome], id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower()})
 
 
 	def containerCallback(self, thread, container):
@@ -395,13 +392,21 @@ class BaseRunner(ProcessUser):
 		"""Handle a keyboard exception caught during running of a set of testcases.
 		
 		"""
+		def finish():
+			# perform cleanup on the test writers - this also takes care of logging summary results
+			for writer in self.writers:
+				try: writer.cleanup()
+				except: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+			del self.writers[:]
+			self.cycleComplete()
+			self.cleanup()
+			sys.exit(1)
+
+		
 		try:
 			if not prompt:
 				print "Keyboard interrupt detected, exiting ... "
-				self.printSummary()
-				self.cycleComplete()
-				self.cleanup()
-				sys.exit(1)
+				finish()
 
 			while 1:
 				print ""
@@ -410,10 +415,7 @@ class BaseRunner(ProcessUser):
 				if line == "y" or line == "yes":
 					break
 				elif line == "n" or line == "no":
-					self.printSummary()
-					self.cycleComplete()
-					self.cleanup()
-					sys.exit(1)
+					finish()
 		except KeyboardInterrupt:
 			self.handleKbrdInt(prompt)
 
@@ -509,6 +511,13 @@ class TestContainer:
 				exc_info.append(sys.exc_info())
 				self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
 		# end of global_lock
+
+		for writer in self.runner.writers:
+			try: 
+				if hasattr(writer, 'processTestStarting'):
+					writer.processTestStarting(testObj=self.testObj, cycle=self.cycle)
+			except: 
+				log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 
 		# execute the test if we can
 		try:
