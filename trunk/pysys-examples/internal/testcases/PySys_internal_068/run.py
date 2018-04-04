@@ -1,0 +1,64 @@
+import pysys
+from pysys.constants import *
+from pysys.basetest import BaseTest
+import os, sys, math, shutil, glob
+
+class PySysTest(BaseTest):
+
+	def execute(self):
+		
+		shutil.copytree(self.input, self.output+'/test')
+		# make rootdir and working dir be different
+		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
+
+		env = dict(os.environ)
+		env.pop('PYSYS_COLOR','')
+		p = self.startProcess(command=sys.executable,
+			arguments = [[a for a in sys.argv if a.endswith('pysys.py')][0], 'run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'],
+			environs = env, workingDir='test',
+			stdout = 'pysys.out', stderr='pysys.err', displayName='pysys', 
+			ignoreExitStatus=False, abortOnError=True)
+		self.logFileContents('pysys.out', maxLines=0)
+		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
+			
+	def validate(self):
+		self.assertGrep('pysys.out', expr='(Traceback|caught )', contains=False)
+
+		self.assertGrep('testsummary.csv', expr='id, title, cycle, startTime, duration, outcome')
+		self.assertGrep('testsummary.csv', expr='NestedPass,"Nested testcase",0,[^,]+,[^,]+,PASSED')
+		self.assertGrep('testsummary.csv', expr='NestedPass,"Nested testcase",1,[^,]+,[^,]+,PASSED')
+
+		self.assertOrderedGrep('testsummary.log', exprList=[
+			'PLATFORM: *[^ ]+',
+			'Cycle 0',
+			'FAILED: NestedFail',
+			'PASSED: NestedPass',
+			'Cycle 1',
+			'FAILED: NestedFail'
+		])
+		
+		self.assertGrep('testsummary.xml', expr='<descriptor>file://') # because we enabled filed URLS
+		self.assertGrep('testsummary.xml', expr='<?xml-stylesheet href="./my-pysys-log.xsl"')
+		self.assertOrderedGrep('testsummary.xml', exprList=[
+			'<results cycle="0">',
+			'id="NestedPass" outcome="PASSED"',
+			'<outcomeReason>Reason for timed out outcome is general tardiness</outcomeReason>',
+			'<results cycle="1">',
+			])
+
+
+		self.assertGrep('target/pysys-reports/TEST-NestedPass.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"')
+		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"')
+		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.xml', expr='failures="1" name="NestedTimedout" skipped="0" tests="1"')
+		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness</failure>')
+		
+		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
+		if len(datedtestsum) != 1: self.addOutcome(FAILED, 'Did not find testsummary-<year>.log')
+
+		
+		self.assertOrderedGrep('pysys.out', exprList=[
+			'Summary of non passes: ',
+			'CYCLE 1.*TIMED OUT.*NestedTimedout',
+			'CYCLE 1.*FAILED.*NestedFail',
+			'CYCLE 2.*TIMED OUT.*NestedTimedout',
+		])
