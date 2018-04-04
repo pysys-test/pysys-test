@@ -207,7 +207,7 @@ class TextResultsWriter(BaseResultsWriter):
 		if kwargs.has_key("cycle"): 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
-				self.fp.write('\n[Cycle %d]:\n'%self.cycle)	
+				self.fp.write('\n[Cycle %d]:\n'%(self.cycle+1))
 		
 		self.fp.write("%s: %s\n" % (LOOKUP[testObj.getOutcome()], testObj.descriptor.id))
 
@@ -382,7 +382,7 @@ class XMLResultsWriter(BaseResultsWriter):
 	def __createResultsNode(self):
 		self.resultsElement = self.document.createElement("results")
 		cycleAttribute = self.document.createAttribute("cycle")
-		cycleAttribute.value="%d"%self.cycle
+		cycleAttribute.value="%d"%(self.cycle+1)
 		self.resultsElement.setAttributeNode(cycleAttribute)
 		self.rootElement.appendChild(self.resultsElement)
 
@@ -425,6 +425,7 @@ class JUnitXMLResultsWriter(BaseResultsWriter):
 		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports') if self.outputDir is None else self.outputDir
 		if os.path.exists(self.outputDir): self.purgeDirectory(self.outputDir, True)
 		os.makedirs(self.outputDir)
+		self.cycles = kwargs.pop('cycles', 0)
 
 		
 	def cleanup(self, **kwargs):
@@ -492,8 +493,8 @@ class JUnitXMLResultsWriter(BaseResultsWriter):
 		rootElement.appendChild(testcase)
 		
 		# write out the test result
-		if self.cycle > 0:
-			fp = open(os.path.join(self.outputDir,'TEST-%s.%s.xml'%(testObj.descriptor.id, self.cycle)), 'w')
+		if self.cycles > 1:
+			fp = open(os.path.join(self.outputDir,'TEST-%s.%s.xml'%(testObj.descriptor.id, self.cycle+1)), 'w')
 		else:
 			fp = open(os.path.join(self.outputDir,'TEST-%s.xml'%(testObj.descriptor.id)), 'w')
 		fp.write(document.toprettyxml(indent='	'))
@@ -583,7 +584,7 @@ class CSVResultsWriter(BaseResultsWriter):
 		"""
 		testStart = kwargs["testStart"] if kwargs.has_key("testStart") else time.time()
 		testTime = kwargs["testTime"] if kwargs.has_key("testTime") else 0
-		cycle = kwargs["cycle"] if kwargs.has_key("cycle") else 0
+		cycle = (kwargs["cycle"]+1) if kwargs.has_key("cycle") else 0
 
 		csv = []
 		csv.append(testObj.descriptor.id)
