@@ -65,6 +65,8 @@ What's new in this release
 - Fixed manual tester thread to report a BLOCKED outcome instead of hanging 
   if a fatal error occurs (e.g. Tck does not load due to DISPLAY not being 
   configured correctly). 
+- Added BaseResultsWriter class and associated docstring documentation to 
+  make it easier to create new results writers. 
 
 
  
