@@ -22,8 +22,9 @@ Contains implementations of test output summary writers used to output test resu
 
 There are currently four implementations of writers distributed with the PySys framework,
 namely the L{writer.TextResultsWriter}, the L{writer.XMLResultsWriter}, the
-L{writer.JUnitXMLResultsWriter} and the L{writer.CSVResultsWriter}. Project configuration of
-the writers is through the PySys project file using the <writer> tag - multiple writers may
+L{writer.JUnitXMLResultsWriter} and the L{writer.CSVResultsWriter}, which all subclass L{BaseResultsWriter}. 
+
+Project configuration of the writers is through the PySys project file using the <writer> tag - multiple writers may
 be configured and their individual properties set through the nested <property> tag. Writer
 properties are set as attributes to the class through the setattr() function. Custom (site
 specific) modules can be created and configured by users of the PySys framework (e.g. to
@@ -35,14 +36,11 @@ instance. This calls the class constructors of all configured test writers, and 
 the setup (prior to executing the set of tests), processResult (process a test result), 
 and cleanup (upon completion of the execution of all tests). The **kwargs method parameter
 is used for variable argument passing in the interface methods to allow modification of 
-the PySys framework without breaking writer implementations already in existence. Currently 
-the L{pysys.baserunner.BaseRunner} includes numTests in the call to the setup action (the 
-number of tests to be executed), and cycle in the call to the processResult action 
-(the cycle number when iterations through the same set of tests was requested).
+the PySys framework without breaking writer implementations already in existence.
 
 """
 
-__all__ = ["TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter"]
+__all__ = ["BaseResultsWriter", "TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter"]
 
 import logging, time, urlparse, os, stat
 
@@ -52,8 +50,63 @@ from pysys.exceptions import *
 
 from xml.dom.minidom import getDOMImplementation
 
+class BaseResultsWriter(object):
+	"""Base class for objects that get notified as and when test results are available and 
+	can write them out to a file, to the console or anywhere else, either during execution 
+	or at the end. 
+
+	"""
+	def __init__(self, logfile):
+		""" Create an instance of the TextResultsWriter class.
+
+		@param logfile: Optional configuration property specifying a file to store output in. 
+		Does not apply to all writers, can be ignored if not needed. 
+
+		"""
+		pass
+
+
+	def setup(self, numTests=0, cycles=1, xargs=None, **kwargs):
+		""" Called before any tests begin, and after any configuration properties have been 
+		set on this object. 
+
+		@param numTests: The total number of tests (cycles*testids) to be executed
+		@param cycles: The number of cycles. 
+		@param xargs: The runner's xargs
+		@param kwargs: Additional keyword arguments may be added in a future release. 
+
+		"""
+		pass
+
+
+	def cleanup(self, **kwargs):
+		""" Called after all tests have finished executing (or been cancelled). 
+		
+		This is where file headers can be written, and open handles should be closed. 
+
+		@param kwargs: Additional keyword arguments may be added in a future release. 
+		"""
+		pass
+
+	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, **kwargs):
+		""" Called when each test has completed. 
+		
+		This method is always invoked from the same thread as setup() and cleanup(), even 
+		when multiple tests are running in parallel. 
+
+		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
+		can extract data from this object but should not store a reference to it. 
+		The testObj.descriptor.id indicates the test that ran. 
+		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
+		@param testTime: Duration of the test in seconds. 
+		@param testStart: The time when the test started. 
+		@param kwargs: Additional keyword arguments may be added in a future release. 
+		"""
+		pass
+
+
 class flushfile(): 
-	"""Class to flush on each write operation.  
+	"""Utility class to flush on each write operation - for internal use only.  
 	
 	"""
 	fp=None 
@@ -89,10 +142,10 @@ class flushfile():
 		if self.fp is not None: self.fp.close()
 
 
-class TextResultsWriter:
+class TextResultsWriter(BaseResultsWriter):
 	"""Class to log results to logfile in text format.
 	
-	Writing of the test summary file defaults to the working directory. This can be be over-ridden in the PySys 
+	Writing of the test summary file defaults to the working directory. This can be be overridden in the PySys 
 	project file using the nested <property> tag on the <writer> tag.
 	 
 	@ivar outputDir: Path to output directory to write the test summary files
@@ -123,14 +176,10 @@ class TextResultsWriter:
 		"""		
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 
-		try:
-			self.fp = flushfile(open(self.logfile, "w"))
-			self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
-			self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
-			self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
-		except:
-			pass
-
+		self.fp = flushfile(open(self.logfile, "w"))
+		self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
+		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
+		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
 
 	def cleanup(self, **kwargs):
 		"""Implementation of the cleanup method. 
@@ -140,12 +189,10 @@ class TextResultsWriter:
 		@param kwargs: Variable argument list
 				
 		"""
-		try:
-			if self.fp: 
-				self.fp.write('\n\n\n')
-				self.fp.close()
-		except:
-			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		if self.fp: 
+			self.fp.write('\n\n\n')
+			self.fp.close()
+			self.fp = None
 
 			
 	def processResult(self, testObj, **kwargs):
@@ -166,7 +213,7 @@ class TextResultsWriter:
 
 		
 		
-class XMLResultsWriter:
+class XMLResultsWriter(BaseResultsWriter):
 	"""Class to log results to logfile in XML format.
 	
 	The class creates a DOM document to represent the test output results and writes the DOM to the 
@@ -262,8 +309,8 @@ class XMLResultsWriter:
 				
 			# write the file out
 			self.fp.write(self.document.toprettyxml(indent="  "))
-		except:
-			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		except Exception:
+			log.info("caught %s in XMLResultsWriter: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 
 	def cleanup(self, **kwargs):
@@ -274,14 +321,12 @@ class XMLResultsWriter:
 		@param kwargs: Variable argument list
 				
 		"""
-		self.fp.seek(0)
-		self.statusAttribute.value="complete"
-		self.fp.write(self.document.toprettyxml(indent="  "))
-		try:
-			if self.fp: self.fp.close()
-		except:
-			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
+		if self.fp: 
+			self.fp.seek(0)
+			self.statusAttribute.value="complete"
+			self.fp.write(self.document.toprettyxml(indent="  "))
+			self.fp.close()
+			self.fp = None
 			
 	def processResult(self, testObj, **kwargs):
 		"""Implementation of the processResult method. 
@@ -351,7 +396,7 @@ class XMLResultsWriter:
 			return urlparse.urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])
 	
 	
-class JUnitXMLResultsWriter:
+class JUnitXMLResultsWriter(BaseResultsWriter):
 	"""Class to log test results in Apache Ant JUnit XML format (one output file per test per cycle). 
 	
 	@ivar outputDir: Path to output directory to write the test summary files
@@ -474,7 +519,7 @@ class JUnitXMLResultsWriter:
 			os.rmdir(dir)
 
 
-class CSVResultsWriter:
+class CSVResultsWriter(BaseResultsWriter):
 	"""Class to log results to logfile in CSV format.
 
 	Writing of the test summary file defaults to the working directory. This can be be over-ridden in the PySys
@@ -509,11 +554,8 @@ class CSVResultsWriter:
 		"""
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 
-		try:
-			self.fp = flushfile(open(self.logfile, "w"))
-			self.fp.write('id, title, cycle, startTime, duration, outcome\n')
-		except:
-			pass
+		self.fp = flushfile(open(self.logfile, "w"))
+		self.fp.write('id, title, cycle, startTime, duration, outcome\n')
 
 
 	def cleanup(self, **kwargs):
@@ -524,12 +566,10 @@ class CSVResultsWriter:
 		@param kwargs: Variable argument list
 
 		"""
-		try:
-			if self.fp:
-				self.fp.write('\n\n\n')
-				self.fp.close()
-		except:
-			log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		if self.fp:
+			self.fp.write('\n\n\n')
+			self.fp.close()
+			self.fp = None
 
 
 	def processResult(self, testObj, **kwargs):

@@ -116,7 +116,9 @@ class BaseRunner(ProcessUser):
 			module = import_module(module, sys.path)
 			writer = getattr(module, classname)(filename)
 			for key in properties.keys(): setattr(writer, key, properties[key])
-			self.writers.append(writer)
+			
+			if self.record:
+				self.writers.append(writer)
 			
 		self.duration = 0
 		self.results = {}
@@ -234,10 +236,9 @@ class BaseRunner(ProcessUser):
 		self.setup()
 
 		# call the hook to setup the test output writers
-		if self.record:
-			for writer in self.writers:
-				try: writer.setup(numTests=self.cycle * len(self.descriptors), xargs=self.xargs)
-				except: log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		for writer in self.writers:
+			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs)
+			except: log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
@@ -269,6 +270,7 @@ class BaseRunner(ProcessUser):
 			# wait for the threads to complete if more than one thread	
 			if self.threads > 1: 
 				try:
+					# this is the method that invokes containerCallback and containerExceptionCallback
 					threadPool.wait()
 				except KeyboardInterrupt:
 					log.info("test interrupt from keyboard - joining threads ... ")
@@ -285,10 +287,9 @@ class BaseRunner(ProcessUser):
 				log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
 		# perform cleanup on the test writers
-		if self.record:
-			for writer in self.writers:
-				try: writer.cleanup()
-				except: log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+		for writer in self.writers:
+			try: writer.cleanup()
+			except: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 		
 		for perfreporter in self.performanceReporters:
 				try: perfreporter.cleanup()
@@ -364,11 +365,10 @@ class BaseRunner(ProcessUser):
 			self.testComplete(self.resultsQueue[i].testObj, self.resultsQueue[i].outsubdir)
 					
 			# pass the test object to the test writers is recording
-			if self.record:
-				for writer in self.writers:
-					try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle,
-											  testStart=self.resultsQueue[i].testStart, testTime=self.resultsQueue[i].testTime)
-					except: log.warn("caught %s processing test result: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			for writer in self.writers:
+				try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle,
+										  testStart=self.resultsQueue[i].testStart, testTime=self.resultsQueue[i].testTime)
+				except: log.warn("caught %s processing test result by %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 			
 			# prompt for continuation on control-C
 			if self.resultsQueue[i].kbrdInt == True: self.handleKbrdInt()
@@ -497,18 +497,18 @@ class TestContainer:
 			exc_info.append(sys.exc_info())
 			
 		# import the test class
-		global_lock.acquire()
-		try:
-			module = import_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)], True)
-			self.testObj = getattr(module, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
-
-		except KeyboardInterrupt:
-			self.kbrdInt = True
-		
-		except:
-			exc_info.append(sys.exc_info())
-			self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
-		global_lock.release()
+		with global_lock:
+			try:
+				module = import_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)], True)
+				self.testObj = getattr(module, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
+	
+			except KeyboardInterrupt:
+				self.kbrdInt = True
+			
+			except:
+				exc_info.append(sys.exc_info())
+				self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
+		# end of global_lock
 
 		# execute the test if we can
 		try:

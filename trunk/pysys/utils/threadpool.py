@@ -245,7 +245,9 @@ class ThreadPool:
 
 
 	def wait(self):
-		"""Block until there are no request results pending on the queue."""
+		"""Block until there are no request results pending on the queue.
+		
+		Callbacks for work requests are executed by this method until all results have been dealt with. """
 		while 1:
 			try:
 				self.poll(True)
