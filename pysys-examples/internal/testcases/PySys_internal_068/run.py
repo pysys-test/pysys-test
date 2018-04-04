@@ -25,32 +25,32 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='(Traceback|caught )', contains=False)
 
 		self.assertGrep('testsummary.csv', expr='id, title, cycle, startTime, duration, outcome')
-		self.assertGrep('testsummary.csv', expr='NestedPass,"Nested testcase",0,[^,]+,[^,]+,PASSED')
 		self.assertGrep('testsummary.csv', expr='NestedPass,"Nested testcase",1,[^,]+,[^,]+,PASSED')
+		self.assertGrep('testsummary.csv', expr='NestedPass,"Nested testcase",2,[^,]+,[^,]+,PASSED')
 
 		self.assertOrderedGrep('testsummary.log', exprList=[
 			'PLATFORM: *[^ ]+',
-			'Cycle 0',
+			'Cycle 1',
 			'FAILED: NestedFail',
 			'PASSED: NestedPass',
-			'Cycle 1',
+			'Cycle 2',
 			'FAILED: NestedFail'
 		])
 		
 		self.assertGrep('testsummary.xml', expr='<descriptor>file://') # because we enabled filed URLS
 		self.assertGrep('testsummary.xml', expr='<?xml-stylesheet href="./my-pysys-log.xsl"')
 		self.assertOrderedGrep('testsummary.xml', exprList=[
-			'<results cycle="0">',
+			'<results cycle="1">',
 			'id="NestedPass" outcome="PASSED"',
 			'<outcomeReason>Reason for timed out outcome is general tardiness</outcomeReason>',
-			'<results cycle="1">',
+			'<results cycle="2">',
 			])
 
 
-		self.assertGrep('target/pysys-reports/TEST-NestedPass.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"')
 		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"')
-		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.xml', expr='failures="1" name="NestedTimedout" skipped="0" tests="1"')
-		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness</failure>')
+		self.assertGrep('target/pysys-reports/TEST-NestedPass.2.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"')
+		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='failures="1" name="NestedTimedout" skipped="0" tests="1"')
+		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness</failure>')
 		
 		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
 		if len(datedtestsum) != 1: self.addOutcome(FAILED, 'Did not find testsummary-<year>.log')

@@ -67,6 +67,9 @@ What's new in this release
   configured correctly). 
 - Added BaseResultsWriter class and associated docstring documentation to 
   make it easier to create new results writers. 
+- Changed standard record writers to report the number of cycles starting 
+  from 1 rather than from 0 (which is consistent with how cycles are 
+  displayed by the rest of PySys).
 
 
  
