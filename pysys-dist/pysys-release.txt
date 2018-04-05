@@ -8,6 +8,7 @@ time. See installation notes below for more details.
 
 What's new in this release
 --------------------------
+Changes affecting compatibility:
 - Fixed assertDiff (and filediff) handling of "include" expressions list to 
   filter out lines if no include expressions match (as documented) rather 
   than if any include expressions match. This fix may cause tests to fail 
@@ -15,6 +16,21 @@ What's new in this release
   being filtered out before the comparison. There is also now a message 
   logged at warn level when every line in a file comparison is filtered 
   out, since in most cases this is not desirable behaviour. 
+- Removed the BaseRunner.cycleComplete method, which is not really needed 
+  since cleanup should be performed in each test's cleanup() method rather 
+  than on a per-cycle basis. An error will be raised if a custom runner 
+  class attempts to provide a cycleComplete method. In the unlikely event 
+  that you have a runner which does this, please remove it and ensure any 
+  required cleanup is performed in BaseTest.cleanup() or 
+  BaseRunner.testComplete() instead. 
+ 
+Other fixes and new features:
+- Changed the way multiple cycles are executed in multi-threaded mode to 
+  allow tests from different cycles to execute in parallel instead of waiting 
+  for each cycle to fully complete before starting the next cycle. This 
+  improved parallelism makes it much easier and quicker to reproduce race 
+  conditions demonstrated by a single testcase, which was not possible 
+  with the previous threading behaviour. 
 - Added requires-python and requires-pysys elements to the project XML 
   file which allow checking for the specified minimum python or pysys 
   version, resulting in a clear error if attempting to use the wrong 

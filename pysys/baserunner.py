@@ -67,9 +67,9 @@ class BaseRunner(ProcessUser):
 	detects any core files produced during execution of a testcase from processes started via the L{pysys.process} 
 	module, and performs audit trail logging of the test results on completion of running a set of testcases.
 	
-	The base runner contains the hook functions L{setup}, L{testComplete}, L{cycleComplete} and L{cleanup} to 
+	The base runner contains the hook functions L{setup}, L{testComplete}, and L{cleanup} to 
 	allow a subclass to perform custom operations prior to the execution of a set of testcases, between the 
-	execution of each testcase in a set, between each cycle of execution of a set of testcases, and on completion 
+	execution of each testcase in a set, and on completion 
 	of all testcases respectively. Subclasses are typically used should some global conditions need to be setup 
 	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
 	etc), and subsequently cleaned up after test execution. 
@@ -99,6 +99,9 @@ class BaseRunner(ProcessUser):
 		
 		"""
 		ProcessUser.__init__(self)
+		if hasattr(self, 'cycleComplete'):
+			raise Exception('The BaseRunner.cycleComplete() method is no longer supported. Please remove this method from your runner class and instead use BaseTest.cleanup or BaseRunner.testComplete if any cleanup actions are required.')
+		
 		self.record = record
 		self.purge = purge
 		self.cycle = cycle
@@ -233,13 +236,6 @@ class BaseRunner(ProcessUser):
 		return True
 
 
-	def cycleComplete(self):
-		"""Cycle complete method which may optionally be overridden to perform custom operations between the repeated execution of a set of testcases.
-		
-		"""
-		pass
-
-
 	# perform a test run
 	def start(self, printSummary=True):
 		"""Start the execution of a set of testcases.
@@ -289,26 +285,17 @@ class BaseRunner(ProcessUser):
 				log.info("test interrupt from keyboard")
 				self.handleKbrdInt()
 			
-			# wait for the threads to complete if more than one thread	
-			if self.threads > 1: 
-				try:
-					# this is the method that invokes containerCallback and containerExceptionCallback
-					threadPool.wait()
-				except KeyboardInterrupt:
-					log.info("test interrupt from keyboard - joining threads ... ")
-					threadPool.dismissWorkers(self.threads, True)
-					self.handleKbrdInt(prompt=False)
-	
-			# call the hook for end of cycle - used to do this every cycle, can't anymore 
-			# since cycles can now overlap across threads, but it isn't really very useful anyway
-			try:
-				self.cycleComplete()
-			except KeyboardInterrupt:
-				log.info("test interrupt from keyboard")
-				self.handleKbrdInt()
-			except:
-				log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 		# end of cycles
+
+		# wait for the threads to complete if more than one thread	
+		if self.threads > 1: 
+			try:
+				# this is the method that invokes containerCallback and containerExceptionCallback
+				threadPool.wait()
+			except KeyboardInterrupt:
+				log.info("test interrupt from keyboard - joining threads ... ")
+				threadPool.dismissWorkers(self.threads, True)
+				self.handleKbrdInt(prompt=False)
 		
 		# perform cleanup on the test writers - this also takes care of logging summary results
 		for writer in self.writers:
