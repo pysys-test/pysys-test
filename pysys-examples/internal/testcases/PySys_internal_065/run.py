@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 		shutil.copytree(self.input, self.output+'/test')
 
 		p = self.startProcess(command=sys.executable,
-			arguments = [[a for a in sys.argv if a.endswith('pysys.py')][0], 'run', '-o', 'myoutdir'],
+			arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', 'myoutdir'],
 			environs = os.environ, workingDir='test',
 			stdout = 'pysys.out', stderr = 'pysys.err', displayName='pysys', 
 			ignoreExitStatus=False, abortOnError=True)

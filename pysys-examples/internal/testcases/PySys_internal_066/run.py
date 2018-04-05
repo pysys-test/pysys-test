@@ -13,7 +13,7 @@ class PySysTest(BaseTest):
 			os.rename(self.output+'/'+subtest+'/pysysproject-%s.xml'%subtest, self.output+'/'+subtest+'/pysysproject.xml')
 	
 			p = self.startProcess(command=sys.executable,
-				arguments = [[a for a in sys.argv if a.endswith('pysys.py')][0], 'run', '-o', self.output+'/'+subtest+'_output'],
+				arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', self.output+'/'+subtest+'_output'],
 				environs = os.environ, workingDir=subtest,
 				stdout = subtest+'_pysys.out', stderr = subtest+'_pysys.err', displayName='pysys', 
 				ignoreExitStatus=False, abortOnError=True)
