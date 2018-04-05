@@ -126,7 +126,7 @@ def portIsInUse(port):
 				pass
 			s.close()
 			return False
-		except Exception, e:
+		except Exception as e:
 			# Don't expect this but just in case
 			print 'Here', e
 			if s != None:

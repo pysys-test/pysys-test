@@ -16,7 +16,7 @@ class PySysTest(BaseTest):
 		try:
 			self.waitForSignal(test.stdout, 'foo', process=p, abortOnError=True)
 			self.addOutcome(FAILED, 'Expected abort')
-		except AbortExecution, e:
+		except AbortExecution as e:
 			self.assertThat('%s == %s', e.outcome, BLOCKED)
 			self.assertThat('"due to process '+os.path.basename(sys.executable)+' termination" in "%s"', e.value)
 

@@ -81,15 +81,15 @@ class XMLProjectParser:
 		self.properties = {self.rootdir:self.dirname, self.osfamily:OSFAMILY}
 		
 		if not os.path.exists(self.xmlfile):
-			raise Exception, "Unable to find supplied project file \"%s\"" % self.xmlfile
+			raise Exception("Unable to find supplied project file \"%s\"" % self.xmlfile)
 		
 		try:
 			self.doc = xml.dom.minidom.parse(self.xmlfile)
 		except Exception:
-			raise Exception, sys.exc_info()[1]
+			raise Exception(sys.exc_info()[1])
 		else:
 			if self.doc.getElementsByTagName('pysysproject') == []:
-				raise Exception, "No <pysysproject> element supplied in project file"
+				raise Exception("No <pysysproject> element supplied in project file")
 			else:
 				self.root = self.doc.getElementsByTagName('pysysproject')[0]
 		
@@ -360,7 +360,7 @@ class Project:
 			from pysys.xml.project import XMLProjectParser
 			try:
 				parser = XMLProjectParser(root, projectFile)
-			except Exception, e: 
+			except Exception as e: 
 				raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 			else:
 				parser.checkVersions()

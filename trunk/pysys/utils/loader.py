@@ -34,13 +34,13 @@ def import_module(name, path, reload=False):
 	"""
 	elements = name.split(".")
 	module = __import_module(elements[0], elements[0], None, path, reload and elements[0] == name)
-	if not module: raise ImportError, "No module named " + name
+	if not module: raise ImportError("No module named " + name)
 
 	if len(elements) > 1:  
 		for element in elements[1:]:
 			fqname = "%s.%s" % (module.__name__, element)
 			module = __import_module(fqname, element, module, module and module.__path__, reload and fqname == name)
-			if not module: raise ImportError, "No module named " + fqname
+			if not module: raise ImportError("No module named " + fqname)
 	return module
 
 

@@ -152,7 +152,7 @@ class CommonProcessWrapper(object):
 			if timeout:
 				currentTime = time.time()
 				if currentTime > startTime + timeout:
-					raise ProcessTimeout, "Process timedout"
+					raise ProcessTimeout("Process timedout")
 			time.sleep(0.05)
 		
 

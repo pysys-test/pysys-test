@@ -61,15 +61,15 @@ class XMLManualTestParser:
 		self.xmlfile = xmlfile
 
 		if not os.path.exists(xmlfile):
-			raise Exception, "Unable to find supplied manual test input file \"%s\"" % xmlfile
+			raise Exception("Unable to find supplied manual test input file \"%s\"" % xmlfile)
 		
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
 		except Exception:
-			raise Exception, "%s " % (sys.exc_info()[1])
+			raise Exception("%s " % (sys.exc_info()[1]))
 		else:
 			if self.doc.getElementsByTagName('pysysmanualtest') == []:
-				raise Exception, "No <pysysmanualtest> element supplied in XML descriptor"
+				raise Exception("No <pysysmanualtest> element supplied in XML descriptor")
 			else:
 				self.root = self.doc.getElementsByTagName('pysysmanualtest')[0]
 
@@ -81,7 +81,7 @@ class XMLManualTestParser:
 	def getSteps(self):
 		stepsNodeList = self.root.getElementsByTagName('step')
 		if stepsNodeList == []:
-			raise Exception, "No <step> element supplied in XML manual test input file"
+			raise Exception("No <step> element supplied in XML manual test input file")
 
 		steps = []
 		stepnumber = 0
@@ -91,7 +91,7 @@ class XMLManualTestParser:
 			wrap = stepsNode.getAttribute("wrap")
 
 			if stepsNode.getElementsByTagName('description') == []:
-				raise Exception, "No <description> child element of <step> supplied in XML manual test input file"
+				raise Exception("No <description> child element of <step> supplied in XML manual test input file")
 			else:
 				try:
 					description = stepsNode.getElementsByTagName('description')[0].childNodes[0].data

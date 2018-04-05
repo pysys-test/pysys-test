@@ -206,12 +206,12 @@ def loadproject(start):
 	try:
 		PROJECT = Project(search, projectFile)
 		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
-	except StandardError, e:
+	except StandardError as e:
 		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
 		# need a traceback if it's an unexpected error like this
 		traceback.print_exc()
 		sys.exit(1)
-	except Exception, e:
+	except Exception as e:
 		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
 		sys.exit(1)
 

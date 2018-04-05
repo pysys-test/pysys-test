@@ -179,7 +179,7 @@ class ManualTester:
 		try:
 			self.build()
 			self.parentContainer.mainloop()
-		except Exception, e:
+		except Exception as e:
 			self.owner.addOutcome(BLOCKED, 'Manual tester failed: %s'%e)
 			self.isRunning = 0
 			# can't log the exception here since pysys logger suppresses messages from other threads

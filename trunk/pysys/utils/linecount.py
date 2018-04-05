@@ -56,6 +56,6 @@ if __name__ == "__main__":
 
 		print "Line count =	 %d" % (count)
 
-	except FileNotFoundException, value:
+	except FileNotFoundException as value:
 		print "caught %s: %s" % (sys.exc_info()[0], value)
 		print "unable to perform line count... exiting"

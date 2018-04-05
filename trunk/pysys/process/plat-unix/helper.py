@@ -148,7 +148,7 @@ class ProcessWrapper(CommonProcessWrapper):
 				if self.pid == 0: os._exit(os.EX_OSERR)	
 
 		if not self.running() and self.exitStatus == os.EX_OSERR:
-			raise ProcessError, "Error creating process %s" % (self.command)
+			raise ProcessError("Error creating process %s" % (self.command))
 
 
 	def setExitStatus(self):
@@ -173,7 +173,7 @@ class ProcessWrapper(CommonProcessWrapper):
 							self.exitStatus = status
 						self._outQueue = None
 					retries=0
-				except OSError, e:
+				except OSError as e:
 					if e.errno == errno.ECHILD:
 						time.sleep(0.01)
 						retries=retries-1
@@ -203,7 +203,7 @@ class ProcessWrapper(CommonProcessWrapper):
 			
 			self.wait(timeout=timeout)
 		except Exception:
-			raise ProcessError, "Error stopping process"
+			raise ProcessError("Error stopping process")
 
 
 	def signal(self, signal):
@@ -216,7 +216,7 @@ class ProcessWrapper(CommonProcessWrapper):
 		try:
 			os.kill(self.pid, signal)
 		except Exception:
-			raise ProcessError, "Error signaling process"
+			raise ProcessError("Error signaling process")
 
 
 

@@ -182,15 +182,15 @@ class XMLDescriptorParser:
 		self.file = xmlfile
 		self.dirname = os.path.dirname(xmlfile)
 		if not os.path.exists(xmlfile):
-			raise Exception, "Unable to find supplied test descriptor \"%s\"" % xmlfile
+			raise Exception("Unable to find supplied test descriptor \"%s\"" % xmlfile)
 		
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
 		except Exception:
-			raise Exception, "%s " % (sys.exc_info()[1])
+			raise Exception("%s " % (sys.exc_info()[1]))
 		else:
 			if self.doc.getElementsByTagName('pysystest') == []:
-				raise Exception, "No <pysystest> element supplied in XML descriptor"
+				raise Exception("No <pysystest> element supplied in XML descriptor")
 			else:
 				self.root = self.doc.getElementsByTagName('pysystest')[0]
 
@@ -229,7 +229,7 @@ class XMLDescriptorParser:
 		if type == "":
 			type = "auto"
 		elif type not in ["auto", "manual"]:
-			raise Exception, "The type attribute of the test element should be \"auto\" or \"manual\""
+			raise Exception("The type attribute of the test element should be \"auto\" or \"manual\"")
 		return type
 
 
@@ -239,7 +239,7 @@ class XMLDescriptorParser:
 		if state == "":
 			state = "runnable"
 		elif state not in ["runnable", "deprecated", "skipped"]: 
-			raise Exception, "The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\""
+			raise Exception("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\"")
 		return state 
 	
 
@@ -247,10 +247,10 @@ class XMLDescriptorParser:
 		'''Return the test titlecharacter data of the description element.'''
 		descriptionNodeList = self.root.getElementsByTagName('description')
 		if descriptionNodeList == []:
-			raise Exception, "No <description> element supplied in XML descriptor"
+			raise Exception("No <description> element supplied in XML descriptor")
 		
 		if descriptionNodeList[0].getElementsByTagName('title') == []:
-			raise Exception, "No <title> child element of <description> supplied in XML descriptor"
+			raise Exception("No <title> child element of <description> supplied in XML descriptor")
 		else:
 			try:
 				title = descriptionNodeList[0].getElementsByTagName('title')[0]
@@ -263,10 +263,10 @@ class XMLDescriptorParser:
 		'''Return the test purpose character data of the description element.'''
 		descriptionNodeList = self.root.getElementsByTagName('description')
 		if descriptionNodeList == []:
-			raise Exception, "No <description> element supplied in XML descriptor"
+			raise Exception("No <description> element supplied in XML descriptor")
 		
 		if descriptionNodeList[0].getElementsByTagName('purpose') == []:
-			raise Exception, "No <purpose> child element of <description> supplied in XML descriptor"
+			raise Exception("No <purpose> child element of <description> supplied in XML descriptor")
 		else:
 			try:
 				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
@@ -279,7 +279,7 @@ class XMLDescriptorParser:
 		'''Return a list of the group names, contained in the character data of the group elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
 		if classificationNodeList == []:
-			raise Exception, "No <classification> element supplied in XML descriptor"
+			raise Exception("No <classification> element supplied in XML descriptor")
 		
 		groupList = []
 		try:
@@ -295,7 +295,7 @@ class XMLDescriptorParser:
 		'''Return a list of the mode names, contained in the character data of the mode elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
 		if classificationNodeList == []:
-			raise Exception, "No <classification> element supplied in XML descriptor"
+			raise Exception("No <classification> element supplied in XML descriptor")
 		
 		modeList = []
 		try:

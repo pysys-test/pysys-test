@@ -119,7 +119,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 	"""
 	for file in file1, file2:
 		if not os.path.exists(file):
-			raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
+			raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		list1 = []
 		list2 = []
@@ -180,7 +180,7 @@ if __name__ == "__main__":
 	 
 		try:
 			status = filediff(sys.argv[1], sys.argv[2], ignore)
-		except FileNotFoundException, value:
+		except FileNotFoundException as value:
 			print "caught %s: %s" % (sys.exc_info()[0], value)
 			print "unable to diff files... exiting"
 		else:

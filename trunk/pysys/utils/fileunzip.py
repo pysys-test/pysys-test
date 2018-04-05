@@ -32,7 +32,7 @@ def unzipall(path, binary=False):
 	
 	"""
 	if not os.path.exists(path):
-		raise FileNotFoundException, "%s path does not exist" % (os.path.basename(path))
+		raise FileNotFoundException("%s path does not exist" % (os.path.basename(path)))
 
 	for file in glob.glob('%s/*.gz'%(path)):
 		unzip(file, 1, binary)
@@ -55,11 +55,11 @@ def unzip(zfilename, replace=False, binary=False):
 	
 	"""
 	if not os.path.exists(zfilename):
-		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(zfilename))
+		raise FileNotFoundException("unable to find file %s" % (os.path.basename(zfilename)))
 
 	tokens	= string.split(zfilename, '.')
 	if tokens[len(tokens)-1] != 'gz':
-		raise IncorrectFileTypeException, "file does not have a .gz extension"
+		raise IncorrectFileTypeException("file does not have a .gz extension")
 	
 	uzfilename = ''
 	for i in range(len(tokens)-1):

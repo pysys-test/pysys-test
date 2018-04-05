@@ -90,7 +90,7 @@ class ProcessUser(object):
 		@rtype:  integer
 		
 		"""
-		if self.processCount.has_key(displayName):
+		if displayName in self.processCount:
 			return self.processCount[displayName]
 		else:
 			return 0
@@ -176,7 +176,7 @@ class ProcessUser(object):
 		else:
 			self.processList.append(process)
 			try:
-				if self.processCount.has_key(displayName):
+				if displayName in self.processCount:
 					self.processCount[displayName] = self.processCount[displayName] + 1
 				else:
 			 		self.processCount[displayName] = 1
@@ -202,7 +202,7 @@ class ProcessUser(object):
 			try:
 				process.stop()
 				log.info("Stopped process %r", process)
-			except ProcessError, e:
+			except ProcessError as e:
 				if not abortOnError:
 					log.warn("Ignoring failure to stop process %r due to: %s", process, e)
 				else:
@@ -227,7 +227,7 @@ class ProcessUser(object):
 			try:
 				process.signal(signal)
 				log.info("Sent %d signal to process %r", signal, process)
-			except ProcessError, e:
+			except ProcessError as e:
 				if not abortOnError:
 					log.warn("Ignoring failure to signal process %r due to: %s", process, e)
 				else:
@@ -479,7 +479,7 @@ class ProcessUser(object):
 				try:
 					log.debug('Running registered cleanup function: %r'%fn)
 					fn()
-				except Exception, e:
+				except Exception as e:
 					log.error('Error while running cleanup function: %s'%e)
 			self.__cleanupFunctions = []
 		finally:
@@ -690,7 +690,7 @@ class ProcessUser(object):
 		actualpath= os.path.join(self.output, path)
 		try:
 			f = open(actualpath, 'r')
-		except Exception, e:
+		except Exception as e:
 			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False
 		try:

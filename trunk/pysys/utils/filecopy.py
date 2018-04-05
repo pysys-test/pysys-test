@@ -44,7 +44,7 @@ def filecopy(src, dst):
  
 	"""
 	if not os.path.exists(src):
-		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(src))
+		raise FileNotFoundException("unable to find file %s" % (os.path.basename(src)))
 	
 	fsrc = None
 	fdst = None

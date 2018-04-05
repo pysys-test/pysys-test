@@ -513,7 +513,7 @@ class TestContainer:
 						self.testObj.setup()
 						self.testObj.execute()
 					self.testObj.validate()
-				except AbortExecution, e:
+				except AbortExecution as e:
 					del self.testObj.outcome[:]
 					self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
 					log.warn('Aborted test due to abortOnError set to true')

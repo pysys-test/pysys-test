@@ -88,7 +88,7 @@ class ProcessMonitor:
 		
 		# normalise the CPU readings by the supplied factor
 		self.numProcessors=1
-		if kwargs.has_key("numProcessors"): 
+		if "numProcessors" in kwargs: 
 			self.numProcessors = int(kwargs["numProcessors"])
 				
 							
