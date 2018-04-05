@@ -38,6 +38,7 @@ from pysys.utils.filegrep import filegrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
+from pysys.utils.fileutils import mkdir
 from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
@@ -451,15 +452,14 @@ class TestContainer:
 			else:
 				self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
 
-			if not os.path.exists(self.outsubdir):
-				os.makedirs(self.outsubdir)
+			mkdir(self.outsubdir)
 					
 			if self.cycle == 0 and not self.runner.validateOnly: 
 				self.purgeDirectory(self.outsubdir)
 				
 			if self.runner.cycle > 1: 
 				self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
-				os.makedirs(self.outsubdir)
+				mkdir(self.outsubdir)
 
 			# run.log handler
 			self.testFileHandlerRunLog = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
