@@ -42,7 +42,7 @@ def getmatches(file, regexpr, ignores=None):
 	log.debug("Looking for expression \"%s\" in input file %s" %(regexpr, file))
 	
 	if not os.path.exists(file):
-		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
+		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		with open(file, 'r') as f:
 			for l in f:
@@ -75,7 +75,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False):
 	
 	"""
 	if not os.path.exists(file):
-		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
+		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		f = open(file, 'r')
 		try:
@@ -113,7 +113,7 @@ def lastgrep(file, expr, ignore=[], include=[]):
 	
 	"""
 	if not os.path.exists(file):
-		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
+		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		contents = open(file, 'r').readlines()
 		contents = trimContents(contents, ignore, exclude=True)
@@ -155,7 +155,7 @@ def orderedgrep(file, exprList):
 	expr = list.pop();
 
 	if not os.path.exists(file):
-		raise FileNotFoundException, "unable to find file %s" % (os.path.basename(file))
+		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		contents = open(file, 'r').readlines()	  
 		for i in range(len(contents)):
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 	else:
 		try:
 			status = filegrep(sys.argv[1], sys.argv[2])
-		except FileNotFoundException, value:
+		except FileNotFoundException as value:
 			print "caught %s: %s" % (sys.exc_info()[0], value)
 			print "unable to perform grep... exiting"
 		else:

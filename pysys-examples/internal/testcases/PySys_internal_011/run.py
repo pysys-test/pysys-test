@@ -40,7 +40,7 @@ class PySysTest(BaseTest):
 		aborted=False
 		try:
 			self.matches1 = self.waitForSignal("testscript.out", expr="This wont match", condition=">=2", timeout=2, abortOnError=True)
-		except Exception, e:
+		except Exception as e:
 			self.log.info('Got expected abort %s', sys.exc_info()[0], exc_info=1)
 			aborted = True
 		if not aborted: self.abort(FAILED, 'test should have aborted')
@@ -49,7 +49,7 @@ class PySysTest(BaseTest):
 		aborted=False
 		try:
 			self.waitForSignal("foobar.out", expr="This wont match", condition=">=2", timeout=2, abortOnError=True)
-		except Exception, e:
+		except Exception as e:
 			self.log.info('Got expected abort %s', sys.exc_info()[0], exc_info=1)
 			aborted = True
 		if not aborted: self.abort(FAILED, 'test should have aborted')

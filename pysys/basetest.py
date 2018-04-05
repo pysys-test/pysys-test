@@ -153,7 +153,7 @@ class BaseTest(ProcessUser):
 		
 		@raises NotImplementedError:  Raised exeception should the method not be overridden
 		"""
-		raise NotImplementedError, "The execute method of the BaseTest class must be implemented in a subclass"
+		raise NotImplementedError("The execute method of the BaseTest class must be implemented in a subclass")
 
 
 	def validate(self):
@@ -218,7 +218,7 @@ class BaseTest(ProcessUser):
 		try:
 			self.log.info("Starting process monitor on process with id = %d", process.pid)
 			monitor.start()
-		except ProcessError, e:
+		except ProcessError as e:
 			self.addOutcome(BLOCKED, 'Unable to start process monitor for %s: %s'%(process, e))
 		else:
 			self.monitorList.append(monitor)
@@ -337,7 +337,7 @@ class BaseTest(ProcessUser):
 				expr = expr % args
 			
 			result = bool(eval(expr))
-		except Exception, e:
+		except Exception as e:
 			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" with args %r: %s'%(conditionstring, args, e))
 			return
 		
@@ -616,7 +616,7 @@ class BaseTest(ProcessUser):
 		@param default: Default assert statement to return if a parameter is not supplied
 		
 		"""
-		if xargs.has_key('assertMessage'): return xargs['assertMessage']
+		if 'assertMessage' in xargs: return xargs['assertMessage']
 		return default
 
 
@@ -626,7 +626,7 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list to an assert method
 
 		"""
-		if xargs.has_key('abortOnError'): return xargs['abortOnError']
+		if 'abortOnError' in xargs: return xargs['abortOnError']
 		return PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 
 	def reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):

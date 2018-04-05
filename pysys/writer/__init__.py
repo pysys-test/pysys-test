@@ -268,7 +268,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
-		if kwargs.has_key("cycle"): 
+		if "cycle" in kwargs: 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
 				self.fp.write('\n[Cycle %d]:\n'%(self.cycle+1))
@@ -316,7 +316,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
-		self.numTests = kwargs["numTests"] if kwargs.has_key("numTests") else 0 
+		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		
 		try:
@@ -359,7 +359,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 
 			# add the extra params nodes
 			element = self.document.createElement("xargs")
-			if kwargs.has_key("xargs"): 
+			if "xargs" in kwargs: 
 				for key in kwargs["xargs"].keys():
 					childelement = self.document.createElement("xarg")
 					nameAttribute = self.document.createAttribute("name")
@@ -403,7 +403,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		"""	
 		self.fp.seek(0)
 		
-		if kwargs.has_key("cycle"): 
+		if "cycle" in kwargs: 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
 				self.__createResultsNode()
@@ -510,7 +510,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""	
-		if kwargs.has_key("cycle"): 
+		if "cycle" in kwargs: 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
 		
@@ -646,9 +646,9 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 
 		"""
-		testStart = kwargs["testStart"] if kwargs.has_key("testStart") else time.time()
-		testTime = kwargs["testTime"] if kwargs.has_key("testTime") else 0
-		cycle = (kwargs["cycle"]+1) if kwargs.has_key("cycle") else 0
+		testStart = kwargs["testStart"] if "testStart" in kwargs else time.time()
+		testTime = kwargs["testTime"] if "testTime" in kwargs else 0
+		cycle = (kwargs["cycle"]+1) if "cycle" in kwargs else 0
 
 		csv = []
 		csv.append(testObj.descriptor.id)

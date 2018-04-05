@@ -159,8 +159,8 @@ class ProcessWrapper(CommonProcessWrapper):
 			for arg in self.arguments: command = '%s %s' % (command, self.__quotePath(arg))
 			try:
 				self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command, None, None, 1, 0, self.environs or None, os.path.normpath(self.workingDir), StartupInfo)
-			except pywintypes.error, e:
-				raise ProcessError, "Error creating process %s: %s" % (old_command, e)
+			except pywintypes.error as e:
+				raise ProcessError("Error creating process %s: %s" % (old_command, e))
 
 			win32file.CloseHandle(hStdin_r)
 			win32file.CloseHandle(hStdout)
@@ -182,7 +182,7 @@ class ProcessWrapper(CommonProcessWrapper):
 					if self.__hProcess: win32file.CloseHandle(self.__hProcess)
 					if self.__hThread: win32file.CloseHandle(self.__hThread)
 					if self.__stdin: win32file.CloseHandle(self.__stdin)
-				except Exception, e:
+				except Exception as e:
 					# these failed sometimes with 'handle is invalid', probably due to interference of stdin writer thread
 					log.warning('Could not close process and thread handles for process %s: %s', self.pid, e)
 				self.__stdin = self.__hThread = self.__hProcess = None
@@ -205,7 +205,7 @@ class ProcessWrapper(CommonProcessWrapper):
 			
 			self.wait(timeout=timeout)
 		except Exception:
-			raise ProcessError, "Error stopping process"
+			raise ProcessError("Error stopping process")
 		
 
 	def signal(self, signal):
@@ -218,6 +218,6 @@ class ProcessWrapper(CommonProcessWrapper):
 		@raise ProcessError: Raised if an error occurred whilst trying to signal the process
 		
 		"""
-		raise NotImplementedError , "Unable to send a signal to a windows process"
+		raise NotImplementedError("Unable to send a signal to a windows process")
 
 

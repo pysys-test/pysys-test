@@ -83,7 +83,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	for descriptorfile in descriptorfiles:
 		try:
 			descriptors.append(XMLDescriptorParser(descriptorfile).getContainer())
-		except Exception, value:
+		except Exception as value:
 			print sys.exc_info()[0], sys.exc_info()[1]
 			log.info("Error reading descriptorfile %s" % descriptorfile)
 	descriptors = sorted(descriptors, key=lambda x: x.file)

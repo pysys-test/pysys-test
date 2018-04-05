@@ -28,6 +28,6 @@ def mkdir(path):
 	"""
 	try:
 		os.makedirs(path)
-	except OSError, e:
+	except OSError as e:
 		if not os.path.isdir(path):
 			raise e
