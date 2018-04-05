@@ -102,7 +102,7 @@ if __name__ == '__main__':
 		# (file scope) context)
 		execfile(testFile, globals, globals)
 		testClasses = []
-		for k, v in globals.items():
+		for k, v in list(globals.items()):
 			if isinstance(v, type(unittest.TestCase)):
 				testClasses.append(v)
 		return (testClasses, globals)

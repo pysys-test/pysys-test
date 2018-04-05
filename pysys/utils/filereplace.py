@@ -52,7 +52,7 @@ def replace(input, output, dict={}, marker=''):
 		fi = open(input, 'r')
 		fo = open(output, 'w')
 		for line in fi.readlines():
-			for key in dict.keys():
+			for key in list(dict.keys()):
 				line = line.replace('%s%s%s'%(marker, key, marker), "%s" % (dict[key]))
 			fo.write(line)
 		fi.close()

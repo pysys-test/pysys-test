@@ -122,7 +122,7 @@ class BaseRunner(ProcessUser):
 		for classname, module, filename, properties in PROJECT.writers:
 			module = import_module(module, sys.path)
 			writer = getattr(module, classname)(filename)
-			for key in properties.keys(): setattr(writer, key, properties[key])
+			for key in list(properties.keys()): setattr(writer, key, properties[key])
 			
 			if isinstance(writer, BaseSummaryResultsWriter):
 				summarywriters.append(writer)
@@ -161,7 +161,7 @@ class BaseRunner(ProcessUser):
 		@param xargs: A dictionary of the user defined extra arguments
 		
 		"""
-		for key in xargs.keys():
+		for key in list(xargs.keys()):
 			setattr(self, key, xargs[key])
 
 	

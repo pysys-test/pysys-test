@@ -107,7 +107,7 @@ class ProcessMonitor:
 		# loop through to locate the instance and inum of the supplied pid
 		instance = None
 		inum = -1
-		for instance, numInstances in instanceDict.items():
+		for instance, numInstances in list(instanceDict.items()):
 			for inum in xrange(numInstances+1):
 				try:
 					value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")

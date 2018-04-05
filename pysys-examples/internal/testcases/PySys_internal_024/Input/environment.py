@@ -8,7 +8,7 @@ if __name__ == "__main__":
 	sys.stdout.write("Writing process environment\n")
 	sys.stdout.flush()
 	
-	keys = os.environ.keys()
+	keys = list(os.environ.keys())
 	keys.sort()
 	
 	for key in keys:
