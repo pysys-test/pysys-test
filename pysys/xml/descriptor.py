@@ -365,12 +365,12 @@ class XMLDescriptorParser:
 if __name__ == "__main__":
 
 	if ( len(sys.argv) < 2 ) or ( sys.argv[1] not in ("create", "parse", "validate") ):
-		print "Usage: %s (create | parse ) filename" % os.path.basename(sys.argv[0])
+		print("Usage: %s (create | parse ) filename" % os.path.basename(sys.argv[0]))
 		sys.exit()
 	
 	if sys.argv[1] == "parse":
 		parser = XMLDescriptorParser(sys.argv[2])
-		print parser.getContainer()
+		print(parser.getContainer())
 		parser.unlink()
 
 	elif sys.argv[1] == "create":

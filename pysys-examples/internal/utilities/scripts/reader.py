@@ -16,6 +16,6 @@ def run(loops):
 # entry point for running the script as an executable
 if __name__ == "__main__":
 	if len(sys.argv) < 1:
-		print "Usage: %s <count>" % os.path.basename(sys.argv[0])
+		print("Usage: %s <count>" % os.path.basename(sys.argv[0]))
 	else:
 		run(int(sys.argv[1]))

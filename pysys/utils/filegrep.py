@@ -184,19 +184,19 @@ def logContents(message, list):
 # entry point for running the script as an executable
 if __name__ == "__main__":
 	if len(sys.argv) < 3:
-		print "Usage: filegrep.py <file> <regexpr>"
+		print("Usage: filegrep.py <file> <regexpr>")
 		sys.exit()
 	else:
 		try:
 			status = filegrep(sys.argv[1], sys.argv[2])
 		except FileNotFoundException as value:
-			print "caught %s: %s" % (sys.exc_info()[0], value)
-			print "unable to perform grep... exiting"
+			print("caught %s: %s" % (sys.exc_info()[0], value))
+			print("unable to perform grep... exiting")
 		else:
 			if status == True:
-				print "Matches found"
+				print("Matches found")
 			else:
-				print "No matches found"
+				print("No matches found")
 			
 				
 

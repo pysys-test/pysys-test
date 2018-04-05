@@ -132,13 +132,13 @@ if __name__ == '__main__':
 	eval('_suite_.run(_results_)', globals)
 
 	for r in results.successes:
-		print getTestName(r)+' ... passed'
+		print(getTestName(r)+' ... passed')
 	for r in results.errors:
-		print getTestName(r[0])+ ' ... failed'
-		print r[1].rstrip()
+		print(getTestName(r[0])+ ' ... failed')
+		print(r[1].rstrip())
 	for r in results.failures:
-		print getTestName(r[0])+' ... failed'
-		print r[1].rstrip()
+		print(getTestName(r[0])+' ... failed')
+		print(r[1].rstrip())
 	
 	if results.wasSuccessful():
 		sys.exit(0)

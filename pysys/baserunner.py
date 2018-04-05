@@ -378,7 +378,7 @@ class BaseRunner(ProcessUser):
 		
 		try:
 			if not prompt:
-				print "Keyboard interrupt detected, exiting ... "
+				print("Keyboard interrupt detected, exiting ... ")
 				finish()
 
 			while 1:

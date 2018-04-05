@@ -45,13 +45,13 @@ class ConsoleCleanTestHelper:
 
 
 	def printUsage(self, printXOptions):
-		print "\nPySys System Test Framework (version %s): Console clean test helper" % __version__ 
-		print "\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name)
-		print "   where [option] includes;"
-		print "       -h | --help                 print this message"
-		print "       -a | --all                  clean all compiled testclass files"
-		print "       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)"
-		print "       -o | --outdir    STRING     set the name of the test output subdirectories to clean"
+		print("\nPySys System Test Framework (version %s): Console clean test helper" % __version__) 
+		print("\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name))
+		print("   where [option] includes;")
+		print("       -h | --help                 print this message")
+		print("       -a | --all                  clean all compiled testclass files")
+		print("       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)")
+		print("       -o | --outdir    STRING     set the name of the test output subdirectories to clean")
 		sys.exit()
 
 
@@ -150,33 +150,33 @@ class ConsolePrintHelper:
 		
 
 	def printUsage(self):
-		print "\nPySys System Test Framework (version %s): Console print test helper" % __version__ 
-		print "\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name)
-		print "    where options include;"
-		print "       -h | --help                 print this message"
-		print "       -f | --full                 print full information"
-		print "       -g | --groups               print test groups defined"
-		print "       -d | --modes                print test modes defined"
-		print "       -r | --requirements         print test requirements covered"
-		print "       -m | --mode      STRING     print tests that run in user defined mode "
-		print "       -a | --type      STRING     print tests of supplied type (auto or manual, default all)"
-		print "       -t | --trace     STRING     print tests which cover requirement id " 
-		print "       -i | --include   STRING     print tests in included group (can be specified multiple times)"
-		print "       -e | --exclude   STRING     do not print tests in excluded group (can be specified multiple times)"
-		print ""
-		print "   and where [tests] describes a set of tests to be printed to the console. Note that multiple test "
-		print "   sets can be specified, and where none are given all available tests will be run. If an include "
-		print "   group is given, only tests that belong to that group will be printed. If an exclude group is given, "
-		print "   tests in the group will not be run. The following syntax is used to select a test set;"
-		print ""
-		print "       test1    - a single testcase with id test1"
-		print "       :test2   - upto testcase with id test2"
-		print "       test1:   - from testcase with id test1 onwards"
-		print "       id1:id2  - all tests between tests with ids test1 and test2"
-		print ""
-		print "   e.g. "
-		print "       %s -i group1 -e group2 --full test1:test3" % os.path.basename(sys.argv[0])
-		print ""
+		print("\nPySys System Test Framework (version %s): Console print test helper" % __version__) 
+		print("\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name))
+		print("    where options include;")
+		print("       -h | --help                 print this message")
+		print("       -f | --full                 print full information")
+		print("       -g | --groups               print test groups defined")
+		print("       -d | --modes                print test modes defined")
+		print("       -r | --requirements         print test requirements covered")
+		print("       -m | --mode      STRING     print tests that run in user defined mode ")
+		print("       -a | --type      STRING     print tests of supplied type (auto or manual, default all)")
+		print("       -t | --trace     STRING     print tests which cover requirement id ") 
+		print("       -i | --include   STRING     print tests in included group (can be specified multiple times)")
+		print("       -e | --exclude   STRING     do not print tests in excluded group (can be specified multiple times)")
+		print("")
+		print("   and where [tests] describes a set of tests to be printed to the console. Note that multiple test ")
+		print("   sets can be specified, and where none are given all available tests will be run. If an include ")
+		print("   group is given, only tests that belong to that group will be printed. If an exclude group is given, ")
+		print("   tests in the group will not be run. The following syntax is used to select a test set;")
+		print("")
+		print("       test1    - a single testcase with id test1")
+		print("       :test2   - upto testcase with id test2")
+		print("       test1:   - from testcase with id test1 onwards")
+		print("       id1:id2  - all tests between tests with ids test1 and test2")
+		print("")
+		print("   e.g. ")
+		print("       %s -i group1 -e group2 --full test1:test3" % os.path.basename(sys.argv[0]))
+		print("")
 		sys.exit()
 
 
@@ -231,9 +231,9 @@ class ConsolePrintHelper:
 					for group in descriptor.groups:
 						if group not in groups:
 							groups.append(group)
-				print "\nGroups defined: "
+				print("\nGroups defined: ")
 				for group in groups:
-					print "                 %s" % (group)
+					print("                 %s" % (group))
 				exit = 1
 
 			if self.modes == True:
@@ -242,9 +242,9 @@ class ConsolePrintHelper:
 					for mode in descriptor.modes:
 						if mode not in modes:
 							modes.append(mode)
-				print "\nModes defined: "
+				print("\nModes defined: ")
 				for mode in modes:
-					print "                 %s" % (mode)
+					print("                 %s" % (mode))
 				exit = 1
 
 			if self.requirements == True:
@@ -253,9 +253,9 @@ class ConsolePrintHelper:
 					for requirement in descriptor.traceability:
 						if requirement not in requirements:
 							requirements.append(requirement)
-				print "\nRequirements covered: "
+				print("\nRequirements covered: ")
 				for requirement in requirements:
-					print "                 %s" % (requirement)
+					print("                 %s" % (requirement))
 				exit = 1
 		
 			if exit: return
@@ -269,12 +269,12 @@ class ConsolePrintHelper:
 				if self.mode and not self.mode in descriptor.modes: continue
 				padding = " " * (maxsize - len(descriptor.id))
 				if not self.full:
-					print "%s:%s%s" % (descriptor.id, padding, descriptor.title)
+					print("%s:%s%s" % (descriptor.id, padding, descriptor.title))
 				else:
-					print "=========================================="
-					print "		" + descriptor.id
-					print "=========================================="
-					print descriptor
+					print("==========================================")
+					print("		" + descriptor.id)
+					print("==========================================")
+					print(descriptor)
 
 
 
@@ -287,14 +287,14 @@ class ConsoleMakeTestHelper:
 
 
 	def printUsage(self):
-		print "\nPySys System Test Framework (version %s): Console make test helper" % __version__ 
-		print "\nUsage: %s %s [option]+ [testid]" % (os.path.basename(sys.argv[0]), self.name)
-		print "   where [option] includes;"
-		print "       -h | --help                 print this message"
-		print "       -a | --type     STRING      set the test type (auto or manual, default is auto)"
-		print "       -d | --dir      STRING      base path to testcase (default is current working dir)"
-		print ""
-		print "   and where [testid] is the mandatory test identifier."
+		print("\nPySys System Test Framework (version %s): Console make test helper" % __version__) 
+		print("\nUsage: %s %s [option]+ [testid]" % (os.path.basename(sys.argv[0]), self.name))
+		print("   where [option] includes;")
+		print("       -h | --help                 print this message")
+		print("       -a | --type     STRING      set the test type (auto or manual, default is auto)")
+		print("       -d | --dir      STRING      base path to testcase (default is current working dir)")
+		print("")
+		print("   and where [testid] is the mandatory test identifier.")
 		sys.exit()
 
 
@@ -302,7 +302,7 @@ class ConsoleMakeTestHelper:
 		try:
 			optlist, arguments = getopt.getopt(args, 'ht:d:', ["help","type=","dir="] )
 		except Exception:
-			print "Error parsing command line arguments: %s" % (sys.exc_info()[1])
+			print("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			self.printUsage()
 			
 		for option, value in optlist:
@@ -319,7 +319,7 @@ class ConsoleMakeTestHelper:
 				self.testdir = value		
 
 		if arguments == []:
-			print "A valid string test id must be supplied"
+			print("A valid string test id must be supplied")
 			self.printUsage()
 		else:
 			self.testId = arguments[0]
@@ -390,49 +390,49 @@ class ConsoleLaunchHelper:
 
 
 	def printUsage(self, printXOptions):
-		print "\nPySys System Test Framework (version %s): Console run test helper" % __version__ 
-		print "\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name)
-		print "   where [option] includes;"
-		print "       -h | --help                 print this message"
-		print "       -r | --record               record the test results in the working directory"
-		print "       -p | --purge                purge the output subdirectory on test pass"
-		print "       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)"
-		print "       -a | --type      STRING     set the test type to run (auto or manual, default is both)" 
-		print "       -t | --trace     STRING     set the requirement id for the test run"
-		print "       -i | --include   STRING     set the test groups to include (can be specified multiple times)"
-		print "       -e | --exclude   STRING     set the test groups to exclude (can be specified multiple times)"
-		print "       -c | --cycle     INT        set the the number of cycles to run the tests"
-		print "       -o | --outdir    STRING     set the name of the test output subdirectory"
-		print "       -m | --mode      STRING     set the user defined mode to run the tests"
-		print "       -n | --threads   INT        set the number of worker threads to run the tests (defaults to 1). "
-		print "                                   A value of 0 sets to the number of available CPUs"
-		print "       -g | --progress             print progress updates after completion of each test"
-		print "                                   (or set PYSYS_PROGRESS=true environment variable"
-		print "       -b | --abort     STRING     set the default abort on error property (true|false, overrides "
-		print "                                   that specified in the project properties)"
-		print "       -y | --validateOnly         test the validate() method without re-running execute()"
-		print "       -X               KEY=VALUE  set user defined options to be passed through to the test and "
-		print "                                   runner classes. The left hand side string is the data attribute "
-		print "                                   to set, the right hand side string the value (True of not specified) "
+		print("\nPySys System Test Framework (version %s): Console run test helper" % __version__) 
+		print("\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name))
+		print("   where [option] includes;")
+		print("       -h | --help                 print this message")
+		print("       -r | --record               record the test results in the working directory")
+		print("       -p | --purge                purge the output subdirectory on test pass")
+		print("       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)")
+		print("       -a | --type      STRING     set the test type to run (auto or manual, default is both)") 
+		print("       -t | --trace     STRING     set the requirement id for the test run")
+		print("       -i | --include   STRING     set the test groups to include (can be specified multiple times)")
+		print("       -e | --exclude   STRING     set the test groups to exclude (can be specified multiple times)")
+		print("       -c | --cycle     INT        set the the number of cycles to run the tests")
+		print("       -o | --outdir    STRING     set the name of the test output subdirectory")
+		print("       -m | --mode      STRING     set the user defined mode to run the tests")
+		print("       -n | --threads   INT        set the number of worker threads to run the tests (defaults to 1). ")
+		print("                                   A value of 0 sets to the number of available CPUs")
+		print("       -g | --progress             print progress updates after completion of each test")
+		print("                                   (or set PYSYS_PROGRESS=true environment variable")
+		print("       -b | --abort     STRING     set the default abort on error property (true|false, overrides ")
+		print("                                   that specified in the project properties)")
+		print("       -y | --validateOnly         test the validate() method without re-running execute()")
+		print("       -X               KEY=VALUE  set user defined options to be passed through to the test and ")
+		print("                                   runner classes. The left hand side string is the data attribute ")
+		print("                                   to set, the right hand side string the value (True of not specified) ")
 		if printXOptions: printXOptions()
-		print ""
-		print "   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, "
-		print "   where none are given all available tests will be run. If an include group is given, only tests that "
-		print "   belong to that group will be run. If an exclude group is given, tests in the group will not be run. "
-		print "   Tests should contain only alphanumeric and the underscore characters. The following syntax is used "
-		print "   to select a test set;"
-		print ""
-		print "       test1                     - a single testcase with id test1"
-		print "       :test2                    - up to testcase with id test2"
-		print "       test1:                    - from testcase with id test1 onwards"
-		print "       test1:test2               - all tests between tests with ids test1 and test2"
-		print "       test1 test 2 test5:test9  - test1, test2 and all tests between test5 and test9"
-		print "       ^test*                    - all tests matching the regex ^test*"
-		print ""
-		print "   e.g. "
-		print "       %s -vDEBUG --include MYTESTS test1:test4 test7" % os.path.basename(sys.argv[0])
-		print "       %s -c2 -Xhost=localhost test1:" % os.path.basename(sys.argv[0])
-		print ""
+		print("")
+		print("   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, ")
+		print("   where none are given all available tests will be run. If an include group is given, only tests that ")
+		print("   belong to that group will be run. If an exclude group is given, tests in the group will not be run. ")
+		print("   Tests should contain only alphanumeric and the underscore characters. The following syntax is used ")
+		print("   to select a test set;")
+		print("")
+		print("       test1                     - a single testcase with id test1")
+		print("       :test2                    - up to testcase with id test2")
+		print("       test1:                    - from testcase with id test1 onwards")
+		print("       test1:test2               - all tests between tests with ids test1 and test2")
+		print("       test1 test 2 test5:test9  - test1, test2 and all tests between test5 and test9")
+		print("       ^test*                    - all tests matching the regex ^test*")
+		print("")
+		print("   e.g. ")
+		print("       %s -vDEBUG --include MYTESTS test1:test4 test7" % os.path.basename(sys.argv[0]))
+		print("       %s -c2 -Xhost=localhost test1:" % os.path.basename(sys.argv[0]))
+		print("")
 		sys.exit()
 
 
@@ -483,7 +483,7 @@ class ConsoleLaunchHelper:
 				try:
 					self.cycle = int(value)
 				except Exception:
-					print "Error parsing command line arguments: A valid integer for the number of cycles must be supplied"
+					print("Error parsing command line arguments: A valid integer for the number of cycles must be supplied")
 					self.printUsage(printXOptions)
 
 			elif option in ("-o", "--outdir"):
@@ -496,7 +496,7 @@ class ConsoleLaunchHelper:
 				try:
 					self.threads = int(value)
 				except Exception:
-					print "Error parsing command line arguments: A valid integer for the number of threads must be supplied"
+					print("Error parsing command line arguments: A valid integer for the number of threads must be supplied")
 					self.printUsage(printXOptions)
 
 			elif option in ("-b", "--abort"):
