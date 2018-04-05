@@ -710,7 +710,7 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
 				for outcome in FAILS:
 					for (id, reason, outputdir) in self.results[cycle][outcome]: 
-						log.critical(" %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower()})
+						log.critical("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower()})
 						if showOutputDir:
 							log.critical("      %s", os.path.normpath(os.path.relpath(outputdir)))
 						if showOutcomeReason and reason:
