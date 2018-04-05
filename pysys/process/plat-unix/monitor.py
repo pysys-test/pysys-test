@@ -148,7 +148,7 @@ class ProcessMonitor:
 				for i in range(len(data)):
 					data[i] = string.split(info)[i]
 				fp.close()
-			except:
+			except Exception:
 				fp.close()
 			currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
 			file.write( "%s\t%s\t%s\t%s\n" % (currentTime, data[0]/self.numProcessors, data[1], data[2]) )
@@ -195,7 +195,7 @@ if __name__ == "__main__":
 			interval = int(sys.argv[2])
 			duration = int(sys.argv[3])
 			file = sys.argv[4]
-		except: 
+		except Exception: 
 			print "Process ID, interval and duration should be valid integers"
 			sys.exit(-1)	
 		

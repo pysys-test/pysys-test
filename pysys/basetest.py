@@ -420,7 +420,7 @@ class BaseTest(ProcessUser):
 		result = False
 		try:
 			result = filediff(f1, f2, ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput)
-		except:
+		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
@@ -476,7 +476,7 @@ class BaseTest(ProcessUser):
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		try:
 			result = filegrep(f, expr, ignores=ignores, returnMatch=True)
-		except:
+		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = self.__assertMsg(xargs, 'Grep on %s %s "%s"'%(file, 'contains' if contains else 'does not contain', expr))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
@@ -521,7 +521,7 @@ class BaseTest(ProcessUser):
 		msg = self.__assertMsg(xargs, 'Grep on last line of %s %s "%s"'%(file, 'contains' if contains else 'not contains', expr))
 		try:
 			result = lastgrep(f, expr, ignores, includes) == contains
-		except:
+		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
@@ -558,7 +558,7 @@ class BaseTest(ProcessUser):
 		expr = None
 		try:
 			expr = orderedgrep(f, exprList)
-		except:
+		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
@@ -597,7 +597,7 @@ class BaseTest(ProcessUser):
 		try:
 			numberLines = linecount(f, expr, ignores=ignores)
 			log.debug("Number of matching lines is %d"%numberLines)
-		except:
+		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:

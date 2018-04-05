@@ -163,7 +163,7 @@ def orderedgrep(file, exprList):
 			if regexpr.search(r"%s"%contents[i]) is not None:
 				try:
 					expr = list.pop();
-				except:
+				except Exception:
 					return None
 		return expr
 

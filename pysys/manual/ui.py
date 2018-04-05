@@ -20,7 +20,7 @@
 try:
 	import tkMessageBox
 	from Tkinter import *
-except:
+except Exception:
 	pass
 
 from pysys.constants import *
@@ -160,7 +160,7 @@ class ManualTester:
 		for r in range(len(self.steps)):
 			try: 
 				result += "\nStep %s - %s: %s" % (r + 1, self.steps[r].title, self.intToRes[self.results[r]])		
-			except: pass
+			except Exception: pass
 		if self.defect != "": result += "\n\nDefect - %s recorded with test failure" % self.defect
 		return result
 
@@ -171,7 +171,7 @@ class ManualTester:
 					self.owner.log.info("Step %s - %s: %s" % (r + 1, self.steps[r].title, self.intToRes[self.results[r]]))
 					if self.results[r] == 0: self.owner.outcome.append(FAILED)
 					elif self.results[r] == 1: self.owner.outcome.append(PASSED)
-				except: pass
+				except Exception: pass
 		if self.defect != "": self.owner.log.info("Defect - %s recorded with test failure" % self.defect)
 
 	def start(self):

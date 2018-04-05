@@ -58,7 +58,7 @@ def getEphemeralTCPPortRange():
 		h = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters')
 		try:
 			ephemeral_high = _winreg.QueryValueEx(h, 'MaxUserPort')[0]
-		except:
+		except Exception:
 			# Accept the default if there isn't a value in the registry
 			pass
 		finally:

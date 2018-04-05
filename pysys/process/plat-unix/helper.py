@@ -73,11 +73,11 @@ class ProcessWrapper(CommonProcessWrapper):
 		self.stderr = '/dev/null'
 		try:
 			if stdout is not None: self.stdout = stdout
-		except:
+		except Exception:
 			log.info('Unable to create file to capture stdout - using the null device')
 		try:
 			if stderr is not None: self.stderr = stderr
-		except:
+		except Exception:
 			log.info('Unable to create file to capture stdout - using the null device')
 
 		# private instance variables
@@ -127,12 +127,12 @@ class ProcessWrapper(CommonProcessWrapper):
 					# close any stray file descriptors (within reason)
 					try:
 						maxfd = os.sysconf("SC_OPEN_MAX")
-					except:
+					except Exception:
 						maxfd=256
 					for fd in range(3, maxfd):
 						try:
 							os.close(fd)
-						except:
+						except Exception:
 							pass
 				
 					# execve the process to start it
@@ -144,7 +144,7 @@ class ProcessWrapper(CommonProcessWrapper):
 					# and start a thread to write to the write end
 					os.close(stdin_r)
 					self.__stdin = stdin_w
-			except:
+			except Exception:
 				if self.pid == 0: os._exit(os.EX_OSERR)	
 
 		if not self.running() and self.exitStatus == os.EX_OSERR:
@@ -183,7 +183,7 @@ class ProcessWrapper(CommonProcessWrapper):
 			if self.exitStatus != None:
 				if self.__stdin:
 					try: os.close(self.__stdin)
-					except: pass # just being conservative, should never happen
+					except Exception: pass # just being conservative, should never happen
 					self.__stdin = None # MUST not close this more than once
 
 			
@@ -202,7 +202,7 @@ class ProcessWrapper(CommonProcessWrapper):
 				os.kill(self.pid, signal.SIGTERM)
 			
 			self.wait(timeout=timeout)
-		except:
+		except Exception:
 			raise ProcessError, "Error stopping process"
 
 
@@ -215,7 +215,7 @@ class ProcessWrapper(CommonProcessWrapper):
 		"""
 		try:
 			os.kill(self.pid, signal)
-		except:
+		except Exception:
 			raise ProcessError, "Error signaling process"
 
 

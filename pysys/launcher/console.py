@@ -58,7 +58,7 @@ class ConsoleCleanTestHelper:
 	def parseArgs(self, args, printXOptions=None):
 		try:
 			optlist, self.arguments = getopt.getopt(args, self.optionString, self.optionList)
-		except:
+		except Exception:
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 
@@ -105,7 +105,7 @@ class ConsoleCleanTestHelper:
 							if stat.S_ISREG(mode):
 								os.remove(path)
 							log.info("Deleting compiled module: " + path)
-						except:
+						except Exception:
 							log.debug("Error deleting compiled module: " + path)
 
 				pathToDelete = os.path.join(descriptor.output, self.outsubdir)
@@ -187,7 +187,7 @@ class ConsolePrintHelper:
 	def parseArgs(self, args):
 		try:
 			optlist, self.arguments = getopt.getopt(args, self.optionString, self.optionList)
-		except:
+		except Exception:
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 			
@@ -309,7 +309,7 @@ class ConsoleMakeTestHelper:
 	def parseArgs(self, args):
 		try:
 			optlist, arguments = getopt.getopt(args, 'ht:d:', ["help","type=","dir="] )
-		except:
+		except Exception:
 			print "Error parsing command line arguments: %s" % (sys.exc_info()[1])
 			self.printUsage()
 			
@@ -447,7 +447,7 @@ class ConsoleLaunchHelper:
 	def parseArgs(self, args, printXOptions=None):
 		try:
 			optlist, self.arguments = getopt.getopt(args, self.optionString, self.optionList)
-		except:
+		except Exception:
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 
@@ -490,7 +490,7 @@ class ConsoleLaunchHelper:
 			elif option in ("-c", "--cycle"):
 				try:
 					self.cycle = int(value)
-				except:
+				except Exception:
 					print "Error parsing command line arguments: A valid integer for the number of cycles must be supplied"
 					self.printUsage(printXOptions)
 
@@ -503,7 +503,7 @@ class ConsoleLaunchHelper:
 			elif option in ("-n", "--threads"):
 				try:
 					self.threads = int(value)
-				except:
+				except Exception:
 					print "Error parsing command line arguments: A valid integer for the number of threads must be supplied"
 					self.printUsage(printXOptions)
 
