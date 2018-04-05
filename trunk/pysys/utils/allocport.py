@@ -128,7 +128,7 @@ def portIsInUse(port):
 			return False
 		except Exception as e:
 			# Don't expect this but just in case
-			print 'Here', e
+			sys.stderr.write('Exception from port allocator: %s\n'%e)
 			if s != None:
 				s.close()
 			return True

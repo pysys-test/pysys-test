@@ -7,10 +7,10 @@ class PySysTest(BaseTest):
 	def execute(self):
 		with open(self.output+'/f1.txt', 'w') as f:
 			for i in range(100):
-				print >>f, 'f1 line %03d'%(i+1)
+				f.write('f1 line %03d\n'%(i+1))
 		with open(self.output+'/f2.txt', 'w') as f:
 			for i in range(5):
-				print >>f, 'f2 line %03d'%(i+1)
+				f.write('f2 line %03d\n'%(i+1))
 		
 		result = self.logFileContents('does not exist.txt')#
 		assert not result

@@ -48,7 +48,7 @@ class XMLManualTestStep:
 		print "Step title:        %s" % self.title 
 		print "Step validate:     %s" % self.validate
 		print "Step wrap:         %s" % self.wrap
-		print "Step description:     ",
+		sys.stdout.write("Step description:     ")
 		desc = self.description.split('\n')
 		for index in range(0, len(desc)):
 			if index == 0: print desc[index]
