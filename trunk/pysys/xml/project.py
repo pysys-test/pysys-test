@@ -101,7 +101,7 @@ class XMLProjectParser:
 			requirespython = requirespython[0].firstChild.nodeValue
 			if requirespython: # ignore if empty
 				thisversion = sys.version_info
-				if list(sys.version_info) < map(int, requirespython.split('.')):
+				if list(sys.version_info) < list(map(int, requirespython.split('.'))):
 					raise Exception('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join(map(str, sys.version_info[:3])), sys.executable))
 
 		requirespysys = self.root.getElementsByTagName('requires-pysys')
@@ -109,7 +109,7 @@ class XMLProjectParser:
 			requirespysys = requirespysys[0].firstChild.nodeValue
 			if requirespysys: # ignore if empty
 				thisversion = __version__
-				if map(int, thisversion.split('.')) < map(int, requirespysys.split('.')):
+				if list(map(int, thisversion.split('.'))) < list(map(int, requirespysys.split('.'))):
 					raise Exception('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
 		
 	def unlink(self):
@@ -241,7 +241,7 @@ class XMLProjectParser:
 			
 		summaryfile = optionsDict.pop('summaryfile', '')
 		summaryfile = self.expandFromProperty(summaryfile, summaryfile)
-		if optionsDict: raise Exception('Unexpected performancereporter attribute(s): '+', '.join(optionsDict.keys()))
+		if optionsDict: raise Exception('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
 		
 		return cls, summaryfile
 
@@ -369,7 +369,7 @@ class Project:
 				
 				# get the properties
 				properties = parser.getProperties()
-				keys = properties.keys()
+				keys = list(properties.keys())
 				keys.sort()
 				for key in keys: setattr(self, key, properties[key])
 				

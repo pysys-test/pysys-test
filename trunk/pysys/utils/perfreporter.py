@@ -163,7 +163,7 @@ class CSVPerformanceReporter(object):
 					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by this test: "%s"'%(resultKey))
 					return
 				if prevresult[0] != testobj.descriptor.id or prevresult[2] != d:
-					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests and modes: "%s" (already used by %s)'%(resultKey, prevresult[2].items()))
+					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests and modes: "%s" (already used by %s)'%(resultKey, list(prevresult[2].items())))
 					return
 			else:
 				self.__previousResultKeys[resultKey] = (testobj.descriptor.id, hash(testobj), d)
@@ -358,7 +358,7 @@ class CSVPerformanceFile(object):
 	def __repr__(self):
 		# a full multi-line user-readable serialization of the model
 		return 'CSVPerformanceFile<runDetails: %s%s\n>'%(', '.join([('%s="%s"'%(k, self.runDetails[k])) for k in self.runDetails]), 
-			''.join([('\n - %s'%(', '.join([('%s=%s'%(k, self.__maybequote(r.get(k, r.get('resultDetails',{}).get(k,None))))) for k in r.keys()+r.get('resultDetails',{}).keys() if k!='resultDetails']))) for r in self.results]))
+			''.join([('\n - %s'%(', '.join([('%s=%s'%(k, self.__maybequote(r.get(k, r.get('resultDetails',{}).get(k,None))))) for k in list(r.keys())+list(r.get('resultDetails',{}).keys()) if k!='resultDetails']))) for r in self.results]))
 
 	@staticmethod
 	def aggregate(files):

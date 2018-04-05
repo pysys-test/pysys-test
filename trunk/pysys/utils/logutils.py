@@ -54,7 +54,7 @@ class BasePySysLoggingFormatter(logging.Formatter):
 			propertiesDict.pop('datefmt', None)
 			)
 		
-		if propertiesDict: raise Exception('Unknown formatter option(s) specified: %s'%', '.join(propertiesDict.keys()))
+		if propertiesDict: raise Exception('Unknown formatter option(s) specified: %s'%', '.join(list(propertiesDict.keys())))
 	
 class DefaultPySysLoggingFormatter(BasePySysLoggingFormatter):
 	"""

@@ -135,7 +135,7 @@ class BaseTest(ProcessUser):
 		@param xargs: A dictionary of the user defined extra arguments
 		
 		"""
-		for key in xargs.keys():
+		for key in list(xargs.keys()):
 			setattr(self, key, xargs[key])
 
 			

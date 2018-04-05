@@ -360,7 +360,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 			# add the extra params nodes
 			element = self.document.createElement("xargs")
 			if "xargs" in kwargs: 
-				for key in kwargs["xargs"].keys():
+				for key in list(kwargs["xargs"].keys()):
 					childelement = self.document.createElement("xarg")
 					nameAttribute = self.document.createAttribute("name")
 					valueAttribute = self.document.createAttribute("value") 
@@ -699,13 +699,13 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 		
 		log.critical("Summary of non passes: ")
 		fails = 0
-		for cycle in self.results.keys():
-			for outcome in self.results[cycle].keys():
+		for cycle in list(self.results.keys()):
+			for outcome in list(self.results[cycle].keys()):
 				if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
 		if fails == 0:
 			log.critical("	THERE WERE NO NON PASSES", extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'passed'})
 		else:
-			for cycle in self.results.keys():
+			for cycle in list(self.results.keys()):
 				cyclestr = ''
 				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
 				for outcome in FAILS:
