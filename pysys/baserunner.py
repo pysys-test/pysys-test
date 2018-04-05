@@ -145,9 +145,6 @@ class BaseRunner(ProcessUser):
 		self.duration = 0 # no longer needed
 		self.results = {}
 		
-		self.resultsPointer = 0
-		self.resultsQueue = []
-		
 		self.performanceReporters = PROJECT._createPerformanceReporters(self.outsubdir)
 
 	def setKeywordArgs(self, xargs):
@@ -277,21 +274,16 @@ class BaseRunner(ProcessUser):
 		for cycle in range(self.cycle):
 			# loop through tests for the cycle
 			try:
-				self.resultsPointer = 0
-				self.resultsQueue = []
 				self.results[cycle] = {}
 				for outcome in PRECEDENT: self.results[cycle][outcome] = []
 		
-				counter = 0
 				for descriptor in self.descriptors:
-					self.resultsQueue.append(None)
-					container = TestContainer(counter, descriptor, cycle, self)
+					container = TestContainer(descriptor, cycle, self)
 					if self.threads > 1:
 						request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 						threadPool.putRequest(request)
 					else:
 						self.containerCallback(thread.get_ident(), container())
-					counter = counter + 1
 			except KeyboardInterrupt:
 				log.info("test interrupt from keyboard")
 				self.handleKbrdInt()
@@ -305,8 +297,9 @@ class BaseRunner(ProcessUser):
 					log.info("test interrupt from keyboard - joining threads ... ")
 					threadPool.dismissWorkers(self.threads, True)
 					self.handleKbrdInt(prompt=False)
-
-			# call the hook for end of cycle
+	
+			# call the hook for end of cycle - used to do this every cycle, can't anymore 
+			# since cycles can now overlap across threads, but it isn't really very useful anyway
 			try:
 				self.cycleComplete()
 			except KeyboardInterrupt:
@@ -314,7 +307,8 @@ class BaseRunner(ProcessUser):
 				self.handleKbrdInt()
 			except:
 				log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
+		# end of cycles
+		
 		# perform cleanup on the test writers - this also takes care of logging summary results
 		for writer in self.writers:
 			try: writer.cleanup()
@@ -339,45 +333,36 @@ class BaseRunner(ProcessUser):
 		@param container: A reference to the container object that ran the test
 		
 		Called on completion of running a testcase, either directly by the BaseRunner class (or 
-		a sub-class thereof), or from the ThreadPool when running with more than one worker thread. 
+		a sub-class thereof), or from the ThreadPool.wait() when running with more than one worker thread. 
+		This method is always invoked from a single thread, even in multi-threaded mode. 
+		
+		
 		The method is responsible for calling of the testComplete() method of the runner, recording 
 		of the test result to the result writers, and for deletion of the test container object. 
 		
 		"""
-		self.resultsQueue[container.counter] = container
-		if self.threads > 1: self.log.info("[%s] Queueing result for test %s" % (thread, container.descriptor.id))
+		if self.threads > 1: 
+			# write out cached messages from the worker thread
+			sys.stdout.write('\n'+container.testFileHandlerStdout.stream.getvalue())
+		if stdoutHandler.level >= logging.WARN:
+			log.critical("%s: %s (%s)", LOOKUP[container.testObj.getOutcome()], container.descriptor.id, container.descriptor.title)
 		
-		spacer = True
-		for i in range(self.resultsPointer, len(self.resultsQueue)):
-			if self.resultsQueue[i] is None: break
-			
-			if self.threads > 1: 
-				if spacer: self.log.info(""); spacer = False
-				# write out cached messages from the worker thread
-				sys.stdout.write(self.resultsQueue[i].testFileHandlerStdout.stream.getvalue())
-			if stdoutHandler.level >= logging.WARN:
-				log.critical("%s: %s (%s)", LOOKUP[self.resultsQueue[i].testObj.getOutcome()], self.resultsQueue[i].descriptor.id,  self.resultsQueue[i].descriptor.title)
-			
-			# call the hook for end of test execution
-			self.testComplete(self.resultsQueue[i].testObj, self.resultsQueue[i].outsubdir)
-					
-			# pass the test object to the test writers is recording
-			for writer in self.writers:
-				try: writer.processResult(self.resultsQueue[i].testObj, cycle=self.resultsQueue[i].cycle,
-										  testStart=self.resultsQueue[i].testStart, testTime=self.resultsQueue[i].testTime)
-				except: log.warn("caught %s processing test result by %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
-			
-			# prompt for continuation on control-C
-			if self.resultsQueue[i].kbrdInt == True: self.handleKbrdInt()
+		# call the hook for end of test execution
+		self.testComplete(container.testObj, container.outsubdir)
+				
+		# pass the test object to the test writers is recording
+		for writer in self.writers:
+			try: writer.processResult(container.testObj, cycle=container.cycle,
+									  testStart=container.testStart, testTime=container.testTime)
+			except: log.warn("caught %s processing test result by %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 		
-			# store the result
-			self.duration = self.duration + self.resultsQueue[i].testTime
-			self.results[self.resultsQueue[i].cycle][self.resultsQueue[i].testObj.getOutcome()].append(self.resultsQueue[i].descriptor.id)
+		# prompt for continuation on control-C
+		if container.kbrdInt == True: self.handleKbrdInt()
+	
+		# store the result
+		self.duration = self.duration + container.testTime
+		self.results[container.cycle][container.testObj.getOutcome()].append(container.descriptor.id)
 		
-			# delete the container
-			self.resultsQueue[i] = None
-			self.resultsPointer = self.resultsPointer + 1
-
 
 	def containerExceptionCallback(self, thread, exc_info):
 		"""Callback method for unhandled exceptions thrown when running a test.
@@ -385,7 +370,7 @@ class BaseRunner(ProcessUser):
 		@param exc_info: The tuple of values as created from sys.exc_info()
 		 
 		"""
-		log.warn("caught %s: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+		log.warn("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 
 
 	def handleKbrdInt(self, prompt=True):
@@ -425,7 +410,7 @@ class TestContainer:
 	
 	"""
 	
-	def __init__ (self, counter, descriptor, cycle, runner):
+	def __init__ (self, descriptor, cycle, runner):
 		"""Create an instance of the TestContainer class.
 		
 		@param descriptor: A reference to the testcase descriptor
@@ -433,7 +418,6 @@ class TestContainer:
 		@param runner: A reference to the runner that created this class
 
 		"""
-		self.counter = counter
 		self.descriptor = descriptor
 		self.cycle = cycle
 		self.runner = runner
@@ -455,6 +439,12 @@ class TestContainer:
 		exc_info = []
 		self.testStart = time.time()
 		try:
+			# stdout - set this up right at the very beginning to ensure we can see the log output in case any later step fails
+			self.testFileHandlerStdout = ThreadedStreamHandler(StringIO.StringIO())
+			self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
+			self.testFileHandlerStdout.setLevel(stdoutHandler.level)
+			log.addHandler(self.testFileHandlerStdout)
+
 			# set the output subdirectory and purge contents
 			if os.path.isabs(self.runner.outsubdir):
 				self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
@@ -477,13 +467,7 @@ class TestContainer:
 			self.testFileHandlerRunLog.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
 			log.addHandler(self.testFileHandlerRunLog)
-			
-			# stdout
-			self.testFileHandlerStdout = ThreadedStreamHandler(StringIO.StringIO())
-			self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
-			self.testFileHandlerStdout.setLevel(stdoutHandler.level)
-			log.addHandler(self.testFileHandlerStdout)
-			
+
 			log.info(62*"=")
 			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
 			log.info("Id   : %s", self.descriptor.id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
@@ -528,7 +512,7 @@ class TestContainer:
 				self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode, abortOnError=False)
 			
 			elif len(exc_info) > 0:
-				self.testObj.addOutcome(BLOCKED, 'Failed to set up test', abortOnError=False)
+				self.testObj.addOutcome(BLOCKED, 'Failed to set up test: %s'%exc_info[0][1], abortOnError=False)
 				for info in exc_info:
 					log.warn("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
 					
