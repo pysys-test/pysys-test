@@ -13,7 +13,7 @@ class PySysTest(BaseTest):
 		env['PYSYS_COLOR'] = 'tRue'
 		env['PYSYS_TEST_FRIENDLY_ESCAPES'] = 'true'
 		p = self.startProcess(command=sys.executable,
-			arguments = [[a for a in sys.argv if a.endswith('pysys.py')][0], 'run', '-o', self.output+'/myoutdir', '-v', 'DEBUG'],
+			arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', self.output+'/myoutdir', '-v', 'DEBUG'],
 			environs = env, workingDir='test',
 			stdout = 'pysys.out', stderr='pysys.err', displayName='pysys', 
 			ignoreExitStatus=False, abortOnError=True)

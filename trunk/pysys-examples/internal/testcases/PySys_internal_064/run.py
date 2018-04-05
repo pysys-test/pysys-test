@@ -14,7 +14,7 @@ class PySysTest(BaseTest):
 		try:
 			self.waitForSignal('bad.txt', expr='goodexpr', errorExpr=['not found', ' ERROR '], abortOnError=True)
 			self.addOutcome(FAILED, 'Expected abort')
-		except AbortExecution, e:
+		except AbortExecution as e:
 			del self.outcome[:]
 			self.assertThat('%s == %s', e.outcome, BLOCKED)
 			self.log.info('Got abort: %s', e.value)
