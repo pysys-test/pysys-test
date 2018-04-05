@@ -84,11 +84,7 @@ class ConsoleCleanTestHelper:
 
 
 	def clean(self):
-		try:
 			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir)		
-		except Exception, (strerror):
-			log.info(strerror)
-		else:
 			for descriptor in descriptors:
 				if self.all:
 					if sys.version_info >= (3,):
@@ -227,11 +223,7 @@ class ConsolePrintHelper:
 
 
 	def printTests(self):
-		try:
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
-		except Exception, (strerror):
-			log.info(strerror)
-		else:
 			exit = 0
 			if self.groups == True:
 				groups = []
