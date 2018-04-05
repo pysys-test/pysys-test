@@ -85,11 +85,11 @@ class ProcessWrapper(CommonProcessWrapper):
 		self.fStderr = 'nul'
 		try:
 			if stdout is not None: self.fStdout = _stringToUnicode(stdout)
-		except:
+		except Exception:
 			log.info("Unable to create file to capture stdout - using the null device")
 		try:
 			if stderr is not None: self.fStderr = _stringToUnicode(stderr)
-		except:
+		except Exception:
 			log.info("Unable to create file to capture stdout - using the null device")
 
 
@@ -204,7 +204,7 @@ class ProcessWrapper(CommonProcessWrapper):
 				win32api.TerminateProcess(self.__hProcess,0)
 			
 			self.wait(timeout=timeout)
-		except:
+		except Exception:
 			raise ProcessError, "Error stopping process"
 		
 

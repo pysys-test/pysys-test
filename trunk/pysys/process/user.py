@@ -180,7 +180,7 @@ class ProcessUser(object):
 					self.processCount[displayName] = self.processCount[displayName] + 1
 				else:
 			 		self.processCount[displayName] = 1
-			except:
+			except Exception:
 				pass
 		return process
 
@@ -486,7 +486,7 @@ class ProcessUser(object):
 			for process in self.processList:
 				try:
 					if process.running(): process.stop()
-				except:
+				except Exception:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.processList = []
 			self.processCount = {}

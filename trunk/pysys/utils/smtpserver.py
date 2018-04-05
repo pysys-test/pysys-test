@@ -29,7 +29,7 @@ class SimpleSMTPServer(smtpd.SMTPServer):
 			self.fp = open(filename, 'w')
 			self.logMails = logMails
 			self.count = 0
-		except:
+		except Exception:
 			pass
 
 	def process_message(self, peer, mailfrom, rcpttos, data):

@@ -65,7 +65,7 @@ class XMLManualTestParser:
 		
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
-		except:
+		except Exception:
 			raise Exception, "%s " % (sys.exc_info()[1])
 		else:
 			if self.doc.getElementsByTagName('pysysmanualtest') == []:
@@ -95,11 +95,11 @@ class XMLManualTestParser:
 			else:
 				try:
 					description = stepsNode.getElementsByTagName('description')[0].childNodes[0].data
-				except:
+				except Exception:
 					description = ""
 			try:
 				expectedResult = stepsNode.getElementsByTagName('expectedresult')[0].childNodes[0].data
-			except:
+			except Exception:
 				expectedResult = ""
 			stepnumber = stepnumber + 1
 			steps.append(XMLManualTestStep(stepnumber, title, validate, wrap, description, expectedResult))

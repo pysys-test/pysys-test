@@ -96,6 +96,6 @@ if __name__ == "__main__":
 				status = unzip(sys.argv[2], 1)
 			elif sys.argv[1] == 'unzipall':
 				status = unzipall(sys.argv[2])
-		except:
+		except Exception:
 			print "caught %s: %s" % (sys.exc_info()[0], sys.exc_info()[1])
 			print "unable to perform unzip operation" 

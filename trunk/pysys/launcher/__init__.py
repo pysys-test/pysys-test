@@ -127,7 +127,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 				# each specified test patten must match something, else probably user made a typo
 				if not matches: raise Exception("No matches for: '%s'", t)
 				
-			except :
+			except Exception:
 				raise Exception("Unable to locate requested testcase(s): '%s'"%t)
 			# don't add duplicates
 			for m in matches:

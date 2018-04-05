@@ -186,7 +186,7 @@ class XMLDescriptorParser:
 		
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
-		except:
+		except Exception:
 			raise Exception, "%s " % (sys.exc_info()[1])
 		else:
 			if self.doc.getElementsByTagName('pysystest') == []:
@@ -255,7 +255,7 @@ class XMLDescriptorParser:
 			try:
 				title = descriptionNodeList[0].getElementsByTagName('title')[0]
 				return title.childNodes[0].data
-			except:
+			except Exception:
 				return ""
 				
 				
@@ -271,7 +271,7 @@ class XMLDescriptorParser:
 			try:
 				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
 				return purpose.childNodes[0].data
-			except:
+			except Exception:
 				return ""
 			
 				
@@ -287,7 +287,7 @@ class XMLDescriptorParser:
 			for node in groups.getElementsByTagName('group'):
 				groupList.append(node.childNodes[0].data)
 			return groupList
-		except:
+		except Exception:
 			return []
 	
 				
@@ -303,7 +303,7 @@ class XMLDescriptorParser:
 			for node in modes.getElementsByTagName('mode'):
 				modeList.append(node.childNodes[0].data)
 			return modeList
-		except:
+		except Exception:
 			return []
 
 				
@@ -313,7 +313,7 @@ class XMLDescriptorParser:
 			dataNodeList = self.root.getElementsByTagName('data')
 			el = dataNodeList[0].getElementsByTagName('class')[0]
 			return [el.getAttribute('name'), el.getAttribute('module')]
-		except:
+		except Exception:
 			return [DEFAULT_TESTCLASS, DEFAULT_MODULE]
 
 			
@@ -323,7 +323,7 @@ class XMLDescriptorParser:
 			dataNodeList = self.root.getElementsByTagName('data')
 			input = dataNodeList[0].getElementsByTagName('input')[0]
 			return input.getAttribute('path')
-		except:
+		except Exception:
 			return DEFAULT_INPUT
 
 			
@@ -333,7 +333,7 @@ class XMLDescriptorParser:
 			dataNodeList = self.root.getElementsByTagName('data')
 			output = dataNodeList[0].getElementsByTagName('output')[0]
 			return output.getAttribute('path')
-		except:
+		except Exception:
 			return DEFAULT_OUTPUT
 
 
@@ -343,7 +343,7 @@ class XMLDescriptorParser:
 			dataNodeList = self.root.getElementsByTagName('data')
 			ref = dataNodeList[0].getElementsByTagName('reference')[0]
 			return ref.getAttribute('path')
-		except:
+		except Exception:
 			return DEFAULT_REFERENCE
 
 
@@ -356,7 +356,7 @@ class XMLDescriptorParser:
 			for node in requirements.getElementsByTagName('requirement'):
 				reqList.append(node.getAttribute('id'))
 			return reqList
-		except:
+		except Exception:
 			return []
 					
 

@@ -454,7 +454,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	def __pathToURL(self, path):
 		try: 
 			if self.useFileURL.lower() == "false": return path
-		except:
+		except Exception:
 			return path
 		else:
 			return urlparse.urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])

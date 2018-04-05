@@ -85,7 +85,7 @@ class XMLProjectParser:
 		
 		try:
 			self.doc = xml.dom.minidom.parse(self.xmlfile)
-		except:
+		except Exception:
 			raise Exception, sys.exc_info()[1]
 		else:
 			if self.doc.getElementsByTagName('pysysproject') == []:
@@ -149,7 +149,7 @@ class XMLProjectParser:
 		if os.path.exists(file):
 			try:
 				fp = open(file, "r")
-			except: 
+			except Exception: 
 				pass
 			else:
 				for line in fp.readlines():
@@ -200,7 +200,7 @@ class XMLProjectParser:
 		try:
 			runnerNodeList = self.root.getElementsByTagName('runner')[0]
 			return [runnerNodeList.getAttribute('classname'), runnerNodeList.getAttribute('module')]
-		except:
+		except Exception:
 			return DEFAULT_RUNNER
 
 	def _parseClassAndConfigDict(self, node, defaultClass):
@@ -249,7 +249,7 @@ class XMLProjectParser:
 		try:
 			makerNodeList = self.root.getElementsByTagName('maker')[0]
 			return [makerNodeList.getAttribute('classname'), makerNodeList.getAttribute('module')]
-		except:
+		except Exception:
 			return DEFAULT_MAKER
 
 
@@ -284,7 +284,7 @@ class XMLProjectParser:
 					try:
 						file = writerNode.getAttribute('file') if writerNode.hasAttribute('file') else None
 						writer = [writerNode.getAttribute('classname'), writerNode.getAttribute('module'), file, {}]
-					except:
+					except Exception:
 						pass
 					else:
 						propertyNodeList = writerNode.getElementsByTagName('property')
@@ -293,13 +293,13 @@ class XMLProjectParser:
 								name = propertyNode.getAttribute("name") 
 								value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
 								writer[3][name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
-							except:
+							except Exception:
 								pass
 						writers.append(writer)				
 			else:
 				writers.append(DEFAULT_WRITER)
 			return writers
-		except:
+		except Exception:
 			return [DEFAULT_WRITER]
 		
 

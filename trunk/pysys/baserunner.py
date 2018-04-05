@@ -211,7 +211,7 @@ class BaseRunner(ProcessUser):
 						try:
 							os.remove(path)
 							break
-						except:
+						except Exception:
 							time.sleep(0.1)
 							count = count + 1
 
@@ -259,7 +259,7 @@ class BaseRunner(ProcessUser):
 		# call the hook to setup the test output writers
 		for writer in list(self.writers):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads)
-			except: 
+			except Exception: 
 				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 				self.writers.remove(writer) # if setup fails, nothing else is going to work
 
@@ -300,7 +300,7 @@ class BaseRunner(ProcessUser):
 		# perform cleanup on the test writers - this also takes care of logging summary results
 		for writer in self.writers:
 			try: writer.cleanup()
-			except: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+			except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 		del self.writers[:]
 		
 		for perfreporter in self.performanceReporters:
@@ -342,7 +342,7 @@ class BaseRunner(ProcessUser):
 		for writer in self.writers:
 			try: writer.processResult(container.testObj, cycle=container.cycle,
 									  testStart=container.testStart, testTime=container.testTime)
-			except: log.warn("caught %s processing test result by %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+			except Exception: log.warn("caught %s processing test result by %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 		
 		# prompt for continuation on control-C
 		if container.kbrdInt == True: self.handleKbrdInt()
@@ -369,7 +369,7 @@ class BaseRunner(ProcessUser):
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			for writer in self.writers:
 				try: writer.cleanup()
-				except: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 			del self.writers[:]
 			self.cycleComplete()
 			self.cleanup()
@@ -466,7 +466,7 @@ class TestContainer:
 		except KeyboardInterrupt:
 			self.kbrdInt = True
 		
-		except:
+		except Exception:
 			exc_info.append(sys.exc_info())
 			
 		# import the test class
@@ -478,7 +478,7 @@ class TestContainer:
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 			
-			except:
+			except Exception:
 				exc_info.append(sys.exc_info())
 				self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
 		# end of global_lock
@@ -487,7 +487,7 @@ class TestContainer:
 			try: 
 				if hasattr(writer, 'processTestStarting'):
 					writer.processTestStarting(testObj=self.testObj, cycle=self.cycle)
-			except: 
+			except Exception: 
 				log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 
 		# execute the test if we can
@@ -525,7 +525,7 @@ class TestContainer:
 			self.kbrdInt = True
 			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 
-		except:
+		except Exception:
 			log.warn("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
 	
@@ -550,7 +550,7 @@ class TestContainer:
 			self.testFileHandlerRunLog.close()
 			log.removeHandler(self.testFileHandlerRunLog)
 			log.removeHandler(self.testFileHandlerStdout)
-		except: 
+		except Exception: 
 			pass
 		
 		# return a reference to self

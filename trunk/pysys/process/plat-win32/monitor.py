@@ -113,7 +113,7 @@ class ProcessMonitor:
 					value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")
 					if value == pid:
 						return instance, inum
-				except:
+				except Exception:
 					pass
 
 		return instance, inum
@@ -139,7 +139,7 @@ class ProcessMonitor:
 			try:	
 				value = self.__win32getProfileAttribute("Thread", instances[i], instanceNum[i], "ID Process")
 				if value == pid: threads.append((instances[i], instanceNum[i]))
-			except:
+			except Exception:
 				pass
 		return threads
 
@@ -155,7 +155,7 @@ class ProcessMonitor:
 		value = None
 		try:
 			value =	 win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LONG)[1]  
-		except:
+		except Exception:
 			pass
 		
 		# tidy up and return the value
@@ -198,7 +198,7 @@ class ProcessMonitor:
 			for i in range(0, len(thread_counters)):
 				try:
 					data[0]=data[0]+win32pdh.GetFormattedCounterValue(thread_counters[i], win32pdh.PDH_FMT_LONG)[1] 
-				except:
+				except Exception:
 					pass
 	
 			currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
