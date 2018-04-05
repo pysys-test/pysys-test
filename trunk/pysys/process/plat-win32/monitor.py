@@ -249,23 +249,23 @@ class ProcessMonitor:
 			
 if __name__ == "__main__":
 	items, instances = win32pdh.EnumObjectItems(None, None, "System", -1)
-	print "System - available counters are; "
-	for item in items: print item
-	print 
+	print("System - available counters are; ")
+	for item in items: print(item)
+	print() 
 
 	items, instances = win32pdh.EnumObjectItems(None, None, "Processor", -1)
-	print "Processor - available counters are; "
-	for item in items: print item
-	print 
+	print("Processor - available counters are; ")
+	for item in items: print(item)
+	print() 
 
 	items, instances = win32pdh.EnumObjectItems(None, None, "Process", -1)
-	print "Process - available counters are; "
-	for item in items: print item
-	print 
+	print("Process - available counters are; ")
+	for item in items: print(item)
+	print() 
 
 	items, instances = win32pdh.EnumObjectItems(None, None, "Thread", -1)
-	print "Thread - available counters are; "
-	for item in items: print item
-	print
+	print("Thread - available counters are; ")
+	for item in items: print(item)
+	print()
 
 	 

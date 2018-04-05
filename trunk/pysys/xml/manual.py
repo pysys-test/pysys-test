@@ -44,16 +44,16 @@ class XMLManualTestStep:
 
 		
 	def toString(self):
-		print "Step number:       %d" % self.number
-		print "Step title:        %s" % self.title 
-		print "Step validate:     %s" % self.validate
-		print "Step wrap:         %s" % self.wrap
+		print("Step number:       %d" % self.number)
+		print("Step title:        %s" % self.title) 
+		print("Step validate:     %s" % self.validate)
+		print("Step wrap:         %s" % self.wrap)
 		sys.stdout.write("Step description:     ")
 		desc = self.description.split('\n')
 		for index in range(0, len(desc)):
-			if index == 0: print desc[index]
-			if index != 0: print "                   %s" % desc[index]
-		print "Expected result:   %s" % self.expectedResult
+			if index == 0: print(desc[index])
+			if index != 0: print("                   %s" % desc[index])
+		print("Expected result:   %s" % self.expectedResult)
 
 class XMLManualTestParser:
 	def __init__(self, xmlfile):

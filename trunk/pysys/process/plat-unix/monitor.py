@@ -188,7 +188,7 @@ class ProcessMonitor:
 # used to run class from the command line
 if __name__ == "__main__":
 	if len(sys.argv) < 5:
-		print "Usage: monprocess.py <pid> <interval> <duration> <filename>"
+		print("Usage: monprocess.py <pid> <interval> <duration> <filename>")
 	else:
 		try: 
 			pid = int(sys.argv[1])
@@ -196,7 +196,7 @@ if __name__ == "__main__":
 			duration = int(sys.argv[3])
 			file = sys.argv[4]
 		except Exception: 
-			print "Process ID, interval and duration should be valid integers"
+			print("Process ID, interval and duration should be valid integers")
 			sys.exit(-1)	
 		
 		monitor = ProcessMonitor(pid, interval, file)

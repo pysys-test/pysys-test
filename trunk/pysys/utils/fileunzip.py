@@ -87,8 +87,8 @@ def unzip(zfilename, replace=False, binary=False):
 # entry point for running the script as an executable
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
-		print "Usage: fileunzip <unzip> <file> or"
-		print "					<unzipall> <path>"
+		print("Usage: fileunzip <unzip> <file> or")
+		print("					<unzipall> <path>")
 		sys.exit()
 	else:
 		try:
@@ -97,5 +97,5 @@ if __name__ == "__main__":
 			elif sys.argv[1] == 'unzipall':
 				status = unzipall(sys.argv[2])
 		except Exception:
-			print "caught %s: %s" % (sys.exc_info()[0], sys.exc_info()[1])
-			print "unable to perform unzip operation" 
+			print("caught %s: %s" % (sys.exc_info()[0], sys.exc_info()[1]))
+			print("unable to perform unzip operation") 

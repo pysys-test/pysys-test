@@ -51,11 +51,11 @@ if __name__ == "__main__":
 		elif len(sys.argv) == 2:
 			count = linecount(sys.argv[1])
 		else:
-			print "Usage: lineCount.py <file> [regexpr]"
+			print("Usage: lineCount.py <file> [regexpr]")
 			sys.exit()
 
-		print "Line count =	 %d" % (count)
+		print("Line count =	 %d" % (count))
 
 	except FileNotFoundException as value:
-		print "caught %s: %s" % (sys.exc_info()[0], value)
-		print "unable to perform line count... exiting"
+		print("caught %s: %s" % (sys.exc_info()[0], value))
+		print("unable to perform line count... exiting")

@@ -62,7 +62,7 @@ def filecopy(src, dst):
 # entry point for running the script as an executable
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
-		print "Usage: fileunzip <src> <dst>"
+		print("Usage: fileunzip <src> <dst>")
 		sys.exit()
 	else:
 		filecopy(sys.argv[1], sys.argv[2])

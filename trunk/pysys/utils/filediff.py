@@ -171,7 +171,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 # entry point for running the script as an executable
 if __name__ == "__main__":
 	if len(sys.argv) < 3:
-			print "Usage: filediff.py <file1> <file2> [regexpr1 [regexp2]...]"
+			print("Usage: filediff.py <file1> <file2> [regexpr1 [regexp2]...]")
 			sys.exit()
 	else:	
 		ignore = []
@@ -181,13 +181,13 @@ if __name__ == "__main__":
 		try:
 			status = filediff(sys.argv[1], sys.argv[2], ignore)
 		except FileNotFoundException as value:
-			print "caught %s: %s" % (sys.exc_info()[0], value)
-			print "unable to diff files... exiting"
+			print("caught %s: %s" % (sys.exc_info()[0], value))
+			print("unable to diff files... exiting")
 		else:
 			if status == True:
-				print "No differences detected"
+				print("No differences detected")
 			else:
-				print "Differences detected"
+				print("Differences detected")
 			
 
 
