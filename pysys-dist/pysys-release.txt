@@ -109,14 +109,14 @@ Other fixes and new features:
   to be printed underneath each failure outcome, to make it easy to quickly 
   find and open the relevant files to debug the failure. 
 - Added a --progress command line option (can also be switched on using 
-	the PYSYS_PROGRESS=true environment variable), which logs a summary of 
-	how many test have executed, outcomes, a list of most recent failure 
-	reasons and a list of what other tests are currently executing. This 
-	provides very helpful feedback to the user while executing a long 
-	test run. The progress reporting is implemented in a fully extensible 
-	way using a new kind of 'progress' result writer. A custom progress 
-	result writer class can be configured for a project; if none is 
-	specified the default ConsoleProgressResultsWriter is added automatically. 
+  the PYSYS_PROGRESS=true environment variable), which logs a summary of 
+  how many test have executed, outcomes, a list of most recent failure 
+  reasons and a list of what other tests are currently executing. This 
+  provides very helpful feedback to the user while executing a long 
+  test run. The progress reporting is implemented in a fully extensible 
+  way using a new kind of 'progress' result writer. A custom progress 
+  result writer class can be configured for a project; if none is 
+  specified the default ConsoleProgressResultsWriter is added automatically. 
 
 
  
