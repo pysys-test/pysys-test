@@ -56,7 +56,7 @@ __status__  = "Production"
 __version__ = "1.3.0"
 """The version of this release."""
 
-__date__ = "DD-MMM-YYYY"
+__date__ = "06-April-2018"
 """The date of this release."""
 
 __all__     = [ "constants",
