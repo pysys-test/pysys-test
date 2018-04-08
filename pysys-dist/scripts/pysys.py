@@ -17,16 +17,13 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, sys, time, logging
-script_path = os.path.abspath(sys.path[0])
-# the sys.path starts with the directory containing pysys.py which we want to remove as 
+import os, sys, logging
+
+# the sys.path starts with the directory containing pysys.py which we want to remove as
 # that dir might be anywhere and could contain anything; it's not needed for locating 
 # the pysys modules since those will be in site-packages once pysys is installed
+script_path = os.path.abspath(sys.path[0])
 sys.path = [p for p in sys.path if os.path.abspath(p) != script_path]
-
-if os.path.basename(os.path.dirname(script_path)) == 'pysys-dist':
-	# allows running pysys.py from source without installing it
-	sys.path.append(os.path.dirname(os.path.dirname(script_path)))
 
 # before anything else, configure the logger
 from pysys import log, stdoutHandler
@@ -41,7 +38,6 @@ from pysys.constants import *
 
 from pysys.utils.loader import import_module
 from pysys.launcher.console import ConsoleLaunchHelper
-from pysys.launcher.console import ConsoleMakeTestHelper
 from pysys.launcher.console import ConsolePrintHelper
 from pysys.launcher.console import ConsoleCleanTestHelper
 
