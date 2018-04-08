@@ -31,10 +31,9 @@ on the file system, and provides utilities for parsing command line arguments in
 to launch operations against a set of tests etc.  
 
 """
-__all__ = [ "createDescriptors",
-			"console" ]
+__all__ = [ "createDescriptors","console" ]
 
-import sys, os, os.path, glob, getopt, re, string, logging
+import os.path, string
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -43,9 +42,7 @@ except NameError:
 	import sets
 	from sets import Set as set
 
-from pysys import log
 from pysys.constants import *
-from pysys.exceptions import *
 from pysys.xml.descriptor import XMLDescriptorParser
 
 
@@ -99,7 +96,8 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 		for t in testIdSpecs:
 			try:
 				index = index1 = index2 = -1
-				t = t.rstrip('/\\') # ignore trailing directory separators which can be added by shell completion and are harmless
+				t = t.rstrip('/\\')
+
 				if re.search('^[\w_]*$', t):
 					for i in range(0,len(descriptors)):
 						if idMatch(descriptors[i].id, t): index = i
@@ -126,12 +124,11 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 
 				# each specified test patten must match something, else probably user made a typo
 				if not matches: raise Exception("No matches for: '%s'", t)
-				
+				tests.extend(matches)
+
 			except Exception:
 				raise Exception("Unable to locate requested testcase(s): '%s'"%t)
-			# don't add duplicates
-			for m in matches:
-				if m not in tests: tests.append(m)
+
 				
 	# trim down the list based on the type
 	if type:
@@ -173,7 +170,6 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 			else:
 				index = index +1
 
-
 	# trim down the list based on the traceability
 	if trace:
 		index = 0
@@ -187,5 +183,5 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 		raise Exception("The supplied options did not result in the selection of any tests")
 	else:
 		return tests
-		
+
 
