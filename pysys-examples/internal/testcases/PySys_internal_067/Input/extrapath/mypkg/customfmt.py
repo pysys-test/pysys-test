@@ -1,7 +1,7 @@
-from pysys.utils.logutils import DefaultPySysLoggingFormatter
+from pysys.utils.logutils import ColorLogFormatter
 import logging, os
 
-class CustomFormatter(DefaultPySysLoggingFormatter):
+class CustomFormatter(ColorLogFormatter):
 	def __init__(self, optionsDict, isStdOut):
 		super(CustomFormatter, self).__init__(optionsDict, isStdOut)
 		

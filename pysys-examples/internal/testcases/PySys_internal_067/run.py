@@ -6,7 +6,6 @@ import os, sys, math, shutil
 class PySysTest(BaseTest):
 
 	def execute(self):
-		
 		shutil.copytree(self.input, self.output+'/test')
 
 		env = dict(os.environ)
@@ -18,7 +17,6 @@ class PySysTest(BaseTest):
 			stdout = 'pysys.out', stderr='pysys.err', displayName='pysys', 
 			ignoreExitStatus=False, abortOnError=True)
 		self.logFileContents('pysys.out', maxLines=0)
-		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			
 	def validate(self):
 		self.assertGrep('pysys.out', expr=r'Failed to format log message', contains=False)
