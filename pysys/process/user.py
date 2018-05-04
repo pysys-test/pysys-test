@@ -23,7 +23,7 @@ from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
-from pysys.utils.logutils import DefaultPySysLoggingFormatter
+from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 
@@ -170,8 +170,7 @@ class ProcessUser(object):
 			log.info("%s", sys.exc_info()[1], exc_info=0)
 		except ProcessTimeout:
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
-			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout, extra={
-				DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'timed out'})
+			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			process.stop()
 		else:
 			self.processList.append(process)
@@ -255,8 +254,7 @@ class ProcessUser(object):
 				log.info("Process %s terminated after %d secs", process, time.time()-t)
 		except ProcessTimeout:
 			if not abortOnError:
-				log.warn("Ignoring timeout waiting for process %r after %d secs", process, time.time()-t, extra={
-					DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'timed out'})
+				log.warn("Ignoring timeout waiting for process %r after %d secs", process, time.time() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout), self.__callRecord())
 
@@ -435,8 +433,7 @@ class ProcessUser(object):
 				if abortOnError:
 					self.abort(TIMEDOUT, msg, self.__callRecord())
 				else:
-					log.warn(msg, extra={
-						DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'timed out'})
+					log.warn(msg, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 				break
 			
 			if process and not process.running():
@@ -540,11 +537,10 @@ class ProcessUser(object):
 		if outcomeReason and printReason:
 			if outcome in FAILS:
 				if callRecord==None: callRecord = self.__callRecord()
-				log.warn('%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), '[%s]'%','.join(callRecord) if callRecord!=None else '', extra={
-					DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower(), DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:1})
+				log.warn('%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), '[%s]'%','.join(callRecord) if callRecord!=None else '',
+						 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 			else:
-				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra={
-					DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower(), DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:1})
+				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
@@ -620,21 +616,18 @@ class ProcessUser(object):
 		"""
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
 
+
 	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False):
 		""" Searches for a regular expression in the specified file, and returns it. 
 
-		If the regex contains groups, the specified group is returned. 
-		
-		If the expression is not found, an exception is raised, 
-		unless getAll=True or returnNoneIfMissing=True. 
-		
-		e.g. 
+		If the regex contains groups, the specified group is returned. If the expression is not found, an exception is raised,
+		unless getAll=True or returnNoneIfMissing=True. For example;
+
 		self.getExprFromFile('test.txt', 'myKey="(.*)"') on a file containing 'myKey="foobar"' would return "foobar"
 		self.getExprFromFile('test.txt', 'foo') on a file containing 'myKey=foobar' would return "foo"
 		
 		@param path: file to search (located in the output dir unless an absolute path is specified)
-		@param expr: the regular expression, optionally containing the regex group operator (...) to specify what will be 
-		returned
+		@param expr: the regular expression, optionally containing the regex group operator (...)
 		@param groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ['1'] meaning 
 		the first group. If more than one group is specified, the result will be a tuple of group values, otherwise the
 		result will be the value of the group at the specified index.
@@ -657,32 +650,24 @@ class ProcessUser(object):
 						matches.append(match.group(0))
 					else: 
 						return match.group(0)
-			if returnAll: 
-				return matches
+
+			if returnAll: return matches
 			if returnNoneIfMissing: return None
-			# throw an easy to understand error, since it's likely subsequent steps would fail anyway in this case
 			raise Exception('Could not find expression "%s" in %s'%(expr, os.path.basename(path)))
-		
+
+
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False):
-		""" Logs some or all the lines in the specified file. 
+		""" Logs some or all of the lines in the specified file.
 		
-		If the file does not exist or cannot be opened, does nothing. 
-		
-		This method is useful for providing key diagnostic information 
-		(e.g. error messages from tools executed by the test) directly in run.log, 
+		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
+		diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
 		to make test failures easier to triage quickly. 
 		
-		@param path: May be an absolute path, or relative to the 
-			test output directory. If None or cannot be opened, this is a no-op. 
-		@param includes: Optional list of regex strings, for example [' ERROR.*', ' WARN.*']. 
-			If specified, only matches of these regexes will be logged. 
-		@param excludes: Optional list of regex strings. If specified, 
-			no line containing these will be logged. 
-		@param maxLines: Upper limit on the number of lines from the file 
-			that will be logged. Set to zero for unlimited. 
-		@param tail: Prints the _last_ 'maxLines' in the file rather than 
-			the first 'maxLines'.
-			
+		@param path: May be an absolute, or relative to the test output directory
+		@param includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
+		@param excludes: Optional list of regex strings. If specified, no line containing these will be logged
+		@param maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
+		@param tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
 		@return: True if anything was logged, False if not
 		
 		"""
@@ -725,7 +710,7 @@ class ProcessUser(object):
 		if not tolog:
 			return False
 			
-		logextra = {DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'filecontents'}
+		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
 		self.log.info('Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
 			self.log.info('  %s', l, extra=logextra)

@@ -17,9 +17,8 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, os.path, sys, re, logging
+import sys
 
-from pysys import log
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 

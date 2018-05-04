@@ -63,7 +63,7 @@ import logging, time, urlparse, os, stat
 from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.utils.logutils import DefaultPySysLoggingFormatter
+from pysys.utils.logutils import ColorLogFormatter
 
 from xml.dom.minidom import getDOMImplementation
 
@@ -703,18 +703,18 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 			for outcome in list(self.results[cycle].keys()):
 				if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
 		if fails == 0:
-			log.critical("	THERE WERE NO NON PASSES", extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'passed'})
+			log.critical("	THERE WERE NO NON PASSES", extra=ColorLogFormatter.tag(LOG_PASSES))
 		else:
 			for cycle in list(self.results.keys()):
 				cyclestr = ''
 				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
 				for outcome in FAILS:
 					for (id, reason, outputdir) in self.results[cycle][outcome]: 
-						log.critical("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[outcome].lower()})
+						log.critical("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra=ColorLogFormatter.tag(LOOKUP[outcome].lower()))
 						if showOutputDir:
 							log.critical("      %s", os.path.normpath(os.path.relpath(outputdir)))
 						if showOutcomeReason and reason:
-							log.critical("      %s", reason, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'outcomereason'})
+							log.critical("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
 
 
 class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
@@ -767,19 +767,19 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		
 		timediv = 1
 		if time.time()-self.startTime > 60: timediv = 60
-		log.info('--- Progress: completed %d/%d = %0.1f%% of tests in %d %s', executed, self.numTests, 100.0*executed/self.numTests, int((time.time()-self.startTime)/timediv), 
-			'seconds' if timediv==1 else 'minutes', extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'progress'})
+		log.info('--- Progress: completed %d/%d = %0.1f%% of tests in %d %s', executed, self.numTests, 100.0 * executed / self.numTests, int((time.time()-self.startTime)/timediv),
+			'seconds' if timediv==1 else 'minutes', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 		failednumber = sum([self.outcomes[o] for o in FAILS])
 		passed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o not in FAILS and self.outcomes[o]>0])
 		failed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o in FAILS and self.outcomes[o]>0])
-		if passed: log.info('      %s (%0.1f%%)', passed, 100.0*(executed-failednumber)/executed, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'passed'})
-		if failed: log.info('      %s', failed, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'failed'})
+		if passed: log.info('      %s (%0.1f%%)', passed, 100.0 * (executed-failednumber) / executed, extra=ColorLogFormatter.tag(LOG_PASSES))
+		if failed: log.info('      %s', failed, extra=ColorLogFormatter.tag(LOG_FAILURES))
 		if self._recentFailureReasons:
-			log.info('    Recent failures: ', extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'progress'})
+			log.info('    Recent failures: ', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 			for f in self._recentFailureReasons:
-				log.info('      '+f, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'failed'})
+				log.info('      ' + f, extra=ColorLogFormatter.tag(LOG_FAILURES))
 		inprogress = list(self.inprogress)
 		if self.threads>1 and inprogress:
-			log.info('    Currently executing: %s', ', '.join(sorted(inprogress)), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'progress'})
-		log.info('-'*62, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'progress'}) 
+			log.info('    Currently executing: %s', ', '.join(sorted(inprogress)), extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
+		log.info('-' * 62, extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 

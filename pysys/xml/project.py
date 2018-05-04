@@ -17,12 +17,12 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, os.path, sys, string, logging, time, xml.dom.minidom
+import os, os.path, sys, logging, xml.dom.minidom
 
 from pysys.constants import *
 from pysys import __version__
 from pysys.utils.loader import import_module
-from pysys.utils.logutils import DefaultPySysLoggingFormatter
+from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
@@ -92,26 +92,25 @@ class XMLProjectParser:
 				raise Exception("No <pysysproject> element supplied in project file")
 			else:
 				self.root = self.doc.getElementsByTagName('pysysproject')[0]
-		
+
+
 	def checkVersions(self):
-		# fail fast and clearly if user has said they need a more recent PySys 
-		# than this one
 		requirespython = self.root.getElementsByTagName('requires-python')
 		if requirespython and requirespython[0].firstChild: 
 			requirespython = requirespython[0].firstChild.nodeValue
-			if requirespython: # ignore if empty
-				thisversion = sys.version_info
+			if requirespython:
 				if list(sys.version_info) < list(map(int, requirespython.split('.'))):
 					raise Exception('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join(map(str, sys.version_info[:3])), sys.executable))
 
 		requirespysys = self.root.getElementsByTagName('requires-pysys')
 		if requirespysys and requirespysys[0].firstChild: 
 			requirespysys = requirespysys[0].firstChild.nodeValue
-			if requirespysys: # ignore if empty
+			if requirespysys:
 				thisversion = __version__
 				if list(map(int, thisversion.split('.'))) < list(map(int, requirespysys.split('.'))):
 					raise Exception('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
-		
+
+
 	def unlink(self):
 		if self.doc: self.doc.unlink()	
 
@@ -168,10 +167,9 @@ class XMLProjectParser:
 			for m in matches:
 				try:
 					insert = os.environ[m[1]]
-				except Exception: # presumably a KeyError
-					if default==value: # if even default can't be resolved avoid infinite loop and tell user
+				except Exception:
+					if default==value:
 						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
-					# fall back to default, which we will then try to expand if necessary
 					value = default
 					break
 				value = value.replace(m[0], insert)
@@ -185,11 +183,10 @@ class XMLProjectParser:
 			for m in matches:
 				try:
 					insert = self.properties[m[1]]
-				except Exception as e: # presumably a KeyError
+				except Exception as e:
 					log.debug('Failed to expand properties in "%s" - %s: %s', value, e.__class__.__name__, e)
-					if default==value: # if even default can't be resolved avoid infinite loop and tell user
+					if default==value:
 						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
-					# fall back to default, which we will then try to expand if necessary
 					value = default
 					break
 				value = value.replace(m[0], insert)
@@ -203,39 +200,8 @@ class XMLProjectParser:
 		except Exception:
 			return DEFAULT_RUNNER
 
-	def _parseClassAndConfigDict(self, node, defaultClass):
-		"""
-		Parses a dictionary of arbitrary options and a python class out of 
-		the specified XML node. 
-		
-		The node may optionally contain classname and module (if not specified 
-		as a separate attribute, module will be extracted from the first part of classname); 
-		any other attributes will be returned in the optionsDict, as will <option name=""></option> child elements. 
-		
-		@param node: The node, may be None
-		@param defaultClass: a string specifying the default fully-qualified class
-		@return: a tuple of (pythonclass, propertiesdict)
-		"""
-		optionsDict = {}
-		if node:
-			for att in range(node.attributes.length):
-				value = self.expandFromEnvironent(node.attributes.item(att).value, None)
-				optionsDict[node.attributes.item(att).name] = self.expandFromProperty(value, None)
-			for tag in node.getElementsByTagName('property'):
-				assert tag.getAttribute('name')
-				value = self.expandFromEnvironent(tag.getAttribute("value"), tag.getAttribute("default"))
-				optionsDict[tag.getAttribute('name')] = self.expandFromProperty(value, tag.getAttribute("default"))
-		
-		classname = optionsDict.pop('classname', defaultClass)
-		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
-		classname = classname.split('.')[-1]
-		module = import_module(mod, sys.path)
-		cls = getattr(module, classname)
-		
-		return cls, optionsDict
 
 	def getPerformanceReporterDetails(self):
-		summaryfile = None
 		nodeList = self.root.getElementsByTagName('performance-reporter')
 		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.utils.perfreporter.CSVPerformanceReporter')
 			
@@ -244,6 +210,7 @@ class XMLProjectParser:
 		if optionsDict: raise Exception('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
 		
 		return cls, summaryfile
+
 
 	def getMakerDetails(self):
 		try:
@@ -261,17 +228,19 @@ class XMLProjectParser:
 			formattersNodeList = formattersNodeList[0].getElementsByTagName('formatter')
 		if formattersNodeList:
 			for formatterNode in formattersNodeList:
-				cls, optionsDict = self._parseClassAndConfigDict(formatterNode, 'pysys.utils.logutils.DefaultPySysLoggingFormatter')
-				
-				fname = optionsDict.pop('name', None) # every formatter must have a name
-				if fname not in ['stdout', 'runlog']: raise Exception('Formatter name "%s" is invalid - must be stdout or runlog'%fname)
-				f = cls(optionsDict, isStdOut=fname=='stdout')
+				fname = formatterNode.getAttribute('name')
+				if fname not in ['stdout', 'runlog']:
+					raise Exception('Formatter "%s" is invalid - must be stdout or runlog'%fname)
+
 				if fname == 'stdout':
-					stdout = f
+					cls, options = self._parseClassAndConfigDict(formatterNode, 'pysys.utils.logutils.ColorLogFormatter')
+					stdout = cls(options)
 				else:
-					runlog = f
+					cls, options = self._parseClassAndConfigDict(formatterNode, 'pysys.utils.logutils.BaseLogFormatter')
+					runlog = cls(options)
 		return stdout, runlog
-		
+
+
 	def getWriterDetails(self):
 		writersNodeList = self.root.getElementsByTagName('writers')
 		if writersNodeList == []: return [DEFAULT_WRITER]
@@ -311,7 +280,6 @@ class XMLProjectParser:
 				value = self.expandFromProperty(raw, "")
 				relative = pathNode.getAttribute("relative")
 				if not value: 
-					# this probably suggests a malformed project XML 
 					log.warn('Cannot add directory to the python <path>: "%s"', raw)
 					continue
 
@@ -328,6 +296,36 @@ class XMLProjectParser:
 		f = open(self.xmlfile, 'w')
 		f.write(self.doc.toxml())
 		f.close()
+
+
+	def _parseClassAndConfigDict(self, node, defaultClass):
+		"""Parses a dictionary of arbitrary options and a python class out of the specified XML node.
+
+		The node may optionally contain classname and module (if not specified as a separate attribute,
+		module will be extracted from the first part of classname); any other attributes will be returned in
+		the optionsDict, as will <option name=""></option> child elements.
+
+		@param node: The node, may be None
+		@param defaultClass: a string specifying the default fully-qualified class
+		@return: a tuple of (pythonclass, propertiesdict)
+		"""
+		optionsDict = {}
+		if node:
+			for att in range(node.attributes.length):
+				value = self.expandFromEnvironent(node.attributes.item(att).value, None)
+				optionsDict[node.attributes.item(att).name] = self.expandFromProperty(value, None)
+			for tag in node.getElementsByTagName('property'):
+				assert tag.getAttribute('name')
+				value = self.expandFromEnvironent(tag.getAttribute("value"), tag.getAttribute("default"))
+				optionsDict[tag.getAttribute('name')] = self.expandFromProperty(value, tag.getAttribute("default"))
+
+		classname = optionsDict.pop('classname', defaultClass)
+		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
+		classname = classname.split('.')[-1]
+		module = import_module(mod, sys.path)
+		cls = getattr(module, classname)
+		return cls, optionsDict
+
 
 class Project:
 	"""Class detailing project specific information for a set of PySys tests.
@@ -349,14 +347,12 @@ class Project:
 		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
 		self.makerClassname, self.makerModule = DEFAULT_MAKER
 		self.writers = [DEFAULT_WRITER]
-		self._createPerformanceReporters = lambda outdir: [] # no-op if there is no project XML file
+		self._createPerformanceReporters = lambda outdir: []
 
-		from pysys.utils.logutils import DefaultPySysLoggingFormatter # added here to avoid circular reference
 		stdoutformatter, runlogformatter = None, None
 
 		self.projectFile = None
 		if projectFile is not None and os.path.exists(os.path.join(root, projectFile)):
-			# parse the project file
 			from pysys.xml.project import XMLProjectParser
 			try:
 				parser = XMLProjectParser(root, projectFile)
@@ -364,7 +360,6 @@ class Project:
 				raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 			else:
 				parser.checkVersions()
-
 				self.projectFile = os.path.join(root, projectFile)
 				
 				# get the properties
@@ -392,10 +387,9 @@ class Project:
 				stdoutformatter, runlogformatter = parser.createFormatters()
 				
 				# set the data attributes
-				parser.unlink()	
-		if not stdoutformatter: stdoutformatter = DefaultPySysLoggingFormatter({}, isStdOut=True)
-		if not runlogformatter: runlogformatter = DefaultPySysLoggingFormatter({}, isStdOut=False)
+				parser.unlink()
+
+		if not stdoutformatter: stdoutformatter = ColorLogFormatter({}, isStdOut=True)
+		if not runlogformatter: runlogformatter = BaseLogFormatter({}, isStdOut=False)
 		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
-			
-
