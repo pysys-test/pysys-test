@@ -28,49 +28,34 @@ else:
 
 lib_dir = distutils.sysconfig.get_python_lib(plat_specific=1)
 
+IS_WINDOWS = sys.platform.lower().startswith('win')
+
 def get_site_packages_path():
-	if sys.platform.lower().startswith('win'):
+	if IS_WINDOWS:
 		return os.path.join("Lib", "site-packages")
 	else:
 		return os.path.join("lib", "python%s" % sys.version[:3], "site-packages")
 
-		
-if sys.platform.lower().startswith('win'):
-	setup(cmdclass = {'build_py': build_py},
-		  name='PySys',
-		  version=pysys.__version__,
-		  author=pysys.__author__,
-		  author_email=pysys.__author_email__,
-		  description='Python System Test Framework',
-		  url="http://www.sourceforge.net/projects/pysys",
-		  scripts = ['pysys-dist/scripts/pysys.py', 'pysys-dist/scripts/pysys_postinstall.py'],
-		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
-					'pysys.process', 'pysys.process.plat-win32', 
-					'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
-					'pysys.writer', 'pysys.xml'],
-		  data_files=[('%s/pysys-doc' % get_site_packages_path(), glob.glob('pysys-doc/*.*')),
-					  (get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
+data_files = [(get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
 					  (get_site_packages_path(), ['pysys-dist/pysys-licence.txt']),
 					  (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]
-		)
-else:
-	setup(cmdclass = {'build_py': build_py},
-		  name='PySys',
-		  version=pysys.__version__,
-		  author=pysys.__author__,
-		  author_email=pysys.__author_email__,
-		  description='Python System Test Framework',
-		  url="http://www.sourceforge.net/projects/pysys",
-		  scripts = ['pysys-dist/scripts/pysys.py'],
-		  packages=['pysys', 'pysys.launcher',  'pysys.manual',
-					'pysys.process', 'pysys.process.plat-win32', 
-					'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
-					'pysys.writer', 'pysys.xml'],
-		  data_files=[(get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
-					  (get_site_packages_path(), ['pysys-dist/pysys-licence.txt']),
-					  (get_site_packages_path(), ['pysys-dist/pysys-log.xsl'])]
-		)
-
+if IS_WINDOWS: data_files.append(('%s/pysys-doc' % get_site_packages_path(), glob.glob('pysys-doc/*.*')))
+	
+setup(cmdclass = {'build_py': build_py},
+	  name='PySys',
+	  version=pysys.__version__,
+	  author=pysys.__author__,
+	  author_email=pysys.__author_email__,
+	  description='Python System Test Framework',
+	  url="http://www.sourceforge.net/projects/pysys",
+	  scripts = ['pysys-dist/scripts/pysys.py', 'pysys-dist/scripts/pysys_postinstall.py'] if IS_WINDOWS
+	  	else ['pysys-dist/scripts/pysys.py'],
+	  packages=['pysys', 'pysys.launcher',  'pysys.manual',
+				'pysys.process', 'pysys.process.plat-win32', 
+				'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
+				'pysys.writer', 'pysys.xml'],
+	  data_files=data_files,
+	)
 	
 # to run on windows use
 # python c:\Python24\Scripts\epydoc.py --no-private --html -o pysys-doc pysys
