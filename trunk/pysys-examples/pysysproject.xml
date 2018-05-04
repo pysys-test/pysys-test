@@ -40,6 +40,18 @@
 
 <pysysproject>
 
+	<!--
+	Specify a minimum required pysys version to run these tests
+	-->
+	<requires-pysys>1.3.0</requires-pysys>
+
+
+	<!--
+	Specify a minimum required python version to run these tests
+	-->
+	<requires-python>2.7.0</requires-python>
+
+
 	<!-- 
 	Get a reference to the environment, which can then be used as a substitution variable 
 	within the project file, e.g. ${env.PROCESSORS} would be substituted with the value of
@@ -94,7 +106,8 @@
 	substitution through the ${variable} syntax (where variable must be defined before the import
 	 -->
 	<property file="${osfamily}.properties" />
-	
+
+
 	<!-- 
 	Add a path to the python path to allow importing custom modules, e.g. extensions to the 
 	BaseTest or BaseRunner classes, or customer test output writers. If the relative attribute 
@@ -105,16 +118,7 @@
 	<path value="./src" relative="true" />
 	-->
 
-	<!-- 
-	Can specify a minimum required pysys version to run these tests
-	-->
-	<requires-pysys>1.3.0</requires-pysys>
 
-	<!-- 
-	Can specify a minimum required python version to run these tests
-	-->
-	<requires-python>2.7.0</requires-python>
-	
 	<!-- 
 	Use a custom runner class that extends the BaseRunner class distributed with PySys. Extensions to 
 	the BaseRunner are used to define custom setup and tear down operations before running the set of 
@@ -169,8 +173,8 @@
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
 			-->
-		</writer>	
-		
+		</writer>
+
 		<!--
 		Add in the test results writer if straight text output is required 
 		
@@ -179,7 +183,7 @@
 		</writer>
 		-->
 
-    <!--
+    	<!--
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
@@ -197,7 +201,6 @@
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
 			<property name="outputDir" value="${root}/target/pysys-reports"/>
 		</writer>
-		
 		-->
 
 		<!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run, 
@@ -213,20 +216,37 @@
 	
 	
 	<!--
-	Allow setting the message and date format of the python logging handlers for the test output to stdout, 
-	and to the run log of a testcase. The messagefmt atribute allows setting of the message format and 
-	defaults to '%(asctime)s %(levelname)-5s %(message)s' when not specified - see the Python logging module 
-	documentation for more information on the specifiers. The datefmt attribute allows setting of the date 
-	format when the %(asctime)s message format specifier is set - see the Python time.strftime module 
-	documentation for a full description of the time format specifiers.
+	Specify custom formatters for logging to the console or run.log, and/or configure the formatter
+	appropriately through custom properties. Custom formatters should be defined using the classname
+	and module attributes and should extend the pysys.utils.logutils.BaseLogFormatter class. If no
+	classname and module is given the default pysys.utils.logutils.ColorLogFormatter is assumed.
+
+	The ColorLogFormatter allows specification of the message and date strings using the messagefmt and
+	datafmt attributes. Enabling color to the console (stdout) formatter can be done using the color
+	property, and the colors for supported message types can be specified via the color:<category> property.
+	See below for more details for the default color types and categories. Supported colors are BLUE,
+	GREEN, YELLOW, RED, MAGENTA, CYAN, and WHITE.
 	-->
 	<formatters>
-		<formatter name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S"/>
-		
-		<!--
-		Example setting the format for the run log messages. 
-		<formatter name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
-		-->
+		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
+				name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
+			<property name="color" value="true"/>
+			<property name="color:warn" value="MAGENTA"/>
+			<property name="color:error" value="RED"/>
+			<property name="color:traceback" value="RED"/>
+			<property name="color:debug" value="BLUE"/>
+			<property name="color:filecontents" value="BLUE"/>
+			<property name="color:details" value="CYAN"/>
+			<property name="color:outcomereason" value="CYAN"/>
+			<property name="color:progress" value="CYAN"/>
+			<property name="color:timed out" value="MAGENTA"/>
+			<property name="color:failed" value="RED"/>
+			<property name="color:passed" value="GREEN"/>
+			<property name="color:skipped" value="YELLOW"/>
+		</formatter>
+
+		<formatter classname="BaseLogFormatter" module="pysys.utils.logutils"
+				name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 	</formatters>
 	
 </pysysproject>
