@@ -33,16 +33,10 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
-from pysys.utils.filecopy import filecopy
-from pysys.utils.filegrep import filegrep
-from pysys.utils.filediff import filediff
-from pysys.utils.filegrep import orderedgrep
-from pysys.utils.linecount import linecount
 from pysys.utils.fileutils import mkdir
-from pysys.process.helper import ProcessWrapper
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
-from pysys.utils.logutils import DefaultPySysLoggingFormatter
+from pysys.utils.logutils import BaseLogFormatter
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
 global_lock = threading.Lock()
@@ -323,8 +317,7 @@ class BaseRunner(ProcessUser):
 		Called on completion of running a testcase, either directly by the BaseRunner class (or 
 		a sub-class thereof), or from the ThreadPool.wait() when running with more than one worker thread. 
 		This method is always invoked from a single thread, even in multi-threaded mode. 
-		
-		
+
 		The method is responsible for calling of the testComplete() method of the runner, recording 
 		of the test result to the result writers, and for deletion of the test container object. 
 		
@@ -403,7 +396,6 @@ class TestContainer:
 		@param descriptor: A reference to the testcase descriptor
 		@param cycle: The cycle number of the test
 		@param runner: A reference to the runner that created this class
-
 		"""
 		self.descriptor = descriptor
 		self.cycle = cycle
@@ -456,11 +448,13 @@ class TestContainer:
 
 			log.info(62*"=")
 			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
-			log.info("Id   : %s", self.descriptor.id, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
-			if self.runner.cycle > 1: 
-				log.info("Cycle: %s", str(self.cycle+1), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
-			if len(title)>0: log.info("Title: %s", str(title[0]), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
-			for l in title[1:]: log.info("       %s", l, extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'details', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
+			log.info("Id   : %s", self.descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+			if len(title)>0:
+				log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+			for l in title[1:]:
+				log.info("       %s", l, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+			if self.runner.cycle > 1:
+				log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 			log.info(62*"=")
 		except KeyboardInterrupt:
 			self.kbrdInt = True
@@ -479,8 +473,7 @@ class TestContainer:
 			
 			except Exception:
 				exc_info.append(sys.exc_info())
-				self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner) 
-		# end of global_lock
+				self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner)
 
 		for writer in self.runner.writers:
 			try: 
@@ -540,10 +533,10 @@ class TestContainer:
 		try:
 			self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
 			log.info("")
-			log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'debug', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
-			log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:LOOKUP[self.testObj.getOutcome()].lower(), DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
+			log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
+			log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra=BaseLogFormatter.tag(LOOKUP[self.testObj.getOutcome()].lower(), 0))
 			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
-				log.info("Test failure reason: %s", self.testObj.getOutcomeReason(), extra={DefaultPySysLoggingFormatter.KEY_COLOR_CATEGORY:'outcomereason', DefaultPySysLoggingFormatter.KEY_COLOR_ARG_INDEX:0})
+				log.info("Test failure reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
 			log.info("")
 			
 			self.testFileHandlerRunLog.close()
@@ -562,7 +555,6 @@ class TestContainer:
 		
 		@param dir: The top level directory to be purged
 		@param delTop: Indicates if the top level directory should also be deleted
-		
 		"""
 		try:
 			for file in os.listdir(dir):

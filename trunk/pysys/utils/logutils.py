@@ -17,85 +17,87 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import logging, time, os, copy
+import copy
 
 from pysys.constants import *
-from pysys.exceptions import *
 
-class BasePySysLoggingFormatter(logging.Formatter):
-	"""
-	Base class for formatting for log messages, either destined for the stdout/console 
-	or for the run.log file. 
+class BaseLogFormatter(logging.Formatter):
+	"""Base class for formatting log messages.
 	
-	The default implementation delegates everything to L{logging.Formatter} using 
-	the configured messagefmt and datefmt. 
-	
-	Subclasses may be implemented to provide any required customizations, and 
-	can be registered by specifying classname= in the formatter node 
-	of the project configuration file. 
+	This implementation delegates everything to L{logging.Formatter} using the messagefmt and datefmt
+	properties. Subclasses may be implemented to provide required customizations, and can be registered
+	by specifying classname in the formatter node of the project configuration file.
 	"""
-	def __init__(self, propertiesDict, isStdOut):
+
+	# the key to add to the extra={} dict of a logger call to specify the category
+	CATEGORY = 'log_category'
+
+	# the key to add to the extra={} dict of a logger call to specify the arg index for the category
+	ARG_INDEX = 'log_arg_index'
+
+	@classmethod
+	def tag(cls, category, arg_index=None):
+		"""Return  dictionary to tag a string to format with color encodings.
+
+		@param category: The category, as defined in L{COLOR_CATEGORIES}
+		@param arg_index: The index of a string in the format message to color
+		@return: A dictionary that can then be used in calls to the logger
 		"""
-		Constructs a formatter. 
+		if arg_index is None: return {cls.CATEGORY:category}
+		else: return {cls.CATEGORY:category, cls.ARG_INDEX:arg_index}
+
+
+	def __init__(self, propertiesDict):
+		"""Create an instance of the formatter class.
+
+		The class is constructed with a dictionary of properties, which are configured by providing
+		<property name="..." value="..."/> elements or attributes on the formatter node of the project
+		configuration file. Entries in the properties should be specific to the class, and removed
+		when passing the properties to the super class, which will throw an exception if any unexpected
+		options are present
 		
-		@param propertiesDict: dictionary of formatter-specific options which can be customized; 
-		these are configured by providing <property name="..." value="..."/> elements or attributes 
-		on the formatter node of the project configuration file. 
-		Any properties handled by a subclass should be removed (popped) before passing the 
-		remaining propertiesDict to the super class, which will throw an exception 
-		if any unexpected options are present. 
-		
-		@param isStdOut: True if this formatter is producing output for stdout i.e. the console. 
-		Some formatters may treat console output differently to output to a file. 
+		@param propertiesDict: dictionary of formatter-specific options
+
 		"""
-		self.isStdOut = isStdOut
-		super(BasePySysLoggingFormatter, self).__init__(
-			propertiesDict.pop('messagefmt', DEFAULT_FORMAT_STDOUT if isStdOut else DEFAULT_FORMAT_RUNLOG),
-			propertiesDict.pop('datefmt', None)
-			)
+		self.name = propertiesDict.pop('name', None)
+
+		super(BaseLogFormatter, self).__init__(
+			propertiesDict.pop('messagefmt', DEFAULT_FORMAT),
+			propertiesDict.pop('datefmt', None) )
 		
 		if propertiesDict: raise Exception('Unknown formatter option(s) specified: %s'%', '.join(list(propertiesDict.keys())))
+
+
+class ColorLogFormatter(BaseLogFormatter):
+	"""Formatter supporting colored output to a console.
 	
-class DefaultPySysLoggingFormatter(BasePySysLoggingFormatter):
-	"""
-	The default formatter for creating log messages. 
-	
-	Supports coloring the console output if PYSYS_COLOR=true environment 
-	variable is set, or the "color" option is set to true on the formatter. 
-	The colors used for each colorable category defined by this class 
-	can be overridden by specifying "color:XXX" options, e.g. 
+	This implementation supports color coding of messages based on the category of the message,
+	and the index of the string in the format encoding. This implementation is the default for
+	console output, with the color coding enabled either by the color option on the formatter
+	set to true, or if PYSYS_COLOR=true is set in the environment. The colors used for each
+	category defined by this class can be overridden by specifying "color:XXX" options, e.g.
 	<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
+
 	"""
-	
-	KEY_COLOR_CATEGORY = 'pysys_color_category' # the key to add to the extra={} dict of a logger call to specify what kind of color to give it
-	KEY_COLOR_ARG_INDEX = 'pysys_color_arg_index' # the key to add to the extra={} dict of a logger call to color the specified formatted arg rather than the whole message
-	
-	# we don't want to hardcode the specific colors in the various places where we log stuff, so 
-	# use a lookup table here to map from colorable message "categories" to colors, 
-	# which can be overridden in configuration or a subclass. 
-	# All other outcomes not explicitly listed here are colored as "passed" or "failed"
+
+	# use a lookup map from message "categories" to colors,
 	COLOR_CATEGORIES = {
-		'warn':'MAGENTA',
-		'error':'RED',
-		'traceback':'RED',
-		'debug':'BLUE', # blue lines blend into black well, and highlighting debug lines makes it easier to read the non-debug lines
-		'filecontents':'BLUE', # these are effectively debug lines
-		'details':'CYAN', # details such as test id that are worth highlighting
-		'outcomereason':'CYAN', # this is key info so make it stand out in a different color
-		'progress':'CYAN', # this is key info so make it stand out in a different color
-		
-		# pick colors to make it easy to see at a glance whether it passed/failed/skipped; 
-		# timedout often indicates a loaded machine or mis-sized test so merits a distinct color
-		'timed out':'MAGENTA',
-		'failed':'RED',
-		'passed':'GREEN',
-		'skipped':'YELLOW',
-		
-		'end':'END',
+		LOG_WARN:'MAGENTA',
+		LOG_ERROR:'RED',
+		LOG_TRACEBACK:'RED',
+		LOG_DEBUG:'BLUE',
+		LOG_FILE_CONTENTS:'BLUE',
+		LOG_TEST_DETAILS:'CYAN',
+		LOG_TEST_OUTCOMES: 'CYAN',
+		LOG_TEST_PROGRESS: 'CYAN',
+		LOG_TIMEOUTS: 'MAGENTA',
+		LOG_FAILURES: 'RED',
+		LOG_PASSES: 'GREEN',
+		LOG_SKIPS: 'YELLOW',
+		LOG_END:'END',
 	}
 	
-	# By default we use standard ANSI escape sequences, supported by most unix terminals 
-	# and several libraries for windows too. Can be customized by a subclass if desired
+	# by default we use standard ANSI escape sequences, supported by most unix terminals
 	COLOR_ESCAPE_CODES = {
 		'BLUE': '\033[94m',
 		'GREEN':'\033[92m',
@@ -106,82 +108,91 @@ class DefaultPySysLoggingFormatter(BasePySysLoggingFormatter):
 		'WHITE':'\033[97m',
 		'END':'\033[0m',
 	}
-	
-	def __init__(self, propertiesDict, isStdOut):
-		# whether to color console output should usually be configured in the environment 
-		# rather than the pysys project, since it depends on the preference of the 
-		# person running the tests, and to what OS and shell/terminal type they are using
-		
-		# allow color:XXX prefixes to specify the color for particular categories
-		for o in list(propertiesDict.keys()):
-			if o.startswith('color:'):
-				self.COLOR_CATEGORIES[o[len('color:'):].lower()] = propertiesDict.pop(o).upper()
-		
-		self.color = propertiesDict.pop('color','')=='true'
-		self.color = isStdOut and (os.getenv('PYSYS_COLOR', 'false').lower() == 'true' or self.color)
+
+
+	def __init__(self, propertiesDict):
+		"""Create an instance of the formatter class."""
+
+		# extract to override entries in the color map from properties
+		for prop in list(propertiesDict.keys()):
+			if prop.startswith('color:'):
+				self.COLOR_CATEGORIES[prop[len('color:'):].lower()] = propertiesDict.pop(prop).upper()
+
+		self.color = propertiesDict.pop('color','').lower() == 'true'
+		self.color = (os.getenv('PYSYS_COLOR', 'false').lower() == 'true' or self.color)
 		if self.color: self.initColoringLibrary()
-		super(DefaultPySysLoggingFormatter, self).__init__(propertiesDict, isStdOut)
+
+		super(ColorLogFormatter, self).__init__(propertiesDict)
 
 		# ensure all outcomes are permitted as possible precedents		
 		for outcome in PRECEDENT:
 			if LOOKUP[outcome].lower() not in self.COLOR_CATEGORIES:
-				self.COLOR_CATEGORIES[LOOKUP[outcome].lower()] = self.COLOR_CATEGORIES['failed'] if outcome in FAILS else self.COLOR_CATEGORIES['passed']
+				self.COLOR_CATEGORIES[LOOKUP[outcome].lower()] = self.COLOR_CATEGORIES[LOG_FAILURES] if outcome in FAILS else self.COLOR_CATEGORIES[LOG_PASSES]
 		for cat in self.COLOR_CATEGORIES: assert self.COLOR_CATEGORIES[cat] in self.COLOR_ESCAPE_CODES, cat
 
+
 	def formatException(self, exc_info):
-		# override standard formatter to add coloring
-		return self.colorCategoryToEscapeSequence('traceback')+super(DefaultPySysLoggingFormatter, self).formatException(exc_info)+self.colorCategoryToEscapeSequence('end')
+		"""Format an exception for logging, returning the new value.
+
+		@param exc_info: The exception info
+		@return: The formatted message ready for logging
+
+		"""
+		return self.colorCategoryToEscapeSequence(LOG_TRACEBACK)+ super(ColorLogFormatter, self).formatException(exc_info) + \
+			   self.colorCategoryToEscapeSequence(LOG_END)
+
 
 	def format(self, record):
-		# override standard formatter to add coloring
+		"""Format a log record for logging, returning the new value.
+
+		@param record: The message to be formatted
+		@return: The formatted message ready for logging
+
+		"""
 		if self.color:
 			try:
-				cat = getattr(record, self.KEY_COLOR_CATEGORY, None)
+				cat = getattr(record, self.CATEGORY, None)
 				if not cat:
-					# if no category was explicitly specified, color warn and error lines
-					if record.levelname == 'WARN':
-						cat = 'warn'
-					elif record.levelname == 'ERROR':
-						cat = 'error'
-					elif record.levelname == 'DEBUG':
-						cat = 'debug'
-				if cat: # if there's something to color
+					if record.levelname == 'WARN': cat = LOG_WARN
+					elif record.levelname == 'ERROR': cat = LOG_ERROR
+					elif record.levelname == 'DEBUG': cat = LOG_DEBUG
+				if cat:
 					cat = cat.lower()
 					record = copy.copy(record)
-					i = getattr(record, self.KEY_COLOR_ARG_INDEX, None)
-					if i == None or not isinstance(record.args[i], str): # color whole line
-						record.msg = self.colorCategoryToEscapeSequence(cat)+record.msg+self.colorCategoryToEscapeSequence('end')
+					i = getattr(record, self.ARG_INDEX, None)
+					if i == None or not isinstance(record.args[i], str):
+						record.msg = self.colorCategoryToEscapeSequence(cat)+record.msg+self.colorCategoryToEscapeSequence(LOG_END)
 					else:
 						args = list(record.args)
-						args[i] = self.colorCategoryToEscapeSequence(cat)+args[i]+self.colorCategoryToEscapeSequence('end')
+						args[i] = self.colorCategoryToEscapeSequence(cat)+args[i]+self.colorCategoryToEscapeSequence(LOG_END)
 						record.args = tuple(args)
 					
 			except Exception as e:
 				log.debug('Failed to format log message "%s": %s'%(record.msg, repr(e)))
-		return super(DefaultPySysLoggingFormatter, self).format(record)
-	
+
+		return super(ColorLogFormatter, self).format(record)
+
+
 	def colorCategoryToEscapeSequence(self, category):
 		""" Return the escape sequence to be used for the specified category of logging output. 
 		
-		@param category: A colorable category such as 'passed' or 'warn'. In the default implementation 
-		of this class, categories should be in self.COLOR_CATEGORIES
-		@return: The escape sequence.  
+		@param category: The category of the log message
+		@return: The escape sequence
+
 		"""
 		color = self.COLOR_CATEGORIES.get(category, '<%s>'%category)
 		return self.COLOR_ESCAPE_CODES.get(color.upper(), '<%s>'%color)
-	
+
+
 	def initColoringLibrary(self):
-		"""
-		Initialize any python library required for ensuring ANSI escape sequences 
-		can be processed, e.g. for terminals such as Windows that do not do this 
-		automatically. The default implementation does nothing on Unix but on Windows 
-		attempts to load the "Colorama" library if is is present. 
+		"""Initialize any python library required for ensuring ANSI escape sequences can be processed.
+
+		The default implementation does nothing on Unix but on Windows attempts to load the "Colorama"
+		library if is is present.
+
 		"""
 		if OSFAMILY=='windows':
 			try:
-				# if user happens to have the colorama library installed, try to load it since 
-				# then we get coloring for free. If not, no harm done. User could provide 
-				# a subclass that loads a different library if desired. 
 				import colorama
 				colorama.init()
 			except Exception as e:
@@ -189,6 +200,5 @@ class DefaultPySysLoggingFormatter(BasePySysLoggingFormatter):
 			
 		# since sys.stdout may be been redirected using the above, we need to change the 
 		# stream that our handler points at
-		assert stdoutHandler.stream # before we change it make sure it's currently set
+		assert stdoutHandler.stream
 		stdoutHandler.stream = sys.stdout
-			

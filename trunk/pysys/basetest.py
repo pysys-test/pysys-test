@@ -168,10 +168,10 @@ class BaseTest(ProcessUser):
 		
 		The cleanup method performs actions to stop all processes started in the background and not 
 		explicitly killed during the test execution. It also stops all process monitors running in 
-		seperate threads, and any instances of the manual tester user interface. 
+		separate threads, and any instances of the manual tester user interface.
 		
-		Should a custom cleanup for a subclass be required, use 
-		L{addCleanupFunction} instead of overriding this method. 
+		Should a custom cleanup for a subclass be required, use L{addCleanupFunction} instead of overriding
+		this method.
 				
 		"""
 		try:

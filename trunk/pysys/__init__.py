@@ -78,8 +78,8 @@ __all__     = [ "constants",
 process_lock = threading.Lock()
 
 # customize the default logging names for display
-logging._levelNames[50] = 'CRIT'
-logging._levelNames[30] = 'WARN'
+logging.addLevelName(50, 'CRIT')
+logging.addLevelName(30, 'WARN')
 
 # class extensions for supporting multi-threaded nature
 class ThreadedStreamHandler(logging.StreamHandler):
