@@ -59,7 +59,7 @@ __version__ = "1.3.0"
 __date__ = "06-April-2018"
 """The date of this release."""
 
-__license__ == "GNU Lesser General Public License"
+__license__ = "GNU Lesser General Public License"
 """The PySys license."""
 
 __all__     = [ "constants",
