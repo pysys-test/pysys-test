@@ -389,7 +389,7 @@ class Project:
 				# set the data attributes
 				parser.unlink()
 
-		if not stdoutformatter: stdoutformatter = ColorLogFormatter({}, isStdOut=True)
-		if not runlogformatter: runlogformatter = BaseLogFormatter({}, isStdOut=False)
+		if not stdoutformatter: stdoutformatter = ColorLogFormatter({})
+		if not runlogformatter: runlogformatter = BaseLogFormatter({})
 		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
