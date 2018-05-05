@@ -69,7 +69,7 @@ CLASSIFIERS = [
 ]
 KEYWORDS = ['testing', 'qa', 'system testing', 'integration testing', 'unit testing']
 
-with codecs.open(os.path.abspath(os.path.dirname(__file__))+'/README.rst', "rb", "ascii") as f:
+with codecs.open(os.path.abspath(os.path.dirname(__file__))+'/pysys-dist/README.rst', "rb", "ascii") as f:
 	long_description = f.read()
 
 setup(cmdclass = {'build_py': build_py},
