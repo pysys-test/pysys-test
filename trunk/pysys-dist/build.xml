@@ -104,6 +104,7 @@
 	<target name="deploy.installer.sdist" depends="prepare">
 		<copy file="setup.py" tofile="../setup.py" />
 		<copy file="MANIFEST.in" tofile="../MANIFEST.in" />
+		<copy file="README.rst" tofile="../README.rst" />
  		<exec executable="${python.executable}" dir="..">
  			<env key="PYTHONPATH" value=".." /> 
 			<arg value="setup.py"/>

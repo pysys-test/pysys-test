@@ -95,10 +95,3 @@ setup(cmdclass = {'build_py': build_py},
 	  data_files=data_files,
 	)
 	
-# to run on windows use
-# python c:\Python24\Scripts\epydoc.py --no-private --html -o pysys-doc pysys
-# python.exe pysys-dist/setup.py bdist_wininst --install-script pysys_postinstall.py
-# winzip32.exe -min -a -r -p dist\PySys-examples.X.Y.Z.zip pysys-examples
-
-# to run on unix use
-# /usr/local/bin/python2.4 setup.py sdist
