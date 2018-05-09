@@ -2,8 +2,8 @@ from pysys.utils.logutils import ColorLogFormatter
 import logging, os
 
 class CustomFormatter(ColorLogFormatter):
-	def __init__(self, optionsDict, isStdOut):
-		super(CustomFormatter, self).__init__(optionsDict, isStdOut)
+	def __init__(self, optionsDict):
+		super(CustomFormatter, self).__init__(optionsDict)
 		
 	def colorCategoryToEscapeSequence(self, category):
 		if os.getenv('PYSYS_TEST_FRIENDLY_ESCAPES','')!='true': # use env var to allow running nested test to see results visually when running nested test on its own
