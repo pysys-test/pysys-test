@@ -64,6 +64,13 @@ def runTest(args):
 	runner = getattr(module, PROJECT.runnerClassname)(*args)
 	runner.start()
 	
+	for cycledict in runner.results.values():
+		for outcome in FAILS:
+			if cycledict.get(outcome, None):
+				sys.exit(2)
+				
+	sys.exit(0)
+	
 def makeTest(args):
 	module = import_module(PROJECT.makerModule, sys.path)
 	maker = getattr(module, PROJECT.makerClassname)("make")
