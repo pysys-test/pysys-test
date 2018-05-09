@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 			arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'],
 			environs = env, workingDir='test',
 			stdout = 'pysys.out', stderr='pysys.err', displayName='pysys', 
-			ignoreExitStatus=False, abortOnError=True)
+			ignoreExitStatus=True, abortOnError=True)
 		self.logFileContents('pysys.out', maxLines=0)
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			

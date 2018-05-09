@@ -23,6 +23,8 @@ Changes affecting compatibility:
   that you have a runner which does this, please remove it and ensure any 
   required cleanup is performed in BaseTest.cleanup() or 
   BaseRunner.testComplete() instead. 
+- Changed "pysys.py run" to return a non-zero exit code if any tests 
+  failed, whereas previously it would return 0.
  
 Other fixes and new features:
 - Changed the way multiple cycles are executed in multi-threaded mode to 

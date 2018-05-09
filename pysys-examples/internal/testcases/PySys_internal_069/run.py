@@ -16,7 +16,8 @@ class PySysTest(BaseTest):
 			arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', self.output+'/myoutdir', '--progress', '--cycle', '2'],
 			environs = env, workingDir='test',
 			stdout = 'pysys.out', stderr='pysys.err', displayName='pysys', 
-			ignoreExitStatus=False, abortOnError=True)
+			ignoreExitStatus=True, abortOnError=True, state=FOREGROUND)
+		self.assertThat('%d > 0', p.exitStatus) # test failures should result in an error
 		self.logFileContents('pysys.out', maxLines=0)
 			
 	def validate(self):
