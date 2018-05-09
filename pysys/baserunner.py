@@ -93,8 +93,6 @@ class BaseRunner(ProcessUser):
 		
 		"""
 		ProcessUser.__init__(self)
-		if hasattr(self, 'cycleComplete'):
-			raise Exception('The BaseRunner.cycleComplete() method is no longer supported. Please remove this method from your runner class and instead use BaseTest.cleanup or BaseRunner.testComplete if any cleanup actions are required.')
 		
 		self.record = record
 		self.purge = purge
@@ -262,6 +260,13 @@ class BaseRunner(ProcessUser):
 
 		# loop through each cycle
 		self.startTime = time.time()
+		
+		# by default we allow running tests from different cycles in parallel, 
+		# but if the user provided a custom runner with a cycleComplete then 
+		# revert to pre-PySys 1.3.0 compatible behaviour and join each cycle 
+		# before starting the next, so we can invoke cycleComplete reliably
+		concurrentcycles = not hasattr(self, 'cycleComplete')
+		
 		for cycle in range(self.cycle):
 			# loop through tests for the cycle
 			try:
@@ -279,6 +284,25 @@ class BaseRunner(ProcessUser):
 				log.info("test interrupt from keyboard")
 				self.handleKbrdInt()
 			
+			if not concurrentcycles:
+				if self.threads > 1: 
+					try:
+						threadPool.wait()
+					except KeyboardInterrupt:
+						log.info("test interrupt from keyboard - joining threads ... ")
+						threadPool.dismissWorkers(self.threads, True)
+						self.handleKbrdInt(prompt=False)
+	
+				# call the hook for end of cycle if one has been provided
+				try:
+					if hasattr(self, 'cycleComplete'):
+						self.cycleComplete()
+				except KeyboardInterrupt:
+					log.info("test interrupt from keyboard")
+					self.handleKbrdInt()
+				except:
+					log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+
 		# end of cycles
 
 		# wait for the threads to complete if more than one thread	
@@ -364,7 +388,8 @@ class BaseRunner(ProcessUser):
 				try: writer.cleanup()
 				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 			del self.writers[:]
-			self.cycleComplete()
+			if hasattr(self, 'cycleComplete'):
+				self.cycleComplete()
 			self.cleanup()
 			sys.exit(1)
 
