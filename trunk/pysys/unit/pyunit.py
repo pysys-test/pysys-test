@@ -68,7 +68,7 @@ class PyUnitTest(BaseTest):
 		self.log.addFilter(filter)
 		environ = os.environ.copy()
 		environ['PYTHONPATH'] = os.pathsep.join(self.getPythonPath() + sys.path)
-		process = self.startProcess(command, arguments, environ, self.output, FOREGROUND, DEFAULT_TIMEOUT, dstdout, dstderr, displayName)
+		process = self.startProcess(command, arguments, environ, self.output, FOREGROUND, DEFAULT_TIMEOUT, dstdout, dstderr, displayName, ignoreExitStatus=True)
 		self.log.removeFilter(filter)		
 		if process.exitStatus:
 			self.addOutcome(FAILED, 'Non-zero exit code from %s'%os.path.basename(testFile), printReason=False)

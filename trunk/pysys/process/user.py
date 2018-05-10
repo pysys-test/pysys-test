@@ -26,6 +26,7 @@ from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
+from pysys.utils.fileutils import mkdir
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 
@@ -62,6 +63,7 @@ class ProcessUser(object):
 		self.__outcomeReason = ''
 		
 		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
+		self.defaultIgnoreExitStatus = PROJECT.defaultIgnoreExitStatus.lower()=='true' if hasattr(PROJECT, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
 
 
@@ -117,7 +119,7 @@ class ProcessUser(object):
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, ignoreExitStatus=True):
+			abortOnError=None, ignoreExitStatus=None):
 		"""Start a process running in the foreground or background, and return the process handle.
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments,
@@ -140,11 +142,13 @@ class ProcessUser(object):
 		@param displayName: Logical name of the process used for display and reference counting (defaults to the basename of the command)
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
 			project setting)
-		@param ignoreExitStatus: If False, non-zero exit codes are reported as an error outcome
+		@param ignoreExitStatus: If False, non-zero exit codes are reported as an error outcome. None means the value will 
+		be taken from defaultIgnoreExitStatus, which can be configured in the project XML, or is set to True if not specified there. 
 		@return: The process handle of the process (L{pysys.process.helper.ProcessWrapper})
 		@rtype: handle
 
 		"""
+		if ignoreExitStatus == None: ignoreExitStatus = self.defaultIgnoreExitStatus
 		workingDir = os.path.join(self.output, workingDir or '')
 		if not displayName: displayName = os.path.basename(command)
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -717,3 +721,14 @@ class ProcessUser(object):
 		self.log.info('  -----', extra=logextra)
 		self.log.info('', extra=logextra)
 		return True
+
+	def mkdir(self, path):
+		"""
+		Create a directory, with recursive creation of any parent directories.
+		
+		This function is a no-op (does not throw) if the directory already exists. 
+		
+		@return: the same path passed, to facilitate fluent-style method calling. 
+		"""
+		mkdir(path)
+		return path
