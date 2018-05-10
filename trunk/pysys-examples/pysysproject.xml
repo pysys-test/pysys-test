@@ -233,7 +233,7 @@
 	datafmt attributes. Enabling color to the console (stdout) formatter can be done using the color
 	property, and the colors for supported message types can be specified via the color:<category> property.
 	See below for more details for the default color types and categories. Supported colors are BLUE,
-	GREEN, YELLOW, RED, MAGENTA, CYAN, and WHITE.
+	GREEN, YELLOW, RED, MAGENTA, CYAN, WHITE and BLACK.
 	-->
 	<formatters>
 		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
