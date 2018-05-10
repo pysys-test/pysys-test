@@ -97,6 +97,14 @@
 	-->
 	<property name="defaultAbortOnError" value="false"/>	
 
+
+	<!-- 
+	Controls whether by default tests will report a failure outcome when a process completes with 
+	a non-zero return code. The default value as specified below will be used when the ignoreExitStatus 
+	parameter to the function is not specified. 
+	-->
+	<property name="defaultIgnoreExitStatus" value="false"/>
+
 	
 	<!-- 
 	Import properties from file (fails silently if the file does not exist). The imported 

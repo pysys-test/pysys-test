@@ -13,6 +13,7 @@ class PySysTest(BaseTest):
 						  workingDir = self.output,
 						  stdout = "%s/counter.out" % self.output,
 						  stderr = "%s/counter.err" % self.output,
+						  ignoreExitStatus=True,
 						  state=FOREGROUND)
 		
 		# do a couple of wait for files

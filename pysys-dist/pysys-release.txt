@@ -121,6 +121,15 @@ Other fixes and new features:
   Python logging.info/warn/error() methods is called. This behaviour was 
   triggered if certain libraries (e.g SSL libraries) were not available 
   when python starts. 
+- Added defaultIgnoreExitStatus project property which controls whether 
+  non-zero return codes from startProcess() result in test failures, when the 
+  ignoreExitStatus flag is not explicitly specified. To retain the same 
+  behaviour for existing projects, defaultIgnoreExitStatus is set to True if 
+  the property is not configured in the project configuration. However to 
+  promote best practice for new PySys projects, the example pysys project 
+  configuration file sets defaultIgnoreExitStatus to False, which ensures 
+  that processes taht return failure codes are not ignored unless explicitly 
+  intended by the author of the testcase. 
 
 
 Release History
