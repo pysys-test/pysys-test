@@ -348,7 +348,7 @@ class BaseRunner(ProcessUser):
 		"""
 		if self.threads > 1: 
 			# write out cached messages from the worker thread
-			sys.stdout.write('\n'+container.testFileHandlerStdout.stream.getvalue())
+			sys.stdout.write(container.testFileHandlerStdout.stream.getvalue())
 		if stdoutHandler.level >= logging.WARN:
 			log.critical("%s: %s (%s)", LOOKUP[container.testObj.getOutcome()], container.descriptor.id, container.descriptor.title)
 		
