@@ -74,8 +74,13 @@ class ColorLogFormatter(BaseLogFormatter):
 	This implementation supports color coding of messages based on the category of the message,
 	and the index of the string in the format encoding. This implementation is the default for
 	console output, with the color coding enabled either by the color option on the formatter
-	set to true, or if PYSYS_COLOR=true is set in the environment. The colors used for each
-	category defined by this class can be overridden by specifying "color:XXX" options, e.g.
+	set to true. 
+	
+	The PYSYS_COLOR environment variable can be set to true or false, overriding any 
+	setting specified in the project configuration.
+	
+	The colors used for each category defined by this class can be overridden 
+	by specifying "color:XXX" options, e.g.
 	<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
 
 	"""
@@ -119,7 +124,9 @@ class ColorLogFormatter(BaseLogFormatter):
 				self.COLOR_CATEGORIES[prop[len('color:'):].lower()] = propertiesDict.pop(prop).upper()
 
 		self.color = propertiesDict.pop('color','').lower() == 'true'
-		self.color = (os.getenv('PYSYS_COLOR', 'false').lower() == 'true' or self.color)
+		if os.getenv('PYSYS_COLOR',None):
+			self.color = os.getenv('PYSYS_COLOR').lower() == 'true'
+		
 		if self.color: self.initColoringLibrary()
 
 		super(ColorLogFormatter, self).__init__(propertiesDict)

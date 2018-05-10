@@ -36,17 +36,18 @@ Other fixes and new features:
   version, resulting in a clear error if attempting to use the wrong 
   version. 
 - Added support for coloring console output to highlight passes, fails, 
-  warnings and more. To enable this, set the PYSYS_COLOR=true environment 
-  variable (since it's a per-user and per-machine/terminal type preference 
-  rather than per-project). This will enable colored output on any terminal 
-  that supports ANSI escape sequences (e.g. most Unix terminals). On Windows, 
-  which does not, it is possible to get colored output by installing a 
-  package such as "colorama", which PySys will load if it is present on the 
-  python path. If is possible to customize the colors used and to use 
-  alternative libraries for coloring on windows by providing a custom subclass 
-  of the DefaultPySysLoggingFormatter class. The colors used for each category 
-  of log messages can be customized in the project configuration file, e.g. 
-  <formatter><property name="color:dumped core" value="YELLOW"/></formatter>
+  warnings and more. This is configured in the project configuration file. 
+  Coloring can also be enabled or disabled for a particular user and/or 
+  machine using the PYSYS_COLOR=true/false environment variable override. 
+  Coloring works on any terminal that supports ANSI escape sequences (e.g. 
+  most Unix terminals). On Windows, which does not, it is possible to get 
+  colored output by installing a package such as "colorama", which PySys will 
+  load if it is present on the python path. It is possible to customize the 
+  colors used or to use alternative libraries for coloring on windows by 
+  providing a custom ColorLogFormatter class. The colors used for each 
+  category of log messages can be customized in the project configuration 
+  file, e.g. 
+  <formatter><property name="color:timed out" value="MAGENTA"/></formatter>
 - Added ProcessUser.getExprFromFile helper method to automate the common task 
   of retrieving some text from a file, for example to capture information 
   such as a process identifier from a log file, or to extract some 
