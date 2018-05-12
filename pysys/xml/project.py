@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, os.path, sys, logging, xml.dom.minidom
+import os.path, logging, xml.dom.minidom, collections
 
 from pysys.constants import *
 from pysys import __version__

@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import copy
+import copy, logging
 
 from pysys.constants import *
 
