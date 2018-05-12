@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os.path, sys, re, string, copy
+import os.path, logging, copy
 
 from pysys import log
 from pysys.constants import *

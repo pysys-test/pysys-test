@@ -64,7 +64,7 @@ breaking writer implementations already in existence.
 
 __all__ = ["BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", "ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter"]
 
-import time, urlparse, stat
+import time, urlparse, stat, logging
 
 from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter

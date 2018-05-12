@@ -22,19 +22,16 @@ Contains the base test class for test execution and validation.
 For more information see the L{pysys.basetest.BaseTest} API documentation. 
 
 """
-import sys, os, os.path, re, string, time, thread, logging, copy, math, stat, inspect
+import os.path, time, thread, logging
 
 from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.utils.filecopy import filecopy
 from pysys.utils.filegrep import filegrep
 from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
-from pysys.process.user import ProcessUser
-from pysys.process.helper import ProcessWrapper
 from pysys.process.monitor import ProcessMonitor
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
