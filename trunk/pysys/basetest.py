@@ -629,44 +629,38 @@ class BaseTest(ProcessUser):
 		if 'abortOnError' in xargs: return xargs['abortOnError']
 		return PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 
+
 	def reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
-		"""
-		Reports a new performance result, with an associated unique key that identifies it for 
-		comparison purposes. 
+		""" Reports a new performance result, with an associated unique key that identifies it for  comparison purposes.
 		
-		Where possible it is better to report the rate at which an operation can be performed 
-		(e.g. throughput) rather than the total time taken, since this allows the number of 
-		iterations to be increased . 
+		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
+		rather than the total time taken, since this allows the number of iterations to be increased .
 		
 		@param value: The value to be reported. Usually this is a float or integer, but string is 
 		also permitted. 
+
+		@param resultKey: A unique string that fully identifies what was measured, which will be
+		used to compare results from different test runs. For example "HTTP transport message sending throughput
+		using with 3 connections". The resultKey must be unique across all test cases and modes. It should be fully
+		self-describing (without the need to look up extra information such as the associated testId). Do not include
+		the test id or units in the resultKey string. It must be stable across different runs, so cannot contain
+		process identifiers, date/times or other numbers that will vary. If possible resultKeys should be written
+		so that related results will be together when all performance results are sorted by resultKey, which usually
+		means putting general information near the start of the string and specifics (throughput/latency, sending/receiving)
+		towards the end of the string. It should be as concise as possible (given the above).
+
+		@param unit: Identifies the unit the the value is measured in, including whether bigger numbers are better or
+		worse (used to determine improvement or regression). Must be an instance of L{PerformanceUnit}. In most cases,
+		use L{PerformanceUnit.SECONDS} (e.g. for latency) or L{PerformanceUnit.PER_SECOND} (e.g. for throughput); the
+		string literals 's' and '/s' can be used as a shorthand for those PerformanceUnit instances.
 		
-		@param resultKey: A unique string that fully identifies what was measured, which will be 
-		used to compare results from different test runs. For example 
-		"HTTP transport message sending throughput using  with 3 connections". 
-		The resultKey must be unique across all test cases and modes. 
-		It should be fully self-describing (without the need to look up extra information such as 
-		the associated testId). Do not include the test id or units in the resultKey string. 
-		It must be stable across different runs, so cannot contain process identifiers, date/times 
-		or other numbers that will vary. 
-		If possible resultKeys should be written so that related results will be together when 
-		all performance results are sorted by resultKey, which usually means putting 
-		general information near the start of the string and specifics (throughput/latency, 
-		sending/receiving) towards the end of the string. 
-		It should be as concise as possible (given the above). 
-		
-		@param unit: Identifies the unit the the value is measured in, including whether 
-		bigger numbers are better or worse (used to determine improvement or regression). 
-		Must be an instance of L{PerformanceUnit}. In most cases, use L{PerformanceUnit.SECONDS} 
-		(e.g. for latency) or L{PerformanceUnit.PER_SECOND} (e.g. for throughput); 
-		the string literals 's' and '/s' can be used as a shorthand for those PerformanceUnit instances. 
-		
-		@param toleranceStdDevs: (optional) A float that indicates how many standard deviations away 
-		from the mean a result needs to be to be considered a regression. 
+		@param toleranceStdDevs: (optional) A float that indicates how many standard deviations away from the mean a
+		result needs to be to be considered a regression.
 		
 		@param resultDetails: (optional) A dictionary of detailed information about this specific result 
 		and/or test that should be recorded together with the result, for example information about what mode the 
-		test is running in. 
+		test is running in.
+
 		"""
 		for p in self.runner.performanceReporters:
 			p.reportResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)
