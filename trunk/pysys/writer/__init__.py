@@ -18,70 +18,70 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 """
-Contains implementations of test output writers used to output test results during runtime execution. 
+Contains implementations of output writers used to output test results during runtime execution.
 
-There are currently three kinds of writer, any number of which can be configured in the 
-project XML file, and which are enabled under different circumstances according to their babse class: 
-- "Record" writers log results only when a test run is started with the --record flag, typically to 
-a file or database. Any results writer that does not subclass BaseProgressResultsWriter or 
-BaseSummaryResultsWriter is treated as a record writer, although best practice is to 
-subclass L{BaseRecordResultsWriter}. 
-- "Progress" writers subclass L{BaseProgressResultWriter) and log results as they occur 
-during a test run to give an indication of how far and how well the run is progressing, 
-and are enabled only when the --progress flag is specified or when the PYSYS_PROGRESS=true 
-environment variable is set. If none are explicitly configured in the project XML, 
-an instance of the default progress writer L{ConsoleProgressResultsWriter} is used. 
-- "Summary" writers subclass L{BaseSummaryResultWriter) and log a summary of results 
-at the end of the test run. Summary writers are always enabled regardless of the flags 
-specified on the command line. If none are explicitly configured in the project XML, 
-an instance of the default summary writer L{ConsoleSummaryResultsWriter} is used. 
+Output writers are responsible for summarising test results on completion of a test, or on completion
+of a set of tests. There are currently three distinct types of writers, namely Record, Progress, and
+Summary, each of which performs output at different stages of a run i.e.
 
-There are currently four implementations of record writers distributed with the PySys framework,
-namely the L{writer.TextResultsWriter}, the L{writer.XMLResultsWriter}, the
-L{writer.JUnitXMLResultsWriter} and the L{writer.CSVResultsWriter}, which all subclass L{BaseResultsWriter}. 
+- "Record" writers output the outcome of a specific test after completion of that test, to allow
+runtime auditing of the test output, e.g. into a relational database. Four implementations of record
+writers are distributed with the PySys framework, namely the L{writer.TextResultsWriter}, the
+L{writer.XMLResultsWriter}, the L{writer.JUnitXMLResultsWriter} and the L{writer.CSVResultsWriter}.
+Whilst the record writers distributed with PySys all subclass L{writer.BaseResultsWriter} best practice
+is to subclass L{writer.BaseRecordResultsWriter} when writing custom implementations. Record writers
+are enabled when the --record flag is given to the PySys launcher.
 
-Project configuration of the writers is through the PySys project file using the <writer> tag - multiple writers may
-be configured and their individual properties set through the nested <property> tag. Writer
-properties are set as attributes to the class through the setattr() function. Custom (site
-specific) modules can be created and configured by users of the PySys framework (e.g. to
-output test results into a relational database etc), though they must adhere to the interface
-demonstrated by the implementations demonstrated here.
+- "Progress" writers output a summary of the test progress after completion of each test, to give
+an indication of how far and how well the run is progressing. A single implementation of a progress
+writer is distributed with the PySys framework, namely the L{writer.ConsoleProgressResultsWriter},
+which details the percentage of tests selected to be run and that have executed, and a summary
+of the recent test failures. Progress writers should extend the L{writer.BaseProgressResultWriter} and
+are enabled when the --progress flag is given to the PySys launcher, or when PYSYS_PROGRESS=true is
+set in the local environment.
 
-The writers are instantiated and invoked by the L{pysys.baserunner.BaseRunner} class
-instance. This calls the class constructors of all configured test writers, and then 
-the setup (prior to executing the set of tests), processResult (process a test result), 
-and cleanup (upon completion of the execution of all tests). The **kwargs method parameter
-is used for variable argument passing in the interface methods to allow modification of 
-the PySys framework without breaking writer implementations already in existence.
+- "Summary" writers output an overall summary of the status at the end of a test run. A single implementation
+of a progress writer is distributed with the PySys framework, namely the L{writer.ConsoleSummaryResultsWriter},
+which details the overall test run outcome and lists any tests that did not pass. A summary writer is always
+enabled regardless of the flags given to the pysys launcher.
+
+Project configuration of the writers is through the PySys project XML file using the <writer> tag. Multiple
+writers may be configured and their individual properties set through the nested <property> tag. Writer
+properties are set as attributes to the class through the setattr() function. Custom (site specific) modules
+can be created and configured by users of the PySys framework (e.g. to output test results into a relational
+database etc), though they must adhere to the interface demonstrated by the implementations demonstrated here.
+If no progress writers are explicitly configured in the PySys project XML file, an instance of
+L{writer.ConsoleProgressResultsWriter} is used. If no summary writer is explicitly configured in the PySys project
+XML file, an instance of L{writer.ConsoleSummaryResultsWriter} is used.
+
+The writers are instantiated and invoked by the L{pysys.baserunner.BaseRunner} class instance. This calls the class
+constructors of all configured test writers, and then the setup (prior to executing the set of tests), processResult
+(process a test result), and cleanup (upon completion of the execution of all tests). The **kwargs method parameter
+is used for variable argument passing in the interface methods to allow modification of the PySys framework without
+breaking writer implementations already in existence.
 
 """
 
 __all__ = ["BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", "ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter"]
 
-import logging, time, urlparse, os, stat
+import time, urlparse, stat
 
-from pysys import log
 from pysys.constants import *
-from pysys.exceptions import *
 from pysys.utils.logutils import ColorLogFormatter
 
 from xml.dom.minidom import getDOMImplementation
 
 class BaseResultsWriter(object):
-	"""Base class for objects that get notified as and when test results are available and 
-	can write them out to a file, to the console or anywhere else, either during execution 
-	or at the end. 
+	"""Base class for objects that get notified as and when test results are available. """
 
-	"""
 	def __init__(self, logfile=None):
-		""" Create an instance of the TextResultsWriter class.
+		""" Create an instance of the BaseResultsWriter class.
 
 		@param logfile: Optional configuration property specifying a file to store output in. 
 		Does not apply to all writers, can be ignored if not needed. 
 
 		"""
 		pass
-
 
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, **kwargs):
 		""" Called before any tests begin, and after any configuration properties have been 
@@ -96,13 +96,13 @@ class BaseResultsWriter(object):
 		"""
 		pass
 
-
 	def cleanup(self, **kwargs):
 		""" Called after all tests have finished executing (or been cancelled). 
 		
 		This is where file headers can be written, and open handles should be closed. 
 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
+
 		"""
 		pass
 
@@ -119,52 +119,53 @@ class BaseResultsWriter(object):
 		@param testTime: Duration of the test in seconds. 
 		@param testStart: The time when the test started. 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
+
 		"""
 		pass
 
 	def processTestStarting(self, testObj, cycle=-1, **kwargs):
 		""" Called when a test is just about to begin executing. 
 
-		Note on thread-safety: unlike the other methods on this interface, 
-		this is usually executed on a worker thread, so any data structures 
-		accessed in this method and others on this class must be synchronized 
-		if performing non-atomic operations. 
+		Note on thread-safety: unlike the other methods on this interface, this is usually executed on a
+		worker thread, so any data structures accessed in this method and others on this class must be
+		synchronized if performing non-atomic operations.
 		
 		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
-		can extract data from this object but should not store a reference to it. 
-		The testObj.descriptor.id indicates the test that ran. 
+		can extract data from this object but should not store a reference to it. The testObj.descriptor.id
+		indicates the test that ran.
 		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
+
 		"""
 		pass
 
+
 class BaseRecordResultsWriter(BaseResultsWriter):
-	"""
-	Base class for writers that record the results of tests, 
-	and are enabled only when the --record flag is specified. 
+	"""Base class for writers that record the results of tests, and are enabled only when the --record flag is specified.
 	
-	For compatibility reasons writers that do not subclass 
-	BaseSummaryResultsWriter or BaseProgressResultsWriter are 
-	treated as "record" writers even if they do not inherit from 
-	this class. 
+	For compatibility reasons writers that do not subclass BaseSummaryResultsWriter or BaseProgressResultsWriter are
+	treated as "record" writers even if they do not inherit from this class.
+
 	"""
 	pass
 
 
 class BaseSummaryResultsWriter(BaseResultsWriter):
-	"""
-	Base class for writers that display a summary of test results. 
+	"""Base class for writers that display a summary of test results.
 	
-	Summary writers are always enabled (regardless of whether 
-	--progress or --record are specified). If no "summary" writers 
-	are configured, a default ConsoleSummaryResultsWriter instance will be added automatically. 
+	Summary writers are always enabled (regardless of whether --progress or --record are specified). If
+	no "summary" writers are configured, a default ConsoleSummaryResultsWriter instance will be added
+	automatically.
+
 	"""
 	pass
 
+
 class BaseProgressResultsWriter(BaseResultsWriter):
-	"""
-	Base class for writers that display progress information 
-	while tests are running, which are only enabled if the --progress flag is specified. 
+	""" Base class for writers that display progress information while tests are running.
+
+	Progress writers are only enabled if the --progress flag is specified.
+
 	"""
 	pass
 
@@ -228,7 +229,6 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		self.cycle = -1
 		self.fp = None
 
-
 	def setup(self, **kwargs):
 		"""Implementation of the setup method.
 
@@ -258,7 +258,6 @@ class TextResultsWriter(BaseRecordResultsWriter):
 			self.fp.close()
 			self.fp = None
 
-			
 	def processResult(self, testObj, **kwargs):
 		"""Implementation of the processResult method. 
 		
@@ -275,7 +274,6 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		
 		self.fp.write("%s: %s\n" % (LOOKUP[testObj.getOutcome()], testObj.descriptor.id))
 
-		
 		
 class XMLResultsWriter(BaseRecordResultsWriter):
 	"""Class to log results to logfile in XML format.
@@ -306,7 +304,6 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.cycle = -1
 		self.numResults = 0
 		self.fp = None
-
 
 	def setup(self, **kwargs):
 		"""Implementation of the setup method.
@@ -376,7 +373,6 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		except Exception:
 			log.info("caught %s in XMLResultsWriter: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-
 	def cleanup(self, **kwargs):
 		"""Implementation of the cleanup method. 
 		
@@ -441,7 +437,6 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 				
 		# write the file out
 		self.fp.write(self.document.toprettyxml(indent="  "))
-    	
 
 	def __createResultsNode(self):
 		self.resultsElement = self.document.createElement("results")
@@ -450,7 +445,6 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.resultsElement.setAttributeNode(cycleAttribute)
 		self.rootElement.appendChild(self.resultsElement)
 
-    	
 	def __pathToURL(self, path):
 		try: 
 			if self.useFileURL.lower() == "false": return path
@@ -477,7 +471,6 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		"""	
 		self.cycle = -1
 
-
 	def setup(self, **kwargs):	
 		"""Implementation of the setup method.
 
@@ -485,13 +478,12 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 						
 		@param kwargs: Variable argument list
 		
-		"""	
+		"""
 		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports') if self.outputDir is None else self.outputDir
 		if os.path.exists(self.outputDir): self.purgeDirectory(self.outputDir, True)
 		os.makedirs(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
 
-		
 	def cleanup(self, **kwargs):
 		"""Implementation of the cleanup method. 
 
@@ -499,7 +491,6 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 				
 		"""
 		pass
-			
 
 	def processResult(self, testObj, **kwargs):
 		"""Implementation of the processResult method. 
@@ -563,7 +554,6 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 			fp = open(os.path.join(self.outputDir,'TEST-%s.xml'%(testObj.descriptor.id)), 'w')
 		fp.write(document.toprettyxml(indent='	'))
 		fp.close()
-		
 
 	def purgeDirectory(self, dir, delTop=False):
 		for file in os.listdir(dir):
@@ -607,7 +597,6 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.fp = None
 
-
 	def setup(self, **kwargs):
 		"""Implementation of the setup method.
 
@@ -622,7 +611,6 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		self.fp = flushfile(open(self.logfile, "w"))
 		self.fp.write('id, title, cycle, startTime, duration, outcome\n')
 
-
 	def cleanup(self, **kwargs):
 		"""Implementation of the cleanup method.
 
@@ -635,7 +623,6 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 			self.fp.write('\n\n\n')
 			self.fp.close()
 			self.fp = None
-
 
 	def processResult(self, testObj, **kwargs):
 		"""Implementation of the processResult method.
@@ -659,10 +646,10 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		csv.append(LOOKUP[testObj.getOutcome()])
 		self.fp.write('%s \n' % ','.join(csv))
 
+
 class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
-	"""
-	Standard 'summary' writer that is used to list a summary of the 
-	test results at the end of execution. 
+	"""Default summary writer that is used to list a summary of the test results at the end of execution.
+
 	"""
 	def __init__(self, logfile=None):
 		self.showOutcomeReason = self.showOutputDir = False # option added in 1.3.0. May soon change the default to True. 
@@ -679,7 +666,6 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 	def processResult(self, testObj, cycle=-1, testTime=-1, testStart=-1, **kwargs):
 		self.results[cycle][testObj.getOutcome()].append( (testObj.descriptor.id, testObj.getOutcomeReason(), testObj.output ))
 		self.duration = self.duration + testTime
-
 
 	def cleanup(self, **kwargs):
 		log = logging.getLogger('pysys.resultssummary')
@@ -718,9 +704,8 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 
 
 class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
-	"""
-	Standard 'progress' writer that logs a summary of progress so far to the console, after each test completes. 
-	
+	"""Default progress writer that logs a summary of progress so far to the console, after each test completes.
+
 	"""
 	def __init__(self, logfile=None):
 		self.recentFailures = 5  # configurable
@@ -745,7 +730,6 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		return id
 
 	def processResult(self, testObj, cycle=-1, **kwargs):
-		# don't bother if only one test
 		if self.numTests == 1: return
 		log = logging.getLogger('pysys.resultsprogress')
 		
@@ -764,22 +748,20 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 			self._recentFailureReasons = self._recentFailureReasons[-1*self.recentFailures:] # keep last N
 		
 		# nb: no need to lock since this always executes on the main thread
-		
 		timediv = 1
 		if time.time()-self.startTime > 60: timediv = 60
-		log.info('--- Progress: completed %d/%d = %0.1f%% of tests in %d %s', executed, self.numTests, 100.0 * executed / self.numTests, int((time.time()-self.startTime)/timediv),
+		log.info('Progress: completed %d/%d = %0.1f%% of tests in %d %s', executed, self.numTests, 100.0 * executed / self.numTests, int((time.time()-self.startTime)/timediv),
 			'seconds' if timediv==1 else 'minutes', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 		failednumber = sum([self.outcomes[o] for o in FAILS])
 		passed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o not in FAILS and self.outcomes[o]>0])
 		failed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o in FAILS and self.outcomes[o]>0])
-		if passed: log.info('      %s (%0.1f%%)', passed, 100.0 * (executed-failednumber) / executed, extra=ColorLogFormatter.tag(LOG_PASSES))
-		if failed: log.info('      %s', failed, extra=ColorLogFormatter.tag(LOG_FAILURES))
+		if passed: log.info('   %s (%0.1f%%)', passed, 100.0 * (executed-failednumber) / executed, extra=ColorLogFormatter.tag(LOG_PASSES))
+		if failed: log.info('   %s', failed, extra=ColorLogFormatter.tag(LOG_FAILURES))
 		if self._recentFailureReasons:
-			log.info('    Recent failures: ', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
+			log.info('Recent failures: ', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 			for f in self._recentFailureReasons:
-				log.info('      ' + f, extra=ColorLogFormatter.tag(LOG_FAILURES))
+				log.info('   ' + f, extra=ColorLogFormatter.tag(LOG_FAILURES))
 		inprogress = list(self.inprogress)
 		if self.threads>1 and inprogress:
-			log.info('    Currently executing: %s', ', '.join(sorted(inprogress)), extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
-		log.info('-' * 62, extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
-
+			log.info('Currently executing: %s', ', '.join(sorted(inprogress)), extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
+		log.info('')
