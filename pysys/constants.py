@@ -27,7 +27,7 @@ about the structure and contents of the project file, see the PySys examples
 distribution. 
 
 """
-import sys, re, os, os.path, socket, logging, traceback, collections
+import sys, re, os, os.path, socket, traceback
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -36,7 +36,6 @@ except NameError:
 	import sets
 	from sets import Set as set
 
-from pysys import log
 from pysys import stdoutHandler
 
 # set the platform and platform related constants
@@ -121,11 +120,9 @@ LOOKUP[DUMPEDCORE] = "DUMPED CORE"
 LOOKUP[BLOCKED] = "BLOCKED"
 LOOKUP[SKIPPED] = "SKIPPED"
 
-
 # set the precedent for the test outcomes
 PRECEDENT = [SKIPPED, BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED, NOTVERIFIED, INSPECT, PASSED]
 FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
-
 
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_PROJECTFILE = ['pysysproject.xml', '.pysysproject']
@@ -145,7 +142,6 @@ DEFAULT_ABORT_ON_ERROR=False
 
 # set the directories to not recursively walk when looking for the descriptors
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn' ]
-
 
 # set the timeout values for specific executables when executing a test
 DEFAULT_TIMEOUT = 600
@@ -171,7 +167,6 @@ LOG_FAILURES = 'failed'
 LOG_PASSES = 'passed'
 LOG_SKIPS = 'skipped'
 LOG_END = 'end'
-
 
 # reference to the project instance defining parameters for the 
 # pysys project
@@ -222,7 +217,6 @@ def loadproject(start):
 		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
 	except StandardError as e:
 		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
-		# need a traceback if it's an unexpected error like this
 		traceback.print_exc()
 		sys.exit(1)
 	except Exception as e:

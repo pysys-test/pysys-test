@@ -26,9 +26,9 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os, os.path, sys, stat, re, traceback, time, math, logging, string, thread, threading, imp, textwrap, StringIO
+import os.path, stat, math, logging, textwrap, StringIO
 
-from pysys import log, ThreadedFileHandler, ThreadedStreamHandler
+from pysys import ThreadedFileHandler, ThreadedStreamHandler
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
@@ -123,12 +123,13 @@ class BaseRunner(ProcessUser):
 			elif self.record: # assume everything else is a record result writer (for compatibility reasons)
 				self.writers.append(writer)
 		
-		# summary writes are always enabled regardless of record mode. 
+		# summary writers are always enabled regardless of record mode.
 		# allow user to provide their own summary writer in the config, or if not, supply our own
 		if summarywriters: 
 			self.writers.extend(summarywriters)
 		else:
 			self.writers.append(ConsoleSummaryResultsWriter())
+
 		if xargs.get('__progressWritersEnabled', False):
 			if progresswriters: 
 				self.writers.extend(progresswriters)
@@ -142,6 +143,7 @@ class BaseRunner(ProcessUser):
 		self.results = {}
 		
 		self.performanceReporters = PROJECT._createPerformanceReporters(self.outsubdir)
+
 
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the class.
@@ -214,16 +216,15 @@ class BaseRunner(ProcessUser):
 
 
 	def isPurgableFile(self, path):
-		"""
-		This method is called by testComplete to provide runners with the 
-		ability to veto deletion of non-empty files that should always be left 
-		in a test's output directory even when the test has passed, 
-		by returning False from this method. For example this could be used to 
-		avoid deleting code coverage files. 
-		
-		By default this will return True. 
+		"""Determine if a file should be purged when empty at the end of a test run.
+
+		This method is called by testComplete to provide runners with the ability to veto
+		deletion of non-empty files that should always be left in a test's output directory
+		even when the test has passed, by returning False from this method. For example this
+		could be used to avoid deleting code coverage files. By default this will return True.
 		
 		@param path: The absolute path of the file to be purged
+
 		"""
 		return True
 
@@ -240,10 +241,12 @@ class BaseRunner(ProcessUser):
 		
 		@param printSummary: Ignored, exists only for compatibility reasons. To provide a custom summary printing 
 		implementation, specify a BaseSummaryResultsWriter subclass in the <writers> section of your project XML file. 
-		@return: Use of this value is deprecated as of 1.3.0. This method returns a dictionary of testcase outcomes, and 
-		for compatibility reasons this will continue in the short term, but will be removed in a future release. Please ignore 
-		the return value of start() and use a custom BaseSummaryResultsWriter if you need to customize summarization of 
-		results. 
+
+		@return: Use of this value is deprecated as of 1.3.0. This method returns a dictionary of testcase outcomes, and
+		for compatibility reasons this will continue in the short term, but will be removed in a future release. Please
+		ignore the return value of start() and use a custom BaseSummaryResultsWriter if you need to customize summarization of
+		results.
+
 		"""
 		# call the hook to setup prior to running tests
 		self.setup()
@@ -303,8 +306,6 @@ class BaseRunner(ProcessUser):
 				except:
 					log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
-		# end of cycles
-
 		# wait for the threads to complete if more than one thread	
 		if self.threads > 1: 
 			try:
@@ -320,12 +321,12 @@ class BaseRunner(ProcessUser):
 			try: writer.cleanup()
 			except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 		del self.writers[:]
-		
+
+		# perform clean on the performance reporters
 		for perfreporter in self.performanceReporters:
 				try: perfreporter.cleanup()
 				except Exception as e: log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			
-		
+
 		# call the hook to cleanup after running tests
 		self.cleanup()
 
@@ -393,7 +394,6 @@ class BaseRunner(ProcessUser):
 			self.cleanup()
 			sys.exit(1)
 
-		
 		try:
 			if not prompt:
 				print("Keyboard interrupt detected, exiting ... ")
