@@ -17,10 +17,9 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import string, os.path, time, thread, logging, Queue
+import os.path, time, thread, Queue
 
 from pysys import log
-from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 

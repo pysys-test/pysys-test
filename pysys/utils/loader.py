@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import sys, imp, threading
+import sys, imp
 
 def import_module(name, path, reload=False):
 	"""Import a named module, searching within a list of paths.

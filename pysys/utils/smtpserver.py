@@ -19,8 +19,6 @@
  
 import asyncore, smtpd, threading
 
-from pysys.constants import *
-
 
 class SimpleSMTPServer(smtpd.SMTPServer): 
 	def __init__(self, localaddr, remoteaddr, filename='smtpserver.out', logMails=True):

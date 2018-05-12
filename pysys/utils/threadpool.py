@@ -21,10 +21,9 @@
 # by Christopher Arndt (http://chrisarndt.de/en/software/python/threadpool/)
 # with minor modifications.
  
-import sys, time, logging, thread, threading, Queue, traceback
+import sys, time, threading, Queue, traceback
 
 from pysys import log
-
 
 # exceptions
 class NoResultsPending(Exception):

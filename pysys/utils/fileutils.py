@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import sys, os
+import os
 
 def mkdir(path):
 	"""

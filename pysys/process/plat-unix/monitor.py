@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, sys, string, time, thread
+import string, time, thread
 
 from pysys.constants import *
 

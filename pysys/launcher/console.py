@@ -16,14 +16,12 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import sys, os, os.path, stat, glob, getopt, re, string, logging
+import os.path, stat, getopt, logging
 
 from pysys import log
-from pysys import stdoutHandler
 
 from pysys import __version__
 from pysys.constants import *
-from pysys.exceptions import *
 from pysys.launcher import createDescriptors
 from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
 from pysys.basetest import TEST_TEMPLATE

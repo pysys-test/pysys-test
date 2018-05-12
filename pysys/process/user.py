@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import sys, os, time, collections, inspect, re
+import time, collections, inspect
 
 from pysys import log
 from pysys.constants import *

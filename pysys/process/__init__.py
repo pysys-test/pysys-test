@@ -31,7 +31,6 @@ correct modules based on their current operation system.
 
 """
 
-import os.path
 from pysys.constants import *
 
 # set the modules to import when imported the pysys.process package

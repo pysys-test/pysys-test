@@ -17,9 +17,8 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import collections, sys, threading, re, time, getopt, math, logging
+import collections, threading, time, math
 
-from pysys import process_lock
 from pysys.constants import *
 from pysys.utils.fileutils import mkdir
 
