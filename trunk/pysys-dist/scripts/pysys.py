@@ -25,7 +25,6 @@ import os, sys, logging
 script_path = os.path.abspath(sys.path[0])
 sys.path = [p for p in sys.path if os.path.abspath(p) != script_path]
 
-
 # before anything else, configure the logger
 logging.getLogger().addHandler(logging.NullHandler())
 from pysys import log, stdoutHandler
@@ -37,12 +36,10 @@ loadproject(os.getcwd())
 
 from pysys import __version__
 from pysys.constants import *
-
 from pysys.utils.loader import import_module
 from pysys.launcher.console import ConsoleLaunchHelper
 from pysys.launcher.console import ConsolePrintHelper
 from pysys.launcher.console import ConsoleCleanTestHelper
-
 
 def printUsage():
 	sys.stdout.write("\nPySys System Test Framework (version %s)\n" % __version__)
