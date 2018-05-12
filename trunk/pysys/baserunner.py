@@ -336,16 +336,17 @@ class BaseRunner(ProcessUser):
 
 	def containerCallback(self, thread, container):
 		"""Callback method on completion of running a test.
-		
-		@param container: A reference to the container object that ran the test
-		
+
 		Called on completion of running a testcase, either directly by the BaseRunner class (or 
 		a sub-class thereof), or from the ThreadPool.wait() when running with more than one worker thread. 
 		This method is always invoked from a single thread, even in multi-threaded mode. 
 
 		The method is responsible for calling of the testComplete() method of the runner, recording 
 		of the test result to the result writers, and for deletion of the test container object. 
-		
+
+		@param thread: A reference to the calling thread (ignored in 1.3.0 onwards)
+		@param container: A reference to the container object that ran the test
+
 		"""
 		if self.threads > 1: 
 			# write out cached messages from the worker thread
@@ -421,6 +422,7 @@ class TestContainer:
 		@param descriptor: A reference to the testcase descriptor
 		@param cycle: The cycle number of the test
 		@param runner: A reference to the runner that created this class
+
 		"""
 		self.descriptor = descriptor
 		self.cycle = cycle
@@ -438,7 +440,8 @@ class TestContainer:
 	def __call__(self, *args, **kwargs):
 		"""Over-ridden call builtin to allow the class instance to be called directly.
 		
-		Invoked by thread pool when using multiple worker threads. 
+		Invoked by thread pool when using multiple worker threads.
+
 		"""		
 		exc_info = []
 		self.testStart = time.time()
@@ -580,6 +583,7 @@ class TestContainer:
 		
 		@param dir: The top level directory to be purged
 		@param delTop: Indicates if the top level directory should also be deleted
+
 		"""
 		try:
 			for file in os.listdir(dir):
