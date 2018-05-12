@@ -10,4 +10,4 @@ class MyCustomRunner(BaseRunner):
 		
 		"""
 		self.currentcycle += 1
-		log.info('Called BaseRunner.cycleComplete for cycle %d'%self.currentcycle)
+		self.log.info('Called BaseRunner.cycleComplete for cycle %d'%self.currentcycle)

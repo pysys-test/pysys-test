@@ -27,9 +27,9 @@ class PySysTest(BaseTest):
 		self.addOutcome(PASSED)
 
 	def createFiles(self):
-		log.info("Creating %d files" % NUM_FILES)
+		self.log.info("Creating %d files" % NUM_FILES)
 		for i in range(1, NUM_FILES+1):
 			with open(os.path.join(self.output, "%d.txt" % i), "w") as f:
 				f.write(str(i))
 				f.close()
-		log.info("Completed creation of files")
+		self.log.info("Completed creation of files")
