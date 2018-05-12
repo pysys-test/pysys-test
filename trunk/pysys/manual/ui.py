@@ -23,8 +23,6 @@ try:
 except Exception:
 	pass
 
-from pysys.constants import *
-from pysys.exceptions import *
 from pysys.xml.manual import *
 
 

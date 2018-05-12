@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import collections, random, socket, sys, subprocess
+import collections, random, subprocess
 from pysys import process_lock
 from pysys.constants import *
 

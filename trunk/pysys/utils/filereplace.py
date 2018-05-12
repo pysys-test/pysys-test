@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os.path, sys, string
+import os.path
 
 from pysys.exceptions import *
 

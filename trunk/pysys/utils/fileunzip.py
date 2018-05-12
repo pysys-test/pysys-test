@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, os.path, stat, sys, string, glob, gzip
+import os.path, string, glob, gzip
 
 from pysys.constants import *
 from pysys.exceptions import *
