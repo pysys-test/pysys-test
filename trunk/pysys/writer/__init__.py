@@ -24,7 +24,7 @@ Output writers are responsible for summarising test results on completion of a t
 of a set of tests. There are currently three distinct types of writers, namely Record, Progress, and
 Summary, each of which performs output at different stages of a run i.e.
 
-- "Record" writers output the outcome of a specific test after completion of that test, to allow
+   - "Record" writers output the outcome of a specific test after completion of that test, to allow
 runtime auditing of the test output, e.g. into a relational database. Four implementations of record
 writers are distributed with the PySys framework, namely the L{writer.TextResultsWriter}, the
 L{writer.XMLResultsWriter}, the L{writer.JUnitXMLResultsWriter} and the L{writer.CSVResultsWriter}.
@@ -32,7 +32,7 @@ Whilst the record writers distributed with PySys all subclass L{writer.BaseResul
 is to subclass L{writer.BaseRecordResultsWriter} when writing custom implementations. Record writers
 are enabled when the --record flag is given to the PySys launcher.
 
-- "Progress" writers output a summary of the test progress after completion of each test, to give
+   - "Progress" writers output a summary of the test progress after completion of each test, to give
 an indication of how far and how well the run is progressing. A single implementation of a progress
 writer is distributed with the PySys framework, namely the L{writer.ConsoleProgressResultsWriter},
 which details the percentage of tests selected to be run and that have executed, and a summary
@@ -40,7 +40,7 @@ of the recent test failures. Progress writers should extend the L{writer.BasePro
 are enabled when the --progress flag is given to the PySys launcher, or when PYSYS_PROGRESS=true is
 set in the local environment.
 
-- "Summary" writers output an overall summary of the status at the end of a test run. A single implementation
+   - "Summary" writers output an overall summary of the status at the end of a test run. A single implementation
 of a progress writer is distributed with the PySys framework, namely the L{writer.ConsoleSummaryResultsWriter},
 which details the overall test run outcome and lists any tests that did not pass. A summary writer is always
 enabled regardless of the flags given to the pysys launcher.
