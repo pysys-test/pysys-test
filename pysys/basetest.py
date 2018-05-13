@@ -647,9 +647,10 @@ class BaseTest(ProcessUser):
 		towards the end of the string. It should be as concise as possible (given the above).
 
 		@param unit: Identifies the unit the the value is measured in, including whether bigger numbers are better or
-		worse (used to determine improvement or regression). Must be an instance of L{PerformanceUnit}. In most cases,
-		use L{PerformanceUnit.SECONDS} (e.g. for latency) or L{PerformanceUnit.PER_SECOND} (e.g. for throughput); the
-		string literals 's' and '/s' can be used as a shorthand for those PerformanceUnit instances.
+		worse (used to determine improvement or regression). Must be an instance of L{pysys.utils.perfreporter.PerformanceUnit}.
+		In most cases, use L{pysys.utils.perfreporter.PerformanceUnit.SECONDS} (e.g. for latency) or
+		L{pysys.utils.perfreporter.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be
+		used as a shorthand for those PerformanceUnit instances.
 		
 		@param toleranceStdDevs: (optional) A float that indicates how many standard deviations away from the mean a
 		result needs to be to be considered a regression.

@@ -36,7 +36,7 @@ are enabled when the --record flag is given to the PySys launcher.
 an indication of how far and how well the run is progressing. A single implementation of a progress
 writer is distributed with the PySys framework, namely the L{writer.ConsoleProgressResultsWriter},
 which details the percentage of tests selected to be run and that have executed, and a summary
-of the recent test failures. Progress writers should extend the L{writer.BaseProgressResultWriter} and
+of the recent test failures. Progress writers should extend the L{writer.BaseProgressResultsWriter} and
 are enabled when the --progress flag is given to the PySys launcher, or when PYSYS_PROGRESS=true is
 set in the local environment.
 
