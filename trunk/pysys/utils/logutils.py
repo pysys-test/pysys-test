@@ -181,7 +181,7 @@ class ColorLogFormatter(BaseLogFormatter):
 						record.args = tuple(args)
 					
 			except Exception as e:
-				log.debug('Failed to format log message "%s": %s'%(record.msg, repr(e)))
+				logging.getLogger('pysys.utils.logutils').debug('Failed to format log message "%s": %s'%(record.msg, repr(e)))
 
 		return super(ColorLogFormatter, self).format(record)
 
