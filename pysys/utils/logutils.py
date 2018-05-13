@@ -83,8 +83,12 @@ class ColorLogFormatter(BaseLogFormatter):
 	by specifying "color:XXX" options, e.g.
 	<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
 
-	"""
+	@ivar COLOR_CATEGORIES: the color map for the defined logging categories
+	@itype COLOR_CATEGORIES: dictionary
+	@ivar COLOR_ESCAPE_CODES: the escape codes for each of the support colors
+	@itype COLOR_ESCAPE_CODES: dictionary
 
+	"""
 	# use a lookup map from message "categories" to colors,
 	COLOR_CATEGORIES = {
 		LOG_WARN:'MAGENTA',
