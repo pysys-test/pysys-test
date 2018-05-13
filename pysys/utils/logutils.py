@@ -40,7 +40,7 @@ class BaseLogFormatter(logging.Formatter):
 		"""Return  dictionary to tag a string to format with color encodings.
 
 		@param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
-		@param arg_index: The index of a string in the format message to color
+		@param arg_index: The index of argument in the string expansion to color
 		@return: A dictionary that can then be used in calls to the logger
 		"""
 		if arg_index is None: return {cls.CATEGORY:category}
@@ -99,6 +99,7 @@ class ColorLogFormatter(BaseLogFormatter):
 		LOG_TEST_DETAILS:'CYAN',
 		LOG_TEST_OUTCOMES: 'CYAN',
 		LOG_TEST_PROGRESS: 'CYAN',
+		LOG_TEST_PERFORMANCE: 'CYAN',
 		LOG_TIMEOUTS: 'MAGENTA',
 		LOG_FAILURES: 'RED',
 		LOG_PASSES: 'GREEN',

@@ -20,6 +20,7 @@
 import collections, threading, time, math
 
 from pysys.constants import *
+from pysys.utils.logutils import ColorLogFormatter
 from pysys.utils.fileutils import mkdir
 
 class PerformanceUnit(object):
