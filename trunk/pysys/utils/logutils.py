@@ -39,7 +39,7 @@ class BaseLogFormatter(logging.Formatter):
 	def tag(cls, category, arg_index=None):
 		"""Return  dictionary to tag a string to format with color encodings.
 
-		@param category: The category, as defined in L{COLOR_CATEGORIES}
+		@param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
 		@param arg_index: The index of a string in the format message to color
 		@return: A dictionary that can then be used in calls to the logger
 		"""
