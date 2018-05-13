@@ -247,6 +247,7 @@
 			<property name="color:details" value="CYAN"/>
 			<property name="color:outcomereason" value="CYAN"/>
 			<property name="color:progress" value="CYAN"/>
+			<property name="color:performance" value="CYAN"/>
 			<property name="color:timed out" value="MAGENTA"/>
 			<property name="color:failed" value="RED"/>
 			<property name="color:passed" value="GREEN"/>
