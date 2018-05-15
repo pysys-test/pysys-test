@@ -728,7 +728,10 @@ class ProcessUser(object):
 		
 		This function is a no-op (does not throw) if the directory already exists. 
 		
+		@param path: The path to be created. This can be an absolute path or 
+		relative to the testcase output directory.
+		
 		@return: the same path passed, to facilitate fluent-style method calling. 
 		"""
-		mkdir(path)
+		mkdir(os.path.join(self.output, path))
 		return path
