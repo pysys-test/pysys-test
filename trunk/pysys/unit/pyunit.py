@@ -100,7 +100,7 @@ if __name__ == '__main__':
 		# Use globals dictionary for locals as well because we
 		# want to treat this like it is being run in a global
 		# (file scope) context)
-		execfile(testFile, globals, globals)
+		exec(compile(open(testFile).read(), testFile, 'exec'), globals, globals)
 		testClasses = []
 		for k, v in list(globals.items()):
 			if isinstance(v, type(unittest.TestCase)):
