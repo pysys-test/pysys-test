@@ -216,7 +216,7 @@ def loadproject(start):
 	try:
 		PROJECT = Project(search, projectFile)
 		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
-	except StandardError as e:
+	except (ImportError, SyntaxError) as e:
 		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
 		traceback.print_exc()
 		sys.exit(1)
