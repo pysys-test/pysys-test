@@ -298,7 +298,7 @@ class ConsoleMakeTestHelper:
 
 	def parseArgs(self, args):
 		try:
-			optlist, arguments = getopt.getopt(args, 'ht:d:', ["help","type=","dir="] )
+			optlist, arguments = getopt.getopt(args, 'ha:d:', ["help","type=","dir="] )
 		except Exception:
 			print("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			self.printUsage()
