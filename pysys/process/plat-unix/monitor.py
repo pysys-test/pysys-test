@@ -118,41 +118,48 @@ class ProcessMonitor:
 			pidTree = [pid]
 		
 		# perform the repeated collection of data for the profile. 
-		while self.active:
-			data = [0, 0, 0]
-			fp = os.popen("ps -o pid,pcpu,rss,vsz")
-			info = fp.readlines()
-			fp.close()
-			
-			for i in range(1, len(info)):
-				if int(string.split(info[i])[0]) in pidTree:
-					data[0] = data[0] + float(string.split(info[i])[1])
-					data[1] = int(string.split(info[i])[2])
-					data[2] = int(string.split(info[i])[3])
-
-			currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
-			file.write( "%s\t%f\t%d\t%d\n" % (currentTime, data[0]/self.numProcessors, data[1], data[2]) )
-			time.sleep(interval)
-
-		# clean up			
-		if file != sys.stdout: file.close()
+		try:
+			while self.active:
+				data = [0, 0, 0]
+				fp = os.popen("ps -o pid,pcpu,rss,vsz")
+				info = fp.readlines()
+				fp.close()
+				
+				for i in range(1, len(info)):
+					if int(string.split(info[i])[0]) in pidTree:
+						data[0] = data[0] + float(string.split(info[i])[1])
+						data[1] = int(string.split(info[i])[2])
+						data[2] = int(string.split(info[i])[3])
+	
+				currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
+				file.write( "%s\t%f\t%d\t%d\n" % (currentTime, float(data[0])/self.numProcessors, data[1], data[2]) )
+				time.sleep(interval)
+	
+			# clean up			
+		finally:
+			if file != sys.stdout: file.close()
+			self.active = 0
 
 
 	def __solarisLogProfile(self, pid, interval, file):	
 		# perform the repeated collection of data for the profile. 
 		data = [-1, -1, -1]
-		while self.active:
-			try:
-				fp = os.popen("ps -p %s -o pcpu,rss,vsz" % (pid))
-				info = fp.readlines()[1]
-				for i in range(len(data)):
-					data[i] = string.split(info)[i]
-				fp.close()
-			except Exception:
-				fp.close()
-			currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
-			file.write( "%s\t%s\t%s\t%s\n" % (currentTime, data[0]/self.numProcessors, data[1], data[2]) )
-			time.sleep(interval)
+		try:
+			while self.active:
+				try:
+					fp = os.popen("ps -p %s -o pcpu,rss,vsz" % (pid))
+					info = fp.readlines()[1]
+					for i in range(len(data)):
+						data[i] = string.split(info)[i]
+					fp.close()
+				except Exception:
+					fp.close()
+				currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
+				file.write( "%s\t%s\t%s\t%s\n" % (currentTime, float(data[0])/self.numProcessors, data[1], data[2]) )
+				time.sleep(interval)
+		finally:
+			if file != sys.stdout: file.close()
+			self.active = 0
 
 
 	# public methods to start and stop a process monitor thread
