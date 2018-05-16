@@ -7,16 +7,13 @@ import os, sys, math, shutil
 class PySysTest(BaseTest):
 
 	def execute(self):
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
 		
 		for subtest in ['customformat', 'customclass']:
 			shutil.copytree(self.input, self.output+'/'+subtest)
 			os.rename(self.output+'/'+subtest+'/pysysproject-%s.xml'%subtest, self.output+'/'+subtest+'/pysysproject.xml')
 	
-			p = self.startProcess(command=sys.executable,
-				arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', self.output+'/'+subtest+'_output'],
-				environs = os.environ, workingDir=subtest,
-				stdout = subtest+'_pysys.out', stderr = subtest+'_pysys.err', displayName='pysys', 
-				ignoreExitStatus=False, abortOnError=True)
+			runPySys(self, subtest+'_pysys', ['run', '-o', self.output+'/'+subtest+'_output'], workingDir=subtest)
 			self.logFileContents(subtest+'_pysys.out', maxLines=0)
 			self.logFileContents(subtest+'_output/PySys_NestedTestcase/run.log')
 			self.logFileContents(subtest+'_pysys.err')

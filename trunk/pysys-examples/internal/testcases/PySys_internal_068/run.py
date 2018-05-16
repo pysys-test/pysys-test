@@ -11,14 +11,8 @@ class PySysTest(BaseTest):
 		# make rootdir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
-		env = dict(os.environ)
-		env.pop('PYSYS_COLOR','')
-		env.pop('PYSYS_PROGRESS','')
-		p = self.startProcess(command=sys.executable,
-			arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'],
-			environs = env, workingDir='test',
-			stdout = 'pysys.out', stderr='pysys.err', displayName='pysys', 
-			ignoreExitStatus=True, abortOnError=True)
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
 		self.logFileContents('pysys.out', maxLines=0)
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			

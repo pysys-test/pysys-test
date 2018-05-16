@@ -15,16 +15,9 @@ class PySysTest(BaseTest):
 		shutil.copyfile(self.input+'/pysysproject-notset.xml', self.output+'/test-notset/pysysproject.xml')
 		shutil.copyfile(self.input+'/../../../../pysysproject.xml', self.output+'/test-exampleproject/pysysproject.xml')
 		
-		env = dict(os.environ)
-		env.pop('PYSYS_COLOR','')
-		env.pop('PYSYS_PROGRESS','')
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
 		for t in ['notset', 'exampleproject']:
-			p = self.startProcess(command=sys.executable,
-				arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 
-					'run', '-o', self.output+'/output-%s'%t],
-				environs = env, workingDir='test-%s'%t,
-				stdout = 'pysys-%s.out'%t, stderr='pysys-%s.err'%t, displayName='pysys '+t, 
-				ignoreExitStatus=True, abortOnError=True, state=FOREGROUND)
+			runPySys(self, 'pysys-%s'%t, ['run', '-o', self.output+'/output-%s'%t], workingDir='test-%s'%t, ignoreExitStatus=True)
 			self.logFileContents('pysys-%s.out'%t, maxLines=0)
 			
 	def validate(self):

@@ -18,9 +18,9 @@ class PySysTest(BaseTest):
 		# write to the process stdin
 		self.log.info("Writing to the process stdin")
 		self.hprocess.write("The cat sat on the mat\n")
-		self.hprocess.write("No westlin winds and slaughtering guns")
+		self.writeProcess(self.hprocess, "No westlin winds and slaughtering guns")
 		self.hprocess.write("In the temple of science there are many mansions ", addNewLine=FALSE)
-		self.hprocess.write("and varied indeed are those that dwell therein ", addNewLine=FALSE)
+		self.writeProcess(self.hprocess, "and varied indeed are those that dwell therein ", addNewLine=False)
 		self.hprocess.write("and the motives that have led them there", addNewLine=TRUE)
 
 		# wait for the strings to be writen to sdtout
