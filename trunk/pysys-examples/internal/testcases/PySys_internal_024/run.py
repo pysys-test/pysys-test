@@ -11,6 +11,8 @@ class PySysTest(BaseTest):
 		env["PYSYS-TEST"] = "Test variable"
 		env["EMPTY-ENV"] = ""
 		env["INT-ENV"] = "1"
+		env["PYTHONPATH"] = os.pathsep.join(sys.path)
+
 		
 		if PLATFORM=='win32':
 			# on win32, minimal environment must have SYSTEMROOT set
@@ -34,7 +36,7 @@ class PySysTest(BaseTest):
 	def validate(self):
 		# validate against the reference file
 
-		ignores=['SYSTEMROOT','LD_LIBRARY_PATH']
+		ignores=['SYSTEMROOT','LD_LIBRARY_PATH', 'PYTHONPATH']
 		if PLATFORM=='darwin':
 			ignores.append('VERSIONER_PYTHON')
 			ignores.append('__CF_USER_TEXT_ENCODING')
