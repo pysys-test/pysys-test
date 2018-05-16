@@ -8,14 +8,8 @@ class PySysTest(BaseTest):
 	def execute(self):
 		shutil.copytree(self.input, os.path.join(self.output,'test'))
 
-		env = dict(os.environ)
-		env.pop('PYSYS_COLOR','')
-		env.pop('PYSYS_PROGRESS','')
-		p = self.startProcess(command=sys.executable,
-			arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', os.path.join(self.output,'myoutdir'), '--progress', '--cycle', '2'],
-			environs = env, workingDir='test',
-			stdout = 'pysys.out', stderr='pysys.err', displayName='pysys', 
-			ignoreExitStatus=True, abortOnError=True, state=FOREGROUND)
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		p = runPySys(self, 'pysys', ['run', '-o', os.path.join(self.output,'myoutdir'), '--progress', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
 		self.assertThat('%d > 0', p.exitStatus)
 		self.logFileContents('pysys.out', maxLines=0)
 			
@@ -37,4 +31,3 @@ class PySysTest(BaseTest):
 			'  FAILED: NestedFail \\[CYCLE 02\\]',
 			'Progress: completed 5/6'
 		])
-

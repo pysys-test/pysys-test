@@ -9,12 +9,8 @@ class PySysTest(BaseTest):
 	def execute(self):
 		
 		shutil.copytree(self.input, self.output+'/test')
-
-		p = self.startProcess(command=sys.executable,
-			arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 'run', '-o', 'myoutdir'],
-			environs = os.environ, workingDir='test',
-			stdout = 'pysys.out', stderr = 'pysys.err', displayName='pysys', 
-			ignoreExitStatus=False, abortOnError=True)
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		runPySys(self, 'pysys', ['run', '-o', 'myoutdir'], workingDir='test')
 		self.logFileContents('pysys.out', maxLines=0)
 		self.logFileContents('pysys.err')
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)

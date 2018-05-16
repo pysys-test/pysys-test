@@ -9,15 +9,8 @@ class PySysTest(BaseTest):
 		
 		shutil.copytree(self.input, self.output+'/test')
 
-		env = dict(os.environ)
-		env.pop('PYSYS_COLOR','')
-		env.pop('PYSYS_PROGRESS','')
-		p = self.startProcess(command=sys.executable,
-			arguments = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0]), 
-				'run', '-o', self.output+'/myoutdir', '--cycle', '10', '-n', '20'],
-			environs = env, workingDir='test',
-			stdout = 'pysys.out', stderr='pysys.err', displayName='pysys', 
-			ignoreExitStatus=False, abortOnError=True, state=FOREGROUND)
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '--cycle', '10', '-n', '20'], workingDir='test')
 		self.logFileContents('pysys.out', maxLines=0)
 			
 	def validate(self):
