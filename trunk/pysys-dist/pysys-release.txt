@@ -131,6 +131,8 @@ Other fixes and new features:
   configuration file sets defaultIgnoreExitStatus to False, which ensures 
   that processes taht return failure codes are not ignored unless explicitly 
   intended by the author of the testcase. 
+- Fixed waitForSocket, which in previous versions immediately returned 
+  success instead of waiting a valid socket connection as documented. 
 
 
 Release History
