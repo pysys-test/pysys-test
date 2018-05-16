@@ -116,7 +116,7 @@ class XMLProjectParser:
 
 
 	def getProperties(self):
-		propertyNodeList = self.root.getElementsByTagName('property')
+		propertyNodeList = [element for element in self.root.getElementsByTagName('property') if element.parentNode == self.root]
 
 		for propertyNode in propertyNodeList:
 			if propertyNode.hasAttribute("environment"):
