@@ -13,7 +13,7 @@ class PySysTest(BaseTest):
 						  stdout = "%s/test.out" % self.output,
 						  stderr = "%s/test.err" % self.output,
 						  state=BACKGROUND)
-		pm = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor.dat')
+		pm = self.startProcessMonitor(p, interval=0.1, file='monitor.dat')
 		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.dat', numProcessors=10)
 		assert pm.running()
 		self.waitForSignal('monitor.dat', expr='.', condition='>=5')
