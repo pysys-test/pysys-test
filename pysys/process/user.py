@@ -19,7 +19,7 @@
 
 import time, collections, inspect
 
-from pysys import log
+from pysys import log, process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
@@ -283,37 +283,62 @@ class ProcessUser(object):
 			raise Exception("Write to process %r stdin not performed as process is not running", process)
 
 
-	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], abortOnError=None):
-		"""Wait for a socket connection to be established.
+	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], abortOnError=None, process=None):
+		"""Wait until it is possible to establish a socket connection to a 
+		server running on the specified port. 
 		
 		This method blocks until connection to a particular host:port pair can be established. This is useful for
 		test timing where a component under test creates a socket for client server interaction - calling of this
 		method ensures that on return of the method call the server process is running and a client is able to
 		create connections to it. If a connection cannot be made within the specified timeout interval, the method
-		returns to the caller.
+		returns to the caller, or aborts the test if abortOnError=True. 
 		
 		@param port: The port value in the socket host:port pair
 		@param host: The host value in the socket host:port pair
 		@param timeout: The timeout in seconds to wait for connection to the socket
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-			project setting)
-
+		project setting)
+		@param process: If a handle to a process is specified, the wait will abort if 
+		the process dies before the socket becomes available.
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		
+
 		log.debug("Performing wait for socket creation:")
-		log.debug("  file:       %d" % port)
-		log.debug("  filedir:    %s" % host)
-		
+		log.debug("  port:       %d" % port)
+		log.debug("  host:       %s" % host)
+
+		with process_lock:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			# the following lines are to prevent handles being inherited by 
+			# other processes started while this test is runing
+			if OSFAMILY =='windows':
+				s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, 0)
+				import win32api, win32con
+				win32api.SetHandleInformation(s.fileno(), win32con.HANDLE_FLAG_INHERIT, 0)
+				s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			else:
+				import fcntl
+				fcntl.fcntl(s.fileno(), fcntl.F_SETFD, 1)
+			
 		startTime = time.time()
-		while not exit:
+		while True:
 			try:
 				s.connect((host, port))
+				s.shutdown(socket.SHUT_RDWR)
+				
 				log.debug("Wait for socket creation completed successfully")
 				if time.time()-startTime>10:
-					log.info("Wait for socket creation completed")
+					log.info("Wait for socket creation completed after %d secs", time.time()-startTime)
+				return True
 			except socket.error:
+				if process and not process.running():
+					msg = "Waiting for socket connection aborted due to unexpected process %s termination"%(process)
+					if abortOnError:
+						self.abort(BLOCKED, msg, self.__callRecord())
+					else:
+						log.warn(msg)
+					return False
+
 				if timeout:
 					currentTime = time.time()
 					if currentTime > startTime + timeout:
@@ -322,7 +347,7 @@ class ProcessUser(object):
 							self.abort(TIMEDOUT, msg, self.__callRecord())
 						else:
 							log.warn(msg)
-						break
+						return False
 			time.sleep(0.01)
 
 
