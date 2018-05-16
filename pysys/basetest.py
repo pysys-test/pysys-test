@@ -318,14 +318,17 @@ class BaseTest(ProcessUser):
 		arguments. This provides an easy way to check conditions that also produces clear
 		outcome messages.
 		
-		e.g. self.assertThat('%d >= 5 or "%s"=="foobar"', myvalue, myothervalue)
+		The safest way to pass arbitrary arguments of type string is to use the 
+		repr() function to add appropriate quotes and escaping. 
 
+		e.g. self.assertThat('%d >= 5 or %s=="foobar"', myvalue, repr(mystringvalue))
+		
 		@param conditionstring: A string will have any following args 
-			substituted into it and then be evaluated as a boolean python 
-			expression. If your args are strings that could contain double-quotes, 
-			put single quotes around the %s in the conditionstring, and vice-versa. 
+		substituted into it and then be evaluated as a boolean python 
+		expression. 
+		
 		@param args: Zero or more arguments to be substituted into the format 
-			string
+		string
 		
 		"""
 		try:
