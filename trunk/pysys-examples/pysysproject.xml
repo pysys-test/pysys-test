@@ -177,7 +177,7 @@
 			from any location on the local disk, but cannot load resources when referenced by a
 			file URL. 
 
-			<property name="outputDir" value="${root}"/>
+			<property name="outputDir" value="${rootdir}"/>
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
 			-->
@@ -187,7 +187,7 @@
 		Add in the test results writer if straight text output is required 
 		
 		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
-			<property name="outputDir" value="${root}"/>
+			<property name="outputDir" value="${rootdir}"/>
 		</writer>
 		-->
 
@@ -196,7 +196,7 @@
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
 		<writer classname="CSVResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.csv">
-			<property name="outputDir" value="${root}"/>
+			<property name="outputDir" value="${rootdir}"/>
 		</writer>
 		-->
 
@@ -205,11 +205,11 @@
 		outputDir property to define the output directory for the JUnit test summary files (the writer will 
 		produce one file per test into this output directory). If not specified this defaults to the current 
 		working directory.
-		
-		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${root}/target/pysys-reports"/>
-		</writer>
 		-->
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${rootdir}/target/pysys-reports"/>
+		</writer>
+		
 
 		<!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run, 
 			optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
@@ -219,8 +219,7 @@
 			<property name="showOutputDir" value="false"/>
 			<property name="showOutcomeReason" value="true"/>
 		</writer>
-		
-	</writers>		
+	</writers>
 	
 	
 	<!--
