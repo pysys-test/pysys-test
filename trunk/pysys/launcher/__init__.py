@@ -33,7 +33,7 @@ to launch operations against a set of tests etc.
 """
 __all__ = [ "createDescriptors","console" ]
 
-import os.path, string
+import os.path, string, logging
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -82,7 +82,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 			descriptors.append(XMLDescriptorParser(descriptorfile).getContainer())
 		except Exception as value:
 			print('%s - %s'%(sys.exc_info()[0], sys.exc_info()[1]))
-			log.info("Error reading descriptorfile %s" % descriptorfile)
+			logging.getLogger('pysys').info("Error reading descriptorfile %s" % descriptorfile)
 	descriptors = sorted(descriptors, key=lambda x: x.file)
 
 	# trim down the list for those tests in the test specifiers 
