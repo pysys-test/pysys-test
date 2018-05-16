@@ -184,36 +184,38 @@ class ProcessMonitor:
 	
 		# perform the continual data collection until the thread is no longer active
 		data = [0]*(len(process_counters)+1)	
-		while self.active:
-			win32pdh.CollectQueryData(process_query)
-			win32pdh.CollectQueryData(thread_query)
-
-			for i in range(len(process_counters)):
-				try:
-					data[i+1] = win32pdh.GetFormattedCounterValue(process_counters[i], win32pdh.PDH_FMT_LONG)[1]
-				except win32api.error:
-					data[i+1] = -1
-		
-			data[0]=0
-			for i in range(0, len(thread_counters)):
-				try:
-					data[0]=data[0]+win32pdh.GetFormattedCounterValue(thread_counters[i], win32pdh.PDH_FMT_LONG)[1] 
-				except Exception:
-					pass
+		try:
+			while self.active:
+				win32pdh.CollectQueryData(process_query)
+				win32pdh.CollectQueryData(thread_query)
 	
-			currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
-			file.write( "%s\t%s\t%d\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]/self.numProcessors, float(data[1])/1024,
-													  float(data[2])/1024, float(data[3])/1024, float(data[4]), float(data[5])))
-			time.sleep(interval)
-
-		# clean up
-		for c in process_counters:
-			win32pdh.RemoveCounter(c)
-		win32pdh.CloseQuery(process_query)
-		for c in thread_counters:
-			win32pdh.RemoveCounter(c)
-		win32pdh.CloseQuery(thread_query)
-		if file != sys.stdout: file.close()
+				for i in range(len(process_counters)):
+					try:
+						data[i+1] = win32pdh.GetFormattedCounterValue(process_counters[i], win32pdh.PDH_FMT_LONG)[1]
+					except win32api.error:
+						data[i+1] = -1
+			
+				data[0]=0
+				for i in range(0, len(thread_counters)):
+					try:
+						data[0]=data[0]+win32pdh.GetFormattedCounterValue(thread_counters[i], win32pdh.PDH_FMT_LONG)[1] 
+					except Exception:
+						pass
+		
+				currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
+				file.write( "%s\t%s\t%d\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]//self.numProcessors, float(data[1])/1024,
+														  float(data[2])/1024, float(data[3])/1024, float(data[4]), float(data[5])))
+				time.sleep(interval)
+		finally:
+			# clean up
+			for c in process_counters:
+				win32pdh.RemoveCounter(c)
+			win32pdh.CloseQuery(process_query)
+			for c in thread_counters:
+				win32pdh.RemoveCounter(c)
+			win32pdh.CloseQuery(thread_query)
+			if file != sys.stdout: file.close()
+			self.active = 0
 
 	def running(self):
 		"""Return the running status of the process monitor.
@@ -238,7 +240,6 @@ class ProcessMonitor:
 		
 		# log the stats in a separate thread
 		thread.start_new_thread(self.__win32LogProfile, (instance, inum, threads, self.interval, self.file))
-		
 
 	def stop(self):
 		"""Stop the process monitor.
