@@ -237,7 +237,9 @@
 	<formatters>
 		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
 				name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
+			<!-- 
 			<property name="color" value="true"/>
+			-->
 			<property name="color:warn" value="MAGENTA"/>
 			<property name="color:error" value="RED"/>
 			<property name="color:traceback" value="RED"/>
