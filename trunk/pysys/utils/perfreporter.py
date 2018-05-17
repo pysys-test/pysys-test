@@ -20,7 +20,7 @@
 import collections, threading, time, math
 
 from pysys.constants import *
-from pysys.utils.logutils import ColorLogFormatter
+from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.fileutils import mkdir
 
 class PerformanceUnit(object):
@@ -182,7 +182,9 @@ class CSVPerformanceReporter(object):
 		if isinstance(resultDetails, list):
 			resultDetails = collections.OrderedDict(resultDetails)
 
-		testobj.log.info("> Reported performance result: %s = %s %s (%s)", resultKey, self.valueToDisplayString(value), unit, 'bigger is better' if unit.biggerIsBetter else 'smaller is better')
+		testobj.log.info("Performance result: %s = %s %s (%s)", resultKey, self.valueToDisplayString(value), unit,
+						 'bigger is better' if unit.biggerIsBetter else 'smaller is better',
+						 extra = BaseLogFormatter.tag(LOG_TEST_PERFORMANCE, [0,1]))
 		with self._lock:
 			prevresult = self.__previousResultKeys.get(resultKey, None)
 			d = collections.OrderedDict(resultDetails)
