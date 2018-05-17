@@ -40,11 +40,13 @@ class BaseLogFormatter(logging.Formatter):
 		"""Return  dictionary to tag a string to format with color encodings.
 
 		@param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
-		@param arg_index: The index of argument in the string expansion to color
+		@param arg_index: The index of argument in the string expansion to color. This can be either a single
+		integer value representing the index, or a list of integers representing a set of indexes
 		@return: A dictionary that can then be used in calls to the logger
 		"""
-		if arg_index is None: return {cls.CATEGORY:category}
-		else: return {cls.CATEGORY:category, cls.ARG_INDEX:arg_index}
+		if type(arg_index) is int: return {cls.CATEGORY:category, cls.ARG_INDEX:[arg_index]}
+		if type(arg_index) is list and all(isinstance(i, int) for i in arg_index): return {cls.CATEGORY:category, cls.ARG_INDEX:arg_index}
+		return {cls.CATEGORY:category}
 
 
 	def __init__(self, propertiesDict):
@@ -172,18 +174,29 @@ class ColorLogFormatter(BaseLogFormatter):
 				if cat:
 					cat = cat.lower()
 					record = copy.copy(record)
-					i = getattr(record, self.ARG_INDEX, None)
-					if i == None or not isinstance(record.args[i], str):
+					indexes = getattr(record, self.ARG_INDEX, None)
+					if indexes == None:
 						record.msg = self.colorCategoryToEscapeSequence(cat)+record.msg+self.colorCategoryToEscapeSequence(LOG_END)
 					else:
 						args = list(record.args)
-						args[i] = self.colorCategoryToEscapeSequence(cat)+args[i]+self.colorCategoryToEscapeSequence(LOG_END)
+						for index in indexes: args[index] = self.formatArg(cat, args[index])
 						record.args = tuple(args)
 					
 			except Exception as e:
 				logging.getLogger('pysys.utils.logutils').debug('Failed to format log message "%s": %s'%(record.msg, repr(e)))
 
 		return super(ColorLogFormatter, self).format(record)
+
+
+	def formatArg(self, category, arg):
+		"""Format a single argument within a record, based on its category.
+
+		@param category: The logging category
+		@param arg: The argument within the record.
+
+		"""
+		if isinstance(arg, str): return self.colorCategoryToEscapeSequence(category)+arg+self.colorCategoryToEscapeSequence(LOG_END)
+		return arg
 
 
 	def colorCategoryToEscapeSequence(self, category):

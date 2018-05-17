@@ -750,8 +750,9 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		# nb: no need to lock since this always executes on the main thread
 		timediv = 1
 		if time.time()-self.startTime > 60: timediv = 60
-		log.info('Progress: completed %d/%d = %0.1f%% of tests in %d %s', executed, self.numTests, 100.0 * executed / self.numTests, int((time.time()-self.startTime)/timediv),
-			'seconds' if timediv==1 else 'minutes', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
+		log.info('Test progress: %s = %s of tests in %d %s', ('completed %d/%d' % (executed, self.numTests)),
+				'%0.1f%%' % (100.0 * executed / self.numTests), int((time.time()-self.startTime)/timediv),
+				'seconds' if timediv==1 else 'minutes', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS, [0,1]))
 		failednumber = sum([self.outcomes[o] for o in FAILS])
 		passed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o not in FAILS and self.outcomes[o]>0])
 		failed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o in FAILS and self.outcomes[o]>0])
