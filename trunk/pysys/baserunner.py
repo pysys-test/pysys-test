@@ -480,7 +480,7 @@ class TestContainer:
 			if len(title)>0:
 				log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 			for l in title[1:]:
-				log.info("       %s", l, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+				log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 			if self.runner.cycle > 1:
 				log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 			log.info(62*"=")
