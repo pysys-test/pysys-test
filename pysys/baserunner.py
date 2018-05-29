@@ -141,6 +141,7 @@ class BaseRunner(ProcessUser):
 		# a bit to allow overlap before removal
 		self.duration = 0 # no longer needed
 		self.results = {}
+		self.__remainingTests = self.cycle * len(self.descriptors)
 		
 		self.performanceReporters = PROJECT._createPerformanceReporters(self.outsubdir)
 
@@ -348,6 +349,8 @@ class BaseRunner(ProcessUser):
 		@param container: A reference to the container object that ran the test
 
 		"""
+		self.__remainingTests -= 1
+		
 		if self.threads > 1: 
 			# write out cached messages from the worker thread
 			sys.stdout.write(container.testFileHandlerStdout.stream.getvalue())
@@ -384,6 +387,9 @@ class BaseRunner(ProcessUser):
 		"""Handle a keyboard exception caught during running of a set of testcases.
 		
 		"""
+		if self.__remainingTests <= 0 or os.getenv('PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT', 'false').lower()=='true':
+			prompt = False
+		
 		def finish():
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			for writer in self.writers:

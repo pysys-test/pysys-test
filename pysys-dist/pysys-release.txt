@@ -133,6 +133,11 @@ Other fixes and new features:
   intended by the author of the testcase. 
 - Fixed waitForSocket, which in previous versions immediately returned 
   success instead of waiting a valid socket connection as documented. 
+- If the test run is interrupted from the keyboard, the prompt that asks 
+  whether to continue to run tests is no longer displayed if there are no more 
+  tests left to run. The prompt can also be completely disabled using an 
+  environment variable PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT=true, for users who 
+  prefer Ctrl+C to immediately terminate the test run in all cases. 
 
 
 Release History
