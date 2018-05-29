@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<path value="${root}/extrapath"/>
+	<formatters>
+		<formatter name="runlog" customopt="CUSTOM_RUNLOG_PREFIX" classname="mypkg.customfmt.CustomFormatter"/>
+		<formatter name="stdout" customopt="CUSTOM_STDOUT_PREFIX" module="mypkg.customfmt" classname="CustomFormatter"/>
+	</formatters>
+	
+</pysysproject>
