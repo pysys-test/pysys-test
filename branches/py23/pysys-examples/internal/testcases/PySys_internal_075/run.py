@@ -6,7 +6,9 @@ import os, sys, re
 class PySysTest(BaseTest):
 
 	def execute(self):
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		l = {}
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		runPySys = l['runPySys']
 		runPySys(self, 'make1', ['make', 'mynewtest1'])
 		runPySys(self, 'make2', ['make', 'mynewtest2'])
 		runPySys(self, 'run1', ['run', '-o', 'cleaned'])
