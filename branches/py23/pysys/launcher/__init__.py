@@ -34,7 +34,7 @@ to launch operations against a set of tests etc.
 from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
 
-import os.path, string, logging
+import os.path, logging
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -106,18 +106,18 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 
 				elif re.search('^:[\w_]*', t):
 					for i in range(0,len(descriptors)):
-						if idMatch(descriptors[i].id, string.split(t, ':')[1]): index = i
+						if idMatch(descriptors[i].id, t.split(':')[1]): index = i
 					matches = descriptors[:index+1]
 
 				elif re.search('^[\w_]*:$', t):
 					for i in range(0,len(descriptors)):
-					  	if idMatch(descriptors[i].id, string.split(t, ':')[0]): index = i
+					  	if idMatch(descriptors[i].id, t.split(':')[0]): index = i
 					matches = descriptors[index:]
 
 				elif re.search('^[\w_]*:[\w_]*$', t):
 					for i in range(0,len(descriptors)):
-					  	if idMatch(descriptors[i].id, string.split(t, ':')[0]): index1 = i
-					  	if idMatch(descriptors[i].id, string.split(t, ':')[1]): index2 = i
+					  	if idMatch(descriptors[i].id, t.split(':')[0]): index1 = i
+					  	if idMatch(descriptors[i].id, t.split(':')[1]): index2 = i
 					matches = descriptors[index1:index2+1]
 
 				else:
