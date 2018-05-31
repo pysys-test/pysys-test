@@ -27,7 +27,11 @@ API documentation.
 
 """
 from __future__ import print_function
-import os.path, stat, math, logging, textwrap, StringIO
+import os.path, stat, math, logging, textwrap, sys
+if sys.version_info[0] == 2:
+	from StringIO import StringIO
+else:
+	from io import StringIO
 
 from pysys import ThreadedFileHandler, ThreadedStreamHandler
 from pysys.constants import *
@@ -454,7 +458,7 @@ class TestContainer:
 		self.testStart = time.time()
 		try:
 			# stdout - set this up right at the very beginning to ensure we can see the log output in case any later step fails
-			self.testFileHandlerStdout = ThreadedStreamHandler(StringIO.StringIO())
+			self.testFileHandlerStdout = ThreadedStreamHandler(StringIO())
 			self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
 			self.testFileHandlerStdout.setLevel(stdoutHandler.level)
 			log.addHandler(self.testFileHandlerStdout)
