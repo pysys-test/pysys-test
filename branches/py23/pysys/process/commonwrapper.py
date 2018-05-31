@@ -17,7 +17,11 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os.path, time, threading, Queue
+import os.path, time, threading, sys
+if sys.version_info[0] == 2:
+	import Queue
+else:
+	import queue as Queue
 
 from pysys import log
 from pysys.constants import *

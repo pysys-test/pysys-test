@@ -22,6 +22,10 @@
 # with minor modifications.
  
 import sys, time, threading, Queue, traceback
+if sys.version_info[0] == 2:
+	import Queue
+else:
+	import queue as Queue
 
 from pysys import log
 
