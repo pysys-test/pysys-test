@@ -21,7 +21,7 @@
 # by Christopher Arndt (http://chrisarndt.de/en/software/python/threadpool/)
 # with minor modifications.
  
-import sys, time, threading, Queue, traceback
+import sys, time, threading, traceback
 if sys.version_info[0] == 2:
 	import Queue
 else:
