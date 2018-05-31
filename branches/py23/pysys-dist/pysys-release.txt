@@ -138,6 +138,8 @@ Other fixes and new features:
   tests left to run. The prompt can also be completely disabled using an 
   environment variable PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT=true, for users who 
   prefer Ctrl+C to immediately terminate the test run in all cases. 
+- Added pysys.utils.pycompat module containing a small set of helpers for 
+  writing code that works with Python 2 and Python 3. 
 
 
 Release History

@@ -20,6 +20,7 @@
 import copy, logging
 
 from pysys.constants import *
+from pysys.utils.pycompat import *
 
 class BaseLogFormatter(logging.Formatter):
 	"""Base class for formatting log messages.
@@ -195,7 +196,7 @@ class ColorLogFormatter(BaseLogFormatter):
 		@param arg: The argument within the record.
 
 		"""
-		if isinstance(arg, str): return self.colorCategoryToEscapeSequence(category)+arg+self.colorCategoryToEscapeSequence(LOG_END)
+		if isstring(arg): return self.colorCategoryToEscapeSequence(category)+arg+self.colorCategoryToEscapeSequence(LOG_END)
 		return arg
 
 

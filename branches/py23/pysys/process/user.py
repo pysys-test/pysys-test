@@ -27,6 +27,7 @@ from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir
+from pysys.utils.pycompat import *
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 
@@ -429,7 +430,7 @@ class ProcessUser(object):
 		log.debug("  expression: %s" % expr)
 		log.debug("  condition:  %s" % condition)
 		
-		if errorExpr: assert not isinstance(errorExpr, basestring), 'errorExpr must be a list of strings not a string'
+		if errorExpr: assert not isstring(errorExpr), 'errorExpr must be a list of strings not a string'
 		
 		matches = []
 		startTime = time.time()
@@ -710,7 +711,7 @@ class ProcessUser(object):
 		try:
 			lineno = 0
 			def matchesany(s, regexes):
-				assert not isinstance(regexes, basestring), 'must be a list of strings not a string'
+				assert not isstring(regexes), 'must be a list of strings not a string'
 				for x in regexes:
 					m = re.search(x, s)
 					if m: return m.group(0)

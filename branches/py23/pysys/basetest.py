@@ -35,7 +35,7 @@ from pysys.utils.linecount import linecount
 from pysys.process.monitor import ProcessMonitor
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
-
+from pysys.utils.pycompat import *
 
 TEST_TEMPLATE = '''%s
 %s
@@ -211,7 +211,7 @@ class BaseTest(ProcessUser):
 		@rtype: handle
 		
 		"""
-		if isinstance(file, basestring): file = os.path.join(self.output, file)
+		if isstring(file): file = os.path.join(self.output, file)
 		monitor = ProcessMonitor(process.pid, interval, file, **kwargs)
 		try:
 			self.log.info("Starting process monitor on process with id = %d", process.pid)

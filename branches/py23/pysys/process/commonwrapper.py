@@ -22,14 +22,16 @@ import os.path, time, threading, Queue
 from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
+from pysys.utils.pycompat import *
 
 # check for new lines on end of a string
 EXPR = re.compile(".*\n$")
 
 def _stringToUnicode(s):
 	""" Converts a unicode string or a utf-8 bit string into a unicode string. 
-	
+	@deprecated: for internal use only, will be removed in future. 
 	"""
+	if not PY2: return s
 	if isinstance(s, unicode):
 		return s
 	else:
