@@ -17,17 +17,17 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='(Traceback.*|caught .*)', contains=False)
 
 		self.assertOrderedGrep('pysys.out', exprList=[
-			'INFO.*Progress: completed 1/6 = 16.7% of tests in ',
+			'INFO.*Test progress: completed 1/6 = 16.7% of tests in ',
 			'1 FAILED',
-			'Progress: completed 2/6'
+			'Test progress: completed 2/6'
 		])
 		self.assertOrderedGrep('pysys.out', exprList=[
-			'INFO.*Progress: completed 4/6 = 66.7% of tests',
+			'INFO.*Test progress: completed 4/6 = 66.7% of tests',
 			'  1 PASSED [(]25[.]0%[)]',
 			'  1 TIMED OUT, 2 FAILED',
 			'Recent failures: ',
 			'  FAILED: NestedFail \\[CYCLE 01\\]',
 			'  TIMED OUT: NestedTimedout \\[CYCLE 01\\]: Reason for timed out outcome is general tardiness',
 			'  FAILED: NestedFail \\[CYCLE 02\\]',
-			'Progress: completed 5/6'
+			'Test progress: completed 5/6'
 		])
