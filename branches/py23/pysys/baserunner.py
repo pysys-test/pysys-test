@@ -422,7 +422,7 @@ class BaseRunner(ProcessUser):
 			self.handleKbrdInt(prompt)
 
 
-class TestContainer:
+class TestContainer(object):
 	"""Class used for co-ordinating the execution of a single test case.
 	
 	"""

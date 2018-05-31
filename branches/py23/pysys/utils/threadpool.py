@@ -106,7 +106,7 @@ class WorkerThread(threading.Thread):
 
 
 
-class WorkRequest:
+class WorkRequest(object):
 	"""Holds the details of a request placed on the thread pool request queue. 
 	
 	"""
@@ -139,7 +139,7 @@ class WorkRequest:
 
 
 
-class ThreadPool:
+class ThreadPool(object):
 	"""Main pool to manage worker threads processing an internal request queue.
 
 	"""

@@ -24,7 +24,7 @@ from pysys import log
 from pysys.constants import *
 
 
-class ProcessMonitor:
+class ProcessMonitor(object):
 	"""Process monitor for the logging of process statistics.
 	
 	The process monitor uses either the win32pdh module (windows systems) or the ps command line utility 

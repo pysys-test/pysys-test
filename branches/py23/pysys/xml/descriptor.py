@@ -82,7 +82,7 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
 ''' 
 
 
-class XMLDescriptorContainer:
+class XMLDescriptorContainer(object):
 	"""Holder class for the contents of a testcase descriptor. """
 
 	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
@@ -147,7 +147,7 @@ class XMLDescriptorContainer:
 		return str
 
 
-class XMLDescriptorCreator:
+class XMLDescriptorCreator(object):
 	'''Helper class to create a test descriptor template.'''
 		
 	def __init__(self, file, type="auto", group=DEFAULT_GROUP, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
@@ -166,7 +166,7 @@ class XMLDescriptorCreator:
 
 
 
-class XMLDescriptorParser:
+class XMLDescriptorParser(object):
 	'''Helper class to parse an XML test descriptor.
 
 	The class uses the minidom DOM (Document Object Model) non validating

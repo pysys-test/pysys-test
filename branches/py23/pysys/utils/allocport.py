@@ -145,7 +145,7 @@ def allocateTCPPort():
 		else:
 			return port
 
-class TCPPortOwner:
+class TCPPortOwner(object):
 	def __init__(self):
 		self.port = allocateTCPPort()
 

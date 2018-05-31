@@ -71,7 +71,7 @@ PROPERTY_EXPAND = "(?P<replace>\${(?P<key>.*?)})"
 PROPERTY_FILE = "(?P<name>^.*)=(?P<value>.*)$"
 
 
-class XMLProjectParser:
+class XMLProjectParser(object):
 	def __init__(self, dirname, file):
 		self.dirname = dirname
 		self.xmlfile = os.path.join(dirname, file)
@@ -327,7 +327,7 @@ class XMLProjectParser:
 		return cls, optionsDict
 
 
-class Project:
+class Project(object):
 	"""Class detailing project specific information for a set of PySys tests.
 	
 	Reads and parses the PySys project file if it exists and translates property element 
