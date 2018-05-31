@@ -283,7 +283,7 @@ class BaseRunner(ProcessUser):
 						request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 						threadPool.putRequest(request)
 					else:
-						self.containerCallback(thread.get_ident(), container())
+						self.containerCallback(threading.current_thread().ident, container())
 			except KeyboardInterrupt:
 				log.info("test interrupt from keyboard")
 				self.handleKbrdInt()

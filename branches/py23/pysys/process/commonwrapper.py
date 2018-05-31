@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os.path, time, thread, Queue
+import os.path, time, threading, Queue
 
 from pysys import log
 from pysys.constants import *
@@ -120,7 +120,8 @@ class CommonProcessWrapper(object):
 		if self._outQueue == None:
 			# start thread on demand
 			self._outQueue = Queue.Queue()
-			thread.start_new_thread(self.writeStdin, ())
+			t = threading.Thread(target=self.writeStdin, name='pysys.stdinreader_%s'%str(self))
+			t.start()
 			
 		self._outQueue.put(data)
 		

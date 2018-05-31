@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import string, time, thread
+import string, time, threading
 
 from pysys.constants import *
 
@@ -177,10 +177,13 @@ class ProcessMonitor:
 		
 		"""
 		self.active = 1
+		
 		if PLATFORM == 'sunos':
-			thread.start_new_thread(self.__solarisLogProfile, (self.pid, self.interval, self.file))
-		elif PLATFORM in ['linux','darwin']:
-			thread.start_new_thread(self.__linuxLogProfile, (self.pid, self.interval, self.file))
+			t = threading.Thread(target=self.__solarisLogProfile, args=(self.pid, self.interval, self.file))
+		else:
+			t = threading.Thread(target=self.__linuxLogProfile, args=(self.pid, self.interval, self.file))
+		t.start()
+		
 
 
 	def stop(self):

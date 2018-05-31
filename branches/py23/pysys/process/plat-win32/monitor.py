@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, sys, string, time, thread, logging, win32api, win32pdh
+import os, sys, string, time, threading, logging, win32api, win32pdh
 
 from pysys import log
 from pysys.constants import *
@@ -239,7 +239,8 @@ class ProcessMonitor:
 		threads = self.__win32GetThreads(pid=self.pid, bRefresh=1)
 		
 		# log the stats in a separate thread
-		thread.start_new_thread(self.__win32LogProfile, (instance, inum, threads, self.interval, self.file))
+		t = threading.Thread(target=self.__win32LogProfile, args=(instance, inum, threads, self.interval, self.file))
+		t.start()
 
 	def stop(self):
 		"""Stop the process monitor.

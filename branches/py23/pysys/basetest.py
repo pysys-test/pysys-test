@@ -22,7 +22,7 @@ Contains the base test class for test execution and validation.
 For more information see the L{pysys.basetest.BaseTest} API documentation. 
 
 """
-import os.path, time, thread, logging
+import os.path, time, threading, logging
 
 from pysys import log
 from pysys.constants import *
@@ -255,7 +255,8 @@ class BaseTest(ProcessUser):
 	
 		if not self.manualTester or self.manualTester.running() == 0:
 			self.manualTester = ManualTester(self, os.path.join(filedir, file))
-			thread.start_new_thread(self.manualTester.start, ())
+			t = threading.Thread(target=self.manualTester.start, name=self.__class__.__name__+'.manualtester')
+			t.start()
 		
 			if state == FOREGROUND:
 				startTime = time.time()
