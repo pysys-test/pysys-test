@@ -17,13 +17,13 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import os.path, logging, copy
 
 from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filediff import trimContents
-
 
 def getmatches(file, regexpr, ignores=None):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches.

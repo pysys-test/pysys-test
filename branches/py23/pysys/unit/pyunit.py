@@ -19,6 +19,7 @@
 Contains the test class used to run pyunit tests
 """
 
+from __future__ import print_function
 from pysys import ThreadFilter
 from pysys.constants import *
 from pysys.basetest import BaseTest

@@ -17,6 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import os, sys, string, time, threading, logging, win32api, win32pdh
 
 from pysys import log

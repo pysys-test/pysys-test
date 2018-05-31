@@ -17,6 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import sys, os
 from pysys.exceptions import *
 

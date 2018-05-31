@@ -17,6 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import string, time, threading
 
 from pysys.constants import *

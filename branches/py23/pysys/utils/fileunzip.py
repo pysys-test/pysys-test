@@ -17,6 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import os.path, string, glob, gzip
 
 from pysys.constants import *

@@ -16,7 +16,7 @@ def run(loops, status):
 # entry point for running the script as an executable
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
-		print("Usage: %s <count> <exit status>" % os.path.basename(sys.argv[0]))
+		sys.stdout.write("Usage: %s <count> <exit status>\n" % os.path.basename(sys.argv[0]))
 	else:
 		sys.stderr.write("Process id of test executable is %d" % os.getpid())
 		sys.stderr.flush()

@@ -16,6 +16,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import os.path, stat, getopt, logging
 
 from pysys import log
