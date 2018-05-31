@@ -17,11 +17,14 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+import sys
 try:
-	import tkMessageBox
-	from Tkinter import *
+	if sys.version_info[0] == 2:
+		from Tkinter import *
+	else:
+		from tkinter import *
 except Exception:
-	pass
+	pass 
 
 from pysys.xml.manual import *
 
