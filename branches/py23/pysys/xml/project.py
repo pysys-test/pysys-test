@@ -100,7 +100,7 @@ class XMLProjectParser:
 			requirespython = requirespython[0].firstChild.nodeValue
 			if requirespython:
 				if list(sys.version_info) < list(map(int, requirespython.split('.'))):
-					raise Exception('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join(map(str, sys.version_info[:3])), sys.executable))
+					raise Exception('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join([str(x) for x in sys.version_info[:3]]), sys.executable))
 
 		requirespysys = self.root.getElementsByTagName('requires-pysys')
 		if requirespysys and requirespysys[0].firstChild: 
