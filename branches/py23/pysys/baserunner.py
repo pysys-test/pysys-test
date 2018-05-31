@@ -26,7 +26,7 @@ list to perform the test execution. For more information see the L{pysys.baserun
 API documentation. 
 
 """
-import os.path, stat, math, logging, textwrap, StringIO, thread
+import os.path, stat, math, logging, textwrap, StringIO
 
 from pysys import ThreadedFileHandler, ThreadedStreamHandler
 from pysys.constants import *
