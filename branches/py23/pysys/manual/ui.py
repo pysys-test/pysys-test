@@ -188,11 +188,16 @@ class ManualTester(object):
 			raise
 
 	def stop(self):
+		"""
+		Logs the results of the manual tester and ensures that it is not still running. 
+		
+		This method may be called from the UI thread or another thread. 
+		"""
 		self.logResults()
 		self.isRunning = 0
 		if self.parentContainer != None:
 			self.parentContainer.quit()
-			self.parentContainer.destroy()
+			self.parentContainer = None
 
 	def running(self):
 		return self.isRunning
