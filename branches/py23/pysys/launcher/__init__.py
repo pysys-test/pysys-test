@@ -34,7 +34,6 @@ to launch operations against a set of tests etc.
 from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
 
-from __future__ import print_function
 import os.path, string, logging
 
 # if set is not available (>python 2.6) fall back to the sets module

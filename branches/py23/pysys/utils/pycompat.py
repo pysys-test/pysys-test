@@ -34,4 +34,4 @@ def isstring(s):
 	On Python 2 this could be a unicode character string or a byte str, 
 	on python 3 this must be a character str. 
 	"""
-	return isinstance(s, stringtypes)
+	return isinstance(s, string_types)
