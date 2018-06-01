@@ -265,14 +265,18 @@ class ProcessUser(object):
 
 
 	def writeProcess(self, process, data, addNewLine=True):
-		"""Write data to the stdin of a process.
+		"""Write binary data to the stdin of a process.
 
-		This method uses the L{pysys.process.helper} module to write a data string to the stdin of a process. This
+		This method uses the L{pysys.process.helper} module to write data to the stdin of a process. This
 		wrapper around the write method of the process helper only adds checking of the process running status prior
 		to the write being performed, and logging to the testcase run log to detail the write.
 
 		@param process: The process handle returned from the L{startProcess()} method
-		@param data: The data to write to the process
+		@param data: The data to write to the process stdin. 
+		As only binary data can be written to a process stdin, 
+		if a character string rather than a byte object is passed as the data,
+		it will be automatically converted to a bytes object using the encoding 
+		given by L{locale.getpreferredencoding()}. 
 		@param addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""

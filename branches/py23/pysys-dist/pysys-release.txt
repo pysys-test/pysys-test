@@ -140,6 +140,11 @@ Other fixes and new features:
   prefer Ctrl+C to immediately terminate the test run in all cases. 
 - Added pysys.utils.pycompat module containing a small set of helpers for 
   writing code that works with Python 2 and Python 3. 
+- Fixed writing to process stdin so that if a character string is passed in it 
+  will be converted to a byte object automatically, using the default 
+  encoding. Previously, it was not possible to write character strings in 
+  Python 3, and in Python 2 it would only work if they contained only ascii 
+  characters. 
 
 
 Release History

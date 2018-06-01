@@ -29,6 +29,8 @@ PY2 = sys.version_info[0] == 2
 
 string_types = (basestring,) if PY2 else (str,)
 
+binary_type = str if PY2 else bytes
+
 def isstring(s): 
 	""" Returns True if the specified object is a python string. 
 	On Python 2 this could be a unicode character string or a byte str, 
