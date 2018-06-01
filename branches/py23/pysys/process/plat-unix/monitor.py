@@ -98,7 +98,7 @@ class ProcessMonitor(object):
 		
 		for i in range(1, len(psList)):
 			pid = int(psList[i].split()[0])
-			ppid = int(psList.split[i].split()[1])
+			ppid = int(psList[i].split()[1])
 			if ppid == parentPid:
 				children[len(children):] = self.__findChildren(psList, pid)
 				
@@ -152,7 +152,7 @@ class ProcessMonitor(object):
 					fp = os.popen("ps -p %s -o pcpu,rss,vsz" % (pid))
 					info = fp.readlines()[1]
 					for i in range(len(data)):
-						data[i] = info.split()[i]
+						data[i] = info[i].split()
 					fp.close()
 				except Exception:
 					fp.close()
