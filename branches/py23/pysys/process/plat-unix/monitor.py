@@ -82,7 +82,7 @@ class ProcessMonitor(object):
 		self.pid = pid
 		self.interval = interval
 		if file:
-			self.file = open(file, 'w', 0)
+			self.file = open(file, 'w')
 		else:	
 			self.file = sys.stdout		
 	
@@ -134,6 +134,7 @@ class ProcessMonitor(object):
 	
 				currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
 				file.write( "%s\t%f\t%d\t%d\n" % (currentTime, float(data[0])/self.numProcessors, data[1], data[2]) )
+				file.flush()
 				time.sleep(interval)
 	
 			# clean up			
@@ -157,6 +158,7 @@ class ProcessMonitor(object):
 					fp.close()
 				currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
 				file.write( "%s\t%s\t%s\t%s\n" % (currentTime, float(data[0])/self.numProcessors, data[1], data[2]) )
+				file.flush()
 				time.sleep(interval)
 		finally:
 			if file != sys.stdout: file.close()
