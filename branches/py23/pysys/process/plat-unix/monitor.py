@@ -18,7 +18,7 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 from __future__ import print_function
-import string, time, threading
+import time, threading
 
 from pysys.constants import *
 
@@ -97,8 +97,8 @@ class ProcessMonitor(object):
 		children.append(int(parentPid))
 		
 		for i in range(1, len(psList)):
-			pid = int(string.split(psList[i])[0])
-			ppid = int(string.split(psList[i])[1])
+			pid = int(psList[i].split()[0])
+			ppid = int(psList.split[i].split()[1])
 			if ppid == parentPid:
 				children[len(children):] = self.__findChildren(psList, pid)
 				
@@ -127,10 +127,10 @@ class ProcessMonitor(object):
 				fp.close()
 				
 				for i in range(1, len(info)):
-					if int(string.split(info[i])[0]) in pidTree:
-						data[0] = data[0] + float(string.split(info[i])[1])
-						data[1] = int(string.split(info[i])[2])
-						data[2] = int(string.split(info[i])[3])
+					if int(info[i].split()[0]) in pidTree:
+						data[0] = data[0] + float(info[i].split()[1])
+						data[1] = int(info[i].split()[2])
+						data[2] = int(info[i].split()[3])
 	
 				currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
 				file.write( "%s\t%f\t%d\t%d\n" % (currentTime, float(data[0])/self.numProcessors, data[1], data[2]) )
@@ -152,7 +152,7 @@ class ProcessMonitor(object):
 					fp = os.popen("ps -p %s -o pcpu,rss,vsz" % (pid))
 					info = fp.readlines()[1]
 					for i in range(len(data)):
-						data[i] = string.split(info)[i]
+						data[i] = info.split()[i]
 					fp.close()
 				except Exception:
 					fp.close()

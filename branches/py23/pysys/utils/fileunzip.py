@@ -18,7 +18,7 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 from __future__ import print_function
-import os.path, string, glob, gzip
+import os.path, glob, gzip
 
 from pysys.constants import *
 from pysys.exceptions import *
@@ -58,7 +58,7 @@ def unzip(zfilename, replace=False, binary=False):
 	if not os.path.exists(zfilename):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(zfilename)))
 
-	tokens	= string.split(zfilename, '.')
+	tokens	= zfilename.split('.')
 	if tokens[len(tokens)-1] != 'gz':
 		raise IncorrectFileTypeException("file does not have a .gz extension")
 	
