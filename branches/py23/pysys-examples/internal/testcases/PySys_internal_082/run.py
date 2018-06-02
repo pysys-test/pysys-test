@@ -25,6 +25,8 @@ class PySysTest(BaseTest):
 		self.assertGrep('test-local.txt', expr=TEST_STR, contains=True)
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=False)
 
+		self.waitForSignal('test-local.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True)
+
 		# test using a bytes object, currently works only for Python 2
 		if not PY2:
 			self.log.info('skipping tests that use a bytes object as not currently supported for Python 3')
@@ -42,3 +44,6 @@ class PySysTest(BaseTest):
 
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), contains=True)
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), contains=False)
+
+		self.waitForSignal('test-local.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), condition='==2', timeout=2, abortOnError=True)
+		self.waitForSignal('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==2', timeout=2, abortOnError=True)
