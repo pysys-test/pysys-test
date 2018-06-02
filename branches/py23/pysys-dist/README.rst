@@ -32,9 +32,7 @@ API documentation is available at http://pysys.sourceforge.net/
 Installation
 ============
 
-PySys has been written and tested against Python 2.7 and higher. 
-
-Python 3.x is also supported, by running the 2to3.py script at installation time. 
+PySys can be used with Python 2.7 or Python 3.5 and later. 
 
 Dependencies
 ------------
@@ -84,7 +82,7 @@ process to facilitate the management and execution of testcases. On unix
 systems the script is installed into the Python binary directory, e.g. 
 /usr/local/bin, and is hence on the default user's path. On windows systems 
 the script is installed into the Scripts directory of the Python 
-installation, e.g. c:\Python24\Scripts\pysys.py, which is not by default on 
+installation, e.g. c:\Python\Scripts\pysys.py, which is not by default on 
 the user's path. To run on windows systems the Scripts directory of the 
 Python installation should be added to the user's path to allow direct 
 execution of the script. 

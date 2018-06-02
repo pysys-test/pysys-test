@@ -1,9 +1,9 @@
 PySys 1.3.0 Release Notes
 =========================
 
-PySys has been written and tested against Python 2.7 and higher. Support 
-for Python 3.x is included, where the 2to3.py script is run on install 
-time. See installation notes in README.rst for more details.
+PySys can be used with Python 2.7 or Python 3.5 and later. 
+
+See installation notes in README.rst for more details.
 
 
 What's new in this release
@@ -20,6 +20,9 @@ Changes affecting compatibility:
   failed, whereas previously it would return 0.
  
 Other fixes and new features:
+- PySys now provides 'single-source' support for both Python 2.7 and 
+  Python 3.x, without the need for the 2to3.py script to be run at 
+  installation time for use with Python 3.
 - Changed the way multiple cycles are executed in multi-threaded mode to 
   allow tests from different cycles to execute in parallel instead of waiting 
   for each cycle to fully complete before starting the next cycle. This 
