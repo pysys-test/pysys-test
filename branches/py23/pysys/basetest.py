@@ -601,6 +601,7 @@ class BaseTest(ProcessUser):
 			log.debug("Number of matching lines is %d"%numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			msg = self.__assertMsg(xargs, 'Line count on %s for "%s"%s '%(file, expr, condition))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
 			if (eval("%d %s" % (numberLines, condition))):
