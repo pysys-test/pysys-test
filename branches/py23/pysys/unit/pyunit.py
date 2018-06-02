@@ -23,6 +23,7 @@ from __future__ import print_function
 from pysys import ThreadFilter
 from pysys.constants import *
 from pysys.basetest import BaseTest
+from pysys.utils.pycompat import openfile
 import glob, os, unittest
 
 class PyUnitTest(BaseTest):
@@ -75,8 +76,9 @@ class PyUnitTest(BaseTest):
 			self.addOutcome(FAILED, 'Non-zero exit code from %s'%os.path.basename(testFile), printReason=False)
 		else:
 			self.addOutcome(PASSED)
-		for l in open(dstdout):
-			self.log.info(l.rstrip())
+		with openfile(dstdout, encoding=self.getDefaultFileEncoding(dstdout)) as f:
+			for l in f:
+				self.log.info(l.rstrip())
 
 	def getPythonPath(self):
 		"""Override this method to return a sequence of paths to put

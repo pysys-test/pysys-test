@@ -23,7 +23,7 @@
 	example both Python 2 and Python 3. 
 """
 
-import sys
+import sys, os, io
 
 PY2 = sys.version_info[0] == 2
 
@@ -49,3 +49,44 @@ def quotestring(s):
 	# the confusing "b'valuehere'" representation that "%s" would 
 	# produce for python 3 bytes objects
 	return '"%s"'%s if isstring(s) else repr(s)
+	
+def openfile(path, mode='r', encoding=None, **kwargs):
+	"""
+	Opens the specified file, following the default 
+	"open()" semantics for this Python version unless an encoding is 
+	explicitly specified, in which case a file stream 
+	yielding (unicode) character strings is always returned. 
+	
+	Specifically:
+	
+	On Python 3 this method returns a file stream yielding character strings 
+	unless a binary mode was specified in which case a stream yielding 
+	bytes is returned. 
+	
+	On Python 2 this method returns a file stream yielding unicode 
+	character strings only if an encoding was explicitly specified; 
+	otherwise it returns a file stream yielding "str" bytes objects. 
+	
+	@param path: The path to open; must be an absolute path. 
+	
+	@param mode: The file mode, e.g. 'r' for reading, 'wb' for binary writing. 
+	
+	@param encoding: The encoding to use to translate between the bytes of the 
+	file and the characters used in the returned stream. If an encoding 
+	is specified then the returned stream is always a unicode character stream. 
+	This must be None if the mode specifies binary. 
+	
+	@param kwargs: Any additional args to be passed to open() or io.open(). 
+	
+	@return: A file stream, either using unicode characters or binary bytes. 
+	This stream should be closed when no longer required.
+	
+	"""
+	assert path
+	# sanity check to avoid accidentally creating files in cwd rather than test output directory
+	assert os.path.isabs(path), path
+	
+	if encoding or (not PY2):
+		if encoding: assert 'b' not in mode, 'cannot open file %s with binary mode %s as an encoding was specified'%(path, mode)
+		return io.open(path, mode=mode, encoding=encoding, **kwargs)
+	return open(path, mode=mode, **kwargs)

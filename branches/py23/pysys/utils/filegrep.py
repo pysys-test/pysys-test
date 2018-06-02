@@ -24,13 +24,15 @@ from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filediff import trimContents
+from pysys.utils.pycompat import openfile
 
-def getmatches(file, regexpr, ignores=None):
+def getmatches(file, regexpr, ignores=None, encoding=None):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches.
 	
 	@param file: The full path to the input file
 	@param regexpr: The regular expression used to search for matches
 	@param ignores: A list of regexes which will cause matches to be discarded
+	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	@return: A list of the match objects 
 	@rtype: list
 	@raises FileNotFoundException: Raised if the input file does not exist
@@ -44,7 +46,7 @@ def getmatches(file, regexpr, ignores=None):
 	if not os.path.exists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
-		with open(file, 'r') as f:
+		with openfile(file, 'r', encoding=encoding) as f:
 			for l in f:
 				match = rexp.search(l)
 				if match is not None: 
@@ -61,13 +63,15 @@ def getmatches(file, regexpr, ignores=None):
 		return matches
 
 
-def filegrep(file, expr, ignores=None, returnMatch=False):
+def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None):
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
 	
 	@param file: The full path to the input file
 	@param expr: The regular expression (uncompiled) to search for in the input file
 	@param ignores: Optional list of regular expression strings to ignore when searching file. 
 	@param returnMatch: return the regex match object instead of a simple boolean
+	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	
 	@returns: success (True / False), unless returnMatch=True in which case it returns the regex match 
 		object (or None if not matched)
 	@rtype: integer
@@ -77,7 +81,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False):
 	if not os.path.exists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
-		f = open(file, 'r')
+		f = openfile(file, 'r', encoding=encoding)
 		try:
 			if log.isEnabledFor(logging.DEBUG):
 				contents = f.readlines()
@@ -100,7 +104,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False):
 			f.close()
 
 
-def lastgrep(file, expr, ignore=[], include=[]):
+def lastgrep(file, expr, ignore=[], include=[], encoding=None):
 	"""Search for matches to a regular expression in the last line of an input file, returning true if a match occurs.
 	
 	@param file: The full path to the input file
@@ -108,6 +112,8 @@ def lastgrep(file, expr, ignore=[], include=[]):
 	@returns: success (True / False)
 	@param ignore: A list of regular expressions which remove entries in the input file contents before making the grep
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the grep 
+	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	
 	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
@@ -115,9 +121,11 @@ def lastgrep(file, expr, ignore=[], include=[]):
 	if not os.path.exists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
-		contents = open(file, 'r').readlines()
+		with openfile(file, 'r', encoding=encoding) as f:
+			contents = f.readlines()
 		contents = trimContents(contents, ignore, exclude=True)
 		contents = trimContents(contents, include, exclude=False)
+		log.info('contents: %s', contents)
 		
 		logContents("Contents of %s after pre-processing;" % os.path.basename(file), contents)
 		if len(contents) > 0:
@@ -127,7 +135,7 @@ def lastgrep(file, expr, ignore=[], include=[]):
 		return False
 
 
-def orderedgrep(file, exprList):
+def orderedgrep(file, exprList, encoding=None):
 	"""Seach for ordered matches to a set of regular expressions in an input file, returning true if the matches occur in the correct order.
 	
 	The ordered grep method will only return true if matches to the set of regular expression in the expression 
@@ -145,6 +153,8 @@ def orderedgrep(file, exprList):
 	
 	@param file: The full path to the input file
 	@param exprList: A list of regular expressions (uncompiled) to search for in the input file
+	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	
 	@returns: success (True / False)
 	@rtype: integer
 	@raises FileNotFoundException: Raised if the input file does not exist
@@ -157,7 +167,8 @@ def orderedgrep(file, exprList):
 	if not os.path.exists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
-		contents = open(file, 'r').readlines()	  
+		with openfile(file, 'r', encoding=encoding) as f:
+			contents = f.readlines()	  
 		for i in range(len(contents)):
 			regexpr = re.compile(expr)
 			if regexpr.search(r"%s"%contents[i]) is not None:

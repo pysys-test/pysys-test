@@ -6,7 +6,7 @@ import io, locale
 
 # contains a non-ascii £ character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello £ world' 
-# use a different encoding to the default
+# use a different encoding to the default/local encoding
 TEST_ENCODING = 'latin-1' if locale.getpreferredencoding() == 'utf-8' else 'utf-8'
 
 class PySysTest(BaseTest):
@@ -20,12 +20,16 @@ class PySysTest(BaseTest):
 	def validate(self):
 		# test using a unicode character string
 		self.assertLineCount('test-local.txt', expr=TEST_STR, condition='==2')
-		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR, condition='==0') # currently pysys cannot match character expressions in non-default files
+		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR, condition='==0')
+		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR, condition='==2', encoding=TEST_ENCODING)
 
 		self.assertGrep('test-local.txt', expr=TEST_STR, contains=True)
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=False)
-
+		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=True, encoding=TEST_ENCODING)
+		
+		# smoke test this one too
 		self.waitForSignal('test-local.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True)
+		self.waitForSignal('test-nonlocal.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True, encoding=TEST_ENCODING)
 
 		# test using a bytes object, currently works only for Python 2
 		if not PY2:
@@ -38,6 +42,7 @@ class PySysTest(BaseTest):
 		
 		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==2')
 		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), condition='==0')
+		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==0', encoding=TEST_ENCODING)
 
 		self.assertGrep('test-local.txt', expr=TEST_STR.encode(TEST_ENCODING), contains=False)
 		self.assertGrep('test-local.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), contains=True)

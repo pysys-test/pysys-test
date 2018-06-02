@@ -20,8 +20,9 @@
 import os.path
 
 from pysys.exceptions import *
+from pysys.utils.pycompat import openfile
 
-def replace(input, output, dict={}, marker=''):
+def replace(input, output, dict={}, marker='', encoding=None):
 	"""Read an input file, and write to output tailoring the file to replace set keywords with values.
 
 	The replace method reads in the contents of the input file line by line, checks for matches in 
@@ -43,19 +44,18 @@ def replace(input, output, dict={}, marker=''):
 	@param dict: A dictionary of key/value pairs to use in the replacement
 	@param marker: The character used to mark key words to be replaced (may be the empty string
 	               if no characters are used)
+	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
 	if not os.path.exists(input):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(input)))
 	else:
-		fi = open(input, 'r')
-		fo = open(output, 'w')
-		for line in fi.readlines():
-			for key in list(dict.keys()):
-				line = line.replace('%s%s%s'%(marker, key, marker), "%s" % (dict[key]))
-			fo.write(line)
-		fi.close()
-		fo.close()
+		with openfile(input, 'r', encoding=encoding) as fi, openfile(output, 'w', encoding=encoding) as fo:
+			for line in fi.readlines():
+				for key in list(dict.keys()):
+					line = line.replace('%s%s%s'%(marker, key, marker), "%s" % (dict[key]))
+				fo.write(line)
 
 	

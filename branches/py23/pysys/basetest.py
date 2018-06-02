@@ -383,7 +383,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 
-	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], **xargs):
+	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], encoding=None, **xargs):
 		"""Perform a validation assert on the comparison of two input text files.
 		
 		This method performs a file comparison on two input files. The files are pre-processed prior to the 
@@ -403,6 +403,9 @@ class BaseTest(ProcessUser):
 			carried out. This is often useful to replace timestamps in logfiles etc.
 		@param includes: A list of regular expressions used to denote lines in the files which should be used in the 
 			comparison. Only lines which match an expression in the list are used for the comparison
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
@@ -421,7 +424,7 @@ class BaseTest(ProcessUser):
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
 		result = False
 		try:
-			result = filediff(f1, f2, ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput)
+			result = filediff(f1, f2, ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
@@ -430,10 +433,10 @@ class BaseTest(ProcessUser):
 				self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
 			finally:
 				if not result:
-					self.logFileContents(unifiedDiffOutput)
+					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
 
 
-	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, **xargs):
+	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, encoding=None, **xargs):
 		"""Perform a validation assert on a regular expression occurring in a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -450,6 +453,9 @@ class BaseTest(ProcessUser):
 			ignored when reading the file. 
 		@param literal: By default expr is treated as a regex, but set this to True to pass in 
 			a string literal instead
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
@@ -477,7 +483,7 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		try:
-			result = filegrep(f, expr, ignores=ignores, returnMatch=True)
+			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f))
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = self.__assertMsg(xargs, 'Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
@@ -494,7 +500,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(outcome, msg, abortOnError=self.__abortOnError(xargs))
 		
 
-	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], **xargs):
+	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], encoding=None, **xargs):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -507,7 +513,10 @@ class BaseTest(ProcessUser):
 		@param expr: The regular expression to check for in the last line of the file
 		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
 		@param ignores: A list of regular expressions used to denote lines in the file which should be ignored
-		@param includes: A list of regular expressions used to denote lines in the file which should be used in the assertion.
+		@param includes: A list of regular expressions used to denote lines in the file which should be used in the assertion.#
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
@@ -522,7 +531,7 @@ class BaseTest(ProcessUser):
 
 		msg = self.__assertMsg(xargs, 'Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
 		try:
-			result = lastgrep(f, expr, ignores, includes) == contains
+			result = lastgrep(f, expr, ignores, includes, encoding=encoding or self.getDefaultFileEncoding(f)) == contains
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
@@ -531,7 +540,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 
-	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, **xargs):   
+	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, encoding=None, **xargs):   
 		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
 		
 		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome 
@@ -544,6 +553,9 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		@param exprList: A list of regular expressions which should occur in the file in the order they appear in the list
 		@param contains: Boolean flag to denote if the expressions should or should not be seen in the file in the order specified
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
@@ -559,7 +571,7 @@ class BaseTest(ProcessUser):
 		msg = self.__assertMsg(xargs, 'Ordered grep on input file %s' % file)
 		expr = None
 		try:
-			expr = orderedgrep(f, exprList)
+			expr = orderedgrep(f, exprList, encoding=encoding or self.getDefaultFileEncoding(f))
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
@@ -577,8 +589,8 @@ class BaseTest(ProcessUser):
 				msg += ' failed on expression \"%s\"'% expr
 			self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
 
-
-	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, **xargs):
+	
+	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, encoding=None, **xargs):
 		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -587,9 +599,12 @@ class BaseTest(ProcessUser):
 		
 		@param file: The basename of the file used in the line count
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param expr: The regular expression used to match a line of the input file
+		@param expr: The regular expression string used to match a line of the input file
 		@param condition: The condition to be met for the number of lines matching the regular expression
 		@param ignores: A list of regular expressions that will cause lines to be excluded from the count
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""	
@@ -597,7 +612,7 @@ class BaseTest(ProcessUser):
 		f = os.path.join(filedir, file)
 
 		try:
-			numberLines = linecount(f, expr, ignores=ignores)
+			numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f))
 			log.debug("Number of matching lines is %d"%numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)

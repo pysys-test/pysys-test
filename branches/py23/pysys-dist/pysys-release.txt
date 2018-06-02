@@ -23,6 +23,18 @@ Other fixes and new features:
 - PySys now provides 'single-source' support for both Python 2.7 and 
   Python 3.x, without the need for the 2to3.py script to be run at 
   installation time for use with Python 3.
+- Added support to specifying what file encoding is to be used for reading 
+  and writing text files (for example in waitForSignal and various 
+  assertions). This is especially important for Python 3 where text files 
+  are processed using unicode character strings rather than Python 2 
+  byte "str" objects. The encoding can be specified explicitly on 
+  individual methods the open files, or globally based on file names 
+  or extensions by overriding the new ProcessUser.getDefaultFileEncoding() 
+  method. For example, getDefaultFileEncoding could be overridden to 
+  specify that .xml files should be treated as UTF-8 by default. If 
+  the encoding is not specified explicitly or through 
+  getDefaultFileEncoding(), Python selects the preferred encoding based 
+  on the locale that it is running in. 
 - Changed the way multiple cycles are executed in multi-threaded mode to 
   allow tests from different cycles to execute in parallel instead of waiting 
   for each cycle to fully complete before starting the next cycle. This 

@@ -23,6 +23,7 @@ import os.path, copy, difflib
 from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
+from pysys.utils.pycompat import openfile
 
 
 def trimContents(contents, expressions, exclude=True):
@@ -93,7 +94,7 @@ def logContents(message, list):
 
 
 
-def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None):
+def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None, encoding=None):
 	"""Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.
 	
 	The method reads in the files and loads the contents of each as a list of strings. The two files are 
@@ -113,6 +114,8 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
 	@param unifiedDiffOutput: If specified, indicates the full path of a file to which unified diff output will be written, 
 		if the diff fails. 
+	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	
 	@return: success (True / False)
 	@rtype: boolean
 	@raises FileNotFoundException: Raised if either of the files do not exist
@@ -125,10 +128,10 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 		list1 = []
 		list2 = []
 
-		with open(file1, 'r') as f:
+		with openfile(file1, 'r', encoding=encoding) as f:
 			for i in f: list1.append(i.strip())
 
-		with open(file2, 'r') as f:
+		with openfile(file2, 'r', encoding=encoding) as f:
 			for i in f: list2.append(i.strip())
 		
 		list1 = trimContents(list1, ignore, exclude=True)
@@ -160,7 +163,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 				tofile='%s (%d lines)'%(os.path.basename(file1), len(l1)),
 				))
 			if unifiedDiffOutput:
-				with open(unifiedDiffOutput, 'w') as f:
+				with openfile(unifiedDiffOutput, 'w', encoding=encoding) as f:
 					f.write(diff)
 			for line in diff.split('\n'): log.debug("  %s", line)
 
