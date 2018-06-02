@@ -1,6 +1,7 @@
 # -*- coding: latin-1 -*-
 from pysys.constants import *
 from pysys.basetest import BaseTest
+from pysys.utils.pycompat import PY2
 import io, locale
 
 # contains a non-ascii £ character that is different in utf-8 vs latin-1
@@ -10,8 +11,6 @@ TEST_ENCODING = 'latin-1' if locale.getpreferredencoding() == 'utf-8' else 'utf-
 
 class PySysTest(BaseTest):
 	def execute(self):
-		#self.log.info('Using test string: %s', TEST_STR.encode('utf-8'))
-		
 		self.log.info('Python local/default/preferred encoding is %s; will test with non-local encoding %s', locale.getpreferredencoding(), TEST_ENCODING)
 		with io.open(self.output+'/test-local.txt', 'w', encoding=locale.getpreferredencoding()) as f:
 			f.write(os.linesep.join([TEST_STR, TEST_STR, 'otherstring']))
@@ -25,8 +24,13 @@ class PySysTest(BaseTest):
 
 		self.assertGrep('test-local.txt', expr=TEST_STR, contains=True)
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=False)
-		
-		# test using a bytes object
+
+		# test using a bytes object, currently works only for Python 2
+		if not PY2:
+			self.log.info('skipping tests that use a bytes object as not currently supported for Python 3')
+			# we could potentially get this working by having assertLineCount/assertGrep open files in 
+			# binary mode if a bytes object was passed for the expr, if we wanted to
+			return
 		self.assertLineCount('test-local.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==0')
 		self.assertLineCount('test-local.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), condition='==2')
 		
