@@ -619,8 +619,18 @@ class BaseTest(ProcessUser):
 		@param default: Default assert statement to return if a parameter is not supplied
 		
 		"""
-		if 'assertMessage' in xargs: return xargs['assertMessage']
-		return default
+		if 'assertMessage' in xargs: 
+			msg = xargs['assertMessage']
+		else:
+			msg = default
+		if PY2 and isinstance(msg, str): 
+			# The python2 logger is very unhappy about byte str objects containing 
+			# non-ascii characters (specifically it will fail to log them and dump a 
+			# traceback on stderr). Since it's pretty important that assertion 
+			# messages and test outcome reasons don't get swallowed, add a 
+			# workaround for this here. Not a problem in python 3. 
+			msg = msg.decode('ascii', errors='replace')
+		return msg
 
 
 	def __abortOnError(self, xargs):
