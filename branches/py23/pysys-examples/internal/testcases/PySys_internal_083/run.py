@@ -7,7 +7,7 @@ import io, locale
 # contains a non-ascii £ character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello £ world' 
 # use a different encoding to the default/local encoding
-TEST_ENCODING = 'latin-1' if locale.getpreferredencoding() == 'utf-8' else 'utf-8'
+TEST_ENCODING = 'latin-1' if locale.getpreferredencoding().lower() == 'utf-8' else 'utf-8'
 
 class PySysTest(BaseTest):
 	def execute(self):
@@ -17,7 +17,8 @@ class PySysTest(BaseTest):
 		self.__myDefaultEncoding = None
 
 	def validate(self):
-		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=False) # without encoding arg, won't work
+		if TEST_ENCODING == 'utf-8': # can't even read the file without an exception on utf8 systems
+			self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=False) # without encoding arg, won't work
 
 		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR, condition='==2', encoding=TEST_ENCODING)
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=True, encoding=TEST_ENCODING)
