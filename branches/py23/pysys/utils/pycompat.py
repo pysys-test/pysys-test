@@ -37,3 +37,15 @@ def isstring(s):
 	on python 3 this must be a character str. 
 	"""
 	return isinstance(s, string_types)
+
+def quotestring(s):
+	""" Adds double quotation marks around the specified character string 
+	(but does not escape quotes contained within it). 
+	If a byte string is provided and this is Python 3+ then the 
+	'repr' representation is used instead. 
+	"""
+	# this function exists to provide the same quoting behaviour 
+	# for str/unicode in Python 2 and str in Python 3, but avoiding 
+	# the confusing "b'valuehere'" representation that "%s" would 
+	# produce for python 3 bytes objects
+	return '"%s"'%s if isstring(s) else repr(s)

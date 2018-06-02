@@ -480,7 +480,7 @@ class BaseTest(ProcessUser):
 			result = filegrep(f, expr, ignores=ignores, returnMatch=True)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			msg = self.__assertMsg(xargs, 'Grep on %s %s "%s"'%(file, 'contains' if contains else 'does not contain', expr))
+			msg = self.__assertMsg(xargs, 'Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
 			# short message if it succeeded, more verbose one if it failed to help you understand why, 
@@ -489,8 +489,8 @@ class BaseTest(ProcessUser):
 			if outcome == PASSED: 
 				msg = self.__assertMsg(xargs, 'Grep on input file %s' % file)
 			else:
-				msg = self.__assertMsg(xargs, 'Grep on %s %s "%s"'%(file, 'contains' if contains else 'does not contain', 
-					result.group(0) if result else expr))
+				msg = self.__assertMsg(xargs, 'Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', 
+					quotestring(result.group(0) if result else expr) ))
 			self.addOutcome(outcome, msg, abortOnError=self.__abortOnError(xargs))
 		
 
@@ -520,7 +520,7 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 
-		msg = self.__assertMsg(xargs, 'Grep on last line of %s %s "%s"'%(file, 'contains' if contains else 'not contains', expr))
+		msg = self.__assertMsg(xargs, 'Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
 		try:
 			result = lastgrep(f, expr, ignores, includes) == contains
 		except Exception:
@@ -601,14 +601,14 @@ class BaseTest(ProcessUser):
 			log.debug("Number of matching lines is %d"%numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			msg = self.__assertMsg(xargs, 'Line count on %s for "%s"%s '%(file, expr, condition))
+			msg = self.__assertMsg(xargs, 'Line count on %s for %s%s '%(file, quotestring(expr), condition))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
 		else:
 			if (eval("%d %s" % (numberLines, condition))):
 				msg = self.__assertMsg(xargs, 'Line count on input file %s' % file)
 				self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
 			else:
-				msg = self.__assertMsg(xargs, 'Line count on %s for "%s"%s (actual =%d) '%(file, expr, condition, numberLines))
+				msg = self.__assertMsg(xargs, 'Line count on %s for %s%s (actual =%d) '%(file, quotestring(expr), condition, numberLines))
 				self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
 
 

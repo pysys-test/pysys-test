@@ -454,7 +454,7 @@ class ProcessUser(object):
 						errmatches = getmatches(f, err+'.*') # add .* to capture entire err msg for a better outcome reason
 						if errmatches:
 							err = errmatches[0].group(0).strip()
-							msg = '"%s" found during %s'%(err, msg)
+							msg = '%s found during %s'%(quotestring(err), msg)
 							# always report outcome for this case; additionally abort if requested to
 							self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
 							return matches
@@ -687,7 +687,7 @@ class ProcessUser(object):
 
 			if returnAll: return matches
 			if returnNoneIfMissing: return None
-			raise Exception('Could not find expression "%s" in %s'%(expr, os.path.basename(path)))
+			raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
 
 
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False):
