@@ -25,7 +25,7 @@ from pysys.utils.pycompat import *
 class BaseLogFormatter(logging.Formatter):
 	"""Base class for formatting log messages.
 	
-	This implementation delegates everything to L{logging.Formatter} using the messagefmt and datefmt
+	This implementation delegates everything to logging.Formatter using the messagefmt and datefmt
 	properties. Subclasses may be implemented to provide required customizations, and can be registered
 	by specifying classname in the formatter node of the project configuration file.
 	"""

@@ -276,7 +276,7 @@ class ProcessUser(object):
 		As only binary data can be written to a process stdin, 
 		if a character string rather than a byte object is passed as the data,
 		it will be automatically converted to a bytes object using the encoding 
-		given by L{locale.getpreferredencoding()}. 
+		given by locale.getpreferredencoding(). 
 		@param addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""
