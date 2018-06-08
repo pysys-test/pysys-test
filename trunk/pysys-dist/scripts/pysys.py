@@ -55,35 +55,41 @@ def printUsage():
 	sys.exit()
 	
 def runTest(args):
-	launcher = ConsoleLaunchHelper(os.getcwd(), "run")
-	args = launcher.parseArgs(args)
-	module = import_module(PROJECT.runnerModule, sys.path)
-	runner = getattr(module, PROJECT.runnerClassname)(*args)
-	runner.start()
+	try:
+		launcher = ConsoleLaunchHelper(os.getcwd(), "run")
+		args = launcher.parseArgs(args)
+		module = import_module(PROJECT.runnerModule, sys.path)
+		runner = getattr(module, PROJECT.runnerClassname)(*args)
+		runner.start()
 	
-	for cycledict in runner.results.values():
-		for outcome in FAILS:
-			if cycledict.get(outcome, None):
-				sys.exit(2)
-				
-	sys.exit(0)
-	
+		for cycledict in runner.results.values():
+			for outcome in FAILS:
+				if cycledict.get(outcome, None): sys.exit(2)
+		sys.exit(0)
+	except Exception, e:
+		sys.stdout.write('\nWARN: %s\n' % e.message)
+		sys.exit(-1)
+
+def printTest(args):
+	try:
+		printer = ConsolePrintHelper(os.getcwd(), "print")
+		printer.parseArgs(args)
+		printer.printTests()
+	except Exception, e:
+		sys.stdout.write('\nWARN: %s\n\n' % e.message)
+
 def makeTest(args):
 	module = import_module(PROJECT.makerModule, sys.path)
 	maker = getattr(module, PROJECT.makerClassname)("make")
 	maker.parseArgs(args)
 	maker.makeTest()
-	
-def printTest(args):
-	printer = ConsolePrintHelper(os.getcwd(), "print")
-	printer.parseArgs(args)
-	printer.printTests()
-	
+
 def cleanTest(args):
 	cleaner = ConsoleCleanTestHelper(os.getcwd(), "clean")
 	cleaner.parseArgs(args)
 	cleaner.clean()
-	
+
+
 if __name__ == "__main__":
 	if len(sys.argv) < 2: 
 		printUsage()
