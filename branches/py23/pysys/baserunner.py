@@ -235,6 +235,22 @@ class BaseRunner(ProcessUser):
 		return True
 
 
+	def cycleComplete(self):
+		"""Cycle complete method which can optionally be overridden to perform 
+		custom operations between the repeated execution of a set of testcases.
+		
+		The default implementation of this method does nothing. Note that providing 
+		an override for this method will result in disabling concurrent test 
+		execution across multiple cycles. 
+		
+		@deprecated: Overriding this method is discouraged as it disables 
+		concurrent test execution across cycles. Instead, cleanup should be 
+		performed using either BaseTest.cleanup() or BaseRunner.testComplete() 
+		instead. 
+		"""
+		pass
+
+
 	# perform a test run
 	def start(self, printSummary=True):
 		"""Start the execution of a set of testcases.
@@ -271,10 +287,11 @@ class BaseRunner(ProcessUser):
 		self.startTime = time.time()
 		
 		# by default we allow running tests from different cycles in parallel, 
-		# but if the user provided a custom runner with a cycleComplete then 
-		# revert to pre-PySys 1.3.0 compatible behaviour and join each cycle 
-		# before starting the next, so we can invoke cycleComplete reliably
-		concurrentcycles = not hasattr(self, 'cycleComplete')
+		# but if the user provided a runner with a cycleComplete that actually 
+		# does something then revert to pre-PySys 1.3.0 compatible behaviour and 
+		# join each cycle before starting the next, so we can invoke 
+		# cycleComplete reliably
+		concurrentcycles = type(self).cycleComplete == BaseRunner.cycleComplete
 		
 		for cycle in range(self.cycle):
 			# loop through tests for the cycle
@@ -304,8 +321,7 @@ class BaseRunner(ProcessUser):
 	
 				# call the hook for end of cycle if one has been provided
 				try:
-					if hasattr(self, 'cycleComplete'):
-						self.cycleComplete()
+					self.cycleComplete()
 				except KeyboardInterrupt:
 					log.info("test interrupt from keyboard")
 					self.handleKbrdInt()
@@ -401,8 +417,7 @@ class BaseRunner(ProcessUser):
 				try: writer.cleanup()
 				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 			del self.writers[:]
-			if hasattr(self, 'cycleComplete'):
-				self.cycleComplete()
+			self.cycleComplete()
 			self.cleanup()
 			sys.exit(1)
 

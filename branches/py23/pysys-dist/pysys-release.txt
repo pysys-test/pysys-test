@@ -42,7 +42,7 @@ Other fixes and new features:
   conditions demonstrated by a single testcase, which was not possible 
   with the previous threading behaviour. To maintain existing 
   behaviour for users who have provided a runner.cycleComplete() method, 
-  concurrent cycle execution will be disabled if cycleComplete() exists. 
+  concurrent cycle execution will be disabled if cycleComplete() is overridden. 
   Anybody affected by this is encouraged to transition away from use of 
   cycleComplete() and perform any required cleanup tasks in 
   BaseTest.cleanup() or BaseRunner.testComplete() instead. 
