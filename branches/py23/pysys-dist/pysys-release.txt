@@ -23,7 +23,7 @@ Other fixes and new features:
 - PySys now provides 'single-source' support for both Python 2.7 and 
   Python 3.x, without the need for the 2to3.py script to be run at 
   installation time for use with Python 3.
-- Added support to specifying what file encoding is to be used for reading 
+- Added support for specifying what file encoding is to be used for reading 
   and writing text files (for example in waitForSignal and various 
   assertions). This is especially important for Python 3 where text files 
   are processed using unicode character strings rather than Python 2 

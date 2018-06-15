@@ -6,21 +6,21 @@ It provides a comprehensive package of utility methods to make all the common op
 
 Key features include:
 
-- A comprehensive library of assertion methods appropriate for system-level testing, such as checking for error/success messages in log file and comparing the contents of output files
+- A comprehensive library of assertion methods appropriate for system-level testing, such as checking for error/success messages in log files and comparing the contents of output files
 - A comprehensive library of methods to automate platform-independent process starting, orchestration, and cleanup, for both Windows and Unix-based systems. Includes common operations such as:
 
   * dynamic port allocation, 
   * waiting until a server is running on a specified port
-  * waiting until a file contains a specific message, 
-  * and aborting early if an error message is detected
+  * waiting until a file contains a specified message, 
+  * aborting early if an error message is detected
 
 - Support for executing tests in parallel to significantly speed up execution time
 - A process memory monitoring framework to check for memory leaks
 - A performance monitoring framework for recording and aggregating latency, throughput and other performance metrics
 - A pluggable "writers" framework for recording test outcomes in any format, including a standard JUnit-compatible XML results writer in the box
 - Integrated support for running PyUnit tests
-- Integrated support for executing manual user-driven test cases
-- Test categorization and selective include/exclude execution using per-test classification groups
+- Integrated support for executing manual interactively driven test cases
+- Test categorization and selective include/exclude execution, using per-test classification groups
 
 
 Download
