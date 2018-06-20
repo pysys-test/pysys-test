@@ -214,10 +214,11 @@ class ColorLogFormatter(BaseLogFormatter):
 		"""Initialize any python library required for ensuring ANSI escape sequences can be processed.
 
 		The default implementation does nothing on Unix but on Windows attempts to load the "Colorama"
-		library if is is present.
+		library if is is present (unless the environment variable 
+		PYSYS_DISABLE_COLORAMA=true is set).
 
 		"""
-		if OSFAMILY=='windows':
+		if OSFAMILY=='windows' and os.getenv('PYSYS_DISABLE_COLORAMA','')!='true':
 			try:
 				import colorama
 				colorama.init()
