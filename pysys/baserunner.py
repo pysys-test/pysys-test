@@ -387,7 +387,7 @@ class BaseRunner(ProcessUser):
 		"""Handle a keyboard exception caught during running of a set of testcases.
 		
 		"""
-		if self.__remainingTests <= 0 or os.getenv('PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT', 'false').lower()=='true':
+		if self.__remainingTests <= 0 or os.getenv('PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT', 'false').lower()=='true' or not os.isatty(0):
 			prompt = False
 		
 		def finish():
