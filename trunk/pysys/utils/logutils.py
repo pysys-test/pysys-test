@@ -153,8 +153,12 @@ class ColorLogFormatter(BaseLogFormatter):
 		@return: The formatted message ready for logging
 
 		"""
-		return self.colorCategoryToEscapeSequence(LOG_TRACEBACK)+ super(ColorLogFormatter, self).formatException(exc_info) + \
-			   self.colorCategoryToEscapeSequence(LOG_END)
+		msg = super(ColorLogFormatter, self).formatException(exc_info)
+		if self.color:
+			return self.colorCategoryToEscapeSequence(LOG_TRACEBACK)+ msg + \
+				self.colorCategoryToEscapeSequence(LOG_END)
+		else:
+			return msg
 
 
 	def format(self, record):
