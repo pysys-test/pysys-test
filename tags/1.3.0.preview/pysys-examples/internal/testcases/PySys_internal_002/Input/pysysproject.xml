@@ -1,8 +1,0 @@
-<pysysproject>
-	<property environment="environ"/>
-	<property osfamily="osfamily"/>
-	<property file="${osfamily}.properties" />
-	<property name="lib" value="lib_${osfamily}_${version}.so"/>
-	<property osfamily="os"/>
-	<property name="user" value="${environ.TEST_USER}.${os}"/>
-</pysysproject>
