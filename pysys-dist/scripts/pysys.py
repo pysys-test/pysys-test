@@ -66,8 +66,8 @@ def runTest(args):
 			for outcome in FAILS:
 				if cycledict.get(outcome, None): sys.exit(2)
 		sys.exit(0)
-	except Exception, e:
-		sys.stderr.write('\nWARN: %s\n' % e.message)
+	except Exception as e:
+		sys.stderr.write('\nWARN: %s\n' % e)
 		sys.exit(-1)
 
 def printTest(args):
@@ -75,8 +75,8 @@ def printTest(args):
 		printer = ConsolePrintHelper(os.getcwd(), "print")
 		printer.parseArgs(args)
 		printer.printTests()
-	except Exception, e:
-		sys.stderr.write('\nWARN: %s\n\n' % e.message)
+	except Exception as e:
+		sys.stderr.write('\nWARN: %s\n\n' % e)
 
 def makeTest(args):
 	module = import_module(PROJECT.makerModule, sys.path)
