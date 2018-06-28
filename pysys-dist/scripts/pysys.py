@@ -67,7 +67,7 @@ def runTest(args):
 				if cycledict.get(outcome, None): sys.exit(2)
 		sys.exit(0)
 	except Exception, e:
-		sys.stdout.write('\nWARN: %s\n' % e.message)
+		sys.stderr.write('\nWARN: %s\n' % e.message)
 		sys.exit(-1)
 
 def printTest(args):
@@ -76,7 +76,7 @@ def printTest(args):
 		printer.parseArgs(args)
 		printer.printTests()
 	except Exception, e:
-		sys.stdout.write('\nWARN: %s\n\n' % e.message)
+		sys.stderr.write('\nWARN: %s\n\n' % e.message)
 
 def makeTest(args):
 	module = import_module(PROJECT.makerModule, sys.path)
