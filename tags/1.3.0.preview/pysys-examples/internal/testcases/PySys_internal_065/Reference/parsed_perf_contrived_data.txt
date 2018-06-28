@@ -1,0 +1,5 @@
+CSVPerformanceFile<runDetails: 
+ - testId="testid1", value=0.0, resultKey="my result key1", foobar="foobarval", unit="unitval", biggerIsBetter=False, toleranceStdDevs=0.0, samples=-1, stdDev=-1.0
+ - testId="testid1", value=0.0, resultKey="my result key1", foobar="foobarval", unit="unitval", biggerIsBetter=False, toleranceStdDevs=0.0, samples=-1, stdDev=-1.0
+ - testId="testid2", value=0.0, resultKey="my result key2", foobar="foobarval2", unit="unitval", biggerIsBetter=False, toleranceStdDevs=0.0, samples=-1, stdDev=-1.0
+>

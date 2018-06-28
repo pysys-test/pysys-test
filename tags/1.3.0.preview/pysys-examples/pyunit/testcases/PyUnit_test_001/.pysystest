@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Basic PyUnit tests</title>    
+    <purpose><![CDATA[Test the basic behaviour PyUnit pysys extension with
+two test classes in two different files
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>pyunit</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
