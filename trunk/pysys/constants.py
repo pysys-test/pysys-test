@@ -196,22 +196,23 @@ def loadproject(start):
 
 	global PROJECT
 
-	projectFile = None
-	projectFileSet = set(DEFAULT_PROJECTFILE)
-	
+	projectFile = os.getenv('PYSYS_PROJECTFILE', None)
 	search = start
-	drive, path = os.path.splitdrive(search)
-	while (not search == drive):
-		intersection =  projectFileSet & set(os.listdir(search))
-		if intersection : 
-			projectFile = intersection.pop()
-			break
-		else:
-			search, drop = os.path.split(search)
-			if not drop: search = drive
-
-	if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))):
-		sys.stderr.write("WARNING: No project file found, taking project root to be '%s' \n" % (search or '.'))
+	if not projectFile:
+		projectFileSet = set(DEFAULT_PROJECTFILE)
+		
+		drive, path = os.path.splitdrive(search)
+		while (not search == drive):
+			intersection =  projectFileSet & set(os.listdir(search))
+			if intersection : 
+				projectFile = intersection.pop()
+				break
+			else:
+				search, drop = os.path.split(search)
+				if not drop: search = drive
+	
+		if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))):
+			sys.stderr.write("WARNING: No project file found, taking project root to be '%s' \n" % (search or '.'))
 
 	try:
 		PROJECT = Project(search, projectFile)
