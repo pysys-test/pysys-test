@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Process Module - timeout foreground process with abortOnError=False</title>    
+    <purpose><![CDATA[
+Checks that a process started in the foreground times out after the specified timeout, 
+appending a TIMEDOUT result to the outcome list. Also checks that the process is stopped
+after the timeout occurs. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
