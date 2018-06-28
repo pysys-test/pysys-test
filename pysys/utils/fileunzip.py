@@ -17,7 +17,8 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os.path, string, glob, gzip
+from __future__ import print_function
+import os.path, glob, gzip, shutil, re
 
 from pysys.constants import *
 from pysys.exceptions import *
@@ -26,16 +27,21 @@ from pysys.exceptions import *
 def unzipall(path, binary=False):
 	"""Unzip all .gz files in a given directory.
 	
-	@param path: The full path to the directory containing the archive files
-	@param binary: Boolean flag to indicate if the unzipped files should be written as binary 
-	@raises FileNotFoundException: Raised if the directory path does not exist
+	Archive files are automatically deleted after unzipping. 
+	
+	@param path: The full path to the directory containing the archive files.
+	@param binary: Boolean flag to indicate if the unzipped files should be written as binary. 
+	The default value of False indicates that on some platforms newline characters will be 
+	converted to the operating system default. 
+	
+	@raises FileNotFoundException: Raised if the directory path does not exist.
 	
 	"""
 	if not os.path.exists(path):
 		raise FileNotFoundException("%s path does not exist" % (os.path.basename(path)))
 
 	for file in glob.glob('%s/*.gz'%(path)):
-		unzip(file, 1, binary)
+		unzip(file, True, binary)
 
 
 
@@ -43,21 +49,25 @@ def unzip(zfilename, replace=False, binary=False):
 	"""Unzip a .gz archive and write the contents to disk.
 	
 	The method will unpack a file of the form C{file.data.gz} to C{file.data}, removing the 
-	archive file in the process if the replace input parameter is set to true. By default the 
-	unpacked archive is written as text data, unless the binary input parameter is set to true,
-	in which case the unpacked file is written as binary.
+	archive file in the process if the C{replace} input parameter is set to true. 
 	
-	@param zfilename: The full path to the archive file
-	@param replace: Boolean flag to indicate if the archive file should be removed after unpacking
-	@param binary: Boolean flag to indicate if the unzipped file should be written as binary
-	@raises FileNotFoundException: Raised if the archive file does not exist
-	@raises IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension
+	By default the unpacked archive is treated as non-binary data, 
+	unless the binary input parameter is set to true.
+	
+	@param zfilename: The full path to the archive file.
+	@param replace: Boolean flag to indicate if the archive file should be removed after unpacking.
+	@param binary: Boolean flag to indicate if the unzipped file should be written as binary.
+	The default value of False indicates that on some platforms newline characters will be 
+	converted to the operating system default. 
+	
+	@raises FileNotFoundException: Raised if the archive file does not exist.
+	@raises IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension.
 	
 	"""
 	if not os.path.exists(zfilename):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(zfilename)))
 
-	tokens	= string.split(zfilename, '.')
+	tokens	= zfilename.split('.')
 	if tokens[len(tokens)-1] != 'gz':
 		raise IncorrectFileTypeException("file does not have a .gz extension")
 	
@@ -67,13 +77,21 @@ def unzip(zfilename, replace=False, binary=False):
 		if i != len(tokens)-2:
 			uzfilename = uzfilename + '.'
 
+	# must read and write in binary in all cases, since we don't know for 
+	# certain what encoding it's in and want to avoid corrupting 
+	# non-newline characters
 	zfile = gzip.GzipFile(zfilename, 'rb', 9)
-	if binary:
-		uzfile = open(uzfilename, 'wb')
+	uzfile = open(uzfilename, 'wb')
+	if binary: 
+		# do an efficient block-by-block copy, in case it's large
+		shutil.copyfileobj(zfile, uzfile)
 	else:
-		uzfile = open(uzfilename, 'w')
-	buffer = zfile.read()
-	uzfile.write(buffer)
+		# non-binary means fix newlines.
+		# for compatibility with pre-1.3 PySys this is currently 
+		# implemented for basic cases and only on windows. 
+		buffer = zfile.read()
+		if PLATFORM=='win32': buffer = buffer.replace(b'\n', b'\r\n')
+		uzfile.write(buffer)
 	zfile.close()	 
 	uzfile.close()
 

@@ -17,16 +17,19 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+import sys
 try:
-	import tkMessageBox
-	from Tkinter import *
+	if sys.version_info[0] == 2:
+		from Tkinter import *
+	else:
+		from tkinter import *
 except Exception:
-	pass
+	pass 
 
 from pysys.xml.manual import *
 
 
-class ManualTester:
+class ManualTester(object):
 	def __init__(self, owner, filename, logname=None):
 		self.parentContainer = None
 		self.owner = owner
@@ -185,11 +188,16 @@ class ManualTester:
 			raise
 
 	def stop(self):
+		"""
+		Logs the results of the manual tester and ensures that it is not still running. 
+		
+		This method may be called from the UI thread or another thread. 
+		"""
 		self.logResults()
 		self.isRunning = 0
 		if self.parentContainer != None:
 			self.parentContainer.quit()
-			self.parentContainer.destroy()
+			self.parentContainer = None
 
 	def running(self):
 		return self.isRunning

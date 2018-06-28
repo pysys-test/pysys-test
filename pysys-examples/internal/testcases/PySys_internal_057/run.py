@@ -11,9 +11,9 @@ class PySysTest(BaseTest):
 				sock = socket.socket()
 				sock.bind(('127.0.0.1', port))
 				sock.close()
-			except:
+			except Exception as e:
 				self.log.warn("Error binding to port %s", sys.exc_info()[1], exc_info=0)
-				self.addOutcome(FAILED)
+				self.addOutcome(FAILED, "Error binding to port #%d: %s"%(i,e))
 				break
 				
 	def validate(self):

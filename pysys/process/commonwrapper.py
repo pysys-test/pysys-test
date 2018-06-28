@@ -17,19 +17,22 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os.path, time, thread, Queue
+import os.path, time, threading, sys, locale
+if sys.version_info[0] == 2:
+	import Queue
+else:
+	import queue as Queue
 
 from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
-
-# check for new lines on end of a string
-EXPR = re.compile(".*\n$")
+from pysys.utils.pycompat import *
 
 def _stringToUnicode(s):
 	""" Converts a unicode string or a utf-8 bit string into a unicode string. 
-	
+	@deprecated: for internal use only, will be removed in future. 
 	"""
+	if not PY2: return s
 	if isinstance(s, unicode):
 		return s
 	else:
@@ -101,7 +104,7 @@ class CommonProcessWrapper(object):
 	def signal(self): raise Exception('Not implemented')
 
 	def write(self, data, addNewLine=True):
-		"""Write data to the stdin of the process.
+		"""Write binary data to the stdin of the process.
 		
 		Note that when the addNewLine argument is set to true, if a new line does not 
 		terminate the input data string, a newline character will be added. If one 
@@ -109,18 +112,27 @@ class CommonProcessWrapper(object):
 		require to add data without the method appending a new line charater set 
 		addNewLine to false.
 		
-		@param data:       The data to write to the process stdout
+		@param data: The data to write to the process stdin. 
+		As only binary data can be written to a process stdin, 
+		if a character string rather than a byte object is passed as the data,
+		it will be automatically converted to a bytes object using the encoding 
+		given by locale.getpreferredencoding. 
 		@param addNewLine: True if a new line character is to be added to the end of 
 		                   the data string
 		
 		"""
 		if not self.running(): raise Exception('Cannot write to process stdin when it is not running')
-		if addNewLine and not EXPR.search(data): data = "%s\n" % data
+		
+		if not data: return
+		if type(data) != binary_type:
+			data = data.encode(locale.getpreferredencoding())
+		if addNewLine and not data.endswith(b'\n'): data = data+b'\n'
 			
 		if self._outQueue == None:
 			# start thread on demand
 			self._outQueue = Queue.Queue()
-			thread.start_new_thread(self.writeStdin, ())
+			t = threading.Thread(target=self.writeStdin, name='pysys.stdinreader_%s'%str(self))
+			t.start()
 			
 		self._outQueue.put(data)
 		

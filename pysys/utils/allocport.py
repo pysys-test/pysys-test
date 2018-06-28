@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import collections, random, subprocess
+import collections, random, subprocess, sys
 from pysys import process_lock
 from pysys.constants import *
 
@@ -54,15 +54,18 @@ def getEphemeralTCPPortRange():
 	elif PLATFORM == 'win32':
 		ephemeral_low = 1025
 		ephemeral_high = 5000 # The default
-		import _winreg
-		h = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters')
+		if sys.version_info[0] == 2:
+			import _winreg as winreg
+		else:
+			import winreg
+		h = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters')
 		try:
-			ephemeral_high = _winreg.QueryValueEx(h, 'MaxUserPort')[0]
+			ephemeral_high = winreg.QueryValueEx(h, 'MaxUserPort')[0]
 		except Exception:
 			# Accept the default if there isn't a value in the registry
 			pass
 		finally:
-			_winreg.CloseKey(h)
+			winreg.CloseKey(h)
 			del h
 	else:
 		raise SystemError("No way of determining ephemeral port range on platform %s" % sys.platform)
@@ -80,7 +83,7 @@ def initializePortPool():
 	ephemeral_low, ephemeral_high = getEphemeralTCPPortRange()
 
 	# Allocate server ports from all non-privileged, non-ephemeral ports
-	tcpServerPortPool = range(1024, ephemeral_low) + range(ephemeral_high,65536)
+	tcpServerPortPool = list(range(1024, ephemeral_low)) + list(range(ephemeral_high,65536))
 
 	# Randomize the port set to reduce the chance of clashes between
 	# simultaneous runs on the same machine
@@ -142,7 +145,7 @@ def allocateTCPPort():
 		else:
 			return port
 
-class TCPPortOwner:
+class TCPPortOwner(object):
 	def __init__(self):
 		self.port = allocateTCPPort()
 

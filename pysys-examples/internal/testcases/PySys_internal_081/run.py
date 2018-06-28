@@ -20,7 +20,7 @@ class PySysTest(BaseTest):
 		# this should fail
 		try:
 			self.waitForSocket(port, abortOnError=True, timeout=2)
-		except Exception, e:
+		except Exception as e:
 			self.log.info('Got exception as expected: %s', e)
 			del self.outcome[:]
 		else:

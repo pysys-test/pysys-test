@@ -92,9 +92,9 @@
 	<target name="deploy.examples.bdist_wininst" depends="prepare">
 		<zip destfile="${deploy.examples.archive}.zip">
 			<zipfileset dir="../pysys-examples/" prefix="pysys-examples" includes="pysysproject.xml"/>
-			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn"/>
-			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn"/>
-			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn"/>
+			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn,**/__pycache/**"/>
+			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn,**/__pycache/**"/>
+			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn,**/__pycache/**"/>
 		</zip>
 	</target>
 	
@@ -113,9 +113,9 @@
 	
 	<target name="deploy.examples.sdist" depends="prepare">
 		<tar destfile="${deploy.examples.archive}.tar.gz" compression="gzip">
-			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn"/>
-			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn"/>
-			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn"/>
+			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn,**/__pycache/**"/>
+			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn,**/__pycache/**"/>
+			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn,**/__pycache/**"/>
 			<zipfileset file="../pysys-examples/pysysproject.xml" prefix="pysys-examples"/>
 		</tar>
 	</target>

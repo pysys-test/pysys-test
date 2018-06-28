@@ -39,10 +39,6 @@ testcases provides a single framework for all test organisation requirements.
 """
 
 import sys, logging, threading
-if sys.version_info >= (3,):
-	from _thread import get_ident as threadId
-else:
-	from thread import get_ident as threadId
 
 __author__  = "Moray Grieve"
 """The author of PySys."""
@@ -50,13 +46,13 @@ __author__  = "Moray Grieve"
 __author_email__ = "moraygrieve@users.sourceforge.net"
 """The author's email address."""
 
-__status__  = "Production"
+__status__  = "PREVIEW"
 """The status of this release."""
 
 __version__ = "1.3.0"
 """The version of this release."""
 
-__date__ = "12-May-2018"
+__date__ = "28-June-2018"
 """The date of this release."""
 
 __license__ = "GNU Lesser General Public License"
@@ -99,12 +95,12 @@ class ThreadedStreamHandler(logging.StreamHandler):
 	"""
 	def __init__(self, strm):
 		"""Overrides logging.StreamHandler.__init__."""
-		self.threadId = threadId()
+		self.threadId = threading.current_thread().ident
 		logging.StreamHandler.__init__(self, strm)
 				
 	def emit(self, record):
 		"""Overrides logging.StreamHandler.emit."""
-		if self.threadId != threadId(): return
+		if self.threadId != threading.current_thread().ident: return
 		logging.StreamHandler.emit(self, record)
 		
 		
@@ -121,12 +117,12 @@ class ThreadedFileHandler(logging.FileHandler):
 	"""
 	def __init__(self, filename):
 		"""Overrides logging.FileHandler.__init__"""
-		self.threadId = threadId()
+		self.threadId = threading.current_thread().ident
 		logging.FileHandler.__init__(self, filename, "a")
 				
 	def emit(self, record):
 		"""Overrides logging.FileHandler.emit."""
-		if self.threadId != threadId(): return
+		if self.threadId != threading.current_thread().ident: return
 		# must put formatted messages into the buffer otherwise we lose log level 
 		# and (critically) exception tracebacks from the output
 		logging.FileHandler.emit(self, record)
@@ -145,12 +141,12 @@ class ThreadFilter(logging.Filterer):
 	"""
 	def __init__(self):
 		"""Overrides logging.Filterer.__init__"""
-		self.threadId = threadId()
+		self.threadId = threading.current_thread().ident
 		logging.Filterer.__init__(self)
 		
 	def filter(self, record):
 		"""Implementation of logging.Filterer.filter to block from the creating thread."""
-		if self.threadId != threadId(): return True
+		if self.threadId != threading.current_thread().ident: return True
 		return False
 	
 
