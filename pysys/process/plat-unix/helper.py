@@ -129,11 +129,7 @@ class ProcessWrapper(CommonProcessWrapper):
 						maxfd = os.sysconf("SC_OPEN_MAX")
 					except Exception:
 						maxfd=256
-					for fd in range(3, maxfd):
-						try:
-							os.close(fd)
-						except Exception:
-							pass
+					os.closerange(3, maxfd)
 				
 					# execve the process to start it
 					arguments = copy.copy(self.arguments)
