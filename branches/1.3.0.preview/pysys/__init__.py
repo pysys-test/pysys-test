@@ -46,13 +46,13 @@ __author__  = "Moray Grieve"
 __author_email__ = "moraygrieve@users.sourceforge.net"
 """The author's email address."""
 
-__status__  = "Production"
+__status__  = "PREVIEW"
 """The status of this release."""
 
 __version__ = "1.3.0"
 """The version of this release."""
 
-__date__ = "12-May-2018"
+__date__ = "28-June-2018"
 """The date of this release."""
 
 __license__ = "GNU Lesser General Public License"
