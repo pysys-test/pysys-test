@@ -6,7 +6,9 @@ import os, sys, re, shutil
 class PySysTest(BaseTest):
 
 	def execute(self):
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		l = {}
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		runPySys = l['runPySys']
 		runPySys(self, 'toplevel', ['--help'])
 		runPySys(self, 'run', ['run', '--help'])
 		runPySys(self, 'print', ['print', '-h'])

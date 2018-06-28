@@ -38,7 +38,7 @@ class SimpleSMTPServer(smtpd.SMTPServer):
 			self.fp.flush()
 
 
-class SimpleSMTPServerRunner:
+class SimpleSMTPServerRunner(object):
 	def __init__(self):
 		self.exit = 0
 

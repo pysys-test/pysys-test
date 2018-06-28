@@ -9,7 +9,9 @@ class PySysTest(BaseTest):
 		
 		shutil.copytree(self.input, self.output+'/test')
 
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		l = {}
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		runPySys = l['runPySys']
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '--cycle', '10', '-n', '20'], workingDir='test')
 		self.logFileContents('pysys.out', maxLines=0)
 			

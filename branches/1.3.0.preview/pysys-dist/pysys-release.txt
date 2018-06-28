@@ -1,9 +1,9 @@
 PySys 1.3.0 Release Notes
 =========================
 
-PySys has been written and tested against Python 2.7 and higher. Support 
-for Python 3.x is included, where the 2to3.py script is run on install 
-time. See installation notes in README.rst for more details.
+PySys can be used with Python 2.7 or Python 3.5 and later. 
+
+See installation notes in README.rst for more details.
 
 
 What's new in this release
@@ -20,6 +20,21 @@ Changes affecting compatibility:
   failed, whereas previously it would return 0.
  
 Other fixes and new features:
+- PySys now provides 'single-source' support for both Python 2.7 and 
+  Python 3.x, without the need for the 2to3.py script to be run at 
+  installation time for use with Python 3.
+- Added support for specifying what file encoding is to be used for reading 
+  and writing text files (for example in waitForSignal and various 
+  assertions). This is especially important for Python 3 where text files 
+  are processed using unicode character strings rather than Python 2 
+  byte "str" objects. The encoding can be specified explicitly on 
+  individual methods the open files, or globally based on file names 
+  or extensions by overriding the new ProcessUser.getDefaultFileEncoding() 
+  method. For example, getDefaultFileEncoding could be overridden to 
+  specify that .xml files should be treated as UTF-8 by default. If 
+  the encoding is not specified explicitly or through 
+  getDefaultFileEncoding(), Python selects the preferred encoding based 
+  on the locale that it is running in. 
 - Changed the way multiple cycles are executed in multi-threaded mode to 
   allow tests from different cycles to execute in parallel instead of waiting 
   for each cycle to fully complete before starting the next cycle. This 
@@ -27,7 +42,7 @@ Other fixes and new features:
   conditions demonstrated by a single testcase, which was not possible 
   with the previous threading behaviour. To maintain existing 
   behaviour for users who have provided a runner.cycleComplete() method, 
-  concurrent cycle execution will be disabled if cycleComplete() exists. 
+  concurrent cycle execution will be disabled if cycleComplete() is overridden. 
   Anybody affected by this is encouraged to transition away from use of 
   cycleComplete() and perform any required cleanup tasks in 
   BaseTest.cleanup() or BaseRunner.testComplete() instead. 
@@ -138,6 +153,13 @@ Other fixes and new features:
   tests left to run. The prompt can also be completely disabled using an 
   environment variable PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT=true, for users who 
   prefer Ctrl+C to immediately terminate the test run in all cases. 
+- Added pysys.utils.pycompat module containing a small set of helpers for 
+  writing code that works with Python 2 and Python 3. 
+- Fixed writing to process stdin so that if a character string is passed in it 
+  will be converted to a byte object automatically, using the default 
+  encoding. Previously, it was not possible to write character strings in 
+  Python 3, and in Python 2 it would only work if they contained only ascii 
+  characters. 
 
 
 Release History

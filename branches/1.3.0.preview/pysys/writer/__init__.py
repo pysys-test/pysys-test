@@ -64,12 +64,18 @@ breaking writer implementations already in existence.
 
 __all__ = ["BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", "ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter"]
 
-import time, urlparse, stat, logging
+import time, stat, logging, sys
+if sys.version_info[0] == 2:
+	from urlparse import urlunparse
+else:
+	from urllib.parse import urlunparse
 
 from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter
 
 from xml.dom.minidom import getDOMImplementation
+
+log = logging.getLogger('pysys.writer')
 
 class BaseResultsWriter(object):
 	"""Base class for objects that get notified as and when test results are available. """
@@ -451,7 +457,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		except Exception:
 			return path
 		else:
-			return urlparse.urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])
+			return urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])
 	
 	
 class JUnitXMLResultsWriter(BaseRecordResultsWriter):

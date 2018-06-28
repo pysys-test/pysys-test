@@ -17,8 +17,12 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import string, os.path, time, thread, logging, Queue
+import string, os.path, time, logging, sys
 import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, threading
+if sys.version_info[0] == 2:
+	import Queue
+else:
+	import queue as Queue
 
 from pysys import log
 from pysys import process_lock

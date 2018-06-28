@@ -27,6 +27,7 @@ from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir
+from pysys.utils.pycompat import *
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 
@@ -264,14 +265,18 @@ class ProcessUser(object):
 
 
 	def writeProcess(self, process, data, addNewLine=True):
-		"""Write data to the stdin of a process.
+		"""Write binary data to the stdin of a process.
 
-		This method uses the L{pysys.process.helper} module to write a data string to the stdin of a process. This
+		This method uses the L{pysys.process.helper} module to write data to the stdin of a process. This
 		wrapper around the write method of the process helper only adds checking of the process running status prior
 		to the write being performed, and logging to the testcase run log to detail the write.
 
 		@param process: The process handle returned from the L{startProcess()} method
-		@param data: The data to write to the process
+		@param data: The data to write to the process stdin. 
+		As only binary data can be written to a process stdin, 
+		if a character string rather than a byte object is passed as the data,
+		it will be automatically converted to a bytes object using the encoding 
+		given by locale.getpreferredencoding(). 
 		@param addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""
@@ -394,7 +399,7 @@ class ProcessUser(object):
 
 			
 	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
-			process=None, errorExpr=[], abortOnError=None):
+			process=None, errorExpr=[], abortOnError=None, encoding=None):
 		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
 		
 		This method blocks until a particular regular expression is seen in a text file on a set
@@ -417,7 +422,9 @@ class ProcessUser(object):
 			much clearer test failure messages in this case. 
 		@param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
 			project setting)
-
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
@@ -429,14 +436,14 @@ class ProcessUser(object):
 		log.debug("  expression: %s" % expr)
 		log.debug("  condition:  %s" % condition)
 		
-		if errorExpr: assert not isinstance(errorExpr, basestring), 'errorExpr must be a list of strings not a string'
+		if errorExpr: assert not isstring(errorExpr), 'errorExpr must be a list of strings not a string'
 		
 		matches = []
 		startTime = time.time()
 		msg = "Wait for signal \"%s\" %s in %s" % (expr, condition, os.path.basename(file))
 		while 1:
 			if os.path.exists(f):
-				matches = getmatches(f, expr)
+				matches = getmatches(f, expr, encoding=encoding or self.getDefaultFileEncoding(f))
 				if eval("%d %s" % (len(matches), condition)):
 					if PROJECT.verboseWaitForSignal.lower()=='true' if hasattr(PROJECT, 'verboseWaitForSignal') else False:
 						log.info("%s completed successfully", msg)
@@ -446,10 +453,10 @@ class ProcessUser(object):
 				
 				if errorExpr:
 					for err in errorExpr:
-						errmatches = getmatches(f, err+'.*') # add .* to capture entire err msg for a better outcome reason
+						errmatches = getmatches(f, err+'.*', encoding=encoding or self.getDefaultFileEncoding(f)) # add .* to capture entire err msg for a better outcome reason
 						if errmatches:
 							err = errmatches[0].group(0).strip()
-							msg = '"%s" found during %s'%(err, msg)
+							msg = '%s found during %s'%(quotestring(err), msg)
 							# always report outcome for this case; additionally abort if requested to
 							self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
 							return matches
@@ -646,7 +653,7 @@ class ProcessUser(object):
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
 
 
-	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False):
+	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None):
 		""" Searches for a regular expression in the specified file, and returns it. 
 
 		If the regex contains groups, the specified group is returned. If the expression is not found, an exception is raised,
@@ -663,8 +670,11 @@ class ProcessUser(object):
 		@param returnAll: returns all matching lines if True, the first matching line otherwise.
 		@param returnNoneIfMissing: set this to return None instead of throwing an exception
 		if the regex is not found in the file
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
 		"""
-		with open(os.path.join(self.output, path), 'r') as f:
+		with openfile(os.path.join(self.output, path), 'r', encoding=encoding or self.getDefaultFileEncoding(os.path.join(self.output, path))) as f:
 			matches = []
 			for l in f:
 				match = re.search(expr, l)
@@ -682,10 +692,10 @@ class ProcessUser(object):
 
 			if returnAll: return matches
 			if returnNoneIfMissing: return None
-			raise Exception('Could not find expression "%s" in %s'%(expr, os.path.basename(path)))
+			raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
 
 
-	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False):
+	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None):
 		""" Logs some or all of the lines in the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
@@ -697,20 +707,24 @@ class ProcessUser(object):
 		@param excludes: Optional list of regex strings. If specified, no line containing these will be logged
 		@param maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
 		@param tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
+		
 		@return: True if anything was logged, False if not
 		
 		"""
 		if not path: return False
 		actualpath= os.path.join(self.output, path)
 		try:
-			f = open(actualpath, 'r')
+			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath))
 		except Exception as e:
 			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False
 		try:
 			lineno = 0
 			def matchesany(s, regexes):
-				assert not isinstance(regexes, basestring), 'must be a list of strings not a string'
+				assert not isstring(regexes), 'must be a list of strings not a string'
 				for x in regexes:
 					m = re.search(x, s)
 					if m: return m.group(0)
@@ -760,3 +774,35 @@ class ProcessUser(object):
 		"""
 		mkdir(os.path.join(self.output, path))
 		return path
+		
+	def getDefaultFileEncoding(self, file, **xargs):
+		"""
+		Specifies what encoding should be used to read or write the specified 
+		text file.
+		
+		This method is used to select the appropriate encoding whenever PySys 
+		needs to open a file, for example to wait for a signal, for a 
+		file-based assertion, or to write a file with replacements. 
+		Many methods allow the encoding to be overridden for just that call, 
+		but getDefaultFileEncoding exists to allow global defaults to be specified 
+		based on the filename. 
+		
+		For example, this method could be overridden to specify that utf-8 encoding 
+		is to be used for opening filenames ending in .xml, .json and .yaml. 
+		
+		A return value of None indicates default behaviour, which on Python 3 is to 
+		use the default encoding, as specified by python's 
+		locale.getpreferredencoding(), and on Python 2 is to use binary "str" 
+		objects with no character encoding or decoding applied. 
+		
+		@param file: The filename to be read or written. This may be an 
+		absolute path or a relative path.
+		 
+		@param xargs: Ensure that an **xargs argument is specified so that 
+		additional information can be passed to this method in future releases. 
+		
+		@return: The encoding to use for this file, or None if default behaviour is 
+		to be used.
+		"""
+		return None
+	

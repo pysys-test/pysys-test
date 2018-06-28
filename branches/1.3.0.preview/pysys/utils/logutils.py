@@ -20,11 +20,12 @@
 import copy, logging
 
 from pysys.constants import *
+from pysys.utils.pycompat import *
 
 class BaseLogFormatter(logging.Formatter):
 	"""Base class for formatting log messages.
 	
-	This implementation delegates everything to L{logging.Formatter} using the messagefmt and datefmt
+	This implementation delegates everything to logging.Formatter using the messagefmt and datefmt
 	properties. Subclasses may be implemented to provide required customizations, and can be registered
 	by specifying classname in the formatter node of the project configuration file.
 	"""
@@ -199,7 +200,7 @@ class ColorLogFormatter(BaseLogFormatter):
 		@param arg: The argument within the record.
 
 		"""
-		if isinstance(arg, str): return self.colorCategoryToEscapeSequence(category)+arg+self.colorCategoryToEscapeSequence(LOG_END)
+		if isstring(arg): return self.colorCategoryToEscapeSequence(category)+arg+self.colorCategoryToEscapeSequence(LOG_END)
 		return arg
 
 

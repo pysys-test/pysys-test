@@ -22,6 +22,7 @@ import collections, threading, time, math
 from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.fileutils import mkdir
+from pysys.utils.pycompat import *
 
 class PerformanceUnit(object):
 	"""Class which identifies the unit in which a performance result is measured.
@@ -172,7 +173,7 @@ class CSVPerformanceReporter(object):
 		if '%s' in resultKey or '%d' in resultKey or '%f' in resultKey: # people do this without noticing sometimes
 			raise Exception('Invalid resultKey - contains unsubstituted % format string: '+resultKey)
 
-		if isinstance(value, basestring): value = float(value)
+		if isstring(value): value = float(value)
 
 		if unit in self.unitAliases: unit = self.unitAliases[unit]
 		assert isinstance(unit, PerformanceUnit), repr(unit)
@@ -430,7 +431,7 @@ class CSVPerformanceFile(object):
 		if self.runDetails == None: self.runDetails = collections.OrderedDict()
 
 	def __maybequote(self, s):
-		return '"%s"' % s if isinstance(s, basestring) else s
+		return '"%s"' % s if isstring(s) else s
 		
 	def __str__(self):
 		return 'CSVPerformanceFile< %d results; runDetails: %s>'%(len(self.results), ', '.join([('%s=%s'%(k, self.__maybequote(self.runDetails[k]))) for k in self.runDetails]))
