@@ -17,8 +17,11 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import string, os.path, time, logging, sys
-import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, threading
+import string, os.path, time, logging, sys, threading
+
+if 'epydoc' not in sys.modules:
+	import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes
+
 if sys.version_info[0] == 2:
 	import Queue
 else:

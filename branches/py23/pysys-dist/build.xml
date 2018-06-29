@@ -42,16 +42,18 @@
 		<echo message="   "/>
 	</target>
 
+	<property name="epydoc.executable" location="/usr/local/bin/epydoc" />
 	<!--
 	Target to create the epydoc documentation
 	-->
 	<target name="epydoc">
- 		<exec executable="${python.executable}" dir="..">
-			<arg value="/usr/local/bin/epydoc"/>	
+ 		<exec executable="${python.executable}" dir=".." failonerror="true">
+			<arg value="${epydoc.executable}"/>	
  			<arg value="--debug"/>
 			<arg value="-v"/>
 			<arg value="--html"/>
  			<arg value="--no-private"/>
+ 			<arg value="--fail-on-docstring-warning"/>
 			<arg value="-o"/>
 			<arg value="pysys-doc"/>
 			<arg value="pysys"/>
