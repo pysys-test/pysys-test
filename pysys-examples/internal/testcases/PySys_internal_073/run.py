@@ -10,7 +10,9 @@ class PySysTest(BaseTest):
 		assert testsdir.endswith('pysys-examples'), testsdir
 		self.log.info('printing tests from: %s', testsdir)
 		
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		l = {}
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		runPySys = l['runPySys']
 		runPySys(self, 'basic', ['print'], workingDir=testsdir)
 		runPySys(self, 'thistest', ['print', 'PySys_internal_073'], workingDir=testsdir)
 		runPySys(self, 'full', ['print', '--full'], workingDir=testsdir)

@@ -42,16 +42,18 @@
 		<echo message="   "/>
 	</target>
 
+	<property name="epydoc.executable" location="/usr/local/bin/epydoc" />
 	<!--
 	Target to create the epydoc documentation
 	-->
 	<target name="epydoc">
- 		<exec executable="${python.executable}" dir="..">
-			<arg value="/usr/local/bin/epydoc"/>	
+ 		<exec executable="${python.executable}" dir=".." failonerror="true">
+			<arg value="${epydoc.executable}"/>	
  			<arg value="--debug"/>
 			<arg value="-v"/>
 			<arg value="--html"/>
  			<arg value="--no-private"/>
+ 			<arg value="--fail-on-docstring-warning"/>
 			<arg value="-o"/>
 			<arg value="pysys-doc"/>
 			<arg value="pysys"/>
@@ -92,9 +94,9 @@
 	<target name="deploy.examples.bdist_wininst" depends="prepare">
 		<zip destfile="${deploy.examples.archive}.zip">
 			<zipfileset dir="../pysys-examples/" prefix="pysys-examples" includes="pysysproject.xml"/>
-			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn"/>
-			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn"/>
-			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn"/>
+			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn,**/__pycache__/**"/>
+			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn,**/__pycache__/**"/>
+			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn,**/__pycache__/**"/>
 		</zip>
 	</target>
 	
@@ -113,9 +115,9 @@
 	
 	<target name="deploy.examples.sdist" depends="prepare">
 		<tar destfile="${deploy.examples.archive}.tar.gz" compression="gzip">
-			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn"/>
-			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn"/>
-			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn"/>
+			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn,**/__pycache__/**"/>
+			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn,**/__pycache__/**"/>
+			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn,**/__pycache__/**"/>
 			<zipfileset file="../pysys-examples/pysysproject.xml" prefix="pysys-examples"/>
 		</tar>
 	</target>
@@ -132,7 +134,7 @@
 		<delete dir="../build"/>
 		<delete>
 			<fileset dir="../pysys" includes="**/*.pyc"/>
-			<fileset dir="../pysys-examples" includes="**/*.pyc"/>
+			<fileset dir="../pysys-examples" includes="**/*.pyc,**/__pycache__/**"/>
 		</delete>
 	</target>
 	

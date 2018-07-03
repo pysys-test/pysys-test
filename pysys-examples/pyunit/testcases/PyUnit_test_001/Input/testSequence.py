@@ -6,7 +6,7 @@ class TestSequence(unittest.TestCase):
 	SIZE = 10
 	
 	def testReverse(self):
-		s1 = range(self.SIZE)
+		s1 = list(range(self.SIZE))
 		random.shuffle(s1)
 		s2 = list(s1)
 		s2.reverse()

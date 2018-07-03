@@ -17,6 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import sys, os
 from pysys.exceptions import *
 
@@ -62,7 +63,7 @@ def filecopy(src, dst):
 # entry point for running the script as an executable
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
-		print("Usage: fileunzip <src> <dst>")
+		print("Usage: filecopy <src> <dst>")
 		sys.exit()
 	else:
 		filecopy(sys.argv[1], sys.argv[2])

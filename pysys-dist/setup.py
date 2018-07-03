@@ -22,10 +22,7 @@ import pysys, glob, sys
 import distutils.sysconfig
 from distutils.core import setup
 
-if sys.version_info >= (3,):
-  from distutils.command.build_py import build_py_2to3 as build_py
-else:
-  from distutils.command.build_py import build_py
+from distutils.command.build_py import build_py
 
 lib_dir = distutils.sysconfig.get_python_lib(plat_specific=1)
 

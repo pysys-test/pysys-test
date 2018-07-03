@@ -17,7 +17,11 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import signal, time, copy, Queue, errno, threading
+import signal, time, copy, errno, threading, sys
+if sys.version_info[0] == 2:
+	import Queue
+else:
+	import queue as Queue
 
 from pysys import log
 from pysys import process_lock

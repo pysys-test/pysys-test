@@ -1,11 +1,12 @@
+import sys
 fib= []
 fib.append(0)
 fib.append(1)
 
-print("Calculating fibonacci series with ten entries")
+sys.stdout.write("Calculating fibonacci series with ten entries\n")
 for i in range(2, 10):
 	fib.append(fib[i-1] + fib[i-2])
 
-print("Writting fibonacci series to stdout")
+sys.stdout.write("Writting fibonacci series to stdout\n")
 for line in fib:
-	print(line)
+	sys.stdout.write('%s\n'%line)

@@ -15,7 +15,9 @@ class PySysTest(BaseTest):
 		shutil.copyfile(self.input+'/pysysproject-notset.xml', self.output+'/test-notset/pysysproject.xml')
 		shutil.copyfile(self.input+'/../../../../pysysproject.xml', self.output+'/test-exampleproject/pysysproject.xml')
 		
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		l = {}
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		runPySys = l['runPySys']
 		for t in ['notset', 'exampleproject']:
 			runPySys(self, 'pysys-%s'%t, ['run', '-o', self.output+'/output-%s'%t], workingDir='test-%s'%t, ignoreExitStatus=True)
 			self.logFileContents('pysys-%s.out'%t, maxLines=0)

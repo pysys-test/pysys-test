@@ -7,7 +7,9 @@ import os, sys, math, shutil
 class PySysTest(BaseTest):
 
 	def execute(self):
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read()) # define runPySys
+		l = {}
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		runPySys = l['runPySys']
 
 		shutil.copytree(self.input, self.output+'/test')
 		runPySys(self, 'all', ['print'], workingDir='test')

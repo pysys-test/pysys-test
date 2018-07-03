@@ -1,4 +1,4 @@
-import string
+import string, shutil
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.process.helper import ProcessWrapper
@@ -7,11 +7,12 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		script = "%s/workingdir.py" % self.input
+		shutil.copytree(self.input+'/dir', self.output+'/parent/my-working-dir')
 		
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script],
 						  environs = os.environ,
-						  workingDir = os.path.join(self.input, "dir"),
+						  workingDir = os.path.join(self.output, 'parent/my-working-dir'),
 						  stdout = "%s/workingdir.out" % self.output,
 						  stderr = "%s/workingdir.err" % self.output,
 						  state=FOREGROUND)
@@ -23,7 +24,7 @@ class PySysTest(BaseTest):
 		
 	def validate(self):
 		# validate the working directory of the process
-		self.assertGrep("workingdir.err", expr="Current working directory is %s$"%os.path.join(self.input, "dir").replace("\\", "/"))
+		self.assertGrep("workingdir.err", expr="Current working directory is %s$"%os.path.join(self.output, 'parent/my-working-dir').replace("\\", "/"))
 		
 		# validate against the reference file
 		self.assertDiff("workingdir.out", "ref_workingdir.out", ignores=['.svn'], sort=True)
