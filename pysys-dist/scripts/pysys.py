@@ -34,9 +34,6 @@ log.addHandler(stdoutHandler)
 from pysys.constants import loadproject
 loadproject(os.getcwd())
 
-from pysys import __version__
-from pysys.constants import *
-from pysys.utils.loader import import_module
 from pysys.launcher.console import main
 
 if __name__ == "__main__":
