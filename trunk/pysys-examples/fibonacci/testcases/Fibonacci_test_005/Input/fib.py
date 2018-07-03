@@ -1,4 +1,4 @@
-import time
+import time, sys
 t = time.time()
 val1, val2 = 0, 1
 iterations = 0
@@ -10,4 +10,4 @@ while time.time() < t+1:
 	for x in range(batchsize): # do the calculations in batches to avoid calling .time() too often which would end up skewing the results
 		val1, val2 = val2, val1+val2
 	iterations += batchsize
-print('completed %d calculations in %f seconds'%(iterations, time.time()-t))
+sys.stdout.write('completed %d calculations in %f seconds\n'%(iterations, time.time()-t))

@@ -71,7 +71,7 @@ PROPERTY_EXPAND = "(?P<replace>\${(?P<key>.*?)})"
 PROPERTY_FILE = "(?P<name>^.*)=(?P<value>.*)$"
 
 
-class XMLProjectParser:
+class XMLProjectParser(object):
 	def __init__(self, dirname, file):
 		self.dirname = dirname
 		self.xmlfile = os.path.join(dirname, file)
@@ -100,7 +100,7 @@ class XMLProjectParser:
 			requirespython = requirespython[0].firstChild.nodeValue
 			if requirespython:
 				if list(sys.version_info) < list(map(int, requirespython.split('.'))):
-					raise Exception('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join(map(str, sys.version_info[:3])), sys.executable))
+					raise Exception('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join([str(x) for x in sys.version_info[:3]]), sys.executable))
 
 		requirespysys = self.root.getElementsByTagName('requires-pysys')
 		if requirespysys and requirespysys[0].firstChild: 
@@ -327,7 +327,7 @@ class XMLProjectParser:
 		return cls, optionsDict
 
 
-class Project:
+class Project(object):
 	"""Class detailing project specific information for a set of PySys tests.
 	
 	Reads and parses the PySys project file if it exists and translates property element 

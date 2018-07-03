@@ -17,13 +17,17 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, sys, string, time, thread, logging, win32api, win32pdh
+from __future__ import print_function
+import os, sys, string, time, threading, logging
+
+if 'epydoc' not in sys.modules:
+	import win32api, win32pdh
 
 from pysys import log
 from pysys.constants import *
 
 
-class ProcessMonitor:
+class ProcessMonitor(object):
 	"""Process monitor for the logging of process statistics.
 	
 	The process monitor uses either the win32pdh module (windows systems) or the ps command line utility 
@@ -82,7 +86,7 @@ class ProcessMonitor:
 		self.pid = pid
 		self.interval = interval
 		if file:
-			self.file = open(file, 'w', 0)
+			self.file = open(file, 'w')
 		else:	
 			self.file = sys.stdout
 		
@@ -108,7 +112,7 @@ class ProcessMonitor:
 		instance = None
 		inum = -1
 		for instance, numInstances in list(instanceDict.items()):
-			for inum in xrange(numInstances+1):
+			for inum in range(numInstances+1):
 				try:
 					value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")
 					if value == pid:
@@ -205,6 +209,7 @@ class ProcessMonitor:
 				currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
 				file.write( "%s\t%s\t%d\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]//self.numProcessors, float(data[1])/1024,
 														  float(data[2])/1024, float(data[3])/1024, float(data[4]), float(data[5])))
+				file.flush()
 				time.sleep(interval)
 		finally:
 			# clean up
@@ -239,7 +244,8 @@ class ProcessMonitor:
 		threads = self.__win32GetThreads(pid=self.pid, bRefresh=1)
 		
 		# log the stats in a separate thread
-		thread.start_new_thread(self.__win32LogProfile, (instance, inum, threads, self.interval, self.file))
+		t = threading.Thread(target=self.__win32LogProfile, args=(instance, inum, threads, self.interval, self.file))
+		t.start()
 
 	def stop(self):
 		"""Stop the process monitor.

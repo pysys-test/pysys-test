@@ -17,13 +17,13 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import sys
 
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 
-
-def linecount(file, regexpr=None, ignores=None):
+def linecount(file, regexpr=None, ignores=None, encoding=None):
 	"""Count the number of lines in an input file matching a regular expression, return the count.
 	
 	If the input regular expression is set to None, the method returns a count of the 
@@ -35,10 +35,11 @@ def linecount(file, regexpr=None, ignores=None):
 	@param ignores: A list of regular expressions that will cause lines to be excluded from the count
 	@return: The number of matching lines in the input file 
 	@rtype: integer
+	@param encoding: Specifies a non-default encoding to be used for opening the file. 
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
-	matches = getmatches(file, regexpr, ignores=ignores)
+	matches = getmatches(file, regexpr, ignores=ignores, encoding=encoding)
 	return len(matches)
 
 

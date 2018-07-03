@@ -16,6 +16,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
+from __future__ import print_function
 import os.path, stat, getopt, logging
 
 from pysys import log
@@ -31,7 +32,7 @@ EXPR2 = re.compile("^[\w\.]*$")
 EXPR3 = re.compile("^[\w]*_([0-9]+)$")
 
 
-class ConsoleCleanTestHelper:
+class ConsoleCleanTestHelper(object):
 	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
@@ -128,7 +129,7 @@ class ConsoleCleanTestHelper:
 		if delTop: os.rmdir(dir)
 
 
-class ConsolePrintHelper:
+class ConsolePrintHelper(object):
 	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
@@ -276,7 +277,7 @@ class ConsolePrintHelper:
 
 
 
-class ConsoleMakeTestHelper:
+class ConsoleMakeTestHelper(object):
 	def __init__(self, name=""):
 		self.name = name
 		self.testId = None
@@ -365,7 +366,7 @@ class ConsoleMakeTestHelper:
 		
 
 
-class ConsoleLaunchHelper:
+class ConsoleLaunchHelper(object):
 	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
