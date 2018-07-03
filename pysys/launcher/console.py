@@ -26,6 +26,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
 from pysys.basetest import TEST_TEMPLATE
+from pysys.utils.loader import import_module
 
 EXPR1 = re.compile("^[\w\.]*=.*$")
 EXPR2 = re.compile("^[\w\.]*$")
@@ -522,3 +523,67 @@ class ConsoleLaunchHelper(object):
 		
 		return self.record, self.purge, self.cycle, self.mode, self.threads, self.outsubdir, descriptors, self.userOptions
 		
+def printUsage():
+	sys.stdout.write("\nPySys System Test Framework (version %s)\n" % __version__)
+	sys.stdout.write("\nUsage: %s [mode] [option]* { [tests]* | [testId] }\n" % os.path.basename(sys.argv[0]))
+	sys.stdout.write("    where [mode] can be;\n")
+	sys.stdout.write("       run    - run a set of tests rooted from the current working directory\n")
+	sys.stdout.write("       make   - make a new testcase directory structure in the current working directory\n")
+	sys.stdout.write("       print  - print details of a set of tests rooted from the current working directory\n")
+	sys.stdout.write("       clean  - clean the output subdirectories of tests rooted from the current working directory\n")
+	sys.stdout.write("\n")
+	sys.stdout.write("    For more information on the options available to each mode, use the -h | --help option, e.g.\n")
+	sys.stdout.write("       %s run --help\n" % os.path.basename(sys.argv[0]))
+	sys.exit()
+	
+def runTest(args):
+	try:
+		launcher = ConsoleLaunchHelper(os.getcwd(), "run")
+		args = launcher.parseArgs(args)
+		module = import_module(PROJECT.runnerModule, sys.path)
+		runner = getattr(module, PROJECT.runnerClassname)(*args)
+		runner.start()
+	
+		for cycledict in runner.results.values():
+			for outcome in FAILS:
+				if cycledict.get(outcome, None): sys.exit(2)
+		sys.exit(0)
+	except Exception as e:
+		sys.stderr.write('\nWARN: %s\n' % e)
+		sys.exit(-1)
+
+def printTest(args):
+	try:
+		printer = ConsolePrintHelper(os.getcwd(), "print")
+		printer.parseArgs(args)
+		printer.printTests()
+	except Exception as e:
+		sys.stderr.write('\nWARN: %s\n\n' % e)
+
+def makeTest(args):
+	module = import_module(PROJECT.makerModule, sys.path)
+	maker = getattr(module, PROJECT.makerClassname)("make")
+	maker.parseArgs(args)
+	maker.makeTest()
+
+def cleanTest(args):
+	cleaner = ConsoleCleanTestHelper(os.getcwd(), "clean")
+	cleaner.parseArgs(args)
+	cleaner.clean()
+
+
+def main(args):
+	if len(args) < 1: 
+		printUsage()
+	else:
+		mode = args[0]
+		if mode == "run":
+			runTest(args[1:])
+		elif mode == "make":
+			makeTest(args[1:])
+		elif mode == "print":
+			printTest(args[1:])
+		elif mode == "clean":
+			cleanTest(args[1:])
+		else:
+			printUsage()
