@@ -524,7 +524,8 @@ class ConsoleLaunchHelper(object):
 		return self.record, self.purge, self.cycle, self.mode, self.threads, self.outsubdir, descriptors, self.userOptions
 		
 def printUsage():
-	sys.stdout.write("\nPySys System Test Framework (version %s)\n" % __version__)
+	sys.stdout.write("\nPySys System Test Framework (version %s on Python %s.%s.%s)\n" % (
+		__version__, sys.version_info[0], sys.version_info[1], sys.version_info[2]))
 	sys.stdout.write("\nUsage: %s [mode] [option]* { [tests]* | [testId] }\n" % os.path.basename(sys.argv[0]))
 	sys.stdout.write("    where [mode] can be;\n")
 	sys.stdout.write("       run    - run a set of tests rooted from the current working directory\n")
