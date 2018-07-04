@@ -37,7 +37,7 @@ def get_site_packages_path():
 data_files = [(get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
 					  (get_site_packages_path(), ['pysys-dist/pysys-licence.txt']),
 					  (get_site_packages_path(), ['pysys-dist/pysys-log.xsl']),
-					  (get_site_packages_path(), ['pysys-dist/README.rst']),
+					  (get_site_packages_path()+'/pysys', ['pysys-dist/README.rst']),
 					  ]
 if IS_WINDOWS: data_files.append(('%s/pysys-doc' % get_site_packages_path(), glob.glob('pysys-doc/*.*')))
 
