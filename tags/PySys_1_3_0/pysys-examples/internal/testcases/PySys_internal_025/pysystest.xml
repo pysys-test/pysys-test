@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Process Module - set the process working directory</title>    
+    <purpose><![CDATA[
+Checks that the working directory of a process can be set in the startProcess
+method call. Test executable prints out the working directory and then lists
+the contents of the working directory - these are then compared to reference 
+and grepped from the stdout and stdin of the process.
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
