@@ -40,6 +40,8 @@
 		<echo message="      deploy.bdist_wininst  - creates the binary installer for windows"/>
 		<echo message="      deploy.sdist          - creates the source distribution package"/>
 		<echo message="   "/>
+		<echo message="   Distribution files are written to ../dist"/>
+		<echo message="   "/>
 	</target>
 
 	<property name="epydoc.executable" location="/usr/local/bin/epydoc" />
@@ -82,7 +84,7 @@
 	Targets to create the win32 python installer and examples archive
 	-->
 	<target name="deploy.installer.bdist_wininst" depends="prepare">
- 		<exec executable="${python.executable}" dir="..">
+ 		<exec executable="${python.executable}" dir=".." failonerror="true">
  			<env key="PYTHONPATH" value="./" /> 
 			<arg value="pysys-dist/setup.py"/>
 			<arg value="bdist_wininst"/>
@@ -106,7 +108,7 @@
 	<target name="deploy.installer.sdist" depends="prepare">
 		<copy file="setup.py" tofile="../setup.py" />
 		<copy file="MANIFEST.in" tofile="../MANIFEST.in" />
- 		<exec executable="${python.executable}" dir="..">
+ 		<exec executable="${python.executable}" dir=".." failonerror="true">
  			<env key="PYTHONPATH" value=".." /> 
 			<arg value="setup.py"/>
 			<arg value="sdist"/>
@@ -114,7 +116,7 @@
 	</target>
 	
 	<target name="deploy.examples.sdist" depends="prepare">
-		<tar destfile="${deploy.examples.archive}.tar.gz" compression="gzip">
+		<tar destfile="${deploy.examples.archive}.tar.gz" compression="gzip" longfile="posix">
 			<zipfileset dir="../pysys-examples/fibonacci" prefix="pysys-examples/fibonacci" excludes="*.pyc,.svn,**/__pycache__/**"/>
 			<zipfileset dir="../pysys-examples/internal" prefix="pysys-examples/internal" excludes="*.pyc,.svn,**/__pycache__/**"/>
 			<zipfileset dir="../pysys-examples/pyunit" prefix="pysys-examples/pyunit" excludes="*.pyc,.svn,**/__pycache__/**"/>
@@ -134,7 +136,7 @@
 		<delete dir="../build"/>
 		<delete>
 			<fileset dir="../pysys" includes="**/*.pyc"/>
-			<fileset dir="../pysys-examples" includes="**/*.pyc,**/__pycache__/**"/>
+			<fileset dir="../pysys-examples" includes="**/*.pyc,**/__pycache__/**,**/performance_output/**"/>
 		</delete>
 	</target>
 	
