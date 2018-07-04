@@ -52,7 +52,7 @@ __status__  = "Production"
 __version__ = "1.3.0"
 """The version of this release."""
 
-__date__ = "12-May-2018"
+__date__ = "04-July-2018"
 """The date of this release."""
 
 __license__ = "GNU Lesser General Public License"
