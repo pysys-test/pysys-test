@@ -125,7 +125,6 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None):
 			contents = f.readlines()
 		contents = trimContents(contents, ignore, exclude=True)
 		contents = trimContents(contents, include, exclude=False)
-		log.info('contents: %s', contents)
 		
 		logContents("Contents of %s after pre-processing;" % os.path.basename(file), contents)
 		if len(contents) > 0:
