@@ -40,6 +40,14 @@ New features
 
 - PySys can now be installed simply by running `pip install PySys`. 
 
+- Added optional `errors=` parameter to `pycompat.openfile()` to allow easily 
+  enabling non-strict handling of unsupported characters for cases where it 
+  does not matter (e.g. logging file contents), without needing caller to 
+  special-case for Python 2 where no encoding is performed and the parameter 
+  is not available. `ProcessUser.logFileContents()` now uses `errors='replace'`
+  since for diagnostic logging a best-effort approach to non-ASCII characters 
+  is most helpful. 
+
 
 Bug fixes
 ---------
