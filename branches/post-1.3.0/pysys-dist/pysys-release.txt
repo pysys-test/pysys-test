@@ -28,6 +28,8 @@ What's new in this release
   logging purposes. 
 - Fixed rare condition in which performance result reporting would be prevented 
   due to spurious error about resultKey already being used. 
+- Added PerformanceUnit.NANO_SECONDS (with alias "ns") for use when 
+  measuring the peformance of operations that take less than a second. 
   
 
 Release History
