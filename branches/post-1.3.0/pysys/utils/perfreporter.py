@@ -154,7 +154,7 @@ class CSVPerformanceReporter(object):
 		"""Report a performance result, with an associated unique key that identifies it.
 
 		@param testobj: the test case instance registering the value
-		@param value: the value to be reported
+		@param value: the value to be reported. This may be an int, float, or a character (unicode) string. 
 		@param resultKey: a unique string that fully identifies what was measured
 		@param unit: identifies the unit the the value is measured in
 		@param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression
@@ -174,6 +174,7 @@ class CSVPerformanceReporter(object):
 			raise Exception('Invalid resultKey - contains unsubstituted % format string: '+resultKey)
 
 		if isstring(value): value = float(value)
+		assert isinstance(value, int) or isinstance(value, float), 'invalid type for performance result: %s'%(repr(value))
 
 		if unit in self.unitAliases: unit = self.unitAliases[unit]
 		assert isinstance(unit, PerformanceUnit), repr(unit)
