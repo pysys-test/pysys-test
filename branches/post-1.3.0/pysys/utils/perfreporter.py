@@ -192,23 +192,27 @@ class CSVPerformanceReporter(object):
 			d = collections.OrderedDict(resultDetails)
 			d['testId'] = testobj.descriptor.id
 			if prevresult:
+				previd, prevcycle, prevdetails = prevresult
 				# if only difference is cycle (i.e. different testobj but same test id) then allow, but
 				# make sure we report error if this test tries to report same key more than once, or if it
 				# overlaps with another test's result keys
-				# (if there was a simple way of getting the cycle passed into the testobj - currently there isn't -
-				# that would be a simpler way to achieve this)
-				if prevresult[1] == hash(testobj):
+				if previd == testobj.descriptor.id and prevcycle==testobj.testCycle:
 					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by this test: "%s"'%(resultKey))
 					return
-				if prevresult[0] != testobj.descriptor.id or prevresult[2] != d:
-					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests and modes: "%s" (already used by %s)'%(resultKey, list(prevresult[2].items())))
+				elif previd != testobj.descriptor.id: 
+					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used - resultKey must be unique across all tests: "%s" (already used by %s)'%(resultKey, previd))
+					return
+				elif prevdetails != d: 
+					# prevent different cycles of same test with different resultdetails 
+					testobj.addOutcome(BLOCKED, 'Cannot report performance result as resultKey was already used by a different cycle of this test with different resultDetails - resultKey must be unique across all tests and modes: "%s" (this test resultDetails: %s; previous resultDetails: %s)'%(resultKey, list(d.items()), list(prevdetails.items()) ))
 					return
 			else:
-				self.__previousResultKeys[resultKey] = (testobj.descriptor.id, hash(testobj), d)
+				self.__previousResultKeys[resultKey] = (testobj.descriptor.id, testobj.testCycle, d)
 
 		if testobj.getOutcome() in FAILS:
-			testobj.log.warn('Performance result "%s" will not be recorded as test has failed', resultKey)
+			testobj.log.warn('   Performance result "%s" will not be recorded as test has failed', resultKey)
 			return
+
 
 		formatted = self.formatResult(testobj, value, resultKey, unit, toleranceStdDevs, resultDetails)
 		self.recordResult(formatted, testobj)
