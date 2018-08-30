@@ -52,6 +52,10 @@ New features
   identify the test (and cycle, in multi-cycle runs), for diagnostic and 
   logging purposes. 
 
+- Added `PerformanceUnit.NANO_SECONDS` (with alias `ns`) for use when 
+  measuring the peformance of operations that take less than a second. 
+
+
 Bug fixes
 ---------
 
@@ -71,7 +75,6 @@ Bug fixes
   mode. Only affects Python 2. 
 
 - Fixed rare condition in which performance result reporting would be prevented 
-  due to a spurious error about `resultKey` already being used. 
 
 ---------------
 Release History
