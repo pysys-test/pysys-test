@@ -11,6 +11,13 @@ What's new in this release
   start due to a PocessError, unless ignoreExitStatus=True. Previously this 
   flag only affected non-zero exit codes resulting in ProcessError failures 
   getting ignored. 
+- Added optional "errors" parameter to pycompat.openfile to allow easily 
+  enabling non-strict handling of unsupported characters for cases where it 
+  does not matter (e.g. logging file contents), without needing caller to 
+  special-case for python 2 where no encoding is performed and the parameter 
+  is not available. ProcessUser.logFileContents() now uses errors='replace' 
+  since for diagnostic logging a best-effort approach to non-ASCII characters 
+  is most helpful. 
   
 
 Release History
