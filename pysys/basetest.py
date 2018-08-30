@@ -98,6 +98,9 @@ class BaseTest(ProcessUser):
 	@type project: L{Project}
 	@ivar descriptor: Information about this testcase, with fields such as id, title, etc
 	@type descriptor: L{pysys.xml.descriptor.XMLDescriptorContainer}
+	@ivar testCycle: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
+	The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
+	@type testCycle: int
 		
 	"""
 	
@@ -120,7 +123,16 @@ class BaseTest(ProcessUser):
 		self.monitorList = []
 		self.manualTester = None
 		self.resources = []
-
+		self.testCycle = BaseTest._currentTestCycle
+	
+	def __str__(self): 
+		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
+		and a suffix indicating the cycle number if this is a multi-cycle test run. 
+		
+		This is suitable for diagnostic purposes and display to the test author. The format of this string may 
+		change without notice. 
+		"""
+		return ('%s.cycle%03d'%(self.descriptor.id, self.testCycle)) if self. testCycle else self.descriptor.id
 
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the test class.

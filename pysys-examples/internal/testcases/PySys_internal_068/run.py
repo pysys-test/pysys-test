@@ -19,7 +19,7 @@ class PySysTest(BaseTest):
 		l = {}
 		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
 		runPySys = l['runPySys']
-		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
+		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
 		self.logFileContents('pysys.out', maxLines=0)
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			
