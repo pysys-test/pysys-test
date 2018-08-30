@@ -64,7 +64,7 @@ breaking writer implementations already in existence.
 
 __all__ = ["BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", "ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter"]
 
-import time, stat, logging, sys
+import time, stat, logging, sys, io
 if sys.version_info[0] == 2:
 	from urlparse import urlunparse
 else:
@@ -323,7 +323,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		
 		try:
-			self.fp = flushfile(open(self.logfile, "w"))
+			self.fp = flushfile(io.open(self.logfile, "wb"))
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
@@ -375,7 +375,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 			self.rootElement.appendChild(element)
 				
 			# write the file out
-			self.fp.write(self.document.toprettyxml(indent="  "))
+			self.fp.write(self.document.toprettyxml(indent="  ", encoding='utf-8', newl=os.linesep))
 		except Exception:
 			log.info("caught %s in XMLResultsWriter: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
@@ -390,7 +390,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		if self.fp: 
 			self.fp.seek(0)
 			self.statusAttribute.value="complete"
-			self.fp.write(self.document.toprettyxml(indent="  "))
+			self.fp.write(self.document.toprettyxml(indent="  ", encoding='utf-8', newl=os.linesep))
 			self.fp.close()
 			self.fp = None
 			
@@ -442,7 +442,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.completedAttribute.value="%s/%s" % (self.numResults, self.numTests)
 				
 		# write the file out
-		self.fp.write(self.document.toprettyxml(indent="  "))
+		self.fp.write(self.document.toprettyxml(indent="  ", encoding='utf-8', newl=os.linesep))
 
 	def __createResultsNode(self):
 		self.resultsElement = self.document.createElement("results")
@@ -485,7 +485,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
-		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports') if self.outputDir is None else self.outputDir
+		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
 		if os.path.exists(self.outputDir): self.purgeDirectory(self.outputDir, True)
 		os.makedirs(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
@@ -545,8 +545,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 			failure.appendChild(document.createTextNode( testObj.getOutcomeReason() ))		
 						
 			stdout = document.createElement('system-out')
-			fp = open(os.path.join(testObj.output, 'run.log'))
-			stdout.appendChild(document.createTextNode(fp.read()))
+			fp = io.open(os.path.join(testObj.output, 'run.log'))
+			stdout.appendChild(document.createTextNode(fp.read().replace('\n', os.linesep)))
 			fp.close()
 			
 			testcase.appendChild(failure)
@@ -554,11 +554,11 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		rootElement.appendChild(testcase)
 		
 		# write out the test result
-		if self.cycles > 1:
-			fp = open(os.path.join(self.outputDir,'TEST-%s.%s.xml'%(testObj.descriptor.id, self.cycle+1)), 'w')
-		else:
-			fp = open(os.path.join(self.outputDir,'TEST-%s.xml'%(testObj.descriptor.id)), 'w')
-		fp.write(document.toprettyxml(indent='	'))
+		fp = io.open(os.path.join(self.outputDir,
+			('TEST-%s.%s.xml'%(testObj.descriptor.id, self.cycle+1)) if self.cycles > 1 else 
+			('TEST-%s.xml'%(testObj.descriptor.id))), 
+			'wb')
+		fp.write(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep))
 		fp.close()
 
 	def purgeDirectory(self, dir, delTop=False):

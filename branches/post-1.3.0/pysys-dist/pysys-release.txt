@@ -18,6 +18,8 @@ What's new in this release
   is not available. ProcessUser.logFileContents() now uses errors='replace' 
   since for diagnostic logging a best-effort approach to non-ASCII characters 
   is most helpful. 
+- JUnitXMLResultsWriter and XMLResultsWriter now write using UTF-8 encoding, 
+  and include the encoding="utf-8" header in the XML header. 
   
 
 Release History
