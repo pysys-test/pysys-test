@@ -1,0 +1,32 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Custom Runner - cycleComplete() is invoked if present</title>    
+    <purpose><![CDATA[
+Ensures that if a custom runner class is supplied with a cycleComplete 
+method, that method is invoked at the end of each cycle even when using multiple threads. 
+This is to check backwards compatibility with tests created before PySys 1.3 when 
+BaseRunner had an cycleComplete method that was always invoked. Use of this method is no longer 
+recommended as it makes it impossible to cycle a test using multiple threads. However we retain 
+the old behaviour for those that are relying on it. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
