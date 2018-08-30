@@ -48,6 +48,10 @@ New features
   since for diagnostic logging a best-effort approach to non-ASCII characters 
   is most helpful. 
 
+- Added `__str__` implementations for BaseTest and BaseRunner, which uniquely 
+  identify the test (and cycle, in multi-cycle runs), for diagnostic and 
+  logging purposes. 
+
 Bug fixes
 ---------
 
