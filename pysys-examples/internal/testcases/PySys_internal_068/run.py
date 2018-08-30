@@ -1,7 +1,12 @@
+# -*- coding: latin-1 -*-
+
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, math, shutil, glob
+
+# contains a non-ascii £ character that is different in utf-8 vs latin-1
+TEST_STR = u'Hello £ world' 
 
 class PySysTest(BaseTest):
 
@@ -37,20 +42,20 @@ class PySysTest(BaseTest):
 			'FAILED: NestedFail'
 		])
 		
-		self.assertGrep('testsummary.xml', expr='<descriptor>file://') # because we enabled filed URLS
-		self.assertGrep('testsummary.xml', expr='<?xml-stylesheet href="./my-pysys-log.xsl"')
+		self.assertGrep('testsummary.xml', expr='<descriptor>file://', encoding='utf-8') # because we enabled filed URLS
+		self.assertGrep('testsummary.xml', expr='<?xml-stylesheet href="./my-pysys-log.xsl"', encoding='utf-8')
 		self.assertOrderedGrep('testsummary.xml', exprList=[
 			'<results cycle="1">',
 			'id="NestedPass" outcome="PASSED"',
-			'<outcomeReason>Reason for timed out outcome is general tardiness</outcomeReason>',
+			'<outcomeReason>Reason for timed out outcome is general tardiness - %s</outcomeReason>'%TEST_STR,
 			'<results cycle="2">',
-			])
+			], encoding='utf-8')
 
 
-		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"')
-		self.assertGrep('target/pysys-reports/TEST-NestedPass.2.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"')
-		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='failures="1" name="NestedTimedout" skipped="0" tests="1"')
-		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness</failure>')
+		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"', encoding='utf-8')
+		self.assertGrep('target/pysys-reports/TEST-NestedPass.2.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"', encoding='utf-8')
+		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='failures="1" name="NestedTimedout" skipped="0" tests="1"', encoding='utf-8')
+		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness - %s</failure>'%TEST_STR, encoding='utf-8')
 		
 		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
 		if len(datedtestsum) != 1: self.addOutcome(FAILED, 'Did not find testsummary-<year>.log')
@@ -59,7 +64,10 @@ class PySysTest(BaseTest):
 		self.assertOrderedGrep('pysys.out', exprList=[
 			'Summary of non passes: ',
 			'CYCLE 1.*TIMED OUT.*NestedTimedout',
-			'Reason for timed out outcome is general tardiness',
+			'Reason for timed out outcome is general tardiness - %s'%(
+				# stdout seems to get written in utf-8 not local encoding on python2 for some unknown reason, so skip verification of extra chars on that version; 
+				# for python 3 we can do the full verification
+				'Hello' if sys.version_info[0] == 2 else TEST_STR),
 			'CYCLE 1.*FAILED.*NestedFail',
 			'CYCLE 2.*TIMED OUT.*NestedTimedout',
 		])

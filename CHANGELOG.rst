@@ -33,7 +33,7 @@ Changes affecting compatibility
   but is available on https://pysys-test.github.io/pysys-test website or as a 
   separate zip file available from 
   https://github.com/pysys-test/pysys-test/releases. 
-
+  
 
 New features
 ------------
@@ -49,6 +49,7 @@ New features
   is most helpful. 
 
 
+
 Bug fixes
 ---------
 
@@ -56,6 +57,12 @@ Bug fixes
   start due to a ProcessError, unless ignoreExitStatus=True. Previously this 
   flag only affected non-zero exit codes resulting in ProcessError failures 
   getting ignored. 
+
+- `JUnitXMLResultsWriter` and `XMLResultsWriter` now write using UTF-8 
+  encoding rather than local/default encoding, and also include the 
+  `encoding="utf-8"` header in the XML header. Since previously there was no
+  `encoding` header many tools would have interpreted them as UTF-8 already, 
+  and now the behaviour is consistent with that expectation. 
 
 ---------------
 Release History
