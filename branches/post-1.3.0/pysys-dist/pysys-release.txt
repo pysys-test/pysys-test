@@ -23,6 +23,9 @@ What's new in this release
 - Fix bug in which non-ASCII characters in test outcome reasons could 
   prevent the test log being written to disk if executed in multi-threaded 
   mode. Only affects Python 2. 
+- Added __str__ implementations for BaseTest and BaseRunner, which uniquely 
+  identify the test (and cycle, in a multi-cycle run), for diagnostic and 
+  logging purposes. 
   
 
 Release History

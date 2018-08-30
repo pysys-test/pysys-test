@@ -151,7 +151,13 @@ class BaseRunner(ProcessUser):
 		
 		self.performanceReporters = PROJECT._createPerformanceReporters(self.outsubdir)
 
-
+	def __str__(self): 
+		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
+		suitable for diagnostic purposes and display to the test author. 
+		The format of this string may change without notice. 
+		"""
+		return self.__class__.__name__ # there's usually only one base runner so class name is sufficient
+	
 	def setKeywordArgs(self, xargs):
 		"""Set the xargs as data attributes of the class.
 				
@@ -522,6 +528,7 @@ class TestContainer(object):
 			
 		# import the test class
 		with global_lock:
+			BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 			try:
 				module = import_module(os.path.basename(self.descriptor.module), [os.path.dirname(self.descriptor.module)], True)
 				self.testObj = getattr(module, self.descriptor.classname)(self.descriptor, self.outsubdir, self.runner)
@@ -532,6 +539,8 @@ class TestContainer(object):
 			except Exception:
 				exc_info.append(sys.exc_info())
 				self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner)
+			# can't set this in constructor without breaking compatibility, but set it asap after construction
+			del BaseTest._currentTestCycle
 
 		for writer in self.runner.writers:
 			try: 

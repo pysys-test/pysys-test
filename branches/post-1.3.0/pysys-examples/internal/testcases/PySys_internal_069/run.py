@@ -18,6 +18,11 @@ class PySysTest(BaseTest):
 	def validate(self):
 		self.assertGrep('pysys.out', expr='(Traceback.*|caught .*)', contains=False)
 
+		self.assertGrep('pysys.out', expr="runner object str='BaseRunner'")
+		self.assertGrep('pysys.out', expr="NestedPass test object str='NestedPass.cycle001'")
+		self.assertGrep('pysys.out', expr="NestedPass test object str='NestedPass.cycle002'")
+
+
 		self.assertOrderedGrep('pysys.out', exprList=[
 			'INFO.*Test progress: completed 1/6 = 16.7% of tests in ',
 			'1 FAILED',
