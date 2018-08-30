@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
 
   <description> 
-    <title>Performance test for calulating the fibonacci series</title>
+    <title>Performance test for calculating the fibonacci series</title>
     <purpose><![CDATA[
 Demonstrate how to measure and report performance results by measuring 
 the time taken to calculate fibonacci numbers. 
