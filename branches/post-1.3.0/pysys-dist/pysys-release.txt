@@ -19,7 +19,10 @@ What's new in this release
   since for diagnostic logging a best-effort approach to non-ASCII characters 
   is most helpful. 
 - JUnitXMLResultsWriter and XMLResultsWriter now write using UTF-8 encoding, 
-  and include the encoding="utf-8" header in the XML header. 
+  and include the encoding="utf-8" header in the XML header.
+- Fix bug in which non-ASCII characters in test outcome reasons could 
+  prevent the test log being written to disk if executed in multi-threaded 
+  mode. Only affects Python 2. 
   
 
 Release History
