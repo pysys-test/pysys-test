@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<property name="verboseWaitForSignal" value="true"/>
+	<property name="defaultAbortOnError" value="true"/>
+
+	<writers>
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${root}/target/pysys-reports"/>
+		</writer>
+
+		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+			<property name="showOutcomeReason" value="true"/>
+			<property name="showOutputDir" value="true"/>
+		</writer>
+		
+	</writers>		
+	
+</pysysproject>
