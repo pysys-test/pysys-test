@@ -269,11 +269,17 @@ class CSVPerformanceFile(object):
 	If this file contains aggregated results the number of "samples" may be greater than 1 and the "value"
 	will specify the mean result.
 
-	@ivar RUN_DETAILS: A dictionary containing information about the whole test run
-	@type RUN_DETAILS: dictionary
-	@ivar RESULT_DETAILS: List where each item is a dictionary containing information about a given result
-	@type RESULT_DETAILS: list
-	@ivar COLUMNS: List of the columns in the performance output
+	@ivar runDetails: A dictionary containing (string key, string value) information about the whole test run
+	@type runDetails: dictionary
+	@ivar results: A list where each item is a dictionary containing information about a given result, 
+	containing values for each of the keys in L{COLUMNS}, for example 'resultKey', 'value', etc. 
+	@type results: list
+
+	@ivar RUN_DETAILS: The constant prefix identifying information about the whole test run
+	@type RUN_DETAILS: string
+	@ivar RESULT_DETAILS: The constant prefix identifying detailed information about a given result
+	@type RESULT_DETAILS: string
+	@ivar COLUMNS: Constant list of the columns in the performance output
 	@type COLUMNS: list
 
 	"""
