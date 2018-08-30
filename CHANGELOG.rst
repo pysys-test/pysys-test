@@ -44,7 +44,10 @@ New features
 Bug fixes
 ---------
 
-- todo
+- Fixed startProcess to add a BLOCKED test outcome when a process fails to 
+  start due to a ProcessError, unless ignoreExitStatus=True. Previously this 
+  flag only affected non-zero exit codes resulting in ProcessError failures 
+  getting ignored. 
 
 ---------------
 Release History

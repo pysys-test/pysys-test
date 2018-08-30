@@ -171,8 +171,11 @@ class ProcessUser(object):
 
 			elif state == BACKGROUND:
 				log.info("Started %s with process id %d", displayName, process.pid)
-		except ProcessError:
-			log.info("%s", sys.exc_info()[1], exc_info=0)
+		except ProcessError as e:
+			if not ignoreExitStatus:
+				self.addOutcome(BLOCKED, 'Could not start %s process: %s'%(displayName, e), abortOnError=abortOnError)
+			else:
+				log.info("%s", sys.exc_info()[1], exc_info=0)
 		except ProcessTimeout:
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
 			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
