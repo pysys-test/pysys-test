@@ -50,7 +50,7 @@ def quotestring(s):
 	# produce for python 3 bytes objects
 	return '"%s"'%s if isstring(s) else repr(s)
 	
-def openfile(path, mode='r', encoding=None, **kwargs):
+def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	"""
 	Opens the specified file, following the default 
 	"open()" semantics for this Python version unless an encoding is 
@@ -76,6 +76,11 @@ def openfile(path, mode='r', encoding=None, **kwargs):
 	is specified then the returned stream is always a unicode character stream. 
 	This must be None if the mode specifies binary. 
 	
+	@param errors: Optional string that specifies how encoding/decoding errors 
+	are handled, such as 'strict', 'ignore', 'replace'; see documentation of 
+	io module for more details. The value of this attribute is ignored 
+	if using the python 2 open() built-in with bytes mode that does not support it. 
+	
 	@param kwargs: Any additional args to be passed to open() or io.open(). 
 	
 	@return: A file stream, either using unicode characters or binary bytes. 
@@ -88,5 +93,5 @@ def openfile(path, mode='r', encoding=None, **kwargs):
 	
 	if encoding or (not PY2):
 		if encoding: assert 'b' not in mode, 'cannot open file %s with binary mode %s as an encoding was specified'%(path, mode)
-		return io.open(path, mode=mode, encoding=encoding, **kwargs)
+		return io.open(path, mode=mode, encoding=encoding, errors=errors, **kwargs)
 	return open(path, mode=mode, **kwargs)

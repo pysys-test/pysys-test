@@ -720,7 +720,7 @@ class ProcessUser(object):
 		if not path: return False
 		actualpath= os.path.join(self.output, path)
 		try:
-			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath))
+			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath), errors='replace')
 		except Exception as e:
 			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False
