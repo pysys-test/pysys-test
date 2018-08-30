@@ -136,7 +136,7 @@ class BaseRunner(ProcessUser):
 		else:
 			self.writers.append(ConsoleSummaryResultsWriter())
 
-		if xargs.get('__progressWritersEnabled', False):
+		if xargs.pop('__progressWritersEnabled', False):
 			if progresswriters: 
 				self.writers.extend(progresswriters)
 			else:
