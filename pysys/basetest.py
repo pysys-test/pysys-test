@@ -96,6 +96,8 @@ class BaseTest(ProcessUser):
 	@type log: logging.Logger
 	@ivar project: Reference to the project details as set on the module load of the launching executable  
 	@type project: L{Project}
+	@ivar descriptor: Information about this testcase, with fields such as id, title, etc
+	@type descriptor: L{pysys.xml.descriptor.XMLDescriptorContainer}
 		
 	"""
 	
