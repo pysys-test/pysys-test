@@ -70,6 +70,9 @@ Bug fixes
   prevent the test log being written to disk if executed in multi-threaded 
   mode. Only affects Python 2. 
 
+- Fixed rare condition in which performance result reporting would be prevented 
+  due to a spurious error about `resultKey` already being used. 
+
 ---------------
 Release History
 ---------------
