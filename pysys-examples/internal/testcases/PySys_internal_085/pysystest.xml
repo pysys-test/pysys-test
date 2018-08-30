@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>I18N outcome reasons - multiple threads</title>    
+    <purpose><![CDATA[
+Checks that I18N characters in outcome reason string (similar to test 068) 
+work correctly when running multi-threaded, since a different code branch executes 
+in that case. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

@@ -43,12 +43,10 @@ New features
 - Added optional `errors=` parameter to `pycompat.openfile()` to allow easily 
   enabling non-strict handling of unsupported characters for cases where it 
   does not matter (e.g. logging file contents), without needing caller to 
-  special-case for Python 2 where no encoding is performed and the parameter 
+  special-case for Python 2 where no encoding is performed and the parameter
   is not available. `ProcessUser.logFileContents()` now uses `errors='replace'`
   since for diagnostic logging a best-effort approach to non-ASCII characters 
   is most helpful. 
-
-
 
 Bug fixes
 ---------
@@ -63,6 +61,10 @@ Bug fixes
   `encoding="utf-8"` header in the XML header. Since previously there was no
   `encoding` header many tools would have interpreted them as UTF-8 already, 
   and now the behaviour is consistent with that expectation. 
+
+- Fix bug in which non-ASCII characters in test outcome reasons could 
+  prevent the test log being written to disk if executed in multi-threaded 
+  mode. Only affects Python 2. 
 
 ---------------
 Release History

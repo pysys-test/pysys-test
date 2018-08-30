@@ -27,7 +27,7 @@ API documentation.
 
 """
 from __future__ import print_function
-import os.path, stat, math, logging, textwrap, sys
+import os.path, stat, math, logging, textwrap, sys, locale
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
 else:
@@ -42,6 +42,7 @@ from pysys.utils.fileutils import mkdir
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
+from pysys.utils.pycompat import *
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
 global_lock = threading.Lock()
@@ -374,7 +375,10 @@ class BaseRunner(ProcessUser):
 		
 		if self.threads > 1: 
 			# write out cached messages from the worker thread
-			sys.stdout.write(container.testFileHandlerStdout.stream.getvalue())
+			bufferedoutput = container.testFileHandlerStdout.stream.getvalue()
+			# in python2, stdout expects bytes, and bufferedoutput could be bytes or chars; in py3 everything is chars
+			if PY2 and isinstance(bufferedoutput, unicode): bufferedoutput = bufferedoutput.encode(locale.getpreferredencoding())
+			sys.stdout.write(bufferedoutput)
 		if stdoutHandler.level >= logging.WARN:
 			log.critical("%s: %s (%s)", LOOKUP[container.testObj.getOutcome()], container.descriptor.id, container.descriptor.title)
 		
