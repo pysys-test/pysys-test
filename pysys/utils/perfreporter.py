@@ -29,9 +29,15 @@ class PerformanceUnit(object):
 	
 	Every unit encodes whether big numbers are better or worse (which can be used 
 	to calculate the improvement or regression when results are compared), e.g. 
-	better for throughput numbers, worse for time taken or latency numbers. For
-	consistency, we recommend using the the pre-defined units of SECONDS (e.g.
-	for latency values) or PER_SECOND (e.g. throughput) where possible.
+	better for throughput numbers, worse for time taken or latency numbers. 
+	
+	For consistency, we recommend using the the pre-defined units where possible. 
+	For throughput numbers or rates, that means using PER_SECOND. For latency 
+	measurements that means using SECONDS if long time periods of several 
+	seconds are expected, or NANO_SECONDS (=10**-9 seconds) if sub-second 
+	time periods are expected (since humans generally find numbers such as 
+	1,234,000 ns easier to skim-read and compare than fractional numbers like 
+	0.001234).
 
 	"""
 	def __init__(self, name, biggerIsBetter):
@@ -44,6 +50,7 @@ class PerformanceUnit(object):
 		return self.name
 
 PerformanceUnit.SECONDS = PerformanceUnit('s', False)
+PerformanceUnit.NANO_SECONDS = PerformanceUnit('ns', False) # 10**-9 seconds
 PerformanceUnit.PER_SECOND = PerformanceUnit('/s', True)
 
 class CSVPerformanceReporter(object):
@@ -90,7 +97,11 @@ class CSVPerformanceReporter(object):
 		self.__runDetails = self.getRunDetails()
 		
 		# anything listed here can be passed using just a string literal
-		self.unitAliases = {'s':PerformanceUnit.SECONDS, '/s': PerformanceUnit.PER_SECOND}
+		self.unitAliases = {
+			's':PerformanceUnit.SECONDS, 
+			'ns':PerformanceUnit.NANO_SECONDS, 
+			'/s': PerformanceUnit.PER_SECOND
+			}
 		
 	def getRunDetails(self):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
