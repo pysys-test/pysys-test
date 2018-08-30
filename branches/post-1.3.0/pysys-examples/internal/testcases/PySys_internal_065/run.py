@@ -37,7 +37,7 @@ class PySysTest(BaseTest):
 		with open(self.output+'/parsed_perf_genuine_data.txt', 'w') as f:
 			f.write(repr(s))
 
-		assert len(s.results)==2, s
+		assert len(s.results)==4, s
 		
 		# do extra testing of parsing weirdly shaped data
 		f2 = CSVPerformanceFile(
