@@ -7,7 +7,11 @@ See installation notes in README.rst for more details.
 
 What's new in this release
 --------------------------
-
+- Fixed startProcess to add a BLOCKED test outcome when a process fails to 
+  start due to a PocessError, unless ignoreExitStatus=True. Previously this 
+  flag only affected non-zero exit codes resulting in ProcessError failures 
+  getting ignored. 
+  
 
 Release History
 ---------------
