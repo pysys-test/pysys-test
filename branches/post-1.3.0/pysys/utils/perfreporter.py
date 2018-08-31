@@ -78,7 +78,7 @@ class CSVPerformanceReporter(object):
 
 	"""
 
-	def __init__(self, project, summaryfile, testoutdir):
+	def __init__(self, project, summaryfile, testoutdir, **kwargs):
 		"""Construct an instance of the performance reporter.
 
 		@param project: The project configuration instance.
@@ -86,6 +86,10 @@ class CSVPerformanceReporter(object):
 		@param testoutdir: The output directory for this test run
 
 		"""
+		self.runner = kwargs.pop('runner', None) or self._runnerSingleton
+		assert self.runner is not None
+		assert not kwargs, kwargs.keys() # **kwargs allows constructor to be extended in future fi needed; give error if any unexpected args are passed
+		
 		self.testoutdir = os.path.basename(testoutdir)
 		self.summaryfile = summaryfile
 		self.project = project
@@ -94,7 +98,6 @@ class CSVPerformanceReporter(object):
 		
 		self._lock = threading.RLock()
 		self.__previousResultKeys = {} # value = (testid, testobjhash, resultDetails)
-		self.__runDetails = self.getRunDetails()
 		
 		# anything listed here can be passed using just a string literal
 		self.unitAliases = {
@@ -103,10 +106,13 @@ class CSVPerformanceReporter(object):
 			'/s': PerformanceUnit.PER_SECOND
 			}
 		
+		self.__runDetails = self.getRunDetails()
+		
 	def getRunDetails(self):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
 		
-		Subclasses may wish to override this to add additional items such as version or build number.
+		Subclasses may wish to override this to add additional items such as 
+		version, build number, or mode information obtained from self.runner.
 
 		"""
 		d = collections.OrderedDict()
