@@ -149,7 +149,7 @@ class BaseRunner(ProcessUser):
 		self.results = {}
 		self.__remainingTests = self.cycle * len(self.descriptors)
 		
-		self.performanceReporters = PROJECT._createPerformanceReporters(self.outsubdir)
+		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
 
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -277,6 +277,17 @@ class BaseRunner(ProcessUser):
 		results.
 
 		"""
+		if PROJECT.perfReporterConfig:
+			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
+			# might not be fully constructed yet
+			try:
+				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir, runner=self)]
+			except Exception:
+				# support for passing kwargs was added in 1.3.1; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
+				PROJECT.perfReporterConfig[0]._runnerSingleton = self
+				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir)]
+				del PROJECT.perfReporterConfig[0]._runnerSingleton
+		
 		# call the hook to setup prior to running tests
 		self.setup()
 
