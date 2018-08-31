@@ -355,7 +355,7 @@ class Project(object):
 		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
 		self.makerClassname, self.makerModule = DEFAULT_MAKER
 		self.writers = [DEFAULT_WRITER]
-		self._createPerformanceReporters = lambda outdir: []
+		self.perfReporterConfig = None
 
 		stdoutformatter, runlogformatter = None, None
 
@@ -388,8 +388,7 @@ class Project(object):
 				# get the loggers to use
 				self.writers = parser.getWriterDetails()
 
-				perfReporterDetails = parser.getPerformanceReporterDetails()
-				self._createPerformanceReporters = lambda testoutdir: [perfReporterDetails[0](self, perfReporterDetails[1], testoutdir)]
+				self.perfReporterConfig = parser.getPerformanceReporterDetails()
 
 				# get the stdout and runlog formatters
 				stdoutformatter, runlogformatter = parser.createFormatters()

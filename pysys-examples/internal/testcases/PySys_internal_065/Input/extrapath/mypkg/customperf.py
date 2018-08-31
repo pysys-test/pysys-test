@@ -2,6 +2,11 @@ from pysys.utils.perfreporter import CSVPerformanceReporter
 import logging
 
 class CustomPerfReporter(CSVPerformanceReporter):
+	def __init__(self, project, summaryfile, testoutdir):
+		# this checks backwards compatibility with any custom perf reporter classes created against 1.3.0 before **kwargs was added
+		super(CustomPerfReporter, self).__init__(project, summaryfile, testoutdir)
+		assert self.runner is not None
+	
 	def getRunHeader(self):
 		return '<custom reporter>\n'+super(CustomPerfReporter, self).getRunHeader()
 

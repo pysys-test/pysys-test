@@ -34,6 +34,12 @@ Changes affecting compatibility
   separate zip file available from 
   https://github.com/pysys-test/pysys-test/releases. 
   
+- Any custom performance reporter classes created using PySys 1.3.0 
+  and which provided a custom constructor should be updated to include the 
+  `**kwargs` parameter added in this version of PySys, as the old constructor 
+  signature is now deprecated. As this API was added in 1.3.0 no other versions 
+  are affected. 
+
 
 New features
 ------------
@@ -54,6 +60,10 @@ New features
 
 - Added `PerformanceUnit.NANO_SECONDS` (with alias `ns`) for use when 
   measuring the peformance of operations that take less than a second. 
+
+- Performance reporter classes can now make use of `self.runner` to access 
+  information such as the mode in which the test is running for reporting 
+  purposes. 
 
 
 Bug fixes
