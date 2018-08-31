@@ -4,6 +4,7 @@ import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, math, shutil, glob
+import locale
 
 # contains a non-ascii £ character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello £ world' 
@@ -26,4 +27,4 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.err', expr='WARN.*', contains=False)
 
 		# pysys.out will be in the default encoding
-		self.assertGrep('pysys.out', expr='Reason for timed out outcome is general tardiness - %s'%TEST_STR)
+		self.assertGrep('pysys.out', expr='Reason for timed out outcome is general tardiness - %s'%TEST_STR, encoding=locale.getpreferredencoding())
