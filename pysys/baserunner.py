@@ -394,7 +394,7 @@ class BaseRunner(ProcessUser):
 			# write out cached messages from the worker thread
 			bufferedoutput = container.testFileHandlerStdout.stream.getvalue()
 			# in python2, stdout expects bytes, and bufferedoutput could be bytes or chars; in py3 everything is chars
-			if PY2 and isinstance(bufferedoutput, unicode): bufferedoutput = bufferedoutput.encode(locale.getpreferredencoding())
+			if PY2 and isinstance(bufferedoutput, unicode): bufferedoutput = bufferedoutput.encode(locale.getpreferredencoding(), errors='replace')
 			sys.stdout.write(bufferedoutput)
 		if stdoutHandler.level >= logging.WARN:
 			log.critical("%s: %s (%s)", LOOKUP[container.testObj.getOutcome()], container.descriptor.id, container.descriptor.title)
