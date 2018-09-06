@@ -462,6 +462,8 @@ class TestContainer(object):
 	"""Class used for co-ordinating the execution of a single test case.
 	
 	"""
+
+	__purgedOutputDirs = set() # static field
 	
 	def __init__ (self, descriptor, cycle, runner):
 		"""Create an instance of the TestContainer class.
@@ -506,10 +508,17 @@ class TestContainer(object):
 				self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
 
 			mkdir(self.outsubdir)
-					
-			if self.cycle == 0 and not self.runner.validateOnly: 
-				self.purgeDirectory(self.outsubdir)
-				
+
+			if not self.runner.validateOnly: 
+				if self.runner.cycle <= 1: 
+					self.purgeDirectory(self.outsubdir)
+				else:
+					# must use lock to avoid deleting the parent dir after we've started creating outdirs for some cycles
+					with global_lock:
+						if self.outsubdir not in TestContainer.__purgedOutputDirs:
+							self.purgeDirectory(self.outsubdir)
+							TestContainer.__purgedOutputDirs.add(self.outsubdir)
+			
 			if self.runner.cycle > 1: 
 				self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
 				mkdir(self.outsubdir)
