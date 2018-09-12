@@ -141,6 +141,29 @@ of the execute() method::
 As well as setting the test outcome and reason, this will raise an exception ensuring that the rest of execute() and 
 validate() do not get executed. 
 
+Checking for error messages in log files
+-----------------------------------------
+The assertGrep() method is an easy way to check that there are no error messages in log files from processes started 
+by PySys. Rather than checking for an expression such as ' ERROR: ', it is recommended to define your expression so 
+that the error message itself is included, e.g.::
+	self.assertGrep('myprocess.log', expr=' ERROR: .*', contains=False)
+
+This approach ensures that the error message itself is included in the test's console output, run.log and the summary 
+of failed test outcomes, which avoids the need to open up the individual logs to find out what happened, and makes it 
+much easier to triage test failures, especially if several tests fail for the same reason. 
+
+Sharing logic for validation across tests
+-----------------------------------------
+Often you may have some standard logic that needs to be used in the validation of many/all testcases, such as checking 
+log files for errors. One recommended way to do that is to define a helper function in a custom BaseTest inherited 
+by your tests named after what is being checked - for example checkLogsForErrors - and explicitly call that method from 
+the .validate() method of each test. That approach allows you to later customize the logic by changing just one single 
+place, and also to omit it for specific tests where it is not wanted. 
+
+An alternative approach if you have logic that is definitely needed in all your tests is to have the basetest 
+call registerCleanupFunction() and perform the validation steps. This allows extra conditions to be added to all 
+tess without the need to modify individual tests. 
+
 License
 =======
 PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. 
