@@ -39,6 +39,9 @@ What's new in this release
 - Added IS_WINDOWS constant, since conditionalizing logic for Windows vs 
   non-Windows is very common, to avoid the need for error-prone matching to 
   string literals. 
+- Added LIBRARY_PATH_ENV_VAR_NAME constant, since it's common when starting 
+  processes to need to add a directory to either PATH or LD_LIBRARY_PATH, 
+  depending on OS. 
   
 
 Release History

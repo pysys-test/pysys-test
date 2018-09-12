@@ -91,6 +91,12 @@ ENVSEPERATOR = os.pathsep
 
 IS_WINDOWS = OSFAMILY=='windows'
 
+LIBRARY_PATH_ENV_VAR_NAME = 'PATH' if IS_WINDOWS else 'LD_LIBRARY_PATH'
+"""
+Constant specifying the name of the environment variable used on this platform for locating libraries. 
+For example on Windows this is PATH and on Linux this is LD_LIBRARY_PATH. 
+"""
+
 # constants used in testing
 TRUE=True
 FALSE=False
