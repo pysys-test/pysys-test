@@ -65,6 +65,10 @@ New features
   information such as the mode in which the test is running for reporting 
   purposes. 
 
+- Added boolean `IS_WINDOWS` constant, since conditionalizing logic for Windows 
+  versus all other Operating Systems is very common; this avoids the need for 
+  error-prone matching against string literals. 
+
 
 Bug fixes
 ---------
@@ -85,6 +89,8 @@ Bug fixes
   mode. Only affects Python 2. 
 
 - Fixed rare condition in which performance result reporting would be prevented 
+  due to spurious error about `resultKey` already being used. 
+
 
 ---------------
 Release History
