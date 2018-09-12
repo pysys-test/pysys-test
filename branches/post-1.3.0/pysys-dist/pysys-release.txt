@@ -36,6 +36,9 @@ What's new in this release
   and which provided a custom constructor should be updated to include the 
   **kwargs parameter added in this version of PySys, as the old constructor 
   signature is now deprecated. 
+- Added IS_WINDOWS constant, since conditionalizing logic for Windows vs 
+  non-Windows is very common, to avoid the need for error-prone matching to 
+  string literals. 
   
 
 Release History

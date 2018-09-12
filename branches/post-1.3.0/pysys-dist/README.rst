@@ -117,6 +117,30 @@ simply execute::
  $ pysys.py run  
 
 
+How To Guide/FAQ
+================
+
+Platform detection
+------------------
+In addition to the features provided by Python itself, PySys includes some constants to help quickly detect what 
+platform is in use, such as OSFAMILY and PLATFORM. It's very common to have one set of logic for Windows and 
+another for non-Windows (Unix-based) platforms, and PySys has a dedicated constant for that::
+
+	if IS_WINDOWS:
+		...
+	else:
+		...
+
+Skipping tests
+--------------
+If your run.py logic detects that a test should not be executed for this platform or mode, simply use this near the top 
+of the execute() method::
+
+	self.abort(SKIPPED, 'Skipped because MyFeature is not supported on Windows') 
+	
+As well as setting the test outcome and reason, this will raise an exception ensuring that the rest of execute() and 
+validate() do not get executed. 
+
 License
 =======
 PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. 

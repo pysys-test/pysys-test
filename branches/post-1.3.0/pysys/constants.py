@@ -92,6 +92,8 @@ else:
 	DYLD_LIBRARY_PATH = ''
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
+IS_WINDOWS = OSFAMILY=='windows'
+
 # constants used in testing
 TRUE=True
 FALSE=False
