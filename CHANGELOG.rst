@@ -69,6 +69,10 @@ New features
   versus all other Operating Systems is very common; this avoids the need for 
   error-prone matching against string literals. 
 
+- Added `skipTest()` method, which can be used to avoid running the rest of the 
+  `execute()` or `validate()` method, if it is not appropriate for the test to 
+  execute on this platform/mode. 
+
 
 Bug fixes
 ---------
@@ -90,8 +94,7 @@ Bug fixes
 
 - Fixed rare condition in which performance result reporting would be prevented 
   due to spurious error about `resultKey` already being used. 
-
-
+  
 ---------------
 Release History
 ---------------
