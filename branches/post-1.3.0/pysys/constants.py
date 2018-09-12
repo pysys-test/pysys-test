@@ -44,7 +44,6 @@ if re.search('win32', sys.platform):
 	PLATFORM='win32'	
 	OSFAMILY='windows'
 	DEVNULL = 'nul'
-	ENVSEPERATOR = ';'
 	WINDIR = os.getenv('windir', 'c:\WINDOWS')
 	PATH = r'%s;%s\system32;%s\System32\Wbem' % (WINDIR, WINDIR, WINDIR)
 	LD_LIBRARY_PATH = ''
@@ -55,7 +54,6 @@ elif re.search('sunos', sys.platform):
 	PLATFORM='sunos'
 	OSFAMILY='unix'
 	DEVNULL = '/dev/null'
-	ENVSEPERATOR = ':'
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/openwin/bin:/opt/SUNWspro/bin'
 	LD_LIBRARY_PATH = '/usr/local/lib' 
 	DYLD_LIBRARY_PATH = ''
@@ -65,7 +63,6 @@ elif re.search('linux', sys.platform):
 	PLATFORM='linux'
 	OSFAMILY='unix'
 	DEVNULL = '/dev/null'
-	ENVSEPERATOR = ':'
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
 	LD_LIBRARY_PATH = '/usr/lib'
 	DYLD_LIBRARY_PATH = ''
@@ -75,7 +72,6 @@ elif re.search('darwin', sys.platform):
 	PLATFORM='darwin'
 	OSFAMILY='unix'
 	DEVNULL = '/dev/null'
-	ENVSEPERATOR = ':'
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
 	LD_LIBRARY_PATH = ''
 	DYLD_LIBRARY_PATH = '/usr/lib:/usr/local/lib'
@@ -86,11 +82,12 @@ else:
 	PLATFORM=sys.platform
 	OSFAMILY='unix'
 	DEVNULL = '/dev/null'
-	ENVSEPERATOR = ':'
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
 	LD_LIBRARY_PATH = '/usr/lib'
 	DYLD_LIBRARY_PATH = ''
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
+
+ENVSEPERATOR = os.pathsep
 
 IS_WINDOWS = OSFAMILY=='windows'
 
