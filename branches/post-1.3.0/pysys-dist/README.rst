@@ -134,9 +134,9 @@ another for non-Windows (Unix-based) platforms, and PySys has a dedicated consta
 Skipping tests
 --------------
 If your run.py logic detects that a test should not be executed for this platform or mode, simply use this near the top 
-of the execute() method::
+of the execute() method, specifying the reason for the skip::
 
-	self.abort(SKIPPED, 'Skipped because MyFeature is not supported on Windows') 
+	self.skipTest('MyFeature is not supported on Windows') 
 	
 As well as setting the test outcome and reason, this will raise an exception ensuring that the rest of execute() and 
 validate() do not get executed. 

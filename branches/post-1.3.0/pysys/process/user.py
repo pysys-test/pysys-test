@@ -537,7 +537,9 @@ class ProcessUser(object):
 		storing the list of validation outcomes. Multiple validations may be performed, the current
 		supported validation outcomes of which are:
 				
-		SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately)
+		SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately). 
+		See also L{skipTest()} which is usually the best way to skip a test from the run.py file. 
+
 		BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
 		DUMPEDCORE:  A process started by the test produced a core file (unix only)
 		TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
@@ -551,12 +553,17 @@ class ProcessUser(object):
 		in L{pysys.constants}. 
 		
 		@param outcome: The outcome to add
-		@param outcomeReason: A string summarizing the reason for the outcome
+		
+		@param outcomeReason: A string summarizing the reason for the outcome, 
+		for example "Grep on x.log contains 'ERROR: server failed'". 
+		
 		@param printReason: If True the specified outcomeReason will be printed
+		
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-			project setting if not specified)
+		project setting if not specified)
+		
 		@param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
-			to the log output for better test triage.
+		to the log output for better test triage.
 		
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
@@ -584,6 +591,8 @@ class ProcessUser(object):
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
 		"""Raise an AbortException.
+		
+		See also L{skipTest}. 
 
 		@param outcome: The outcome, which will override any existing outcomes previously recorded.
 		@param outcomeReason: A string summarizing the reason for the outcome
@@ -591,6 +600,17 @@ class ProcessUser(object):
 		"""
 		raise AbortExecution(outcome, outcomeReason, callRecord)
 
+
+	def skipTest(self, outcomeReason, callRecord=None):
+		"""Raise an AbortException that will set the test outcome to SKIPPED and 
+		ensure that the rest of the execute() and validate() methods do not execute. 
+		
+		This is useful when a test should not be executed in the current mode or platform. 
+
+		@param outcomeReason: A string summarizing the reason the test is being skipped, for example
+		"Feature X is not supported on Windows". 
+		"""
+		raise AbortExecution(SKIPPED, outcomeReason, callRecord)
 
 	def getOutcome(self):
 		"""Get the overall outcome based on the precedence order.
