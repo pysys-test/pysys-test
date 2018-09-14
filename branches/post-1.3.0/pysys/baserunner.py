@@ -149,7 +149,7 @@ class BaseRunner(ProcessUser):
 		self.results = {}
 		self.__remainingTests = self.cycle * len(self.descriptors)
 		
-		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
+		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed		
 
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -182,14 +182,17 @@ class BaseRunner(ProcessUser):
 
 
 	def testComplete(self, testObj, dir):
-		"""Test complete method which performs completion actions after execution of a testcase.
+		"""Test complete method which performs completion actions after a testcase has finished executing and 
+		its final outcome has been determined.
 		
 		The testComplete method performs purging of the output subdirectory of a testcase on completion 
 		of the test execution. Purging involves removing all files with a zero file length in order to 
 		only include files with content of interest. Should C{self.purge} be set, the purging will remove
 		all files (excluding the run.log) on a C{PASSED} outcome of the testcase in order to reduce the 
 		on-disk memory footprint when running a large number of tests. Should a custom testComplete for 
-		a subclass be required, the BaseRunner testComplete method should first be called.
+		a subclass be required, the BaseRunner testComplete method should be called afterwards inside a 
+		try...finally block. Do not put logic which could change the test outcome in testComplete - 
+		use L{BaseTest.cleanup} instead. 
 		
 		@param testObj: Reference to the L{pysys.basetest.BaseTest} instance of the test just completed
 		@param dir: The directory to perform the purge on
