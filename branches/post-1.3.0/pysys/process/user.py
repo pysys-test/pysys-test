@@ -516,7 +516,7 @@ class ProcessUser(object):
 					log.debug('Running registered cleanup function: %r'%fn)
 					fn()
 				except Exception as e:
-					log.error('Error while running cleanup function: %s'%e)
+					log.exception('Error while running cleanup function: ')
 			self.__cleanupFunctions = []
 		finally:
 			for process in self.processList:
