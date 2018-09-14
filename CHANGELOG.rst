@@ -73,6 +73,14 @@ New features
   `execute()` or `validate()` method, if it is not appropriate for the test to 
   execute on this platform/mode. 
 
+- Fixed bug in which symbols (classes, constants, imports) defined in one 
+  `run.py` could be seen by other run.py files, potentially causing test 
+  behaviour to vary based on what other tests had previously run, and/or 
+  race conditions seen only during parallel execution. Now every `run.py` file 
+  has its own independent namespace. It is possible some previously passing 
+  tests might fail as a result of this change, if they were relying on 
+  the buggy behaviour to implicitly import symbols. 
+
 
 Bug fixes
 ---------
