@@ -117,15 +117,10 @@ class ProcessWrapper(CommonProcessWrapper):
 
 
 	def __quotePath(self, input):
-		"""Private method to sanitise a windows path.
+		"""Private method to escape a windows path according to documented guidelines for this OS.
 		
 		"""
-		i = input
-		if i.find(' ') > 0:
-			return '\"%s\"' % i
-		else:
-			return i
-
+		return '\"%s\"'%input.replace('"', '""')
 
 	def startBackgroundProcess(self):
 		"""Method to start a process running in the background.

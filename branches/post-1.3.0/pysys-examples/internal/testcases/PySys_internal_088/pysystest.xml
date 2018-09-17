@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Process Module - argument escaping</title>    
+    <purpose><![CDATA[
+Tests that a variety of arguments containing special characters such as spaces can be passed correctly. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

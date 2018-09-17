@@ -52,6 +52,11 @@ What's new in this release
   has its own independent namespace. It is possible some previously passing 
   tests might fail as a result of this change, if they were relying on 
   the buggy behaviour. 
+- Fixed startProcess to correctly handle passing empty arguments, 
+  and arguments containing spaces, quotes and glob characters on Windows 
+  (PySys bug 16). Previously empty arguments were skipped, and arguments 
+  containing spaces were only handled correctly if first character was not 
+  a space. 
   
 
 Release History
