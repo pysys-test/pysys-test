@@ -100,6 +100,11 @@ Bug fixes
   prevent the test log being written to disk if executed in multi-threaded 
   mode. Only affects Python 2. 
 
+- Fixed startProcess to correctly handle passing empty arguments, 
+  and arguments containing spaces, quotes and glob characters on Windows. 
+  Previously, empty arguments were skipped, and arguments containing spaces 
+  were only handled correctly if first character was not a space. 
+
 - Fixed rare condition in which performance result reporting would be prevented 
   due to spurious error about `resultKey` already being used. 
   
