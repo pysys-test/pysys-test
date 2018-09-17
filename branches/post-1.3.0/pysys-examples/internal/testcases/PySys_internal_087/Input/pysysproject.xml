@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<property name="verboseWaitForSignal" value="true"/>
+	<property name="defaultAbortOnError" value="true"/>
+	
+</pysysproject>
