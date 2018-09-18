@@ -316,73 +316,75 @@ class BaseRunner(ProcessUser):
 		# cycleComplete reliably
 		concurrentcycles = type(self).cycleComplete == BaseRunner.cycleComplete
 		
-		for cycle in range(self.cycle):
-			# loop through tests for the cycle
-			try:
-				self.results[cycle] = {}
-				for outcome in PRECEDENT: self.results[cycle][outcome] = []
-		
-				for descriptor in self.descriptors:
-					container = TestContainer(descriptor, cycle, self)
-					if self.threads > 1:
-						request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
-						threadPool.putRequest(request)
-					else:
-						self.containerCallback(threading.current_thread().ident, container())
-			except KeyboardInterrupt:
-				log.info("test interrupt from keyboard")
-				self.handleKbrdInt()
-			
-			if not concurrentcycles:
-				if self.threads > 1: 
-					try:
-						threadPool.wait()
-					except KeyboardInterrupt:
-						log.info("test interrupt from keyboard - joining threads ... ")
-						threadPool.dismissWorkers(self.threads, True)
-						self.handleKbrdInt(prompt=False)
-	
-				# call the hook for end of cycle if one has been provided
+		try:
+			for cycle in range(self.cycle):
+				# loop through tests for the cycle
 				try:
-					self.cycleComplete()
+					self.results[cycle] = {}
+					for outcome in PRECEDENT: self.results[cycle][outcome] = []
+			
+					for descriptor in self.descriptors:
+						container = TestContainer(descriptor, cycle, self)
+						if self.threads > 1:
+							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
+							threadPool.putRequest(request)
+						else:
+							self.containerCallback(threading.current_thread().ident, container())
 				except KeyboardInterrupt:
 					log.info("test interrupt from keyboard")
 					self.handleKbrdInt()
-				except:
-					log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
-		# wait for the threads to complete if more than one thread	
-		if self.threads > 1: 
+				
+				if not concurrentcycles:
+					if self.threads > 1: 
+						try:
+							threadPool.wait()
+						except KeyboardInterrupt:
+							log.info("test interrupt from keyboard - joining threads ... ")
+							threadPool.dismissWorkers(self.threads, True)
+							self.handleKbrdInt(prompt=False)
+		
+					# call the hook for end of cycle if one has been provided
+					try:
+						self.cycleComplete()
+					except KeyboardInterrupt:
+						log.info("test interrupt from keyboard")
+						self.handleKbrdInt()
+					except:
+						log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+	
+			# wait for the threads to complete if more than one thread	
+			if self.threads > 1: 
+				try:
+					# this is the method that invokes containerCallback and containerExceptionCallback
+					threadPool.wait()
+				except KeyboardInterrupt:
+					log.info("test interrupt from keyboard - joining threads ... ")
+					threadPool.dismissWorkers(self.threads, True)
+					self.handleKbrdInt(prompt=False)
+			
+			# perform cleanup on the test writers - this also takes care of logging summary results
+			for writer in self.writers:
+				try: writer.cleanup()
+				except Exception as ex: 
+					log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+					# might stop results being completely displayed to user
+					fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
+			del self.writers[:]
+	
+			# perform clean on the performance reporters
+			for perfreporter in self.performanceReporters:
+					try: perfreporter.cleanup()
+					except Exception as e: 
+						log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
+		
+		finally:
+			# call the hook to cleanup after running tests
 			try:
-				# this is the method that invokes containerCallback and containerExceptionCallback
-				threadPool.wait()
-			except KeyboardInterrupt:
-				log.info("test interrupt from keyboard - joining threads ... ")
-				threadPool.dismissWorkers(self.threads, True)
-				self.handleKbrdInt(prompt=False)
-		
-		# perform cleanup on the test writers - this also takes care of logging summary results
-		for writer in self.writers:
-			try: writer.cleanup()
-			except Exception as ex: 
-				log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
-				# might stop results being completely displayed to user
-				fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
-		del self.writers[:]
-
-		# perform clean on the performance reporters
-		for perfreporter in self.performanceReporters:
-				try: perfreporter.cleanup()
-				except Exception as e: 
-					log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-					fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
-		
-		# call the hook to cleanup after running tests
-		try:
-			self.cleanup()
-		except Exception as ex:
-			log.warn("caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			fatalerrors.append('Failed to cleanup runner: %s'%(ex))
+				self.cleanup()
+			except Exception as ex:
+				log.warn("caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 		
 		if fatalerrors:
 			# these are so serious we need to make sure the user notices
