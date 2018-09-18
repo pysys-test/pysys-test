@@ -551,6 +551,7 @@ def runTest(args):
 		sys.exit(0)
 	except Exception as e:
 		sys.stderr.write('\nWARN: %s\n' % e)
+		traceback.print_exc()
 		sys.exit(-1)
 
 def printTest(args):
