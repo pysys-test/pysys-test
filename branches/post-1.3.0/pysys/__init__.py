@@ -46,10 +46,10 @@ __author__  = "Moray Grieve"
 __author_email__ = "moraygrieve@users.sourceforge.net"
 """The author's email address."""
 
-__status__  = "Production"
+__status__  = "BETA"
 """The status of this release."""
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 """The version of this release."""
 
 __date__ = "13-July-2018"
