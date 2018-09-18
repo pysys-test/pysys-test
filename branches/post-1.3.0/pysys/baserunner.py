@@ -299,13 +299,15 @@ class BaseRunner(ProcessUser):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads)
 			except Exception: 
 				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
-				self.writers.remove(writer) # if setup fails, nothing else is going to work
-
+				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
+				
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
 
 		# loop through each cycle
 		self.startTime = time.time()
+		
+		fatalerrors = []
 		
 		# by default we allow running tests from different cycles in parallel, 
 		# but if the user provided a runner with a cycleComplete that actually 
@@ -362,16 +364,29 @@ class BaseRunner(ProcessUser):
 		# perform cleanup on the test writers - this also takes care of logging summary results
 		for writer in self.writers:
 			try: writer.cleanup()
-			except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+			except Exception as ex: 
+				log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				# might stop results being completely displayed to user
+				fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
 		del self.writers[:]
 
 		# perform clean on the performance reporters
 		for perfreporter in self.performanceReporters:
 				try: perfreporter.cleanup()
-				except Exception as e: log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-
+				except Exception as e: 
+					log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
+		
 		# call the hook to cleanup after running tests
-		self.cleanup()
+		try:
+			self.cleanup()
+		except Exception as ex:
+			log.warn("caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			fatalerrors.append('Failed to cleanup runner: %s'%(ex))
+		
+		if fatalerrors:
+			# these are so serious we need to make sure the user notices
+			raise Exception('Test runner encountered fatal problems: %s'%'; '.join(fatalerrors))
 
 		# return the results dictionary
 		return self.results
@@ -393,12 +408,21 @@ class BaseRunner(ProcessUser):
 		"""
 		self.__remainingTests -= 1
 		
+		errors = []
+		
 		if self.threads > 1: 
-			# write out cached messages from the worker thread
-			bufferedoutput = container.testFileHandlerStdout.stream.getvalue()
-			# in python2, stdout expects bytes, and bufferedoutput could be bytes or chars; in py3 everything is chars
-			if PY2 and isinstance(bufferedoutput, unicode): bufferedoutput = bufferedoutput.encode(locale.getpreferredencoding(), errors='replace')
-			sys.stdout.write(bufferedoutput)
+			try:
+				# write out cached messages from the worker thread
+				bufferedoutput = container.testFileHandlerStdout.stream.getvalue()
+				# in python2, stdout expects bytes, and bufferedoutput could be bytes or chars; in py3 everything is chars
+				if PY2 and isinstance(bufferedoutput, unicode): bufferedoutput = bufferedoutput.encode(locale.getpreferredencoding(), errors='replace')
+				sys.stdout.write(bufferedoutput)
+			except Exception as ex:
+				# first write a simple message without any unusual characters, in case nothing else can be printed
+				sys.stdout.write('ERROR - failed to write buffered test output for %s\n'%container.descriptor.id)
+				errors.append('Failed to write buffered test output')
+				log.exception("Failed to write buffered test output for %s: "%container.descriptor.id)
+				
 		if stdoutHandler.level >= logging.WARN:
 			log.critical("%s: %s (%s)", LOOKUP[container.testObj.getOutcome()], container.descriptor.id, container.descriptor.title)
 		
@@ -409,7 +433,9 @@ class BaseRunner(ProcessUser):
 		for writer in self.writers:
 			try: writer.processResult(container.testObj, cycle=container.cycle,
 									  testStart=container.testStart, testTime=container.testTime)
-			except Exception: log.warn("caught %s processing test result by %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+			except Exception as ex: 
+				log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], container.descriptor.id, writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				errors.append('Failed to record test result using writer %s: %s'%(repr(writer), ex))
 		
 		# prompt for continuation on control-C
 		if container.kbrdInt == True: self.handleKbrdInt()
@@ -417,6 +443,9 @@ class BaseRunner(ProcessUser):
 		# store the result
 		self.duration = self.duration + container.testTime
 		self.results[container.cycle][container.testObj.getOutcome()].append(container.descriptor.id)
+		
+		if errors:
+			raise Exception('Failed to process results from %s: %s'%(container.descriptor.id, '; '.join(errors)))
 		
 
 	def containerExceptionCallback(self, thread, exc_info):
