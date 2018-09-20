@@ -410,6 +410,10 @@ class ProcessUser(object):
 		the C{condition} argument in textual form i.e. for a match on more than 2 lines use condition =\">2\".
 		If the regular expression is not seen in the file matching the supplied condition within the 
 		specified timeout interval, the method returns to the caller.
+		
+		Example:
+		self.waitForSignal('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
+			errorExpr=[' ERROR ', ' FATAL '], encoding='utf-8')
 
 		@param file: The absolute or relative name of the file used to wait for the signal
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
@@ -429,6 +433,8 @@ class ProcessUser(object):
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 
 		"""
+		assert expr, 'expr= argument must be specified when calling waitForSignal'
+		
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
