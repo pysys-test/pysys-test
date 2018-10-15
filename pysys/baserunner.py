@@ -472,8 +472,11 @@ class BaseRunner(ProcessUser):
 				try: writer.cleanup()
 				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 			del self.writers[:]
-			self.cycleComplete()
-			self.cleanup()
+			try:
+				self.cycleComplete()
+				self.cleanup()
+			except Exception: 
+				log.warn("caught %s cleaning up runner after interrupt %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 			sys.exit(1)
 
 		try:
