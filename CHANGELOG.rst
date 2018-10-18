@@ -84,6 +84,15 @@ New features
 - Outcome reason now has a suffix specifying how many additional failure 
   outcomes were logged (so if you have a complex test you can see at a glance 
   if there's just one problem to resolve, or 5, or 20!).
+- Added support for configuring the default encodings to use for common file 
+  patterns in the pysysproject.xml configuration, e.g. 
+  <default-file-encoding pattern="*.yaml" encoding="utf-8"/>. The 
+  pysys-examples/pysysproject.xml sample project configuration file now 
+  sets utf-8 as the default encoding for XML, json and yaml files - see 
+  comments there and in ProcessUser.getDefaultFileEncoding() for more details.
+- The default implementation of BaseTest.getDefaultFileEncoding() now delegates 
+  to the runner's implementation, allowing customizations to be performed 
+  in just one place if desired. 
 
 - Added `runLogOutput=` parameter to the `processResult()` method of 
   the `BaseResultsWriter` API so that writers such as the 

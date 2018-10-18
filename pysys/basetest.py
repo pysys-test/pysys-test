@@ -715,3 +715,15 @@ class BaseTest(ProcessUser):
 		"""
 		for p in self.runner.performanceReporters:
 			p.reportResult(self, value, resultKey, unit, toleranceStdDevs=toleranceStdDevs, resultDetails=resultDetails)
+			
+	def getDefaultFileEncoding(self, file, **xargs):
+		"""
+		Specifies what encoding should be used to read or write the specified 
+		text file. The default implementation for BaseTest delegates to the 
+		runner, which in turn gets its defaults from the pysyproject.xml 
+		configuration. 
+		
+		See L{pysys.process.ProcessUser.getDefaultFileEncoding} for more details.
+		"""
+		return self.runner.getDefaultFileEncoding(file, **xargs)
+		
