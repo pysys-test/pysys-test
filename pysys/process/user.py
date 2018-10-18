@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import time, collections, inspect, locale
+import time, collections, inspect, locale, fnmatch
 
 from pysys import log, process_lock
 from pysys.constants import *
@@ -832,6 +832,10 @@ class ProcessUser(object):
 		For example, this method could be overridden to specify that utf-8 encoding 
 		is to be used for opening filenames ending in .xml, .json and .yaml. 
 		
+		The default implementation of this method uses pysysproject.xml 
+		configuration rules such as 
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		
 		A return value of None indicates default behaviour, which on Python 3 is to 
 		use the default encoding, as specified by python's 
 		locale.getpreferredencoding(), and on Python 2 is to use binary "str" 
@@ -846,5 +850,10 @@ class ProcessUser(object):
 		@return: The encoding to use for this file, or None if default behaviour is 
 		to be used.
 		"""
+		file = file.replace('\\','/').lower() # normalize slashes and ignore case
+		for e in self.project.defaultFileEncodings:
+			# first match wins
+			if fnmatch.fnmatchcase(file, e['pattern'].lower()) or fnmatch.fnmatchcase(os.path.basename(file), e['pattern'].lower()):
+				return e['encoding']
 		return None
 	
