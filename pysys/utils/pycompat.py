@@ -18,12 +18,14 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 """
-	pycompat is a small PySys module containing a minimal set of utilities for 
-	writing single-source Python that runs in multiple python versions, for 
-	example both Python 2 and Python 3. 
+pycompat is a small PySys module containing a minimal set of utilities for 
+writing single-source Python that runs in multiple python versions, for 
+example both Python 2 and Python 3. 
+
+@undocumented: _UnicodeSafeStreamWrapper
 """
 
-import sys, os, io
+import sys, os, io, locale
 
 PY2 = sys.version_info[0] == 2
 
@@ -95,3 +97,60 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 		if encoding: assert 'b' not in mode, 'cannot open file %s with binary mode %s as an encoding was specified'%(path, mode)
 		return io.open(path, mode=mode, encoding=encoding, errors=errors, **kwargs)
 	return open(path, mode=mode, **kwargs)
+
+class _UnicodeSafeStreamWrapper(object):
+	"""
+	Non-public API - for internal use only, may change at any time. 
+	
+	Wraps a stream, forwarding calls to flush()/close() and ensuring all 
+	write() calls are forwarded with either unicode or byte strings 
+	(depending on the writebytes argument) but not a mixture, with conversions 
+	performed safely replacing invalid characters rather than generating exceptions. 
+	
+	There is no __del__ implementation to automatically close the stream, 
+	to faciliate having multiple wrappers using the same underlying stream. 
+	"""
+	def __init__(self, underlying, writebytes, encoding=None):
+		"""
+		@param underlying: the underlying stream. May optionally have an "encoding" field. 
+		@param writebytes: if True, bytes are written, if False unicode characters are written. 
+		@param encoding: encoding which all written bytes/chars are guaranteed to be present in; 
+		if None, will be taken from underlying encoding or getpreferredencoding(). 
+		"""
+		self.stream = underlying
+		# on python 2 stdout.encoding=None if redirected, and falling back on getpreferredencoding is the best we can do
+		self.__encoding = encoding or getattr(underlying, 'encoding', None) or locale.getpreferredencoding()
+		assert self.__encoding
+		self.__writebytes = writebytes
+		#self.write('ENCODING=%s underlying=%s wrapped=%s\n'%(self.__encoding, getattr(underlying, 'encoding', None), underlying))
+	
+	def write(self, s):
+		if not s: return
+		if self.__writebytes:
+			if isinstance(s, binary_type):
+				self.stream.write(s) # always safe in python 2 and not supported in python 3
+			else:
+				self.stream.write(s.encode(self.__encoding, errors='replace'))
+		else:
+			if isinstance(s, binary_type):
+				s = s.decode(self.__encoding, errors='replace')
+			# even if it's already a unicode string it could contain characters that aren't supported in this encoding 
+			# (e.g. unicode replacement characters - such as the decode above generates - aren't supported by ascii); 
+			# so check it round-trips
+			s = s.encode(self.__encoding, errors='replace')
+			s = s.decode(self.__encoding, errors='replace')
+			self.stream.write(s)
+				
+	def flush(self): 
+		if self.stream is None: return
+		self.stream.flush()
+	
+	def close(self): 
+		"""
+		Flush and close the stream, and prevent any more writes to it. 
+		This method is idempotent. 
+		"""
+		if self.stream is None: return
+		self.stream.flush()
+		self.stream.close()
+		self.stream = None

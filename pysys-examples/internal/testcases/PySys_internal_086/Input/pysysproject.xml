@@ -1,0 +1,43 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<property name="verboseWaitForSignal" value="true"/>
+	<property name="defaultAbortOnError" value="true"/>
+
+	<writers>
+		<writer classname="XMLResultsWriter" module="pysys.writer" file="xmlresults.xml">
+			<property name="outputDir" value="${root}/${env.TEST_RUNID}"/>
+			<property name="useFileURL" value="true"/>
+		</writer>	
+
+		<writer classname="TextResultsWriter" module="pysys.writer" file="textresults.txt">
+			<property name="outputDir" value="${root}/${env.TEST_RUNID}"/>
+		</writer>
+
+		<writer classname="CSVResultsWriter" module="pysys.writer" file="csvresults.csv">
+			<property name="outputDir" value="${root}/${env.TEST_RUNID}"/>
+		</writer>
+
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${root}/${env.TEST_RUNID}/junitresults"/>
+		</writer>
+
+		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+			<property name="showOutcomeReason" value="true"/>
+			<property name="showOutputDir" value="true"/>
+		</writer>
+		
+	</writers>		
+	
+	<path value="${root}/test"/>
+	
+	<formatters>
+		<formatter name="stdout" classname="mypkg.customfmt.CustomFormatter"/>
+	</formatters>
+<!--
+	<runner classname="MyCustomRunner" module="mypkg.customrunner"/>
+-->
+</pysysproject>
