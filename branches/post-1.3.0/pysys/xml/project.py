@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os.path, logging, xml.dom.minidom, collections
+import os.path, logging, xml.dom.minidom, collections, codecs
 
 from pysys.constants import *
 from pysys import __version__
@@ -27,7 +27,7 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, formatters?, performance-reporter?) >
+<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?) >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requires-python (#PCDATA)>
@@ -35,6 +35,7 @@ DTD='''
 <!ELEMENT runner (#PCDATA)>
 <!ELEMENT performance-reporter (property*)>
 <!ELEMENT maker (#PCDATA)>
+<!ELEMENT default-file-encodings (default-file-encoding+) >
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (property*) >
 <!ELEMENT writers (writer+) >
@@ -63,6 +64,8 @@ DTD='''
 <!ATTLIST writer classname CDATA #REQUIRED>
 <!ATTLIST writer module CDATA #REQUIRED>
 <!ATTLIST writer file CDATA #IMPLIED>
+<!ATTLIST default-file-encoding pattern CDATA #REQUIRED>
+<!ATTLIST default-file-encoding encoding CDATA #REQUIRED>
 ]>
 '''
 
@@ -240,6 +243,18 @@ class XMLProjectParser(object):
 					runlog = cls(options)
 		return stdout, runlog
 
+	def getDefaultFileEncodings(self):
+		result = []
+		for n in self.root.getElementsByTagName('default-file-encoding'):
+			pattern = (n.getAttribute('pattern') or '').strip().replace('\\','/')
+			encoding = (n.getAttribute('encoding') or '').strip()
+			if not pattern: raise Exception('<default-file-encoding> element must include both a pattern= attribute')
+			if encoding: 
+				codecs.lookup(encoding) # give an exception if an invalid encoding is specified
+			else:
+				encoding=None
+			result.append({'pattern':pattern, 'encoding':encoding})
+		return result
 
 	def getWriterDetails(self):
 		writersNodeList = self.root.getElementsByTagName('writers')
@@ -348,6 +363,7 @@ class Project(object):
 		self.makerClassname, self.makerModule = DEFAULT_MAKER
 		self.writers = [DEFAULT_WRITER]
 		self.perfReporterConfig = None
+		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
 
 		stdoutformatter, runlogformatter = None, None
 
@@ -384,6 +400,8 @@ class Project(object):
 
 				# get the stdout and runlog formatters
 				stdoutformatter, runlogformatter = parser.createFormatters()
+				
+				self.defaultFileEncodings = parser.getDefaultFileEncodings()
 				
 				# set the data attributes
 				parser.unlink()
