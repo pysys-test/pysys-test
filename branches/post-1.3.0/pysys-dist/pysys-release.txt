@@ -76,8 +76,10 @@ What's new in this release
   patterns in the pysysproject.xml configuration, e.g. 
   <default-file-encoding pattern="*.yaml" encoding="utf-8"/>. The 
   pysys-examples/pysysproject.xml sample project configuration file now 
-  sets utf-8 as the default encoding for XML, json and yaml files - see 
-  comments there and in ProcessUser.getDefaultFileEncoding() for more details.
+  sets utf-8 as the default encoding for XML, json and yaml files, and also 
+  for testcase run.log files (though run.log continues to be written in local encoding 
+  unless the project file is updated). For more information on this feature, 
+  see comments in pysysproject.xml and in ProcessUser.getDefaultFileEncoding().
 - The default implementation of BaseTest.getDefaultFileEncoding() now delegates 
   to the runner's implementation, allowing customizations to be performed 
   in just one place if desired. 

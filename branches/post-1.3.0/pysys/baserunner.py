@@ -566,9 +566,10 @@ class TestContainer(object):
 			mkdir(self.outsubdir)
 
 			# run.log handler
+			runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or locale.getpreferredencoding()
 			self.testFileHandlerRunLog = ThreadedStreamHandler(_UnicodeSafeStreamWrapper(
-				io.open(os.path.join(self.outsubdir, 'run.log'), 'a', encoding=locale.getpreferredencoding()), 
-				writebytes=False, encoding=locale.getpreferredencoding()))
+				io.open(os.path.join(self.outsubdir, 'run.log'), 'a', encoding=runLogEncoding), 
+				writebytes=False, encoding=runLogEncoding))
 			self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
 			self.testFileHandlerRunLog.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
