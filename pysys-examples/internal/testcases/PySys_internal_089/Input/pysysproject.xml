@@ -8,6 +8,8 @@
 	<property name="defaultAbortOnError" value="true"/>
 
 	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
 		<default-file-encoding pattern="*.default" encoding=""/>
 		<!-- check that first match wins-->
 		<default-file-encoding pattern="mydir/*somefile.LOG" encoding="cp775"/>

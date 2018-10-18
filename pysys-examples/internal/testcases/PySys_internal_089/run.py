@@ -32,9 +32,13 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='Path somefile.log encoding=euc_jp')
 		self.assertGrep('pysys.out', expr='Path mydir.FILE2.log encoding=iso8859_2') # case insensitivity (want same behaviour on all platforms)
 		self.assertGrep('pysys.out', expr='Path file3.log encoding=euc_kr')
-		self.assertGrep('pysys.out', expr='Path run.log encoding=euc_kr')
+		self.assertGrep('pysys.out', expr='Path run.log encoding=utf-8')
 		self.assertGrep('pysys.out', expr='file4.log encoding=euc_kr')
 		self.assertGrep('pysys.out', expr='file5.log encoding=euc_kr')
+
+		# a unicode string; contains chars that are not representable in iso8859-1
+		utf8teststring = b'utf8_European\\xe1\\xc1x\\xdf_Katakana\\uff89\\uff81\\uff90\\uff81\\uff7f\\uff78\\uff81\\uff7d\\uff81\\uff7f\\uff76\\uff72\\uff7d\\uff84_Hiragana\\u65e5\\u672c\\u8a9e_Symbols\\u2620\\u2622\\u2603_abc123@#\\xa3!~=\\xa3x'.decode('unicode_escape')
+		self.assertGrep('myoutdir/NestedTest/run.log', expr=u'Some i18n characters that only show up in run.log if utf-8: %s'%utf8teststring, encoding='utf-8')
 		
 		self.log.info('')
 		self.log.info('Checking pysys-examples project defaults:')
@@ -44,3 +48,5 @@ class PySysTest(BaseTest):
 		self.assertThat('self.getDefaultFileEncoding(%s) == %s', repr("foo.json"), repr('utf-8'))
 		self.assertThat('self.getDefaultFileEncoding(%s) == %s', repr("foo.whatever"), repr(None))
 		self.assertThat('self.getDefaultFileEncoding(%s) == %s', repr("foo.log"), repr(None))
+
+		self.assertThat('self.getDefaultFileEncoding(%s) == %s', repr("run.log"), repr('utf-8'))

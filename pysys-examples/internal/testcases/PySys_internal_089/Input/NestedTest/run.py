@@ -23,6 +23,10 @@ class PySysTest(BaseTest):
 		
 		
 		assert self.getDefaultFileEncoding('file3.log') == self.runner.getDefaultFileEncoding('file3.log')
+		
+		utf8teststring = b'utf8_European\\xe1\\xc1x\\xdf_Katakana\\uff89\\uff81\\uff90\\uff81\\uff7f\\uff78\\uff81\\uff7d\\uff81\\uff7f\\uff76\\uff72\\uff7d\\uff84_Hiragana\\u65e5\\u672c\\u8a9e_Symbols\\u2620\\u2622\\u2603_abc123@#\\xa3!~=\\xa3x'.decode('unicode_escape')
+		self.log.info(u'Some i18n characters that only show up in run.log if utf-8: %s', utf8teststring)
+
 		self.addOutcome(PASSED)
 
 	def validate(self):
