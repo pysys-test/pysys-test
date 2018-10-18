@@ -28,6 +28,7 @@ API documentation.
 """
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale
+
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
 else:
@@ -38,7 +39,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
-from pysys.utils.fileutils import mkdir
+from pysys.utils.fileutils import mkdir, deletedir
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
@@ -222,11 +223,12 @@ class BaseRunner(ProcessUser):
 							os.remove(path)
 							break
 						except Exception:
+							#if not os.path.exists(path): break
 							time.sleep(0.1)
 							count = count + 1
 
 		except OSError as ex:
-			log.warning("Caught OSError while cleaning output directory:")
+			log.warning("Caught OSError while cleaning output directory after test completed:")
 			log.warning(ex)
 			log.warning("Output directory may not be completely clean")
 
@@ -544,21 +546,19 @@ class TestContainer(object):
 			else:
 				self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
 
-			mkdir(self.outsubdir)
-
 			if not self.runner.validateOnly: 
 				if self.runner.cycle <= 1: 
-					self.purgeDirectory(self.outsubdir)
+					deletedir(self.outsubdir)
 				else:
 					# must use lock to avoid deleting the parent dir after we've started creating outdirs for some cycles
 					with global_lock:
 						if self.outsubdir not in TestContainer.__purgedOutputDirs:
-							self.purgeDirectory(self.outsubdir)
+							deletedir(self.outsubdir)
 							TestContainer.__purgedOutputDirs.add(self.outsubdir)
 			
 			if self.runner.cycle > 1: 
 				self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
-				mkdir(self.outsubdir)
+			mkdir(self.outsubdir)
 
 			# run.log handler
 			self.testFileHandlerRunLog = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
@@ -685,6 +685,7 @@ class TestContainer(object):
 		@param dir: The top level directory to be purged
 		@param delTop: Indicates if the top level directory should also be deleted
 
+		@deprecated: Use L{fileutils.deletedir} instead. 
 		"""
 		try:
 			for file in os.listdir(dir):

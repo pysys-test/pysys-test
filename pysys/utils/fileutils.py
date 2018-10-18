@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os
+import os, shutil
 
 def mkdir(path):
 	"""
@@ -31,3 +31,15 @@ def mkdir(path):
 	except OSError as e:
 		if not os.path.isdir(path):
 			raise e
+
+def deletedir(path):
+	"""
+	Recursively delete the specified directory. 
+	
+	Does nothing if it does not exist. Raises an exception if the deletion fails. 
+	"""
+	try:
+		shutil.rmtree(path)
+	except Exception:
+		if not os.path.exists(path): return # nothing to do
+		raise
