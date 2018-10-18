@@ -85,6 +85,11 @@ New features
   outcomes were logged (so if you have a complex test you can see at a glance 
   if there's just one problem to resolve, or 5, or 20!).
 
+- Added `runLogOutput=` parameter to the `processResult()` method of 
+  the `BaseResultsWriter` API so that writers such as the 
+  `JUnitXMLResultsWriter` can include the test output with no loss of unicode 
+  character information. 
+
 
 Bug fixes
 ---------
@@ -121,6 +126,15 @@ Bug fixes
   previous versions were probably not correct, as they only measured CPU for 
   the threads that existed when the process monitor was started).
 
+- Significant improvements to robustness when testing support for international 
+  (I18N) characters. This includes implementing fully safe logging of unicode 
+  strings (with `?` replacements for any unsupported characters) that works 
+  regardless of what encoding is in use for stdout and `run.log`. Also fixed 
+  exception when logging unicode characters in Python 2 if a formatter was not 
+  configured in `pysysproject.xml`, by ensuring it is always stored as a 
+  unicode character string not a byte string (which used to happen in Python 2 
+  if it was not mentioned in the project config). Fixed `logFileContents` to 
+  more robustly handle files containing I18N/non-ASCII characters. 
 
 ---------------
 Release History

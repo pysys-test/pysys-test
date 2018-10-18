@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import time, collections, inspect
+import time, collections, inspect, locale
 
 from pysys import log, process_lock
 from pysys.constants import *
@@ -758,7 +758,8 @@ class ProcessUser(object):
 		if not path: return False
 		actualpath= os.path.join(self.output, path)
 		try:
-			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath), errors='replace')
+			# always open with a specific encoding not in bytes mode, since otherwise we can't reliably pass the read lines to the logger
+			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath) or locale.getpreferredencoding(), errors='replace')
 		except Exception as e:
 			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False
@@ -795,9 +796,9 @@ class ProcessUser(object):
 			return False
 			
 		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
-		self.log.info('Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
+		self.log.info(u'Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
-			self.log.info('  %s', l, extra=logextra)
+			self.log.info(u'  %s'%(l), extra=logextra)
 		self.log.info('  -----', extra=logextra)
 		self.log.info('', extra=logextra)
 		return True

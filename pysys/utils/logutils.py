@@ -67,7 +67,7 @@ class BaseLogFormatter(logging.Formatter):
 		super(BaseLogFormatter, self).__init__(
 			propertiesDict.pop('messagefmt', DEFAULT_FORMAT),
 			propertiesDict.pop('datefmt', None) )
-		
+		assert not isinstance(self._fmt, binary_type), 'message format must be a unicode not a byte string otherwise % arg formatting will not work consistently'
 		if propertiesDict: raise Exception('Unknown formatter option(s) specified: %s'%', '.join(list(propertiesDict.keys())))
 
 
@@ -227,10 +227,11 @@ class ColorLogFormatter(BaseLogFormatter):
 			try:
 				import colorama
 				colorama.init()
+				logging.getLogger('pysys.utils.logutils').debug('Successfully initialized the coloring library')
 			except Exception as e:
 				logging.getLogger('pysys.utils.logutils').debug('Failed to load coloring library: %s', repr(e))
 			
 		# since sys.stdout may be been redirected using the above, we need to change the 
 		# stream that our handler points at
-		assert stdoutHandler.stream
-		stdoutHandler.stream = sys.stdout
+		stdoutHandler._updateUnderlyingStream()
+
