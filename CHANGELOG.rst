@@ -81,6 +81,10 @@ New features
   tests might fail as a result of this change, if they were relying on 
   the buggy behaviour to implicitly import symbols. 
 
+- Outcome reason now has a suffix specifying how many additional failure 
+  outcomes were logged (so if you have a complex test you can see at a glance 
+  if there's just one problem to resolve, or 5, or 20!).
+
 
 Bug fixes
 ---------
