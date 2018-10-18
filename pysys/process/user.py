@@ -644,6 +644,8 @@ class ProcessUser(object):
 		@rtype:  string
 
 		"""	
+		fails = len([o for o in self.outcome if o in FAILS])
+		if fails > 1: return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
 		return self.__outcomeReason
 
 
