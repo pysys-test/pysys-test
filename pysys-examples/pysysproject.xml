@@ -232,6 +232,8 @@
 		method. See pysys.process.ProcessUser.getDefaultFileEncoding for more details. 
 		
 		-->
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
 		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
 		<default-file-encoding pattern="*.json" encoding="utf-8"/>
 		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
