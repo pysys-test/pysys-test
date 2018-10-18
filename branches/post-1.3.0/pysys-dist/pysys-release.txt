@@ -69,7 +69,9 @@ What's new in this release
 - Added runLogOutput parameter to the processResult() method of 
   the BaseResultsWriter API so that writers such as the JUnitXMLResultsWriter 
   can include the test output with no loss of unicode character information. 
-
+- Outcome reason now has a suffix specifying how many additional failure 
+  outcomes were logged (so if you have a complex test you can see at a glance 
+  if there's just one problem to resolve, or 5, or 20!).
 
 Release History
 ---------------
