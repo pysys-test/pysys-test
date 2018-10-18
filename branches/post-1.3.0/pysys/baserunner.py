@@ -27,7 +27,7 @@ API documentation.
 
 """
 from __future__ import print_function
-import os.path, stat, math, logging, textwrap, sys, locale
+import os.path, stat, math, logging, textwrap, sys, locale, io
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
 else:
@@ -43,6 +43,8 @@ from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.pycompat import *
+from pysys.utils.pycompat import _UnicodeSafeStreamWrapper
+
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
 global_lock = threading.Lock()
@@ -412,13 +414,13 @@ class BaseRunner(ProcessUser):
 		
 		errors = []
 		
+		bufferedoutput = container.testFileHandlerStdoutBuffer.getvalue()
+
 		if self.threads > 1: 
 			try:
 				# write out cached messages from the worker thread
-				bufferedoutput = container.testFileHandlerStdout.stream.getvalue()
-				# in python2, stdout expects bytes, and bufferedoutput could be bytes or chars; in py3 everything is chars
-				if PY2 and isinstance(bufferedoutput, unicode): bufferedoutput = bufferedoutput.encode(locale.getpreferredencoding(), errors='replace')
-				sys.stdout.write(bufferedoutput)
+				_UnicodeSafeStreamWrapper(sys.stdout, writebytes=PY2).write(bufferedoutput)
+				
 			except Exception as ex:
 				# first write a simple message without any unusual characters, in case nothing else can be printed
 				sys.stdout.write('ERROR - failed to write buffered test output for %s\n'%container.descriptor.id)
@@ -433,8 +435,9 @@ class BaseRunner(ProcessUser):
 				
 		# pass the test object to the test writers is recording
 		for writer in self.writers:
-			try: writer.processResult(container.testObj, cycle=container.cycle,
-									  testStart=container.testStart, testTime=container.testTime)
+			try: 
+				writer.processResult(container.testObj, cycle=container.cycle,
+									  testStart=container.testStart, testTime=container.testTime, runLogOutput=bufferedoutput)
 			except Exception as ex: 
 				log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], container.descriptor.id, writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 				errors.append('Failed to record test result using writer %s: %s'%(repr(writer), ex))
@@ -520,6 +523,7 @@ class TestContainer(object):
 		self.testBuffer = []
 		self.testFileHandlerRunLog = None
 		self.testFileHandlerStdout = None
+		self.testFileHandlerStdoutBuffer = StringIO() # unicode characters written to the output for this testcase
 		self.kbrdInt = False
 
 		
@@ -533,7 +537,9 @@ class TestContainer(object):
 		self.testStart = time.time()
 		try:
 			# stdout - set this up right at the very beginning to ensure we can see the log output in case any later step fails
-			self.testFileHandlerStdout = ThreadedStreamHandler(StringIO())
+			# here we use UnicodeSafeStreamWrapper to ensure we get a buffer of unicode characters (mixing chars+bytes leads to exceptions), 
+			# from any supported character (utf-8 being pretty much a superset of all encodings)
+			self.testFileHandlerStdout = ThreadedStreamHandler(_UnicodeSafeStreamWrapper(self.testFileHandlerStdoutBuffer, writebytes=False, encoding='utf-8'))
 			self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
 			self.testFileHandlerStdout.setLevel(stdoutHandler.level)
 			log.addHandler(self.testFileHandlerStdout)
@@ -561,7 +567,9 @@ class TestContainer(object):
 				mkdir(self.outsubdir)
 
 			# run.log handler
-			self.testFileHandlerRunLog = ThreadedFileHandler(os.path.join(self.outsubdir, 'run.log'))
+			self.testFileHandlerRunLog = ThreadedStreamHandler(_UnicodeSafeStreamWrapper(
+				io.open(os.path.join(self.outsubdir, 'run.log'), 'a', encoding=locale.getpreferredencoding()), 
+				writebytes=False, encoding=locale.getpreferredencoding()))
 			self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
 			self.testFileHandlerRunLog.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
@@ -671,6 +679,7 @@ class TestContainer(object):
 			self.testFileHandlerRunLog.close()
 			log.removeHandler(self.testFileHandlerRunLog)
 			log.removeHandler(self.testFileHandlerStdout)
+			self.testFileHandlerRunLog.stream.close()
 		except Exception: 
 			pass
 		

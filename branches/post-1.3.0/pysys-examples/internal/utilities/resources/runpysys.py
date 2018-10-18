@@ -6,7 +6,9 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 	args = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0])] + args
 	env = dict(environs or {})
 	for k in os.environ: 
-		if not k.startswith('PYSYS_'): env[k] = os.environ[k]
+		if k not in env and not k.startswith('PYSYS_'): env[k] = os.environ[k]
+	for k in list(env.keys()):
+		if env[k] == None: env.pop(k)
 	pypath = os.path.dirname(sys.executable)
 	if not env.get('PATH','').startswith(pypath+os.pathsep):
 		# whatever python we're using, make sure it's on path, otherwise in some cases child pythons don't have sys.executable set
@@ -20,7 +22,6 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		# output for child processes; otherwise we'd only get coverage for things 
 		# that can be tested using the top-level pysys invocation
 		args = ['-m', 'coverage', 'run', '--parallel-mode']+args
-		
 	return processowner.startProcess(command=sys.executable,
 		arguments = args,
 		environs = env, ignoreExitStatus=ignoreExitStatus, abortOnError=abortOnError, 

@@ -36,6 +36,7 @@ can be written to make use of a manual test user interface (L{pysys.manual.ui.Ma
 execute the test to be presented to a tester in a concise and navigable manner. The tight integration of both manual and automated 
 testcases provides a single framework for all test organisation requirements. 
 
+@undocumented: ThreadedStreamHandler, ThreadedFileHandler
 """
 
 import sys, logging, threading
@@ -81,6 +82,9 @@ logging.addLevelName(50, 'CRIT')
 logging.addLevelName(30, 'WARN')
 
 # class extensions for supporting multi-threaded nature
+
+from pysys.utils.pycompat import _UnicodeSafeStreamWrapper, PY2
+
 class ThreadedStreamHandler(logging.StreamHandler):
 	"""Stream handler to only log from the creating thread.
 	
@@ -92,17 +96,29 @@ class ThreadedStreamHandler(logging.StreamHandler):
 	handler to stdout, either immediately or (when multiple threads are in use) 
 	at the end of each test's execution. 
 	
+	@deprecated: For internal use only, do not use. 
 	"""
-	def __init__(self, strm):
-		"""Overrides logging.StreamHandler.__init__."""
+	def __init__(self, strm=None, streamFactory=None):
+		"""Overrides logging.StreamHandler.__init__.
+		@param strm: the stream
+		@param streamFactory: a function that returns the stream, if strm is not specified. 
+		"""
 		self.threadId = threading.current_thread().ident
-		logging.StreamHandler.__init__(self, strm)
-				
+		self.__streamfactory = streamFactory if streamFactory else (lambda:strm)
+		logging.StreamHandler.__init__(self, self.__streamfactory())
+		
 	def emit(self, record):
 		"""Overrides logging.StreamHandler.emit."""
 		if self.threadId != threading.current_thread().ident: return
 		logging.StreamHandler.emit(self, record)
-		
+
+	def _updateUnderlyingStream(self):
+		""" Update the stream this handler uses by calling again the stream factory; 
+		needed if it's possible another library has changed the underlying stream 
+		(e.g. to add coloring support to sys.stdout). 
+		"""
+		assert self.stream # otherwise assigning to it wouldn't do anything
+		self.stream = self.__streamfactory()
 		
 class ThreadedFileHandler(logging.FileHandler):
 	"""File handler to only log from the creating thread.
@@ -114,12 +130,13 @@ class ThreadedFileHandler(logging.FileHandler):
 	This is used to pass log output from the specific test 
 	that creates this handler to the associated run.log. 
 
+	@deprecated: No longer used, will be removed. 
 	"""
-	def __init__(self, filename):
+	def __init__(self, filename, encoding=None):
 		"""Overrides logging.FileHandler.__init__"""
 		self.threadId = threading.current_thread().ident
-		logging.FileHandler.__init__(self, filename, "a")
-				
+		logging.FileHandler.__init__(self, filename, "a", encoding=self.__streamencoding)
+
 	def emit(self, record):
 		"""Overrides logging.FileHandler.emit."""
 		if self.threadId != threading.current_thread().ident: return
@@ -156,7 +173,7 @@ rootLogger = logging.getLogger('pysys')
 rootLogger.setLevel(logging.DEBUG)
 """The root logger log level (set to DEBUG as all filtering is done by the handlers)."""
 
-stdoutHandler = ThreadedStreamHandler(sys.stdout)
+stdoutHandler = ThreadedStreamHandler(streamFactory=lambda: _UnicodeSafeStreamWrapper(sys.stdout, writebytes=PY2))
 """The default stdout logging handler for all logging within PySys."""
 
 # see also pysys.py for logging configuration

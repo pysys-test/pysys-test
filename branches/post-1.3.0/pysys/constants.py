@@ -142,7 +142,7 @@ DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
 DEFAULT_MAKER =  ['ConsoleMakeTestHelper', 'pysys.launcher.console']
 DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml', {}]
 DEFAULT_STYLESHEET = os.path.join(SITE_PACKAGES_DIR, 'pysys-log.xsl')
-DEFAULT_FORMAT = '%(asctime)s %(levelname)-5s %(message)s'
+DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_ABORT_ON_ERROR=False
 
 # set the directories to not recursively walk when looking for the descriptors

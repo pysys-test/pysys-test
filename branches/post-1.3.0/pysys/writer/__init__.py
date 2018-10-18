@@ -124,6 +124,7 @@ class BaseResultsWriter(object):
 		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
 		@param testTime: Duration of the test in seconds. 
 		@param testStart: The time when the test started. 
+		@param runLogOutput: The logging output written to run.log, as a unicode character string. 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
@@ -501,7 +502,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def processResult(self, testObj, **kwargs):
 		"""Implementation of the processResult method. 
 		
-		Creates a test summary file in the Apache Ant Junit XML format. 
+		Creates a test summary file in the Apache Ant JUnit XML format. 
 		
 		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
 		@param kwargs: Variable argument list
@@ -545,9 +546,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 			failure.appendChild(document.createTextNode( testObj.getOutcomeReason() ))		
 						
 			stdout = document.createElement('system-out')
-			fp = io.open(os.path.join(testObj.output, 'run.log'))
-			stdout.appendChild(document.createTextNode(fp.read().replace('\n', os.linesep)))
-			fp.close()
+			runLogOutput = kwargs.get('runLogOutput','') # always unicode characters
+			stdout.appendChild(document.createTextNode(runLogOutput.replace('\r','').replace('\n', os.linesep)))
 			
 			testcase.appendChild(failure)
 			testcase.appendChild(stdout)

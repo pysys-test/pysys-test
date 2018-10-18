@@ -24,6 +24,7 @@ class PySysTest(BaseTest):
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			
 	def validate(self):
+		self.assertGrep('pysys.err', expr='.+', contains=False)
 		self.assertGrep('pysys.out', expr='(Traceback.*|caught .*)', contains=False)
 		
 		# we didn't enable progress writers so there should be none here
