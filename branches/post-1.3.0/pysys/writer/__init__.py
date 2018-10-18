@@ -72,6 +72,7 @@ else:
 
 from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter
+from pysys.utils.fileutils import mkdir, deletedir
 
 from xml.dom.minidom import getDOMImplementation
 
@@ -487,8 +488,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		
 		"""
 		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
-		if os.path.exists(self.outputDir): self.purgeDirectory(self.outputDir, True)
-		os.makedirs(self.outputDir)
+		deletedir(self.outputDir)
+		mkdir(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
 
 	def cleanup(self, **kwargs):
@@ -562,6 +563,9 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		fp.close()
 
 	def purgeDirectory(self, dir, delTop=False):
+		"""
+		@deprecated: Use L{fileutils.deletedir} instead. 
+		"""
 		for file in os.listdir(dir):
 			path = os.path.join(dir, file)
 			if PLATFORM in ['sunos', 'linux']:
