@@ -294,6 +294,21 @@ class BaseRunner(ProcessUser):
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir)]
 				del PROJECT.perfReporterConfig[0]._runnerSingleton
 		
+		class PySysPrintRedirector(object):
+			def __init__(self):
+				self.last = None
+				self.encoding = sys.stdout.encoding
+				self.log = logging.getLogger('pysys.stdout')
+			def flush(self): pass
+			def write(self, s): 
+				# heuristic for coping with \n happening in a separate write to the message - ignore first newline after a non-newline
+				if s!='\n' or self.last=='\n': 
+					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
+					self.log.info(s.rstrip())
+				self.last = s
+		if os.getenv('PYSYS_DISABLE_PRINT_REDIRECTOR','')!= 'true':
+			sys.stdout = PySysPrintRedirector()
+		
 		# call the hook to setup prior to running tests
 		self.setup()
 
