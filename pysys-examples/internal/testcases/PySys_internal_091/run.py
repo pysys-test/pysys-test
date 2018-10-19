@@ -2,6 +2,7 @@ import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, re, shutil
+from pysys.utils.pycompat import PY2
 
 class PySysTest(BaseTest):
 
@@ -31,4 +32,4 @@ class PySysTest(BaseTest):
 			'After newlines'
 		], encoding='utf-8')
 		
-		self.assertGrep('myoutdir/NestedTest/run.log', expr=u'Hello world! \xa3', encoding='utf-8')
+		self.assertGrep('myoutdir/NestedTest/run.log', expr=u'Hello world! . bytes' if PY2 else u'Hello world! \xa3', encoding='utf-8')
