@@ -117,8 +117,7 @@ class ThreadedStreamHandler(logging.StreamHandler):
 
 	def _updateUnderlyingStream(self):
 		""" Update the stream this handler uses by calling again the stream factory; 
-		needed if it's possible another library has changed the underlying stream 
-		(e.g. to add coloring support to sys.stdout). 
+		used only for testing. 
 		"""
 		assert self.stream # otherwise assigning to it wouldn't do anything
 		self.stream = self.__streamfactory()
