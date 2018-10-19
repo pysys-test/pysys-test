@@ -34,7 +34,7 @@ if sys.version_info[0] == 2:
 else:
 	from io import StringIO
 
-from pysys import ThreadedFileHandler, ThreadedStreamHandler
+from pysys import ThreadedStreamHandler
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
