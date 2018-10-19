@@ -574,14 +574,19 @@ class ProcessUser(object):
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
-		outcomeReason = outcomeReason.strip() if outcomeReason else ''
+		if outcomeReason is None:
+			outcomeReason = ''
+		else: 
+			outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
 		
 		old = self.getOutcome()
 		self.outcome.append(outcome)
 
 		#store the reason of the highest precedent outcome
-		if self.getOutcome() != old: self.__outcomeReason = outcomeReason
-
+		
+		# although we should print whatever is passed in, store a version with control characters stripped 
+		# out so that it's easier to read (e.g. coloring codes from third party tools)
+		if self.getOutcome() != old: self.__outcomeReason = re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F]', '', outcomeReason)
 		if outcome in FAILS and abortOnError:
 			if callRecord==None: callRecord = self.__callRecord()
 			self.abort(outcome, outcomeReason, callRecord)
@@ -645,7 +650,7 @@ class ProcessUser(object):
 
 		"""	
 		fails = len([o for o in self.outcome if o in FAILS])
-		if fails > 1: return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
+		if self.__outcomeReason and (fails > 1): return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
 		return self.__outcomeReason
 
 
