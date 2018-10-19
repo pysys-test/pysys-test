@@ -1,0 +1,32 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<property name="verboseWaitForSignal" value="true"/>
+	<property name="defaultAbortOnError" value="true"/>
+
+	<writers>
+		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary.xml">
+			<property name="outputDir" value="${root}"/>
+		</writer>	
+
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${root}/junit-report"/>
+		</writer>
+
+		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+			<property name="showOutcomeReason" value="true"/>
+			<property name="showOutputDir" value="true"/>
+		</writer>
+		
+	</writers>		
+	
+	
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf_8_sig"/>
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+	</default-file-encodings>	
+</pysysproject>

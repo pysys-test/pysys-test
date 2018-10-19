@@ -1,0 +1,32 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Writers - escaping of XML control characters in stdout and outcome reason</title>    
+    <purpose><![CDATA[
+Checks that we don't generate illegal/unparseable XML - since delightfully XML 
+outlaws lots of valid utf-8 characters, and Python's XML generation libraries 
+do not have a way of coping with this: https://bugs.python.org/issue5166. 
+
+Also checks we strip out the ascii control characters from outcome reason 
+(for all output mechanisms not just XML) since they're not helpful. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

@@ -95,6 +95,14 @@ New features
 - The default implementation of BaseTest.getDefaultFileEncoding() now delegates 
   to the runner's implementation, allowing customizations to be performed 
   in just one place if desired. 
+- Added pysys.writers.replaceIllegalXMLCharacters utility function, and use it 
+  to avoid XMLResultsWriter and JUnitXMLResultsWriter from generating invalid 
+  XML if run.log or outcome reason contained characters not permitted by 
+  XML. Also ASCII control characters (e.g. colouring instructions 
+  from other tools) are now stripped out of all outcome reason strings 
+  (including in run.log and non-XML based writers) since such characters 
+  are not useful and make summary test results harder to read. 
+  
 
 - Added `runLogOutput=` parameter to the `processResult()` method of 
   the `BaseResultsWriter` API so that writers such as the 
