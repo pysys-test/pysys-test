@@ -6,7 +6,6 @@ from pysys.constants import Project
 class PySysTest(BaseTest):
 
 	def execute(self):
-		os.environ["TEST_USER"] = "Felicity Kendal"
 		self.proj = Project(self.input, 'pysysproject.xml')
 		for attr in dir(self.proj):
 			if attr in ['lib', 'library', 'version', 'user']:
