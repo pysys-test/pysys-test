@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+	</default-file-encodings>
+	
+	<formatters>
+		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
+				name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
+			<property name="color" value="true"/>
+		</formatter>
+	</formatters>
+
+</pysysproject>
