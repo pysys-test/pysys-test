@@ -2,21 +2,24 @@ from pysys import stdoutHandler
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.constants import Project 
+import shutil
 
 class PySysTest(BaseTest):
 
 	def execute(self):
-		os.environ["TEST_USER"] = "Felicity Kendal"
-		self.proj = Project(self.input, 'pysysproject.xml')
-		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
-	
+		
+		shutil.copytree(self.input, self.output+'/test')
+		l = {}
+		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		runPySys = l['runPySys']
+		try:
+			runPySys(self, 'pysys', ['run', '-o', 'myoutdir'], workingDir='test', environs={
+				'TEST_USER':"Felicity Kendal"
+			})
+		finally:
+			self.logFileContents('pysys.out', maxLines=0)
+			self.logFileContents('pysys.err')
+		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
+
 	def validate(self):
-		self.assertTrue(self.proj.env_user == "Felicity Kendal")
-		self.assertTrue(self.proj.env_user_prepend == "append-on-front-Felicity Kendal")
-		self.assertTrue(self.proj.env_user_append == "Felicity Kendal-append-on-back")
-		self.assertTrue(self.proj.env_default == "default value")
-		self.assertTrue(self.proj.env_default_none == "")
-		self.assertTrue(self.proj.user_firstname == "Simon")
-		self.assertTrue(self.proj.user_lastname == "Smith")
-		self.assertTrue(self.proj.user_title == "Professor")
-		self.assertTrue(self.proj.user_full == "Professor Simon Smith")
+		pass # checked by nested testcase
