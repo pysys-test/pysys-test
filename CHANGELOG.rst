@@ -102,7 +102,12 @@ New features
   from other tools) are now stripped out of all outcome reason strings 
   (including in run.log and non-XML based writers) since such characters 
   are not useful and make summary test results harder to read. 
-  
+- Use of print() rather than self.log is a common mistake that results in 
+  essential diagnostic information showing up on the console but not 
+  stored in run.log. PySys will now catch output written using print() 
+  statements and redirect it to the logging framework, so it will show up 
+  in run.log. 
+
 
 - Added `runLogOutput=` parameter to the `processResult()` method of 
   the `BaseResultsWriter` API so that writers such as the 

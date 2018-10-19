@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Logging - print() statements are redirected to run.log</title>    
+    <purpose><![CDATA[
+Ensure any attempt to use print from within a testcase gets redirected to the log. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
