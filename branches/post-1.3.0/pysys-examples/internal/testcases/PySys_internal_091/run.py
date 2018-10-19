@@ -8,15 +8,12 @@ class PySysTest(BaseTest):
 	def execute(self):
 		shutil.copytree(self.input, self.output+'/test')
 		
-		# TODO: enable coloring
-		# enable run.log utf8
-		
 		l = {}
 		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
 		runPySys = l['runPySys']
 		# use multiple cycles since the buffering is different
 		try:
-			runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir'], workingDir=self.output+'/test')
+			runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir'], workingDir=self.output+'/test', environs={'PYSYS_COLOR':'true'})
 		finally:
 			self.logFileContents('pysys.out', maxLines=0)
 			self.logFileContents('pysys.err', maxLines=0)
