@@ -176,7 +176,8 @@ rootLogger.setLevel(logging.DEBUG)
 """The root logger log level (set to DEBUG as all filtering is done by the handlers)."""
 
 stdoutHandler = ThreadedStreamHandler(streamFactory=lambda: _UnicodeSafeStreamWrapper(sys.stdout, writebytes=PY2))
-"""The default stdout logging handler for all logging within PySys."""
+"""The handler that sends pysys.* log output from the main thread to stdout, 
+including buffered output from completed tests when running in parallel."""
 
 # see also pysys.py for logging configuration
 
