@@ -110,6 +110,13 @@ New features
 - Fixed bug in which random log lines might not be written to run.log and/or 
   stdout when running tests multi-threaded (as a result of an underlying 
   python bug https://bugs.python.org/issue35185).
+- Fixed startProcessMonitor() on Windows to take a few seconds instead of a few 
+  minutes, by using the Process performance counter to get % Processor Time 
+  instead of the Thread counter (the values reported by previous versions were 
+  probably not correct, as they only measured CPU for the threads that existed 
+  when the process monitor was started).
+- Fixed startProcessMonitor() on Windows to return correct values - was 
+  returning negative values for large numbers such as the virtual memory usage. 
 
 
 - Added `runLogOutput=` parameter to the `processResult()` method of 
