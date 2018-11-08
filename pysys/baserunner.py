@@ -467,8 +467,11 @@ class BaseRunner(ProcessUser):
 
 		if self.threads > 1: 
 			try:
-				# write out cached messages from the worker thread
-				_UnicodeSafeStreamWrapper(sys.stdout, writebytes=PY2).write(bufferedoutput)
+				# write out cached messages from the worker thread to stdout
+				# (use the stdoutHandler stream which includes coloring redirections if applicable, 
+				# but not print redirection which we don't want; also includes the 
+				# appropriate _UnicodeSafeStreamWrapper). 
+				stdoutHandler.stream.write(bufferedoutput)
 				
 			except Exception as ex:
 				# first write a simple message without any unusual characters, in case nothing else can be printed
