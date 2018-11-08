@@ -107,6 +107,9 @@ New features
   stored in run.log. PySys will now catch output written using print() 
   statements and redirect it to the logging framework, so it will show up 
   in run.log. 
+- Fixed bug in which random log lines might not be written to run.log and/or 
+  stdout when running tests multi-threaded (as a result of an underlying 
+  python bug https://bugs.python.org/issue35185).
 
 
 - Added `runLogOutput=` parameter to the `processResult()` method of 
