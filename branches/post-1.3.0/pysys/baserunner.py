@@ -27,13 +27,12 @@ API documentation.
 
 """
 from __future__ import print_function
-import os.path, stat, math, logging, textwrap, sys, locale, io, shutil
+import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
 else:
 	from io import StringIO
 
-from pysys import ThreadedStreamHandler
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
@@ -151,7 +150,39 @@ class BaseRunner(ProcessUser):
 		self.results = {}
 		self.__remainingTests = self.cycle * len(self.descriptors)
 		
-		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed		
+		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
+		
+		class DelegatingPerThreadLogHandler(logging.Handler):
+			"""A log handler that delegates emits to a list of handlers, 
+			set on a per-thread basis. If no handlers are setup for this 
+			thread nothing is emitted.
+			
+			Note that calling close() on this handler does not call close 
+			on any of the delegated handlers (since they may 
+			be used by multiple threads, and to avoid leaks we don't keep a 
+			global list of them anyway). 
+			"""
+			def __init__(self):
+				super(DelegatingPerThreadLogHandler, self).__init__()
+				self.__threadLocals = threading.local()
+
+			def setLogHandlersForCurrentThread(self, handlers):
+				self.__threadLocals.handlers = handlers
+				self.__threadLocals.emitFunctions = [(h.level, h.emit) for h in handlers] if handlers else None
+			def getLogHandlersForCurrentThread(self):
+				return getattr(self.__threadLocals, 'handlers', None) or []
+			
+			def emit(self, record):
+				functions = getattr(self.__threadLocals, 'emitFunctions', None) 
+				if functions is not None: 
+					for (hdlrlevel, emitFunction) in functions:
+						# handlers can have different levels, so need to replicate the checking that callHandlers performs
+						if record.levelno >= hdlrlevel:
+							emitFunction(record)
+			def flush(self): 
+				for h in self.getLogHandlersForCurrentThread(): h.flush()
+		
+		self._testThreadsLogHandler = DelegatingPerThreadLogHandler()
 
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -283,6 +314,7 @@ class BaseRunner(ProcessUser):
 		results.
 
 		"""
+		log.addHandler(self._testThreadsLogHandler)
 		if PROJECT.perfReporterConfig:
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet
@@ -555,10 +587,10 @@ class TestContainer(object):
 			# stdout - set this up right at the very beginning to ensure we can see the log output in case any later step fails
 			# here we use UnicodeSafeStreamWrapper to ensure we get a buffer of unicode characters (mixing chars+bytes leads to exceptions), 
 			# from any supported character (utf-8 being pretty much a superset of all encodings)
-			self.testFileHandlerStdout = ThreadedStreamHandler(_UnicodeSafeStreamWrapper(self.testFileHandlerStdoutBuffer, writebytes=False, encoding='utf-8'))
+			self.testFileHandlerStdout = logging.StreamHandler(_UnicodeSafeStreamWrapper(self.testFileHandlerStdoutBuffer, writebytes=False, encoding='utf-8'))
 			self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
 			self.testFileHandlerStdout.setLevel(stdoutHandler.level)
-			log.addHandler(self.testFileHandlerStdout)
+			self.runner._testThreadsLogHandler.setLogHandlersForCurrentThread([self.testFileHandlerStdout])
 
 			# set the output subdirectory and purge contents
 			if os.path.isabs(self.runner.outsubdir):
@@ -582,13 +614,13 @@ class TestContainer(object):
 
 			# run.log handler
 			runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or locale.getpreferredencoding()
-			self.testFileHandlerRunLog = ThreadedStreamHandler(_UnicodeSafeStreamWrapper(
+			self.testFileHandlerRunLog = logging.StreamHandler(_UnicodeSafeStreamWrapper(
 				io.open(os.path.join(self.outsubdir, 'run.log'), 'a', encoding=runLogEncoding), 
 				writebytes=False, encoding=runLogEncoding))
 			self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
 			self.testFileHandlerRunLog.setLevel(logging.INFO)
 			if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
-			log.addHandler(self.testFileHandlerRunLog)
+			self.runner._testThreadsLogHandler.setLogHandlersForCurrentThread([self.testFileHandlerStdout, self.testFileHandlerRunLog])
 
 			log.info(62*"=")
 			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
@@ -691,12 +723,12 @@ class TestContainer(object):
 				log.info("Test failure reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
 			log.info("")
 			
-			self.testFileHandlerRunLog.close()
-			log.removeHandler(self.testFileHandlerRunLog)
-			log.removeHandler(self.testFileHandlerStdout)
-			self.testFileHandlerRunLog.stream.close()
-		except Exception: 
-			pass
+			self.runner._testThreadsLogHandler.flush()
+			if self.testFileHandlerRunLog: self.testFileHandlerRunLog.stream.close()
+			self.runner._testThreadsLogHandler.setLogHandlersForCurrentThread([])
+		except Exception as ex: # really should never happen so if it does make sure we know why
+			sys.stderr.write('Error in callback for %s: %s\n'%(self.descriptor.id, ex))
+			traceback.print_exc()
 		
 		# return a reference to self
 		return self
