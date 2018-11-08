@@ -6,7 +6,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		with open(self.output+'/wait.py', 'w') as f:
-			f.write('import time\ntime.sleep(1000000)')
+			f.write('import time\ntime.sleep(5)\nwhile True: pass')
 		p = self.startProcess(command=sys.executable,
 						  arguments = [self.output+'/wait.py'],
 						  environs = dict(os.environ),

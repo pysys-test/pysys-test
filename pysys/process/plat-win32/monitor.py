@@ -97,10 +97,14 @@ class ProcessMonitor(object):
 				
 							
 	def __win32GetInstance(self, pid, bRefresh=0):
+		# convert a pid to the (processname, instancecounter) that the PDH API uses to identify processes
+		
 		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
 	
 		# get the list of processes running
-		items, instances = win32pdh.EnumObjectItems(None, None, "Process", -1)
+		log.debug('win32pdh.EnumObjectItems - getting process list')
+		counters, instances = win32pdh.EnumObjectItems(None, None, "Process", -1)
+		log.debug('win32pdh.EnumObjectItems - returned %d processes', len(instances))
 		
 		# convert to a dictionary of process instance, to number of instances
 		instanceDict = {}
@@ -116,37 +120,12 @@ class ProcessMonitor(object):
 				try:
 					value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")
 					if value == pid:
+						log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', pid, instance, inum)
 						return instance, inum
-				except Exception:
-					pass
-
+				except Exception as ex:
+					log.debug('__win32GetInstance: failed to get process id for %s: %s', instance, ex)
+		log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', pid, instance, inum)
 		return instance, inum
-
-
-	def __win32GetThreads(self, pid, bRefresh=0):
-		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
-
-		# get the list of threads running
-		items, instances = win32pdh.EnumObjectItems(None, None, "Thread", -1)
-				
-		# convert to a dictionary of thread instance, to number of instances
-		instanceNum = []
-		instanceDict = {}
-		for i in instances:
-			try: instanceDict[i] = instanceDict[i] + 1
-			except KeyError: instanceDict[i] = 0
-			instanceNum.append(instanceDict[i])
-			
-		# loop through to locate the instance and inum of each thread for the supplied process id
-		threads=[]
-		for i in range(0, len(instances)):
-			try:	
-				value = self.__win32getProfileAttribute("Thread", instances[i], instanceNum[i], "ID Process")
-				if value == pid: threads.append((instances[i], instanceNum[i]))
-			except Exception:
-				pass
-		return threads
-
 
 	def __win32getProfileAttribute(self, object, instance, inum, counter):
 		# make the path, open and collect the query
@@ -168,44 +147,28 @@ class ProcessMonitor(object):
 		return value
 
 
-	def __win32LogProfile(self, instance, inum, threads, interval, file):
+	def __win32LogProfile(self, instance, inum, interval, file):
 		
 		# create the process performance counters
 		process_counters=[]
 		process_query=win32pdh.OpenQuery()
-		for counter in "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count":
+		for counter in "% Processor Time", "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count":
 			path = win32pdh.MakeCounterPath( (None, "Process", instance, None, inum, counter) )
 			process_counters.append(win32pdh.AddCounter(process_query, path))
 		win32pdh.CollectQueryData(process_query)
-					
-		# create the thread performance counter
-		thread_counters=[]
-		thread_query=win32pdh.OpenQuery()
-		for (instance, inum) in threads:
-			path=win32pdh.MakeCounterPath( (None, "Thread", instance, None, inum, "% Processor Time") )
-			thread_counters.append(win32pdh.AddCounter(thread_query, path))
-		win32pdh.CollectQueryData(thread_query)
 	
 		# perform the continual data collection until the thread is no longer active
-		data = [0]*(len(process_counters)+1)	
+		data = [0]*(len(process_counters))	
 		try:
 			while self.active:
 				win32pdh.CollectQueryData(process_query)
-				win32pdh.CollectQueryData(thread_query)
 	
 				for i in range(len(process_counters)):
 					try:
-						data[i+1] = win32pdh.GetFormattedCounterValue(process_counters[i], win32pdh.PDH_FMT_LONG)[1]
+						data[i] = win32pdh.GetFormattedCounterValue(process_counters[i], win32pdh.PDH_FMT_LARGE)[1]
 					except win32api.error:
-						data[i+1] = -1
+						data[i] = -1
 			
-				data[0]=0
-				for i in range(0, len(thread_counters)):
-					try:
-						data[0]=data[0]+win32pdh.GetFormattedCounterValue(thread_counters[i], win32pdh.PDH_FMT_LONG)[1] 
-					except Exception:
-						pass
-		
 				currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
 				file.write( "%s\t%s\t%d\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]//self.numProcessors, float(data[1])/1024,
 														  float(data[2])/1024, float(data[3])/1024, float(data[4]), float(data[5])))
@@ -216,9 +179,6 @@ class ProcessMonitor(object):
 			for c in process_counters:
 				win32pdh.RemoveCounter(c)
 			win32pdh.CloseQuery(process_query)
-			for c in thread_counters:
-				win32pdh.RemoveCounter(c)
-			win32pdh.CloseQuery(thread_query)
 			if file != sys.stdout: file.close()
 			self.active = 0
 
@@ -239,12 +199,9 @@ class ProcessMonitor(object):
 		
 		# get the instance and instance number for this process id
 		instance, inum = self.__win32GetInstance(pid=self.pid, bRefresh=1)
-
-		# get the instance and instance number for each thread of this process id
-		threads = self.__win32GetThreads(pid=self.pid, bRefresh=1)
 		
 		# log the stats in a separate thread
-		t = threading.Thread(target=self.__win32LogProfile, args=(instance, inum, threads, self.interval, self.file))
+		t = threading.Thread(target=self.__win32LogProfile, args=(instance, inum, self.interval, self.file))
 		t.start()
 
 	def stop(self):

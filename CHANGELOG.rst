@@ -112,7 +112,16 @@ Bug fixes
 - Fixed rare condition in which performance result reporting would be prevented 
   due to spurious error about `resultKey` already being used. 
   
----------------
+- Fixed `startProcessMonitor()` on Windows to return correct values instead of 
+  negative values for large numbers (such as the virtual memory usage). 
+  
+- Fixed `startProcessMonitor()` on Windows to take a few seconds instead of a 
+  few minutes, by using the `Process` performance counter to get 
+  `% Processor Time` instead of the `Thread` counter (the values reported by 
+  previous versions were probably not correct, as they only measured CPU for 
+  the threads that existed when the process monitor was started).
+
+
 Release History
 ---------------
 
