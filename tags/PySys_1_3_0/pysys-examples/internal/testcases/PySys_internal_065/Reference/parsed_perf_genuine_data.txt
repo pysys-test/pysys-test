@@ -1,4 +1,0 @@
-CSVPerformanceFile<runDetails: outdir="myoutdir", hostname="troll", time="2018-03-20 17:24:59", myBuildNumber="1.23.45X"
- - resultKey="Sample integer performance result", testId="PySys_NestedTestcase", value=1234.1, unit="s", biggerIsBetter=False, toleranceStdDevs=0.0, samples=1, stdDev=0.0, someResultDetail="value;yesitis"
- - resultKey="Sample float performance result", testId="PySys_NestedTestcase", value=0.012341, unit="/s", biggerIsBetter=True, toleranceStdDevs=0.0, samples=1, stdDev=0.0
->
