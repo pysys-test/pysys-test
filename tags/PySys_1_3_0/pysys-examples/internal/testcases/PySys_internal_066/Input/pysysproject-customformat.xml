@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<property name="verboseWaitForSignal" value="true"/>
+	<property name="defaultAbortOnError" value="true"/>
+
+	<formatters>
+		<formatter name="stdout" messagefmt="%(asctime)s %(levelname)-5s STDOUT_PREFIX %(message)s" datefmt="STDOUT_DATE_FORMAT %Y-%m-%d %H:%M:%S"/>
+		<formatter name="runlog" messagefmt="%(asctime)s %(levelname)-5s RUNLOG_PREFIX %(message)s" datefmt=""/>
+	</formatters>
+	
+</pysysproject>
