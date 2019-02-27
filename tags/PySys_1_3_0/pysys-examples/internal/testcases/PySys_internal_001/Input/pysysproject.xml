@@ -1,0 +1,12 @@
+<pysysproject>
+	<!-- Example properties to be set in the project -->
+	<property name="env_user" value="${env.TEST_USER}" />
+	<property name="env_user_prepend" value="append-on-front-${env.TEST_USER}" />
+	<property name="env_user_append" value="${env.TEST_USER}-append-on-back" />
+	<property name="env_default" value="${env.NOT_EXIST}" default="default value"/>
+	<property name="env_default_none" value="${env.NOT_EXIST}" />
+	<property name="user_firstname" value="Simon" />
+	<property name="user_lastname" value="Smith" />
+	<property name="user_title" value="Professor" />
+	<property name="user_full" value="${user_title} ${user_firstname} ${user_lastname}" />
+</pysysproject>

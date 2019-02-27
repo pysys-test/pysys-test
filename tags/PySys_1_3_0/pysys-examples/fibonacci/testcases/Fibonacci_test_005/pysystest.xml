@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+
+  <description> 
+    <title>Performance test for calulating the fibonacci series</title>
+    <purpose><![CDATA[
+Demonstrate how to measure and report performance results by measuring 
+the time taken to calculate fibonacci numbers. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>examples</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>  
+      <requirement id="AL2" />    
+    </requirements>
+  </traceability>
+  
+</pysystest>
+
