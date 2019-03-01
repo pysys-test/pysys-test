@@ -1,0 +1,146 @@
+# Travis CI configuration file. 
+#
+# Executes Unix shell commands instructions from "install", then "script" sections, then finally invokes "deploy" if successful. 
+#
+# If you wish to try something out manually any of these commands will run just as well in a Linux shell. 
+# However for ease of use and build reproducability execution on Travis is the canonical way to build PySys 
+# binary (whl) and source distributions, as well as packages of the API doc and samples. 
+#
+# Only required setup in Travis is to set the secure environment variable GITHUB_API_KEY to 
+# a personal access token from this GitHub repo (to be found under Developer Settings)
+#
+
+language: python
+
+os:
+  - linux
+  
+  # will enable windows as soon as secure env vars issue is fixed, though may need to use 
+  # language:cpp and choco install python hack until support for python is officially added
+  #- windows
+  
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  
+cache: pip
+
+addons:
+  apt:
+    packages:
+      # for todos (unix2dos) command
+      - tofrodos
+
+install:
+  # need latest version of wheel to get consistent and correct behaviour
+  - pip install --upgrade setuptools wheel
+  
+  # build universal wheel and python source distribution
+  - export PYSYS_VERSION=`cat VERSION`
+  - "echo Using PySys version: $PYSYS_VERSION"
+  - python setup.py check --strict
+  - python setup.py bdist_wheel
+  - python setup.py sdist
+  
+  # pre-process module file to include current date, which also goes into the epydoc
+  - sed -i "s/__date__ = .*/__date__ = \"`date --iso-8601`\"/g" pysys/__init__.py
+  
+  # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
+  - cp README.rst LICENSE.txt pysys-examples/
+  - "tar -czf dist/PySys-$PYSYS_VERSION-sample-testcases-unix.tar.gz pysys-examples"
+  - "find pysys-examples -type f | xargs todos"
+  - "zip -r --quiet dist/PySys-$PYSYS_VERSION-sample-testcases-win.zip pysys-examples"
+  - "export TRAVIS_TAG=PySys_$PYSYS_VERSION"
+
+# for running tests and building documentation:
+script:
+  - echo ~
+  - cd pysys-examples
+  - export PYSYS_COLOR=true
+  
+  # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
+  - pip install ../dist/PySys*.whl
+  - pip install coverage codecov
+  # TODO: change to run on several threads but currently breaks some tests in python 2 mode due to I18N bugs
+  #- pysys.py run --threads 0 --purge --record --include pysys-packaging
+  - "echo travis_fold:start:main-tests"
+  - pysys.py print
+  - which pysys.py
+  - python -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads 1 --purge --record --type auto
+  - "echo travis_fold:end:main-tests"
+  - python internal/utilities/scripts/coverage_pysys.py report
+  
+  # as a quick sanity-test, also run packaging tests after installing from source
+  - "echo travis_fold:start:touch-tests"
+  - pip uninstall --yes PySys
+  - "pip install ../dist/PySys-$PYSYS_VERSION.tar.gz"
+  - pysys.py run --threads 0 --purge --record --include pysys-packaging --outdir against-src-dist-setuptools
+
+  # as a final sanity-test, also run packaging tests directly from source in "develop mode" as a pysys developer probably would
+  - pip uninstall --yes PySys
+  - "pip install -e .."
+  - pysys.py run --threads 0 --purge --record --include pysys-packaging --outdir against-src-develop-mode
+  - "echo travis_fold:end:touch-tests"
+
+  - cd ..
+  
+  # check the documentation is good
+  # must do this after testing to avoid polluting the installed packages while running the tests
+  - pip install rstcheck
+  - rstcheck *.rst
+  
+  # generate API docs (epydoc only works on Python 2.7 unfortunately), and a zip 
+  # including these and the text files (with Windows line endings)
+  - pip install epydoc
+  - mkdir dist/api-docs/
+  - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then epydoc --debug -v --html --no-private --fail-on-docstring-warning --name "PySys $PYSYS_VERSION" "--url=https://pypi.org/project/PySys" -o dist/api-docs pysys ; fi
+  - todos *.rst *.txt
+  - cp README.rst CHANGELOG.rst LICENSE.txt dist/api-docs/
+  - cd dist/api-docs
+  # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions; use C locale to avoid ignoring __'s
+  - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then LC_ALL=C sort --unique -o api-objects.txt api-objects.txt ; fi
+  - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then zip -r --quiet ../../dist/PySys-$PYSYS_VERSION-docs.zip .  ; fi
+  - cd ../..
+
+after_script:
+  # upload Python code coverage
+  - cd pysys-examples
+  - codecov
+  - cd ..
+
+deploy:
+  - provider: releases
+    api_key: $GITHUB_API_KEY
+    file_glob: true
+    file: 
+      - dist/*
+      - CHANGELOG.rst
+    skip_cleanup: true
+    overwrite: true
+    on: 
+       # by default we only create a draft release for commits to master
+       branch: master
+       # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
+       condition: $TRAVIS_PYTHON_VERSION = 2.7
+
+    name: "PySys v$PYSYS_VERSION"
+    body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See CHANGELOG.rst for a full list of changes. 
+  
+    # this is a draft release, allows manually editing details in github UI
+    draft: true
+
+  - provider: pages
+    github-token: $GITHUB_API_KEY
+    target-branch: gh-pages
+    local-dir: dist/api-docs/
+    skip_cleanup: true
+    keep-history: true
+    project-name: "PySys $PYSYS_VERSION"
+    
+    on: 
+       # only publish doc for released version
+       branch: master
+       # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
+       condition: $TRAVIS_PYTHON_VERSION = 2.7
