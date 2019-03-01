@@ -13,7 +13,12 @@ What's new in this release
 Changes affecting compatibility
 -------------------------------
 
-- todo
+- Removed `DEFAULT_STYLESHEET` `pysys-log.xsl` as referenced in 
+  `XMLResultsWriter`, as it cannot be made to work in most modern browsers 
+  (e.g. Chrome, Firefox) for security reasons and is not widely used. If you 
+  need this functionality, the ability to specify a custom .xsl stylesheet for 
+  the `XMLResultsWriter` is still available as a configuration option in 
+  `pysysproject.xml`. 
 
 
 

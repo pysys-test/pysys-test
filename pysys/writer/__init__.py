@@ -327,8 +327,9 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
-			stylesheet = self.document.createProcessingInstruction("xml-stylesheet", "href=\"%s\" type=\"text/xsl\"" % (self.stylesheet))
-			self.document.insertBefore(stylesheet, self.document.childNodes[0])
+			if self.stylesheet:
+				stylesheet = self.document.createProcessingInstruction("xml-stylesheet", "href=\"%s\" type=\"text/xsl\"" % (self.stylesheet))
+				self.document.insertBefore(stylesheet, self.document.childNodes[0])
 
 			# create the root and add in the status, number of tests and number completed
 			self.rootElement = self.document.documentElement
