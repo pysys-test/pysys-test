@@ -7,7 +7,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		l = {}
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
 		runPySys = l['runPySys']
 		runPySys(self, 'make', ['make', 'mynewtest'])
 		runPySys(self, 'run', ['run','mynewtest'])

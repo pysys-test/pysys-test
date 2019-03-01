@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 		self.log.info('printing tests from: %s', testsdir)
 		
 		l = {}
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
 		runPySys = l['runPySys']
 		runPySys(self, 'basic', ['print'], workingDir=testsdir)
 		runPySys(self, 'thistest', ['print', 'PySys_internal_073'], workingDir=testsdir)

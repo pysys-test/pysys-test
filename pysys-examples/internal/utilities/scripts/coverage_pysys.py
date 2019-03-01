@@ -1,10 +1,11 @@
+#!/usr/bin/env python
 # Read lines in from stdin and echo them out with 
 # the line number prepended
 #
 from __future__ import print_function
 import time, sys, os.path
 
-TESTS_DIR = os.path.normpath(os.path.dirname(__file__)+'/../../..')
+TESTS_DIR = os.path.abspath(os.path.dirname(__file__)+'/../../..')
 def getCoverageFiles():
 	assert TESTS_DIR.endswith('pysys-examples'), TESTS_DIR
 	cov = []
@@ -21,7 +22,7 @@ def main(args):
 		print('found %d coverage file(s) in %s'%(len(files), TESTS_DIR))
 		import coverage
 		if os.path.exists('combined-pysys-coverage'): os.remove('combined-pysys-coverage')
-		c = coverage.Coverage('combined-pysys-coverage')
+		c = coverage.Coverage('.coverage.combined-pysys')
 		# nb: combine automatically deletes all the files (!)
 		c.combine(files)
 		# ... so it's a good idea to save a new combined file so we're not left with nothing
@@ -44,7 +45,7 @@ def main(args):
 		print('')
 		print('To generate a coverage report, run:')
 		print('   > cd pysys-examples')
-		print('   > python -m coverage run ../pysys-dist/scripts/pysys.py run -n0'.replace('/',os.sep))
+		print('   > python -m coverage run ../scripts/pysys.py run -n0'.replace('/',os.sep))
 		print('   > internal/utilities/scripts/coverage_pysys.py report'.replace('/',os.sep))
 		
 if __name__ == "__main__":

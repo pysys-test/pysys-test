@@ -9,7 +9,7 @@ class PySysTest(BaseTest):
 		shutil.copytree(self.input, os.path.join(self.output,'test'))
 
 		l = {}
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
 		runPySys = l['runPySys']
 		p = runPySys(self, 'pysys', ['run', '-o', os.path.join(self.output,'myoutdir'), '--progress', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
 		self.assertThat('%d > 0', p.exitStatus)

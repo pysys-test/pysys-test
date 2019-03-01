@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
 		l = {}
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
 		runPySys = l['runPySys']
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
 		self.logFileContents('pysys.out', maxLines=0)

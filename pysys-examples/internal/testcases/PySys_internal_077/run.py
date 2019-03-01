@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		l = {}
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
+		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
 		runPySys = l['runPySys']
 		
 		shutil.copytree(self.input, self.output+'/test')

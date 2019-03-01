@@ -19,7 +19,7 @@ class PySysTest(BaseTest):
 			env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
 		elif PLATFORM=='linux' or PLATFORM=='solaris':
 			# On UNIX we may need the python shared libraries on the LD_LIBRARY_PATH
-			env["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]
+			env["LD_LIBRARY_PATH"] = os.environ.get("LD_LIBRARY_PATH",'')
 		
 		# create the process
 		self.hprocess = self.startProcess(command=sys.executable,
