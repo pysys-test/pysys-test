@@ -24,7 +24,10 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
-  
+
+# currently xenial linux is needed for python 3.7 support
+dist: xenial
+
 cache: pip
 
 addons:
