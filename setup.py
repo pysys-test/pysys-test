@@ -83,8 +83,7 @@ setup(cmdclass = {'build_py': build_py},
 	long_description=long_description,
 	long_description_content_type='text/x-rst',
 	python_requires=">=2.7, <4", # be flexible
-	scripts = ['scripts/pysys.py', 'scripts/pysys_postinstall.py'] if IS_WINDOWS
-	else ['scripts/pysys.py'],
+	scripts = ['scripts/pysys.py'],
 	packages=['pysys', 'pysys.launcher',  'pysys.manual',
 			'pysys.process', 'pysys.process.plat-win32', 
 			'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
