@@ -1,8 +1,8 @@
 What is PySys?
 ==============
-PySys is an easy-to-use tool for running and orchestrating all your system, integration, manual and unit tests. 
+PySys is an easy-to-use cross-platform framework for writing and orchestrating all your system/integration tests, fully integrated with your unit and manual tests. 
 
-It provides a comprehensive package of utility methods to make all the common operations a breeze, as well as the flexibility to add whatever test execution and validation logic you need using the full power of the Python language, and without the compilation time and slower development of static/non-scripting languages such as Java/JUnit.
+It provides a comprehensive package of utility methods to make all the common system/integration testing operations a breeze, as well as the flexibility to add whatever test execution and validation logic you need using the full power of the Python language. If you've ever tried to repurpose a unit-test oriented framework such as JUnit/NUnit for writing system tests you'll find PySys makes your life a lot easier - there's no need to wait for testcase code to compile, put up with limited access to platform-specific APIs, or write a huge library of custom helper classes to deal with the process orchestration and log file checking aspects of integration testing. It's also a lot more powerful and easy to maintain than writing platform-specific shell scripts. Whatever language the application you're testing is written in, and whatever platforms it needs to run on, PySys can help!
 
 Key features include:
 
@@ -15,110 +15,107 @@ Key features include:
   * aborting early if an error message is detected
 
 - Support for executing tests in parallel to significantly speed up execution time
-- A process memory monitoring framework to check for memory leaks
+- A process memory monitoring framework to check for memory leaks when soak testing your application
 - A performance monitoring framework for recording and aggregating latency, throughput and other performance metrics
 - A pluggable "writers" framework for recording test outcomes in any format, including a standard JUnit-compatible XML results writer in the box
-- Integrated support for running PyUnit tests
+- Integrated support for running PyUnit tests, in case your application is also written in Python
 - Integrated support for executing manual interactively driven test cases
 - Test categorization and selective include/exclude execution, using per-test classification groups
 
 
-Download
-========
-The PySys source package can be downloaded from https://pypi.org. There is also a Windows binary installer available for download on the project page at https://sourceforge.net/projects/pysys/ .
+Project Links
+=============
+- API documentation: https://pysys-test.github.io/pysys-test
+- Dowload releases, including example testcases: https://github.com/pysys-test/pysys-test/releases
+- Stackoverflow tag for questions: https://stackoverflow.com/tags/pysys
+- Change log: https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst
+- Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
+- Source respository: https://github.com/pysys-test/pysys-test
 
-API documentation is available at http://pysys.sourceforge.net/
+License and credits
+===================
+PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. See LICENSE.txt for details. 
+
+PySys was created and developed by Moray Grieve. The current maintainer is Ben Spiller. 
+
+This is a community effort so we welcome your contributions, whether enhancement issues or github pull requests! 
 
 Installation
 ============
+PySys can be installed into Python 3.5/3.6/3.7+ (recommended) or Python 2.7. 
 
-PySys can be used with Python 2.7 or Python 3.5 and later. 
+The best way to install PySys is using the standard 
+`pip <https://packaging.python.org/tutorials/installing-packages>`_ installer 
+to download and install the binary package (.whl) for the current PySys release 
+from, by executing::
 
-Dependencies
-------------
-Running on windows requires installation of the pywin32 extensions written 
-by Mark Hammond (http://sourceforge.net/projects/pywin32). 
+	> pip install pysys
 
-Those wishing to use the manual tester on unix systems also require the tcl/tk libraries to be installed 
-on the host machine and the Python version to be compiled with tcl/tk 
-support.
+Alternatively, you can download the binary .whl distribution from 
+https://github.com/pysys-test/pysys-test/releases and use `pip install XXX.whl` 
+instead. Make you have an up-to-date pip using `pip install --upgrade pip`. 
 
+Windows
+-------
+On Windows, pip will automatically install the 
+`pywin32 <https://pypi.org/project/pywin32/>`_ extensions written 
+by Mark Hammond which PySys depends upon. Windows users may optionally 
+install the `colorama <https://pypi.org/project/colorama/>`_ library 
+(using `pip install colorama`) to enable colored output on the console. 
 
-Windows Binary Installation
----------------------------
-Installation on windows via the binary distribution bundle is performed by 
-downloading the PySys-X.Y.Z.win32.exe installer executable and running. 
-Note that a common error on windows is in the execution of the post-install 
-script, where an error of the form below is reported::
-
-  close failed in file object destructor:
-  sys.excepthook is missing
-  lost sys.stderr
-
-If obtained, right click the installer executable in an explorer window, 
-and select "Troubleshoot Compatability". Select "Try recommended settings", 
-and then "Start the program ...".  
-
-
-Windows/Unix Source Installation
---------------------------------
-To install from source on unix or windows systems you should download the 
-source archive and perform the following (use winrar or winzip to unpack 
-on windows)::
-
- $ tar zxvpf PySys-X.Y.Z.tar.gz
- $ cd PySys-X.Y.Z
- $ python setup.py build
- $ python setup.py install
- 
-To install on both windows and unix systems you may need to have root 
-privileges on the machine. 
+The executable launcher script `pysys.py` is installed into the `Scripts\` 
+directory of the Python installation, e.g. `c:\Python\Scripts\pysys.py`. 
+To allow easy invocation of PySys from any test directory you may wish to add 
+the Scripts directory to your `PATH` or copy the script to a location that is 
+already on `PATH`. 
 
 
-The 'pysys.py' launcher 
------------------------
-PySys installs a launcher script 'pysys.py' as part of the installation 
-process to facilitate the management and execution of testcases. On unix 
-systems the script is installed into the Python binary directory, e.g. 
-/usr/local/bin, and is hence on the default user's path. On windows systems 
-the script is installed into the Scripts directory of the Python 
-installation, e.g. c:\Python\Scripts\pysys.py, which is not by default on 
-the user's path. To run on windows systems the Scripts directory of the 
-Python installation should be added to the user's path to allow direct 
-execution of the script. 
+Unix
+----
+On Unix, those wishing to use the manual tester should ensure they have 
+installed the tcl/tk libraries on the host machine and are using a Python 
+version that was compiled with tcl/tk support.
 
-After installation, to see the available options to the pysys.py script use::
-
-  $ pysys.py --help
-  
-The script takes four main top level command line options to it, namely 
-'run', 'print', 'make' and 'clean', which are used to run a set of testcases, 
-print the meta data for a set of testcases, make a new testcase directory 
-structure, or clean all testcase output. For more information on the further 
-options available to each add --help after the top level option, e.g.::
-
-  $ pysys.py run --help
+The executable launcher script `pysys.py` is installed into Python's binary 
+directory, e.g. `/usr/local/bin`, and hence should be on the current user's 
+`PATH` automatically; if not, just add it. 
 
 
 Getting Started
 ===============
-PySys comes with a set of simple example testcases to demonstrate its use for running 
-automated and manual testcases. 
+After installation, to see the available options to the pysys.py script use::
 
-The samples are distributed in a unix line ending friendly tar.gz archive, and a windows line ending friendly zip file. 
-To unpack the tests on unix systems use::
+  > pysys.py --help
+  
+The script takes four main top level command line options to it: 
+`run`, `print`, `make` and `clean`, which are used to run a set of testcases, 
+print the meta data for a set of testcases, make a new testcase directory 
+structure, or clean all testcase output. For more information on the further 
+options available to each add --help after the top level option, e.g. ::
 
- $ tar zxvpf PySys-examples.X.Y.Z.tar.gz
- $ cd pysys-examples
+  > pysys.py run --help
+
+
+PySys has a set of simple example testcases to demonstrate its use for 
+running automated and manual testcases. 
+
+The samples can be downloaded as a `.tar.gz` containing files with Unix line 
+endings, or a `.zip` using Windows line endings from 
+https://github.com/pysys-test/pysys-test/releases.
+
+To unpack the tests on Unix systems, use::
+
+	> tar zxvpf PySys-examples.X.Y.Z.tar.gz
+	> cd pysys-examples
 
 To run the testcases, after changing directory to the testcases location, 
 simply execute::
 
- $ pysys.py run  
+	> pysys.py run  
 
+When creating your own test suite you should copy the `pysysproject.xml` 
+file from the examples directory into the root of your tests to get 
+a good set of default settings which you can then customize as needed. 
 
-License
-=======
-PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. 
-
-See pysys-license.txt for details. 
+For reference information about the PySys API, see
+https://pysys-test.github.io/pysys-test.
