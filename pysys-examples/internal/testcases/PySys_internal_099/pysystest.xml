@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Packaging - check licenses and readme are available</title>    
+    <purpose><![CDATA[
+Ensure that whether we hve the correct licenses and text files available where this is a source or binary distribution. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>pysys-packaging</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
