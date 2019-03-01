@@ -121,7 +121,7 @@ deploy:
     overwrite: true
     on: 
        # by default we only create a draft release for commits to master
-       branch: master
+       branch: latest
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
        condition: $TRAVIS_PYTHON_VERSION = 2.7
 
@@ -141,6 +141,6 @@ deploy:
     
     on: 
        # only publish doc for released version
-       branch: master
+       branch: latest
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
        condition: $TRAVIS_PYTHON_VERSION = 2.7
