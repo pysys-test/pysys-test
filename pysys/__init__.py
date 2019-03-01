@@ -41,18 +41,21 @@ testcases provides a single framework for all test organisation requirements.
 import sys, logging, threading
 
 __author__  = "Moray Grieve"
-"""The author of PySys."""
+"""The original author of PySys."""
 
-__author_email__ = "moraygrieve@users.sourceforge.net"
-"""The author's email address."""
+__maintainer__  = "Ben Spiller"
+"""The current lead maintainer of PySys."""
+
+__maintainer_email__ = "pysys-dev@googlegroups.com"
+"""The maintainer e-mail address."""
 
 __status__  = "Production"
 """The status of this release."""
 
-__version__ = "1.3.0"
+__version__ = "1.4.0.dev1"
 """The version of this release."""
 
-__date__ = "13-July-2018"
+__date__ = "yyyy-mm-dd"
 """The date of this release."""
 
 __license__ = "GNU Lesser General Public License"
