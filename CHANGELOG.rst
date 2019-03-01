@@ -1,39 +1,66 @@
-PySys 1.3.0 Release Notes
+=========================
+PySys 1.4.0 Release Notes
 =========================
 
-PySys can be used with Python 2.7 or Python 3.5 and later. 
+PySys can be used with Python 3.5+ or Python 2.7. 
 
 See installation notes in README.rst for more details.
 
-
+--------------------------
 What's new in this release
 --------------------------
+
+Changes affecting compatibility
+-------------------------------
+
+- todo
+
+
+
+New features
+------------
+
+- todo
+
+Bug fixes
+---------
+
+- todo
+
+---------------
+Release History
+---------------
+
+1.2.0 to 1.3.0
+--------------
 Changes affecting compatibility:
-- Fixed assertDiff (and filediff) handling of "include" expressions list to 
-  filter out lines if no include expressions match (as documented) rather 
-  than if any include expressions match. This fix may cause tests to fail 
+
+- Fixed `BaseTest.assertDiff` (and filediff) handling of "include" expressions 
+  list to filter out lines if no include expressions match (as documented) 
+  rather than if any include expressions match. This fix may cause tests to fail 
   that had previously - and incorrectly - passed as a result of all lines 
   being filtered out before the comparison. There is also now a message 
   logged at warn level when every line in a file comparison is filtered 
   out, since in most cases this is not desirable behaviour. 
-- Changed "pysys.py run" to return a non-zero exit code if any tests 
+- Changed `pysys.py run` to return a non-zero exit code if any tests 
   failed, whereas previously it would return 0.
  
 Other fixes and new features:
+
 - PySys now provides 'single-source' support for both Python 2.7 and 
   Python 3.x, without the need for the 2to3.py script to be run at 
   installation time for use with Python 3.
 - Added support for specifying what file encoding is to be used for reading 
-  and writing text files (for example in waitForSignal and various 
+  and writing text files (for example in `waitForSignal` and various 
   assertions). This is especially important for Python 3 where text files 
   are processed using unicode character strings rather than Python 2 
   byte "str" objects. The encoding can be specified explicitly on 
   individual methods the open files, or globally based on file names 
-  or extensions by overriding the new ProcessUser.getDefaultFileEncoding() 
-  method. For example, getDefaultFileEncoding could be overridden to 
+  or extensions by overriding the new `ProcessUser.getDefaultFileEncoding()` 
+  method. For example, `getDefaultFileEncoding` could be overridden to 
   specify that .xml files should be treated as UTF-8 by default. If 
   the encoding is not specified explicitly or through 
-  getDefaultFileEncoding(), Python selects the preferred encoding based 
+  `getDefaultFileEncoding()`, Python selects the preferred encoding based 
   on the locale that it is running in. 
 - Changed the way multiple cycles are executed in multi-threaded mode to 
   allow tests from different cycles to execute in parallel instead of waiting 
@@ -41,19 +68,19 @@ Other fixes and new features:
   improved parallelism makes it much easier to reproduce race 
   conditions demonstrated by a single testcase, which was not possible 
   with the previous threading behaviour. To maintain existing 
-  behaviour for users who have provided a runner.cycleComplete() method, 
-  concurrent cycle execution will be disabled if cycleComplete() is overridden. 
+  behaviour for users who have provided a `runner.cycleComplete()` method, 
+  concurrent cycle execution will be disabled if `cycleComplete()` is overridden. 
   Anybody affected by this is encouraged to transition away from use of 
-  cycleComplete() and perform any required cleanup tasks in 
-  BaseTest.cleanup() or BaseRunner.testComplete() instead. 
-- Added requires-python and requires-pysys elements to the project XML 
+  `cycleComplete()` and perform any required cleanup tasks in 
+  `BaseTest.cleanup()` or `BaseRunner.testComplete()` instead. 
+- Added `<requires-python>` and `<requires-pysys>` elements to the project XML 
   file which allow checking for the specified minimum python or pysys 
   version, resulting in a clear error if attempting to use the wrong 
   version. 
 - Added support for coloring console output to highlight passes, fails, 
   warnings and more. This is configured in the project configuration file. 
   Coloring can also be enabled or disabled for a particular user and/or 
-  machine using the PYSYS_COLOR=true/false environment variable override. 
+  machine using the `PYSYS_COLOR=true/false` environment variable override. 
   Coloring works on any terminal that supports ANSI escape sequences (e.g. 
   most Unix terminals). On Windows, which does not, it is possible to get 
   colored output by installing a package such as "colorama", which PySys will 
@@ -61,16 +88,18 @@ Other fixes and new features:
   colors used or to use alternative libraries for coloring on windows by 
   providing a custom ColorLogFormatter class. The colors used for each 
   category of log messages can be customized in the project configuration 
-  file, e.g. 
+  file, e.g. ::
+
   <formatter><property name="color:timed out" value="MAGENTA"/></formatter>
-- Added ProcessUser.getExprFromFile helper method to automate the common task 
+
+- Added `ProcessUser.getExprFromFile` helper method to automate the common task 
   of retrieving some text from a file, for example to capture information 
   such as a process identifier from a log file, or to extract some 
   performance results that were logged. 
-- Added BaseTest.reportPerformanceResult() and a flexible framework for 
+- Added `BaseTest.reportPerformanceResult()` and a flexible framework for 
   recording performance results (e.g. throughput, latency etc) measured 
   by PySys tests, including storage of results in a human-readable and 
-  machine-parseable CSV file together with run-specific information 
+  machine-parsable CSV file together with run-specific information 
   such as the host where the test was executed. The CSV files can be 
   aggregated across multiple test runs and/or cycles and imported into 
   any spreadsheet for comparisons and more detailed analysis. The standard 
@@ -79,7 +108,7 @@ Other fixes and new features:
   other file format). Fibonacci_test_005 demonstrates how performance 
   results can be reported using this framework. 
 - Added support for providing a custom class to implement formatting of 
-  log messages, for both run.log and stdout. Errors in the <formatters> XML 
+  log messages, for both run.log and stdout. Errors in the `<formatters>` XML 
   node will now be treated as errors rather than being silently ignored. 
 - Changed pysys.py to ignore trailing slash characters on test ids, which 
   makes it easier to use shell tab completion to select a specific test. 
@@ -88,72 +117,72 @@ Other fixes and new features:
   not be parsed. Previously invalid test ids would be either silently 
   ignored without an error, or would result in other test ids being 
   executed more than once. 
-- Fixed startProcess to use the test output directory (rather than the current 
-  working directory) as the root when a relative path is specified 
-  for the workingDir argument. 
+- Fixed `ProcessUser.startProcess` to use the test output directory (rather 
+  than the current working directory) as the root when a relative path is 
+  specified for the workingDir argument. 
 - Fixed bug in which log level and exception tracebacks were being 
   inadvertently suppressed from the stdout console output when executing 
   from multiple threads. 
 - Fixed manual tester thread to report a BLOCKED outcome instead of hanging 
   if a fatal error occurs (e.g. Tck does not load due to DISPLAY not being 
   configured correctly). 
-- Added BaseResultsWriter class and associated docstring documentation to 
+- Added `BaseResultsWriter` class and associated docstring documentation to 
   make it easier to create new results writers. 
 - Changed standard record writers to report the number of cycles starting 
   from 1 rather than from 0 (which is consistent with how cycles are 
   displayed by the rest of PySys).
 - Extended the concept of "writers" to include not just "record" writers 
-  (which are enabled only when --record is specified) but also "summary" 
+  (which are enabled only when `--record` is specified) but also "summary" 
   writers which are always enabled and log a summary at the end of test 
   execution (if none is explicitly configured a default 
-  ConsoleSummaryResultsWriter is instantiated), and "progress" writers 
-  which are enabled only when --progress is specified and log progress 
+  `ConsoleSummaryResultsWriter` is instantiated), and "progress" writers 
+  which are enabled only when `--progress` is specified and log progress 
   information throughout a run. 
 - The monolithic logic for writing a summary to the console at the end of 
   test execution has been refactored out of baserunner and into 
-  the configurable and separately extendable ConsoleSummaryResultsWriter class. 
+  the configurable and separately extendable `ConsoleSummaryResultsWriter` class. 
   Any baserunner subclasses that are currently overriding the summary printing 
-  functionality and/or making use of the results dictionary returned by start() 
-  should now switch to using "summary" writers instead. This functionality 
-  will be removed in a future release and is now deprecated.
+  functionality and/or making use of the results dictionary returned by 
+  `start()` should now switch to using "summary" writers instead. This 
+  functionality will be removed in a future release and is now deprecated.
 - The default summary results writer now has a configuration parameter 
-  showOutcomeReason which causes the outcome reason string to be included 
+  `showOutcomeReason` which causes the outcome reason string to be included 
   underneath each failure outcome, to provide a quick summary of what went 
   wrong. 
 - The default summary results writer now has a configuration parameter 
-  showOutputDir which causes the path to the test's output directory 
+  `showOutputDir` which causes the path to the test's output directory 
   to be printed underneath each failure outcome, to make it easy to quickly 
   find and open the relevant files to debug the failure. 
-- Added a --progress command line option (can also be switched on using 
-  the PYSYS_PROGRESS=true environment variable), which logs a summary of 
+- Added a `--progress` command line option (can also be switched on using 
+  the `PYSYS_PROGRESS=true` environment variable), which logs a summary of 
   how many test have executed, outcomes, a list of most recent failure 
   reasons and a list of what other tests are currently executing. This 
   provides very helpful feedback to the user while executing a long 
   test run. The progress reporting is implemented in a fully extensible 
   way using a new kind of 'progress' result writer. A custom progress 
   result writer class can be configured for a project; if none is 
-  specified the default ConsoleProgressResultsWriter is added automatically. 
+  specified the default `ConsoleProgressResultsWriter` is added automatically. 
 - Fixed unexpected DEBUG logging on standard output after any of the 
-  Python logging.info/warn/error() methods is called. This behaviour was 
+  Python `logging.info/warn/error()` methods is called. This behaviour was 
   triggered if certain libraries (e.g SSL libraries) were not available 
   when python starts. 
-- Added defaultIgnoreExitStatus project property which controls whether 
-  non-zero return codes from startProcess() result in test failures, when the 
-  ignoreExitStatus flag is not explicitly specified. To retain the same 
-  behaviour for existing projects, defaultIgnoreExitStatus is set to True if 
+- Added `defaultIgnoreExitStatus` project property which controls whether 
+  non-zero return codes from `startProcess()` result in test failures, when the 
+  `ignoreExitStatus` flag is not explicitly specified. To retain the same 
+  behaviour for existing projects, `defaultIgnoreExitStatus` is set to True if 
   the property is not configured in the project configuration. However to 
   promote best practice for new PySys projects, the example pysys project 
-  configuration file sets defaultIgnoreExitStatus to False, which ensures 
-  that processes taht return failure codes are not ignored unless explicitly 
+  configuration file sets `defaultIgnoreExitStatus` to False, which ensures 
+  that processes that return failure codes are not ignored unless explicitly 
   intended by the author of the testcase. 
-- Fixed waitForSocket, which in previous versions immediately returned 
+- Fixed `waitForSocket`, which in previous versions immediately returned 
   success instead of waiting a valid socket connection as documented. 
 - If the test run is interrupted from the keyboard, the prompt that asks 
   whether to continue to run tests is no longer displayed if there are no more 
   tests left to run. The prompt can also be completely disabled using an 
-  environment variable PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT=true, for users who 
+  environment variable `PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT=true`, for users who 
   prefer Ctrl+C to immediately terminate the test run in all cases. 
-- Added pysys.utils.pycompat module containing a small set of helpers for 
+- Added `pysys.utils.pycompat` module containing a small set of helpers for 
   writing code that works with Python 2 and Python 3. 
 - Fixed writing to process stdin so that if a character string is passed in it 
   will be converted to a byte object automatically, using the default 
@@ -161,9 +190,6 @@ Other fixes and new features:
   Python 3, and in Python 2 it would only work if they contained only ascii 
   characters. 
 
-
-Release History
----------------
 1.1.1 to 1.2.0
 --------------
 - Added the errorExpr argument to the waitForSignal method. Occurrence of any
@@ -172,7 +198,7 @@ Release History
 - Refactored reconfiguration of global logging out of the pysys __init__.py
   class into the pysys.py launcher. This allows other applications making
   use of the PySys framework to make their own logging decisions.
-- Improved useability of the assertDiff method by writing out the unified
+- Improved usability of the assertDiff method by writing out the unified
   diff to a file in the output subdirectory so failures are easier to triage.
 - Added the literal argument to the assertGrep method to avoid having to
   escape regular expressions.
@@ -221,7 +247,7 @@ Release History
 0.9.2 to 0.9.3
 --------------
 - Added Darwin as a supported platform.
-- Added the maker tag to the pysysproject file to allow specifiying a
+- Added the maker tag to the pysysproject file to allow specifying a
   custom test maker class, e.g. to create specific run templates etc.
   See the pysysproject.xml file in pysys-examples for more information.
 - The make option to pysys.py now accepts the testcase directory to be
@@ -330,7 +356,7 @@ Release History
   in a non-atomic way, e.g using direct references to os.environ() in one 
   test when another test modifies the environment directly etc.
 - The constructor to the pysys.baserunner.BaseRunner class was changed to 
-  include the threads parameter, i.e.
+  include the threads parameter, i.e. ::
   
   	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs)
   	
