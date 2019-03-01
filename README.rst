@@ -42,6 +42,16 @@ This is a community effort so we welcome your contributions, whether enhancement
 
 Installation
 ============
+
+.. warning:: 
+   This document describes how the upcoming PySys version 1.4.0 can be 
+   installed, but as it has not yet been released on PyPi these instructions 
+   do not yet work. 
+   
+   To install PySys 1.3.0 or earlier, see the README provided with the 
+   release you're installing instead. 
+
+
 PySys can be installed into Python 3.5/3.6/3.7+ (recommended) or Python 2.7. 
 
 The best way to install PySys is using the standard 
