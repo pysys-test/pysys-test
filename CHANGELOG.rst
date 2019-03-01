@@ -20,12 +20,24 @@ Changes affecting compatibility
   the `XMLResultsWriter` is still available as a configuration option in 
   `pysysproject.xml`. 
 
+- The available options for installing PySys have been reworked and modernised. 
+  The recommended way to install PySys is by running `pip install PySys`. 
+  A binary `.whl` wheel is now available for the first time, which is more 
+  efficient, reliable and lightweight than other installation methods, and 
+  is used by the pip installer. The `tar.gz` source distribution is still 
+  available but is no longer a recommended installation mechanism. The Windows 
+  GUI installer is no longer published as this is superseded by the simpler 
+  installation experience provided by `pip`. 
+
+- HTML documentation of the PySys API is no longer installed locally by default, 
+  but is available on XXXXXX website or as a separate zip file. 
 
 
 New features
 ------------
 
-- todo
+- PySys can now be installed simply by running `pip install PySys`. 
+
 
 Bug fixes
 ---------
