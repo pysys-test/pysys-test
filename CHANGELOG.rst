@@ -2,7 +2,7 @@
 PySys 1.4.0 Release Notes
 =========================
 
-PySys can be used with Python 3.5+ or Python 2.7. 
+PySys can be used with Python 3.5/3.6/3.7+ or Python 2.7. 
 
 See installation notes in README.rst for more details.
 
@@ -30,7 +30,9 @@ Changes affecting compatibility
   installation experience provided by `pip`. 
 
 - HTML documentation of the PySys API is no longer installed locally by default, 
-  but is available on XXXXXX website or as a separate zip file. 
+  but is available on https://pysys-test.github.io/pysys-test website or as a 
+  separate zip file available from 
+  https://github.com/pysys-test/pysys-test/releases. 
 
 
 New features
@@ -386,7 +388,7 @@ Other fixes and new features:
   framework, and which can be referenced directly from the pysys.constants 
   module. Attached to this logger are two handler types; one for logging 
   to stdout, and one for logging to the run 
-  log file saved in the output subdirectory of each test. The sdtout 
+  log file saved in the output subdirectory of each test. The stdout 
   handler is set to only log to stdout from the main thread, whilst the 
   run log file handlers are set to log to the output subdirectory of a 
   test only on the creating thread.
@@ -401,7 +403,7 @@ Other fixes and new features:
 - The clean target has been updated to accept the -a | --all command line 
   option to allow deleting all derived files produced when running a set 
   of testcases, i.e. both the testcase output subdirectory and any 
-  compiled testclass modules.
+  compiled test class modules.
 - The waitForSignal method of the ProcessUser class, subclassed by both 
   the BaseTestand BaseRunner classes, has been updated to return a list of 
   match objects on invocation. By using tagged regular expressions in the 
@@ -417,7 +419,7 @@ Other fixes and new features:
 --------------
 - The PySys test and PySys project files have been renamed by default from  
   .pysystest to pysystest.xm, and .pysysproject to pysysproject.xml 
-  respectively. Backwards compatability is maintained for the previous 
+  respectively. Backwards compatibility is maintained for the previous 
   file naming convention, though this will be deprecated in a later 
   release; it is strongly advised that the new naming convention is 
   adopted. New tests made using the PySys launcher will by default use the 
@@ -440,7 +442,7 @@ Other fixes and new features:
   for display via XLST in a web browser. A simple XSL stylesheet is 
   included with the PySys distribution to provide better display in 
   internet browsers. 
-- Added the ability to specifiy custom test output summary writers in the 
+- Added the ability to specify custom test output summary writers in the 
   PySys project file via the <writer> tag. For an example see the 
   .pysysproject file in the pysys-examples distribution. Should no 
   <writer> be specified in the project file, the default 
@@ -510,7 +512,7 @@ Other fixes and new features:
   a default value of "env" is assumed (this allows for backwards compatibility).
 - The .pysysproject file now takes the file attribute to the <property> 
   element. This allows properties to be read from file, where the 
-  properties are specified in the name=value syntax, e.g.
+  properties are specified in the name=value syntax, e.g. ::
   
     <pysysproject>
       <property environment="env"/>
@@ -519,7 +521,7 @@ Other fixes and new features:
       <property name="lib" value="${library}_${osfamily}_${version}_${env.USER}.so"/>
     </pysysproject>
   
-  where the property file contains the following;
+  where the property file contains the following::
   
      version=1.0
      library=jstore${version}.jar
@@ -600,7 +602,7 @@ Other fixes and new features:
 
 0.3.1 to 0.3.2
 --------------
-- Release was superceded immediately by the 0.3.3 release. See release 
+- Release was superseded immediately by the 0.3.3 release. See release 
   notes for new features for 0.3.3 for more information.
 
 0.3.0 to 0.3.1
