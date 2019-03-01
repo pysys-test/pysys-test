@@ -17,7 +17,7 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 from __future__ import print_function
-import os.path, stat, getopt, logging
+import os.path, stat, getopt, logging, traceback
 
 from pysys import log
 
@@ -413,7 +413,7 @@ class ConsoleLaunchHelper(object):
 		print("       -y | --validateOnly         test the validate() method without re-running execute()")
 		print("       -X               KEY=VALUE  set user defined options to be passed through to the test and ")
 		print("                                   runner classes. The left hand side string is the data attribute ")
-		print("                                   to set, the right hand side string the value (True of not specified) ")
+		print("                                   to set, the right hand side string the value (True if not specified) ")
 		if printXOptions: printXOptions()
 		print("")
 		print("   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, ")
@@ -550,8 +550,9 @@ def runTest(args):
 				if cycledict.get(outcome, None): sys.exit(2)
 		sys.exit(0)
 	except Exception as e:
-		sys.stderr.write('\nWARN: %s\n' % e)
-		sys.exit(-1)
+		sys.stderr.write('\nPYSYS FATAL ERROR: %s\n' % e)
+		traceback.print_exc()
+		sys.exit(10)
 
 def printTest(args):
 	try:

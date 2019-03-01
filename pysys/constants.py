@@ -222,6 +222,6 @@ def loadproject(start):
 		traceback.print_exc()
 		sys.exit(1)
 	except Exception as e:
-		sys.stderr.write("ERROR: %s - %s\n"%(e.__class__.__name__, e))
+		sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
 		sys.exit(1)
 
