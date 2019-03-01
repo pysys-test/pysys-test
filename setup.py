@@ -76,7 +76,7 @@ setup(
 		'Tracker': 'https://github.com/pysys-test/pysys-test/issues',
 		'Change Log': 'https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst',
 		'Stackoverflow Tag': 'https://stackoverflow.com/tags/pysys', 
-		'Download Examples': 'https://github.com/pysys-test/pysys-test/releases',
+		'Download Samples': 'https://github.com/pysys-test/pysys-test/releases',
 	},
 
 	version=pysys.__version__,

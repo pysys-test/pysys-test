@@ -26,7 +26,7 @@ Key features include:
 Project Links
 =============
 - API documentation: https://pysys-test.github.io/pysys-test
-- Dowload releases, including example testcases: https://github.com/pysys-test/pysys-test/releases
+- Download releases, including sample testcases: https://github.com/pysys-test/pysys-test/releases
 - Stackoverflow tag for questions: https://stackoverflow.com/tags/pysys
 - Change log: https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
@@ -73,8 +73,8 @@ by Mark Hammond which PySys depends upon. Windows users may optionally
 install the `colorama <https://pypi.org/project/colorama/>`_ library 
 (using `pip install colorama`) to enable colored output on the console. 
 
-The executable launcher script `pysys.py` is installed into the `Scripts\` 
-directory of the Python installation, e.g. `c:\Python\Scripts\pysys.py`. 
+The executable launcher script `pysys.py` is installed into the `Scripts\\` 
+directory of the Python installation, e.g. `c:\\Python\\Scripts\\pysys.py`. 
 To allow easy invocation of PySys from any test directory you may wish to add 
 the Scripts directory to your `PATH` or copy the script to a location that is 
 already on `PATH`. 
@@ -106,7 +106,7 @@ options available to each add --help after the top level option, e.g. ::
   > pysys.py run --help
 
 
-PySys has a set of simple example testcases to demonstrate its use for 
+PySys has a set of simple sample testcases to demonstrate its use for 
 running automated and manual testcases. 
 
 The samples can be downloaded as a `.tar.gz` containing files with Unix line 
@@ -115,7 +115,7 @@ https://github.com/pysys-test/pysys-test/releases.
 
 To unpack the tests on Unix systems, use::
 
-	> tar zxvpf PySys-examples.X.Y.Z.tar.gz
+	> tar zxvpf PySys-VERSION-sample-testcases-unix.tar.gz
 	> cd pysys-examples
 
 To run the testcases, after changing directory to the testcases location, 
@@ -124,7 +124,7 @@ simply execute::
 	> pysys.py run  
 
 When creating your own test suite you should copy the `pysysproject.xml` 
-file from the examples directory into the root of your tests to get 
+file from the examples directory into the root of your tests directory to get 
 a good set of default settings which you can then customize as needed. 
 
 For reference information about the PySys API, see
