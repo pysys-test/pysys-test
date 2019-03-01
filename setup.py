@@ -34,10 +34,10 @@ def get_site_packages_path():
 	else:
 		return os.path.join("lib", "python%s" % sys.version[:3], "site-packages")
 
-data_files = [(get_site_packages_path(), ['pysys-dist/pysys-release.txt']),
-					  (get_site_packages_path(), ['pysys-dist/pysys-licence.txt']),
+data_files = [(get_site_packages_path(), ['CHANGELOG.rst']),
+					  (get_site_packages_path(), ['LICENSE.txt']),
 					  (get_site_packages_path(), ['pysys-dist/pysys-log.xsl']),
-					  (get_site_packages_path()+'/pysys', ['pysys-dist/README.rst']),
+					  (get_site_packages_path()+'/pysys', ['README.rst']),
 					  ]
 if IS_WINDOWS: data_files.append(('%s/pysys-doc' % get_site_packages_path(), glob.glob('pysys-doc/*.*')))
 
@@ -67,29 +67,29 @@ CLASSIFIERS = [
 ]
 KEYWORDS = ['testing', 'qa', 'system testing', 'integration testing', 'unit testing']
 
-with codecs.open( (os.path.abspath(os.path.dirname(__file__))+'/pysys-dist/README.rst').replace('\\','/').replace('pysys-dist/pysys-dist','pysys-dist'), "rb", "ascii") as f:
+with codecs.open( (os.path.abspath(os.path.dirname(__file__))+'/README.rst'), "rb", "ascii") as f:
 	long_description = f.read()
 
 setup(cmdclass = {'build_py': build_py},
-	  name='PySys',
-	  description='Python System Test Framework',
-	  url="http://www.sourceforge.net/projects/pysys",
-	  version=pysys.__version__,
-	  author=pysys.__author__,
-	  maintainer=pysys.__author__,
-	  license=pysys.__license__,
-	  author_email=pysys.__author_email__,
-	  keywords=KEYWORDS,
-	  classifiers=CLASSIFIERS,
-	  long_description=long_description,
-	  long_description_content_type='text/x-rst',
-	  python_requires=">=2.7, <4", # be flexible
-	  scripts = ['pysys-dist/scripts/pysys.py', 'pysys-dist/scripts/pysys_postinstall.py'] if IS_WINDOWS
-	  	else ['pysys-dist/scripts/pysys.py'],
-	  packages=['pysys', 'pysys.launcher',  'pysys.manual',
-				'pysys.process', 'pysys.process.plat-win32', 
-				'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
-				'pysys.writer', 'pysys.xml'],
-	  data_files=data_files,
-	)
-	
+	name='PySys',
+	description='Python System Test Framework',
+	url="http://www.sourceforge.net/projects/pysys",
+	version=pysys.__version__,
+	author=pysys.__author__,
+	maintainer=pysys.__author__,
+	license=pysys.__license__,
+	author_email=pysys.__author_email__,
+	keywords=KEYWORDS,
+	classifiers=CLASSIFIERS,
+	long_description=long_description,
+	long_description_content_type='text/x-rst',
+	python_requires=">=2.7, <4", # be flexible
+	scripts = ['scripts/pysys.py', 'scripts/pysys_postinstall.py'] if IS_WINDOWS
+	else ['scripts/pysys.py'],
+	packages=['pysys', 'pysys.launcher',  'pysys.manual',
+			'pysys.process', 'pysys.process.plat-win32', 
+			'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
+			'pysys.writer', 'pysys.xml'],
+	data_files=data_files,
+)
+
