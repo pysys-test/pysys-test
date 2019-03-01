@@ -107,7 +107,15 @@ class XMLProjectParser(object):
 			requirespysys = requirespysys[0].firstChild.nodeValue
 			if requirespysys:
 				thisversion = __version__
-				if list(map(int, thisversion.split('.'))) < list(map(int, requirespysys.split('.'))):
+				
+				def compareVersions(v1, v2):
+					v1 = [int(i) if i.isdigit() else i for i in v1.split('.')]
+					v2 = [int(i) if i.isdigit() else i for i in v2.split('.')]
+					if v1 > v2: return 1
+					if v1 == v2: return 0
+					return -1
+				
+				if compareVersions(thisversion, requirespysys) < 0:
 					raise Exception('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
 
 
