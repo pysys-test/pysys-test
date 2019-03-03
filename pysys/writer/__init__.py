@@ -565,7 +565,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 	def purgeDirectory(self, dir, delTop=False):
 		"""
-		@deprecated: Use L{fileutils.deletedir} instead. 
+		@deprecated: Use L{pysys.fileutils.deletedir} instead. 
 		"""
 		for file in os.listdir(dir):
 			path = os.path.join(dir, file)
