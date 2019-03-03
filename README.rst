@@ -49,6 +49,12 @@ Key features include:
 
 Project Links
 =============
+.. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=latest
+	:target: https://travis-ci.com/pysys-test/pysys-test
+
+.. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/latest/graph/badge.svg
+	:target: https://codecov.io/gh/pysys-test/pysys-test
+
 - API documentation: https://pysys-test.github.io/pysys-test
 - Download releases, including sample testcases: https://github.com/pysys-test/pysys-test/releases
 - Stackoverflow tag for questions: https://stackoverflow.com/tags/pysys
