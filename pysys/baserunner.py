@@ -685,7 +685,7 @@ class TestContainer(object):
 		@param dir: The top level directory to be purged
 		@param delTop: Indicates if the top level directory should also be deleted
 
-		@deprecated: Use L{fileutils.deletedir} instead. 
+		@deprecated: Use L{pysys.fileutils.deletedir} instead. 
 		"""
 		try:
 			for file in os.listdir(dir):

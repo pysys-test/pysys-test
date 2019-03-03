@@ -89,10 +89,10 @@ New features
 Bug fixes
 ---------
 
-- Fixed startProcess to add a BLOCKED test outcome when a process fails to 
-  start due to a ProcessError, unless ignoreExitStatus=True. Previously this 
-  flag only affected non-zero exit codes resulting in ProcessError failures 
-  getting ignored. 
+- Fixed `startProcess()` to add a `BLOCKED` test outcome when a process fails 
+  to start due to a `ProcessError`, unless `ignoreExitStatus=True`. Previously 
+  this flag only affected non-zero exit codes, resulting in `ProcessError` 
+  failures getting ignored. 
 
 - `JUnitXMLResultsWriter` and `XMLResultsWriter` now write using UTF-8 
   encoding rather than local/default encoding, and also include the 
@@ -104,7 +104,7 @@ Bug fixes
   prevent the test log being written to disk if executed in multi-threaded 
   mode. Only affects Python 2. 
 
-- Fixed startProcess to correctly handle passing empty arguments, 
+- Fixed `startProcess()` to correctly handle passing empty arguments, 
   and arguments containing spaces, quotes and glob characters on Windows. 
   Previously, empty arguments were skipped, and arguments containing spaces 
   were only handled correctly if first character was not a space. 

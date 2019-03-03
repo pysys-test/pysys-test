@@ -411,24 +411,34 @@ class ProcessUser(object):
 		If the regular expression is not seen in the file matching the supplied condition within the 
 		specified timeout interval, the method returns to the caller.
 		
-		Example:
-		self.waitForSignal('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
-			errorExpr=[' ERROR ', ' FATAL '], encoding='utf-8')
+		Example::
+		
+			self.waitForSignal('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
+				errorExpr=[' ERROR ', ' FATAL '], encoding='utf-8')
 
 		@param file: The absolute or relative name of the file used to wait for the signal
+		
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		
 		@param expr: The regular expression to search for in the text file
+		
 		@param condition: The condition to be met for the number of lines matching the regular expression
+		
 		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
+		
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
+		
 		@param process: If a handle to the process object producing output is specified, the wait will abort if 
-			the process dies before the expected signal appears.
+		the process dies before the expected signal appears.
+		
 		@param errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
-			for the main expression to be aborted with an error outcome. This is useful to avoid waiting a long time for 
-			the expected expression when an ERROR is logged that means it will never happen, and also provides 
-			much clearer test failure messages in this case. 
+		for the main expression to be aborted with an error outcome. This is useful to avoid waiting a long time for 
+		the expected expression when an ERROR is logged that means it will never happen, and also provides 
+		much clearer test failure messages in this case. 
+		
 		@param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
-			project setting)
+		project setting)
+		
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 
