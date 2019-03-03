@@ -37,8 +37,11 @@ class PySysTest(BaseTest):
 		# validate against the reference file
 
 		ignores=['SYSTEMROOT','LD_LIBRARY_PATH', 'PYTHONPATH']
+		
 		if PLATFORM=='darwin':
 			ignores.append('VERSIONER_PYTHON')
 			ignores.append('__CF_USER_TEXT_ENCODING')
+		# also ignore env vars that Pythong sometimes sets on itself
+		ignores.append('LC_CTYPE')
 
 		self.assertDiff("environment.out", "ref_environment.out", ignores=ignores)
