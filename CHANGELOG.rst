@@ -122,6 +122,7 @@ Bug fixes
   the threads that existed when the process monitor was started).
 
 
+---------------
 Release History
 ---------------
 
