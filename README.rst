@@ -1,26 +1,50 @@
 What is PySys?
 ==============
-PySys is an easy-to-use cross-platform framework for writing and orchestrating all your system/integration tests, fully integrated with your unit and manual tests. 
+PySys is an easy-to-use cross-platform framework for writing and orchestrating 
+all your system/integration tests, fully integrated with your unit and manual 
+tests. 
 
-It provides a comprehensive package of utility methods to make all the common system/integration testing operations a breeze, as well as the flexibility to add whatever test execution and validation logic you need using the full power of the Python language. If you've ever tried to repurpose a unit-test oriented framework such as JUnit/NUnit for writing system tests you'll find PySys makes your life a lot easier - there's no need to wait for testcase code to compile, put up with limited access to platform-specific APIs, or write a huge library of custom helper classes to deal with the process orchestration and log file checking aspects of integration testing. It's also a lot more powerful and easy to maintain than writing platform-specific shell scripts. Whatever language the application you're testing is written in, and whatever platforms it needs to run on, PySys can help!
+It provides a comprehensive package of utility methods to make all the common 
+system/integration testing operations a breeze, as well as the flexibility to 
+add whatever test execution and validation logic you need using the full power 
+of the Python language. If you've ever tried to repurpose a unit-test oriented 
+framework such as JUnit/NUnit for writing system tests you'll find PySys makes 
+your life a lot easier - there's no need to wait for testcase code to compile, 
+put up with limited access to platform-specific APIs, or write a huge library 
+of custom helper classes to deal with the process orchestration and log file 
+checking aspects of integration testing. It's also a lot more powerful and easy 
+to maintain than writing platform-specific shell scripts. Whatever language the 
+application you're testing is written in, and whatever platforms it needs to 
+run on, PySys can help!
+
 
 Key features include:
 
-- A comprehensive library of assertion methods appropriate for system-level testing, such as checking for error/success messages in log files and comparing the contents of output files
-- A comprehensive library of methods to automate platform-independent process starting, orchestration, and cleanup, for both Windows and Unix-based systems. Includes common operations such as:
+- A comprehensive library of assertion methods appropriate for system-level 
+  testing, such as checking for error/success messages in log files and 
+  comparing the contents of output files.
+- A comprehensive library of methods to automate platform-independent process 
+  starting, orchestration, and cleanup, for both Windows and Unix-based 
+  systems. Includes common operations such as:
 
-  * dynamic port allocation, 
-  * waiting until a server is running on a specified port
-  * waiting until a file contains a specified message, 
-  * aborting early if an error message is detected
+   * dynamic port allocation, 
+   * waiting until a server is running on a specified port
+   * waiting until a file contains a specified message, 
+   * aborting early if an error message is detected
 
-- Support for executing tests in parallel to significantly speed up execution time
-- A process memory monitoring framework to check for memory leaks when soak testing your application
-- A performance monitoring framework for recording and aggregating latency, throughput and other performance metrics
-- A pluggable "writers" framework for recording test outcomes in any format, including a standard JUnit-compatible XML results writer in the box
-- Integrated support for running PyUnit tests, in case your application is also written in Python
-- Integrated support for executing manual interactively driven test cases
-- Test categorization and selective include/exclude execution, using per-test classification groups
+- Support for executing tests in parallel to significantly speed up execution 
+  time.
+- A process memory monitoring framework to check for memory leaks when soak 
+  testing your application.
+- A performance monitoring framework for recording and aggregating latency, 
+  throughput and other performance metrics.
+- A pluggable "writers" framework for recording test outcomes in any format, 
+  including a standard JUnit-compatible XML results writer in the box.
+- Integrated support for running PyUnit tests, in case your application is also 
+  written in Python.
+- Integrated support for executing manual interactively driven test cases.
+- Test categorization and selective include/exclude execution, using per-test 
+  classification groups.
 
 
 Project Links
@@ -34,36 +58,42 @@ Project Links
 
 License and credits
 ===================
-PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. See LICENSE.txt for details. 
+PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. See 
+LICENSE.txt for details. 
 
-PySys was created and developed by Moray Grieve. The current maintainer is Ben Spiller. 
+PySys was created and developed by Moray Grieve. The current maintainer is 
+Ben Spiller. 
 
-This is a community effort so we welcome your contributions, whether enhancement issues or github pull requests! 
+This is a community effort so we welcome your contributions, whether 
+enhancement issues or GitHub pull requests! 
 
 Installation
 ============
 
 .. warning:: 
-   This document describes how the upcoming PySys version 1.4.0 can be 
-   installed, but as it has not yet been released on PyPi these instructions 
-   do not yet work. 
-   
-   To install PySys 1.3.0 or earlier, see the README provided with the 
-   release you're installing instead. 
+	This document describes how the upcoming PySys version 1.4.0 can be 
+	installed, but as it has not yet been released on PyPi these instructions 
+	do not yet work. 
+
+	To install PySys 1.3.0 or earlier, see the README provided with the 
+	release you're installing instead. 
 
 
 PySys can be installed into Python 3.5/3.6/3.7+ (recommended) or Python 2.7. 
 
-The best way to install PySys is using the standard 
-`pip <https://packaging.python.org/tutorials/installing-packages>`_ installer 
-to download and install the binary package (.whl) for the current PySys release 
-from, by executing::
+The best way to install PySys is using the standard `pip` installer 
+to download and install the binary package (`.whl`) for the current PySys 
+release, by executing::
 
-	> pip install pysys
+	> python -m pip install pysys
 
 Alternatively, you can download the binary .whl distribution from 
-https://github.com/pysys-test/pysys-test/releases and use `pip install XXX.whl` 
-instead. Make you have an up-to-date pip using `pip install --upgrade pip`. 
+https://github.com/pysys-test/pysys-test/releases and use 
+`python -m pip install PySys-<VERSION>.whl` instead. 
+
+Make you have an up-to-date pip using `python -m pip install --upgrade pip`.
+See https://packaging.python.org/tutorials/installing-packages for 
+more information about using `pip`.
 
 Windows
 -------
@@ -71,7 +101,8 @@ On Windows, pip will automatically install the
 `pywin32 <https://pypi.org/project/pywin32/>`_ extensions written 
 by Mark Hammond which PySys depends upon. Windows users may optionally 
 install the `colorama <https://pypi.org/project/colorama/>`_ library 
-(using `pip install colorama`) to enable colored output on the console. 
+(using `python -m pip install colorama`) to enable colored output on the 
+console. 
 
 The executable launcher script `pysys.py` is installed into the `Scripts\\` 
 directory of the Python installation, e.g. `c:\\Python\\Scripts\\pysys.py`. 
@@ -95,15 +126,15 @@ Getting Started
 ===============
 After installation, to see the available options to the pysys.py script use::
 
-  > pysys.py --help
+	> pysys.py --help
   
 The script takes four main top level command line options to it: 
 `run`, `print`, `make` and `clean`, which are used to run a set of testcases, 
-print the meta data for a set of testcases, make a new testcase directory 
+print the metadata for a set of testcases, make a new testcase directory 
 structure, or clean all testcase output. For more information on the further 
 options available to each add --help after the top level option, e.g. ::
 
-  > pysys.py run --help
+	> pysys.py run --help
 
 
 PySys has a set of simple sample testcases to demonstrate its use for 
@@ -129,3 +160,58 @@ a good set of default settings which you can then customize as needed.
 
 For reference information about the PySys API, see
 https://pysys-test.github.io/pysys-test.
+
+
+How To Guide/FAQ
+================
+
+Platform detection
+------------------
+In addition to the features provided by Python itself, PySys includes some 
+constants to help quickly detect what platform is in use, such as OSFAMILY and 
+PLATFORM. It's very common to have one set of logic for Windows and another for 
+all non-Windows (Unix-based) platforms, and PySys has a dedicated constant for 
+that::
+
+	if IS_WINDOWS:
+		...
+	else:
+		...
+
+Skipping tests
+--------------
+If your run.py logic detects that a test should not be executed for this 
+platform or mode, simply use this near the top of the `execute()` method, 
+specifying the reason for the skip::
+
+	self.skipTest('MyFeature is not supported on Windows') 
+	
+As well as setting the test outcome and reason, this will raise an exception 
+ensuring that the rest of `execute()` and `validate()` do not get executed. 
+
+Checking for error messages in log files
+-----------------------------------------
+The `assertGrep()` method is an easy way to check that there are no error 
+messages in log files from processes started by PySys. Rather than checking for 
+an expression such as `' ERROR: '`, it is recommended to define your expression 
+so that the error message itself is included, e.g.::
+
+	self.assertGrep('myprocess.log', expr=' ERROR: .*', contains=False)
+
+This approach ensures that the error message itself is included in the test's 
+console output, run.log and the summary of failed test outcomes, which avoids 
+the need to open up the individual logs to find out what happened, and makes it 
+much easier to triage test failures, especially if several tests fail for the 
+same reason. 
+
+Sharing logic for validation across tests
+-----------------------------------------
+Often you may have some standard logic that needs to be used in the validation 
+of many/all testcases, such as checking log files for errors. One recommended 
+pattern for this is to define a helper function in a custom `BaseTest` 
+subclassed by all your tests that is named after what is being checked - for 
+example `checkLogsForErrors()` - and explicitly call that method from 
+the `.validate()` method of each test. That approach allows you to later 
+customize the logic by changing just one single place, and also to omit it for 
+specific tests where it is not wanted. 
+
