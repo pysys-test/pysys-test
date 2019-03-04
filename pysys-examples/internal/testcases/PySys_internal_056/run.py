@@ -9,7 +9,7 @@ class PySysTest(BaseTest):
 		self.assertTrue(False)
 		self.addOutcome(TIMEDOUT, 'simulated timeout')
 		self.assertTrue(True)
-		self.assertGrep('not_there', expr="")
+		self.assertGrep('not_there', expr="xxx")
 		self.checkOutcome()
 		
 	def checkOutcome(self):
