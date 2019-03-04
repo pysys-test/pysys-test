@@ -43,6 +43,7 @@ class PySysTest(BaseTest):
 				r['LANG'] = LANG # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
 				r['LANGUAGE'] = LANG # needed on some Ubuntu versions
 				r['LC_ALL'] = LANG
+				r['LC_CTYPE'] = LANG
 				r['PYTHONCOERCECLOCALE'] = '0' # to allow us to test i18n cases, need to forcibly disable Python 3.7's attempt to use UTF-8 when in a C locale
 			return r
 		
