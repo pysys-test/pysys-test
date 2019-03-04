@@ -12,6 +12,8 @@ TEST_ENCODING = 'latin-1' if locale.getpreferredencoding().lower() == 'utf-8' el
 class PySysTest(BaseTest):
 	def execute(self):
 		self.log.info('Python local/default/preferred encoding is %s; will test with non-local encoding %s', locale.getpreferredencoding(), TEST_ENCODING)
+		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+
 		with io.open(self.output+'/test-local.txt', 'w', encoding=locale.getpreferredencoding()) as f:
 		#with open(self.output+'/test-local.txt', 'w') as f:
 			f.write(os.linesep.join([TEST_STR, TEST_STR, 'otherstring']))
