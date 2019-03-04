@@ -4,7 +4,7 @@ import logging, os, sys, locale
 
 # purely a hack to allow us to patch getpreferredencoding() before the coloring initializes (and before runner starts opening run.log files etc)
 
-if os.getenv('LANG','') and 'win' in sys.platform:
+if os.getenv('LANG',''):# and 'win' in sys.platform:
 	# bizarely Python has no cross-platform way to customize the preferred encoding via env vars, so have to monkey-patch locale module to get consistent testing on Windows
 	encodingoverride = os.getenv('LANG','').split('.')[-1]
 	def customized_getpreferredencoding(do_setlocale=True): 
