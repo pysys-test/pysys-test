@@ -40,6 +40,15 @@ Changes affecting compatibility
   signature is now deprecated. As this API was added in 1.3.0 no other versions 
   are affected. 
 
+   
+- Added `pysys.writers.replaceIllegalXMLCharacters()` utility function, and use 
+  it to avoid `XMLResultsWriter` and `JUnitXMLResultsWriter` from generating 
+  invalid XML if `run.log` or outcome reason contain characters not permitted 
+  by XML. Also ASCII control characters (e.g. coloring instructions 
+  from other tools) are now stripped out of all outcome reason strings 
+  (including in run.log and non-XML based writers) since such characters 
+  are not useful and make summary test results harder to read. 
+  
 
 New features
 ------------
@@ -84,45 +93,37 @@ New features
 - Outcome reason now has a suffix specifying how many additional failure 
   outcomes were logged (so if you have a complex test you can see at a glance 
   if there's just one problem to resolve, or 5, or 20!).
-- Added support for configuring the default encodings to use for common file 
-  patterns in the pysysproject.xml configuration, e.g. 
-  <default-file-encoding pattern="*.yaml" encoding="utf-8"/>. The 
-  pysys-examples/pysysproject.xml sample project configuration file now 
-  sets utf-8 as the default encoding for XML, json and yaml files, and also 
-  for testcase run.log files (though run.log continues to be written in local encoding 
-  unless the project file is updated). For more information on this feature, 
-  see comments in pysysproject.xml and in ProcessUser.getDefaultFileEncoding().
-- The default implementation of BaseTest.getDefaultFileEncoding() now delegates 
-  to the runner's implementation, allowing customizations to be performed 
-  in just one place if desired. 
-- Added pysys.writers.replaceIllegalXMLCharacters utility function, and use it 
-  to avoid XMLResultsWriter and JUnitXMLResultsWriter from generating invalid 
-  XML if run.log or outcome reason contained characters not permitted by 
-  XML. Also ASCII control characters (e.g. colouring instructions 
-  from other tools) are now stripped out of all outcome reason strings 
-  (including in run.log and non-XML based writers) since such characters 
-  are not useful and make summary test results harder to read. 
-- Use of print() rather than self.log is a common mistake that results in 
-  essential diagnostic information showing up on the console but not 
-  stored in run.log. PySys will now catch output written using print() 
-  statements and redirect it to the logging framework, so it will show up 
-  in run.log. 
-- Fixed bug in which random log lines might not be written to run.log and/or 
-  stdout when running tests multi-threaded (as a result of an underlying 
-  python bug https://bugs.python.org/issue35185).
-- Fixed startProcessMonitor() on Windows to take a few seconds instead of a few 
-  minutes, by using the Process performance counter to get % Processor Time 
-  instead of the Thread counter (the values reported by previous versions were 
-  probably not correct, as they only measured CPU for the threads that existed 
-  when the process monitor was started).
-- Fixed startProcessMonitor() on Windows to return correct values - was 
-  returning negative values for large numbers such as the virtual memory usage. 
-
 
 - Added `runLogOutput=` parameter to the `processResult()` method of 
   the `BaseResultsWriter` API so that writers such as the 
   `JUnitXMLResultsWriter` can include the test output with no loss of unicode 
   character information. 
+
+- Added support for configuring the default encodings to use for common file 
+  patterns in the `pysysproject.xml` configuration, e.g. ::
+  
+	<default-file-encoding pattern="*.yaml" encoding="utf-8"/>. 
+
+  The `pysys-examples/pysysproject.xml` sample project configuration file now 
+  sets utf-8 as the default encoding for XML, json and yaml files, and also 
+  for testcase run.log files (though run.log continues to be written in local 
+  encoding unless the project file is updated). For more information on this 
+  feature, see comments in `pysysproject.xml` and in 
+  `ProcessUser.getDefaultFileEncoding()`.
+  
+- The default implementation of `BaseTest.getDefaultFileEncoding()` now 
+  delegates to the runner's implementation, allowing customizations to be 
+  performed in just one place if neede for both `BaseTest` and runner class.
+
+- Use of `print()` rather than self.log is a common mistake that results in 
+  essential diagnostic information showing up on the console but not 
+  stored in `run.log`. PySys will now catch output written using `print()` 
+  statements and redirect it to the logging framework, so it will show up 
+  in `run.log`. 
+  
+- Fixed bug in which random log lines might not be written to `run.log` and/or 
+  stdout when running tests multi-threaded (as a result of an underlying 
+  python bug https://bugs.python.org/issue35185).
 
 
 Bug fixes

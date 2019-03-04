@@ -122,7 +122,6 @@ class _UnicodeSafeStreamWrapper(object):
 		self.__encoding = encoding or getattr(underlying, 'encoding', None) or locale.getpreferredencoding()
 		assert self.__encoding
 		self.__writebytes = writebytes
-		#self.write('ENCODING=%s underlying=%s wrapped=%s\n'%(self.__encoding, getattr(underlying, 'encoding', None), underlying))
 	
 	def write(self, s):
 		if not s: return
