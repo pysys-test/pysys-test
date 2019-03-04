@@ -69,14 +69,18 @@ script:
   # TODO: change to run on several threads but currently breaks some tests in python 2 mode due to I18N bugs
   #- pysys.py run --threads 0 --purge --record --include pysys-packaging
   - "echo travis_fold:start:main-tests"
-  - pysys.py print
   - which pysys.py
   - python -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads 1 --purge --record --type auto
   - "echo travis_fold:end:main-tests"
   - python internal/utilities/scripts/coverage_pysys.py report
+
+  - "echo travis_fold:start:touch-tests"
+
+  # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
+  # this also checks direct invocation of the launcher from .whl installation
+  - LANG=C LANGUAGE=C LC_ALL=C PYTHONCOERCECLOCALE=0 pysys.py run --threads 0 --purge --record --include i18n --outdir i18n-C
   
   # as a quick sanity-test, also run packaging tests after installing from source
-  - "echo travis_fold:start:touch-tests"
   - pip uninstall --yes PySys
   - "pip install ../dist/PySys-$PYSYS_VERSION.tar.gz"
   - pysys.py run --threads 0 --purge --record --include pysys-packaging --outdir against-src-dist-setuptools
@@ -85,6 +89,7 @@ script:
   - pip uninstall --yes PySys
   - "pip install -e .."
   - pysys.py run --threads 0 --purge --record --include pysys-packaging --outdir against-src-develop-mode
+
   - "echo travis_fold:end:touch-tests"
 
   - cd ..

@@ -13,6 +13,7 @@ Includes testing that I18N characters are handled correctly.
   <classification>
     <groups>
       <group>process</group>
+      <group>i18n</group>
     </groups>
   </classification>
 

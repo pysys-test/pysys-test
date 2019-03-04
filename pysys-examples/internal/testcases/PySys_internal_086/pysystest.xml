@@ -18,7 +18,7 @@ changes to sys.stdout as well as some interesting control characters.
   </description>
 
   <classification>
-    <groups>
+    <groups><group>i18n</group>
     </groups>
   </classification>
 
