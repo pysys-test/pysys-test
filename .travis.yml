@@ -66,11 +66,9 @@ script:
   # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
   - pip install ../dist/PySys*.whl
   - pip install coverage codecov
-  # TODO: change to run on several threads but currently breaks some tests in python 2 mode due to I18N bugs
-  #- pysys.py run --threads 0 --purge --record --include pysys-packaging
   - "echo travis_fold:start:main-tests"
   - which pysys.py
-  - python -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads 1 --purge --record --type auto
+  - python -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads 0 --purge --record --type auto
   - "echo travis_fold:end:main-tests"
   - python internal/utilities/scripts/coverage_pysys.py report
 
