@@ -39,7 +39,7 @@ class PySysTest(BaseTest):
 		def createenv(base, LANG=None):
 			r = dict(base)
 			if LANG:
-				if LANG=='ascii' and not IS_WINDOWS: LANG = 'C'
+				#if LANG=='ascii' and not IS_WINDOWS: LANG = 'C'
 				r['LANG'] = LANG # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
 				r['LANGUAGE'] = LANG # needed on some Ubuntu versions
 				r['LC_ALL'] = LANG
