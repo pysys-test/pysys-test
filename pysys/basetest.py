@@ -473,6 +473,8 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
+		assert expr, 'expr= argument must be specified'
+		
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
@@ -534,6 +536,8 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
+		assert expr, 'expr= argument must be specified'
+		
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
@@ -573,6 +577,8 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""
+		assert expr, 'expr= argument must be specified'
+		
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 	
@@ -622,6 +628,8 @@ class BaseTest(ProcessUser):
 		@param xargs: Variable argument list (see class description for supported parameters)
 				
 		"""	
+		assert expr, 'expr= argument must be specified'
+		
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
