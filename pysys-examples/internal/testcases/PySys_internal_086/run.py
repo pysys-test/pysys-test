@@ -15,8 +15,6 @@ class PySysTest(BaseTest):
 		
 		self.log.info('parent test: preferred encoding=%s, stdout encoding=%s', locale.getpreferredencoding(), sys.stdout.encoding)
 
-		# TODO; create a copy of the test for preferred encoding and another for io encoding, and other for ioencoding=None
-		
 		shutil.copytree(self.input, self.output+'/test')
 		# make rootdir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
@@ -38,69 +36,69 @@ class PySysTest(BaseTest):
 		# extra code path to test; but to maintain coverage of the encoding combinations we need to explicitly set it 
 		# (since otherwise python3 would set it to match the pre-hacked lang on windows, which would not give sensible results)
 		
+		def createenv(base, LANG=None):
+			r = dict(base)
+			if LANG:
+				if LANG=='ascii' and not IS_WINDOWS: LANG = 'C'
+				r['LANG'] = LANG # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
+				r['LANGUAGE'] = LANG # needed on some Ubuntu versions
+				r['LC_ALL'] = LANG
+			return r
+		
 		runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=1')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':'utf-8', # sets stdout encoding
-				'LANG':'ascii' # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}, LANG='ascii')))
 		runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=2')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':'utf-8', # sets stdout encoding
-				'LANG':'ascii' # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}, LANG='ascii')))
 		runid=self.mkdir('default=ascii,stdout=ascii,color=false,threads=1')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'false', # this affects the stdout stream
 				'PYTHONIOENCODING':'ascii', # sets stdout encoding
-				'LANG':'ascii' # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}, LANG='ascii')))
 		runid=self.mkdir('default=ascii,stdout=none,color=true,threads=1') # also progress, why not!
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '--progress'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '--progress'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':None if PY2 else 'ascii', # sets stdout encoding
-				'LANG':'ascii' # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}, LANG='ascii')))
 		runid=self.mkdir('default=ascii,stdout=none,color=false,threads=2')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'false', # this affects the stdout stream
 				'PYTHONIOENCODING': None if PY2 else 'ascii', # sets stdout encoding
-				'LANG':'ascii' # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}, LANG='ascii')))
 		runid=self.mkdir('default=utf8,stdout=ascii,color=true,threads=2')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':'ascii', # sets stdout encoding
-				'LANG':'en_GB.utf-8' # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}, LANG='en_US.utf-8')))
 		runid=self.mkdir('default=utf8,stdout=none,color=true,threads=2')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':None if PY2 else 'utf-8', # sets stdout encoding
-				'LANG':'en_GB.utf-8' # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}, LANG='en_US.utf-8')))
 		runid=self.mkdir('default=utf8,stdout=utf8,color=false,threads=2')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'false', # this affects the stdout stream
 				'PYTHONIOENCODING':'utf-8', # sets stdout encoding
-				'LANG':'en_GB.utf-8' # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}, LANG='en_US.utf-8')))
 		runid=self.mkdir('default=local,stdout=local,color=true,threads=2,debug=true')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '-v', 'debug'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs={
+		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '-v', 'debug'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':None, # sets stdout encoding
-				#'LANG':None # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-			}))
+				}))) #'LANG':None # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
 			
 		for p in processes:
 			self.waitProcess(p, timeout=60)
