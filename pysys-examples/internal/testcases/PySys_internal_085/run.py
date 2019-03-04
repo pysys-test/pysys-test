@@ -13,6 +13,8 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		
+		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+
 		shutil.copytree(self.input, self.output+'/test')
 
 		l = {}
