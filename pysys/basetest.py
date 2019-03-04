@@ -723,7 +723,7 @@ class BaseTest(ProcessUser):
 		runner, which in turn gets its defaults from the pysyproject.xml 
 		configuration. 
 		
-		See L{pysys.process.ProcessUser.getDefaultFileEncoding} for more details.
+		See L{pysys.process.user.ProcessUser.getDefaultFileEncoding} for more details.
 		"""
 		return self.runner.getDefaultFileEncoding(file, **xargs)
 		

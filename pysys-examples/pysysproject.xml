@@ -229,7 +229,7 @@
 		matched case-insensitively against either the full path or the basename using Python's fnmatch.fnmatch method. 
 		
 		The defaults specified here can be overridden or added to by the runner or basetest getDefaultFileEncoding() 
-		method. See pysys.process.ProcessUser.getDefaultFileEncoding for more details. 
+		method. See pysys.process.user.ProcessUser.getDefaultFileEncoding for more details. 
 		
 		-->
 		<default-file-encoding pattern="run.log" encoding="utf-8"/>

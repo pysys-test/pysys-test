@@ -113,7 +113,7 @@ class BaseResultsWriter(object):
 		"""
 		pass
 
-	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, **kwargs):
+	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		""" Called when each test has completed. 
 		
 		This method is always invoked from the same thread as setup() and cleanup(), even 

@@ -838,8 +838,9 @@ class ProcessUser(object):
 		is to be used for opening filenames ending in .xml, .json and .yaml. 
 		
 		The default implementation of this method uses pysysproject.xml 
-		configuration rules such as 
-		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		configuration rules such as::
+		
+			<default-file-encoding pattern="*.xml" encoding="utf-8"/>
 		
 		A return value of None indicates default behaviour, which on Python 3 is to 
 		use the default encoding, as specified by python's 
