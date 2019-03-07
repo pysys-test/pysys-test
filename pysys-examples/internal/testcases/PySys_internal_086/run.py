@@ -44,7 +44,11 @@ class PySysTest(BaseTest):
 				r['LANGUAGE'] = LANG # needed on some Ubuntu versions
 				r['LC_ALL'] = LANG
 				r['LC_CTYPE'] = LANG
-				r['PYTHONCOERCECLOCALE'] = '0' # to allow us to test i18n cases, need to forcibly disable Python 3.7's attempt to use UTF-8 when in a C locale
+				
+				# to allow us to test i18n cases, need to forcibly disable Python 3.7's attempt to use UTF-8 when in a C locale
+				r['PYTHONCOERCECLOCALE'] = '0' 
+				if 'utf-8' not in LANG: r['PYTHONUTF8'] = '0'
+				
 			return r
 		
 		runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=1')
@@ -195,3 +199,4 @@ class PySysTest(BaseTest):
 					self.assertGrep(outfile, expr=u'Text file contents: %s end'%self.utf8teststring, encoding=enc)
 				elif enc == 'ascii': # ensure we have some suitable replacement chars
 					self.assertGrep(outfile, expr='Text file contents: utf8_European[?][?].*_Katakana[?].*_Hiragana[?].* end', encoding=enc)
+	
