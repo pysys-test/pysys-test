@@ -68,9 +68,12 @@ script:
   - pip install coverage codecov
   - "echo travis_fold:start:main-tests"
   - which pysys.py
-  - python -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads 0 --purge --record --type auto
+  - python -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads 0 --purge --record --type auto -i i18n
   - "echo travis_fold:end:main-tests"
+  
+  - "echo travis_fold:start:coverage-summary"
   - python internal/utilities/scripts/coverage_pysys.py report
+  - "echo travis_fold:end:coverage-summary"
 
   - "echo travis_fold:start:touch-tests"
 
