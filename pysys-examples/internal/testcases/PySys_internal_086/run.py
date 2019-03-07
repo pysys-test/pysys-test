@@ -41,12 +41,12 @@ class PySysTest(BaseTest):
 			if LANG:
 				#if LANG=='ascii' and not IS_WINDOWS: LANG = 'C'
 				r['LANG'] = LANG # sets getpreferredencoding (with monkey-patch hack in runner to make it work on windows)
-				r['LANGUAGE'] = LANG # needed on some Ubuntu versions
+				#r['LANGUAGE'] = LANG # needed on some Ubuntu versions
 				
 				# to allow us to test i18n cases, need to forcibly disable Python 3.7's attempt to use UTF-8 when in a C locale
-				r['PYTHONCOERCECLOCALE'] = '0' 
-				if 'utf-8' not in LANG: r['PYTHONUTF8'] = '0'
-				
+				#r['PYTHONCOERCECLOCALE'] = '0' 
+				#if 'utf-8' not in LANG: r['PYTHONUTF8'] = '0'
+			print('using env: %s'%r)
 			return r
 		
 		runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=1')
