@@ -76,7 +76,7 @@ script:
 
   # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
   # this also checks direct invocation of the launcher from .whl installation
-  - LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --threads 0 --purge --record --include i18n --outdir i18n-C
+  #- LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --threads 0 --purge --record --include i18n --outdir i18n-C
   
   # as a quick sanity-test, also run packaging tests after installing from source
   - pip uninstall --yes PySys
