@@ -25,12 +25,6 @@ import os, sys, logging
 script_path = os.path.abspath(sys.path[0])
 sys.path = [p for p in sys.path if os.path.abspath(p) != script_path]
 
-# before anything else, configure the logger
-logging.getLogger().addHandler(logging.NullHandler())
-from pysys import log, stdoutHandler
-stdoutHandler.setLevel(logging.INFO)
-log.addHandler(stdoutHandler)
-
 from pysys.constants import loadproject
 loadproject(os.getcwd())
 
