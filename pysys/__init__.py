@@ -39,8 +39,6 @@ testcases provides a single framework for all test organisation requirements.
 @undocumented: ThreadedStreamHandler, ThreadedFileHandler
 """
 
-import sys, logging, threading
-
 __author__  = "Moray Grieve"
 """The original author of PySys."""
 
@@ -76,9 +74,13 @@ __all__     = [ "constants",
                 "xml"]
 """The submodules of PySys."""
 
+import sys, logging, threading
+
 # Lock to be held when creating processes also while holding any resources
 # we don't want being passed to child processes e.g. sockets, files
 process_lock = threading.Lock()
+
+from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, PY2
 
 # customize the default logging names for display
 logging.addLevelName(50, 'CRIT')
@@ -86,7 +88,6 @@ logging.addLevelName(30, 'WARN')
 
 # class extensions for supporting multi-threaded nature
 
-from pysys.utils.pycompat import _UnicodeSafeStreamWrapper, PY2
 
 class ThreadedStreamHandler(logging.StreamHandler):
 	"""Stream handler to only log from the creating thread.
