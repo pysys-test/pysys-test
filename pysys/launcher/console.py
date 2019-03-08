@@ -17,7 +17,7 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 from __future__ import print_function
-import os.path, stat, getopt, logging, traceback
+import os.path, stat, getopt, logging, traceback, sys
 
 from pysys import log
 
@@ -32,6 +32,7 @@ EXPR1 = re.compile("^[\w\.]*=.*$")
 EXPR2 = re.compile("^[\w\.]*$")
 EXPR3 = re.compile("^[\w]*_([0-9]+)$")
 
+_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
 
 class ConsoleCleanTestHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -46,7 +47,7 @@ class ConsoleCleanTestHelper(object):
 
 	def printUsage(self, printXOptions):
 		print("\nPySys System Test Framework (version %s): Console clean test helper" % __version__) 
-		print("\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name))
+		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes;")
 		print("       -h | --help                 print this message")
 		print("       -a | --all                  clean all compiled testclass files")
@@ -151,7 +152,7 @@ class ConsolePrintHelper(object):
 
 	def printUsage(self):
 		print("\nPySys System Test Framework (version %s): Console print test helper" % __version__) 
-		print("\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name))
+		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("    where options include;")
 		print("       -h | --help                 print this message")
 		print("       -f | --full                 print full information")
@@ -175,7 +176,7 @@ class ConsolePrintHelper(object):
 		print("       id1:id2  - all tests between tests with ids test1 and test2")
 		print("")
 		print("   e.g. ")
-		print("       %s -i group1 -e group2 --full test1:test3" % os.path.basename(sys.argv[0]))
+		print("       %s -i group1 -e group2 --full test1:test3" % _PYSYS_SCRIPT_NAME)
 		print("")
 		sys.exit()
 
@@ -288,7 +289,7 @@ class ConsoleMakeTestHelper(object):
 
 	def printUsage(self):
 		print("\nPySys System Test Framework (version %s): Console make test helper" % __version__) 
-		print("\nUsage: %s %s [option]+ [testid]" % (os.path.basename(sys.argv[0]), self.name))
+		print("\nUsage: %s %s [option]+ [testid]" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes;")
 		print("       -h | --help                 print this message")
 		print("       -a | --type     STRING      set the test type (auto or manual, default is auto)")
@@ -391,7 +392,7 @@ class ConsoleLaunchHelper(object):
 
 	def printUsage(self, printXOptions):
 		print("\nPySys System Test Framework (version %s): Console run test helper" % __version__) 
-		print("\nUsage: %s %s [option]* [tests]*" % (os.path.basename(sys.argv[0]), self.name))
+		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes;")
 		print("       -h | --help                 print this message")
 		print("       -r | --record               record the test results in the working directory")
@@ -430,8 +431,8 @@ class ConsoleLaunchHelper(object):
 		print("       ^test*                    - all tests matching the regex ^test*")
 		print("")
 		print("   e.g. ")
-		print("       %s -vDEBUG --include MYTESTS test1:test4 test7" % os.path.basename(sys.argv[0]))
-		print("       %s -c2 -Xhost=localhost test1:" % os.path.basename(sys.argv[0]))
+		print("       %s -vDEBUG --include MYTESTS test1:test4 test7" % _PYSYS_SCRIPT_NAME)
+		print("       %s -c2 -Xhost=localhost test1:" % _PYSYS_SCRIPT_NAME)
 		print("")
 		sys.exit()
 
@@ -526,7 +527,7 @@ class ConsoleLaunchHelper(object):
 def printUsage():
 	sys.stdout.write("\nPySys System Test Framework (version %s on Python %s.%s.%s)\n" % (
 		__version__, sys.version_info[0], sys.version_info[1], sys.version_info[2]))
-	sys.stdout.write("\nUsage: %s [mode] [option]* { [tests]* | [testId] }\n" % os.path.basename(sys.argv[0]))
+	sys.stdout.write("\nUsage: %s [mode] [option]* { [tests]* | [testId] }\n" % _PYSYS_SCRIPT_NAME)
 	sys.stdout.write("    where [mode] can be;\n")
 	sys.stdout.write("       run    - run a set of tests rooted from the current working directory\n")
 	sys.stdout.write("       make   - make a new testcase directory structure in the current working directory\n")
@@ -534,7 +535,7 @@ def printUsage():
 	sys.stdout.write("       clean  - clean the output subdirectories of tests rooted from the current working directory\n")
 	sys.stdout.write("\n")
 	sys.stdout.write("    For more information on the options available to each mode, use the -h | --help option, e.g.\n")
-	sys.stdout.write("       %s run --help\n" % os.path.basename(sys.argv[0]))
+	sys.stdout.write("       %s run --help\n" % _PYSYS_SCRIPT_NAME)
 	sys.exit()
 	
 def runTest(args):
@@ -575,6 +576,7 @@ def cleanTest(args):
 
 
 def main(args):
+
 	if len(args) < 1: 
 		printUsage()
 	else:
