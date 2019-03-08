@@ -104,7 +104,7 @@ script:
   # including these and the text files (with Windows line endings)
   - pip install epydoc
   - mkdir dist/api-docs/
-  - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then epydoc --debug -v --html --no-private --fail-on-docstring-warning --name "PySys $PYSYS_VERSION" "--url=https://pypi.org/project/PySys" -o dist/api-docs pysys ; fi
+  - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then epydoc --debug -v --html --no-private --fail-on-docstring-warning --name "PySys $PYSYS_VERSION" "--url=https://pypi.org/project/PySys" -o dist/api-docs "--exclude=**/internal/**" pysys ; fi
   - todos *.rst *.txt
   - cp README.rst CHANGELOG.rst LICENSE.txt dist/api-docs/
   - cd dist/api-docs
