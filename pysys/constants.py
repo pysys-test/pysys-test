@@ -140,7 +140,7 @@ DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_ABORT_ON_ERROR=False
 
 # set the directories to not recursively walk when looking for the descriptors
-OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn', '__pycache__' ]
+OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn', '__pycache__', '.git' ]
 
 # set the timeout values for specific executables when executing a test
 DEFAULT_TIMEOUT = 600
