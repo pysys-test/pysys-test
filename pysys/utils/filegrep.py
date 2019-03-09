@@ -154,28 +154,30 @@ def orderedgrep(file, exprList, encoding=None):
 	@param exprList: A list of regular expressions (uncompiled) to search for in the input file
 	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	
-	@returns: success (True / False)
-	@rtype: integer
+	@returns: None on success, or on failure the string expression that was not found. 
+	@rtype: string
 	@raises FileNotFoundException: Raised if the input file does not exist
 		
 	"""
 	list = copy.deepcopy(exprList)
-	list.reverse();
-	expr = list.pop();
+	list.reverse()
+	
+	expr = list.pop()
+	regexpr = re.compile(expr)
 
 	if not os.path.exists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
-	else:
-		with openfile(file, 'r', encoding=encoding) as f:
-			contents = f.readlines()	  
-		for i in range(len(contents)):
-			regexpr = re.compile(expr)
-			if regexpr.search(r"%s"%contents[i]) is not None:
-				try:
-					expr = list.pop();
-				except Exception:
-					return None
-		return expr
+	
+	with openfile(file, 'r', encoding=encoding) as f:
+		for line in f:
+			if regexpr.search(line) is not None:
+				if len(list) == 0:
+					return None # success - found them all
+				
+				expr = list.pop()
+				regexpr = re.compile(expr)
+
+	return expr # the expression we were trying to match
 
 
 def logContents(message, list):
