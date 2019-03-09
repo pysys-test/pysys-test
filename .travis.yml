@@ -55,11 +55,7 @@ install:
   - "tar -czf dist/PySys-$PYSYS_VERSION-sample-testcases-unix.tar.gz pysys-examples"
   - "find pysys-examples -type f | xargs todos"
   - "zip -r --quiet dist/PySys-$PYSYS_VERSION-sample-testcases-win.zip pysys-examples"
-
-  # before we deploy, add a branch suffix onto any deployed version if a non-standard branch
-  - if [ $TRAVIS_BRANCH -ne "latest" -a $TRAVIS_BRANCH -ne "master" ]; then export PYSYS_DEV_BRANCH_SUFFIX=_$TRAVIS_BRANCH ;  fi
-
-  - "export TRAVIS_TAG=PySys_$PYSYS_VERSION$PYSYS_DEV_BRANCH_SUFFIX"
+  - "export TRAVIS_TAG=PySys_$PYSYS_VERSION"
 
 # for running tests and building documentation:
 script:
@@ -134,12 +130,12 @@ deploy:
     overwrite: true
     on: 
        # by default we only create a draft release for commits to master
-       branch: post-1.3.0-logging-fixes
+       branch: latest
        
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
        condition: $TRAVIS_PYTHON_VERSION = 2.7
 
-    name: "PySys v$PYSYS_VERSION$PYSYS_DEV_BRANCH_SUFFIX"
+    name: "PySys v$PYSYS_VERSION"
     body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See CHANGELOG.rst for a full list of changes. 
   
     # this is a draft release, allows manually editing details in github UI
