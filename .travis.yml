@@ -113,15 +113,17 @@ script:
   - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then zip -r --quiet ../../dist/PySys-$PYSYS_VERSION-docs.zip .  ; fi
   - cd ../..
 
+  # before we deploy, add a branch suffix onto any deployed version if a non-standard branch
+  - echo $TRAVIS_BRANCH
+  - if [ $TRAVIS_BRANCH -ne "latest" && $TRAVIS_BRANCH -ne "master" ]; then export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH} ; fi
+  - export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH}_test
+
 after_script:
   # upload Python code coverage
   - cd pysys-examples
   - codecov
   - cd ..
   
-  # before we deploy, add a branch suffix onto any deployed version if a non-standard branch
-  - if [ $TRAVIS_BRANCH -ne "latest" && $TRAVIS_BRANCH -ne "master" ]; then export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH} ; fi
-
 deploy:
   - provider: releases
     api_key: $GITHUB_API_KEY
