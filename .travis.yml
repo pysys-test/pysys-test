@@ -118,6 +118,9 @@ after_script:
   - cd pysys-examples
   - codecov
   - cd ..
+  
+  # before we deploy, add a branch suffix onto any deployed version if a non-standard branch
+  - if [ $TRAVIS_BRANCH -ne "latest" && $TRAVIS_BRANCH -ne "master" ]; then export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH} ; fi
 
 deploy:
   - provider: releases
@@ -131,6 +134,7 @@ deploy:
     on: 
        # by default we only create a draft release for commits to master
        branch: post-1.3.0-logging-fixes
+       
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
        condition: $TRAVIS_PYTHON_VERSION = 2.7
 
