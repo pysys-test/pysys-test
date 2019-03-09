@@ -60,19 +60,20 @@ __date__ = "yyyy-mm-dd"
 __license__ = "GNU Lesser General Public License"
 """The PySys license."""
 
-__all__     = [ "constants",
-                "exceptions",
-                "baserunner",
-                "basetest",
-                "internal",
-                "launcher",
-                "manual",
-                "process",
-                "unit",
-                "utils",
-                "writer",
-                "xml"]
-"""The submodules of PySys."""
+__all__  = [
+	"constants",
+	"exceptions",
+	"baserunner",
+	"basetest",
+	"launcher",
+	"manual",
+	"process",
+	"unit",
+	"utils",
+	"writer",
+	"xml"
+]
+"""The public submodules of PySys."""
 
 # initialize the Python logging system for PySys
 from pysys.internal.initlogging import rootLogger, stdoutHandler, log
