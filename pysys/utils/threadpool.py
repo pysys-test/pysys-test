@@ -15,7 +15,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# Contact: moraygrieve@users.sourceforge.net
+
  
 # Note that the threadpool implementation is based from that proposed
 # by Christopher Arndt (http://chrisarndt.de/en/software/python/threadpool/)

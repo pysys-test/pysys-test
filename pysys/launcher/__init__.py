@@ -15,7 +15,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# Contact: moraygrieve@users.sourceforge.net
+
 """
 Contains utilities used by test launchers when running, printing, cleaning or making new tests. 
 

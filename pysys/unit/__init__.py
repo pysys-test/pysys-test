@@ -15,7 +15,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# Contact: moraygrieve@users.sourceforge.net
+
 """
 Contains classes for running various unit test frameworks, with the underlying
 philosophy being that a suite of unit tests becomes a single pysys test

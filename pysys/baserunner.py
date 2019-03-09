@@ -15,7 +15,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# Contact: moraygrieve@users.sourceforge.net
+
 """
 Contains the base class used to perform the execution and audit trail reporting of a set of tests. 
 

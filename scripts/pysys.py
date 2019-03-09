@@ -15,7 +15,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-# Contact: moraygrieve@users.sourceforge.net
+
 
 # the sys.path starts with the directory containing pysys.py which we want to remove as
 # that dir might be anywhere and could contain anything; it's not needed for locating 
