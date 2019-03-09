@@ -3,7 +3,10 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 	Executes pysys from within pysys. Used only by internal pysys testcases. 
 	"""
 	import os, sys
-	args = [os.path.abspath([a for a in sys.argv if a.endswith('pysys.py')][0])] + args
+	if sys.argv[0].endswith('pysys.py'):
+		args = [os.path.abspath(sys.argv[0])]+args
+	else:
+		args = ['-m', 'pysys']+args
 	env = dict(environs or {})
 	for k in os.environ: 
 		if k not in env and not k.startswith('PYSYS_'): env[k] = os.environ[k]
