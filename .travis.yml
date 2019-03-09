@@ -55,7 +55,11 @@ install:
   - "tar -czf dist/PySys-$PYSYS_VERSION-sample-testcases-unix.tar.gz pysys-examples"
   - "find pysys-examples -type f | xargs todos"
   - "zip -r --quiet dist/PySys-$PYSYS_VERSION-sample-testcases-win.zip pysys-examples"
-  - "export TRAVIS_TAG=PySys_$PYSYS_VERSION"
+
+  # before we deploy, add a branch suffix onto any deployed version if a non-standard branch
+  - if [ $TRAVIS_BRANCH -ne "latest" -a $TRAVIS_BRANCH -ne "master" ]; then export PYSYS_DEV_BRANCH_SUFFIX=_$TRAVIS_BRANCH ;  fi
+
+  - "export TRAVIS_TAG=PySys_$PYSYS_VERSION$PYSYS_DEV_BRANCH_SUFFIX"
 
 # for running tests and building documentation:
 script:
@@ -113,11 +117,6 @@ script:
   - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then zip -r --quiet ../../dist/PySys-$PYSYS_VERSION-docs.zip .  ; fi
   - cd ../..
 
-  # before we deploy, add a branch suffix onto any deployed version if a non-standard branch
-  - echo $TRAVIS_BRANCH
-  - if [ $TRAVIS_BRANCH -ne "latest" -a $TRAVIS_BRANCH -ne "master" ]; then export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH} ; fi
-  - export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH}_test
-
 after_script:
   # upload Python code coverage
   - cd pysys-examples
@@ -140,7 +139,7 @@ deploy:
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
        condition: $TRAVIS_PYTHON_VERSION = 2.7
 
-    name: "PySys v$PYSYS_VERSION"
+    name: "PySys v$PYSYS_VERSION$PYSYS_DEV_BRANCH_SUFFIX"
     body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See CHANGELOG.rst for a full list of changes. 
   
     # this is a draft release, allows manually editing details in github UI
