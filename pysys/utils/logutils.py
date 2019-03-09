@@ -21,6 +21,7 @@ import copy, logging
 
 from pysys.constants import *
 from pysys.utils.pycompat import *
+import pysys, threading
 
 class BaseLogFormatter(logging.Formatter):
 	"""Base class for formatting log messages.
@@ -123,6 +124,7 @@ class ColorLogFormatter(BaseLogFormatter):
 		'END':'\033[0m',
 	}
 
+	__STDOUT_LOCK = threading.Lock()
 
 	def __init__(self, propertiesDict):
 		"""Create an instance of the formatter class."""
@@ -139,17 +141,21 @@ class ColorLogFormatter(BaseLogFormatter):
 		if self.color: 
 			# initColoringLibrary, which might result in sys.stdout getting rewritten; PySys needs control of sys.stdout 
 			# so capture the new stdout then restore the original
-			stdoutbak = sys.stdout
-			try:
-				sys.stdout = sys.__stdout__
-				self.initColoringLibrary()
-			finally:
-				updatedstdout = sys.stdout
-				sys.stdout = stdoutbak
-			# now update the stream used by our handler
-			assert stdoutHandler.stream # unicodewrapper
-			assert stdoutHandler.stream.stream # actual stream
-			stdoutHandler.stream.stream = updatedstdout
+			with ColorLogFormatter.__STDOUT_LOCK:
+				stdoutbak = sys.stdout
+				try:
+					sys.stdout = sys.__stdout__
+					self.initColoringLibrary()
+				finally:
+					updatedstdout = sys.stdout
+					sys.stdout = stdoutbak
+				# now update the stream used by our handler
+				assert stdoutHandler.stream # unicodewrapper
+				assert stdoutHandler.stream.stream # actual stream
+				if 'PySysPrintRedirector' in repr(updatedstdout):
+					raise Exception('FOrmatter has redirector: %s'%repr(updatedstdout))
+
+				stdoutHandler.stream.stream = updatedstdout
 
 		super(ColorLogFormatter, self).__init__(propertiesDict)
 
