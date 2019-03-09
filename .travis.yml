@@ -115,7 +115,7 @@ script:
 
   # before we deploy, add a branch suffix onto any deployed version if a non-standard branch
   - echo $TRAVIS_BRANCH
-  - if [ $TRAVIS_BRANCH -ne "latest" && $TRAVIS_BRANCH -ne "master" ]; then export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH} ; fi
+  - if [ $TRAVIS_BRANCH -ne "latest" -a $TRAVIS_BRANCH -ne "master" ]; then export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH} ; fi
   - export PYSYS_VERSION=${PYSYS_VERSION}_${TRAVIS_BRANCH}_test
 
 after_script:
