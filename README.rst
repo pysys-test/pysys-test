@@ -114,7 +114,7 @@ The executable launcher script `pysys.py` is installed into the `Scripts\\`
 directory of the Python installation, e.g. `c:\\Python\\Scripts\\pysys.py`. 
 To allow easy invocation of PySys from any test directory you may wish to add 
 the Scripts directory to your `PATH` or copy the script to a location that is 
-already on `PATH`. 
+already on `PATH`. Alternatively you can run PySys using `python -m pysys`.
 
 
 Unix
@@ -125,7 +125,8 @@ version that was compiled with tcl/tk support.
 
 The executable launcher script `pysys.py` is installed into Python's binary 
 directory, e.g. `/usr/local/bin`, and hence should be on the current user's 
-`PATH` automatically; if not, just add it. 
+`PATH` automatically; if not, just add it. Alternatively you can run PySys 
+using `python -m pysys`.
 
 
 Getting Started

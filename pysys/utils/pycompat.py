@@ -18,12 +18,13 @@
 # Contact: moraygrieve@users.sourceforge.net
 
 """
-	pycompat is a small PySys module containing a minimal set of utilities for 
-	writing single-source Python that runs in multiple python versions, for 
-	example both Python 2 and Python 3. 
+pycompat is a small PySys module containing a minimal set of utilities for 
+writing single-source Python that runs in multiple python versions, for 
+example both Python 2 and Python 3. 
+
 """
 
-import sys, os, io
+import sys, os, io, locale
 
 PY2 = sys.version_info[0] == 2
 
@@ -95,3 +96,4 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 		if encoding: assert 'b' not in mode, 'cannot open file %s with binary mode %s as an encoding was specified'%(path, mode)
 		return io.open(path, mode=mode, encoding=encoding, errors=errors, **kwargs)
 	return open(path, mode=mode, **kwargs)
+

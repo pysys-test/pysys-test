@@ -113,7 +113,7 @@ class BaseResultsWriter(object):
 		"""
 		pass
 
-	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, **kwargs):
+	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		""" Called when each test has completed. 
 		
 		This method is always invoked from the same thread as setup() and cleanup(), even 
@@ -125,6 +125,7 @@ class BaseResultsWriter(object):
 		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
 		@param testTime: Duration of the test in seconds. 
 		@param testStart: The time when the test started. 
+		@param runLogOutput: The logging output written to run.log, as a unicode character string. 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
@@ -281,7 +282,28 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		
 		self.fp.write("%s: %s\n" % (LOOKUP[testObj.getOutcome()], testObj.descriptor.id))
 
-		
+def replaceIllegalXMLCharacters(unicodeString, replaceWith=u'?'):
+	"""
+	Utility function that takes a unicode character string and replaces all characters 
+	that are not permitted to appear in an XML document. 
+	
+	The XML specification says Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+	
+	Currently Python's XML libraries do not perform checking or removal of such 
+	characters, so if this function is not used then they may generate XML documents 
+	that no XML API (including Python's) can read. 
+	
+	See https://bugs.python.org/issue5166
+	
+	@param unicodeString: a unicode character string (not a byte string). 
+	Since most XML documents are encoded in utf-8, typical usage would be to 
+	decode the UTF-8 bytes into characters before calling this function and then 
+	re-encode as UTF-8 again afterwards.
+	
+	@param replaceWith: the unicode character string to replace each illegal character with. 
+	"""
+	return re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]', replaceWith, unicodeString)
+
 class XMLResultsWriter(BaseRecordResultsWriter):
 	"""Class to log results to logfile in XML format.
 	
@@ -324,7 +346,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		
 		try:
-			self.fp = flushfile(io.open(self.logfile, "wb"))
+			self.fp = io.open(self.logfile, "wb")
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
@@ -377,7 +399,8 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 			self.rootElement.appendChild(element)
 				
 			# write the file out
-			self.fp.write(self.document.toprettyxml(indent="  ", encoding='utf-8', newl=os.linesep))
+			self._writeXMLDocument()
+			
 		except Exception:
 			log.info("caught %s in XMLResultsWriter: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 
@@ -390,9 +413,8 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 				
 		"""
 		if self.fp: 
-			self.fp.seek(0)
 			self.statusAttribute.value="complete"
-			self.fp.write(self.document.toprettyxml(indent="  ", encoding='utf-8', newl=os.linesep))
+			self._writeXMLDocument()
 			self.fp.close()
 			self.fp = None
 			
@@ -405,8 +427,6 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""	
-		self.fp.seek(0)
-		
 		if "cycle" in kwargs: 
 			if self.cycle != kwargs["cycle"]:
 				self.cycle = kwargs["cycle"]
@@ -443,8 +463,16 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.numResults = self.numResults + 1
 		self.completedAttribute.value="%s/%s" % (self.numResults, self.numTests)
 				
-		# write the file out
-		self.fp.write(self.document.toprettyxml(indent="  ", encoding='utf-8', newl=os.linesep))
+		self._writeXMLDocument()
+
+	def _writeXMLDocument(self):
+		if self.fp:
+			self.fp.seek(0)
+			self.fp.write(self._serializeXMLDocumentToBytes(self.document))
+			self.fp.flush()
+		
+	def _serializeXMLDocumentToBytes(self, document):
+		return replaceIllegalXMLCharacters(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep).decode('utf-8')).encode('utf-8')
 
 	def __createResultsNode(self):
 		self.resultsElement = self.document.createElement("results")
@@ -460,7 +488,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 			return path
 		else:
 			return urlunparse(["file", HOSTNAME, path.replace("\\", "/"), "","",""])
-	
+
 	
 class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	"""Class to log test results in Apache Ant JUnit XML format (one output file per test per cycle). 
@@ -503,7 +531,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def processResult(self, testObj, **kwargs):
 		"""Implementation of the processResult method. 
 		
-		Creates a test summary file in the Apache Ant Junit XML format. 
+		Creates a test summary file in the Apache Ant JUnit XML format. 
 		
 		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
 		@param kwargs: Variable argument list
@@ -547,21 +575,25 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 			failure.appendChild(document.createTextNode( testObj.getOutcomeReason() ))		
 						
 			stdout = document.createElement('system-out')
-			fp = io.open(os.path.join(testObj.output, 'run.log'))
-			stdout.appendChild(document.createTextNode(fp.read().replace('\n', os.linesep)))
-			fp.close()
+			runLogOutput = kwargs.get('runLogOutput','') # always unicode characters
+			stdout.appendChild(document.createTextNode(runLogOutput.replace('\r','').replace('\n', os.linesep)))
 			
 			testcase.appendChild(failure)
 			testcase.appendChild(stdout)
 		rootElement.appendChild(testcase)
 		
 		# write out the test result
-		fp = io.open(os.path.join(self.outputDir,
+		self._writeXMLDocument(document, testObj, **kwargs)
+
+	def _writeXMLDocument(self, document, testObj, **kwargs):
+		with io.open(os.path.join(self.outputDir,
 			('TEST-%s.%s.xml'%(testObj.descriptor.id, self.cycle+1)) if self.cycles > 1 else 
 			('TEST-%s.xml'%(testObj.descriptor.id))), 
-			'wb')
-		fp.write(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep))
-		fp.close()
+			'wb') as fp:
+				fp.write(self._serializeXMLDocumentToBytes(document))
+
+	def _serializeXMLDocumentToBytes(self, document):
+		return replaceIllegalXMLCharacters(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep).decode('utf-8')).encode('utf-8')
 
 	def purgeDirectory(self, dir, delTop=False):
 		"""

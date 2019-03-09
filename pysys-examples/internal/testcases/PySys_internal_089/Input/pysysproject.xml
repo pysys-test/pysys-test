@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<property name="verboseWaitForSignal" value="true"/>
+	<property name="defaultAbortOnError" value="true"/>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.default" encoding=""/>
+		<!-- check that first match wins-->
+		<default-file-encoding pattern="mydir/*somefile.LOG" encoding="cp775"/>
+		<default-file-encoding pattern="mydir\file2.log" encoding="iso8859_2"/> 
+		<default-file-encoding pattern="mydir\FILE2.log" encoding="iso8859_3"/>
+		<default-file-encoding pattern="somefile.log" encoding="euc_jp"/>
+		<default-file-encoding pattern="*.log" encoding="euc_kr"/>
+		
+	</default-file-encodings>
+	
+</pysysproject>

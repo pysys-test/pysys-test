@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 # Contact: moraygrieve@users.sourceforge.net
+
 """
 PySys System Test Framework.
 
@@ -38,8 +39,6 @@ testcases provides a single framework for all test organisation requirements.
 
 """
 
-import sys, logging, threading
-
 __author__  = "Moray Grieve"
 """The original author of PySys."""
 
@@ -61,108 +60,26 @@ __date__ = "yyyy-mm-dd"
 __license__ = "GNU Lesser General Public License"
 """The PySys license."""
 
-__all__     = [ "constants",
-                "exceptions",
-                "baserunner",
-                "basetest",
-                "interfaces",
-                "launcher",
-                "manual",
-                "process",
-                "unit",
-                "utils",
-                "writer",
-                "xml"]
-"""The submodules of PySys."""
+__all__  = [
+	"constants",
+	"exceptions",
+	"baserunner",
+	"basetest",
+	"launcher",
+	"manual",
+	"process",
+	"unit",
+	"utils",
+	"writer",
+	"xml"
+]
+"""The public submodules of PySys."""
 
-# Lock to be held when creating processes also while holding any resources
-# we don't want being passed to child processes e.g. sockets, files
+# initialize the Python logging system for PySys
+from pysys.internal.initlogging import rootLogger, stdoutHandler, log
+from pysys.internal.initlogging import ThreadedStreamHandler, ThreadFilter
+
+import threading
 process_lock = threading.Lock()
-
-# customize the default logging names for display
-logging.addLevelName(50, 'CRIT')
-logging.addLevelName(30, 'WARN')
-
-# class extensions for supporting multi-threaded nature
-class ThreadedStreamHandler(logging.StreamHandler):
-	"""Stream handler to only log from the creating thread.
-	
-	Overrides logging.StreamHandler to only allow logging to a stream 
-	from the thread that created the class instance and added to the root 
-	logger via log.addHandler(ThreadedStreamHandler(stream)).
-
-	This is used to pass log output from the specific test that creates this 
-	handler to stdout, either immediately or (when multiple threads are in use) 
-	at the end of each test's execution. 
-	
-	"""
-	def __init__(self, strm):
-		"""Overrides logging.StreamHandler.__init__."""
-		self.threadId = threading.current_thread().ident
-		logging.StreamHandler.__init__(self, strm)
-				
-	def emit(self, record):
-		"""Overrides logging.StreamHandler.emit."""
-		if self.threadId != threading.current_thread().ident: return
-		logging.StreamHandler.emit(self, record)
-		
-		
-class ThreadedFileHandler(logging.FileHandler):
-	"""File handler to only log from the creating thread.
-	
-	Overrides logging.FileHandler to only allow logging to file from 
-	the thread than created the class instance and added to the root 
-	logger via log.addHandler(ThreadFileHandler(filename)).
-	
-	This is used to pass log output from the specific test 
-	that creates this handler to the associated run.log. 
-
-	"""
-	def __init__(self, filename):
-		"""Overrides logging.FileHandler.__init__"""
-		self.threadId = threading.current_thread().ident
-		logging.FileHandler.__init__(self, filename, "a")
-				
-	def emit(self, record):
-		"""Overrides logging.FileHandler.emit."""
-		if self.threadId != threading.current_thread().ident: return
-		# must put formatted messages into the buffer otherwise we lose log level 
-		# and (critically) exception tracebacks from the output
-		logging.FileHandler.emit(self, record)
-		
-
-class ThreadFilter(logging.Filterer):
-	"""Filter to disallow log records from the current thread.
-	
-	Within pysys, logging to standard output is only enabled from the main thread 
-	of execution (that in which the test runner class executes). When running with
-	more than one test worker thread, logging to file of the test run log is 
-	performed through a file handler, which only allows logging from that thread. 
-	To disable either of these, use an instance of this class from the thread in 
-	question, adding to the root logger via log.addFilter(ThreadFilter()).
-	
-	"""
-	def __init__(self):
-		"""Overrides logging.Filterer.__init__"""
-		self.threadId = threading.current_thread().ident
-		logging.Filterer.__init__(self)
-		
-	def filter(self, record):
-		"""Implementation of logging.Filterer.filter to block from the creating thread."""
-		if self.threadId != threading.current_thread().ident: return True
-		return False
-	
-
-rootLogger = logging.getLogger('pysys')
-"""The root logger for all logging within PySys."""
-
-rootLogger.setLevel(logging.DEBUG)
-"""The root logger log level (set to DEBUG as all filtering is done by the handlers)."""
-
-stdoutHandler = ThreadedStreamHandler(sys.stdout)
-"""The default stdout logging handler for all logging within PySys."""
-
-# see also pysys.py for logging configuration
-
-# global reference is using log
-log = rootLogger
+""" Lock to be held when creating processes also while holding any resources
+we don't want being passed to child processes e.g. sockets, files. """

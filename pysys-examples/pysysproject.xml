@@ -220,7 +220,25 @@
 			<property name="showOutcomeReason" value="true"/>
 		</writer>
 	</writers>
-	
+
+	<default-file-encodings>
+		<!-- 
+		Specify the file encoding to be used for reading/writing text files. 
+		
+		The first pattern that matches is used to determine the encoding. The pattern is a glob-style expression to be 
+		matched case-insensitively against either the full path or the basename using Python's fnmatch.fnmatch method. 
+		
+		The defaults specified here can be overridden or added to by the runner or basetest getDefaultFileEncoding() 
+		method. See pysys.process.user.ProcessUser.getDefaultFileEncoding for more details. 
+		
+		-->
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
+		
+	</default-file-encodings>	
 	
 	<!--
 	Specify custom formatters for logging to the console or run.log, and/or configure the formatter

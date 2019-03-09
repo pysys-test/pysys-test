@@ -3,7 +3,7 @@
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
-import os, sys, math, shutil, glob
+import os, sys, math, shutil, glob, locale
 
 # contains a non-ascii £ character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello £ world' 
@@ -12,6 +12,8 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		
+		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+
 		shutil.copytree(self.input, self.output+'/test')
 		# make rootdir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
@@ -24,6 +26,7 @@ class PySysTest(BaseTest):
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			
 	def validate(self):
+		self.assertGrep('pysys.err', expr='.+', contains=False)
 		self.assertGrep('pysys.out', expr='(Traceback.*|caught .*)', contains=False)
 		
 		# we didn't enable progress writers so there should be none here

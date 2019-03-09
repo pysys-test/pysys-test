@@ -85,6 +85,38 @@ New features
   outcomes were logged (so if you have a complex test you can see at a glance 
   if there's just one problem to resolve, or 5, or 20!).
 
+- Added `runLogOutput=` parameter to the `processResult()` method of 
+  the `BaseResultsWriter` API so that writers such as the 
+  `JUnitXMLResultsWriter` can include the test output with no loss of unicode 
+  character information. 
+
+- Added support for configuring the default encodings to use for common file 
+  patterns in the `pysysproject.xml` configuration, e.g. ::
+  
+	<default-file-encoding pattern="*.yaml" encoding="utf-8"/>. 
+
+  The `pysys-examples/pysysproject.xml` sample project configuration file now 
+  sets utf-8 as the default encoding for XML, json and yaml files, and also 
+  for testcase run.log files (though run.log continues to be written in local 
+  encoding unless the project file is updated). For more information on this 
+  feature, see comments in `pysysproject.xml` and in 
+  `ProcessUser.getDefaultFileEncoding()`.
+  
+- The default implementation of `BaseTest.getDefaultFileEncoding()` now 
+  delegates to the runner's implementation, allowing customizations to be 
+  performed in just one place if neede for both `BaseTest` and runner class.
+
+- Use of `print()` rather than self.log is a common mistake that results in 
+  essential diagnostic information showing up on the console but not 
+  stored in `run.log`. PySys will now catch output written using `print()` 
+  statements and redirect it to the logging framework, so it will show up 
+  in `run.log`. 
+
+- As an alternative to the usual `pysys.py` executable script, it is now also 
+  possible to launch PySys using::
+  
+    python -m pysys
+
 
 Bug fixes
 ---------
@@ -120,6 +152,28 @@ Bug fixes
   `% Processor Time` instead of the `Thread` counter (the values reported by 
   previous versions were probably not correct, as they only measured CPU for 
   the threads that existed when the process monitor was started).
+
+- Significant improvements to robustness when testing support for international 
+  (I18N) characters. This includes implementing fully safe logging of unicode 
+  strings (with `?` replacements for any unsupported characters) that works 
+  regardless of what encoding is in use for stdout and `run.log`. Also fixed 
+  exception when logging unicode characters in Python 2 if a formatter was not 
+  configured in `pysysproject.xml`, by ensuring it is always stored as a 
+  unicode character string not a byte string (which used to happen in Python 2 
+  if it was not mentioned in the project config). Fixed `logFileContents` to 
+  more robustly handle files containing I18N/non-ASCII characters. 
+
+- Added `pysys.writers.replaceIllegalXMLCharacters()` utility function, and use 
+  it to avoid `XMLResultsWriter` and `JUnitXMLResultsWriter` from generating 
+  invalid XML if `run.log` or outcome reason contain characters not permitted 
+  by XML. Also ASCII control characters (e.g. coloring instructions 
+  from other tools) are now stripped out of all outcome reason strings 
+  (including in run.log and non-XML based writers) since such characters 
+  are not useful and make summary test results harder to read. 
+  
+- Fixed bug in which random log lines might not be written to `run.log` and/or 
+  stdout when running tests multi-threaded (as a result of an underlying 
+  python bug https://bugs.python.org/issue35185).
 
 
 ---------------

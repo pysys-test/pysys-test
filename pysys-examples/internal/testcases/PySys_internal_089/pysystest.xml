@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Project Loading - default-file-encoding configuration</title>    
+    <purpose><![CDATA[
+Checks that default file encoding (cf getDefaultFileEncoding()) can be configured in project file. 
+
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>runner</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

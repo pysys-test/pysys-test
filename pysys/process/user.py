@@ -17,7 +17,7 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import time, collections, inspect
+import time, collections, inspect, locale, fnmatch
 
 from pysys import log, process_lock
 from pysys.constants import *
@@ -584,14 +584,19 @@ class ProcessUser(object):
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
-		outcomeReason = outcomeReason.strip() if outcomeReason else ''
+		if outcomeReason is None:
+			outcomeReason = ''
+		else: 
+			outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
 		
 		old = self.getOutcome()
 		self.outcome.append(outcome)
 
 		#store the reason of the highest precedent outcome
-		if self.getOutcome() != old: self.__outcomeReason = outcomeReason
-
+		
+		# although we should print whatever is passed in, store a version with control characters stripped 
+		# out so that it's easier to read (e.g. coloring codes from third party tools)
+		if self.getOutcome() != old: self.__outcomeReason = re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F]', '', outcomeReason)
 		if outcome in FAILS and abortOnError:
 			if callRecord==None: callRecord = self.__callRecord()
 			self.abort(outcome, outcomeReason, callRecord)
@@ -655,7 +660,7 @@ class ProcessUser(object):
 
 		"""	
 		fails = len([o for o in self.outcome if o in FAILS])
-		if fails > 1: return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
+		if self.__outcomeReason and (fails > 1): return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
 		return self.__outcomeReason
 
 
@@ -758,7 +763,8 @@ class ProcessUser(object):
 		if not path: return False
 		actualpath= os.path.join(self.output, path)
 		try:
-			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath), errors='replace')
+			# always open with a specific encoding not in bytes mode, since otherwise we can't reliably pass the read lines to the logger
+			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath) or locale.getpreferredencoding(), errors='replace')
 		except Exception as e:
 			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False
@@ -795,9 +801,9 @@ class ProcessUser(object):
 			return False
 			
 		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
-		self.log.info('Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
+		self.log.info(u'Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
-			self.log.info('  %s', l, extra=logextra)
+			self.log.info(u'  %s'%(l), extra=logextra)
 		self.log.info('  -----', extra=logextra)
 		self.log.info('', extra=logextra)
 		return True
@@ -831,6 +837,11 @@ class ProcessUser(object):
 		For example, this method could be overridden to specify that utf-8 encoding 
 		is to be used for opening filenames ending in .xml, .json and .yaml. 
 		
+		The default implementation of this method uses pysysproject.xml 
+		configuration rules such as::
+		
+			<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		
 		A return value of None indicates default behaviour, which on Python 3 is to 
 		use the default encoding, as specified by python's 
 		locale.getpreferredencoding(), and on Python 2 is to use binary "str" 
@@ -845,5 +856,10 @@ class ProcessUser(object):
 		@return: The encoding to use for this file, or None if default behaviour is 
 		to be used.
 		"""
+		file = file.replace('\\','/').lower() # normalize slashes and ignore case
+		for e in self.project.defaultFileEncodings:
+			# first match wins
+			if fnmatch.fnmatchcase(file, e['pattern'].lower()) or fnmatch.fnmatchcase(os.path.basename(file), e['pattern'].lower()):
+				return e['encoding']
 		return None
 	

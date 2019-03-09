@@ -17,24 +17,12 @@
 
 # Contact: moraygrieve@users.sourceforge.net
 
-import os, sys, logging
-
 # the sys.path starts with the directory containing pysys.py which we want to remove as
 # that dir might be anywhere and could contain anything; it's not needed for locating 
 # the pysys modules since those will be in site-packages once pysys is installed
+import os, sys
 script_path = os.path.abspath(sys.path[0])
 sys.path = [p for p in sys.path if os.path.abspath(p) != script_path]
 
-# before anything else, configure the logger
-logging.getLogger().addHandler(logging.NullHandler())
-from pysys import log, stdoutHandler
-stdoutHandler.setLevel(logging.INFO)
-log.addHandler(stdoutHandler)
-
-from pysys.constants import loadproject
-loadproject(os.getcwd())
-
-from pysys.launcher.console import main
-
-if __name__ == "__main__":
-	main(sys.argv[1:])
+from pysys import __main__
+__main__.main()

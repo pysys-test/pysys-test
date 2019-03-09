@@ -1,0 +1,34 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Writers and logging - logging and logFileContents of I18N characters with various locale combinations</title>    
+    <purpose><![CDATA[
+Checks that I18N characters in log statements, 
+logFileContents and outcome reason are either represented correctly or replaced 
+by ? or similar when running in a locale that does not support them (7 bit ASCII). 
+Main goal is checking that they do not result in messages or outcome reasons going missing, 
+which makes tests very hard to debug - logging really needs to be rock solid. 
+
+Uses multiple threads, which tests extra logic we have for buffering before writing to stdout. 
+Also includes testing with and without coloring as especially on windows this results in 
+changes to sys.stdout as well as some interesting control characters. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups><group>i18n</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
