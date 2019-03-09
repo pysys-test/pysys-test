@@ -130,7 +130,7 @@ deploy:
     overwrite: true
     on: 
        # by default we only create a draft release for commits to master
-       #branch: latest
+       branch: post-1.3.0-logging-fixes
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
        condition: $TRAVIS_PYTHON_VERSION = 2.7
 
