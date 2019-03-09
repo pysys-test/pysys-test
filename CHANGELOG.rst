@@ -39,15 +39,6 @@ Changes affecting compatibility
   `**kwargs` parameter added in this version of PySys, as the old constructor 
   signature is now deprecated. As this API was added in 1.3.0 no other versions 
   are affected. 
-
-   
-- Added `pysys.writers.replaceIllegalXMLCharacters()` utility function, and use 
-  it to avoid `XMLResultsWriter` and `JUnitXMLResultsWriter` from generating 
-  invalid XML if `run.log` or outcome reason contain characters not permitted 
-  by XML. Also ASCII control characters (e.g. coloring instructions 
-  from other tools) are now stripped out of all outcome reason strings 
-  (including in run.log and non-XML based writers) since such characters 
-  are not useful and make summary test results harder to read. 
   
 
 New features
@@ -175,6 +166,14 @@ Bug fixes
   unicode character string not a byte string (which used to happen in Python 2 
   if it was not mentioned in the project config). Fixed `logFileContents` to 
   more robustly handle files containing I18N/non-ASCII characters. 
+
+- Added `pysys.writers.replaceIllegalXMLCharacters()` utility function, and use 
+  it to avoid `XMLResultsWriter` and `JUnitXMLResultsWriter` from generating 
+  invalid XML if `run.log` or outcome reason contain characters not permitted 
+  by XML. Also ASCII control characters (e.g. coloring instructions 
+  from other tools) are now stripped out of all outcome reason strings 
+  (including in run.log and non-XML based writers) since such characters 
+  are not useful and make summary test results harder to read. 
 
 ---------------
 Release History
