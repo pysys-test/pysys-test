@@ -44,7 +44,6 @@ from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.pycompat import *
 from pysys.internal.initlogging import _UnicodeSafeStreamWrapper
-
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
 global_lock = threading.Lock()

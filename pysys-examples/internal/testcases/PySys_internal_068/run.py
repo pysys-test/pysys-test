@@ -8,6 +8,9 @@ import os, sys, math, shutil, glob, locale
 # contains a non-ascii £ character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello £ world' 
 
+# contains a non-ascii £ character that is different in utf-8 vs latin-1
+TEST_STR = u'Hello £ world' 
+
 class PySysTest(BaseTest):
 
 	def execute(self):

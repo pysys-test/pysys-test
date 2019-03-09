@@ -128,7 +128,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 				tests.extend(matches)
 
 			except Exception:
-				raise Exception("Unable to locate requested testcase(s): '%s'"%t)
+				sys.exit("Unable to locate requested testcase(s): '%s'"%t)
 
 				
 	# trim down the list based on the type
@@ -181,7 +181,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 				index = index + 1
 	
 	if len(tests) == 0:
-		raise Exception("The supplied options did not result in the selection of any tests")
+		sys.exit("The supplied options did not result in the selection of any tests")
 	else:
 		return tests
 

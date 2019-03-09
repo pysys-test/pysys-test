@@ -39,7 +39,7 @@ Changes affecting compatibility
   `**kwargs` parameter added in this version of PySys, as the old constructor 
   signature is now deprecated. As this API was added in 1.3.0 no other versions 
   are affected. 
-  
+
 
 New features
 ------------
