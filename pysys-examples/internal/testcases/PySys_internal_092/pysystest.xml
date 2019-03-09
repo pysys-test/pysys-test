@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>pysys.py - launch using -m option</title>    
+    <purpose><![CDATA[
+Ensure that it's possible to run pysys using python -m pysys
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+
+</pysystest>
