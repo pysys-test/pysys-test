@@ -125,6 +125,11 @@ New features
   stdout when running tests multi-threaded (as a result of an underlying 
   python bug https://bugs.python.org/issue35185).
 
+- As an alternative to the usual `pysys.py` executable script, it is now also 
+  possible to launch PySys using::
+  
+    python -m pysys
+
 
 Bug fixes
 ---------
