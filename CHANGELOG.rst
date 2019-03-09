@@ -111,10 +111,6 @@ New features
   stored in `run.log`. PySys will now catch output written using `print()` 
   statements and redirect it to the logging framework, so it will show up 
   in `run.log`. 
-  
-- Fixed bug in which random log lines might not be written to `run.log` and/or 
-  stdout when running tests multi-threaded (as a result of an underlying 
-  python bug https://bugs.python.org/issue35185).
 
 - As an alternative to the usual `pysys.py` executable script, it is now also 
   possible to launch PySys using::
@@ -174,6 +170,11 @@ Bug fixes
   from other tools) are now stripped out of all outcome reason strings 
   (including in run.log and non-XML based writers) since such characters 
   are not useful and make summary test results harder to read. 
+  
+- Fixed bug in which random log lines might not be written to `run.log` and/or 
+  stdout when running tests multi-threaded (as a result of an underlying 
+  python bug https://bugs.python.org/issue35185).
+
 
 ---------------
 Release History
