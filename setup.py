@@ -98,7 +98,7 @@ setup(
 
 	scripts = ['scripts/pysys.py'],
 	packages=['pysys', 'pysys.launcher',  'pysys.manual',
-			'pysys.process', 'pysys.process.plat-win32', 
+			'pysys.process', 'pysys.process.plat-win32', 'pysys.internal',
 			'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
 			'pysys.writer', 'pysys.xml'],
 	include_package_data=True,
