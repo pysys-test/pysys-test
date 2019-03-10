@@ -93,6 +93,14 @@ class BaseResultsWriter(object):
 		"""
 		pass
 
+	def isEnabled(self): 
+		""" Determines whether this writer can be used in the current environment. 
+		
+		@returns: Usually True, but if set to False then after construction 
+		none of the other methods will be called. 
+		"""
+		return True
+
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', **kwargs):
 		""" Called before any tests begin. 
 		
