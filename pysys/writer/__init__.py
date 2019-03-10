@@ -73,6 +73,7 @@ else:
 from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter
 from pysys.utils.fileutils import mkdir, deletedir
+from pysys.utils.pycompat import PY2
 
 from xml.dom.minidom import getDOMImplementation
 
@@ -81,23 +82,35 @@ log = logging.getLogger('pysys.writer')
 class BaseResultsWriter(object):
 	"""Base class for objects that get notified as and when test results are available. """
 
-	def __init__(self, logfile=None):
+	def __init__(self, logfile=None, **kwargs):
 		""" Create an instance of the BaseResultsWriter class.
 
 		@param logfile: Optional configuration property specifying a file to store output in. 
 		Does not apply to all writers, can be ignored if not needed. 
 
+		@param kwargs: Additional keyword arguments may be added in a future release. 
+
 		"""
 		pass
 
-	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, **kwargs):
-		""" Called before any tests begin, and after any configuration properties have been 
-		set on this object. 
+	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', **kwargs):
+		""" Called before any tests begin. 
+		
+		Before this method is called, for each property "PROP" specified for this 
+		writer in the project configuration file, the configured value will be 
+		assigned to `self.PROP`. 
 
 		@param numTests: The total number of tests (cycles*testids) to be executed
 		@param cycles: The number of cycles. 
 		@param xargs: The runner's xargs
 		@param threads: The number of threads used for running tests. 
+		
+		@param testoutdir: The output directory used for this test run 
+		(equal to `runner.outsubdir`), an identifying string which often contains 
+		the platform, or when there are multiple test runs on the same machine 
+		may be used to distinguish between them. This is usually a relative path 
+		but may be an absolute path. 
+		
 		@param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
@@ -165,6 +178,8 @@ class BaseSummaryResultsWriter(BaseResultsWriter):
 	no "summary" writers are configured, a default ConsoleSummaryResultsWriter instance will be added
 	automatically.
 
+	Summary writers are invoked after all other writers, ensuring that their output 
+	will be displayed after output from any other writer types. 
 	"""
 	pass
 
@@ -227,7 +242,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 	"""
 	outputDir = None
 	
-	def __init__(self, logfile):
+	def __init__(self, logfile, **kwargs):
 		"""Create an instance of the TextResultsWriter class.
 		
 		@param logfile: The filename template for the logging of test results
@@ -323,7 +338,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	stylesheet = DEFAULT_STYLESHEET
 	useFileURL = "false"
 
-	def __init__(self, logfile):
+	def __init__(self, logfile, **kwargs):
 		"""Create an instance of the TextResultsWriter class.
 		
 		@param logfile: The filename template for the logging of test results
@@ -342,6 +357,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
+		assert kwargs['testoutdir'], kwargs # TODO remove
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		
@@ -499,7 +515,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	"""
 	outputDir = None
 	
-	def __init__(self, logfile):
+	def __init__(self, **kwargs):
 		"""Create an instance of the TextResultsWriter class.
 		
 		@param logfile: The (optional) filename template for the logging of test results
@@ -631,7 +647,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 	"""
 	outputDir = None
 
-	def __init__(self, logfile):
+	def __init__(self, logfile, **kwargs):
 		"""Create an instance of the TextResultsWriter class.
 
 		@param logfile: The filename template for the logging of test results
@@ -694,7 +710,7 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 	"""Default summary writer that is used to list a summary of the test results at the end of execution.
 
 	"""
-	def __init__(self, logfile=None):
+	def __init__(self, **kwargs):
 		self.showOutcomeReason = self.showOutputDir = False # option added in 1.3.0. May soon change the default to True. 
 	
 	def setup(self, cycles=0, threads=0, **kwargs):
@@ -750,7 +766,7 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 	"""Default progress writer that logs a summary of progress so far to the console, after each test completes.
 
 	"""
-	def __init__(self, logfile=None):
+	def __init__(self, **kwargs):
 		self.recentFailures = 5  # configurable
 
 	def setup(self, cycles=-1, numTests=-1, threads=-1, **kwargs):

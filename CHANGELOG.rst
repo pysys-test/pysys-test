@@ -85,10 +85,13 @@ New features
   outcomes were logged (so if you have a complex test you can see at a glance 
   if there's just one problem to resolve, or 5, or 20!).
 
-- Added `runLogOutput=` parameter to the `processResult()` method of 
-  the `BaseResultsWriter` API so that writers such as the 
+- Extended the writers API. 
+  Added `runLogOutput=` parameter to the `processResult()` method of 
+  the `BaseResultsWriter` class so that writers such as the 
   `JUnitXMLResultsWriter` can include the test output with no loss of unicode 
   character information. 
+  Also added `testoutdir=` parameter to the `setup()` method so writers have 
+  a way to identify different test runs on the same machine. 
 
 - Added support for configuring the default encodings to use for common file 
   patterns in the `pysysproject.xml` configuration, e.g. ::

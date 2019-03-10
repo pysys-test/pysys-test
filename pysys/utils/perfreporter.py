@@ -83,7 +83,12 @@ class CSVPerformanceReporter(object):
 
 		@param project: The project configuration instance.
 		@param summaryfile: The filename pattern used for the summary file(s)
-		@param testoutdir: The output directory for this test run
+		
+		@param testoutdir: The output directory used for this test run 
+		(equal to `runner.outsubdir`), an identifying string which often contains 
+		the platform, or when there are multiple test runs on the same machine 
+		may be used to distinguish between them. This is usually a relative path 
+		but may be an absolute path. 
 
 		"""
 		self.runner = kwargs.pop('runner', None) or self._runnerSingleton

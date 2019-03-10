@@ -77,7 +77,8 @@ class BaseRunner(ProcessUser):
 	      
 	@ivar mode: The user defined modes to run the tests within
 	@type mode: string
-	@ivar outsubdir: The directory name for the output subdirectory 
+	@ivar outsubdir: The directory name for the output subdirectory. Typically a relative path,
+	but can also be an absolute path. 
 	@type outsubdir: string
 	@ivar log: Reference to the logger instance of this class
 	@type log: logging.Logger
@@ -120,7 +121,7 @@ class BaseRunner(ProcessUser):
 		progresswriters = []
 		for classname, module, filename, properties in PROJECT.writers:
 			module = import_module(module, sys.path)
-			writer = getattr(module, classname)(filename)
+			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
 			for key in list(properties.keys()): setattr(writer, key, properties[key])
 			
 			if isinstance(writer, BaseSummaryResultsWriter):
@@ -130,18 +131,18 @@ class BaseRunner(ProcessUser):
 			elif self.record: # assume everything else is a record result writer (for compatibility reasons)
 				self.writers.append(writer)
 		
-		# summary writers are always enabled regardless of record mode.
-		# allow user to provide their own summary writer in the config, or if not, supply our own
-		if summarywriters: 
-			self.writers.extend(summarywriters)
-		else:
-			self.writers.append(ConsoleSummaryResultsWriter())
-
 		if xargs.pop('__progressWritersEnabled', False):
 			if progresswriters: 
 				self.writers.extend(progresswriters)
 			else:
 				self.writers.append(ConsoleProgressResultsWriter())
+
+		# summary writers are always enabled regardless of record mode. They are executed last. 
+		# allow user to provide their own summary writer in the config, or if not, supply our own
+		if summarywriters: 
+			self.writers.extend(summarywriters)
+		else:
+			self.writers.append(ConsoleSummaryResultsWriter())
 		
 		# duration and results used to be used for printing summary info, now (in 1.3.0) replaced by 
 		# more extensible ConsoleSummaryResultsWriter implementation. Keeping these around for 
@@ -321,7 +322,7 @@ class BaseRunner(ProcessUser):
 			try:
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir, runner=self)]
 			except Exception:
-				# support for passing kwargs was added in 1.3.1; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
+				# support for passing kwargs was added in 1.4.0; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
 				PROJECT.perfReporterConfig[0]._runnerSingleton = self
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir)]
 				del PROJECT.perfReporterConfig[0]._runnerSingleton
@@ -346,7 +347,8 @@ class BaseRunner(ProcessUser):
 
 		# call the hook to setup the test output writers
 		for writer in list(self.writers):
-			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads)
+			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
+				testoutdir=self.outsubdir)
 			except Exception: 
 				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
