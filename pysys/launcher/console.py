@@ -520,7 +520,12 @@ class ConsoleLaunchHelper(object):
 				self.userOptions['validateOnly'] = True
 			
 		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True
-		self.userOptions['__progressWritersEnabled'] = self.progress
+		
+		# special hidden dict of extra values to pass to the runner, since we can't change 
+		# the public API now
+		self.userOptions['__extraRunnerOptions'] = {
+			'progressWritersEnabled':self.progress
+		}
 				
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
 		# No exception handler above, as any createDescriptors failure is really a fatal problem that should cause us to 

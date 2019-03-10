@@ -97,7 +97,7 @@ class BaseRunner(ProcessUser):
 		@param threads: The number of worker threads to execute the requested testcases
 		@param outsubdir: The name of the output subdirectory
 		@param descriptors: List of XML descriptor containers detailing the set of testcases to be run
-		@param xargs: The dictionary of additional arguments to be set as data attributes to the class
+		@param xargs: The dictionary of additional "-X" user-defined arguments to be set as data attributes on the class
 		
 		"""
 		ProcessUser.__init__(self)
@@ -111,6 +111,9 @@ class BaseRunner(ProcessUser):
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
+		
+		extraOptions = xargs.pop('__extraRunnerOptions', {})
+		
 		self.setKeywordArgs(xargs)
 
 		if self.threads == 0:
@@ -133,7 +136,7 @@ class BaseRunner(ProcessUser):
 			elif self.record: # assume everything else is a record result writer (for compatibility reasons)
 				self.writers.append(writer)
 		
-		if xargs.pop('__progressWritersEnabled', False):
+		if extraOptions.get('progressWritersEnabled', False):
 			if progresswriters: 
 				self.writers.extend(progresswriters)
 			else:
