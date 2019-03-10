@@ -124,6 +124,8 @@ class BaseRunner(ProcessUser):
 			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
 			for key in list(properties.keys()): setattr(writer, key, properties[key])
 			
+			if hasattr(writer, 'isEnabled') and not writer.isEnabled(): continue
+			
 			if isinstance(writer, BaseSummaryResultsWriter):
 				summarywriters.append(writer)
 			elif isinstance(writer, BaseProgressResultsWriter):
