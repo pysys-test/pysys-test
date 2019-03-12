@@ -97,3 +97,18 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 		return io.open(path, mode=mode, encoding=encoding, errors=errors, **kwargs)
 	return open(path, mode=mode, **kwargs)
 
+if PY2:
+	Enum = object
+	"""In Python 2 an enumeration can be simulated by just assigning 
+	constant values with a unique value (perhaps a string) as 
+	statics in a simple object, e.g. ::
+	
+		class MyEnum(Enum):
+			OPTION1 = 'MyEnum.OPTION1'
+			OPTION2 = 'MyEnum.OPTION2'
+			
+		val = getattr(MyEnum, 'option1'.upper(), None)
+		if val is None: raise Exception('Bad option: "%s"'%...)
+	"""
+else:
+	from enum import Enum

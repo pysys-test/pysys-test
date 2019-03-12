@@ -37,6 +37,7 @@ except NameError:
 	from sets import Set as set
 
 from pysys import stdoutHandler
+from pysys.utils.pycompat import Enum
 
 # set the platform and platform related constants
 HOSTNAME = socket.getfqdn()
@@ -167,6 +168,12 @@ LOG_FAILURES = 'failed'
 LOG_PASSES = 'passed'
 LOG_SKIPS = 'skipped'
 LOG_END = 'end'
+
+class PrintLogs(Enum):
+	"""Specifies when run.log contents are printed to the stdout console."""
+	NONE = 'PrintLogs.NONE'
+	ALL = 'PrintLog.ALL'
+	FAILURES = 'PrintLog.FAILURES'
 
 # reference to the project instance defining parameters for the 
 # pysys project

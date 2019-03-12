@@ -43,7 +43,7 @@ from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.pycompat import *
-from pysys.internal.initlogging import _UnicodeSafeStreamWrapper
+from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, ThreadFilter
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
 global_lock = threading.Lock()
@@ -122,6 +122,7 @@ class BaseRunner(ProcessUser):
 		self.writers = []
 		summarywriters = []
 		progresswriters = []
+		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		for classname, module, filename, properties in PROJECT.writers:
 			module = import_module(module, sys.path)
 			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
@@ -357,7 +358,9 @@ class BaseRunner(ProcessUser):
 			except Exception: 
 				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
-				
+		
+		if self.printLogs is None: self.printLogs = PrintLogs.ALL # default value, unless overridden by user or writer.setup
+		
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
 
@@ -372,8 +375,15 @@ class BaseRunner(ProcessUser):
 		# join each cycle before starting the next, so we can invoke 
 		# cycleComplete reliably
 		concurrentcycles = type(self).cycleComplete == BaseRunner.cycleComplete
-		
+	
 		try:
+
+			# for suppressing print-as-we-execute in single-threaded mode (at least until outcome is known)
+			if self.threads==1 and self.printLogs!=PrintLogs.ALL:
+				singleThreadStdoutDisable = ThreadFilter()
+			else:
+				singleThreadStdoutDisable = None
+				
 			for cycle in range(self.cycle):
 				# loop through tests for the cycle
 				try:
@@ -386,7 +396,12 @@ class BaseRunner(ProcessUser):
 							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 							threadPool.putRequest(request)
 						else:
-							self.containerCallback(threading.current_thread().ident, container())
+							if singleThreadStdoutDisable: stdoutHandler.addFilter(singleThreadStdoutDisable)
+							try:
+								singleThreadedResult = container() # run test
+							finally:
+								if singleThreadStdoutDisable: stdoutHandler.removeFilter(singleThreadStdoutDisable)
+							self.containerCallback(threading.current_thread().ident, singleThreadedResult)
 				except KeyboardInterrupt:
 					log.info("test interrupt from keyboard")
 					self.handleKbrdInt()
@@ -408,7 +423,8 @@ class BaseRunner(ProcessUser):
 						self.handleKbrdInt()
 					except:
 						log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-	
+			
+			
 			# wait for the threads to complete if more than one thread	
 			if self.threads > 1: 
 				try:
@@ -471,7 +487,9 @@ class BaseRunner(ProcessUser):
 		
 		bufferedoutput = container.testFileHandlerStdoutBuffer.getvalue()
 
-		if self.threads > 1: 
+		# print if we need to AND haven't already done so using single-threaded ALL print-as-we-go
+		if (self.printLogs==PrintLogs.ALL and self.threads > 1) or (
+			self.printLogs==PrintLogs.FAILURES and container.testObj.getOutcome() in FAILS): 
 			try:
 				# write out cached messages from the worker thread to stdout
 				# (use the stdoutHandler stream which includes coloring redirections if applicable, 
@@ -485,13 +503,15 @@ class BaseRunner(ProcessUser):
 				errors.append('Failed to write buffered test output')
 				log.exception("Failed to write buffered test output for %s: "%container.descriptor.id)
 				
-		if stdoutHandler.level >= logging.WARN:
+		if self.printLogs != PrintLogs.NONE and stdoutHandler.level >= logging.WARN:
+			# print at least some information even if logging is turned down; 
+			# but if in PrintLogs.NONE mode truly do nothing, as there may be a CI writer doing a customized variant of this
 			log.critical("%s: %s (%s)", LOOKUP[container.testObj.getOutcome()], container.descriptor.id, container.descriptor.title)
 		
 		# call the hook for end of test execution
 		self.testComplete(container.testObj, container.outsubdir)
 				
-		# pass the test object to the test writers is recording
+		# pass the test object to the test writers if recording
 		for writer in self.writers:
 			try: 
 				writer.processResult(container.testObj, cycle=container.cycle,
@@ -593,6 +613,7 @@ class TestContainer(object):
 		"""		
 		exc_info = []
 		self.testStart = time.time()
+		
 		try:
 			# stdout - set this up right at the very beginning to ensure we can see the log output in case any later step fails
 			# here we use UnicodeSafeStreamWrapper to ensure we get a buffer of unicode characters (mixing chars+bytes leads to exceptions), 

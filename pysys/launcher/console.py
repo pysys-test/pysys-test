@@ -391,7 +391,7 @@ class ConsoleLaunchHelper(object):
 		self.userOptions = {}
 		self.descriptors = []
 		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:g'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly', 'progress']
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=']
 
 
 	def printUsage(self, printXOptions):
@@ -415,6 +415,9 @@ class ConsoleLaunchHelper(object):
 		print("                                   the PYSYS_PROGRESS=true environment variable)")
 		print("       -b | --abort     STRING     set the default abort on error property (true|false, overrides ")
 		print("                                   that specified in the project properties)")
+		print("            --printLogs STRING     indicates for which outcome types the run.log output ")
+		print("                                   will be printed to the stdout console; ")
+		print("                                   options are: all|none|failures, default is all.")
 		print("       -y | --validateOnly         test the validate() method without re-running execute()")
 		print("       -X               KEY=VALUE  set user defined options to be passed through to the test and ")
 		print("                                   runner classes. The left hand side string is the data attribute ")
@@ -448,6 +451,7 @@ class ConsoleLaunchHelper(object):
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 
+		printLogs = None
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage(printXOptions)	  
@@ -489,7 +493,7 @@ class ConsoleLaunchHelper(object):
 					self.cycle = int(value)
 				except Exception:
 					print("Error parsing command line arguments: A valid integer for the number of cycles must be supplied")
-					self.printUsage(printXOptions)
+					sys.exit(1)
 
 			elif option in ("-o", "--outdir"):
 				self.outsubdir = value
@@ -502,13 +506,19 @@ class ConsoleLaunchHelper(object):
 					self.threads = int(value)
 				except Exception:
 					print("Error parsing command line arguments: A valid integer for the number of threads must be supplied")
-					self.printUsage(printXOptions)
+					sys.exit(1)
 
 			elif option in ("-b", "--abort"):
 				setattr(PROJECT, 'defaultAbortOnError', str(value.lower()=='true'))
 
 			elif option in ["-g", "--progress"]:
 				self.progress = True
+
+			elif option in ["--printLogs"]:
+				printLogs = getattr(PrintLogs, value.upper(), None)
+				if printLogs is None: 
+					print("Error parsing command line arguments: Unsupported --printLogs value '%s'"%value)
+					sys.exit(1)
 
 			elif option in ["-X"]:
 				if EXPR1.search(value) is not None:
@@ -524,7 +534,8 @@ class ConsoleLaunchHelper(object):
 		# special hidden dict of extra values to pass to the runner, since we can't change 
 		# the public API now
 		self.userOptions['__extraRunnerOptions'] = {
-			'progressWritersEnabled':self.progress
+			'progressWritersEnabled':self.progress,
+			'printLogs': printLogs,
 		}
 				
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)

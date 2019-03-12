@@ -117,6 +117,18 @@ New features
   statements and redirect it to the logging framework, so it will show up 
   in `run.log`. 
 
+- Added new command line option `--printLogs all|failures|none` (default value 
+  is `all`) which allows user to avoid the printing of run.log to the stdout 
+  console either for all tests, or for tests that pass. This is useful to 
+  avoid generating huge amounts of output during large test runs (which can 
+  be problematic when stdout is captured by a Continuous Integration system), 
+  or to show detailed information only for failing tests which makes it easier 
+  for a user to locate the diagnostic information they care about more quickly. 
+  The `printLogs` option is stored in runner.printLogs` and can be changed by 
+  custom writer implementations if desired, for example to avoid duplicating 
+  information already being printed to stdout by the writer in a different 
+  format. 
+
 - As an alternative to the usual `pysys.py` executable script, it is now also 
   possible to launch PySys using::
   

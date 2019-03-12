@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Logging - printLogs option</title>    
+    <purpose><![CDATA[
+Checks it does the right thing, regardless of whether multi-threaded or not
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>logging</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
