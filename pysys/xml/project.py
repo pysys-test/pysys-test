@@ -376,7 +376,9 @@ class Project(object):
 		stdoutformatter, runlogformatter = None, None
 
 		self.projectFile = None
-		if projectFile is not None and os.path.exists(os.path.join(root, projectFile)):
+		if projectFile is not None:
+			if not os.path.exists(os.path.join(root, projectFile)):
+				raise Exception("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
 			from pysys.xml.project import XMLProjectParser
 			try:
 				parser = XMLProjectParser(root, projectFile)
