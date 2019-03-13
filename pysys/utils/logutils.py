@@ -249,4 +249,23 @@ class ColorLogFormatter(BaseLogFormatter):
 				logging.getLogger('pysys.utils.logutils').debug('Successfully initialized the coloring library')
 			except Exception as e:
 				logging.getLogger('pysys.utils.logutils').debug('Failed to load coloring library: %s', repr(e))
-			
+
+def stdoutPrint(s):
+	"""
+	Writes the specified bytes or (preferably) unicode character string 
+	to stdout, avoiding any redirection to loggers performed by PySys, and 
+	performing replacements if needed based on the characters 
+	supported by the stdout encoding, and with support for output coloring 
+	using escape sequences (if enabled in PySys). 
+
+	In most cases a logger should be used for output from PySys, but this 
+	function is provided as a way to write to stdout for cases where it is truly 
+	needed, such as unconditionally writing status messages to a CI system. 
+	
+	@param s: a unicode or bytes string. A newline will be added automatically. 
+	"""
+	if isinstance(s, binary_type):
+		s += b'\n'
+	else:
+		s += u'\n'
+	return stdoutHandler.stream.write(s)

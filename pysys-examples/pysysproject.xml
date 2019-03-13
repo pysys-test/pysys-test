@@ -182,6 +182,12 @@
 			<property name="useFileURL" value="true"/>
 			-->
 		</writer>
+		
+		<!-- CI writers do nothing unless running under the specified CI environment 
+			and also require that the "record" option is specified. 
+		-->
+		<writer classname="TravisCIWriter" module="pysys.writer.ci_writers">
+		</writer>
 
 		<!--
 		Add in the test results writer if straight text output is required 

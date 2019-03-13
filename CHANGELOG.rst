@@ -92,8 +92,18 @@ New features
       character information. 
    - Added `testoutdir=` parameter to the `setup()` method so writers have 
      a way to identify different test runs on the same machine. 
+   - Added `runner=` parameter to the `setup()` method so writers have 
+     access to the runner instance for reading/modifying configuration 
+     settings. 
    - Added `isEnabled()` method that can optionally be used by a writer to 
      disable itself based on the environment in which it is running. 
+
+- Added support for running PySys tests under Travis CI to the sample 
+  pysysproject.xml file, including by default only printing run.log output 
+  for failed tests, and containing that detailed output within a folded 
+  section that can be expanded if needed. To enable this, use the `--record` 
+  command line option, and check that the Travis CI writer is enabled 
+  in your project configuration file. 
 
 - Added support for configuring the default encodings to use for common file 
   patterns in the `pysysproject.xml` configuration, e.g. ::

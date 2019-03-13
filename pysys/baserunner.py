@@ -354,7 +354,7 @@ class BaseRunner(ProcessUser):
 		# call the hook to setup the test output writers
 		for writer in list(self.writers):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
-				testoutdir=self.outsubdir)
+				testoutdir=self.outsubdir, runner=self)
 			except Exception: 
 				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice

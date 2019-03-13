@@ -101,7 +101,7 @@ class BaseResultsWriter(object):
 		"""
 		return True
 
-	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', **kwargs):
+	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		""" Called before any tests begin. 
 		
 		Before this method is called, for each property "PROP" specified for this 
@@ -118,6 +118,8 @@ class BaseResultsWriter(object):
 		the platform, or when there are multiple test runs on the same machine 
 		may be used to distinguish between them. This is usually a relative path 
 		but may be an absolute path. 
+		
+		@param runner: The runner instance that owns this writer. 
 		
 		@param kwargs: Additional keyword arguments may be added in a future release. 
 

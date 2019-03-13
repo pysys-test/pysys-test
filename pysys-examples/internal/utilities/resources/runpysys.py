@@ -9,7 +9,9 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		args = ['-m', 'pysys']+args
 	env = dict(environs or {})
 	for k in os.environ: 
-		if k not in env and not k.startswith('PYSYS_'): env[k] = os.environ[k]
+		# don't preserve any env vars from parent env that might affect test behaviour
+		if k not in env and not k.startswith('PYSYS_') and \
+			k not in ['TRAVIS']: env[k] = os.environ[k]
 	for k in list(env.keys()):
 		if env[k] == None: env.pop(k)
 	pypath = os.path.dirname(sys.executable)
