@@ -61,7 +61,6 @@ install:
 script:
   - echo ~
   - cd pysys-examples
-  - export PYSYS_COLOR=true
   
   # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
   - pip install ../dist/PySys*.whl
