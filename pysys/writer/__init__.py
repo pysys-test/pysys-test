@@ -93,7 +93,7 @@ class BaseResultsWriter(object):
 		"""
 		pass
 
-	def isEnabled(self): 
+	def isEnabled(self, **kwargs): 
 		""" Determines whether this writer can be used in the current environment. 
 		
 		@returns: Usually True, but if set to False then after construction 

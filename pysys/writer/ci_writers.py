@@ -42,7 +42,7 @@ class TravisCIWriter(BaseRecordResultsWriter):
 	
 	"""
 		
-	def isEnabled(self):
+	def isEnabled(self, **kwargs):
 		return os.getenv('TRAVIS','')=='true'
 
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
