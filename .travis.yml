@@ -66,16 +66,11 @@ script:
   # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
   - pip install ../dist/PySys*.whl
   - pip install coverage codecov
-  - "echo travis_fold:start:main-tests"
-  - which pysys.py
   - python -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads 0 --purge --record --type auto
-  - "echo travis_fold:end:main-tests"
   
   - "echo travis_fold:start:coverage-summary"
   - python internal/utilities/scripts/coverage_pysys.py report
   - "echo travis_fold:end:coverage-summary"
-
-  - "echo travis_fold:start:touch-tests"
 
   # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
   # this also checks direct invocation of the launcher from .whl installation
@@ -90,8 +85,6 @@ script:
   - pip uninstall --yes PySys
   - "pip install -e .."
   - pysys.py run --threads 0 --purge --record --include pysys-packaging --outdir against-src-develop-mode
-
-  - "echo travis_fold:end:touch-tests"
 
   - cd ..
   
