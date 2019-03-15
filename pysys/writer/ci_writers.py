@@ -56,7 +56,7 @@ class TravisCIWriter(BaseRecordResultsWriter):
 			# and hard to find the logs of interest
 			runner.printLogs = PrintLogs.FAILURES
 		
-		stdoutPrint(u'travis_fold:start:PySys %s'%self.runid)
+		stdoutPrint(u'travis_fold:start:PySys_%s'%self.runid.replace(' ', '_'))
 		
 		# enable coloring automatically, since this CI provider supports it, 
 		# but must explicitly disable bright colors since it doesn't yet support that
@@ -66,7 +66,7 @@ class TravisCIWriter(BaseRecordResultsWriter):
 	def cleanup(self, **kwargs):
 		# invoked after all tests but before summary is printed, 
 		# a good place to close the folding detail section
-		stdoutPrint(u'travis_fold:end:PySys %s'%self.runid)
+		stdoutPrint(u'travis_fold:end:PySys_%s'%self.runid.replace(' ', '_'))
 
 	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		# nothing to do for Travis as it doesn't collect results, we use the 
