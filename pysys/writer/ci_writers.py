@@ -58,8 +58,10 @@ class TravisCIWriter(BaseRecordResultsWriter):
 		
 		stdoutPrint(u'travis_fold:start:PySys %s'%self.runid)
 		
-		# enable coloring automatically, since this CI provider supports it
+		# enable coloring automatically, since this CI provider supports it, 
+		# but must explicitly disable bright colors since it doesn't yet support that
 		runner.project.formatters.stdout.color = True
+		ColorLogFormatter.configureANSIEscapeCodes(bright=False)
 
 	def cleanup(self, **kwargs):
 		# invoked after all tests but before summary is printed, 

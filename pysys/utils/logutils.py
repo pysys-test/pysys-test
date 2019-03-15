@@ -113,18 +113,45 @@ class ColorLogFormatter(BaseLogFormatter):
 	
 	# by default we use standard ANSI escape sequences, supported by most unix terminals
 	COLOR_ESCAPE_CODES = {
-		'BLUE': '\033[94m',
-		'GREEN':'\033[92m',
-		'YELLOW':'\033[93m',
-		'RED':'\033[91m',
-		'MAGENTA':'\033[95m',
-		'CYAN':'\033[96m',
-		'WHITE':'\033[97m',
-		'BLACK':'\033[30m',
-		'END':'\033[0m',
+		'BLUE':    '',
+		'GREEN':   '',
+		'YELLOW':  '',
+		'RED':     '',
+		'MAGENTA': '',
+		'CYAN':    '',
+		'WHITE':   '',
+		'BLACK':   '',
+		'END':     '',
 	}
 
-	__STDOUT_LOCK = threading.Lock()
+	def configureANSIEscapeCodes(bright=None):
+		"""Sets the ANSI escape codes to be used, either using the extended 
+		"bright" colors that look better, or the more widely supported 
+		standard ones. 
+		
+		Called during startup, but can also be programatically invoked 
+		later 
+		
+		@param bright: set to False to force only the basic (30-39) codes 
+		or True to use the better-looking 90-99 bright codes which are not 
+		supported by all terminals. Default is bright=False, but can be 
+		overridden by PYSYS_COLOR_BASIC env var. 
+		"""
+		if bright is None: bright = os.getenv('PYSYS_COLOR_BRIGHT','true')=='true'
+		# by default we use standard ANSI escape sequences, supported by most unix terminals
+		ColorLogFormatter.COLOR_ESCAPE_CODES = {
+			'BLUE':    '\033[%dm' % (34 if not bright else 94),
+			'GREEN':   '\033[%dm' % (32 if not bright else 92),
+			'YELLOW':  '\033[%dm' % (33 if not bright else 93),
+			'RED':     '\033[%dm' % (31 if not bright else 91),
+			'MAGENTA': '\033[%dm' % (35 if not bright else 95),
+			'CYAN':    '\033[%dm' % (36 if not bright else 96),
+			'WHITE':   '\033[%dm' % (37 if not bright else 97),
+			'BLACK':   '\033[%dm' % (30 if not bright else 90),
+			'END':     '\033[%dm' % (0),
+		}
+
+	__STDOUT_LOCK = threading.Lock() # global lock shared by all instances of this class
 
 	def __init__(self, propertiesDict):
 		"""Create an instance of the formatter class."""
@@ -249,6 +276,7 @@ class ColorLogFormatter(BaseLogFormatter):
 				logging.getLogger('pysys.utils.logutils').debug('Successfully initialized the coloring library')
 			except Exception as e:
 				logging.getLogger('pysys.utils.logutils').debug('Failed to load coloring library: %s', repr(e))
+ColorLogFormatter.configureANSIEscapeCodes()
 
 def stdoutPrint(s):
 	"""
