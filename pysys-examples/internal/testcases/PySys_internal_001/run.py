@@ -19,7 +19,7 @@ class PySysTest(BaseTest):
 		finally:
 			self.logFileContents('pysys.out', maxLines=0)
 			self.logFileContents('pysys.err')
-		self.assertGrep('pysys.out', expr='XXTest final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
+		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 
 	def validate(self):
 		pass # checked by nested testcase
