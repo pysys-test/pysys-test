@@ -22,7 +22,8 @@ class PySysTest(BaseTest):
 
 		subtest = 'default-project' 
 		runPySys(self, subtest, ['run', '--record', '--printLogs', 'all', '--threads', '2', '-o', subtest], 
-			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true', 'PYSYS_PROJECTFILE':self.input+'/../../../../pysysproject.xml'})
+			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true', 
+				'PYSYS_PROJECTFILE':PROJECT.rootdir+'/pysysproject.xml'})
 
 			
 	def validate(self):
