@@ -25,12 +25,10 @@ of a set of tests. There are currently three distinct types of writers, namely R
 Summary, each of which performs output at different stages of a run i.e.
 
    - "Record" writers output the outcome of a specific test after completion of that test, to allow
-runtime auditing of the test output, e.g. into a relational database. Four implementations of record
-writers are distributed with the PySys framework, namely the L{writer.TextResultsWriter}, the
-L{writer.XMLResultsWriter}, the L{writer.JUnitXMLResultsWriter} and the L{writer.CSVResultsWriter}.
-Whilst the record writers distributed with PySys all subclass L{writer.BaseResultsWriter} best practice
-is to subclass L{writer.BaseRecordResultsWriter} when writing custom implementations. Record writers
-are enabled when the --record flag is given to the PySys launcher.
+runtime auditing of the test output, e.g. into a relational database. Several record
+writers are distributed with the PySys framework, such as the L{writer.JUnitXMLResultsWriter}.
+Best practice is to subclass L{writer.BaseRecordResultsWriter} when writing new record writers. 
+Record writers are enabled when the --record flag is given to the PySys launcher.
 
    - "Progress" writers output a summary of the test progress after completion of each test, to give
 an indication of how far and how well the run is progressing. A single implementation of a progress
