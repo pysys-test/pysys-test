@@ -588,6 +588,13 @@ class ProcessUser(object):
 			outcomeReason = ''
 		else: 
 			outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
+			if PY2 and isinstance(outcomeReason, str): 
+				# The python2 logger is very unhappy about byte str objects containing 
+				# non-ascii characters (specifically it will fail to log them and dump a 
+				# traceback on stderr). Since it's pretty important that assertion 
+				# messages and test outcome reasons don't get swallowed, add a 
+				# workaround for this here. Not a problem in python 3. 
+				outcomeReason = outcomeReason.decode('ascii', errors='replace')
 		
 		old = self.getOutcome()
 		self.outcome.append(outcome)
@@ -604,10 +611,10 @@ class ProcessUser(object):
 		if outcomeReason and printReason:
 			if outcome in FAILS:
 				if callRecord==None: callRecord = self.__callRecord()
-				log.warn('%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), '[%s]'%','.join(callRecord) if callRecord!=None else '',
+				log.warn(u'%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
 						 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 			else:
-				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+				log.info(u'%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 
 
 	def abort(self, outcome, outcomeReason, callRecord=None):

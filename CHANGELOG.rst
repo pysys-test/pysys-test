@@ -40,6 +40,9 @@ Changes affecting compatibility
   signature is now deprecated. As this API was added in 1.3.0 no other versions 
   are affected. 
 
+- In the previous release unknown or invalid keyword arguments passed to 
+  assert* methods would be silently ignored (potentially masking mistakes); 
+  now it is an error to specify an invalid argument. 
 
 New features
 ------------
