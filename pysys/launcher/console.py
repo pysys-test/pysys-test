@@ -409,8 +409,8 @@ class ConsoleLaunchHelper(object):
 		print("       -c | --cycle     INT        set the the number of cycles to run the tests")
 		print("       -o | --outdir    STRING     set the name of the directory to use for this run's test output")
 		print("       -m | --mode      STRING     set the user defined mode to run the tests")
-		print("       -n | --threads   INT        set the number of worker threads to run the tests (defaults to 1). ")
-		print("                                   A value of 0 sets to the number of available CPUs")
+		print("       -n | --threads   INT|auto   set the number of worker threads to run the tests (defaults to 1). ")
+		print("                                   A value of 'auto' sets to the number of available CPUs")
 		print("       -g | --progress             print progress updates after completion of each test (or set")
 		print("                                   the PYSYS_PROGRESS=true environment variable)")
 		print("       -b | --abort     STRING     set the default abort on error property (true|false, overrides ")
@@ -503,7 +503,7 @@ class ConsoleLaunchHelper(object):
 
 			elif option in ("-n", "--threads"):
 				try:
-					self.threads = int(value)
+					self.threads = 0 if value.lower()=='auto' else int(value)
 				except Exception:
 					print("Error parsing command line arguments: A valid integer for the number of threads must be supplied")
 					sys.exit(1)

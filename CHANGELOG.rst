@@ -148,6 +148,10 @@ New features
   PySys is running in an interative terminal, and that if running on Windows 
   the `colorama` library is installed. 
 
+- Added `--threads auto` which is equivalent to `--threads 0` and provides 
+  a clearer way to indicate that PySys will automatically determine how many 
+  threads to run tests with based on the number of available CPUs. 
+
 - As an alternative to the usual `pysys.py` executable script, it is now also 
   possible to launch PySys using::
   
