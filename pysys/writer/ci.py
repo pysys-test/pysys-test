@@ -36,9 +36,8 @@ log = logging.getLogger('pysys.writer')
 
 class TravisCIWriter(BaseRecordResultsWriter):
 	"""
-	Writer for Travis CI. Enable using `--record` when running PySys; 
-	only generates output if the TRAVIS=true environment variable is set, so 
-	will do nothing in a non-Travis environment.
+	Writer for Travis CI. Only enabled when running under Travis (specifically, 
+	if the TRAVIS=true environment variable is set).
 	
 	"""
 		

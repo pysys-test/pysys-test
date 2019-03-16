@@ -28,7 +28,9 @@ Summary, each of which performs output at different stages of a run i.e.
 runtime auditing of the test output, e.g. into a relational database. Several record
 writers are distributed with the PySys framework, such as the L{writer.JUnitXMLResultsWriter}.
 Best practice is to subclass L{writer.BaseRecordResultsWriter} when writing new record writers. 
-Record writers are enabled when the --record flag is given to the PySys launcher.
+By default, record writers are enabled only when the --record flag is given to the PySys launcher, 
+though some writers may enable/disable themselves under different conditions, by overriding the 
+L{pysys.writer.BaseRecordResultsWriter.isEnabled} method.
 
    - "Progress" writers output a summary of the test progress after completion of each test, to give
 an indication of how far and how well the run is progressing. A single implementation of a progress
@@ -91,13 +93,23 @@ class BaseResultsWriter(object):
 		"""
 		pass
 
-	def isEnabled(self, **kwargs): 
+	def isEnabled(self, record=False, **kwargs): 
 		""" Determines whether this writer can be used in the current environment. 
 		
-		@returns: Usually True, but if set to False then after construction 
-		none of the other methods will be called. 
+		If set to False then after construction none of the other methods 
+		(including L{setup{})) will be called. 
+		
+		@param record: True if the user ran PySys with the `--record` flag, 
+		indicating that test results should be recorded. 
+		 
+		@returns: For record writers, the default to enable only if record==True, 
+		but individual writers can use different criteria if desired, e.g. 
+		writers for logging output to a CI system may enable themselves 
+		based on environment variables indicating that system is present, 
+		even if record is not specified explicitly. 
+		
 		"""
-		return True
+		return record == True
 
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		""" Called before any tests begin. 
@@ -189,7 +201,8 @@ class BaseSummaryResultsWriter(BaseResultsWriter):
 	Summary writers are invoked after all other writers, ensuring that their output 
 	will be displayed after output from any other writer types. 
 	"""
-	pass
+	def isEnabled(self, record=False, **kwargs): 
+		return True # regardless of record flag
 
 
 class BaseProgressResultsWriter(BaseResultsWriter):
@@ -198,8 +211,8 @@ class BaseProgressResultsWriter(BaseResultsWriter):
 	Progress writers are only enabled if the --progress flag is specified.
 
 	"""
-	pass
-
+	def isEnabled(self, record=False, **kwargs): 
+		return True # regardless of record flag
 
 class flushfile(): 
 	"""Utility class to flush on each write operation - for internal use only.  

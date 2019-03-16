@@ -96,14 +96,15 @@ New features
      access to the runner instance for reading/modifying configuration 
      settings. 
    - Added `isEnabled()` method that can optionally be used by a writer to 
-     disable itself based on the environment in which it is running. 
+     disable itself based on the environment in which it is running, or 
+     to enable itself even when `--record` isn't specified, which is useful 
+     for writers that produce output for a CI system. 
 
 - Added support for running PySys tests under Travis CI to the sample 
   pysysproject.xml file, including by default only printing run.log output 
   for failed tests, and containing that detailed output within a folded 
-  section that can be expanded if needed. To enable this, use the `--record` 
-  command line option, and check that the Travis CI writer is enabled 
-  in your project configuration file. 
+  section that can be expanded if needed. To enable this just ensure that the 
+  Travis CI writer is enabled in your project configuration file. 
 
 - Added support for configuring the default encodings to use for common file 
   patterns in the `pysysproject.xml` configuration, e.g. ::

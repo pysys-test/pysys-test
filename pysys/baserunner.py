@@ -128,14 +128,18 @@ class BaseRunner(ProcessUser):
 			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
 			for key in list(properties.keys()): setattr(writer, key, properties[key])
 			
-			if hasattr(writer, 'isEnabled') and not writer.isEnabled(): continue
+			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
 			
 			if isinstance(writer, BaseSummaryResultsWriter):
 				summarywriters.append(writer)
 			elif isinstance(writer, BaseProgressResultsWriter):
 				progresswriters.append(writer)
-			elif self.record: # assume everything else is a record result writer (for compatibility reasons)
-				self.writers.append(writer)
+			else: # assume everything else is a record result writer (for compatibility reasons)
+				# add extra check on self.record for compatibility with old writers that 
+				# do not subclass the base writer and therefore would have bypassed 
+				# the above isEnabled() check
+				if hasattr(writer, 'isEnabled') or self.record: 
+					self.writers.append(writer)
 		
 		if extraOptions.get('progressWritersEnabled', False):
 			if progresswriters: 
