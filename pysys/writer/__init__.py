@@ -97,7 +97,7 @@ class BaseResultsWriter(object):
 		""" Determines whether this writer can be used in the current environment. 
 		
 		If set to False then after construction none of the other methods 
-		(including L{setup{})) will be called. 
+		(including L{setup})) will be called. 
 		
 		@param record: True if the user ran PySys with the `--record` flag, 
 		indicating that test results should be recorded. 
@@ -264,11 +264,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 	outputDir = None
 	
 	def __init__(self, logfile, **kwargs):
-		"""Create an instance of the TextResultsWriter class.
-		
-		@param logfile: The filename template for the logging of test results
-		
-		"""	
+		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.fp = None
@@ -360,11 +356,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	useFileURL = "false"
 
 	def __init__(self, logfile, **kwargs):
-		"""Create an instance of the TextResultsWriter class.
-		
-		@param logfile: The filename template for the logging of test results
-		
-		"""
+		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.numResults = 0
@@ -537,11 +529,6 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	outputDir = None
 	
 	def __init__(self, **kwargs):
-		"""Create an instance of the TextResultsWriter class.
-		
-		@param logfile: The (optional) filename template for the logging of test results
-		
-		"""	
 		self.cycle = -1
 
 	def setup(self, **kwargs):	
@@ -669,11 +656,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 	outputDir = None
 
 	def __init__(self, logfile, **kwargs):
-		"""Create an instance of the TextResultsWriter class.
-
-		@param logfile: The filename template for the logging of test results
-
-		"""
+		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.fp = None
 
