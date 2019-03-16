@@ -2,16 +2,16 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Logging - redirectPrintToLogger redirects print() statements to run.log</title>    
+    <title>Nested testcase</title>    
     <purpose><![CDATA[
-Ensure any attempt to use print from within a testcase gets redirected to the log. 
+
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group>process</group>
+      <group>outcomes</group>
     </groups>
   </classification>
 

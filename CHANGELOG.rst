@@ -124,9 +124,12 @@ New features
 
 - Use of `print()` rather than self.log is a common mistake that results in 
   essential diagnostic information showing up on the console but not 
-  stored in `run.log`. PySys will now catch output written using `print()` 
-  statements and redirect it to the logging framework, so it will show up 
-  in `run.log`. 
+  stored in `run.log`. A new project option `redirectPrintToLogger` 
+  can optionally be enabled to instruct PySys to catch output written using 
+  `print()` statements or to `sys.stdout` and redirect it to the logging 
+  framework, so it will show up in `run.log`. Writers that genuinely need 
+  the ability to write directly to stdout should be changed to use 
+  `pysys.utils.logutils.stdoutPrint`. 
 
 - Added new command line option `--printLogs all|failures|none` (default value 
   is `all`) which allows user to avoid the printing of run.log to the stdout 

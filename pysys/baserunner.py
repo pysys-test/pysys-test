@@ -349,7 +349,7 @@ class BaseRunner(ProcessUser):
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
-		if os.getenv('PYSYS_DISABLE_PRINT_REDIRECTOR','')!= 'true':
+		if getattr(PROJECT, 'redirectPrintToLogger', False):
 			sys.stdout = PySysPrintRedirector()
 		
 		# call the hook to setup prior to running tests

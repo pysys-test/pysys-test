@@ -2,16 +2,18 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Logging - redirectPrintToLogger redirects print() statements to run.log</title>    
+    <title>Writers - custom writer using sys.stdout and stdoutPrint</title>    
     <purpose><![CDATA[
-Ensure any attempt to use print from within a testcase gets redirected to the log. 
+Compatibility test to check we haven't broken custom writers that might be 
+writing to sys.stdout. Also checks that stdoutPrint gives us a reliable way to 
+write to stdout, whether using unicode or byte strings. 
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group>process</group>
+      <group>writer</group>
     </groups>
   </classification>
 

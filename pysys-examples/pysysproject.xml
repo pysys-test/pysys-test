@@ -107,6 +107,21 @@
 
 	
 	<!-- 
+	Controls whether print() and sys.stdout.write() statements will be 
+	converted into logger.info() calls. If redirection is enabled, output 
+	from print() statements will not be captured in run.log files and will 
+	often not appear in the correct place on the console when running 
+	multi-threaded. 
+	
+	Note that this affects writers as well as testcases. 
+	
+	Use pysys.utils.logutils.stdoutPrint() to write to stdout without any 
+	redirection. 
+	-->
+	<property name="redirectPrintToLogger" value="false"/>
+	
+	
+	<!-- 
 	Import properties from file (fails silently if the file does not exist). The imported 
 	file should be of the format name=value (one pair specified per line). Any imported names
 	can again be used as a substitution variables within the project file, and are also set as 
@@ -207,8 +222,8 @@
 		-->
 
 		<!--
-		Add in the JUnit results writer for PySys test output to be written in the widely-used JUnit XML format. Use the 
-		outputDir property to define the output directory for the JUnit test summary files (the writer will 
+		Add in the JUnit results writer for PySys test output to be written in the widely-used Apache Ant JUnit XML format. 
+		Use the outputDir property to define the output directory for the JUnit test summary files (the writer will 
 		produce one file per test into this output directory). If not specified this defaults to the current 
 		working directory.
 		-->

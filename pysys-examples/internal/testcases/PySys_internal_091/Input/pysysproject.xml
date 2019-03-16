@@ -5,6 +5,8 @@
 		<default-file-encoding pattern="run.log" encoding="utf-8"/>
 	</default-file-encodings>
 	
+	<property name="redirectPrintToLogger" value="true"/>
+	
 	<formatters>
 		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
 				name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
