@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Writers - Travis CI</title>    
+    <purpose><![CDATA[
+Checks it does the right thing, including changing the default setting of 
+printLogs. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>writer</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

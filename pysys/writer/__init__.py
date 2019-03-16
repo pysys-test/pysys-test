@@ -25,12 +25,12 @@ of a set of tests. There are currently three distinct types of writers, namely R
 Summary, each of which performs output at different stages of a run i.e.
 
    - "Record" writers output the outcome of a specific test after completion of that test, to allow
-runtime auditing of the test output, e.g. into a relational database. Four implementations of record
-writers are distributed with the PySys framework, namely the L{writer.TextResultsWriter}, the
-L{writer.XMLResultsWriter}, the L{writer.JUnitXMLResultsWriter} and the L{writer.CSVResultsWriter}.
-Whilst the record writers distributed with PySys all subclass L{writer.BaseResultsWriter} best practice
-is to subclass L{writer.BaseRecordResultsWriter} when writing custom implementations. Record writers
-are enabled when the --record flag is given to the PySys launcher.
+runtime auditing of the test output, e.g. into a relational database. Several record
+writers are distributed with the PySys framework, such as the L{writer.JUnitXMLResultsWriter}.
+Best practice is to subclass L{writer.BaseRecordResultsWriter} when writing new record writers. 
+By default, record writers are enabled only when the --record flag is given to the PySys launcher, 
+though some writers may enable/disable themselves under different conditions, by overriding the 
+L{pysys.writer.BaseRecordResultsWriter.isEnabled} method.
 
    - "Progress" writers output a summary of the test progress after completion of each test, to give
 an indication of how far and how well the run is progressing. A single implementation of a progress
@@ -73,6 +73,7 @@ else:
 from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter
 from pysys.utils.fileutils import mkdir, deletedir
+from pysys.utils.pycompat import PY2
 
 from xml.dom.minidom import getDOMImplementation
 
@@ -81,23 +82,55 @@ log = logging.getLogger('pysys.writer')
 class BaseResultsWriter(object):
 	"""Base class for objects that get notified as and when test results are available. """
 
-	def __init__(self, logfile=None):
+	def __init__(self, logfile=None, **kwargs):
 		""" Create an instance of the BaseResultsWriter class.
 
 		@param logfile: Optional configuration property specifying a file to store output in. 
 		Does not apply to all writers, can be ignored if not needed. 
 
+		@param kwargs: Additional keyword arguments may be added in a future release. 
+
 		"""
 		pass
 
-	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, **kwargs):
-		""" Called before any tests begin, and after any configuration properties have been 
-		set on this object. 
+	def isEnabled(self, record=False, **kwargs): 
+		""" Determines whether this writer can be used in the current environment. 
+		
+		If set to False then after construction none of the other methods 
+		(including L{setup})) will be called. 
+		
+		@param record: True if the user ran PySys with the `--record` flag, 
+		indicating that test results should be recorded. 
+		 
+		@returns: For record writers, the default to enable only if record==True, 
+		but individual writers can use different criteria if desired, e.g. 
+		writers for logging output to a CI system may enable themselves 
+		based on environment variables indicating that system is present, 
+		even if record is not specified explicitly. 
+		
+		"""
+		return record == True
+
+	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
+		""" Called before any tests begin. 
+		
+		Before this method is called, for each property "PROP" specified for this 
+		writer in the project configuration file, the configured value will be 
+		assigned to `self.PROP`. 
 
 		@param numTests: The total number of tests (cycles*testids) to be executed
 		@param cycles: The number of cycles. 
 		@param xargs: The runner's xargs
 		@param threads: The number of threads used for running tests. 
+		
+		@param testoutdir: The output directory used for this test run 
+		(equal to `runner.outsubdir`), an identifying string which often contains 
+		the platform, or when there are multiple test runs on the same machine 
+		may be used to distinguish between them. This is usually a relative path 
+		but may be an absolute path. 
+		
+		@param runner: The runner instance that owns this writer. 
+		
 		@param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
@@ -165,8 +198,11 @@ class BaseSummaryResultsWriter(BaseResultsWriter):
 	no "summary" writers are configured, a default ConsoleSummaryResultsWriter instance will be added
 	automatically.
 
+	Summary writers are invoked after all other writers, ensuring that their output 
+	will be displayed after output from any other writer types. 
 	"""
-	pass
+	def isEnabled(self, record=False, **kwargs): 
+		return True # regardless of record flag
 
 
 class BaseProgressResultsWriter(BaseResultsWriter):
@@ -175,8 +211,8 @@ class BaseProgressResultsWriter(BaseResultsWriter):
 	Progress writers are only enabled if the --progress flag is specified.
 
 	"""
-	pass
-
+	def isEnabled(self, record=False, **kwargs): 
+		return True # regardless of record flag
 
 class flushfile(): 
 	"""Utility class to flush on each write operation - for internal use only.  
@@ -227,12 +263,8 @@ class TextResultsWriter(BaseRecordResultsWriter):
 	"""
 	outputDir = None
 	
-	def __init__(self, logfile):
-		"""Create an instance of the TextResultsWriter class.
-		
-		@param logfile: The filename template for the logging of test results
-		
-		"""	
+	def __init__(self, logfile, **kwargs):
+		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.fp = None
@@ -323,12 +355,8 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	stylesheet = DEFAULT_STYLESHEET
 	useFileURL = "false"
 
-	def __init__(self, logfile):
-		"""Create an instance of the TextResultsWriter class.
-		
-		@param logfile: The filename template for the logging of test results
-		
-		"""
+	def __init__(self, logfile, **kwargs):
+		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.cycle = -1
 		self.numResults = 0
@@ -342,6 +370,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
+		assert kwargs['testoutdir'], kwargs # TODO remove
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		
@@ -499,12 +528,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	"""
 	outputDir = None
 	
-	def __init__(self, logfile):
-		"""Create an instance of the TextResultsWriter class.
-		
-		@param logfile: The (optional) filename template for the logging of test results
-		
-		"""	
+	def __init__(self, **kwargs):
 		self.cycle = -1
 
 	def setup(self, **kwargs):	
@@ -631,12 +655,8 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 	"""
 	outputDir = None
 
-	def __init__(self, logfile):
-		"""Create an instance of the TextResultsWriter class.
-
-		@param logfile: The filename template for the logging of test results
-
-		"""
+	def __init__(self, logfile, **kwargs):
+		# substitute into the filename template
 		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
 		self.fp = None
 
@@ -694,7 +714,7 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 	"""Default summary writer that is used to list a summary of the test results at the end of execution.
 
 	"""
-	def __init__(self, logfile=None):
+	def __init__(self, **kwargs):
 		self.showOutcomeReason = self.showOutputDir = False # option added in 1.3.0. May soon change the default to True. 
 	
 	def setup(self, cycles=0, threads=0, **kwargs):
@@ -750,7 +770,7 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 	"""Default progress writer that logs a summary of progress so far to the console, after each test completes.
 
 	"""
-	def __init__(self, logfile=None):
+	def __init__(self, **kwargs):
 		self.recentFailures = 5  # configurable
 
 	def setup(self, cycles=-1, numTests=-1, threads=-1, **kwargs):

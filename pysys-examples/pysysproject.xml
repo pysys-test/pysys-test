@@ -166,7 +166,7 @@
 	in a file created with a name of  testsummary-20081025213308.xml etc.
 	-->
 	<writers>
-		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.xml">
+		<writer classname="XMLResultsWriter" module="pysys.writer" file="pysys-testsummary-%Y-%m-%d-%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
 			can be set are the stylesheet location, whether to use file URLs in all references 
@@ -181,6 +181,12 @@
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
 			-->
+		</writer>
+		
+		<!-- CI writers do nothing unless running under the specified CI environment 
+			and also require that the "record" option is specified. 
+		-->
+		<writer classname="TravisCIWriter" module="pysys.writer.ci">
 		</writer>
 
 		<!--
@@ -201,13 +207,13 @@
 		-->
 
 		<!--
-		Add in the JUnit results writer if output in the Apache Ant JUnit XML format is required. Use the 
+		Add in the JUnit results writer for PySys test output to be written in the widely-used JUnit XML format. Use the 
 		outputDir property to define the output directory for the JUnit test summary files (the writer will 
 		produce one file per test into this output directory). If not specified this defaults to the current 
 		working directory.
 		-->
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${rootdir}/target/pysys-reports"/>
+			<property name="outputDir" value="${rootdir}/pysys-junit-report"/>
 		</writer>
 		
 

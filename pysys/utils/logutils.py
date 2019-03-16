@@ -113,18 +113,46 @@ class ColorLogFormatter(BaseLogFormatter):
 	
 	# by default we use standard ANSI escape sequences, supported by most unix terminals
 	COLOR_ESCAPE_CODES = {
-		'BLUE': '\033[94m',
-		'GREEN':'\033[92m',
-		'YELLOW':'\033[93m',
-		'RED':'\033[91m',
-		'MAGENTA':'\033[95m',
-		'CYAN':'\033[96m',
-		'WHITE':'\033[97m',
-		'BLACK':'\033[30m',
-		'END':'\033[0m',
+		'BLUE':    '',
+		'GREEN':   '',
+		'YELLOW':  '',
+		'RED':     '',
+		'MAGENTA': '',
+		'CYAN':    '',
+		'WHITE':   '',
+		'BLACK':   '',
+		'END':     '',
 	}
 
-	__STDOUT_LOCK = threading.Lock()
+	@staticmethod
+	def configureANSIEscapeCodes(bright=None):
+		"""Sets the ANSI escape codes to be used, either using the extended 
+		"bright" colors that look better, or the more widely supported 
+		standard ones. 
+		
+		Called during startup, but can also be programatically invoked 
+		later 
+		
+		@param bright: set to False to force only the basic (30-39) codes 
+		or True to use the better-looking 90-99 bright codes which are not 
+		supported by all terminals. Default is bright=False, but can be 
+		overridden by PYSYS_COLOR_BASIC env var. 
+		"""
+		if bright is None: bright = os.getenv('PYSYS_COLOR_BRIGHT','true')=='true'
+		# by default we use standard ANSI escape sequences, supported by most unix terminals
+		ColorLogFormatter.COLOR_ESCAPE_CODES = {
+			'BLACK':   '\033[%dm' % (30 if not bright else 90),
+			'RED':     '\033[%dm' % (31 if not bright else 91),
+			'GREEN':   '\033[%dm' % (32 if not bright else 92),
+			'YELLOW':  '\033[%dm' % (33 if not bright else 93),
+			'BLUE':    '\033[%dm' % (34 if not bright else 94),
+			'MAGENTA': '\033[%dm' % (35 if not bright else 95),
+			'CYAN':    '\033[%dm' % (36 if not bright else 96),
+			'WHITE':   '\033[%dm' % (37 if not bright else 97),
+			'END':     '\033[%dm' % (0),
+		}
+
+	__STDOUT_LOCK = threading.Lock() # global lock shared by all instances of this class
 
 	def __init__(self, propertiesDict):
 		"""Create an instance of the formatter class."""
@@ -249,4 +277,24 @@ class ColorLogFormatter(BaseLogFormatter):
 				logging.getLogger('pysys.utils.logutils').debug('Successfully initialized the coloring library')
 			except Exception as e:
 				logging.getLogger('pysys.utils.logutils').debug('Failed to load coloring library: %s', repr(e))
-			
+ColorLogFormatter.configureANSIEscapeCodes()
+
+def stdoutPrint(s):
+	"""
+	Writes the specified bytes or (preferably) unicode character string 
+	to stdout, avoiding any redirection to loggers performed by PySys, and 
+	performing replacements if needed based on the characters 
+	supported by the stdout encoding, and with support for output coloring 
+	using escape sequences (if enabled in PySys). 
+
+	In most cases a logger should be used for output from PySys, but this 
+	function is provided as a way to write to stdout for cases where it is truly 
+	needed, such as unconditionally writing status messages to a CI system. 
+	
+	@param s: a unicode or bytes string. A newline will be added automatically. 
+	"""
+	if isinstance(s, binary_type):
+		s += b'\n'
+	else:
+		s += u'\n'
+	return stdoutHandler.stream.write(s)

@@ -43,7 +43,7 @@ from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.pycompat import *
-from pysys.internal.initlogging import _UnicodeSafeStreamWrapper
+from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, ThreadFilter
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
 global_lock = threading.Lock()
@@ -77,7 +77,8 @@ class BaseRunner(ProcessUser):
 	      
 	@ivar mode: The user defined modes to run the tests within
 	@type mode: string
-	@ivar outsubdir: The directory name for the output subdirectory 
+	@ivar outsubdir: The directory name for the output subdirectory. Typically a relative path,
+	but can also be an absolute path. 
 	@type outsubdir: string
 	@ivar log: Reference to the logger instance of this class
 	@type log: logging.Logger
@@ -96,7 +97,7 @@ class BaseRunner(ProcessUser):
 		@param threads: The number of worker threads to execute the requested testcases
 		@param outsubdir: The name of the output subdirectory
 		@param descriptors: List of XML descriptor containers detailing the set of testcases to be run
-		@param xargs: The dictionary of additional arguments to be set as data attributes to the class
+		@param xargs: The dictionary of additional "-X" user-defined arguments to be set as data attributes on the class
 		
 		"""
 		ProcessUser.__init__(self)
@@ -110,6 +111,9 @@ class BaseRunner(ProcessUser):
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
+		
+		extraOptions = xargs.pop('__extraRunnerOptions', {})
+		
 		self.setKeywordArgs(xargs)
 
 		if self.threads == 0:
@@ -118,30 +122,37 @@ class BaseRunner(ProcessUser):
 		self.writers = []
 		summarywriters = []
 		progresswriters = []
+		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		for classname, module, filename, properties in PROJECT.writers:
 			module = import_module(module, sys.path)
-			writer = getattr(module, classname)(filename)
+			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
 			for key in list(properties.keys()): setattr(writer, key, properties[key])
+			
+			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
 			
 			if isinstance(writer, BaseSummaryResultsWriter):
 				summarywriters.append(writer)
 			elif isinstance(writer, BaseProgressResultsWriter):
 				progresswriters.append(writer)
-			elif self.record: # assume everything else is a record result writer (for compatibility reasons)
-				self.writers.append(writer)
+			else: # assume everything else is a record result writer (for compatibility reasons)
+				# add extra check on self.record for compatibility with old writers that 
+				# do not subclass the base writer and therefore would have bypassed 
+				# the above isEnabled() check
+				if hasattr(writer, 'isEnabled') or self.record: 
+					self.writers.append(writer)
 		
-		# summary writers are always enabled regardless of record mode.
+		if extraOptions.get('progressWritersEnabled', False):
+			if progresswriters: 
+				self.writers.extend(progresswriters)
+			else:
+				self.writers.append(ConsoleProgressResultsWriter())
+
+		# summary writers are always enabled regardless of record mode. They are executed last. 
 		# allow user to provide their own summary writer in the config, or if not, supply our own
 		if summarywriters: 
 			self.writers.extend(summarywriters)
 		else:
 			self.writers.append(ConsoleSummaryResultsWriter())
-
-		if xargs.pop('__progressWritersEnabled', False):
-			if progresswriters: 
-				self.writers.extend(progresswriters)
-			else:
-				self.writers.append(ConsoleProgressResultsWriter())
 		
 		# duration and results used to be used for printing summary info, now (in 1.3.0) replaced by 
 		# more extensible ConsoleSummaryResultsWriter implementation. Keeping these around for 
@@ -321,7 +332,7 @@ class BaseRunner(ProcessUser):
 			try:
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir, runner=self)]
 			except Exception:
-				# support for passing kwargs was added in 1.3.1; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
+				# support for passing kwargs was added in 1.4.0; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
 				PROJECT.perfReporterConfig[0]._runnerSingleton = self
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir)]
 				del PROJECT.perfReporterConfig[0]._runnerSingleton
@@ -346,11 +357,14 @@ class BaseRunner(ProcessUser):
 
 		# call the hook to setup the test output writers
 		for writer in list(self.writers):
-			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads)
+			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
+				testoutdir=self.outsubdir, runner=self)
 			except Exception: 
 				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
-				
+		
+		if self.printLogs is None: self.printLogs = PrintLogs.ALL # default value, unless overridden by user or writer.setup
+		
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
 
@@ -365,8 +379,15 @@ class BaseRunner(ProcessUser):
 		# join each cycle before starting the next, so we can invoke 
 		# cycleComplete reliably
 		concurrentcycles = type(self).cycleComplete == BaseRunner.cycleComplete
-		
+	
 		try:
+
+			# for suppressing print-as-we-execute in single-threaded mode (at least until outcome is known)
+			if self.threads==1 and self.printLogs!=PrintLogs.ALL:
+				singleThreadStdoutDisable = ThreadFilter()
+			else:
+				singleThreadStdoutDisable = None
+				
 			for cycle in range(self.cycle):
 				# loop through tests for the cycle
 				try:
@@ -379,7 +400,12 @@ class BaseRunner(ProcessUser):
 							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 							threadPool.putRequest(request)
 						else:
-							self.containerCallback(threading.current_thread().ident, container())
+							if singleThreadStdoutDisable: stdoutHandler.addFilter(singleThreadStdoutDisable)
+							try:
+								singleThreadedResult = container() # run test
+							finally:
+								if singleThreadStdoutDisable: stdoutHandler.removeFilter(singleThreadStdoutDisable)
+							self.containerCallback(threading.current_thread().ident, singleThreadedResult)
 				except KeyboardInterrupt:
 					log.info("test interrupt from keyboard")
 					self.handleKbrdInt()
@@ -401,7 +427,8 @@ class BaseRunner(ProcessUser):
 						self.handleKbrdInt()
 					except:
 						log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-	
+			
+			
 			# wait for the threads to complete if more than one thread	
 			if self.threads > 1: 
 				try:
@@ -464,7 +491,9 @@ class BaseRunner(ProcessUser):
 		
 		bufferedoutput = container.testFileHandlerStdoutBuffer.getvalue()
 
-		if self.threads > 1: 
+		# print if we need to AND haven't already done so using single-threaded ALL print-as-we-go
+		if (self.printLogs==PrintLogs.ALL and self.threads > 1) or (
+			self.printLogs==PrintLogs.FAILURES and container.testObj.getOutcome() in FAILS): 
 			try:
 				# write out cached messages from the worker thread to stdout
 				# (use the stdoutHandler stream which includes coloring redirections if applicable, 
@@ -478,13 +507,15 @@ class BaseRunner(ProcessUser):
 				errors.append('Failed to write buffered test output')
 				log.exception("Failed to write buffered test output for %s: "%container.descriptor.id)
 				
-		if stdoutHandler.level >= logging.WARN:
+		if self.printLogs != PrintLogs.NONE and stdoutHandler.level >= logging.WARN:
+			# print at least some information even if logging is turned down; 
+			# but if in PrintLogs.NONE mode truly do nothing, as there may be a CI writer doing a customized variant of this
 			log.critical("%s: %s (%s)", LOOKUP[container.testObj.getOutcome()], container.descriptor.id, container.descriptor.title)
 		
 		# call the hook for end of test execution
 		self.testComplete(container.testObj, container.outsubdir)
 				
-		# pass the test object to the test writers is recording
+		# pass the test object to the test writers if recording
 		for writer in self.writers:
 			try: 
 				writer.processResult(container.testObj, cycle=container.cycle,
@@ -586,6 +617,7 @@ class TestContainer(object):
 		"""		
 		exc_info = []
 		self.testStart = time.time()
+		
 		try:
 			# stdout - set this up right at the very beginning to ensure we can see the log output in case any later step fails
 			# here we use UnicodeSafeStreamWrapper to ensure we get a buffer of unicode characters (mixing chars+bytes leads to exceptions), 
