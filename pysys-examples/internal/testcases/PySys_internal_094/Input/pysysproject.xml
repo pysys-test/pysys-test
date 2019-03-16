@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="yes"?>
 <pysysproject>
 	<writers>
-		<writer classname="pysys.writer.ci.TravisCIWriter">
+		<writer classname="TravisCIWriter" module="pysys.writer.ci">
 		</writer>
 	</writers>
 </pysysproject>
