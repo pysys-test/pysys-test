@@ -89,7 +89,7 @@ New features
    - Added `runLogOutput=` parameter to the `processResult()` method of 
      the `BaseResultsWriter` class so that writers such as the 
      `JUnitXMLResultsWriter` can include the test output with no loss of unicode 
-      character information. 
+     character information. 
    - Added `testoutdir=` parameter to the `setup()` method so writers have 
      a way to identify different test runs on the same machine. 
    - Added `runner=` parameter to the `setup()` method so writers have 
