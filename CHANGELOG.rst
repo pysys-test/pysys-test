@@ -143,6 +143,11 @@ New features
   information already being printed to stdout by the writer in a different 
   format. 
 
+- PySys will now automatically enable colored output if there is no color 
+  setting in the `pysysproject.xml` or `PYSYS_COLOR` environment - provided 
+  PySys is running in an interative terminal, and that if running on Windows 
+  the `colorama` library is installed. 
+
 - As an alternative to the usual `pysys.py` executable script, it is now also 
   possible to launch PySys using::
   

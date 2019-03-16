@@ -162,9 +162,25 @@ class ColorLogFormatter(BaseLogFormatter):
 			if prop.startswith('color:'):
 				self.COLOR_CATEGORIES[prop[len('color:'):].lower()] = propertiesDict.pop(prop).upper()
 
-		self.color = propertiesDict.pop('color','').lower() == 'true'
+		self.color = None
+		if 'color' in propertiesDict:
+			self.color = propertiesDict.pop('color','').lower() == 'true'
 		if os.getenv('PYSYS_COLOR',None):
 			self.color = os.getenv('PYSYS_COLOR').lower() == 'true'
+
+		if self.color is None: 
+			# heuristically decide on an appropriate default if not configured in the project
+			if not sys.__stdout__.isatty():
+				self.color = False
+			elif not IS_WINDOWS: # most unix terminals will support coloring
+				self.color = True
+			else:
+				try:
+					import colorama
+				except Exception:
+					self.color = False
+				else:
+					self.color = True
 		
 		if self.color: 
 			# initColoringLibrary, which might result in sys.stdout getting rewritten; PySys needs control of sys.stdout 
