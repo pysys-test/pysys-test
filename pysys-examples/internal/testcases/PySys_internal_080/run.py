@@ -21,6 +21,8 @@ class PySysTest(BaseTest):
 		assert pm.running()
 		self.stopProcessMonitor(pm)
 		self.stopProcessMonitor(pm) # should silently do nothing
+		p.stop()
+		self.wait(1)
 		self.stopProcessMonitor(pm2)
 						  
 		

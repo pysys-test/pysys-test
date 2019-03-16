@@ -226,7 +226,7 @@ class BaseTest(ProcessUser):
 		
 		"""
 		if isstring(file): file = os.path.join(self.output, file)
-		monitor = ProcessMonitor(process.pid, interval, file, **kwargs)
+		monitor = ProcessMonitor(process.pid, interval, file, process=process, owner=self, **kwargs)
 		try:
 			self.log.info("Starting process monitor on process with id = %d", process.pid)
 			monitor.start()
