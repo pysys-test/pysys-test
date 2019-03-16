@@ -140,14 +140,14 @@ class ColorLogFormatter(BaseLogFormatter):
 		if bright is None: bright = os.getenv('PYSYS_COLOR_BRIGHT','true')=='true'
 		# by default we use standard ANSI escape sequences, supported by most unix terminals
 		ColorLogFormatter.COLOR_ESCAPE_CODES = {
-			'BLUE':    '\033[%dm' % (34 if not bright else 94),
+			'BLACK':   '\033[%dm' % (30 if not bright else 90),
+			'RED':     '\033[%dm' % (31 if not bright else 91),
 			'GREEN':   '\033[%dm' % (32 if not bright else 92),
 			'YELLOW':  '\033[%dm' % (33 if not bright else 93),
-			'RED':     '\033[%dm' % (31 if not bright else 91),
+			'BLUE':    '\033[%dm' % (34 if not bright else 94),
 			'MAGENTA': '\033[%dm' % (35 if not bright else 95),
 			'CYAN':    '\033[%dm' % (36 if not bright else 96),
 			'WHITE':   '\033[%dm' % (37 if not bright else 97),
-			'BLACK':   '\033[%dm' % (30 if not bright else 90),
 			'END':     '\033[%dm' % (0),
 		}
 
