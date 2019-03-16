@@ -32,11 +32,11 @@ class PySysTest(BaseTest):
 			self.assertOrderedGrep('%s.out'%subtest, exprList=[
 				# first folding, using the test outdir name
 				# avoid using the actual literal here else travis will try to fold it!
-				'[@t]ravis_fold:[@s]tart:PySys %s'%subtest,
+				'[@t]ravis_fold:[@s]tart:PySys-%s'%subtest,
 				'INFO .*Id.*:.*NestedFail',
 				'INFO .*Id.*:.*NestedTimedout',
 				# end folding before summary
-				'[@t]ravis_fold:[@e]nd:PySys %s'%subtest,
+				'[@t]ravis_fold:[@e]nd:PySys-%s'%subtest,
 				'Summary of non passes:',
 				])
 
