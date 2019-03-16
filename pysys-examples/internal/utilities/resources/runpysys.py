@@ -27,9 +27,12 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		# output for child processes; otherwise we'd only get coverage for things 
 		# that can be tested using the top-level pysys invocation
 		args = ['-m', 'coverage', 'run', '--parallel-mode']+args
-	return processowner.startProcess(command=sys.executable,
-		arguments = args,
-		environs = env, ignoreExitStatus=ignoreExitStatus, abortOnError=abortOnError, 
-		stdout=stdouterr+'.out', stderr=stdouterr+'.err', 
-		displayName='pysys %s'%stdouterr, 
-		**kwargs)
+	try:
+		return processowner.startProcess(command=sys.executable,
+			arguments = args,
+			environs = env, ignoreExitStatus=ignoreExitStatus, abortOnError=abortOnError, 
+			stdout=stdouterr+'.out', stderr=stdouterr+'.err', 
+			displayName='pysys %s'%stdouterr, 
+			**kwargs)
+	finally: # in case there was any error printed to stderr
+		processowner.logFileContents(stdouterr+'.err')
