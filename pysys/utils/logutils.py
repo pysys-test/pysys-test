@@ -124,6 +124,7 @@ class ColorLogFormatter(BaseLogFormatter):
 		'END':     '',
 	}
 
+	@staticmethod
 	def configureANSIEscapeCodes(bright=None):
 		"""Sets the ANSI escape codes to be used, either using the extended 
 		"bright" colors that look better, or the more widely supported 
