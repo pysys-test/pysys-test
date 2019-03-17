@@ -546,7 +546,7 @@ class ProcessUser(object):
 			log.debug('ProcessUser cleanup function done.')
 		
 
-	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=None, callRecord=None):
+	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None):
 		"""Add a validation outcome (and optionally a reason string) to the validation list.
 		
 		The method provides the ability to add a validation outcome to the internal data structure 
@@ -575,8 +575,9 @@ class ProcessUser(object):
 		
 		@param printReason: If True the specified outcomeReason will be printed
 		
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-		project setting if not specified)
+		@param abortOnError: If true abort the test on any error outcome. This should usually be set to 
+		False for assertions, or the configured `self.defaultAbortOnError` setting (typically True) for 
+		operations that involve waiting. 
 		
 		@param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
 		to the log output for better test triage.
