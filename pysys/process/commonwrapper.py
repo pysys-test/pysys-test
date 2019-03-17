@@ -41,14 +41,23 @@ def _stringToUnicode(s):
 class CommonProcessWrapper(object):
 	"""Abstract base process wrapper class for process execution and management.
 	
-	A base implementation of common process related operations, which should be extended
+	A base implementation of common process related operations, which is extended
 	by the OS specific wrapper classes.
 
 	@ivar pid: The process id for a running or complete process (as set by the OS)
 	@type pid: integer
+	
 	@ivar exitStatus: The process exit status for a completed process	
 	@type exitStatus: integer
 	
+	@ivar stdout: The full path to the filename to write the stdout of the process
+	@type stdout: string
+
+	@ivar stderr: The full path to the filename to write the stderr of the process
+	@type stderr: string
+
+	@ivar displayName: Display name for this process
+	@type displayName: string
 	"""
 
 	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None):
@@ -60,8 +69,8 @@ class CommonProcessWrapper(object):
 		@param workingDir:  The working directory for the process
 		@param state:  The state of the process (L{pysys.constants.FOREGROUND} or L{pysys.constants.BACKGROUND}
 		@param timeout:  The timeout in seconds to be applied to the process
-		@param stdout:  The full path to the filename to write the stdout of the process
-		@param stderr:  The full path to the filename to write the sdterr of the process
+		@param stdout:  The full path to the filename to write the stdout of the process, or None for no output
+		@param stderr:  The full path to the filename to write the sdterr of the process, or None for no output
 		@param displayName: Display name for this process
 
 		"""
@@ -77,6 +86,10 @@ class CommonProcessWrapper(object):
 		# 'publicly' available data attributes set on execution
 		self.pid = None
 		self.exitStatus = None
+		
+		# these may be further updated by the subclass
+		self.stdout = stdout
+		self.stderr = stderr
 
 		# print process debug information
 		log.debug("Process parameters for executable %s" % os.path.basename(self.command))

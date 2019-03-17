@@ -87,18 +87,13 @@ class ProcessWrapper(CommonProcessWrapper):
 		
 		self.__lock = threading.Lock() # to protect access to the fields that get updated
 		
-		# set the stdout|err file handles
-		self.fStdout = 'nul'
-		self.fStderr = 'nul'
-		try:
-			if stdout is not None: self.fStdout = _stringToUnicode(stdout)
-		except Exception:
-			log.info("Unable to create file to capture stdout - using the null device")
-		try:
-			if stderr is not None: self.fStderr = _stringToUnicode(stderr)
-		except Exception:
-			log.info("Unable to create file to capture stdout - using the null device")
+		# on Python 2, convert byte strings to unicode strings
+		self.stdout = u'nul' if (not self.stdout) else _stringToUnicode(stdout)
+		self.stderr = u'nul' if (not self.stderr) else _stringToUnicode(stderr)
 
+		# these different field names are just retained for compatibility in case anyone is using them
+		self.fStdout = self.stdout
+		self.fStderr = self.stderr
 
 	def writeStdin(self):
 		"""Method to write to the process stdin pipe.
@@ -133,10 +128,10 @@ class ProcessWrapper(CommonProcessWrapper):
 	
 			# create pipes for the process to write to
 			hStdin_r, hStdin = win32pipe.CreatePipe(sAttrs, 0)
-			hStdout = win32file.CreateFile(_stringToUnicode(self.fStdout), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+			hStdout = win32file.CreateFile(_stringToUnicode(self.stdout), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
 			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
 			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
-			hStderr = win32file.CreateFile(_stringToUnicode(self.fStderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+			hStderr = win32file.CreateFile(_stringToUnicode(self.stderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
 			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
 			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
 
