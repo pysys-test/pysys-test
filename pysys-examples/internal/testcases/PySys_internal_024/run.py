@@ -1,6 +1,6 @@
+import re
 from pysys.constants import *
 from pysys.basetest import BaseTest
-
 
 class PySysTest(BaseTest):
 
@@ -22,17 +22,30 @@ class PySysTest(BaseTest):
 			env["LD_LIBRARY_PATH"] = os.environ.get("LD_LIBRARY_PATH",'')
 		
 		# create the process
-		self.hprocess = self.startProcess(command=sys.executable,
+		self.startProcess(command=sys.executable,
 						  arguments = [script],
 						  environs = env,
 						  workingDir = self.output,
-						  stdout = os.path.join(self.output, 'environment.out'),
-						  stderr = os.path.join(self.output, 'environment.err'),
+						  stdout = 'environment-specified.out',
+						  stderr = 'environment-specified.err',
+						  ignoreExitStatus=False, abortOnError=True, 
 						  state=FOREGROUND)
 
-		# wait for the strings to be writen to sdtout
-		self.waitForSignal("environment.out", expr="Written process environment", timeout=5)
-			
+		self.startProcess(command=sys.executable,
+						  arguments = [script],
+						  # don't set environs=
+						  workingDir = self.output,
+						  stdout = 'environment-default.out',
+						  stderr = 'environment-default.err',
+						  ignoreExitStatus=False, abortOnError=True, 
+						  state=FOREGROUND)
+		self.logFileContents('environment-default.out')
+
+		# wait for the strings to be writen to stdout (not sure why, should be instant); 
+		# also serves as a verification that they completed successfully
+		self.waitForSignal("environment-specified.out", expr="Written process environment", timeout=5, abortOnError=True)
+		self.waitForSignal("environment-default.out", expr="Written process environment", timeout=5, abortOnError=True)
+
 	def validate(self):
 		# validate against the reference file
 
@@ -44,4 +57,14 @@ class PySysTest(BaseTest):
 		# also ignore env vars that Pythong sometimes sets on itself
 		ignores.append('LC_CTYPE')
 
-		self.assertDiff("environment.out", "ref_environment.out", ignores=ignores)
+		self.assertDiff("environment-specified.out", "ref_environment.out", ignores=ignores)
+
+		# check we haven't copied all env vars from the parent environment
+		# (just a small minimal set required to make things work)
+		envvarignores = [
+			'$PATH=%s'%re.escape(PATH),
+			'$LD_LIBRARY_PATH=%s'%re.escape(LD_LIBRARY_PATH),
+			'$SYSTEMROOT=',
+			]
+		self.assertGrep('environment-default.out', expr='.*=', contains=False, ignores=envvarignores)
+		

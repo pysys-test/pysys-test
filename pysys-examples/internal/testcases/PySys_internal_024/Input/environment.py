@@ -12,7 +12,7 @@ if __name__ == "__main__":
 	keys.sort()
 	
 	for key in keys:
-		sys.stdout.write("%-20s: %s\n" % (key, os.environ[key]))
+		sys.stdout.write("%s=%s\n" % (key, os.environ[key]))
 		sys.stdout.flush()
 	
 	sys.stdout.write("Written process environment\n")
