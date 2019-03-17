@@ -322,7 +322,7 @@ class BaseTest(ProcessUser):
 
 
 	# test validation methods.
-	def assertThat(self, conditionstring, *args, abortOnError=False):
+	def assertThat(self, conditionstring, *args, **kwargs):
 		"""Perform a validation based on a python eval string.
 
 		The eval string should be specified as a format string, with zero or more %s-style
@@ -345,6 +345,8 @@ class BaseTest(ProcessUser):
 		assertion fails. 
 
 		"""
+		abortOnError = kwargs.pop('abortOnError',False)
+		assert not kwargs, 'Invalid keyword arguments: %s'%kwargs.keys()
 		try:
 			expr = conditionstring
 			if args:
