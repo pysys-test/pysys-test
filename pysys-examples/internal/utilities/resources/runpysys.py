@@ -1,24 +1,24 @@
-def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError=True, environs=None, **kwargs):
+def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError=True, environs=None, projectfile=None, **kwargs):
 	"""
 	Executes pysys from within pysys. Used only by internal pysys testcases. 
 	"""
 	import os, sys
+	from pysys.constants import IS_WINDOWS
 	if sys.argv[0].endswith('pysys.py'):
 		args = [os.path.abspath(sys.argv[0])]+args
 	else:
 		args = ['-m', 'pysys']+args
-	env = dict(environs or {})
-	for k in os.environ: 
-		# don't preserve any env vars from parent env that might affect test behaviour
-		if k not in env and not k.startswith('PYSYS_') and \
-			k not in ['TRAVIS']: env[k] = os.environ[k]
-	for k in list(env.keys()):
-		if env[k] == None: env.pop(k)
-	pypath = os.path.dirname(sys.executable)
-	if not env.get('PATH','').startswith(pypath+os.pathsep):
-		# whatever python we're using, make sure it's on path, otherwise in some cases child pythons don't have sys.executable set
-		env['PATH'] = pypath+os.pathsep+env.get('PATH','')
-			
+
+	environs = processowner.createEnvirons(overrides=environs, command=sys.executable)
+	
+	if projectfile:
+		environs['PYSYS_PROJECTFILE'] = os.path.join(processowner.input, projectfile)
+	
+	# allow controlling lang from the parent e.g. via Travis
+	if not IS_WINDOWS: environs['LANG'] = os.getenv('LANG','en_US.UTF-8')
+	# since we might be running this from not an installation
+	environs['PYTHONPATH'] = os.pathsep.join(sys.path)
+
 	try: 
 		import coverage
 	except ImportError: pass
@@ -30,7 +30,8 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 	try:
 		return processowner.startProcess(command=sys.executable,
 			arguments = args,
-			environs = env, ignoreExitStatus=ignoreExitStatus, abortOnError=abortOnError, 
+			environs = environs,
+			ignoreExitStatus=ignoreExitStatus, abortOnError=abortOnError, 
 			stdout=stdouterr+'.out', stderr=stdouterr+'.err', 
 			displayName='pysys %s'%stdouterr, 
 			**kwargs)

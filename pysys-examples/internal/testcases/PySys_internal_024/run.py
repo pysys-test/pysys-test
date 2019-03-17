@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 		env["PYSYS-TEST"] = "Test variable"
 		env["EMPTY-ENV"] = ""
 		env["INT-ENV"] = "1"
-		env["PYTHONPATH"] = os.pathsep.join(sys.path)
+		#env["PYTHONPATH"] = os.pathsep.join(sys.path)
 
 		
 		if PLATFORM=='win32':
@@ -49,7 +49,7 @@ class PySysTest(BaseTest):
 	def validate(self):
 		# validate against the reference file
 
-		ignores=['SYSTEMROOT','LD_LIBRARY_PATH', 'PYTHONPATH']
+		ignores=['SYSTEMROOT','LD_LIBRARY_PATH']#, 'PYTHONPATH']
 		
 		if PLATFORM=='darwin':
 			ignores.append('VERSIONER_PYTHON')
@@ -59,12 +59,8 @@ class PySysTest(BaseTest):
 
 		self.assertDiff("environment-specified.out", "ref_environment.out", ignores=ignores)
 
-		# check we haven't copied all env vars from the parent environment
-		# (just a small minimal set required to make things work)
-		envvarignores = [
-			'$PATH=%s'%re.escape(PATH),
-			'$LD_LIBRARY_PATH=%s'%re.escape(LD_LIBRARY_PATH),
-			'$SYSTEMROOT=',
-			]
+		# check we haven't copied any env vars from the parent environment other than the expected small minimal set
+		envvarignores = ['^%s='%x.upper() for x in 
+			['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 'NUMBER_OF_PROCESSORS']+['LD_LIBRARY_PATH', 'PATH']+ignores]
 		self.assertGrep('environment-default.out', expr='.*=', contains=False, ignores=envvarignores)
 		

@@ -80,6 +80,8 @@ class ProcessWrapper(CommonProcessWrapper):
 		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
 			state, timeout, stdout, stderr, displayName, **kwargs)
 
+		assert self.environs, 'Cannot start a process with no environment variables set; use createEnvirons to make a minimal set of env vars'
+
 		# private instance variables
 		self.__hProcess = None
 		self.__hThread = None
@@ -155,7 +157,7 @@ class ProcessWrapper(CommonProcessWrapper):
 			old_command = command = self.__quotePath(self.command)
 			for arg in self.arguments: command = '%s %s' % (command, self.__quotePath(arg))
 			try:
-				self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command, None, None, 1, 0, self.environs or None, os.path.normpath(self.workingDir), StartupInfo)
+				self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command, None, None, 1, 0, self.environs, os.path.normpath(self.workingDir), StartupInfo)
 			except pywintypes.error as e:
 				raise ProcessError("Error creating process %s: %s" % (old_command, e))
 

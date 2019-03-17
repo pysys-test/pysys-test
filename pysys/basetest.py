@@ -736,7 +736,7 @@ class BaseTest(ProcessUser):
 		"""
 		return self.runner.getDefaultFileEncoding(file, **xargs)
 	
-	def pythonDocTest(self, pythonFile, pythonPath=None, output=None, **kwargs):
+	def pythonDocTest(self, pythonFile, pythonPath=None, output=None, environs=None, **kwargs):
 		"""
 		Execute the Python doctests that exist in the specified python file; 
 		adds a FAILED outcome if any do not pass. 
@@ -749,6 +749,7 @@ class BaseTest(ProcessUser):
 		@param kwargs: extra arguments are passed to startProcess
 		"""
 		assert os.path.exists(os.path.abspath(pythonFile)), os.path.abspath(pythonFile)
+		
 		env = {
 		
 			'LD_LIBRARY_PATH':LD_LIBRARY_PATH,
@@ -763,7 +764,7 @@ class BaseTest(ProcessUser):
 		p = self.startProcess(
 			sys.executable, 
 			arguments=['-m', 'doctest', '-v', os.path.normpath(pythonFile)],
-			environs=env,
+			environs=self.createEnvirons(overrides=[environs, {'PYTHONPATH':os.pathsep.join(pythonPath or [])}]),
 			stdout=output, 
 			stderr=output+'.err', 
 			displayName='Python doctest %s'%os.path.basename(pythonFile),
@@ -774,7 +775,7 @@ class BaseTest(ProcessUser):
 		try:
 			msg += ': '+self.getExprFromFile(output, '\d+ passed.*\d+ failed') # appears whether it succeeds or fails
 		except Exception: 
-			msg += 'failed to execute correctly'
+			msg += ': failed to execute correctly'
 		try:
 			msg += '; first failure is: '+self.getExprFromFile(output, '^File .*, line .*, in .*')
 		except Exception:
@@ -784,6 +785,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(PASSED, msg)
 		else:
 			self.addOutcome(FAILED, msg)
+			self.logFileContents(output+'.err') # in case there are any clues there, for more fatal errors
 			
 			# full doctest output is quite hard to read, so try to summarize just the failures 
 			

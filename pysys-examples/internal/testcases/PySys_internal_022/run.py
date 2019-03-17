@@ -9,7 +9,6 @@ class PySysTest(BaseTest):
 	
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script, "20", "3"],
-						  environs = os.environ,
 						  workingDir = self.output,
 						  stdout = "%s/counter.out" % self.output,
 						  stderr = "%s/counter.err" % self.output,
