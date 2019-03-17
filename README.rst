@@ -60,7 +60,7 @@ Project Links
 - Stackoverflow tag for questions: https://stackoverflow.com/tags/pysys
 - Change log: https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
-- Source respository: https://github.com/pysys-test/pysys-test
+- Source repository: https://github.com/pysys-test/pysys-test
 
 License and credits
 ===================
