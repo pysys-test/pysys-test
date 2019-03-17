@@ -750,15 +750,6 @@ class BaseTest(ProcessUser):
 		"""
 		assert os.path.exists(os.path.abspath(pythonFile)), os.path.abspath(pythonFile)
 		
-		env = {
-		
-			'LD_LIBRARY_PATH':LD_LIBRARY_PATH,
-			'PATH':PATH,
-			'SYSTEMROOT':os.getenv('SYSTEMROOT',''), # needs to be set on Windows
-			
-			'PYTHONPATH':os.pathsep.join(pythonPath or []), 
-		}
-		
 		if not output: output = '%s-doctest.txt'%os.path.basename(pythonFile).replace('.py','')
 		
 		p = self.startProcess(
@@ -785,7 +776,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(PASSED, msg)
 		else:
 			self.addOutcome(FAILED, msg)
-			self.logFileContents(output+'.err') # in case there are any clues there, for more fatal errors
+			self.logFileContents(output+'.err') # in case there are any clues there
 			
 			# full doctest output is quite hard to read, so try to summarize just the failures 
 			
