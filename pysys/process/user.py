@@ -28,6 +28,7 @@ from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir
 from pysys.utils.pycompat import *
+from pysys.utils.stringutils import compareVersions
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 
@@ -871,3 +872,65 @@ class ProcessUser(object):
 				return e['encoding']
 		return None
 	
+	@staticmethod
+	def compareVersions(v1, v2):
+		""" Compares two alphanumeric dotted version strings to see which is more recent. 
+		
+		Example usage::
+		
+			if self.compareVersions(thisversion, '1.2.alpha-3') > 0:
+				... # thisversion is newer than 1.2.alpha-3 
+
+		The comparison algorithm ignores case, and normalizes separators ./-/_ 
+		so that `'1.alpha2'=='1Alpha2'`. Any string components are compared 
+		lexicographically with other strings, and compared to numbers 
+		strings are always considered greater. 
+
+		@param v1: A string containing a version number, with any number of components. 
+		@param v2: A string containing a version number, with any number of components. 
+
+		@return: an integer > 0 if v1>v2, 
+		an integer < 0 if v1<v2, 
+		or 0 if they are semantically the same.
+		
+		>>> ProcessUser.compareVersions('10-alpha5.dev10', '10alpha-5-dEv_10') == 0 # normalization of case and separators
+		True
+
+		>>> ProcessUser.compareVersions(b'1....alpha.2', u'1Alpha2') == 0 # ascii byte and unicode strings both supported
+		True
+
+		>>> ProcessUser.compareVersions('1.2.0', '1.2')
+		0
+
+		>>> ProcessUser.compareVersions('1.02', '1.2')
+		0
+
+		>>> ProcessUser().compareVersions('1.2.3', '1.2') > 0
+		True
+
+		>>> ProcessUser.compareVersions('1.2', '1.2.3')
+		-1
+		
+		>>> ProcessUser.compareVersions('10.2', '1.2')
+		1
+
+		>>> ProcessUser.compareVersions('1.2.text', '1.2.0') # letters are > numbers
+		1
+
+		>>> ProcessUser.compareVersions('1.2.text', '1.2') # letters are > numbers 
+		1
+
+		>>> ProcessUser.compareVersions('10.2alpha1', '10.2alpha')
+		1
+
+		>>> ProcessUser.compareVersions('10.2dev', '10.2alpha') # letters are compared lexicographically
+		1
+
+		>>> ProcessUser.compareVersions('', '')
+		0
+
+		>>> ProcessUser.compareVersions('1', '')
+		1
+
+		"""
+		return compareVersions(v1, v2)

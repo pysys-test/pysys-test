@@ -733,4 +733,77 @@ class BaseTest(ProcessUser):
 		See L{pysys.process.user.ProcessUser.getDefaultFileEncoding} for more details.
 		"""
 		return self.runner.getDefaultFileEncoding(file, **xargs)
+	
+	def pythonDocTest(self, pythonFile, pythonPath=None, output=None, **kwargs):
+		"""
+		Execute the Python doctests that exist in the specified python file; 
+		adds a FAILED outcome if any do not pass. 
+		
+		@param pythonFile: the absolute path to a python file name. 
+		@param pythonPath: a list of directories to be added to the PYTHONPATH.
+		@param output: the output file; if not specified, '%s-doctest.txt' is used with 
+		the basename of the python file. 
+		
+		@param kwargs: extra arguments are passed to startProcess
+		"""
+		assert os.path.exists(os.path.abspath(pythonFile)), os.path.abspath(pythonFile)
+		env = {
+		
+			'LD_LIBRARY_PATH':LD_LIBRARY_PATH,
+			'PATH':PATH,
+			'SYSTEMROOT':os.getenv('SYSTEMROOT',''), # needs to be set on Windows
+			
+			'PYTHONPATH':os.pathsep.join(pythonPath or []), 
+		}
+		
+		if not output: output = '%s-doctest.txt'%os.path.basename(pythonFile).replace('.py','')
+		
+		p = self.startProcess(
+			sys.executable, 
+			arguments=['-m', 'doctest', '-v', os.path.normpath(pythonFile)],
+			environs=env,
+			stdout=output, 
+			stderr=output+'.err', 
+			displayName='Python doctest %s'%os.path.basename(pythonFile),
+			ignoreExitStatus=True,
+			abortOnError=False
+			)
+		msg = 'Python doctest for %s'%(os.path.basename(pythonFile))
+		try:
+			msg += ': '+self.getExprFromFile(output, '\d+ passed.*\d+ failed') # appears whether it succeeds or fails
+		except Exception: 
+			msg += 'failed to execute correctly'
+		try:
+			msg += '; first failure is: '+self.getExprFromFile(output, '^File .*, line .*, in .*')
+		except Exception:
+			pass # probably it succeeded
+		
+		if p.exitStatus == 0:
+			self.addOutcome(PASSED, msg)
+		else:
+			self.addOutcome(FAILED, msg)
+			
+			# full doctest output is quite hard to read, so try to summarize just the failures 
+			
+			failures = []
+			lines = [] # accumulate each test
+			with open(os.path.join(self.output, output), encoding=locale.getpreferredencoding()) as f:
+				for line in f:
+					line = line.rstrip()
+					if line=='Trying:': # start of a new one, end of previous one
+						if lines and lines[-1]!='ok':
+							failures.append(lines)
+						lines = [line]
+					elif line == 'ok': # ignore if passed; needed if last test was a pass
+						lines = []
+					else:
+						lines.append(line)
+				if lines and lines[-1]!='ok':
+					failures.append(lines)
+				
+			for failure in failures:
+				log.info('-'*20)
+				for line in failure:
+					log.warning('  %s'%line.rstrip())
+				log.info('')
 		

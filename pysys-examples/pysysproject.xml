@@ -43,7 +43,7 @@
 	<!--
 	Specify a minimum required pysys version to run these tests
 	-->
-	<requires-pysys>1.3.0</requires-pysys>
+	<requires-pysys>1.4.0</requires-pysys>
 
 
 	<!--

@@ -155,6 +155,12 @@ New features
   a clearer way to indicate that PySys will automatically determine how many 
   threads to run tests with based on the number of available CPUs. 
 
+- Added `BaseTest.pythonDocTest()` method for executing the doctests in a 
+  Python file. 
+
+- Added `ProcessUser.compareVersions()` static helper method for 
+  comparing two alphanumeric dotted version strings. 
+
 - As an alternative to the usual `pysys.py` executable script, it is now also 
   possible to launch PySys using::
   
