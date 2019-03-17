@@ -130,7 +130,7 @@
 	Set temporary directory for child processes to the testcase output 
 	directory to avoid cluttering up common file locations. 
 	-->
-	<property name="defaultEnvironsTempDir" value="self.output'"/>
+	<property name="defaultEnvironsTempDir" value="self.output"/>
 
 
 	<!-- 
