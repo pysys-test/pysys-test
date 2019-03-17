@@ -41,7 +41,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys-none/PySys_NestedTestcase/python.out', expr='Python executed successfully')
 
 		self.assertTrue(os.path.exists(self.output+'/pysys-tempdir/PySys_NestedTestcase/mytemp'), assertMessage='tempdir was created')
-		self.assertGrep('pysys-tempdir/PySys_NestedTestcase/python.out', expr='TempDir=.*PySys_NestedTestcase.mytemp')
+		self.assertGrep('pysys-tempdir/PySys_NestedTestcase/python.out', expr='TempDir=.*[Nn]ested[Tt]estcase.mytemp')
 
 		if IS_WINDOWS:
 			self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='LANG', contains=False)

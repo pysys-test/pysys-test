@@ -1,3 +1,3 @@
-import tempfile
-print('TempDir=%s'%tempfile.gettempdir())
+import tempfile, os
+print('TempDir=%s'%os.path.normpath(tempfile.gettempdir()))
 print('Python executed successfully')

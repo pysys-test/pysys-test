@@ -60,7 +60,8 @@ class PySysTest(BaseTest):
 		self.assertDiff("environment-specified.out", "ref_environment.out", ignores=ignores)
 
 		# check we haven't copied any env vars from the parent environment other than the expected small minimal set
-		envvarignores = ['^%s='%x.upper() for x in 
-			['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 'NUMBER_OF_PROCESSORS']+['LD_LIBRARY_PATH', 'PATH']+ignores]
+		envvarignores = ['TEMP.*', 'TMP=']+['^%s='%x.upper() for x in 
+			['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 'NUMBER_OF_PROCESSORS']+[
+				'LD_LIBRARY_PATH', 'PATH']+ignores]
 		self.assertGrep('environment-default.out', expr='.*=', contains=False, ignores=envvarignores)
 		
