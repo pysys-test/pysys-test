@@ -28,9 +28,9 @@ def mkdir(path):
 	"""
 	try:
 		os.makedirs(path)
-	except OSError as e:
+	except Exception as e:
 		if not os.path.isdir(path):
-			raise e
+			raise
 
 def deletedir(path):
 	"""
