@@ -284,7 +284,7 @@ class ProcessUser(object):
 				
 		if not IS_WINDOWS:
 			if getattr(PROJECT, 'defaultEnvironsDefaultLang',''):
-				e['LANG'] = PROJECT.cleanEnvironsDefaultLang
+				e['LANG'] = PROJECT.defaultEnvironsDefaultLang
 		
 		if command == sys.executable:
 			# ensure it's possible to run another instance of this Python
