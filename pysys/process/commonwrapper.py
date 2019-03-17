@@ -65,7 +65,9 @@ class CommonProcessWrapper(object):
 		
 		@param command:  The full path to the command to execute
 		@param arguments:  A list of arguments to the command
-		@param environs:  A dictionary of environment variables (key, value) for the process context execution
+		@param environs:  A dictionary of environment variables (key, value) for the process context execution. 
+		Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
+		automatically to unicode using utf-8. 
 		@param workingDir:  The working directory for the process
 		@param state:  The state of the process (L{pysys.constants.FOREGROUND} or L{pysys.constants.BACKGROUND}
 		@param timeout:  The timeout in seconds to be applied to the process
