@@ -748,8 +748,7 @@ class BaseTest(ProcessUser):
 		"""
 		assert os.path.exists(os.path.abspath(pythonFile)), os.path.abspath(pythonFile)
 		env = {
-		
-			'LD_LIBRARY_PATH':LD_LIBRARY_PATH,
+			'LD_LIBRARY_PATH':os.getenv('LD_LIBRARY_PATH',''),
 			'PATH':PATH,
 			'SYSTEMROOT':os.getenv('SYSTEMROOT',''), # needs to be set on Windows
 			
@@ -772,7 +771,7 @@ class BaseTest(ProcessUser):
 		try:
 			msg += ': '+self.getExprFromFile(output, '\d+ passed.*\d+ failed') # appears whether it succeeds or fails
 		except Exception: 
-			msg += 'failed to execute correctly'
+			msg += ': failed to execute correctly'
 		try:
 			msg += '; first failure is: '+self.getExprFromFile(output, '^File .*, line .*, in .*')
 		except Exception:
@@ -782,6 +781,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(PASSED, msg)
 		else:
 			self.addOutcome(FAILED, msg)
+			self.logFileContents(output+'.err') # in case there are any clues there
 			
 			# full doctest output is quite hard to read, so try to summarize just the failures 
 			
