@@ -33,7 +33,7 @@ class PySysTest(BaseTest):
 				self.assertGrep('pysys-legacy/PySys_NestedTestcase/python.err', expr='.+')
 			else:
 				self.logFileContents('pysys-legacy/PySys_NestedTestcase/python.out')
-				self.assertGrep('pysys-legacy/PySys_NestedTestcase/python.out', expr='Python environment: [{][}]')
+				self.assertGrep('pysys-legacy/PySys_NestedTestcase/python.out', expr='Python environment: [.]')
 
 		# python setting - affects PYTHONHOME, LD_LIB and executable PATH
 		if IS_WINDOWS:
