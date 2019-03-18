@@ -27,10 +27,12 @@ class PySysTest(BaseTest):
 			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='SOME_OVERRIDE=some value')
 			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='PATHEXT=')
 		else:
-			# empty environment means we can't even start python
-			self.logFileContents('pysys-legacy/PySys_NestedTestcase/run.log')
-			self.assertGrep('pysys-legacy/PySys_NestedTestcase/python.err', expr='.')
-			#self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='.', contains=False)
+			# depending on where python is installed, empty environment might mean we can't even start python
+			# or it might start and print an empty environment
+			if os.path.exists(self.output+'/pysys-legacy/PySys_NestedTestcase/env.txt'):
+				self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='.+', contains=False)
+			else:
+				self.assertGrep('pysys-legacy/PySys_NestedTestcase/python.err', expr='.+')
 
 		# python setting - affects PYTHONHOME, LD_LIB and executable PATH
 		if IS_WINDOWS:
