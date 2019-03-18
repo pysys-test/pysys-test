@@ -15,7 +15,14 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		environs['PYSYS_PROJECTFILE'] = os.path.join(processowner.input, projectfile)
 	
 	# allow controlling lang from the parent e.g. via Travis
-	if not IS_WINDOWS: environs['LANG'] = os.getenv('LANG','en_US.UTF-8')
+	if not IS_WINDOWS: 
+		environs['LANG'] = os.getenv('LANG','en_US.UTF-8')
+		if environs['LANG'] == 'C':
+			environs['LANGUAGE'] = 'C'
+			environs['LC_ALL'] = 'C'
+			environs['PYTHONUTF8'] = '0'
+			environs['PYTHONCOERCECLOCALE'] = '0'
+			
 	# since we might be running this from not an installation
 	environs['PYTHONPATH'] = os.pathsep.join(sys.path)
 
