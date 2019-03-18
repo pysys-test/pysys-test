@@ -28,6 +28,7 @@ class PySysTest(BaseTest):
 			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='PATHEXT=')
 		else:
 			# empty environment means we can't even start python
+			self.logFileContents('pysys-legacy/PySys_NestedTestcase/run.log')
 			self.assertGrep('pysys-legacy/PySys_NestedTestcase/python.err', expr='.')
 			#self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='.', contains=False)
 
@@ -38,7 +39,8 @@ class PySysTest(BaseTest):
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='PATH=.*python')
 		else:
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='python', contains=False)
-			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='LD_LIBRARY_PATH=.*python')
+			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='LD_LIBRARY_PATH=.+')
+			self.logFileContents('pysys-none/PySys_NestedTestcase/env-python.txt')
 		self.assertGrep('pysys-none/PySys_NestedTestcase/python.out', expr='Python executed successfully')
 
 		self.assertTrue(os.path.exists(self.output+'/pysys-tempdir/PySys_NestedTestcase/mytemp'), assertMessage='tempdir was created')
