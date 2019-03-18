@@ -22,21 +22,22 @@ class PySysTest(BaseTest):
 	def validate(self):
 		# inherited environment not passed on, unles in legacy mode on Windows
 		self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='SOME_OVERRIDE=', contains=False)
+
 		if IS_WINDOWS:
 			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='SOME_OVERRIDE=some value')
 			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='PATHEXT=')
 		else:
-			# empty environment
-			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='.', contains=False)
+			# empty environment means we can't even start python
+			self.assertGrep('pysys-legacy/PySys_NestedTestcase/python.err', expr='.')
+			#self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='.', contains=False)
 
-		# python setting
+		# python setting - affects PYTHONHOME, LD_LIB and executable PATH
 		if IS_WINDOWS:
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='python', contains=False)
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='LD_LIBRARY', contains=False)
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='PATH=.*python')
 		else:
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='python', contains=False)
-			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='PATH=.*python', contains=False)
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='LD_LIBRARY_PATH=.*python')
 		self.assertGrep('pysys-none/PySys_NestedTestcase/python.out', expr='Python executed successfully')
 
