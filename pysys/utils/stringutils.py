@@ -30,7 +30,7 @@ __all__ = [
 def compareVersions(v1, v2):
 	""" Compares two alphanumeric dotted version strings to see which is more recent. 
 	
-	See L{ProcessUser.compareVersions} for more details. 
+	See L{pysys.process.user.ProcessUser.compareVersions} for more details. 
 	"""
 	
 	def normversion(v):

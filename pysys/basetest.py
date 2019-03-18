@@ -341,7 +341,7 @@ class BaseTest(ProcessUser):
 		@param args: Zero or more arguments to be substituted into the format 
 		string
 		
-		@param abortOnError: Set to True to make the test immediately abort if the
+		@param kwargs: can include only `abortOnError`: Set to True to make the test immediately abort if the
 		assertion fails. 
 
 		"""
