@@ -289,8 +289,10 @@ class ProcessUser(object):
 		if command == sys.executable:
 			# ensure it's possible to run another instance of this Python
 			# (but only if full path exactly matches)
+			# keep it as clean as possible by not passing sys.path/PYTHONPATH
 			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
 			e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e[LIBRARY_PATH_ENV_VAR]
+			e['PYTHONHOME'] = sys.prefix
 		
 		return e
 

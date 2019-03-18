@@ -1,4 +1,4 @@
-import re
+import re, sys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 
@@ -11,15 +11,14 @@ class PySysTest(BaseTest):
 		env["PYSYS-TEST"] = "Test variable"
 		env["EMPTY-ENV"] = ""
 		env["INT-ENV"] = "1"
-		#env["PYTHONPATH"] = os.pathsep.join(sys.path)
 
-		
+		env['PYTHONHOME'] = sys.prefix
 		if PLATFORM=='win32':
 			# on win32, minimal environment must have SYSTEMROOT set
 			env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
-		elif PLATFORM=='linux' or PLATFORM=='solaris':
+		else:
 			# On UNIX we may need the python shared libraries on the LD_LIBRARY_PATH
-			env["LD_LIBRARY_PATH"] = os.environ.get("LD_LIBRARY_PATH",'')
+			env[LIBRARY_PATH_ENV_VAR] = os.environ.get(LIBRARY_PATH_ENV_VAR,'')
 		
 		# create the process
 		self.startProcess(command=sys.executable,
@@ -49,7 +48,7 @@ class PySysTest(BaseTest):
 	def validate(self):
 		# validate against the reference file
 
-		ignores=['SYSTEMROOT','LD_LIBRARY_PATH']#, 'PYTHONPATH']
+		ignores=['SYSTEMROOT',LIBRARY_PATH_ENV_VAR, 'PYTHONHOME']
 		
 		if PLATFORM=='darwin':
 			ignores.append('VERSIONER_PYTHON')
@@ -60,8 +59,12 @@ class PySysTest(BaseTest):
 		self.assertDiff("environment-specified.out", "ref_environment.out", ignores=ignores)
 
 		# check we haven't copied any env vars from the parent environment other than the expected small minimal set
-		envvarignores = ['TEMP.*', 'TMP=']+['^%s='%x.upper() for x in 
+		envvarignores = []
+		envvarignores.extend(['TEMP.*', 'TMP.*=']) # set in default pysys config file
+
+		envvarignores.extend(['^%s='%x.upper() for x in 
 			['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 'NUMBER_OF_PROCESSORS']+[
-				'LD_LIBRARY_PATH', 'PATH']+ignores]
+				'LD_LIBRARY_PATH', 'PATH']+ignores])
+		if not IS_WINDOWS: envvarignores.append('LANG=en_US.UTF-8') # set in default pysys config file
 		self.assertGrep('environment-default.out', expr='.*=', contains=False, ignores=envvarignores)
 		
