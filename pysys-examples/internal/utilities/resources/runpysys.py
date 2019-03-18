@@ -10,7 +10,8 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		args = ['-m', 'pysys']+args
 
 	# allow controlling lang from the parent e.g. via Travis, if not explicitly set
-	if not IS_WINDOWS and 'LANG' not in environs and 'LANG' in os.environ: 
+	if not IS_WINDOWS and 'LANG' not in (environs or {}) and 'LANG' in os.environ: 
+		environs = dict(environs or {})
 		environs['LANG'] = os.environ['LANG']
 		if environs['LANG'] == 'C':
 			environs['LANGUAGE'] = 'C'
