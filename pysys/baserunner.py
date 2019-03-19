@@ -267,7 +267,7 @@ class BaseRunner(ProcessUser):
 							os.remove(path)
 							break
 						except Exception:
-							#if not os.path.exists(path): break
+							if not os.path.exists(path): break
 							time.sleep(0.1)
 							count = count + 1
 

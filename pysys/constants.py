@@ -26,6 +26,7 @@ abstraction over the contents of the file (L{pysys.constants.Project}). For more
 about the structure and contents of the project file, see the PySys examples 
 distribution. 
 
+@undocumented: ENVSEPERATOR
 """
 import sys, re, os, os.path, socket, traceback
 
@@ -88,7 +89,7 @@ else:
 	DYLD_LIBRARY_PATH = ''
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
-ENVSEPERATOR = os.pathsep
+ENVSEPERATOR = os.pathsep # deprecated, used os.pathsep instead
 
 IS_WINDOWS = OSFAMILY=='windows'
 
