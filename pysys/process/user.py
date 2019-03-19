@@ -219,20 +219,20 @@ class ProcessUser(object):
 		Some features of this method can be configured by setting project 
 		properties:
 		
-		- `defaultEnvironsDefaultLang`: if set to a value such as `en_US.UTF-8` 
-		  the specified value is set for the LANG= variable on Unix; otherwise, 
-		  the LANG variable is not set (which might result in use of the 
-		  legacy POSIX/C encoding).
+		  - `defaultEnvironsDefaultLang`: if set to a value such as `en_US.UTF-8` 
+		    the specified value is set for the LANG= variable on Unix; otherwise, 
+		    the LANG variable is not set (which might result in use of the 
+		    legacy POSIX/C encoding).
 		  
-		- `defaultEnvironsTempDir`: if set the expression will be passed to 
-		  Python `eval()` and used to set the OS-specific temp directory 
-		  environment variables. A typical value is `self.output`.
+		  - `defaultEnvironsTempDir`: if set the expression will be passed to 
+		    Python `eval()` and used to set the OS-specific temp directory 
+		    environment variables. A typical value is `self.output`.
 		
-		- `defaultEnvironsLegacyMode`: set to true to enable compatibility 
-		  mode which keep the behaviour the same as PySys v1.1, 1.2 and 1.3, 
-		  namely using a completely empty default environment on Unix, and 
-		  a copy of the entire parent environment on Windows. This is not 
-		  recommended. 
+		  - `defaultEnvironsLegacyMode`: set to true to enable compatibility 
+		    mode which keep the behaviour the same as PySys v1.1, 1.2 and 1.3, 
+		    namely using a completely empty default environment on Unix, and 
+		    a copy of the entire parent environment on Windows. This is not 
+		    recommended. 
 
 		@param command: If known, the full path of the executable for which 
 		a default environment is being created (when called from `startProcess` 
