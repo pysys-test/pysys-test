@@ -229,10 +229,12 @@ class ProcessUser(object):
 		    environment variables. A typical value is `self.output`.
 		
 		  - `defaultEnvironsLegacyMode`: set to true to enable compatibility 
-		    mode which keep the behaviour the same as PySys v1.1, 1.2 and 1.3, 
+		    mode which keeps the behaviour the same as PySys v1.1, 1.2 and 1.3, 
 		    namely using a completely empty default environment on Unix, and 
 		    a copy of the entire parent environment on Windows. This is not 
-		    recommended. 
+		    recommended unless you have a lot of legacy tests that cannot 
+		    easily be changed to only set minimal required environment 
+		    variables using `createEnvirons()`. 
 
 		@param command: If known, the full path of the executable for which 
 		a default environment is being created (when called from `startProcess` 
