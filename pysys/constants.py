@@ -26,7 +26,7 @@ abstraction over the contents of the file (L{pysys.constants.Project}). For more
 about the structure and contents of the project file, see the PySys examples 
 distribution. 
 
-@undocumented: ENVSEPERATOR
+@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET
 """
 import sys, re, os, os.path, socket, traceback
 
@@ -92,22 +92,43 @@ else:
 ENVSEPERATOR = os.pathsep # deprecated, used os.pathsep instead
 
 IS_WINDOWS = OSFAMILY=='windows'
+""" True if this is Windows, False for other operating systems such as Unix. """
 
 # constants used in testing
-TRUE=True
+TRUE=True 
+""" Deprecated. 
+@deprecated: use True instead. """
 FALSE=False
+""" Deprecated. 
+@deprecated: use False instead. """
 BACKGROUND = 10
+"""Constant indicating a process is to be started asynchronously in the background. """
 FOREGROUND = 11
+"""Constant indicating a process is to be run synchronously in the foreground. """
+
+# outcomes
 PASSED = 20
+""" Non-failure test outcome indicating successful validation steps. """
 INSPECT = 21
+""" Non-failure test outcome indicating that manual inspection of the test output is required (in addition to any automated checks). """
 NOTVERIFIED = 22
+""" Non-failure test outcome indicating that it was not possible to positively validate correct operation. This is not treated as a failure outcome. """
 FAILED = 23
+""" Failure test outcome indicating validation steps with a negative outcome. """
 TIMEDOUT = 24
+""" Failure test outcome indicating that the test timed out while performing execution or validation operations. """
 DUMPEDCORE = 25
+""" Failure test outcome indicating that a crash occurred, and a `core` file was generated (UNIX only). """
 BLOCKED = 26
+""" Failure test outcome indicating that something went wrong, for example an exception was raised by the testcase or a required file could not be found. """
 SKIPPED = 27
+""" Non-failure test outcome indicating that the test was ignored as it is not currently required to run on this platform/mode. 
+	See L{pysys.process.user.ProcessUser.skipTest}.
+"""
 
 LOOKUP = {}
+"""Lookup dictionary providing the string representation of test outcomes.
+"""
 LOOKUP[True] = "TRUE"
 LOOKUP[False] = "FALSE"
 LOOKUP[TRUE] = "TRUE"
@@ -123,7 +144,11 @@ LOOKUP[SKIPPED] = "SKIPPED"
 
 # set the precedent for the test outcomes
 PRECEDENT = [SKIPPED, BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED, NOTVERIFIED, INSPECT, PASSED]
+""" Lists all test outcomes in order of precedence. If a test has multiple outcomes, 
+the one that appears first in this list takes precedence over any other. """
 FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
+""" Lists the test outcomes treated as failure. 
+Outcomes such as L{NOTVERIFIED} and L{SKIPPED} are not considered failures. """
 
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_PROJECTFILE = ['pysysproject.xml', '.pysysproject']
@@ -141,12 +166,14 @@ DEFAULT_STYLESHEET = None # deprecated
 DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_ABORT_ON_ERROR=False
 
-# set the directories to not recursively walk when looking for the descriptors
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn', '__pycache__', '.git' ]
+""" A list of directory names to exclude when recursively walking a directory tree. """
 
-# set the timeout values for specific executables when executing a test
 DEFAULT_TIMEOUT = 600
+"""Deprecated. 
+@deprecated: Use a specific member of TIMEOUTS instead."""
 TIMEOUTS = {}
+""" Default timeouts used for various operations. """
 TIMEOUTS['WaitForSocket'] = 60
 TIMEOUTS['WaitForFile'] = 30
 TIMEOUTS['WaitForSignal'] = 60
@@ -171,14 +198,20 @@ LOG_SKIPS = 'skipped'
 LOG_END = 'end'
 
 class PrintLogs(Enum):
-	"""Specifies when run.log contents are printed to the stdout console."""
+	"""Enumeration constants that specify when run.log contents are printed to the stdout console.
+	
+	In all cases a summary of failures is printed at the end, and the user can always 
+	look at the run.log inside each output directory if they need more detail. 
+	"""
 	NONE = 'PrintLogs.NONE'
+	"""Detailed run.log output is not printed to the stdout console. """
 	ALL = 'PrintLog.ALL'
+	"""Detailed run.log output is always printed to the stdout console, for both passed and failed testcases. """
 	FAILURES = 'PrintLog.FAILURES'
+	"""Detailed run.log output is only printed to the stdout console for failed testcases. """
 
-# reference to the project instance defining parameters for the 
-# pysys project
 PROJECT = None
+""" The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
 
 from pysys.xml.project import Project 
 
