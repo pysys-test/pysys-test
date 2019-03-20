@@ -553,16 +553,13 @@ class ProcessUser(object):
 		storing the list of validation outcomes. Multiple validations may be performed, the current
 		supported validation outcomes of which are:
 				
-		SKIPPED:     An execution/validation step of the test was skipped (e.g. deliberately). 
-		See also L{skipTest()} which is usually the best way to skip a test from the run.py file. 
-
-		BLOCKED:     An execution/validation step of the test could not be run (e.g. a missing resource)
-		DUMPEDCORE:  A process started by the test produced a core file (unix only)
-		TIMEDOUT:    An execution/validation step of the test timed out (e.g. process deadlock)
-		FAILED:      A validation step of the test failed
-		NOTVERIFIED: No validation steps were performed
-		INSPECT:     A validation step of the test requires manual inspection
-		PASSED:      A validation step of the test passed
+		  - L{pysys.constants.SKIPPED}
+		  - L{pysys.constants.DUMPEDCORE}
+		  - L{pysys.constants.TIMEDOUT}
+		  - L{pysys.constants.FAILED}
+		  - L{pysys.constants.NOTVERIFIED}
+		  - L{pysys.constants.INSPECT}
+		  - L{pysys.constants.PASSED}
 		
 		The outcomes are considered to have a precedence order, as defined by the order of the outcomes listed
 		above. Thus a C{BLOCKED} outcome has a higher precedence than a C{PASSED} outcome. The outcomes are defined 
