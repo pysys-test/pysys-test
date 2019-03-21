@@ -145,8 +145,8 @@ New features
 
 - PySys will now automatically enable colored output if there is no color 
   setting in the `pysysproject.xml` or `PYSYS_COLOR` environment - provided 
-  PySys is running in an interative terminal, and that if running on Windows 
-  the `colorama` library is installed. 
+  PySys is running in an interactive terminal. On Windows the `colorama` 
+  library is now a dependency to ensure colored output is always possible. 
 
 - Added `--threads auto` which is equivalent to `--threads 0` and provides 
   a clearer way to indicate that PySys will automatically determine how many 
