@@ -10,26 +10,69 @@
 # a personal access token from this GitHub repo (to be found under Developer Settings)
 #
 
+matrix:
+  include:
+  
+  # --- For most branches run on a limited combination of OS and Python 
+  # versions to get reasonable coverage. Documentation and deployment 
+  # happen only on one of them - Python 2.7 (needed for epydoc) on Linux
+  
+  - os: linux
+    python: 2.7
+    env: PYSYS_DOC_AND_DEPLOY=true
+  
+  - os: osx
+    language: sh
+    # since Travis doesn't have full osx python support yet we use whichever 
+    # 3.x is installed by default; have to set env var manually
+    python: 3
+    env: TRAVIS_PYTHON_VERSION=3
+  
+  - os: windows
+    # until Travis has language=python support on Windows, manually install using choco and sh(ell)
+    language: sh
+    python: 3.7
+    before_install: 
+      - unset GITHUB_API_KEY
+      - choco install python --version 3.7
+      - export PATH=/c/Python37:/c/Python37/Scripts:$PATH
+    # workaround for Travis Windows bug: disable secret filtering and hide secret env by unsetting it
+    filter_secrets: false
+
+  # --- Additional testing combinations only on the main branch
+
+  - os: windows
+    language: sh
+    python: 2.7
+    before_install: 
+      - unset GITHUB_API_KEY
+      - choco install python2 vcredist2008 -i vcpython27
+      - export PATH=/c/Python27:/c/Python27/Scripts:$PATH
+    filter_secrets: false
+    #if: branch = latest
+
+  - os: osx
+    language: sh
+    python: 2.7
+    env: TRAVIS_PYTHON_VERSION=2.7
+    #if: branch = latest
+
+  - os: linux
+    python: 3.7
+    #if: branch = latest
+
+  - os: linux
+    python: 3.5
+    if: branch = latest
+
+  - os: linux
+    python: 3.6
+    if: branch = latest
+
+# Default Linux build runs on Ubuntu; use the Xenial version to get Python 3.7 support
 language: python
-
-os:
-  - linux
-  
-  # will enable windows as soon as secure env vars issue is fixed, though may need to use 
-  # language:cpp and choco install python hack until support for python is officially added
-  #- windows
-  
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-  - "3.7"
-
-# currently xenial linux is needed for python 3.7 support
 dist: xenial
-
 cache: pip
-
 addons:
   apt:
     packages:
@@ -37,24 +80,33 @@ addons:
       - tofrodos
 
 install:
+  - if [[ -z $PY ]]; then export PY=python$TRAVIS_PYTHON_VERSION; fi
+  - $PY -m pip --version
   # need latest version of wheel to get consistent and correct behaviour
-  - pip install --upgrade setuptools wheel
+  - $PY -m pip install --upgrade setuptools wheel
   
   # build universal wheel and python source distribution
   - export PYSYS_VERSION=`cat VERSION`
   - "echo Using PySys version: $PYSYS_VERSION"
-  - python setup.py check --strict
-  - python setup.py bdist_wheel
-  - python setup.py sdist
+  - $PY setup.py check --strict
+  - $PY setup.py bdist_wheel
+  - $PY setup.py sdist
   
-  # pre-process module file to include current date, which also goes into the epydoc
-  - sed -i "s/__date__ = .*/__date__ = \"`date --iso-8601`\"/g" pysys/__init__.py
-  
-  # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
-  - cp README.rst LICENSE.txt pysys-examples/
-  - "tar -czf dist/PySys-$PYSYS_VERSION-sample-testcases-unix.tar.gz pysys-examples"
-  - "find pysys-examples -type f | xargs todos"
-  - "zip -r --quiet dist/PySys-$PYSYS_VERSION-sample-testcases-win.zip pysys-examples"
+  - |
+    if [[ -n $PYSYS_DOC_AND_DEPLOY ]]; then (
+       set -e
+       
+       # pre-process module file to include current date, which also goes into the epydoc
+       sed -i "s/__date__ = .*/__date__ = \"`date --iso-8601`\"/g" pysys/__init__.py
+
+       # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
+       echo --- Preparing PySys sample zip archives
+       cp README.rst LICENSE.txt pysys-examples/
+       tar -czf dist/PySys-$PYSYS_VERSION-sample-testcases-unix.tar.gz pysys-examples
+       find pysys-examples -type f | xargs todos
+       zip -r --quiet dist/PySys-$PYSYS_VERSION-sample-testcases-win.zip pysys-examples
+    )
+    fi
   - "export TRAVIS_TAG=PySys_$PYSYS_VERSION"
 
 # for running tests and building documentation:
@@ -63,12 +115,12 @@ script:
   - cd pysys-examples
   
   # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
-  - pip install ../dist/PySys*.whl
-  - pip install coverage codecov
-  - python -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads auto --purge --record --type auto
+  - $PY -m pip install ../dist/PySys*.whl
+  - $PY -m pip install coverage codecov
+  - $PY -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads auto --purge --record --type auto
   
   - "echo travis_fold:start:coverage-summary"
-  - python internal/utilities/scripts/coverage_pysys.py report
+  - $PY internal/utilities/scripts/coverage_pysys.py report
   - "echo travis_fold:end:coverage-summary"
 
   # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
@@ -76,34 +128,40 @@ script:
   - LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --threads auto --purge --record --include i18n --outdir i18n-C
   
   # as a quick sanity-test, also run packaging tests after installing from source
-  - pip uninstall --yes PySys
-  - "pip install ../dist/PySys-$PYSYS_VERSION.tar.gz"
+  - $PY -m pip uninstall --yes PySys
+  - "$PY -m pip install ../dist/PySys-$PYSYS_VERSION.tar.gz"
   - pysys.py run --threads auto --purge --record --include pysys-packaging --outdir against-src-dist-setuptools
 
   # as a final sanity-test, also run packaging tests directly from source in "develop mode" as a pysys developer probably would
-  - pip uninstall --yes PySys
-  - "pip install -e .."
+  - $PY -m pip uninstall --yes PySys
+  - "$PY -m pip install -e .."
   - pysys.py run --threads auto --purge --record --include pysys-packaging --outdir against-src-develop-mode
 
   - cd ..
   
   # check the documentation is good
   # must do this after testing to avoid polluting the installed packages while running the tests
-  - pip install rstcheck
+  - $PY -m pip install rstcheck
   - rstcheck *.rst
   
   # generate API docs (epydoc only works on Python 2.7 unfortunately), and a zip 
   # including these and the text files (with Windows line endings)
-  - pip install epydoc
-  - mkdir dist/api-docs/
-  - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then epydoc --debug -v --html --no-private --fail-on-docstring-warning --name "PySys $PYSYS_VERSION" "--url=https://pypi.org/project/PySys" -o dist/api-docs "--exclude=.*([.]internal|__main__).*" pysys ; fi
-  - todos *.rst *.txt
-  - cp README.rst CHANGELOG.rst LICENSE.txt dist/api-docs/
-  - cd dist/api-docs
-  # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions; use C locale to avoid ignoring __'s
-  - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then LC_ALL=C sort --unique -o api-objects.txt api-objects.txt ; fi
-  - if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then zip -r --quiet ../../dist/PySys-$PYSYS_VERSION-docs.zip .  ; fi
-  - cd ../..
+  - |
+    if [[ -n $PYSYS_DOC_AND_DEPLOY ]]; then (
+       set -e
+       echo --- Building PySys documentation
+       pip install epydoc
+       mkdir dist/api-docs/
+       epydoc --debug -v --html --no-private --fail-on-docstring-warning --name "PySys $PYSYS_VERSION" "--url=https://pypi.org/project/PySys" -o dist/api-docs "--exclude=.*([.]internal|__main__).*" pysys
+       todos *.rst *.txt
+       cp README.rst CHANGELOG.rst LICENSE.txt dist/api-docs/
+       cd dist/api-docs
+       # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions; use C locale to avoid ignoring __'s
+       LC_ALL=C sort --unique -o api-objects.txt api-objects.txt
+       zip -r --quiet ../../dist/PySys-$PYSYS_VERSION-docs.zip .
+       cd ../..
+    ) 
+    fi
 
 after_script:
   # upload Python code coverage
@@ -125,7 +183,7 @@ deploy:
        branch: latest
        
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
-       condition: $TRAVIS_PYTHON_VERSION = 2.7
+       condition: $PYSYS_DOC_AND_DEPLOY = true
 
     name: "PySys v$PYSYS_VERSION"
     body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See CHANGELOG.rst for a full list of changes. 
@@ -145,4 +203,4 @@ deploy:
        # only publish doc for released version
        branch: latest
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
-       condition: $TRAVIS_PYTHON_VERSION = 2.7
+       condition: $PYSYS_DOC_AND_DEPLOY = true
