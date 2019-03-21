@@ -268,22 +268,23 @@ class BaseTest(ProcessUser):
 		the thread is meant to be finishing. 
 		
 		Example usage::
-		  class PySysTest(BaseTest):
-		    def dosomething(self, stopping, param1, pollingInterval):
-		      while not stopping.is_set():
-			  
-			    # ... do stuff here
-			  
-			    # sleep for pollingInterval, waking up if requested to stop; 
-			    # (hint: ensure this wait time is small to retain 
-			    # responsiveness to Ctrl+C interrupts)
-			    if stopping.wait(pollingInterval): return
+			class PySysTest(BaseTest):
+				def dosomething(self, stopping, log, param1, pollingInterval):
+					log.debug('Message from my thread')
+					while not stopping.is_set():
 		
-		    def execute(self):
-		      t = self.startBackgroundThread('DoSomething1', self.dosomething, {'param1':True, 'pollingInterval':1.0})
-		      ...
-		      t.stop() # requests thread to stop but doesn't wait for it to stop
-		      t.join()
+						# ... do stuff here
+		
+						# sleep for pollingInterval, waking up if requested to stop; 
+						# (hint: ensure this wait time is small to retain 
+						# responsiveness to Ctrl+C interrupts)
+						if stopping.wait(pollingInterval): return
+		
+				def execute(self):
+					t = self.startBackgroundThread('DoSomething1', self.dosomething, {'param1':True, 'pollingInterval':1.0})
+					...
+					t.stop() # requests thread to stop but doesn't wait for it to stop
+					t.join()
 		
 		Note that C{BaseTest} is not thread-safe (apart from C{addOutcome} and 
 		the reading of fields like self.output that don't change) so if you 

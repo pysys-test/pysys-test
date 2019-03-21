@@ -35,7 +35,7 @@ class BackgroundThread(object):
 	"""
 	def __init__(self, owner, name, target, kwargsForTarget):
 		"""
-		For details see L{pysys.BaseTest.startBackgroundThread}.
+		For details see L{pysys.basetest.BaseTest.startBackgroundThread}.
 		
 		@param owner: The BaseTest that owns this background thread and is 
 		responsible for ensuring it is terminated during cleanup. 
@@ -100,9 +100,11 @@ class BackgroundThread(object):
 		the thread ought to be checking regularly. 
 		
 		This method returns immediately; if you wish to wait for the 
-		thread to terminate, call L{join} afterwards.
+		thread to terminate, call L{join} afterwards. Calling this repeatedly 
+		has no effect. 
 		
 		@return: This instance, in case you wish to do fluent method chaining.  
+		@rtype: L{BackgroundThread}
 		"""
 		self.stopping.set()
 		return self
@@ -129,8 +131,10 @@ class BackgroundThread(object):
 		Note that unlike Python's `Thread.join` method, infinite timeouts 
 		are not supported. 
 		
-		@param abortOnError: Set to True if you wish this method to raise an 
-		exception if the thread times out or raises an Exception. 
+		@param abortOnError: Set to True if you wish this method to 
+		immediately abort with an exception if the background thread times out 
+		or raises an Exception. The default is False, which adds the failure 
+		outcome but does not raise an exception. 
 		"""
 		outcomereported = self.__outcomeReported
 		self.__outcomeReported = True # only do this once
