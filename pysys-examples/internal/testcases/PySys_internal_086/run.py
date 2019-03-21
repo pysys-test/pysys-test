@@ -10,6 +10,8 @@ import os, sys, math, shutil, glob, locale
 class PySysTest(BaseTest):
 	# a unicode string; contains chars that are not representable in iso8859-1
 	utf8teststring = b'utf8_European\\xe1\\xc1x\\xdf_Katakana\\uff89\\uff81\\uff90\\uff81\\uff7f\\uff78\\uff81\\uff7d\\uff81\\uff7f\\uff76\\uff72\\uff7d\\uff84_Hiragana\\u65e5\\u672c\\u8a9e_Symbols\\u2620\\u2622\\u2603_abc123@#\\xa3!~=\\xa3x'.decode('unicode_escape')
+	
+	supportsAsciiLANG = PLATFORM != 'darwin' # macos doesn't seem to support overriding LANG, so skip that bit of the test
 
 	def execute(self):
 		
@@ -51,36 +53,38 @@ class PySysTest(BaseTest):
 				
 			return r
 		
-		runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=1')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
-				'TEST_RUNID':runid,
-				'PYSYS_COLOR':'true', # this affects the stdout stream
-				'PYTHONIOENCODING':'utf-8', # sets stdout encoding
-				}, LANG='ascii')))
-		runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=2')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
-				'TEST_RUNID':runid,
-				'PYSYS_COLOR':'true', # this affects the stdout stream
-				'PYTHONIOENCODING':'utf-8', # sets stdout encoding
-				}, LANG='ascii')))
-		runid=self.mkdir('default=ascii,stdout=ascii,color=false,threads=1')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
-				'TEST_RUNID':runid,
-				'PYSYS_COLOR':'false', # this affects the stdout stream
-				'PYTHONIOENCODING':'ascii', # sets stdout encoding
-				}, LANG='ascii')))
-		runid=self.mkdir('default=ascii,stdout=none,color=true,threads=1') # also progress, why not!
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '--progress'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
-				'TEST_RUNID':runid,
-				'PYSYS_COLOR':'true', # this affects the stdout stream
-				'PYTHONIOENCODING':None if PY2 else 'ascii', # sets stdout encoding
-				}, LANG='ascii')))
-		runid=self.mkdir('default=ascii,stdout=none,color=false,threads=2')
-		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
-				'TEST_RUNID':runid,
-				'PYSYS_COLOR':'false', # this affects the stdout stream
-				'PYTHONIOENCODING': None if PY2 else 'ascii', # sets stdout encoding
-				}, LANG='ascii')))
+		if self.supportsAsciiLANG:
+			runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=1')
+			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
+					'TEST_RUNID':runid,
+					'PYSYS_COLOR':'true', # this affects the stdout stream
+					'PYTHONIOENCODING':'utf-8', # sets stdout encoding
+					}, LANG='ascii')))
+			runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=2')
+			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
+					'TEST_RUNID':runid,
+					'PYSYS_COLOR':'true', # this affects the stdout stream
+					'PYTHONIOENCODING':'utf-8', # sets stdout encoding
+					}, LANG='ascii')))
+			runid=self.mkdir('default=ascii,stdout=ascii,color=false,threads=1')
+			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
+					'TEST_RUNID':runid,
+					'PYSYS_COLOR':'false', # this affects the stdout stream
+					'PYTHONIOENCODING':'ascii', # sets stdout encoding
+					}, LANG='ascii')))
+			runid=self.mkdir('default=ascii,stdout=none,color=true,threads=1') # also progress, why not!
+			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '--progress'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
+					'TEST_RUNID':runid,
+					'PYSYS_COLOR':'true', # this affects the stdout stream
+					'PYTHONIOENCODING':None if PY2 else 'ascii', # sets stdout encoding
+					}, LANG='ascii')))
+			runid=self.mkdir('default=ascii,stdout=none,color=false,threads=2')
+			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
+					'TEST_RUNID':runid,
+					'PYSYS_COLOR':'false', # this affects the stdout stream
+					'PYTHONIOENCODING': None if PY2 else 'ascii', # sets stdout encoding
+					}, LANG='ascii')))
+				
 		runid=self.mkdir('default=utf8,stdout=ascii,color=true,threads=2')
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
@@ -113,48 +117,53 @@ class PySysTest(BaseTest):
 
 	def validate(self):
 		runs = [
-			'default=ascii,stdout=utf8,color=true,threads=1',
-			'default=ascii,stdout=utf8,color=true,threads=2',
-			'default=ascii,stdout=ascii,color=false,threads=1',
-			'default=ascii,stdout=none,color=true,threads=1',
-			'default=ascii,stdout=none,color=false,threads=2',
 			'default=utf8,stdout=ascii,color=true,threads=2',
 			'default=utf8,stdout=none,color=true,threads=2',
 			'default=utf8,stdout=utf8,color=false,threads=2',
 			'default=local,stdout=local,color=true,threads=2,debug=true',
 		]
-
-		self.logFileContents('default=local,stdout=local,color=true,threads=2,debug=true'+'/pysys.out', maxLines=0)
-
-		# sanity check that nested python is running with expected locale, which rest of testcase assumes
-		if PY2:
-			self.assertGrep('default=ascii,stdout=none,color=false,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(ascii|ANSI_X3.4-1968), stdout encoding=None')
-		self.assertGrep('default=ascii,stdout=utf8,color=true,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(ascii|ANSI_X3.4-1968), stdout encoding=(utf-8)', encoding='utf-8')
-		self.assertGrep('default=utf8,stdout=ascii,color=true,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(utf-8|UTF-8), stdout encoding=(ascii|ANSI_X3.4-1968)')
-
-
-		# some checks that are only needed for one of the runs
-		self.log.info('')
-		runid='default=ascii,stdout=ascii,color=false,threads=1'
-		self.assertGrep('%s/xmlresults.xml'%runid, expr='<result id="NestedFail" outcome=', encoding='utf-8')
-		self.assertGrep('%s/xmlresults.xml'%runid, expr='<result id="NestedFail" outcome="FAILED">', encoding='utf-8')
-		self.assertGrep('%s/xmlresults.xml'%runid, expr='<outcomeReason>outcome reason .*end</outcomeReason>', encoding='utf-8')
-
-		# even if the run.log file can't represent all the chars, the utf-8 XML ought to
-		self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log message including i18n string %s end.*'%self.utf8teststring, encoding='utf-8')
 		
-		self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log bytes message without i18n.*string', encoding='utf-8') # byte format strings are formatted differently in py 2 vs 3
-		
-		if not PY2:
-			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log bytes message including i18n string .+ end', encoding='utf-8')
-		
-		self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED">outcome reason .+end</failure>', encoding='utf-8')
-		self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED">outcome reason %s end</failure>'%self.utf8teststring, encoding='utf-8')
+		if self.supportsAsciiLANG:
+			runs.extend([
+			'default=ascii,stdout=utf8,color=true,threads=1',
+			'default=ascii,stdout=utf8,color=true,threads=2',
+			'default=ascii,stdout=ascii,color=false,threads=1',
+			'default=ascii,stdout=none,color=true,threads=1',
+			'default=ascii,stdout=none,color=false,threads=2'])
 
-		# specific checks for specific runs
-		self.log.info('')
-		self.assertGrep('default=local,stdout=local,color=true,threads=2,debug=true/pysys.out', expr=' DEBUG ', encoding=locale.getpreferredencoding())
-		self.assertGrep('default=local,stdout=local,color=true,threads=2,debug=true/pysys.out', expr='Failed to load coloring library', encoding=locale.getpreferredencoding(), contains=False)
+
+			self.logFileContents('default=local,stdout=local,color=true,threads=2,debug=true'+'/pysys.out', maxLines=0)
+
+			
+			# sanity check that nested python is running with expected locale, which rest of testcase assumes
+			if PY2:
+				self.assertGrep('default=ascii,stdout=none,color=false,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(ascii|ANSI_X3.4-1968), stdout encoding=None')
+			self.assertGrep('default=ascii,stdout=utf8,color=true,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(ascii|ANSI_X3.4-1968), stdout encoding=(utf-8)', encoding='utf-8')
+			self.assertGrep('default=utf8,stdout=ascii,color=true,threads=2'+'/pysys.out', expr='Nested test: preferred encoding=(utf-8|UTF-8), stdout encoding=(ascii|ANSI_X3.4-1968)')
+
+
+			# some checks that are only needed for one of the runs
+			self.log.info('')
+			runid='default=ascii,stdout=ascii,color=false,threads=1'
+			self.assertGrep('%s/xmlresults.xml'%runid, expr='<result id="NestedFail" outcome=', encoding='utf-8')
+			self.assertGrep('%s/xmlresults.xml'%runid, expr='<result id="NestedFail" outcome="FAILED">', encoding='utf-8')
+			self.assertGrep('%s/xmlresults.xml'%runid, expr='<outcomeReason>outcome reason .*end</outcomeReason>', encoding='utf-8')
+
+			# even if the run.log file can't represent all the chars, the utf-8 XML ought to
+			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log message including i18n string %s end.*'%self.utf8teststring, encoding='utf-8')
+			
+			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log bytes message without i18n.*string', encoding='utf-8') # byte format strings are formatted differently in py 2 vs 3
+			
+			if not PY2:
+				self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log bytes message including i18n string .+ end', encoding='utf-8')
+			
+			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED">outcome reason .+end</failure>', encoding='utf-8')
+			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED">outcome reason %s end</failure>'%self.utf8teststring, encoding='utf-8')
+
+			# specific checks for specific runs
+			self.log.info('')
+			self.assertGrep('default=local,stdout=local,color=true,threads=2,debug=true/pysys.out', expr=' DEBUG ', encoding=locale.getpreferredencoding())
+			self.assertGrep('default=local,stdout=local,color=true,threads=2,debug=true/pysys.out', expr='Failed to load coloring library', encoding=locale.getpreferredencoding(), contains=False)
 
 		i = 0
 		for runid in runs:

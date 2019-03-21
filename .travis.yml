@@ -116,6 +116,7 @@ script:
   
   # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
   - $PY -m pip install ../dist/PySys*.whl
+  - pysys.py --version
   - $PY -m pip install coverage codecov
   - $PY -m coverage run --include '*site-packages/pysys/*' --omit "*pysys-examples*" ../scripts/pysys.py run --threads auto --purge --record --type auto
   
@@ -124,8 +125,8 @@ script:
   - "echo travis_fold:end:coverage-summary"
 
   # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
-  # this also checks direct invocation of the launcher from .whl installation
-  - LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --threads auto --purge --record --include i18n --outdir i18n-C
+  # it's hard to override language on many OSes so just do this on linux
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --threads auto --purge --record --include i18n --outdir i18n-C ; fi
   
   # as a quick sanity-test, also run packaging tests after installing from source
   - $PY -m pip uninstall --yes PySys
