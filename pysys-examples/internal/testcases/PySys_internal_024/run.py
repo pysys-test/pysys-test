@@ -41,6 +41,7 @@ class PySysTest(BaseTest):
 		if PLATFORM=='darwin':
 			ignores.append('VERSIONER_PYTHON')
 			ignores.append('__CF_USER_TEXT_ENCODING')
+			ignores.append('__PYVENV.*')
 		# also ignore env vars that Pythong sometimes sets on itself
 		ignores.append('LC_CTYPE')
 
