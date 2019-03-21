@@ -49,17 +49,17 @@ matrix:
       - choco install python2 vcredist2008 -i vcpython27
       - export PATH=/c/Python27:/c/Python27/Scripts:$PATH
     filter_secrets: false
-    #if: branch = latest
+    if: branch = latest
 
   - os: osx
     language: sh
     python: 2.7
     env: TRAVIS_PYTHON_VERSION=2.7
-    #if: branch = latest
+    if: branch = latest
 
   - os: linux
     python: 3.7
-    #if: branch = latest
+    if: branch = latest
 
   - os: linux
     python: 3.5
