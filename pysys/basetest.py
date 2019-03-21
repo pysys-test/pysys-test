@@ -32,6 +32,7 @@ from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
+from pysys.utils.threadutils import BackgroundThread
 from pysys.process.monitor import ProcessMonitor
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
@@ -121,6 +122,7 @@ class BaseTest(ProcessUser):
 		self.mode = runner.mode
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
+		self.__backgroundThreads = []
 		self.manualTester = None
 		self.resources = []
 		self.testCycle = BaseTest._currentTestCycle
@@ -188,6 +190,14 @@ class BaseTest(ProcessUser):
 		try:
 			if self.manualTester and self.manualTester.running():
 				self.stopManualTester()
+
+			# first request them all to stop
+			# although we don't yet state this method is thread-safe, make it 
+			# as thread-safe as possible by using swap operations
+			threads, self.__backgroundThreads = list(self.__backgroundThreads), []
+			self.__backgroundThreads = []
+			for th in threads: th.stop()
+			for th in threads: th.join(abortOnError=False)
 		
 			for monitor in self.monitorList:
 				if monitor.running(): monitor.stop()
@@ -245,6 +255,70 @@ class BaseTest(ProcessUser):
 		"""
 		if monitor.running: monitor.stop()
 
+	def startBackgroundThread(self, name, target, kwargsForTarget={}):
+		"""
+		Start a new background thread that will invoke the specified `target` 
+		function. 
+		
+		The target function will be invoked with the specified keyword 
+		arguments and also the special keyword argument `stopping` which is 
+		a Python C{threading.Event} instance that can be used to detect 
+		when the thread has been requested to terminate. It is recommended 
+		to use this event instead of C{time.sleep} to avoid waiting when 
+		the thread is meant to be finishing. 
+		
+		Example usage::
+		  class PySysTest(BaseTest):
+		    def dosomething(self, stopping, param1, pollingInterval):
+		      while not stopping.is_set():
+			  
+			    # ... do stuff here
+			  
+			    # sleep for pollingInterval, waking up if requested to stop; 
+			    # (hint: ensure this wait time is small to retain 
+			    # responsiveness to Ctrl+C interrupts)
+			    if stopping.wait(pollingInterval): return
+		
+		    def execute(self):
+		      t = self.startBackgroundThread('DoSomething1', self.dosomething, {'param1':True, 'pollingInterval':1.0})
+		      ...
+		      t.stop() # requests thread to stop but doesn't wait for it to stop
+		      t.join()
+		
+		Note that C{BaseTest} is not thread-safe (apart from C{addOutcome} and 
+		the reading of fields like self.output that don't change) so if you 
+		need to use its fields or methods (such as C{startProcess}) from 
+		background threads, be sure to add your own locking to the foreground 
+		and background threads in your test, including any cleanup functions. 
+		
+		The BaseTest will stop and join all running background threads at the 
+		beginning of cleanup. If a thread doesn't stop within the expected 
+		timeout period a L{constants.TIMEDOUT} outcome will be appended. 
+		If a thread's `target` function raises an Exception then a 
+		L{constants.BLOCKED} outcome will be appended during cleanup or 
+		when it is joined. 
+		
+		@param name: A name for this thread that concisely describes its purpose. 
+		Should be unique within this test/owner instance. 
+		A prefix indicating the test/owner will be added to the provided name. 
+		
+		@param target: The function or instance method that will be executed 
+		on the background thread. The function must accept a keyword argument 
+		named `stopping` in addition to whichever keyword arguments are 
+		specified in `kwargsForTarget`. 
+		
+		@param kwargsForTarget: A dictionary of keyword arguments that will be 
+		passed to the target function. 
+		
+		@return: A L{pysys.utils.threadutils.BackgroundThread} instance 
+		wrapping the newly started thread. 
+		@rtype: L{pysys.utils.threadutils.BackgroundThread}
+		
+		"""
+		t = BackgroundThread(self, name=name, target=target, kwargsForTarget=kwargsForTarget)
+		t.thread.start()
+		self.__backgroundThreads.append(t)
+		return t
 
 	# methods to control the manual tester user interface
 	def startManualTester(self, file, filedir=None, state=FOREGROUND, timeout=TIMEOUTS['ManualTester']):
