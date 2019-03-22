@@ -17,21 +17,22 @@ matrix:
   # versions to get reasonable coverage. Documentation and deployment 
   # happen only on one of them - Python 2.7 (needed for epydoc) on Linux
   
-  - os: linux
+  - name: Python 2.7 Linux + doc + deploy
+    os: linux
     python: 2.7
     env: PYSYS_DOC_AND_DEPLOY=true
   
-  - os: osx
+  - name: Python 3.x OSX
+    os: osx
     language: sh
     # since Travis doesn't have full osx python support yet we use whichever 
     # 3.x is installed by default; have to set env var manually
-    python: 3
     env: TRAVIS_PYTHON_VERSION=3
   
-  - os: windows
+  - name: Python 3.7 Windows
+    os: windows
     # until Travis has language=python support on Windows, manually install using choco and sh(ell)
     language: sh
-    python: 3.7
     before_install: 
       - unset GITHUB_API_KEY
       - choco install python --version 3.7
@@ -41,9 +42,9 @@ matrix:
 
   # --- Additional testing combinations only on the main branch
 
-  - os: windows
+  - name: Python 2.7 Windows
+    os: windows
     language: sh
-    python: 2.7
     before_install: 
       - unset GITHUB_API_KEY
       - choco install python2 vcredist2008 -i vcpython27
@@ -51,21 +52,24 @@ matrix:
     filter_secrets: false
     if: branch = latest
 
-  - os: osx
+  - name: Python 2.7 OSX
+    os: osx
     language: sh
-    python: 2.7
     env: TRAVIS_PYTHON_VERSION=2.7
     if: branch = latest
 
-  - os: linux
+  - name: Python 3.7 Linux
+    os: linux
     python: 3.7
     if: branch = latest
 
-  - os: linux
+  - name: Python 3.5 Linux
+    os: linux
     python: 3.5
     if: branch = latest
 
-  - os: linux
+  - name: Python 3.6 Linux
+    os: linux
     python: 3.6
     if: branch = latest
 
