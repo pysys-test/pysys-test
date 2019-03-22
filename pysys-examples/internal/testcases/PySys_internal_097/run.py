@@ -36,10 +36,11 @@ class PySysTest(BaseTest):
 				self.assertGrep('pysys-legacy/PySys_NestedTestcase/python.out', expr='Python environment: [.]')
 
 		# python setting - affects PYTHONHOME, LD_LIB and executable PATH
+		self.logFileContents('pysys-none/PySys_NestedTestcase/env-python.txt')
 		if IS_WINDOWS:
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='python', contains=False)
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='LD_LIBRARY', contains=False)
-			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='PATH=.*python')
+			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='PATH=.+')
 		else:
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='python', contains=False)
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='LD_LIBRARY_PATH=.+')
