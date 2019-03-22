@@ -690,7 +690,9 @@ class TestContainer(object):
 					try:
 						if not self.runner.validateOnly:
 							self.testObj.setup()
+							log.debug('--- test execute')
 							self.testObj.execute()
+						log.debug('--- test validate')
 						self.testObj.validate()
 					except AbortExecution as e:
 						del self.testObj.outcome[:]
@@ -710,6 +712,7 @@ class TestContainer(object):
 		
 			# call the cleanup method to tear down the test
 			try:
+				log.debug('--- test cleanup')
 				self.testObj.cleanup()
 			
 			except KeyboardInterrupt:
