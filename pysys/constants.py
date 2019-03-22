@@ -26,7 +26,7 @@ abstraction over the contents of the file (L{pysys.constants.Project}). For more
 about the structure and contents of the project file, see the PySys examples 
 distribution. 
 
-@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET
+@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE
 """
 import sys, re, os, os.path, socket, traceback
 
@@ -42,8 +42,11 @@ from pysys.utils.pycompat import Enum
 
 # set the platform and platform related constants
 HOSTNAME = socket.getfqdn()
+""" The fully qualified name of this host. """
+
 if re.search('win32', sys.platform):
-	PLATFORM='win32'	
+	PLATFORM='win32'
+	"""OS platform - current values are: `linux`, `win32` (Windows), `sunos` (Solaris), `darwin` (Mac). """
 	OSFAMILY='windows'
 	DEVNULL = 'nul'
 	WINDIR = os.getenv('windir', 'c:\WINDOWS')
@@ -89,7 +92,9 @@ else:
 	DYLD_LIBRARY_PATH = ''
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
-ENVSEPERATOR = os.pathsep # deprecated, used os.pathsep instead
+ENVSEPERATOR = os.pathsep
+""" Deprecated. 
+@deprecated: use C{os.pathsep} instead. """
 
 IS_WINDOWS = OSFAMILY=='windows'
 """ True if this is Windows, False for other operating systems such as Unix. """
