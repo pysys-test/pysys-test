@@ -56,20 +56,26 @@ class _UnicodeSafeStreamWrapper(object):
 	
 	def write(self, s):
 		if not s: return
-		if self.__writebytes:
-			if isinstance(s, binary_type):
-				self.stream.write(s) # always safe in python 2 and not supported in python 3
+		try:
+			if self.__writebytes:
+				if isinstance(s, binary_type):
+					self.stream.write(s) # always safe in python 2 and not supported in python 3
+				else:
+					self.stream.write(s.encode(self.__encoding, errors='replace'))
 			else:
-				self.stream.write(s.encode(self.__encoding, errors='replace'))
-		else:
-			if isinstance(s, binary_type):
+				if isinstance(s, binary_type):
+					s = s.decode(self.__encoding, errors='replace')
+				# even if it's already a unicode string it could contain characters that aren't supported in this encoding 
+				# (e.g. unicode replacement characters - such as the decode above generates - aren't supported by ascii); 
+				# so check it round-trips
+				s = s.encode(self.__encoding, errors='replace')
 				s = s.decode(self.__encoding, errors='replace')
-			# even if it's already a unicode string it could contain characters that aren't supported in this encoding 
-			# (e.g. unicode replacement characters - such as the decode above generates - aren't supported by ascii); 
-			# so check it round-trips
-			s = s.encode(self.__encoding, errors='replace')
-			s = s.decode(self.__encoding, errors='replace')
-			self.stream.write(s)
+				self.stream.write(s)
+		except Exception:
+			if self.stream is None: # it was closed underneath us
+				pass
+			else:
+				raise
 				
 	def flush(self): 
 		if self.stream is None: return
@@ -80,11 +86,11 @@ class _UnicodeSafeStreamWrapper(object):
 		Flush and close the stream, and prevent any more writes to it. 
 		This method is idempotent. 
 		"""
-		if self.stream is None: return
-		self.stream.flush()
-		self.stream.close()
-		self.stream = None
-
+		stream, self.stream = self.stream, None
+		
+		if stream is None: return
+		stream.flush()
+		stream.close()
 
 class ThreadedStreamHandler(logging.StreamHandler):
 	"""Stream handler to only log from the creating thread.
