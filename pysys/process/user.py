@@ -819,18 +819,14 @@ class ProcessUser(object):
 			if outcome in FAILS and abortOnError:
 				if callRecord==None: callRecord = self.__callRecord()
 				self.abort(outcome, outcomeReason, callRecord)
-				log.warn(u'%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
-						 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
-			else:
-				log.info(u'%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 
 			if outcomeReason and printReason:
 				if outcome in FAILS:
 					if callRecord==None: callRecord = self.__callRecord()
-					log.warn('%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), '[%s]'%','.join(callRecord) if callRecord!=None else '',
+					log.warn(u'%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
 							 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 				else:
-					log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+					log.info(u'%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
 		"""Raise an AbortException.
