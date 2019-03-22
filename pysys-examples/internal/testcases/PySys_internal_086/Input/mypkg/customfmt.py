@@ -12,8 +12,8 @@ if os.getenv('LANG','') and 'win' in sys.platform:
 	locale.getpreferredencoding = customized_getpreferredencoding 
 	sys.stdout.write('HACKED preferred encoding to: %s\n'%locale.getpreferredencoding())
 	
-	# if coloring is not enable we need to explicitly recreate the stream wrapper with the new encoding
-	stdoutHandler._updateUnderlyingStream()
+	# in case coloring is not enabled we need this to explicitly re-execute the logic in _UnicodeSafeStreamWrapper that decides the encoding
+	stdoutHandler.stream.updateUnderlyingStream(stdoutHandler.stream.stream)
 
 class CustomFormatter(ColorLogFormatter):
 	pass

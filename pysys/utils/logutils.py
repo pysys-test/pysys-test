@@ -194,12 +194,10 @@ class ColorLogFormatter(BaseLogFormatter):
 					updatedstdout = sys.stdout
 					sys.stdout = stdoutbak
 				# now update the stream used by our handler
-				assert stdoutHandler.stream # unicodewrapper
-				assert stdoutHandler.stream.stream # actual stream
 				if 'PySysPrintRedirector' in repr(updatedstdout):
-					raise Exception('FOrmatter has redirector: %s'%repr(updatedstdout))
+					raise Exception('Formatter has redirector: %s'%repr(updatedstdout))
 
-				stdoutHandler.stream.stream = updatedstdout
+				stdoutHandler.stream.updateUnderlyingStream(updatedstdout)
 
 		super(ColorLogFormatter, self).__init__(propertiesDict)
 

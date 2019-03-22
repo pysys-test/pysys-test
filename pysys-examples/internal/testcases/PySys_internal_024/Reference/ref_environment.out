@@ -1,6 +1,6 @@
 Writing process environment
-EMPTY-ENV           : 
-INT-ENV             : 1
-PYSYS-TEST          : Test variable
-PYSYS-USER          : Simon Batty
+EMPTY-ENV=
+INT-ENV=1
+PYSYS-TEST=Test variable
+PYSYS-USER=Simon Batty
 Written process environment

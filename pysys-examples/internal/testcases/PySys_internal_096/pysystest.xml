@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Doctests - process.user module</title>    
+    <purpose><![CDATA[
+Execute Python doctests
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>doctest</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+ 
+</pysystest>

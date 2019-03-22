@@ -32,6 +32,7 @@ from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
+from pysys.utils.threadutils import BackgroundThread
 from pysys.process.monitor import ProcessMonitor
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
@@ -69,11 +70,6 @@ class BaseTest(ProcessUser):
 	individual validation outcomes. Several potential outcomes are supported by the PySys framework 
 	(C{SKIPPED}, C{BLOCKED}, C{DUMPEDCORE}, C{TIMEDOUT}, C{FAILED}, C{NOTVERIFIED}, and C{PASSED}) and the 
 	overall outcome of the testcase is determined using aprecedence order of the individual outcomes. 
-	
-	All C{assert*} methods except for C{assertThat} support variable argument lists for common non-default parameters.
-	Currently this includes the C{assertMessage} parameter, to override the default statement logged by the framework
-	to stdout and the run log, and the C{abortOnError} parameter, to override the defaultAbortOnError project
-	setting.
 
 	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks
 	           to modify the test execution based upon the mode.
@@ -121,6 +117,7 @@ class BaseTest(ProcessUser):
 		self.mode = runner.mode
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
+		self.__backgroundThreads = []
 		self.manualTester = None
 		self.resources = []
 		self.testCycle = BaseTest._currentTestCycle
@@ -188,6 +185,14 @@ class BaseTest(ProcessUser):
 		try:
 			if self.manualTester and self.manualTester.running():
 				self.stopManualTester()
+
+			# first request them all to stop
+			# although we don't yet state this method is thread-safe, make it 
+			# as thread-safe as possible by using swap operations
+			threads, self.__backgroundThreads = list(self.__backgroundThreads), []
+			self.__backgroundThreads = []
+			for th in threads: th.stop()
+			for th in threads: th.join(abortOnError=False)
 		
 			for monitor in self.monitorList:
 				if monitor.running(): monitor.stop()
@@ -245,6 +250,71 @@ class BaseTest(ProcessUser):
 		"""
 		if monitor.running: monitor.stop()
 
+	def startBackgroundThread(self, name, target, kwargsForTarget={}):
+		"""
+		Start a new background thread that will invoke the specified `target` 
+		function. 
+		
+		The target function will be invoked with the specified keyword 
+		arguments and also the special keyword argument `stopping` which is 
+		a Python C{threading.Event} instance that can be used to detect 
+		when the thread has been requested to terminate. It is recommended 
+		to use this event instead of C{time.sleep} to avoid waiting when 
+		the thread is meant to be finishing. 
+		
+		Example usage::
+			class PySysTest(BaseTest):
+				def dosomething(self, stopping, log, param1, pollingInterval):
+					log.debug('Message from my thread')
+					while not stopping.is_set():
+		
+						# ... do stuff here
+		
+						# sleep for pollingInterval, waking up if requested to stop; 
+						# (hint: ensure this wait time is small to retain 
+						# responsiveness to Ctrl+C interrupts)
+						if stopping.wait(pollingInterval): return
+		
+				def execute(self):
+					t = self.startBackgroundThread('DoSomething1', self.dosomething, {'param1':True, 'pollingInterval':1.0})
+					...
+					t.stop() # requests thread to stop but doesn't wait for it to stop
+					t.join()
+		
+		Note that C{BaseTest} is not thread-safe (apart from C{addOutcome} and 
+		the reading of fields like self.output that don't change) so if you 
+		need to use its fields or methods (such as C{startProcess}) from 
+		background threads, be sure to add your own locking to the foreground 
+		and background threads in your test, including any cleanup functions. 
+		
+		The BaseTest will stop and join all running background threads at the 
+		beginning of cleanup. If a thread doesn't stop within the expected 
+		timeout period a L{constants.TIMEDOUT} outcome will be appended. 
+		If a thread's `target` function raises an Exception then a 
+		L{constants.BLOCKED} outcome will be appended during cleanup or 
+		when it is joined. 
+		
+		@param name: A name for this thread that concisely describes its purpose. 
+		Should be unique within this test/owner instance. 
+		A prefix indicating the test/owner will be added to the provided name. 
+		
+		@param target: The function or instance method that will be executed 
+		on the background thread. The function must accept a keyword argument 
+		named `stopping` in addition to whichever keyword arguments are 
+		specified in `kwargsForTarget`. 
+		
+		@param kwargsForTarget: A dictionary of keyword arguments that will be 
+		passed to the target function. 
+		
+		@return: A L{pysys.utils.threadutils.BackgroundThread} instance 
+		wrapping the newly started thread. 
+		@rtype: L{pysys.utils.threadutils.BackgroundThread}
+		
+		"""
+		t = BackgroundThread(self, name=name, target=target, kwargsForTarget=kwargsForTarget)
+		t.thread.start()
+		self.__backgroundThreads.append(t)
+		return t
 
 	# methods to control the manual tester user interface
 	def startManualTester(self, file, filedir=None, state=FOREGROUND, timeout=TIMEOUTS['ManualTester']):
@@ -327,7 +397,7 @@ class BaseTest(ProcessUser):
 
 
 	# test validation methods.
-	def assertThat(self, conditionstring, *args):
+	def assertThat(self, conditionstring, *args, **kwargs):
 		"""Perform a validation based on a python eval string.
 
 		The eval string should be specified as a format string, with zero or more %s-style
@@ -346,7 +416,12 @@ class BaseTest(ProcessUser):
 		@param args: Zero or more arguments to be substituted into the format 
 		string
 		
+		@param kwargs: can include only `abortOnError`: Set to True to make the test immediately abort if the
+		assertion fails. 
+
 		"""
+		abortOnError = kwargs.pop('abortOnError',False)
+		assert not kwargs, 'Invalid keyword arguments: %s'%kwargs.keys()
 		try:
 			expr = conditionstring
 			if args:
@@ -354,50 +429,59 @@ class BaseTest(ProcessUser):
 			
 			result = bool(eval(expr))
 		except Exception as e:
-			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" with args %r: %s'%(conditionstring, args, e))
+			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" with args %r: %s'%(conditionstring, args, e), abortOnError=abortOnError)
 			return
 		
 		if result:
 			self.addOutcome(PASSED, 'Assertion on %s'%expr)
 		else:
-			self.addOutcome(FAILED, 'Assertion on %s'%expr)
+			self.addOutcome(FAILED, 'Assertion on %s'%expr, abortOnError=abortOnError)
 
 
-	def assertTrue(self, expr, **xargs):
+	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
 		
 		@param expr: The expression, as a boolean, to check for the True | False value
-		@param xargs: Variable argument list (see class description for supported parameters)
 		
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. 
+		
+		@param assertMessage: Overrides the string used to describe this 
+		assertion in log messages and the outcome reason. 
 		"""
-		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to true')
+		msg = assertMessage or 'Assertion on boolean expression equal to true'
 		if expr == True:
-			self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(PASSED, msg)
 		else:
-			self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(FAILED, msg, abortOnError=abortOnError)
 	
 
-	def assertFalse(self, expr, **xargs):
+	def assertFalse(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to false.
 		
 		If the supplied expression evaluates to false a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to true, a C{FAILED} outcome is added.
 		
 		@param expr: The expression to check for the true | false value
-		@param xargs: Variable argument list (see class description for supported parameters)
-						
+		
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. 	
+		
+		@param assertMessage: Overrides the string used to describe this 
+		assertion in log messages and the outcome reason. 
 		"""
-		msg = self.__assertMsg(xargs, 'Assertion on boolean expression equal to false')
+		msg = assertMessage or 'Assertion on boolean expression equal to false'
 		if expr == False:
-			self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(PASSED, msg)
 		else:
-			self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(FAILED, msg, abortOnError=abortOnError)
 
 
-	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], encoding=None, **xargs):
+	def assertDiff(self, file1, file2, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], encoding=None, 
+			abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the comparison of two input text files.
 		
 		This method performs a file comparison on two input files. The files are pre-processed prior to the 
@@ -420,8 +504,12 @@ class BaseTest(ProcessUser):
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 
-		@param xargs: Variable argument list (see class description for supported parameters)
-				
+		
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. 
+		
+		@param assertMessage: Overrides the string used to describe this 
+		assertion in log messages and the outcome reason. 
 		"""
 		if filedir1 is None: filedir1 = self.output
 		if filedir2 is None: filedir2 = self.reference
@@ -434,23 +522,24 @@ class BaseTest(ProcessUser):
 		log.debug("  file2:       %s" % file2)
 		log.debug("  filedir2:    %s" % filedir2)
 		
-		msg = self.__assertMsg(xargs, 'File comparison between %s and %s'%(file1, file2))
+		msg = assertMessage or ('File comparison between %s and %s'%(file1, file2))
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
 		result = False
 		try:
 			result = filediff(f1, f2, ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
 			try:
-				self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
+				self.addOutcome(PASSED if result else FAILED, msg, abortOnError=abortOnError)
 			finally:
 				if not result:
 					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
 
 
-	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, encoding=None, **xargs):
+	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, encoding=None, 
+			abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on a regular expression occurring in a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -459,19 +548,30 @@ class BaseTest(ProcessUser):
 		be added should the regular expression not be seen in the file.
 		
 		@param file: The basename of the file used in the grep
+		
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		
 		@param expr: The regular expression to check for in the file (or a string literal if literal=True). 
-			If the match fails, the matching regex will be reported as the test outcome
+		If the match fails, the matching regex will be reported as the test outcome
+		
 		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
+		
 		@param ignores: Optional list of regular expressions that will be 
-			ignored when reading the file. 
+		ignored when reading the file. 
+		
 		@param literal: By default expr is treated as a regex, but set this to True to pass in 
-			a string literal instead
+		a string literal instead
+		
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 
-		@param xargs: Variable argument list (see class description for supported parameters)
-				
+		
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. 
+		
+		@param assertMessage: Overrides the string used to describe this 
+		assertion in log messages and the outcome reason. 
+		
 		"""
 		assert expr, 'expr= argument must be specified'
 		
@@ -502,21 +602,22 @@ class BaseTest(ProcessUser):
 			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f))
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			msg = self.__assertMsg(xargs, 'Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
+			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
 			# short message if it succeeded, more verbose one if it failed to help you understand why, 
 			# including the expression it found that should not have been there
 			outcome = PASSED if (result!=None) == contains else FAILED
 			if outcome == PASSED: 
-				msg = self.__assertMsg(xargs, 'Grep on input file %s' % file)
+				msg = assertMessage or ('Grep on input file %s' % file)
 			else:
-				msg = self.__assertMsg(xargs, 'Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', 
+				msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', 
 					quotestring(result.group(0) if result else expr) ))
-			self.addOutcome(outcome, msg, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(outcome, msg, abortOnError=abortOnError)
 		
 
-	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], encoding=None, **xargs):
+	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], encoding=None, 
+			abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -533,8 +634,12 @@ class BaseTest(ProcessUser):
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 
-		@param xargs: Variable argument list (see class description for supported parameters)
-				
+
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. 
+
+		@param assertMessage: Overrides the string used to describe this 
+		assertion in log messages and the outcome reason. 				
 		"""
 		assert expr, 'expr= argument must be specified'
 		
@@ -547,18 +652,19 @@ class BaseTest(ProcessUser):
 		log.debug("  expr:       %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 
-		msg = self.__assertMsg(xargs, 'Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
+		msg = assertMessage or ('Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
 		try:
 			result = lastgrep(f, expr, ignores, includes, encoding=encoding or self.getDefaultFileEncoding(f)) == contains
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
-			if result: msg = self.__assertMsg(xargs, 'Grep on input file %s' % file)
-			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=self.__abortOnError(xargs))
+			if result: msg = assertMessage or ('Grep on input file %s' % file)
+			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=abortOnError)
 
 
-	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, encoding=None, **xargs):   
+	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, encoding=None, 
+			abortOnError=False, assertMessage=None):   
 		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
 		
 		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome 
@@ -574,8 +680,13 @@ class BaseTest(ProcessUser):
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 
-		@param xargs: Variable argument list (see class description for supported parameters)
-				
+
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. 
+
+		@param assertMessage: Overrides the string used to describe this 
+		assertion in log messages and the outcome reason. 
+		
 		"""
 		assert exprList, 'expr= argument must be specified'
 		
@@ -588,13 +699,13 @@ class BaseTest(ProcessUser):
 		for expr in exprList: log.debug("  exprList:   %s" % expr)
 		log.debug("  contains:   %s" % LOOKUP[contains])
 		
-		msg = self.__assertMsg(xargs, 'Ordered grep on input file %s' % file)
+		msg = assertMessage or ('Ordered grep on input file %s' % file)
 		expr = None
 		try:
 			expr = orderedgrep(f, exprList, encoding=encoding or self.getDefaultFileEncoding(f))
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
 			if expr is None and contains:
 				result = PASSED
@@ -607,10 +718,11 @@ class BaseTest(ProcessUser):
 
 			if result == FAILED and expr: 
 				msg += ' failed on expression \"%s\"'% expr
-			self.addOutcome(result, msg, abortOnError=self.__abortOnError(xargs))
+			self.addOutcome(result, msg, abortOnError=abortOnError)
 
 	
-	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, encoding=None, **xargs):
+	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, encoding=None, 
+			abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -625,8 +737,12 @@ class BaseTest(ProcessUser):
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 
-		@param xargs: Variable argument list (see class description for supported parameters)
-				
+
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. 
+		
+		@param assertMessage: Overrides the string used to describe this 
+		assertion in log messages and the outcome reason. 
 		"""	
 		assert expr, 'expr= argument must be specified'
 		
@@ -638,47 +754,15 @@ class BaseTest(ProcessUser):
 			log.debug("Number of matching lines is %d"%numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			msg = self.__assertMsg(xargs, 'Line count on %s for %s%s '%(file, quotestring(expr), condition))
-			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=self.__abortOnError(xargs))
+			msg = assertMessage or ('Line count on %s for %s%s '%(file, quotestring(expr), condition))
+			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
 			if (eval("%d %s" % (numberLines, condition))):
-				msg = self.__assertMsg(xargs, 'Line count on input file %s' % file)
-				self.addOutcome(PASSED, msg, abortOnError=self.__abortOnError(xargs))
+				msg = assertMessage or ('Line count on input file %s' % file)
+				self.addOutcome(PASSED, msg)
 			else:
-				msg = self.__assertMsg(xargs, 'Line count on %s for %s%s (actual =%d) '%(file, quotestring(expr), condition, numberLines))
-				self.addOutcome(FAILED, msg, abortOnError=self.__abortOnError(xargs))
-
-
-	def __assertMsg(self, xargs, default):
-		"""Return an assert statement requested to override the default value.
-		
-		@param xargs: Variable argument list to an assert method
-		@param default: Default assert statement to return if a parameter is not supplied
-		
-		"""
-		if 'assertMessage' in xargs: 
-			msg = xargs['assertMessage']
-		else:
-			msg = default
-		if PY2 and isinstance(msg, str): 
-			# The python2 logger is very unhappy about byte str objects containing 
-			# non-ascii characters (specifically it will fail to log them and dump a 
-			# traceback on stderr). Since it's pretty important that assertion 
-			# messages and test outcome reasons don't get swallowed, add a 
-			# workaround for this here. Not a problem in python 3. 
-			msg = msg.decode('ascii', errors='replace')
-		return msg
-
-
-	def __abortOnError(self, xargs):
-		"""Return an assert statement requested to override the default value.
-
-		@param xargs: Variable argument list to an assert method
-
-		"""
-		if 'abortOnError' in xargs: return xargs['abortOnError']
-		return PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
-
+				msg = assertMessage or ('Line count on %s for %s%s (actual =%d) '%(file, quotestring(expr), condition, numberLines))
+				self.addOutcome(FAILED, msg, abortOnError=abortOnError)
 
 	def reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		""" Reports a new performance result, with an associated unique key that identifies it for  comparison purposes.
@@ -726,4 +810,70 @@ class BaseTest(ProcessUser):
 		See L{pysys.process.user.ProcessUser.getDefaultFileEncoding} for more details.
 		"""
 		return self.runner.getDefaultFileEncoding(file, **xargs)
+	
+	def pythonDocTest(self, pythonFile, pythonPath=None, output=None, environs=None, **kwargs):
+		"""
+		Execute the Python doctests that exist in the specified python file; 
+		adds a FAILED outcome if any do not pass. 
+		
+		@param pythonFile: the absolute path to a python file name. 
+		@param pythonPath: a list of directories to be added to the PYTHONPATH.
+		@param output: the output file; if not specified, '%s-doctest.txt' is used with 
+		the basename of the python file. 
+		
+		@param kwargs: extra arguments are passed to startProcess
+		"""
+		assert os.path.exists(os.path.abspath(pythonFile)), os.path.abspath(pythonFile)
+		
+		if not output: output = '%s-doctest.txt'%os.path.basename(pythonFile).replace('.py','')
+		
+		p = self.startProcess(
+			sys.executable, 
+			arguments=['-m', 'doctest', '-v', os.path.normpath(pythonFile)],
+			environs=self.createEnvirons(overrides=[environs, {'PYTHONPATH':os.pathsep.join(pythonPath or [])}]),
+			stdout=output, 
+			stderr=output+'.err', 
+			displayName='Python doctest %s'%os.path.basename(pythonFile),
+			ignoreExitStatus=True,
+			abortOnError=False
+			)
+		msg = 'Python doctest for %s'%(os.path.basename(pythonFile))
+		try:
+			msg += ': '+self.getExprFromFile(output, '\d+ passed.*\d+ failed') # appears whether it succeeds or fails
+		except Exception: 
+			msg += ': failed to execute correctly'
+		try:
+			msg += '; first failure is: '+self.getExprFromFile(output, '^File .*, line .*, in .*')
+		except Exception:
+			pass # probably it succeeded
+		
+		if p.exitStatus == 0:
+			self.addOutcome(PASSED, msg)
+		else:
+			self.addOutcome(FAILED, msg)
+			self.logFileContents(output+'.err') # in case there are any clues there
+			
+			# full doctest output is quite hard to read, so try to summarize just the failures 
+			
+			failures = []
+			lines = [] # accumulate each test
+			with open(os.path.join(self.output, output), encoding=locale.getpreferredencoding()) as f:
+				for line in f:
+					line = line.rstrip()
+					if line=='Trying:': # start of a new one, end of previous one
+						if lines and lines[-1]!='ok':
+							failures.append(lines)
+						lines = [line]
+					elif line == 'ok': # ignore if passed; needed if last test was a pass
+						lines = []
+					else:
+						lines.append(line)
+				if lines and lines[-1]!='ok':
+					failures.append(lines)
+				
+			for failure in failures:
+				log.info('-'*20)
+				for line in failure:
+					log.warning('  %s'%line.rstrip())
+				log.info('')
 		

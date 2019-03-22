@@ -43,28 +43,39 @@ class _UnicodeSafeStreamWrapper(object):
 		@param encoding: encoding which all written bytes/chars are guaranteed to be present in; 
 		if None, will be taken from underlying encoding or getpreferredencoding(). 
 		"""
+		self.__writebytes = writebytes
+		self.__requestedEncoding = encoding
+		self.updateUnderlyingStream(underlying)
+	
+	def updateUnderlyingStream(self, underlying):
+		assert underlying != self # avoid infinite loops
 		self.stream = underlying
 		# on python 2 stdout.encoding=None if redirected, and falling back on getpreferredencoding is the best we can do
-		self.__encoding = encoding or getattr(underlying, 'encoding', None) or locale.getpreferredencoding()
+		self.__encoding = self.__requestedEncoding or getattr(underlying, 'encoding', None) or locale.getpreferredencoding()
 		assert self.__encoding
-		self.__writebytes = writebytes
 	
 	def write(self, s):
 		if not s: return
-		if self.__writebytes:
-			if isinstance(s, binary_type):
-				self.stream.write(s) # always safe in python 2 and not supported in python 3
+		try:
+			if self.__writebytes:
+				if isinstance(s, binary_type):
+					self.stream.write(s) # always safe in python 2 and not supported in python 3
+				else:
+					self.stream.write(s.encode(self.__encoding, errors='replace'))
 			else:
-				self.stream.write(s.encode(self.__encoding, errors='replace'))
-		else:
-			if isinstance(s, binary_type):
+				if isinstance(s, binary_type):
+					s = s.decode(self.__encoding, errors='replace')
+				# even if it's already a unicode string it could contain characters that aren't supported in this encoding 
+				# (e.g. unicode replacement characters - such as the decode above generates - aren't supported by ascii); 
+				# so check it round-trips
+				s = s.encode(self.__encoding, errors='replace')
 				s = s.decode(self.__encoding, errors='replace')
-			# even if it's already a unicode string it could contain characters that aren't supported in this encoding 
-			# (e.g. unicode replacement characters - such as the decode above generates - aren't supported by ascii); 
-			# so check it round-trips
-			s = s.encode(self.__encoding, errors='replace')
-			s = s.decode(self.__encoding, errors='replace')
-			self.stream.write(s)
+				self.stream.write(s)
+		except Exception:
+			if self.stream is None: # it was closed underneath us
+				pass
+			else:
+				raise
 				
 	def flush(self): 
 		if self.stream is None: return
@@ -75,13 +86,11 @@ class _UnicodeSafeStreamWrapper(object):
 		Flush and close the stream, and prevent any more writes to it. 
 		This method is idempotent. 
 		"""
-		if self.stream is None: return
-		self.stream.flush()
-		self.stream.close()
-		self.stream = None
-
-
-# class extensions for supporting multi-threaded nature
+		stream, self.stream = self.stream, None
+		
+		if stream is None: return
+		stream.flush()
+		stream.close()
 
 class ThreadedStreamHandler(logging.StreamHandler):
 	"""Stream handler to only log from the creating thread.
@@ -94,28 +103,20 @@ class ThreadedStreamHandler(logging.StreamHandler):
 	handler to stdout, either immediately or (when multiple threads are in use) 
 	at the end of each test's execution. 
 	
-	@deprecated: For internal use only, do not use. 
+	@deprecated: For internal use and backwards compatibility only, do not use. 
 	"""
-	def __init__(self, strm=None, streamFactory=None):
+	def __init__(self, strm):
 		"""Overrides logging.StreamHandler.__init__.
 		@param strm: the stream
-		@param streamFactory: a function that returns the stream, if strm is not specified. 
 		"""
 		self.threadId = threading.current_thread().ident
-		self.__streamfactory = streamFactory if streamFactory else (lambda:strm)
-		logging.StreamHandler.__init__(self, self.__streamfactory())
+		logging.StreamHandler.__init__(self, strm)
 		
 	def emit(self, record):
 		"""Overrides logging.StreamHandler.emit."""
 		if self.threadId != threading.current_thread().ident: return
 		logging.StreamHandler.emit(self, record)
 
-	def _updateUnderlyingStream(self):
-		""" Update the stream this handler uses by calling again the stream factory; 
-		used only for testing. 
-		"""
-		assert self.stream # otherwise assigning to it wouldn't do anything
-		self.stream = self.__streamfactory()
 
 class ThreadedFileHandler(logging.FileHandler):
 	"""File handler to only log from the creating thread.
@@ -163,6 +164,35 @@ class ThreadFilter(logging.Filterer):
 		if self.threadId != threading.current_thread().ident: return True
 		return False
 
+class DelegatingPerThreadLogHandler(logging.Handler):
+	"""A log handler that delegates emits to a list of handlers, 
+	set on a per-thread basis. If no handlers are setup for this 
+	thread nothing is emitted.
+	
+	Note that calling close() on this handler does not call close 
+	on any of the delegated handlers (since they may 
+	be used by multiple threads, and to avoid leaks we don't keep a 
+	global list of them anyway). 
+	"""
+	def __init__(self):
+		super(DelegatingPerThreadLogHandler, self).__init__()
+		self.__threadLocals = threading.local()
+
+	def setLogHandlersForCurrentThread(self, handlers):
+		self.__threadLocals.handlers = handlers
+		self.__threadLocals.emitFunctions = [(h.level, h.emit) for h in handlers] if handlers else None
+	def getLogHandlersForCurrentThread(self):
+		return getattr(self.__threadLocals, 'handlers', None) or []
+	
+	def emit(self, record):
+		functions = getattr(self.__threadLocals, 'emitFunctions', None) 
+		if functions is not None: 
+			for (hdlrlevel, emitFunction) in functions:
+				# handlers can have different levels, so need to replicate the checking that callHandlers performs
+				if record.levelno >= hdlrlevel:
+					emitFunction(record)
+	def flush(self): 
+		for h in self.getLogHandlersForCurrentThread(): h.flush()
 
 #####################################
 
@@ -177,15 +207,24 @@ rootLogger = logging.getLogger('pysys')
 
 log = rootLogger
 
-stdoutHandler = ThreadedStreamHandler(streamFactory=lambda: _UnicodeSafeStreamWrapper(sys.stdout, writebytes=PY2))
-"""The handler that sends pysys.* log output from the main thread to stdout, 
-including buffered output from completed tests when running in parallel."""
+stdoutHandler = logging.StreamHandler(_UnicodeSafeStreamWrapper(sys.stdout, writebytes=PY2))
+"""The handler that sends pysys.* log output from to stdout, 
+including buffered output from completed tests when running in parallel.
 
+The .stream field can be used to access the wrapper we use throughout 
+pysys to safely write to stdout (with coloring support if enabled). 
+"""
+
+pysysLogHandler = DelegatingPerThreadLogHandler()
+""" The log handler used by PySys. It ignores log messages unless 
+setLogHandlersForCurrentThread has been called on the current thread. 
+"""
 
 # customize the default logging names for display
 logging.addLevelName(50, 'CRIT')
 logging.addLevelName(30, 'WARN')
 stdoutHandler.setLevel(logging.INFO)
 rootLogger.setLevel(logging.DEBUG) # The root logger log level (set to DEBUG as all filtering is done by the handlers).
-rootLogger.addHandler(stdoutHandler)
+rootLogger.addHandler(pysysLogHandler)
+pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler]) # main thread is by default the only one that writes to stdout
 

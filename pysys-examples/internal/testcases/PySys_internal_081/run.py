@@ -19,12 +19,12 @@ class PySysTest(BaseTest):
 		
 		# this should fail
 		try:
-			self.waitForSocket(port, abortOnError=True, timeout=2)
+			self.waitForSocket(port, abortOnError=True, timeout=3)
 		except Exception as e:
 			self.log.info('Got exception as expected: %s', e)
 			del self.outcome[:]
 		else:
-			self.abort('waitForSocket returned without error when it should have failed')
+			self.abort(FAILED, 'waitForSocket returned without error when it should have failed')
 				
 	def validate(self):
 		return

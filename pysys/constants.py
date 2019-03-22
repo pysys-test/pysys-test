@@ -26,7 +26,7 @@ abstraction over the contents of the file (L{pysys.constants.Project}). For more
 about the structure and contents of the project file, see the PySys examples 
 distribution. 
 
-@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET
+@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE
 """
 import sys, re, os, os.path, socket, traceback
 
@@ -42,14 +42,18 @@ from pysys.utils.pycompat import Enum
 
 # set the platform and platform related constants
 HOSTNAME = socket.getfqdn()
+""" The fully qualified name of this host. """
+
 if re.search('win32', sys.platform):
-	PLATFORM='win32'	
+	PLATFORM='win32'
+	"""OS platform - current values are: `linux`, `win32` (Windows), `sunos` (Solaris), `darwin` (Mac). """
 	OSFAMILY='windows'
 	DEVNULL = 'nul'
 	WINDIR = os.getenv('windir', 'c:\WINDOWS')
 	PATH = r'%s;%s\system32;%s\System32\Wbem' % (WINDIR, WINDIR, WINDIR)
 	LD_LIBRARY_PATH = ''
 	DYLD_LIBRARY_PATH = ''
+	LIBRARY_PATH_ENV_VAR = 'PATH'
 	SITE_PACKAGES_DIR =  os.path.join(sys.prefix, "Lib", "site-packages")
 	
 elif re.search('sunos', sys.platform):
@@ -59,6 +63,7 @@ elif re.search('sunos', sys.platform):
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/openwin/bin:/opt/SUNWspro/bin'
 	LD_LIBRARY_PATH = '/usr/local/lib' 
 	DYLD_LIBRARY_PATH = ''
+	LIBRARY_PATH_ENV_VAR = 'LD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
 elif re.search('linux', sys.platform):
@@ -68,6 +73,7 @@ elif re.search('linux', sys.platform):
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
 	LD_LIBRARY_PATH = '/usr/lib'
 	DYLD_LIBRARY_PATH = ''
+	LIBRARY_PATH_ENV_VAR = 'LD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
 elif re.search('darwin', sys.platform):
@@ -77,8 +83,8 @@ elif re.search('darwin', sys.platform):
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
 	LD_LIBRARY_PATH = ''
 	DYLD_LIBRARY_PATH = '/usr/lib:/usr/local/lib'
+	LIBRARY_PATH_ENV_VAR = 'DYLD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
-
 else:
 	# Fall back to assumed UNIX-like platform
 	PLATFORM=sys.platform
@@ -87,9 +93,12 @@ else:
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
 	LD_LIBRARY_PATH = '/usr/lib'
 	DYLD_LIBRARY_PATH = ''
+	LIBRARY_PATH_ENV_VAR = 'LD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
-ENVSEPERATOR = os.pathsep # deprecated, used os.pathsep instead
+ENVSEPERATOR = os.pathsep
+""" Deprecated. 
+@deprecated: use C{os.pathsep} instead. """
 
 IS_WINDOWS = OSFAMILY=='windows'
 """ True if this is Windows, False for other operating systems such as Unix. """
