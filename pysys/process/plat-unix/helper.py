@@ -53,6 +53,12 @@ class ProcessWrapper(CommonProcessWrapper):
 	@type pid: integer
 	@ivar exitStatus: The process exit status for a completed process	
 	@type exitStatus: integer
+
+	@ivar stdout: The full path to the filename to write the stdout of the process
+	@type stdout: string
+
+	@ivar stderr: The full path to the filename to write the stderr of the process
+	@type stderr: string
 	
 	"""
 
@@ -73,16 +79,8 @@ class ProcessWrapper(CommonProcessWrapper):
 		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
 			state, timeout, stdout, stderr, displayName, **kwargs)
 		
-		self.stdout = '/dev/null'
-		self.stderr = '/dev/null'
-		try:
-			if stdout is not None: self.stdout = stdout
-		except Exception:
-			log.info('Unable to create file to capture stdout - using the null device')
-		try:
-			if stderr is not None: self.stderr = stderr
-		except Exception:
-			log.info('Unable to create file to capture stdout - using the null device')
+		if self.stdout is None: self.stdout = '/dev/null'
+		if self.stderr is None: self.stderr = '/dev/null'
 
 		# private instance variables
 		self.__lock = threading.Lock() # to protect access to the fields that get updated while process is running

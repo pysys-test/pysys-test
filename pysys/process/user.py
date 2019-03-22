@@ -16,6 +16,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
+"""
+Contains the L{ProcessUser} class used by both L{BaseTest} and L{BaseRunner} 
+to provide process-related capabilities including cleanup. 
+"""
 
 import time, collections, inspect, locale, fnmatch
 
@@ -28,6 +32,7 @@ from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir
 from pysys.utils.pycompat import *
+from pysys.utils.stringutils import compareVersions
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 
@@ -117,11 +122,11 @@ class ProcessUser(object):
 			os.path.join(self.output, processKey+suffix+'.err'), 
 			)	
 
-
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
 			abortOnError=None, ignoreExitStatus=None):
-		"""Start a process running in the foreground or background, and return the process handle.
+		"""Start a process running in the foreground or background, and return 
+		the L{ProcessWrapper} process object.
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments,
 		environment and working directory to run the process in can all be specified in the arguments to the
@@ -134,7 +139,12 @@ class ProcessUser(object):
 
 		@param command: The command to start the process (should include the full path)
 		@param arguments: A list of arguments to pass to the command
-		@param environs: A dictionary of the environment to run the process in (defaults to clean environment)
+		
+		@param environs: A dictionary specifying the environment to run the process in. 
+		If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
+		produce a suitable clean default environment for this `command`, containing a minimal set of variables. 
+		If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
+		
 		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
 		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
 		@param timeout: The timeout period after which to termintate processes running in the C{FOREGROUND}
@@ -158,9 +168,12 @@ class ProcessUser(object):
 		if stdout: stdout = os.path.join(self.output, stdout)
 		if stderr: stderr = os.path.join(self.output, stderr)
 		
+		if not environs: # a truly empty env isn't really usable, so populate it with a minimal default environment instead
+			environs = self.getDefaultEnvirons(command=command)
+		
 		try:
 			startTime = time.time()
-			process = ProcessWrapper(command, arguments, environs or {}, workingDir, state, timeout, stdout, stderr, displayName=displayName)
+			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
 			process.start()
 			if state == FOREGROUND:
 				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, exit status %d%s", displayName, process.exitStatus,
@@ -189,8 +202,198 @@ class ProcessUser(object):
 			 		self.processCount[displayName] = 1
 			except Exception:
 				pass
-		return process
+		return process	
 
+	def getDefaultEnvirons(self, command=None, **kwargs):
+		"""
+		Create a new dictionary of environment variables, suitable for passing to 
+		L{startProcess()}, with a minimal clean set of environment variables 
+		for this platform, unaffected (as much as possible) by the 
+		environment that the tests are being run under. 
+		
+		This environment contains a minimal PATH/LD_LIBRARY_PATH but does not 
+		attempt to replicate the full set of default environment variables 
+		on each OS, and in particular it does not include any that identify 
+		the the current username or home area. Additional environment 
+		variables can be added as needed with L{createEnvirons} overrides. If 
+		you don't care about minimizing the risk of your local environment 
+		affecting the test processes you start, just use C{environs=os.environ} 
+		to allow child processes to inherit the entire parent environment. 
+		
+		The L{createEnvirons()} and L{startProcess()} methods use this as the 
+		basis for creating a new set of default environment variables. 
+
+		If needed this method can be overridden in subclasses to add common 
+		environment variables for every process invoked by startProcess, for 
+		example to enable options such as code coverage for Java/Python/etc. 
+		This is also a good place to customize behaviour for different 
+		operating systems. 
+
+		Some features of this method can be configured by setting project 
+		properties:
+		
+		  - `defaultEnvironsDefaultLang`: if set to a value such as `en_US.UTF-8` 
+		    the specified value is set for the LANG= variable on Unix; otherwise, 
+		    the LANG variable is not set (which might result in use of the 
+		    legacy POSIX/C encoding).
+		  
+		  - `defaultEnvironsTempDir`: if set the expression will be passed to 
+		    Python `eval()` and used to set the OS-specific temp directory 
+		    environment variables. A typical value is `self.output`.
+		
+		  - `defaultEnvironsLegacyMode`: set to true to enable compatibility 
+		    mode which keeps the behaviour the same as PySys v1.1, 1.2 and 1.3, 
+		    namely using a completely empty default environment on Unix, and 
+		    a copy of the entire parent environment on Windows. This is not 
+		    recommended unless you have a lot of legacy tests that cannot 
+		    easily be changed to only set minimal required environment 
+		    variables using `createEnvirons()`. 
+
+		@param command: If known, the full path of the executable for which 
+		a default environment is being created (when called from `startProcess` 
+		this is always set). This allows default environment variables to be 
+		customized for different process types e.g. Java, Python, etc. 
+		
+		@param kwargs: Overrides of this method should pass any additional 
+		kwargs down to the super implementation, to allow for future extensions. 
+		
+		@return: A new dictionary containing the environment variables. 
+		"""
+		
+		assert not kwargs, 'Unknown keyword arguments: %s'%kwargs.keys()
+
+		# this feature is a workaround to maintain compatibility for a bug in PySys v1.1-1.3
+		# (see https://github.com/pysys-test/pysys-test/issues/9 for details)
+		if getattr(PROJECT, 'defaultEnvironsLegacyMode','').lower()=='true':
+			if IS_WINDOWS: 
+				return dict(os.environ)
+			else:
+				return {}
+
+		e = {}
+
+		# allows setting TEMP to output dir to avoid contamination/filling up of system location
+		if getattr(PROJECT, 'defaultEnvironsTempDir',None)!=None:
+			tempDir = eval(PROJECT.defaultEnvironsTempDir)
+			self.mkdir(tempDir)
+			if IS_WINDOWS: # pragma: no cover
+				e['TEMP'] = e['TMP'] = os.path.normpath(tempDir)
+			else:
+				e['TMPDIR'] = os.path.normpath(tempDir)
+	
+		inherited = [] 
+		# env vars where it is safe and useful to inherit parent values
+		# avoid anything user-specific or that might cause tests to store data 
+		# outside the test outpuot directory
+		
+		if IS_WINDOWS: 
+			# for windows there are lots; as a matter of policy we set this to a small 
+			# minimal set used by a lot of programs. Keeping up with every single env 
+			# var Microsoft sets in every Windows OS release would be too painful, 
+			# and better to make users explicitly opt-in to the env vars they want
+			inherited.extend(['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 
+				'NUMBER_OF_PROCESSORS', 'PROCESSOR_ARCHITECTURE',
+				'COMMONPROGRAMFILES', 'COMMONPROGRAMFILES(X86)', 'PROGRAMFILES', 'PROGRAMFILES(X86)', 
+				'SYSTEM', 'SYSTEM32'])
+		
+		for k in inherited:
+			if k in os.environ: e[k] = os.environ[k]
+		
+		# always set PATH/LD_LIB_PATH to clean values from constants.py
+		# note that if someone is using an OS with different defaults they won't 
+		# be able to edit constants.py but will be able to provide a custom 
+		# implementation of this method
+		e['PATH'] = PATH
+		if LD_LIBRARY_PATH:
+			e['LD_LIBRARY_PATH'] = LD_LIBRARY_PATH
+		if DYLD_LIBRARY_PATH:
+			e['DYLD_LIBRARY_PATH'] = DYLD_LIBRARY_PATH
+				
+		if not IS_WINDOWS:
+			if getattr(PROJECT, 'defaultEnvironsDefaultLang',''):
+				e['LANG'] = PROJECT.defaultEnvironsDefaultLang
+		
+		if command == sys.executable:
+			# ensure it's possible to run another instance of this Python
+			# (but only if full path exactly matches)
+			# keep it as clean as possible by not passing sys.path/PYTHONPATH
+			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
+			e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e[LIBRARY_PATH_ENV_VAR]
+			e['PYTHONHOME'] = sys.prefix
+		
+		return e
+
+	def createEnvirons(self, overrides=None, addToLibPath=[], addToExePath=[], command=None, **kwargs):
+		"""
+		Create a new customized dictionary of environment variables suitable 
+		for passing to L{startProcess()}'s `environs` argument. 
+		
+		As a starting point, this method uses the value returned by 
+		L{getDefaultEnvirons()} for this `command`. See the documentation on 
+		that method for more details. If you don't care about minimizing the 
+		risk of your local environment affecting the test processes you start, 
+		just use C{environs=os.environ} to allow child processes to inherit the 
+		entire parent environment instead of using this method. 
+		
+		@param overrides: A dictionary of environment variables whose 
+		values will be used instead of any existing values. 
+		You can use `os.getenv('VARNAME','')` if you need to pass selected 
+		variables from the current process as part of the overrides list. 
+		If the value is set to None then any variable of this name will be 
+		deleted. Use unicode strings if possible (byte strings will be 
+		converted depending on the platform). 
+		A list of dictionaries can be specified, in which case the latest 
+		will override the earlier if there are any conflicts.
+		
+		@param addToLibPath: A path or list of paths to be prepended to the 
+		default value for the environment variable used to load libraries 
+		(or the value specified in overrides, if any), 
+		i.e. `[DY]LD_LIBRARY_PATH` on Unix or `PATH` on Windows. This is usually 
+		more convenient than adding it directly to `overrides`. 
+
+		@param addToExePath: A path or list of paths to be prepended to the 
+		default value for the environment variable used to locate executables 
+		(or the value specified in overrides, if any), 
+		i.e. `PATH` on both Unix and Windows. This is usually 
+		more convenient than adding it directly to `overrides`. 
+		
+		@param command: If known, the full path of the executable for which 
+		a default environment is being created (passed to L{getDefaultEnvirons}). 
+		
+		@param kwargs: Overrides of this method should pass any additional 
+		kwargs down to the super implementation, to allow for future extensions. 
+		
+		@return: A new dictionary containing the environment variables. 
+		"""
+		
+		assert not kwargs, 'Unknown keyword arguments: %s'%kwargs.keys()
+		e = self.getDefaultEnvirons(command=command)
+		
+		if overrides:
+			if not isinstance(overrides, list): overrides = [overrides]
+			for d in overrides:
+				if d:
+					for k in d:
+						if k.upper() in ['PATH']: k = k.upper() # normalize common ones to avoid chance of duplicates
+						if d[k] is None:
+							e.pop(k, None) # remove
+						else:
+							e[k] = d[k]
+		
+		def preparepath(path):
+			if isstring(path): 
+				if os.pathsep not in path: path = os.path.normpath(path)
+			else:
+				path = os.pathsep.join([os.path.normpath(p) for p in path if p])
+			return path
+			
+		if addToLibPath:
+			e[LIBRARY_PATH_ENV_VAR] = preparepath(addToLibPath)+os.pathsep+e[LIBRARY_PATH_ENV_VAR]
+
+		if addToExePath:
+			e['PATH'] = preparepath(addToExePath)+os.pathsep+e['PATH']
+		
+		return e
 
 	def stopProcess(self, process, abortOnError=None):
 		"""Send a soft or hard kill to a running process to stop its execution.
@@ -546,7 +749,7 @@ class ProcessUser(object):
 			log.debug('ProcessUser cleanup function done.')
 		
 
-	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=None, callRecord=None):
+	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None):
 		"""Add a validation outcome (and optionally a reason string) to the validation list.
 		
 		The method provides the ability to add a validation outcome to the internal data structure 
@@ -572,8 +775,9 @@ class ProcessUser(object):
 		
 		@param printReason: If True the specified outcomeReason will be printed
 		
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-		project setting if not specified)
+		@param abortOnError: If true abort the test on any error outcome. This should usually be set to 
+		False for assertions, or the configured `self.defaultAbortOnError` setting (typically True) for 
+		operations that involve waiting. 
 		
 		@param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
 		to the log output for better test triage.
@@ -585,6 +789,13 @@ class ProcessUser(object):
 			outcomeReason = ''
 		else: 
 			outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
+			if PY2 and isinstance(outcomeReason, str): 
+				# The python2 logger is very unhappy about byte str objects containing 
+				# non-ascii characters (specifically it will fail to log them and dump a 
+				# traceback on stderr). Since it's pretty important that assertion 
+				# messages and test outcome reasons don't get swallowed, add a 
+				# workaround for this here. Not a problem in python 3. 
+				outcomeReason = outcomeReason.decode('ascii', errors='replace')
 		
 		old = self.getOutcome()
 		self.outcome.append(outcome)
@@ -601,10 +812,10 @@ class ProcessUser(object):
 		if outcomeReason and printReason:
 			if outcome in FAILS:
 				if callRecord==None: callRecord = self.__callRecord()
-				log.warn('%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), '[%s]'%','.join(callRecord) if callRecord!=None else '',
+				log.warn(u'%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
 						 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 			else:
-				log.info('%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+				log.info(u'%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
@@ -860,3 +1071,65 @@ class ProcessUser(object):
 				return e['encoding']
 		return None
 	
+	@staticmethod
+	def compareVersions(v1, v2):
+		""" Compares two alphanumeric dotted version strings to see which is more recent. 
+		
+		Example usage::
+		
+			if self.compareVersions(thisversion, '1.2.alpha-3') > 0:
+				... # thisversion is newer than 1.2.alpha-3 
+
+		The comparison algorithm ignores case, and normalizes separators ./-/_ 
+		so that `'1.alpha2'=='1Alpha2'`. Any string components are compared 
+		lexicographically with other strings, and compared to numbers 
+		strings are always considered greater. 
+
+		@param v1: A string containing a version number, with any number of components. 
+		@param v2: A string containing a version number, with any number of components. 
+
+		@return: an integer > 0 if v1>v2, 
+		an integer < 0 if v1<v2, 
+		or 0 if they are semantically the same.
+		
+		>>> ProcessUser.compareVersions('10-alpha5.dev10', '10alpha-5-dEv_10') == 0 # normalization of case and separators
+		True
+
+		>>> ProcessUser.compareVersions(b'1....alpha.2', u'1Alpha2') == 0 # ascii byte and unicode strings both supported
+		True
+
+		>>> ProcessUser.compareVersions('1.2.0', '1.2')
+		0
+
+		>>> ProcessUser.compareVersions('1.02', '1.2')
+		0
+
+		>>> ProcessUser().compareVersions('1.2.3', '1.2') > 0
+		True
+
+		>>> ProcessUser.compareVersions('1.2', '1.2.3')
+		-1
+		
+		>>> ProcessUser.compareVersions('10.2', '1.2')
+		1
+
+		>>> ProcessUser.compareVersions('1.2.text', '1.2.0') # letters are > numbers
+		1
+
+		>>> ProcessUser.compareVersions('1.2.text', '1.2') # letters are > numbers 
+		1
+
+		>>> ProcessUser.compareVersions('10.2alpha1', '10.2alpha')
+		1
+
+		>>> ProcessUser.compareVersions('10.2dev', '10.2alpha') # letters are compared lexicographically
+		1
+
+		>>> ProcessUser.compareVersions('', '')
+		0
+
+		>>> ProcessUser.compareVersions('1', '')
+		1
+
+		"""
+		return compareVersions(v1, v2)

@@ -1,6 +1,6 @@
+import re, sys
 from pysys.constants import *
 from pysys.basetest import BaseTest
-
 
 class PySysTest(BaseTest):
 
@@ -11,32 +11,44 @@ class PySysTest(BaseTest):
 		env["PYSYS-TEST"] = "Test variable"
 		env["EMPTY-ENV"] = ""
 		env["INT-ENV"] = "1"
-		env["PYTHONPATH"] = os.pathsep.join(sys.path)
 
-		
+		env['PYTHONHOME'] = sys.prefix
 		if PLATFORM=='win32':
 			# on win32, minimal environment must have SYSTEMROOT set
 			env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
-		elif PLATFORM=='linux' or PLATFORM=='solaris':
+		else:
 			# On UNIX we may need the python shared libraries on the LD_LIBRARY_PATH
-			env["LD_LIBRARY_PATH"] = os.environ.get("LD_LIBRARY_PATH",'')
+			env[LIBRARY_PATH_ENV_VAR] = os.environ.get(LIBRARY_PATH_ENV_VAR,'')
 		
 		# create the process
-		self.hprocess = self.startProcess(command=sys.executable,
+		self.startProcess(command=sys.executable,
 						  arguments = [script],
 						  environs = env,
 						  workingDir = self.output,
-						  stdout = os.path.join(self.output, 'environment.out'),
-						  stderr = os.path.join(self.output, 'environment.err'),
+						  stdout = 'environment-specified.out',
+						  stderr = 'environment-specified.err',
+						  ignoreExitStatus=False, abortOnError=True, 
 						  state=FOREGROUND)
 
-		# wait for the strings to be writen to sdtout
-		self.waitForSignal("environment.out", expr="Written process environment", timeout=5)
-			
+		self.startProcess(command=sys.executable,
+						  arguments = [script],
+						  # don't set environs=
+						  workingDir = self.output,
+						  stdout = 'environment-default.out',
+						  stderr = 'environment-default.err',
+						  ignoreExitStatus=False, abortOnError=True, 
+						  state=FOREGROUND)
+		self.logFileContents('environment-default.out')
+
+		# wait for the strings to be writen to stdout (not sure why, should be instant); 
+		# also serves as a verification that they completed successfully
+		self.waitForSignal("environment-specified.out", expr="Written process environment", timeout=5, abortOnError=True)
+		self.waitForSignal("environment-default.out", expr="Written process environment", timeout=5, abortOnError=True)
+
 	def validate(self):
 		# validate against the reference file
 
-		ignores=['SYSTEMROOT','LD_LIBRARY_PATH', 'PYTHONPATH']
+		ignores=['SYSTEMROOT',LIBRARY_PATH_ENV_VAR, 'PYTHONHOME']
 		
 		if PLATFORM=='darwin':
 			ignores.append('VERSIONER_PYTHON')
@@ -45,4 +57,21 @@ class PySysTest(BaseTest):
 		# also ignore env vars that Pythong sometimes sets on itself
 		ignores.append('LC_CTYPE')
 
-		self.assertDiff("environment.out", "ref_environment.out", ignores=ignores)
+		self.assertDiff("environment-specified.out", "ref_environment.out", ignores=ignores)
+
+		# check we haven't copied any env vars from the parent environment other than the expected small minimal set
+		envvarignores = []
+		envvarignores.extend(['TEMP.*', 'TMP.*=']) # set in default pysys config file
+
+		if IS_WINDOWS:
+			envvarignores.extend(['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 
+				'NUMBER_OF_PROCESSORS', 'PROCESSOR_ARCHITECTURE',
+				'COMMONPROGRAMFILES', 'COMMONPROGRAMFILES(X86)', 'PROGRAMFILES', 'PROGRAMFILES(X86)', 
+				'SYSTEM', 'SYSTEM32'])
+
+		envvarignores.extend(['^%s='%x.upper() for x in 
+			['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 'NUMBER_OF_PROCESSORS']+[
+				'LD_LIBRARY_PATH', 'PATH']+ignores])
+		if not IS_WINDOWS: envvarignores.append('LANG=en_US.UTF-8') # set in default pysys config file
+		self.assertGrep('environment-default.out', expr='.*=', contains=False, ignores=envvarignores)
+		
