@@ -93,8 +93,7 @@ setup(
 
 	python_requires=">=2.7, <4", # be flexible
 
-	install_requires=["pywin32;sys_platform=='win32'"],
-	extras_require={'console_color_windows': ["colorama;sys_platform=='win32'"]},
+	install_requires=["pywin32;sys_platform=='win32'", "colorama;sys_platform=='win32'"],
 
 	scripts = ['scripts/pysys.py'],
 	packages=['pysys', 'pysys.launcher',  'pysys.manual',

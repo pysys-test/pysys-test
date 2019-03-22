@@ -23,6 +23,7 @@ from pysys.constants import *
 from pysys import __version__
 from pysys.utils.loader import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
+from pysys.utils.stringutils import compareVersions
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
@@ -110,15 +111,7 @@ class XMLProjectParser(object):
 			requirespysys = requirespysys[0].firstChild.nodeValue
 			if requirespysys:
 				thisversion = __version__
-				
-				def compareVersions(v1, v2):
-					v1 = [int(i) if i.isdigit() else i for i in v1.split('.')]
-					v2 = [int(i) if i.isdigit() else i for i in v2.split('.')]
-					if v1 > v2: return 1
-					if v1 == v2: return 0
-					return -1
-				
-				if compareVersions(thisversion, requirespysys) < 0:
+				if compareVersions(requirespysys, thisversion) > 0:
 					raise Exception('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
 
 

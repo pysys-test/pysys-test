@@ -60,7 +60,7 @@ Project Links
 - Stackoverflow tag for questions: https://stackoverflow.com/tags/pysys
 - Change log: https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
-- Source respository: https://github.com/pysys-test/pysys-test
+- Source repository: https://github.com/pysys-test/pysys-test
 
 License and credits
 ===================
@@ -104,11 +104,9 @@ more information about using `pip`.
 Windows
 -------
 On Windows, pip will automatically install the 
-`pywin32 <https://pypi.org/project/pywin32/>`_ extensions written 
-by Mark Hammond which PySys depends upon. Windows users may optionally 
-install the `colorama <https://pypi.org/project/colorama/>`_ library 
-(using `python -m pip install colorama`) to enable colored output on the 
-console. 
+`pywin32 <https://pypi.org/project/pywin32/>`_ and 
+`colorama <https://pypi.org/project/colorama/>`_ 
+libraries that PySys depends upon, 
 
 The executable launcher script `pysys.py` is installed into the `Scripts\\` 
 directory of the Python installation, e.g. `c:\\Python\\Scripts\\pysys.py`. 

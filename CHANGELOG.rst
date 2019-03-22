@@ -40,6 +40,28 @@ Changes affecting compatibility
   signature is now deprecated. As this API was added in 1.3.0 no other versions 
   are affected. 
 
+- In the previous release unknown or invalid keyword arguments passed to 
+  assert* methods would be silently ignored (potentially masking mistakes); 
+  now it is an error to specify an invalid argument. 
+
+- The environment `startProcess` uses by default if no `environs=` 
+  parameter was specified has changed. Although the documentation states that 
+  a clean environment is used if no `environs` dictionary is specified, in 
+  PySys v1.1, 1.2 and 1.3 the Windows behaviour changed to include a copy of 
+  all environment variables in the parent PySys process (typically a very 
+  large set of variables), which could cause tests to unintentionally 
+  be affected by the environment it was run from. This is now fixed, so that 
+  a small minimal set of environment variables are always returned, as returned 
+  by the new `ProcessUser.getDefaultEnvirons()` method. As a result on Windows 
+  a much smaller set of environment variables and PATH/LD_LIBRARY_PATH 
+  components will be used, and on Unix instead of a completely empty 
+  environment, a few variables will now be set. If this causes problems you can 
+  temporarily go back to the legacy behaviour by setting this 
+  `pysysproject.xml` option::
+  
+     <property name="defaultEnvironsLegacyMode" value="true"/>
+
+  See https://github.com/pysys-test/pysys-test/issues/9 for more information. 
 
 New features
 ------------
@@ -156,12 +178,34 @@ New features
 
 - PySys will now automatically enable colored output if there is no color 
   setting in the `pysysproject.xml` or `PYSYS_COLOR` environment - provided 
-  PySys is running in an interative terminal, and that if running on Windows 
-  the `colorama` library is installed. 
+  PySys is running in an interactive terminal. On Windows the `colorama` 
+  library is now a dependency to ensure colored output is always possible. 
 
 - Added `--threads auto` which is equivalent to `--threads 0` and provides 
   a clearer way to indicate that PySys will automatically determine how many 
   threads to run tests with based on the number of available CPUs. 
+
+- Added `BaseTest.pythonDocTest()` method for executing the doctests in a 
+  Python file. 
+
+- Added `ProcessUser.compareVersions()` static helper method for 
+  comparing two alphanumeric dotted version strings. 
+
+- Added `ProcessUser.getDefaultEnvirons()` method which is now used by 
+  `startProcess()` to provide a minimal but clean set of environment variables 
+  for launching a given process, and can also be used as a basis for creating 
+  customized environments using the new `createEnvirons()` helper method. 
+  There are some new project properties to control how this works, which 
+  are added to the sample `pysysproject.xml` and recommended for new projects, 
+  but are not enabled by default in existing projects to maintain 
+  compatibility::
+  
+	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
+	<property name="defaultEnvironsTempDir" value="self.output'"/>  
+
+  See `ProcessUser.getDefaultEnvirons()` for more information on these. 
+  If needed you can further customize the environment by overriding 
+  `getDefaultEnvirons`. 
 
 - As an alternative to the usual `pysys.py` executable script, it is now also 
   possible to launch PySys using::
@@ -172,6 +216,12 @@ New features
 Bug fixes
 ---------
 
+- Fixed `startProcess()` to use a clean and minimal set of environment 
+  variables on Windows if no `environs=` parameter was specified, rather than 
+  copying all environment variables from the parent PySys process to the child 
+  process. See https://github.com/pysys-test/pysys-test/issues/9 for more 
+  information. 
+  
 - Fixed `startProcess()` to add a `BLOCKED` test outcome when a process fails 
   to start due to a `ProcessError`, unless `ignoreExitStatus=True`. Previously 
   this flag only affected non-zero exit codes, resulting in `ProcessError` 
