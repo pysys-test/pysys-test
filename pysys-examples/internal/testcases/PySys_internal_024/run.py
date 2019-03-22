@@ -62,6 +62,12 @@ class PySysTest(BaseTest):
 		envvarignores = []
 		envvarignores.extend(['TEMP.*', 'TMP.*=']) # set in default pysys config file
 
+		if IS_WINDOWS:
+			envvarignores.extend(['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 
+				'NUMBER_OF_PROCESSORS', 'PROCESSOR_ARCHITECTURE',
+				'COMMONPROGRAMFILES', 'COMMONPROGRAMFILES(X86)', 'PROGRAMFILES', 'PROGRAMFILES(X86)', 
+				'SYSTEM', 'SYSTEM32'])
+
 		envvarignores.extend(['^%s='%x.upper() for x in 
 			['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 'NUMBER_OF_PROCESSORS']+[
 				'LD_LIBRARY_PATH', 'PATH']+ignores])

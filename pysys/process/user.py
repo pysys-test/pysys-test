@@ -16,6 +16,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
+"""
+Contains the L{ProcessUser} class used by both L{BaseTest} and L{BaseRunner} 
+to provide process-related capabilities including cleanup. 
+"""
 
 import time, collections, inspect, locale, fnmatch
 
@@ -207,6 +211,15 @@ class ProcessUser(object):
 		for this platform, unaffected (as much as possible) by the 
 		environment that the tests are being run under. 
 		
+		This environment contains a minimal PATH/LD_LIBRARY_PATH but does not 
+		attempt to replicate the full set of default environment variables 
+		on each OS, and in particular it does not include any that identify 
+		the the current username or home area. Additional environment 
+		variables can be added as needed with L{createEnvirons} overrides. If 
+		you don't care about minimizing the risk of your local environment 
+		affecting the test processes you start, just use C{environs=os.environ} 
+		to allow child processes to inherit the entire parent environment. 
+		
 		The L{createEnvirons()} and L{startProcess()} methods use this as the 
 		basis for creating a new set of default environment variables. 
 
@@ -268,10 +281,20 @@ class ProcessUser(object):
 			else:
 				e['TMPDIR'] = os.path.normpath(tempDir)
 	
-		inherited = [] # env vars where it is safe and useful to inherit parent values
+		inherited = [] 
+		# env vars where it is safe and useful to inherit parent values
+		# avoid anything user-specific or that might cause tests to store data 
+		# outside the test outpuot directory
+		
 		if IS_WINDOWS: 
-			# for windows there are lots; common programs such as Python fail if these are missing
-			inherited.extend(['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 'NUMBER_OF_PROCESSORS'])
+			# for windows there are lots; as a matter of policy we set this to a small 
+			# minimal set used by a lot of programs. Keeping up with every single env 
+			# var Microsoft sets in every Windows OS release would be too painful, 
+			# and better to make users explicitly opt-in to the env vars they want
+			inherited.extend(['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 
+				'NUMBER_OF_PROCESSORS', 'PROCESSOR_ARCHITECTURE',
+				'COMMONPROGRAMFILES', 'COMMONPROGRAMFILES(X86)', 'PROGRAMFILES', 'PROGRAMFILES(X86)', 
+				'SYSTEM', 'SYSTEM32'])
 		
 		for k in inherited:
 			if k in os.environ: e[k] = os.environ[k]
@@ -306,7 +329,11 @@ class ProcessUser(object):
 		for passing to L{startProcess()}'s `environs` argument. 
 		
 		As a starting point, this method uses the value returned by 
-		L{getDefaultEnvirons()} for this `command`. 
+		L{getDefaultEnvirons()} for this `command`. See the documentation on 
+		that method for more details. If you don't care about minimizing the 
+		risk of your local environment affecting the test processes you start, 
+		just use C{environs=os.environ} to allow child processes to inherit the 
+		entire parent environment instead of using this method. 
 		
 		@param overrides: A dictionary of environment variables whose 
 		values will be used instead of any existing values. 
