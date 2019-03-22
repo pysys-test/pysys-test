@@ -8,8 +8,10 @@ class PySysTest(BaseTest):
 			log.info('Hello from function thread')
 			stopping.wait(60*10) # this will block until cleanup
 			stopping.clear()
-			log.info('Background thread got request to stop but wont do it just yet')
-			stopping.wait(15) # this will cause it to timeout after cleanup
+			def functionThatAppearsToHang():
+				log.info('Background thread got request to stop but wont do it just yet')
+				stopping.wait(15) # this will cause it to timeout after cleanup
+			functionThatAppearsToHang()
 					
 		f = self.startBackgroundThread('FunctionThread', afunction)
 		assert f.joinTimeoutSecs > 0

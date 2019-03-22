@@ -16,13 +16,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Module containing the L{BackgroundThread} class.
+Contains the L{BackgroundThread} class.
 """
 
 import sys, os
 import threading
 import logging
 import time
+import traceback
 from pysys.constants import *
 from pysys.internal.initlogging import pysysLogHandler
 
@@ -32,6 +33,14 @@ class BackgroundThread(object):
 	"""
 	PySys wrapper for a background thread that can receive requests to 
 	stop, and can send log output to the same place as the test's logging. 
+
+	@ivar name: The name specified for this thread when it was created. 
+	
+	@ivar joinTimeoutSecs: The default timeout that will be used for joining 
+	this thread. If not explicitly set this will be L{TIMEOUTS}C{['WaitForProcessStop']}.
+	
+	@ivar exception: The exception object raised by the thread if it has 
+	terminated with an error, or None if not. 
 	"""
 	def __init__(self, owner, name, target, kwargsForTarget):
 		"""
@@ -43,6 +52,7 @@ class BackgroundThread(object):
 		assert name, 'Thread name must always be specified'
 
 		self.log = logging.getLogger('pysys.thread.%s'%name) # name without the owner prefix
+		self.name = name
 		self.owner = owner
 		self.__parentLogHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
 		assert self.__parentLogHandlers, self.__parentLogHandlers
@@ -62,7 +72,7 @@ class BackgroundThread(object):
 		
 		self.__outcomeReported = False
 		self.__kbdrInterrupt = None
-		self.log.info('Starting background thread %r'%self)
+		self.log.info('Starting background thread %s'%self)
 	
 	def __repr__(self): return 'BackgroundThread[%s]'%self.thread.name
 	def __str__(self): return self.name # without owner identifier
@@ -83,10 +93,10 @@ class BackgroundThread(object):
 			self.log.debug('%r completed successfully'%self)
 		except Exception as ex:
 			if self.stopping.is_set():
-				self.log.info('%r raised an exception while being stopped (ignoring) - %s: %s'%(self, ex.__class__.__name__, ex))
+				self.log.info('Background thread %s raised an exception while being stopped (ignoring) - %s: %s'%(self, ex.__class__.__name__, ex))
 				return
 			# this is probably the only place we can really get and show the stack trace
-			self.log.exception('%r Background thread failed - '%self)
+			self.log.exception('Background thread %s failed - '%self)
 			
 			# set this so we can report the BLOCKED outcome
 			self.exception = ex
@@ -106,6 +116,7 @@ class BackgroundThread(object):
 		@return: This instance, in case you wish to do fluent method chaining.  
 		@rtype: L{BackgroundThread}
 		"""
+		self.log.debug('Stop() requested for background thread %s', self)
 		self.stopping.set()
 		return self
 		
@@ -144,7 +155,7 @@ class BackgroundThread(object):
 
 		if self.thread.isAlive() or (not outcomereported):
 			# only log it the first time
-			self.log.info('Joining background thread %r'%self)
+			self.log.info('Joining background thread %s'%self)
 		starttime = time.time()
 		
 		# don't call thread.join for the entire time, since on windows that 
@@ -158,14 +169,20 @@ class BackgroundThread(object):
 				raise
 		
 		if self.thread.isAlive():
-			self.stop() # ensure it stops as quickly as possible
+		
 			if not outcomereported:
-				# TODO: print stack trace for the thread
 				self.owner.addOutcome(TIMEDOUT, 'Background thread %s is still running after waiting for allocated timeout period (%d secs)'%(
-					self.thread.name, timeout), abortOnError=abortOnError)
+					self, timeout), abortOnError=abortOnError)
+				try:
+					self.log.warning('Stack of hanging thread %s: \n%s', str(self), 
+						''.join(traceback.format_stack(sys._current_frames()[self.thread.ident])))
+				except Exception as ex:
+					self.log.debug('Failed to get stack of hanging thread: %s: %s', ex.__class__.__name__, ex)
+			self.stop() # ensure it stops as quickly as possible
+
 		elif self.exception is not None:
 			if not outcomereported:
 				self.owner.addOutcome(BLOCKED, 'Background thread %s failed with %s: %s'%(
-					self.thread.name, self.exception.__class__.__name__, self.exception), abortOnError=abortOnError)
-		elif time.time()-starttime>1:
-			self.log.info('Joined background thread %r in %0.1f seconds', self, (time.time()-starttime))
+					self, self.exception.__class__.__name__, self.exception), abortOnError=abortOnError)
+		elif time.time()-starttime>10: # alert user only if it took a long time
+			self.log.info('Joined background thread %s in %0.1f seconds', self, (time.time()-starttime))

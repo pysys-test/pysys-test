@@ -40,34 +40,50 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys-output/Success/run.log', expr=r'Test final outcome:.*PASSED')
 		self.log.info('')
 		
-		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'ERROR .*JoinCleanupException.FunctionThread\] Background thread failed')
+		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'ERROR .*Background thread FunctionThread failed')
 		self.assertOrderedGrep('pysys-output/JoinCleanupException/run.log', exprList=[
 			r'Traceback \(most recent call last\)', 
 			r'Exception: Simulated exception from background thread',
 			r'End of execute',
 			])
 		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'Test final outcome:.*BLOCKED')
-		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'Test failure reason:.*Background thread JoinCleanupException.FunctionThread failed with Exception: Simulated exception from background thread')
+		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'Test failure reason:.*Background thread FunctionThread failed with Exception: Simulated exception from background thread')
 		self.log.info('')
 		
 		self.assertOrderedGrep('pysys-output/JoinExecuteException/run.log', exprList=[
-			r'ERROR .*JoinExecuteException.FunctionThread\] Background thread failed',
+			r'ERROR .*Background thread FunctionThread failed',
 			r'Traceback \(most recent call last\)', 
 			r'Exception: Simulated exception from background thread',
 			])
 		self.assertGrep('pysys-output/JoinExecuteException/run.log', expr=r'End of execute', contains=False) # since we aborted on error
 
 		self.assertGrep('pysys-output/JoinExecuteException/run.log', expr=r'Test final outcome:.*BLOCKED')
-		self.assertGrep('pysys-output/JoinExecuteException/run.log', expr=r'Test failure reason:.*Background thread JoinExecuteException.FunctionThread failed with Exception: Simulated exception from background thread')
+		self.assertGrep('pysys-output/JoinExecuteException/run.log', expr=r'Test failure reason:.*Background thread FunctionThread failed with Exception: Simulated exception from background thread')
 		self.log.info('')
 
+		self.assertOrderedGrep('pysys-output/JoinCleanupTimeout/run.log', exprList=[
+			r'--- test cleanup',
+			r'DEBUG .*Stop.* requested for background thread FunctionThread',
+			r'INFO .*Joining .*FunctionThread',
+			r'WARN .*FunctionThread.* is still running after waiting for allocated timeout period \(\d secs\) ... .*timed out',
+			r'WARN .*Stack of hanging thread FunctionThread:',
+			'functionThatAppearsToHang',
+			])
+		self.assertGrep('pysys-output/JoinCleanupTimeout/run.log', expr=r'Test final outcome:.*TIMED OUT')
+		self.assertGrep('pysys-output/JoinCleanupTimeout/run.log', expr=r'Test failure reason:.*Background thread FunctionThread is still running after waiting for allocated timeout period')
+		self.log.info('')
 
 		self.assertOrderedGrep('pysys-output/JoinExecuteTimeout/run.log', exprList=[
 			r'INFO .*Joining background thread .*FunctionThread',
-			r'WARN .*Background thread JoinExecuteTimeout.FunctionThread is still running after waiting for allocated timeout period \(\d secs\) ... .*timed out',
+			r'WARN .*Background thread FunctionThread is still running after waiting for allocated timeout period \(\d secs\) ... .*timed out',
 			r'End of execute', 
 			])
 		self.assertGrep('pysys-output/JoinExecuteTimeout/run.log', expr=r'Test final outcome:.*TIMED OUT')
-		self.assertGrep('pysys-output/JoinExecuteTimeout/run.log', expr=r'Test failure reason:.*Background thread JoinExecuteTimeout.FunctionThread is still running after waiting for allocated timeout period')
+		self.assertGrep('pysys-output/JoinExecuteTimeout/run.log', expr=r'Test failure reason:.*Background thread FunctionThread is still running after waiting for allocated timeout period')
 		self.log.info('')
 
+		# check we don't have any errors as a result of writing output from background thread 
+		# after run.log stream has been closed
+		self.logFileContents('pysys.err')
+		self.assertGrep('pysys.err', expr='Traceback.*', contains=False)
+		

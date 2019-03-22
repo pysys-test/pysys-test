@@ -5,7 +5,7 @@ from pysys.exceptions import *
 class PySysTest(BaseTest):
 	def execute(self):
 		def afunction(stopping, log, **kwargs):
-			log.info('Hello from function thread')
+			log.info('Hello from function thread')			
 			while not stopping.is_set():
 				stopping.wait(1.0)
 		
