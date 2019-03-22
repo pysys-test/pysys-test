@@ -18,32 +18,33 @@
 
 
 """
-Contains implementations of output writers used to output test results during runtime execution.
+Contains API and sample implementations of L{BaseResultsWriter} and 
+its subclasses, which are used to output test results during runtime execution.
 
 Output writers are responsible for summarising test results on completion of a test, or on completion
-of a set of tests. There are currently three distinct types of writers, namely Record, Progress, and
-Summary, each of which performs output at different stages of a run i.e.
+of a set of tests. There are currently three distinct types of writers, namely `Record`, `Progress`, and
+`Summary`, each of which performs output at different stages of a run:
 
-   - "Record" writers output the outcome of a specific test after completion of that test, to allow
-runtime auditing of the test output, e.g. into a relational database. Several record
-writers are distributed with the PySys framework, such as the L{writer.JUnitXMLResultsWriter}.
-Best practice is to subclass L{writer.BaseRecordResultsWriter} when writing new record writers. 
-By default, record writers are enabled only when the --record flag is given to the PySys launcher, 
-though some writers may enable/disable themselves under different conditions, by overriding the 
-L{pysys.writer.BaseRecordResultsWriter.isEnabled} method.
+   - `Record` writers output the outcome of a specific test after completion of that test, to allow
+     runtime auditing of the test output, e.g. into a relational database. Several record
+     writers are distributed with the PySys framework, such as the L{writer.JUnitXMLResultsWriter}.
+     Best practice is to subclass L{writer.BaseRecordResultsWriter} when writing new record writers. 
+     By default, record writers are enabled only when the --record flag is given to the PySys launcher, 
+     though some writers may enable/disable themselves under different conditions, by overriding the 
+     L{pysys.writer.BaseRecordResultsWriter.isEnabled} method.
 
-   - "Progress" writers output a summary of the test progress after completion of each test, to give
-an indication of how far and how well the run is progressing. A single implementation of a progress
-writer is distributed with the PySys framework, namely the L{writer.ConsoleProgressResultsWriter},
-which details the percentage of tests selected to be run and that have executed, and a summary
-of the recent test failures. Progress writers should extend the L{writer.BaseProgressResultsWriter} and
-are enabled when the --progress flag is given to the PySys launcher, or when PYSYS_PROGRESS=true is
-set in the local environment.
+   - `Progress` writers output a summary of the test progress after completion of each test, to give
+     an indication of how far and how well the run is progressing. A single implementation of a progress
+     writer is distributed with the PySys framework, namely the L{writer.ConsoleProgressResultsWriter},
+     which details the percentage of tests selected to be run and that have executed, and a summary
+     of the recent test failures. Progress writers should extend the L{writer.BaseProgressResultsWriter} and
+     are enabled when the --progress flag is given to the PySys launcher, or when PYSYS_PROGRESS=true is
+     set in the local environment.
 
-   - "Summary" writers output an overall summary of the status at the end of a test run. A single implementation
-of a progress writer is distributed with the PySys framework, namely the L{writer.ConsoleSummaryResultsWriter},
-which details the overall test run outcome and lists any tests that did not pass. A summary writer is always
-enabled regardless of the flags given to the pysys launcher.
+   - `Summary` writers output an overall summary of the status at the end of a test run. A single implementation
+     of a progress writer is distributed with the PySys framework, namely the L{writer.ConsoleSummaryResultsWriter},
+     which details the overall test run outcome and lists any tests that did not pass. A summary writer is always
+     enabled regardless of the flags given to the pysys launcher.
 
 Project configuration of the writers is through the PySys project XML file using the <writer> tag. Multiple
 writers may be configured and their individual properties set through the nested <property> tag. Writer
