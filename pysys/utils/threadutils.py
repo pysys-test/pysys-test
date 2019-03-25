@@ -168,6 +168,8 @@ class BackgroundThread(object):
 				self.__kbdrInterrupt = ex
 				raise
 		
+		timetaken = time.time()-starttime
+		
 		if self.thread.isAlive():
 		
 			if not outcomereported:
@@ -184,5 +186,5 @@ class BackgroundThread(object):
 			if not outcomereported:
 				self.owner.addOutcome(BLOCKED, 'Background thread %s failed with %s: %s'%(
 					self, self.exception.__class__.__name__, self.exception), abortOnError=abortOnError)
-		elif time.time()-starttime>10: # alert user only if it took a long time
-			self.log.info('Joined background thread %s in %0.1f seconds', self, (time.time()-starttime))
+		elif timetaken >10: # alert user only if it took a long time
+			self.log.info('Joined background thread %s in %0.1f seconds', self, timetaken)

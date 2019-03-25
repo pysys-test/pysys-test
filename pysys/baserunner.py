@@ -352,7 +352,8 @@ class BaseRunner(ProcessUser):
 
 			# for suppressing print-as-we-execute in single-threaded mode (at least until outcome is known)
 			singleThreadStdoutDisable = self.threads==1 and self.printLogs!=PrintLogs.ALL
-			assert pysysLogHandler.getLogHandlersForCurrentThread()==[stdoutHandler] # the code below assumes this
+			# the setLogHandlersForCurrentThread invocation below assumes this
+			assert pysysLogHandler.getLogHandlersForCurrentThread()==[stdoutHandler] 
 				
 			for cycle in range(self.cycle):
 				# loop through tests for the cycle

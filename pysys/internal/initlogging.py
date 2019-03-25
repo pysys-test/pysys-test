@@ -181,6 +181,7 @@ class DelegatingPerThreadLogHandler(logging.Handler):
 	def setLogHandlersForCurrentThread(self, handlers):
 		self.__threadLocals.handlers = handlers
 		self.__threadLocals.emitFunctions = [(h.level, h.emit) for h in handlers] if handlers else None
+
 	def getLogHandlersForCurrentThread(self):
 		return getattr(self.__threadLocals, 'handlers', None) or []
 	
