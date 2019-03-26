@@ -107,8 +107,8 @@ Changes affecting compatibility
            ProcessMonitorKey.MEMORY_RESIDENT_KB,
            ProcessMonitorKey.MEMORY_VIRTUAL_KB,
            ProcessMonitorKey.MEMORY_PRIVATE_KB,
-           ProcessMonitorKey.THREADS,
-           ProcessMonitorKey.KERNEL_HANDLES
+           #ProcessMonitorKey.THREADS,
+           #ProcessMonitorKey.KERNEL_HANDLES
         ] if IS_WINDOWS else [
            ProcessMonitorKey.DATE_TIME_LEGACY, 
            ProcessMonitorKey.CPU_CORE_UTILIZATION, 
@@ -121,6 +121,16 @@ Changes affecting compatibility
   CPU_CORE_UTILIZATION value but it is no longer documented and may be 
   removed in a future release. Use CPU_TOTAL_UTILIZATION if you wish to see 
   total CPU usage across all cores. 
+  
+  It is no longer possible to get thread or handle count on Windows. 
+  
+  In the previous release, the Linux process monitor also gathered data 
+  from child processes (that were running at the moment the monitor was 
+  started). As this functinality was not documented, inconsistent with other 
+  platforms, and generated incorrect results (memory usage was reported for a 
+  random process from the list, not accumulated across them) this has been 
+  removed. Optional support for monitoring child processes may be re-added 
+  in a future PySys release. 
 
 New features
 ------------

@@ -93,14 +93,14 @@ class ProcessMonitorKey(object):
 	Calculated from the `Private Bytes` performance counter. 
 	"""
 	
-	THREADS = 'Threads'
+	THREADS = 'Threads' # TODO: remove this, can't support without pdh counters
 	"""
 	Total number of threads for this process. 
 	
 	Not available on all operating systems. 
 	"""
 	
-	KERNEL_HANDLES = 'Kernel handles'
+	KERNEL_HANDLES = 'Kernel handles' # TODO: remove this, can't support without pdh counters
 	"""
 	Total number of open kernel object handles. Windows-only.
 	
@@ -444,7 +444,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 			time.sleep(1)
 			processInstanceName, processInstanceIndex = self.__win32GetInstance()
 		
-		log.info('Windows process monitor for %s is using %s #%d', self, processInstanceName, processInstanceIndex) # TODO: comment out
+		log.info('Windows process monitor for %s is using %s #%d', self, processInstanceName, processInstanceIndex) # TODO: remove
 		
 		# create the process performance counters
 		self._perfCounters={} # key=name, value=counter object
@@ -600,8 +600,8 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		if v is not None: v = v//1024
 		data[ProcessMonitorKey.MEMORY_PRIVATE_KB] = v
 		
-		data[ProcessMonitorKey.THREADS] = counterValues['Thread Count']
-		data[ProcessMonitorKey.KERNEL_HANDLES] = counterValues['Handle Count']
+		#data[ProcessMonitorKey.THREADS] = counterValues['Thread Count']
+		#data[ProcessMonitorKey.KERNEL_HANDLES] = counterValues['Handle Count']
 		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = counterValues['% Processor Time']
 		
 		while True:
@@ -631,9 +631,9 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		#psdata[ProcessMonitorKey.THREADS] = perfinfo['ThreadCount']
 		#psdata[ProcessMonitorKey.KERNEL_HANDLES] = perfinfo['HandleCount']
 		## TODO - remove temp code once this is working
-		log.info('time diff=%0.1f ms', (newvalues['timens']-lastvalues['timens'])/1000000.0)
-		s = ['\n  key %s: counter=%s new=%s'%(k, data.get(k), psdata.get(k)) for k in data ]
-		log.info('Got data for %s: %s', self, ''.join(s))
+		#log.info('time diff=%0.1f ms', (newvalues['timens']-lastvalues['timens'])/1000000.0)
+		#s = ['\n  key %s: counter=%s new=%s'%(k, data.get(k), psdata.get(k)) for k in data ]
+		#log.info('Got data for %s: %s', self, ''.join(s))
 		
 		self._lastValues = newvalues
 		STILL_ACTIVE = 259 # todo check if there's a constant for this
@@ -660,41 +660,8 @@ class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
 				}
 
 class LinuxProcessMonitor(BaseProcessMonitor):
-	# also used for macos darwin
+	# also used for macos/darwin
 	
-	INCLUDE_CHILD_PROCESSES = True
-	"""
-	Configuration option that specifies whether the LinuxProcessMonitor 
-	will include the children of the specified process (that is, child 
-	processes that exist at the point when the process monitor starts). 
-	Note that other process monitors on other platforms currently do not 
-	support this. 
-	"""
-	
-	def start(self):
-		# get the child process tree for this process
-		if (self.INCLUDE_CHILD_PROCESSES):
-			with process_lock:
-				with os.popen("ps -o pid,ppid") as fp:
-					psList = fp.readlines()
-			self._pidTree = self.__findChildren(psList, self.pid)
-		else:
-			self._pidTree = [self.pid]
-
-		BaseProcessMonitor.start(self)
-	
-	def __findChildren(self, psList, parentPid):
-		children = []
-		children.append(int(parentPid))
-		
-		for i in range(1, len(psList)):
-			pid = int(psList[i].split()[0])
-			ppid = int(psList[i].split()[1])
-			if ppid == parentPid:
-				children[len(children):] = self.__findChildren(psList, pid)
-				
-		return children
-
 	def _getData(self, sample):
 		with process_lock:
 			with os.popen("ps -o pid,pcpu,rss,vsz") as fp: 
@@ -705,20 +672,13 @@ class LinuxProcessMonitor(BaseProcessMonitor):
 				ProcessMonitorKey.MEMORY_RESIDENT_KB: 0,
 				ProcessMonitorKey.MEMORY_VIRTUAL_KB: 0,
 			}
-			gotdata = False
-			for i in range(1, len(info)):
-				if int(info[i].split()[0]) in self._pidTree:
-					gotdata = True
-					thisdata = info[i].split()
-					data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = data[ProcessMonitorKey.CPU_CORE_UTILIZATION] + float(thisdata[1])
-					
-					# TODO: this looks like a bug - why are we setting it to an absolute value rather than accumulating for all child processes?
-					data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = int(thisdata[2])
-					data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = int(thisdata[3])
+			if len(info) <= 1: raise Exception('No matching processes found from ps')
+			gotdata = True
+			thisdata = info[1].split()
+			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = float(thisdata[1])
+			data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = int(thisdata[2])
+			data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = int(thisdata[3])
 			
-			# make sure we don't keep returning 0 values once process has terminated
-			if not gotdata: raise Exception('No matching processes found from ps')
-
 			return data
 			
 if PLATFORM=='win32':
