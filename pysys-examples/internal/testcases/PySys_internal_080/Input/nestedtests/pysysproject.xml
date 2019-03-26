@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<property name="defaultAbortOnError" value="true"/>
+
+	<path value="${root}"/>
+	
+	<runner classname="MyCustomRunner" module="customrunner"/>
+	
+</pysysproject>

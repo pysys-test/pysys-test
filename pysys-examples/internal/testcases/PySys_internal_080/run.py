@@ -10,6 +10,13 @@ class PySysTest(BaseTest):
 						  stdout = "%s/test.out" % self.output,
 						  stderr = "%s/test.err" % self.output,
 						  state=BACKGROUND)
+						  
+		l = {}
+		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
+		runPySys = l['runPySys']
+		childtest = runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '-X', 'pidToMonitor=%d'%p.pid], 
+			state=BACKGROUND, workingDir=self.input+'/nestedtests')
+
 		pm = self.startProcessMonitor(p, interval=0.1, file='monitor.tsv')
 		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.tsv', numProcessors='10')
 
@@ -24,6 +31,9 @@ class PySysTest(BaseTest):
 		assert pidmonitor.running(), 'pid monitor is still running'
 		self.stopProcessMonitor(pidmonitor)
 
+		self.waitProcess(childtest, timeout=60)
+		self.assertTrue(childtest.exitStatus==0, assertMessage='nested pysys test passed')
+
 		self.stopProcessMonitor(pm)
 		pm.stop() # should silently do nothing
 		self.stopProcessMonitor(pm) # should silently do nothing
@@ -35,19 +45,43 @@ class PySysTest(BaseTest):
 	def validate(self):
 		self.logFileContents('monitor.tsv')
 		self.logFileContents('monitor-numproc.tsv')
-	
-		with open(self.output+'/monitor.tsv') as f:
+		self.logFileContents('myoutdir/NestedTest/monitor-legacy.tsv')
+
+		with open(self.output+'/myoutdir/NestedTest/monitor-legacy.tsv') as f:
 			header = f.readline()
 			f.readline() # ignore first line of results
 			line = f.readline().strip() 
 		# ensure tab-delimited output has same number of items as header
 		line = line.split('\t')
+		self.log.info('Sample legacy log line:   %s', line)
+		if IS_WINDOWS:
+			self.assertThat('%d == 7', len(line)) 
+		else:
+			self.assertThat('%d == 4', len(line)) 
+		self.assertGrep('myoutdir/NestedTest/monitor-legacy.tsv', expr='#.*', contains=False) # no header line
+		self.log.info('')
+		
+		with open(self.output+'/monitor.tsv') as f:
+			header = f.readline()
+			self.assertTrue(header.startswith('#')) 
+			f.readline() # ignore first line of results
+			line = f.readline().strip() 
+		# ensure tab-delimited output has same number of items as header
+		line = line.split('\t')
 		self.log.info('Sample log line:   %s', line)
-		self.assertThat('%d >= 4', len(line)) # 4 columns on unix, more on windows
+		self.assertThat('%d == %d', len(line), len(header.split('\t'))) # same number of items in header line as normal lines
 		for i in range(len(line)):
 			if i > 0: # apart from the first column, every header should be a valid float or int
-				self.assertThat('float(%s) or True', repr(line[i])) # would raise an exception if not a float
+				try:
+					float(line[i])
+				except Exception:
+					self.addOutcome(FAILED, 'monitor.tsv sample line [%d] is not a number: "%s"'%line[i])
+
 		
 		# check files have at least some valid (non -1 ) values
 		self.assertGrep('monitor.tsv', expr='\t[0-9]+')
 		self.assertGrep('monitor-pid.tsv', expr='\t[0-9]+')
+		self.assertGrep('myoutdir/NestedTest/monitor-legacy.tsv', expr='\t[0-9]+')
+		
+		# should be nothing where we couldn't get the data
+		self.assertGrep('myoutdir/NestedTest/monitor-legacy.tsv', expr='\t-1', contains=False)
