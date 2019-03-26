@@ -460,11 +460,14 @@ class ProcessUser(object):
 		"""Wait for a background process to terminate, return on termination or expiry of the timeout.
 
 		Timeouts will result in an exception unless the project property defaultAbortOnError=False.
+		
+		This method does not check the exit code, but you can manually 
+		check the value of process.exitStatus if you wish to check it succeeded. 
 
 		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-			project setting)
+		project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
