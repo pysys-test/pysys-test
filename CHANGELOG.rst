@@ -63,6 +63,59 @@ Changes affecting compatibility
 
   See https://github.com/pysys-test/pysys-test/issues/9 for more information. 
 
+- The `ProcessMonitor` class has been rewritten as the previous structure 
+  was not flexible enough to permit extensions, for example adding extra 
+  monitoring statistics, or providing custom handlers for the data for 
+  different file formats or automated checking of results. There is now a 
+  common `BaseProcessMonitor` superclass and separate subclasses for each 
+  operating system, which expose the methods for getting data. 
+  `ProcessMonitor` is now an alias pointing to the current class for this 
+  operating system. If you have written a custom subclass of ProcessMonitor 
+  to customize what data is gathered you will need to rework it when moving to 
+  this version of PySys. If you need to provide custom code to handle the 
+  generated statistics, you can now do that by passing a 
+  `BaseProcessMonitorHandler` subclass to `BaseTest.startProcessMonitor`. 
+  
+- The default process monitor file format has changed in this release to 
+  provide consistency across all operating systems, and because it did not 
+  accurately match the documentation. Previously there was no header line, and 
+  on Windows the columns were::
+  
+     %d/%m/%y %H:%M:%S CPU Resident Virtual Private Threads Handles
+  
+  and on Linux::
+
+     %m/%d/%y %H:%M:%S CPU Resident Virtual
+  
+  In this release of PySys the ISO standard date format is used and only the 
+  columns supported on all operating systems are included by default::
+  
+     %Y-%m-%d %H:%M:%S CPU Resident Virtual
+  
+  Additional columns may be added to the default file in future releases. 
+  
+  There is also a machine and human readable header line beginning with `#` so 
+  that each file is self-explanatory. 
+  
+  This behaviour can be customized by adding code to your runner's `setup` 
+  method. For example to go back to the previous file format::
+  
+    TabSeparatedFileHandler.setDefaults(
+        [
+           ProcessMonitorKey.DATE_TIME_LEGACY, 
+           ProcessMonitorKey.CPU_CORE_UTILIZATION, 
+           ProcessMonitorKey.MEMORY_RESIDENT_KB,
+           ProcessMonitorKey.MEMORY_VIRTUAL_KB,
+           ProcessMonitorKey.MEMORY_PRIVATE_KB,
+           ProcessMonitorKey.THREADS,
+           ProcessMonitorKey.KERNEL_HANDLES
+        ] if IS_WINDOWS else [
+           ProcessMonitorKey.DATE_TIME_LEGACY, 
+           ProcessMonitorKey.CPU_CORE_UTILIZATION, 
+           ProcessMonitorKey.MEMORY_RESIDENT_KB,
+           ProcessMonitorKey.MEMORY_VIRTUAL_KB,
+        ], writeHeaderLine=False)
+
 New features
 ------------
 

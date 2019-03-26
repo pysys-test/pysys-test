@@ -33,7 +33,7 @@ from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
 from pysys.utils.threadutils import BackgroundThread
-from pysys.process.monitor import ProcessMonitor
+from pysys.process.monitor import ProcessMonitor, TabSeparatedFileHandler
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 from pysys.utils.pycompat import *
@@ -212,43 +212,77 @@ class BaseTest(ProcessUser):
 		self.resources.append(resource)
 
 
-	def startProcessMonitor(self, process, interval, file, **kwargs):
+	def startProcessMonitor(self, process, interval=5, file=None, handlers=[], **kwargs):
 		"""Start a separate thread to log process statistics to logfile, and return a handle to the process monitor.
 		
 		This method uses the L{pysys.process.monitor} module to perform logging of the process statistics, 
-		starting the monitor as a seperate background thread. Should the request to log the statistics fail 
-		a C{BLOCKED} outcome will be added to the test outcome list. All process monitors not explicitly 
-		stopped using the returned handle are automatically stopped on completion of the test via the L{cleanup} 
-		method of the BaseTest. 
+		starting the monitor as a separate background thread. 
+		
+		All process monitors not explicitly stopped using the returned handle 
+		are automatically stopped on completion of the test via the L{cleanup} 
+		method of the BaseTest, but you may wish to explicitly stop your 
+		process monitors using L{stopProcessMonitor} before you begin 
+		shutting down processes at the end of a test to avoid unwanted spikes 
+		and noise in the last few samples of the data. 
+		
+		You can specify a `file` and/or a list of `handlers`. If you use 
+		`file`, a default L{pysys.process.monitor.TabSeparatedFileHandler} 
+		instance is created with default columns specified by 
+		L{pysys.process.monitor.TabSeparatedFileHandler.DEFAULT_COLUMNS}; 
+		if you wish to customize this for an individual test create your own 
+		TabSeparatedFileHandler instance and pass it to handlers instead. 
+		Additional default columns be added in future releases. 
 		
 		@param process: The process handle returned from the L{startProcess} method
-		@param interval: The interval in seconds between collecting and logging the process statistics
-		@param file: The path to the filename used for logging the process statistics
-		@param kwargs: Keyword arguments to allow platform specific configurations
+		
+		@param interval: The polling interval in seconds between collection of 
+		monitoring statistics. 
+		
+		@param file: The name of a tab separated values (.tsv) file to write to, 
+		for example 'monitor-myprocess.tsv'. 
+		
+		A default L{pysys.process.monitor.TabSeparatedFileHandler} instance is 
+		created if this parameter is specified, with default columns from 
+		L{pysys.process.monitor.TabSeparatedFileHandler.DEFAULT_COLUMNS} . 
+		
+		@param handlers: A list of L{pysys.process.monitor.BaseProcessMonitorHandler} 
+		instances such as L{pysys.process.monitor.TabSeparatedFileHandler}, 
+		which will process monitoring data every polling interval. This can be 
+		used for recording results (for example in a file) or for dynamically 
+		analysing them and reporting problems. 
+		
+		@param kwargs: Keyword arguments to allow advanced parameterization of the process monitor. 
 				
-		@return: A handle to the process monitor (L{pysys.process.monitor.ProcessMonitor})
-		@rtype: handle
+		@return: An object representing the process monitor (L{pysys.process.monitor.ProcessMonitor})
+		@rtype: pysys.process.monitor.ProcessMonitor
 		
 		"""
 		if isstring(file): file = os.path.join(self.output, file)
-		monitor = ProcessMonitor(process.pid, interval, file, process=process, owner=self, **kwargs)
-		try:
-			self.log.info("Starting process monitor on process with id = %d", process.pid)
-			monitor.start()
-		except ProcessError as e:
-			self.addOutcome(BLOCKED, 'Unable to start process monitor for %s: %s'%(process, e))
-		else:
-			self.monitorList.append(monitor)
-			return monitor
+		handlers = [] if handlers is None else list(handlers)
+		if file:
+			handlers.append(TabSeparatedFileHandler(file))
+		
+		self.log.info("Starting process monitor for %r", process)
+		monitor = ProcessMonitor(owner=self, process=process, interval=interval, handlers=handlers, **kwargs)
+		monitor.start()
+		self.monitorList.append(monitor)
+		return monitor
 
 	
 	def stopProcessMonitor(self, monitor):
-		"""Stop a process monitor.
+		"""Request a process monitor to stop.
+		
+		Does not wait for it to finish stopping. 
+
+		All process monitors are automatically stopped and joined during cleanup, 
+		however you may wish to explicitly stop your process monitors 
+		before you begin shutting down processes at the end of a test to avoid 
+		unwanted spikes and noise in the last few samples of the data. 
 		
 		@param monitor: The process monitor handle returned from the L{startProcessMonitor} method
 		
 		"""
-		if monitor.running: monitor.stop()
+		monitor.stop()
 
 	def startBackgroundThread(self, name, target, kwargsForTarget={}):
 		"""

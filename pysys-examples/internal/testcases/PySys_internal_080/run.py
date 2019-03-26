@@ -1,11 +1,12 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.process.helper import ProcessWrapper
+#from pysys.process.monitor import *
 
 class PySysTest(BaseTest):
 
 	def execute(self):
 		with open(self.output+'/wait.py', 'w') as f:
+			# spin, trying to use about 100% of a cpu
 			f.write('import time\ntime.sleep(5)\nwhile True: pass')
 		p = self.startProcess(command=sys.executable,
 						  arguments = [self.output+'/wait.py'],
@@ -13,23 +14,25 @@ class PySysTest(BaseTest):
 						  stdout = "%s/test.out" % self.output,
 						  stderr = "%s/test.err" % self.output,
 						  state=BACKGROUND)
-		pm = self.startProcessMonitor(p, interval=0.1, file='monitor.dat')
-		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.dat', numProcessors=10)
-		assert pm.running()
-		self.waitForSignal('monitor.dat', expr='.', condition='>=5')
-		self.waitForSignal('monitor-numproc.dat', expr='.', condition='>=5')
-		assert pm.running()
+		pm = self.startProcessMonitor(p, interval=0.1, file='monitor.tsv')
+		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.tsv', numProcessors=10)
+		assert pm.running(), 'monitor is still running'
+		self.waitForSignal('monitor.tsv', expr='.', condition='>=5', ignores=['#.*'])
+		self.waitForSignal('monitor-numproc.tsv', expr='.', condition='>=5', ignores=['#.*'])
+		assert pm.running(), 'monitor is still running'
 		self.stopProcessMonitor(pm)
+		pm.stop() # should silently do nothing
 		self.stopProcessMonitor(pm) # should silently do nothing
 		p.stop()
-		self.wait(1)
+		self.wait(1) # keep process monitor running after it to check it doesn't cause an error
 		self.stopProcessMonitor(pm2)
 						  
 		
 	def validate(self):
-		with open(self.output+'/monitor.dat') as f:
-			f.readline()
-			line = f.readline().strip() # ignore first line
+		with open(self.output+'/monitor.tsv') as f:
+			header = f.readline()
+			f.readline() # ignore first line of results
+			line = f.readline().strip() 
 		# ensure tab-delimited output has same number of items as header
 		line = line.split('\t')
 		self.log.info('Sample log line:   %s', line)

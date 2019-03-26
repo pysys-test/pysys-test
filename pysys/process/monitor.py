@@ -15,395 +15,618 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
-
 from __future__ import print_function
+
+__all__ = ['BaseProcessMonitorHandler', 'BaseProcessMonitorHandler', 'TabSeparatedFileHandler', 'ProcessMonitorKey', 
+	'ProcessMonitor', 'WindowsProcessMonitor', 'LinuxProcessMonitor', 'SolarisProcessMonitor']
+
+"""
+Contains the L{BaseProcessMonitor}, L{ProcessMonitorKey} constants for identifying 
+columns and the default L{TabSeparatedFileHandler} class for writing monitoring 
+information to a file. 
+"""
+
+
 import os, sys, string, time, threading, logging
-from pysys import log
+from pysys import process_lock
 from pysys.constants import *
+from pysys.utils.pycompat import *
 
 
 if PLATFORM=='win32' and 'epydoc' not in sys.modules:
 	import win32api, win32pdh
 
-if PLATFORM=='win32':
-	class ProcessMonitor(object):
-		"""Process monitor for the logging of process statistics.
+log = logging.getLogger('pysys.processmonitor')
+
+class ProcessMonitorKey(object):
+	"""
+	Contains constants for supported process monitor keys. 
+	
+	Some of these keys are not currently returned on all platforms. 
+	
+	These constants provide the display names used for column headings etc. 
+	
+	Usually L{CPU_CORE_UTILIZATION} is the best key for measuring 
+	CPU utilization and L{MEMORY_RESIDENT_KB} is the most useful way to 
+	monitor memory usage. 
+	"""
+
+	CPU_CORE_UTILIZATION = 'CPU core %'
+	"""CPU utilization % scaled by the number of cores so that 100% indicates 
+	full use of one core, 200% indicates full use of two cores, etc. 
+	
+	The maximum value is the number of CPU cores times 100. 
+	"""
+
+	CPU_TOTAL_UTILIZATION = 'CPU total %'
+	"""Total utilization % of all available CPU cores, with a maximum value of 100%.
+	
+	If you have 2 cores and one of them is 50% utilized, the value would be 25%.
+	"""
+	
+	MEMORY_RESIDENT_KB = 'Resident memory kB'
+	"""
+	Resident / working set memory usage. 
+	
+	This is usually a good way to check for memory leaks and excessive 
+	memory usage. 
+
+	Equivalent to `rss` on Unix; 
+	on Windows calculated from the `Working Set` performance counter. 
+
+	"""
+	
+	MEMORY_VIRTUAL_KB = 'Virtual memory kB'
+	"""
+	Virtual memory / address space of the process. This can be significant larger than 
+	the amount actually allocated. 
+	
+	Equivalent to `vsz` on Unix; 
+	on Windows calculated from the `Virtual Bytes` performance counter. 
+	"""
+	
+	MEMORY_PRIVATE_KB = 'Private memory kB'
+	"""
+	Memory allocated to this process that cannot be shared with other processes. Windows only. 
+
+	Calculated from the `Private Bytes` performance counter. 
+	"""
+	
+	THREADS = 'Threads'
+	"""
+	Total number of threads for this process. 
+	
+	Not available on all operating systems. 
+	"""
+	
+	KERNEL_HANDLES = 'Kernel handles'
+	"""
+	Total number of open kernel object handles. Windows-only.
+	
+	Corresponds to the 'Handle Count' performance counter. 
+	"""
+	
+	DATE_TIME = 'Time'
+	"""String representation of the date and local time for this sample 
+	in yyyy-mm-dd HH:MM:SS format. 
+	"""
+
+	DATE_TIME_LEGACY = 'Time (legacy)'
+	"""String representation of the date and local time for this sample in 
+	a format compatible with older versions of PySys. 
+	
+	This is %d/%m/%y %H:%M:%S on Windows and %m/%d/%y %H:%M:%S on Unix. 
+	@deprecated: Use L{DATE_TIME} if possible. 
+	"""
+	
+	SAMPLE = 'Sample'
+	"""A counter starting from 1 and incrementing with each new set of 
+	sample data."""
+	
+
+class BaseProcessMonitorHandler(object):
+	"""
+	Interface to be implemented to provide a custom handler that records 
+	or processes data from a L{BaseProcessMonitor}. 
+	"""
+	def handleData(self, data, **kwargs):
+		"""
+		Called on a background thread each time a new sample of monitoring 
+		data is available. 
 		
-		The process monitor uses either the win32pdh module (windows systems) or the ps command line utility 
-		(unix systems) to obtain and log to file statistics on a given process as determined by the process id. 
-		Usage of the class is to create an instance specifying the process id, the logging interval and the log 
-		file. Once created, the process monitor is started and stopped via its L{start} and L{stop} methods. 
-		Process monitors are started as a separate thread, so control passes back to the caller of the start method 
-		immediately.
+		@param data: a dictionary whose keys are from L{ProcessMonitorKeys} 
+		and values are int, float or string values. 
 		
-		On windows systems, statistics obtained include the CPU usage (%), the working set (memory pages allocated), 
-		the virtual bytes (virtual address space including shared memory segments), the private bytes (virtual 
-		address space not including shared memory segments), the number of process threads and the number of 
-		handles. All memory values are quoted in KBytes and the CPU precentage represents the usage over all available 
-		processors. A CPU usage of 100% represents a single CPU fully utilized; it is therefore possible to obtain CPU 
-		usage figures of over 100% on multi-core processors. The format of the log file is tab separated, with 
-		timestamps used to denote the time each measurement was obtained, e.g. ::		
+		@param kwargs: Reserved for future use. 
+		"""
+		raise NotImplementedError('Not implemented yet')
+	
+	def cleanup(self):
+		"""
+		Called on a background thread to perform cleanup for this handler, 
+		for example closing file handles. 
+		"""
+		pass
+
+class TabSeparatedFileHandler(BaseProcessMonitorHandler):
+	"""A ProcessMonitor handler that writes values to a file with 
+	tab separated values (.tsv). 
+	
+	A new line is written every time the process monitor polls for a new sample 
+	of data. By default a header line starting with `#` is included at the 
+	start of the file to indicate the column headings. 
+	
+	If any value cannot be retrieved or is unavailable on this operating 
+	system, a -1 value will be written instead. 
+	"""
+	
+	DEFAULT_COLUMNS = [
+		ProcessMonitorKey.DATE_TIME, 
+		ProcessMonitorKey.CPU_CORE_UTILIZATION, 
+		ProcessMonitorKey.MEMORY_RESIDENT_KB,
+		ProcessMonitorKey.MEMORY_VIRTUAL_KB,
+		ProcessMonitorKey.MEMORY_PRIVATE_KB,
+		ProcessMonitorKey.THREADS,
+		ProcessMonitorKey.KERNEL_HANDLES
+		]
+	"""The default columns to write to the file.
+	
+	Additional columns may be added to the end of this list in future 
+	releases. 
+	
+	See L{setDefaults} if you wish to change the defaults.
+	"""
+	
+	DEFAULT_WRITE_HEADER_LINE = True
+	"""
+	Determines whether a header line prefixed 
+	by `#` will be written at the start of the file.
+
+	See L{setDefaults}.
+	"""
+	
+	@staticmethod
+	def setDefaults(columns, writeHeaderLine=None):
+		"""Static helper method for setting the default columns or 
+		writeHeaderLine setting for all tests that use the 
+		TabSeparatedFileHandler. 
 		
-			Time                    CPU   Working  Virtual  Private  Threads Handles
-			------------------------------------------------------------------------
-			09/16/08 14:20:44       80    125164   212948   118740   44      327
-			09/16/08 14:20:49       86    125676   213972   120128   44      328
-			09/16/08 14:20:54       84    125520   212948   119116   44      328
-			09/16/08 14:20:59       78    125244   212948   119132   44      328
+		This method could be called from a custom runner's 
+		L{pysys.baserunner.BaseRunner.setup} method in order to take effect 
+		for all tests. 
+		
+		Do not call this from within an individual testcase since that 
+		could cause unwanted interference between different testcases. 
+		
+		@param columns: A list of the colums to be included, using values from
+		L{ProcessMonitorKeys}. Since additional columns may be added to the end 
+		of L{DEFAULT_COLUMNS} in future releases, when calling this method you 
+		should specify all the columns you want explicitly including the 
+		current defaults rather than writing `DEFAULT_COLUMNS+[...]`. 
+		
+		@param writeHeaderLine: Specifies whether a header line beginning 
+		with `#` should be written at the start of the file. 
+		"""
+		if columns: TabSeparatedFileHandler.DEFAULT_COLUMNS = list(columns)
+		if writeHeaderLine != None: TabSeparatedFileHandler.DEFAULT_WRITE_HEADER_LINE = writeHeaderLine
+	
+	def __init__(self, file, columns=None, writeHeaderLine=None):
+		"""
+		@param file: An absolute path string or open file handle to which 
+		process monitor data lines will be written. 
+		
+		@param: An ordered list of the columns from L{ProcessMonitorKeys} that 
+		should be included in the file. If not specifed, the columns specified 
+		by L{DEFAULT_COLUMNS} will be used. 
+		
+		@param writeHeaderLine: Determines whether a header line prefixed 
+		by `#` will be written at the start of the file. If not overridden, the 
+		default is taken from L{DEFAULT_WRITE_HEADER_LINE}.
+		"""
+		self.columns = columns or self.DEFAULT_COLUMNS
+		if isstring(file):
+			assert os.path.isabs(file), 'File must be an absolute path: %s'%file
+			self.stream = openfile(file, 'w', encoding='utf-8')
+			self.__closeStream = True
+		else:
+			assert hasattr(file, 'write')
+			self.stream = file
+			self.__closeStream = False
 
+		if writeHeaderLine is None: writeHeaderLine = self.DEFAULT_WRITE_HEADER_LINE
+		if writeHeaderLine:
+			self.stream.write(u'#%s\n'%u'\t'.join(self.columns).replace(u' ',u'_'))
+		self.stream.flush()
+	
+	def handleData(self, data):
+		values = [data.get(k,None) for k in self.columns]
+		line = u'\t'.join([
+			(str(d) if d is not None else u'-1')
+			for d in values])
+		self.stream.write(line)
+		self.stream.write(u'\n')
+		self.stream.flush()
+	
+	def cleanup(self):
+		if self.__closeStream: self.stream.close()
 
-		On unix systems, statistics obtained include the CPU usage (%), the resident memory (via the rss format specifier
-		to ps), and the virtual memory (via the vsz format spepcifier to ps). All memory values are quoted in KBytes and 
-		the CPU precentage represents the usage over all available processors. A CPU usage of 100% represents a single 
-		CPU fully utilized; it is therefore possible to obtain CPU usage figures of over 100% on multi-core processors. 
-		The format of the log file is tab separated, with timestamps used to denote the time each measurement was obtained, 
-		e.g. ::		
+class BaseProcessMonitor(object):
+	"""Process monitor for gathering statistics such as CPU and memory usage 
+	from a running process using a background thread. 
+	
+	For detail on the available statistic keys see L{ProcessMonitorKeys}.
+	
+	The most convenient way to start the default process monitor for this 
+	operating system is to use L{pysys.basetest.BaseTest.startProcessMonitor}.
+	
+	You can create a custom subclass if you need to add support for a new OS 
+	or return additional monitoring statistics.  
 
-			Time                    CPU        Resident  Virtual
-			----------------------------------------------------
-			09/16/08 14:24:10       69.5       89056     1421672
-			09/16/08 14:24:20       73.1       101688    1436804
-			09/16/08 14:24:30       82.9       102196    1436516
-			09/16/08 14:24:40       89.1       102428    1436372
-			09/16/08 14:24:50       94.2       104404    1438420
+	The process monitor uses either the win32pdh module (on Windows) or the 
+	`ps` command line utility (Unix systems) to obtain statistics on a given 
+	process. Monitors are automatically terminated during cleanup at the end 
+	of a test, or can be manually stopped before that using the L{stop} method. 
+	
+	Both windows and unix operating systems support the numProcessors argument in the variable argument list in order 
+	to normalise the CPU statistics gathered by the number of available CPUs.
 
-
-		Both windows and unix operating systems support the numProcessors argument in the variable argument list in order 
-		to normalise the CPU statistics gathered by the number of available CPUs.
-
+	"""
+	
+	def __init__(self, owner, process, interval, handlers, **kwargs):
+		"""Construct an instance of the process monitor.
+		
+		@param pid: The process id to monitor
+		@param interval:  The interval in seconds to record the process statistics
+		
+		@param kwargs: Keyword arguments to allow parameterization of the 
+		returned data. An exception will be raised for any arguments not 
+		expected by this class. 
 		"""
 		
-		def __init__(self, pid, interval, file=None, process=None, **kwargs):
-			"""Construct an instance of the process monitor.
-			
-			@param pid: The process id to monitor
-			@param interval:  The interval in seconds to record the process statistics
-			@param file: The full path to the file to log the process statistics
-			@param kwargs: Keyword arguments to allow platform specific configurations	
-			
-			"""
-			self.pid = pid
-			self.interval = interval
-			if file:
-				self.file = open(file, 'w')
-			else:	
-				self.file = sys.stdout
-			
-			# normalise the CPU readings by the supplied factor
-			self.numProcessors=1
-			if "numProcessors" in kwargs: 
-				self.numProcessors = int(kwargs["numProcessors"])
-			self.process = process
-					
-								
-		def __win32GetInstance(self, pid, bRefresh=0):
-			# convert a pid to the (processname, instancecounter) that the PDH API uses to identify processes
-			
-			if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
+		# NB: this could be subclassed to support different platforms and/or add extra 
+		# data
 		
-			# get the list of processes running
-			log.debug('win32pdh.EnumObjectItems - getting process list')
-			counters, instances = win32pdh.EnumObjectItems(None, None, "Process", -1)
-			log.debug('win32pdh.EnumObjectItems - returned %d processes', len(instances))
-			
-			# convert to a dictionary of process instance, to number of instances
-			instanceDict = {}
-			for i in instances:
-				try: instanceDict[i] = instanceDict[i] + 1
-				except KeyError: instanceDict[i] = 0
+		self.pid = process.pid # just for compatibility
+		self.interval = interval
+		
+		# normalise the CPU readings by the supplied factor
+		self.numProcessors=1
+		if "numProcessors" in kwargs: 
+			self.numProcessors = int(kwargs.pop("numProcessors"))
+		assert not kwargs, 'Unknown process monitor options: %s'%kwargs.keys()
+		
+		self.process = process
+		self.owner = owner
+		
+		assert handlers
+		self.handlers = handlers
+		"""The list of handlers that will be notified each time the process 
+		is polled for new data. """
+		
+		self.thread = None
+		
+	def start(self):
+		"""
+		Called on the main test thread to start monitoring in the background. 
+		
+		Performs any required initialization of data structures then 
+		starts the background thread. 
+		"""
+		# executed on main thread - the best place to perform initial setup so we 
+		# get an immediate error if it fails
+		self.thread = self.owner.startBackgroundThread('ProcessMonitor.%s'%self.process, self.__backgroundThread)
+	
+	def _preprocessData(self, data):
+		""" Called in the background thread with the data dictionary from 
+		each poll of the process, to allow pre-processing and addition of 
+		derived data keys. 
+		
+		@param data: The dictionary of process monitoring data. This method 
+		may add or modify the contents of this dictionary. 
+		
+		"""
+		
+		datetime = time.gmtime(time.time())
+		data[ProcessMonitorKey.DATE_TIME] = time.strftime("%Y-%m-%d %H:%M:%S", datetime)
+		data[ProcessMonitorKey.DATE_TIME_LEGACY] = time.strftime(
+			"%d/%m/%y %H:%M:%S" if IS_WINDOWS else "%m/%d/%y %H:%M:%S", datetime)
+		
+		# TODO: add normalization of CPU cores
+		pass
+	
+	def __backgroundThread(self, log, stopping):
+		sample = 1
+		try:
+			while not stopping.is_set():
+				d = self._getData(sample)
+				assert d, 'No data returned'
 				
-			# loop through to locate the instance and inum of the supplied pid
-			instance = None
-			inum = -1
-			for instance, numInstances in list(instanceDict.items()):
-				for inum in range(numInstances+1):
-					try:
-						value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")
-						if value == pid:
-							log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', pid, instance, inum)
-							return instance, inum
-					except Exception as ex:
-						log.debug('__win32GetInstance: failed to get process id for %s: %s', instance, ex)
-			
-			log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', pid, instance, inum)
-			raise Exception('Could not find running process %d'%pid)
+				d[ProcessMonitorKey.SAMPLE] = sample
+				self._preprocessData(d)
+				
+				for h in self.handlers:
+					h.handleData(d)
+				sample += 1
+				stopping.wait(self.interval)
+		except Exception as ex:
+			if not self.process.running():
+				log.debug('Ignoring process monitor error as the monitored process %s has already terminated: %s', self.process, ex)
+			else:
+				raise
+		finally:
+			log.debug('Calling cleanup on process monitor handler(s)')
+			try:
+				for l in self.handlers:
+					if hasattr(l, 'cleanup'): l.cleanup()
+			finally:
+				self._cleanup()
 
-		def __win32getProfileAttribute(self, object, instance, inum, counter):
-			# make the path, open and collect the query
-			path = win32pdh.MakeCounterPath((None, object, instance, None, inum, counter))
-			query = win32pdh.OpenQuery()
+	def running(self):
+		"""Return the running status of the process monitor.
+		
+		@return: True if the process monitor background thread is still running. 
+		@rtype: bool
+		"""
+		return self.thread.is_alive()
+
+	
+	def stop(self):
+		"""Request the process monitor thread to terminate.
+		
+		Does not wait for the termination to complete. 
+		
+		"""
+		self.thread.stop()
+
+	# for implementation by subclasses
+
+	def _getData(self, sample):
+		"""Implement gathering of latest monitoring data. 
+		
+		Called on the background monitoring thread regularly.
+		
+		@param sample: An integer starting at 1 and incrementing each time 
+		this method is called. 
+		
+		@return: A dictionary of (typically numeric) values, keyed by 
+		L{ProcessMonitorKey}.
+		@rtype: dict
+		"""
+		raise NotImplementedError('_getData is not implemented yet')
+
+	def _cleanup(self):
+		"""Perform implementation-specific cleanup. 
+		
+		Called on the background monitoring thread when the monitor is stopping. 
+		
+		"""
+		pass
+
+		
+class WindowsProcessMonitor(BaseProcessMonitor):
+	"""
+	Windows implementation of the process monitor. 
+	"""
+	
+	def start(self):
+		# get the instance and instance number for this process id
+		try:
+			processInstanceName, processInstanceIndex = self.__win32GetInstance()
+		except Exception as ex: # happens occasionally for no good reason
+			log.debug('__win32GetInstance failed, will retry in case it was transient: %s', ex)
+			time.sleep(1)
+			processInstanceName, processInstanceIndex = self.__win32GetInstance()
+		
+		# create the process performance counters
+		self._perfCounters={} # key=name, value=counter object
+		process_query=win32pdh.OpenQuery()
+		try:
+			for counter in self._getPerfCounters():
+				path = win32pdh.MakeCounterPath( (None, "Process", processInstanceName, None, processInstanceIndex, counter) )
+				self._perfCounters[counter] = win32pdh.AddCounter(process_query, path)
+		except Exception:
+			win32pdh.CloseQuery(process_query)
+		
+		# this will be dealt with in cleanup
+		self._perfQuery = process_query
+		
+		BaseProcessMonitor.start(self)
+
+	def _cleanup(self):
+		win32pdh.CloseQuery(self._perfQuery)
+
+	def __win32GetInstance(self):
+		# used during startup to convert a pid to the (processInstanceName, processInstanceIndex) tuple that the PDH API uses to identify processes
+		
+		log.debug('WindowsProcessMonitor: enumerating processes')
+		
+		# EnumObjectItems just returns whatever data was retrieved by EnumObjects so must call this first
+		bRefresh = True
+		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
+	
+		# get the list of running processes
+		log.debug('win32pdh.EnumObjectItems - getting process list')
+		counters, instances = win32pdh.EnumObjectItems(None, None, "Process", -1)
+		log.debug('win32pdh.EnumObjectItems - returned %d processes', len(instances))
+
+		log.debug('WindowsProcessMonitor: finding process')
+		
+		# convert to a dictionary of process instance, to number of instances
+		instanceDict = {}
+		for i in instances:
+			try: instanceDict[i] = instanceDict[i] + 1
+			except KeyError: instanceDict[i] = 0
+			
+		# loop through to locate the instance and inum of the supplied pid
+		instance = None
+		inum = -1
+		for instance, numInstances in list(instanceDict.items()):
+			for inum in range(numInstances+1):
+				try:
+					value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")
+					if value == self.process.pid:
+						log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.process.pid, instance, inum)
+						return instance, inum
+				except Exception as ex:
+					log.debug('__win32GetInstance: failed to get process id for %s: %s', instance, ex)
+		
+		log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.process.pid, instance, inum)
+		raise Exception('Could not find running process %r'%self.process)
+
+	def __win32getProfileAttribute(self, object, instance, inum, counter):
+		# used during startup to get the pid
+		
+		# make the path, open and collect the query
+		path = win32pdh.MakeCounterPath((None, object, instance, None, inum, counter))
+		query = win32pdh.OpenQuery()
+		try:
 			hcounter = win32pdh.AddCounter(query, path)
 			win32pdh.CollectQueryData(query)
 			
 			# format the counter value
 			value = None
 			try:
-				value =	 win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LONG)[1]  
-			except Exception:
+				value =	 win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LONG)[1] # TODO: use LARGE?
+			except Exception: # TODO: surely we can't tolerate this happening?
 				pass
 			
-			# tidy up and return the value
+			# remove counter just to be on safe side, but CloseQuery should do it
 			win32pdh.RemoveCounter(hcounter)
-			win32pdh.CloseQuery(query)
+			
 			return value
+		finally:
+			win32pdh.CloseQuery(query)
 
-
-		def __win32LogProfile(self, instance, inum, interval, file):
-			try:
-				# create the process performance counters
-				process_counters=[]
-				process_query=win32pdh.OpenQuery()
-				for counter in "% Processor Time", "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count":
-					path = win32pdh.MakeCounterPath( (None, "Process", instance, None, inum, counter) )
-					process_counters.append(win32pdh.AddCounter(process_query, path))
-				
-				def collectData():
-					retries = 10
-					while True:
-						retries -= 1
-						try:
-							win32pdh.CollectQueryData(process_query)
-							return
-						except Exception:
-							if retries == 0: 
-								raise
-							if not self.process.running(): return
-							time.sleep(1)
-						
-				collectData()
-				
-				# perform the continual data collection until the thread is no longer active
-				data = [0]*(len(process_counters))	
-				try:
-					while self.active:
-						collectData()
-			
-						for i in range(len(process_counters)):
-							try:
-								data[i] = win32pdh.GetFormattedCounterValue(process_counters[i], win32pdh.PDH_FMT_LARGE)[1]
-							except win32api.error:
-								data[i] = -1
-					
-						currentTime = time.strftime("%d/%m/%y %H:%M:%S", time.gmtime(time.time()))
-						file.write( "%s\t%s\t%d\t%d\t%d\t%d\t%d\n" % (currentTime, data[0]//self.numProcessors, float(data[1])/1024,
-																  float(data[2])/1024, float(data[3])/1024, float(data[4]), float(data[5])))
-						file.flush()
-						time.sleep(interval)
-				finally:
-					# clean up
-					for c in process_counters:
-						win32pdh.RemoveCounter(c)
-					win32pdh.CloseQuery(process_query)
-					if file != sys.stdout: file.close()
-					self.active = 0
-			except Exception:
-				if self.process and not self.process.running():
-					return
-				raise
-
-		def running(self):
-			"""Return the running status of the process monitor.
-			
-			@return: The running status (True | False)
-			@rtype: integer
-			"""
-			return self.active
-
-		
-		def start(self):
-			"""Start the process monitor.
-			
-			"""
-			self.active = 1
-			
-			# get the instance and instance number for this process id
-			try:
-				instance, inum = self.__win32GetInstance(pid=self.pid, bRefresh=1)
-			except Exception: # happens occasionally for no good reason
-				time.sleep(1)
-				instance, inum = self.__win32GetInstance(pid=self.pid, bRefresh=1)
-			
-			
-			# log the stats in a separate thread
-			t = threading.Thread(target=self.__win32LogProfile, args=(instance, inum, self.interval, self.file))
-			t.start()
-
-		def stop(self):
-			"""Stop the process monitor.
-			
-			"""
-			self.active = 0
-else: # non-Windows
-	class ProcessMonitor(object):
-		"""Process monitor for the logging of process statistics.
-		
-		The process monitor uses either the win32pdh module (windows systems) or the ps command line utility 
-		(unix systems) to obtain and log to file statistics on a given process as determined by the process id. 
-		Usage of the class is to create an instance specifying the process id, the logging interval and the log 
-		file. Once created, the process monitor is started and stopped via its L{start} and L{stop} methods. 
-		Process monitors are started as a separate thread, so control passes back to the caller of the start method 
-		immediately.
-		
-		On windows systems, statistics obtained include the CPU usage (%), the working set (memory pages allocated), 
-		the virtual bytes (virtual address space including shared memory segments), the private bytes (virtual 
-		address space not including shared memory segments), the number of process threads and the number of 
-		handles. All memory values are quoted in KBytes and the CPU precentage represents the usage over all available 
-		processors. A CPU usage of 100% represents a single CPU fully utilized; it is therefore possible to obtain CPU 
-		usage figures of over 100% on multi-core processors. The format of the log file is tab separated, with 
-		timestamps used to denote the time each measurement was obtained, e.g. ::		
-		
-			Time                    CPU   Working  Virtual  Private  Threads Handles
-			------------------------------------------------------------------------
-			09/16/08 14:20:44       80    125164   212948   118740   44      327
-			09/16/08 14:20:49       86    125676   213972   120128   44      328
-			09/16/08 14:20:54       84    125520   212948   119116   44      328
-			09/16/08 14:20:59       78    125244   212948   119132   44      328
-
-
-		On unix systems, statistics obtained include the CPU usage (%), the resident memory (via the rss format specifier
-		to ps), and the virtual memory (via the vsz format spepcifier to ps). All memory values are quoted in KBytes and 
-		the CPU precentage represents the usage over all available processors. A CPU usage of 100% represents a single 
-		CPU fully utilized; it is therefore possible to obtain CPU usage figures of over 100% on multi-core processors. 
-		The format of the log file is tab separated, with timestamps used to denote the time each measurement was obtained, 
-		e.g. ::		
-
-			Time                    CPU        Resident  Virtual
-			----------------------------------------------------
-			09/16/08 14:24:10       69.5       89056     1421672
-			09/16/08 14:24:20       73.1       101688    1436804
-			09/16/08 14:24:30       82.9       102196    1436516
-			09/16/08 14:24:40       89.1       102428    1436372
-			09/16/08 14:24:50       94.2       104404    1438420
-
-
-		Both windows and unix operating systems support the numProcessors argument in the variable argument list in order 
-		to normalise the CPU statistics gathered by the number of available CPUs.
-
+	def _getPerfCounters(self):
+		""" Get the list of string counter names to be monitored. These are passed to PdhMakeCounterPath. 
 		"""
-			
-		def __init__(self, pid, interval, file=None, **kwargs):
-			"""Construct an instance of the process monitor.
-			
-			@param pid: The process id to monitor
-			@param interval:  The interval in seconds to record the process statistics
-			@param file: The full path to the file to log the process statistics
-			@param kwargs: Keyword arguments to allow platform specific configurations
-			
-			"""
-			self.pid = pid
-			self.interval = interval
-			if file:
-				self.file = open(file, 'w')
-			else:	
-				self.file = sys.stdout		
-		
-			# normalise the CPU readings by the supplied factor
-			self.numProcessors=1
-			if "numProcessors" in kwargs: 
-				self.numProcessors = int(kwargs["numProcessors"])
-			
-			
-		def __findChildren(self, psList, parentPid):
-			children = []
-			children.append(int(parentPid))
-			
-			for i in range(1, len(psList)):
-				pid = int(psList[i].split()[0])
-				ppid = int(psList[i].split()[1])
-				if ppid == parentPid:
-					children[len(children):] = self.__findChildren(psList, pid)
-					
-			return children
+		return ["% Processor Time", "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count"]
 
-
-		def __linuxLogProfile(self, pid, interval, file, includeChildren=True):
-			# sleep - fixes weird problem of thread hanging?
-			time.sleep(1)
-			
-			# get the child process tree for this process
-			if (includeChildren):
-				fp = os.popen("ps -o pid,ppid")
-				psList = fp.readlines()
-				fp.close()
-				pidTree = self.__findChildren(psList, pid)
-			else:
-				pidTree = [pid]
-			
-			# perform the repeated collection of data for the profile. 
+	def __getPerfCounterValues(self):
+		""" Get a dictionary containing the formatted counter values.
+		"""
+		retries = 10
+		while True:
+			retries -= 1
 			try:
-				while self.active:
-					data = [0, 0, 0]
-					fp = os.popen("ps -o pid,pcpu,rss,vsz")
-					info = fp.readlines()
-					fp.close()
-					
-					for i in range(1, len(info)):
-						if int(info[i].split()[0]) in pidTree:
-							data[0] = data[0] + float(info[i].split()[1])
-							data[1] = int(info[i].split()[2])
-							data[2] = int(info[i].split()[3])
-		
-					currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
-					file.write( "%s\t%f\t%d\t%d\n" % (currentTime, float(data[0])/self.numProcessors, data[1], data[2]) )
-					file.flush()
-					time.sleep(interval)
-		
-				# clean up			
-			finally:
-				if file != sys.stdout: file.close()
-				self.active = 0
-
-
-		def __solarisLogProfile(self, pid, interval, file):	
-			# perform the repeated collection of data for the profile. 
-			data = [-1, -1, -1]
+				win32pdh.CollectQueryData(self._perfQuery)
+				break
+			except Exception as ex:
+				if retries == 0: 
+					raise
+				if not self.process.running(): raise
+				log.debug('WindowsProcessMonitor: retrying getting perf counter values (%d remaining) after error: %s', retries, ex)
+				time.sleep(1)
+				
+		data = {}
+		for key, counter in self._perfCounters.items():
 			try:
-				while self.active:
-					try:
-						fp = os.popen("ps -p %s -o pcpu,rss,vsz" % (pid))
-						info = fp.readlines()[1]
-						for i in range(len(data)):
-							data[i] = info[i].split()
-						fp.close()
-					except Exception:
-						fp.close()
-					currentTime = time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(time.time()))
-					file.write( "%s\t%s\t%s\t%s\n" % (currentTime, float(data[0])/self.numProcessors, data[1], data[2]) )
-					file.flush()
-					time.sleep(interval)
-			finally:
-				if file != sys.stdout: file.close()
-				self.active = 0
-
-
-		# public methods to start and stop a process monitor thread
-		def running(self):
-			"""Return the running status of the process monitor.
-			
-			@return: The running status (True | False)
-			@rtype: integer
-			"""
-			return self.active
+				data[key] = win32pdh.GetFormattedCounterValue(counter, win32pdh.PDH_FMT_LARGE)[1]
+			except win32api.error:
+				data[key] = None
+		return data
 		
+	def _perfCountersToData(self, counterValues):
+		data = {}
+		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = counterValues['% Processor Time']
 		
-		def start(self):
-			"""Start the process monitor.
-			
-			"""
-			self.active = 1
-			
-			if PLATFORM == 'sunos':
-				t = threading.Thread(target=self.__solarisLogProfile, args=(self.pid, self.interval, self.file))
-			else:
-				t = threading.Thread(target=self.__linuxLogProfile, args=(self.pid, self.interval, self.file))
-			t.start()
-			
+		# the values are all 64-bit integers
+		
+		v = counterValues.get('Working Set',None)
+		if v is not None: v = v//1024
+		data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = v
 
+		v = counterValues.get('Virtual Bytes',None)
+		if v is not None: v = v//1024
+		data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = v
+		
+		v = counterValues.get('Private Bytes',None)
+		if v is not None: v = v//1024
+		data[ProcessMonitorKey.MEMORY_PRIVATE_KB] = v
+		
+		data[ProcessMonitorKey.THREADS] = counterValues['Thread Count']
+		data[ProcessMonitorKey.KERNEL_HANDLES] = counterValues['Handle Count']
+		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = counterValues['% Processor Time']
+		return data
 
-		def stop(self):
-			"""Stop the process monitor.
+	def _getData(self, sample):
+		if sample == 1:
+			# some keys such as processor time do not work until the 2nd time
+			self.__getPerfCounterValues()
+		return self._perfCountersToData(self.__getPerfCounterValues())
+
+class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
+	def _getData(self, sample):
+		with process_lock:
+			with os.popen("ps -p %s -o pcpu,rss,vsz" % (self.process.pid)) as fp:
+				# skip header line
+				info = fp.readlines()[1].strip()
+				return {
+					ProcessMonitorKeys.CPU_CORE_UTILIZATION: float(info[0]),
+					ProcessMonitorKeys.MEMORY_RESIDENT_KB:   float(info[1]),
+					ProcessMonitorKeys.MEMORY_VIRTUAL_KB:    float(info[2]),
+				}
+
+class LinuxProcessMonitor(BaseProcessMonitor):
+	# also used for macos darwin
+	
+	INCLUDE_CHILD_PROCESSES = True
+	"""
+	Configuration option that specifies whether the LinuxProcessMonitor 
+	will include the children of the specified process (that is, child 
+	processes that exist at the point when the process monitor starts). 
+	Note that other process monitors on other platforms currently do not 
+	support this. 
+	"""
+	
+	def start(self):
+		# get the child process tree for this process
+		if (self.INCLUDE_CHILD_PROCESSES):
+			with process_lock:
+				with os.popen("ps -o pid,ppid") as fp:
+					psList = fp.readlines()
+			self._pidTree = self.__findChildren(psList, self.process.pid)
+		else:
+			self._pidTree = [self.process.pid]
+
+		BaseProcessMonitor.start(self)
+	
+	def __findChildren(self, psList, parentPid):
+		children = []
+		children.append(int(parentPid))
+		
+		for i in range(1, len(psList)):
+			pid = int(psList[i].split()[0])
+			ppid = int(psList[i].split()[1])
+			if ppid == parentPid:
+				children[len(children):] = self.__findChildren(psList, pid)
+				
+		return children
+
+	def _getData(self, sample):
+		with process_lock:
+			with os.popen("ps -o pid,pcpu,rss,vsz") as fp: 
+				info = fp.readlines()
 			
-			"""
-			self.active = 0
+			data = {
+				ProcessMonitorKeys.CPU_CORE_UTILIZATION: 0,
+				ProcessMonitorKeys.MEMORY_RESIDENT_KB: 0,
+				ProcessMonitorKeys.MEMORY_VIRTUAL_KB: 0,
+			}
+			for i in range(1, len(info)):
+				if int(info[i].split()[0]) in pidTree:
+					thisdata = info[i].split()
+					data[ProcessMonitorKeys.CPU_CORE_UTILIZATION] = data[ProcessMonitorKeys.CPU_CORE_UTILIZATION] + float(thisdata[1])
+					
+					# TODO: this looks like a bug - why are we setting it to an absolute value rather than accumulating for all child processes?
+					data[ProcessMonitorKeys.MEMORY_RESIDENT_KB] = int(thisdata[2])
+					data[ProcessMonitorKeys.MEMORY_VIRTUAL_KB] = int(thisdata[3])
+			return data
 			
+if PLATFORM=='win32':
+	ProcessMonitor = WindowsProcessMonitor
+	"""Specifies the L{BaseProcessMonitor} subclass to be used for the current platform. """
+elif PLATFORM=='sunos':
+	ProcessMonitor = SolarisProcessMonitor
+else:
+	ProcessMonitor = LinuxProcessMonitor
