@@ -353,7 +353,7 @@ class BaseProcessMonitor(object):
 		data[ProcessMonitorKey.DATE_TIME_LEGACY] = time.strftime(
 			"%d/%m/%y %H:%M:%S" if IS_WINDOWS else "%m/%d/%y %H:%M:%S", datetime)
 		
-		if data.get(ProcessMonitorKey.CPU_CORE_UTILIZATION,None):
+		if data.get(ProcessMonitorKey.CPU_CORE_UTILIZATION,None) is not None:
 
 			data[ProcessMonitorKey.CPU_TOTAL_UTILIZATION] = int(data[ProcessMonitorKey.CPU_CORE_UTILIZATION] / self._cpuCount)
 			
@@ -603,9 +603,9 @@ class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
 				# skip header line
 				info = fp.readlines()[1].strip()
 				return {
-					ProcessMonitorKeys.CPU_CORE_UTILIZATION: float(info[0]),
-					ProcessMonitorKeys.MEMORY_RESIDENT_KB:   float(info[1]),
-					ProcessMonitorKeys.MEMORY_VIRTUAL_KB:    float(info[2]),
+					ProcessMonitorKey.CPU_CORE_UTILIZATION: float(info[0]),
+					ProcessMonitorKey.MEMORY_RESIDENT_KB:   float(info[1]),
+					ProcessMonitorKey.MEMORY_VIRTUAL_KB:    float(info[2]),
 				}
 
 class LinuxProcessMonitor(BaseProcessMonitor):
@@ -650,18 +650,24 @@ class LinuxProcessMonitor(BaseProcessMonitor):
 				info = fp.readlines()
 			
 			data = {
-				ProcessMonitorKeys.CPU_CORE_UTILIZATION: 0,
-				ProcessMonitorKeys.MEMORY_RESIDENT_KB: 0,
-				ProcessMonitorKeys.MEMORY_VIRTUAL_KB: 0,
+				ProcessMonitorKey.CPU_CORE_UTILIZATION: 0,
+				ProcessMonitorKey.MEMORY_RESIDENT_KB: 0,
+				ProcessMonitorKey.MEMORY_VIRTUAL_KB: 0,
 			}
+			gotdata = False
 			for i in range(1, len(info)):
-				if int(info[i].split()[0]) in pidTree:
+				if int(info[i].split()[0]) in self._pidTree:
+					gotdata = True
 					thisdata = info[i].split()
-					data[ProcessMonitorKeys.CPU_CORE_UTILIZATION] = data[ProcessMonitorKeys.CPU_CORE_UTILIZATION] + float(thisdata[1])
+					data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = data[ProcessMonitorKey.CPU_CORE_UTILIZATION] + float(thisdata[1])
 					
 					# TODO: this looks like a bug - why are we setting it to an absolute value rather than accumulating for all child processes?
-					data[ProcessMonitorKeys.MEMORY_RESIDENT_KB] = int(thisdata[2])
-					data[ProcessMonitorKeys.MEMORY_VIRTUAL_KB] = int(thisdata[3])
+					data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = int(thisdata[2])
+					data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = int(thisdata[3])
+			
+			# make sure we don't keep returning 0 values once process has terminated
+			if not gotdata: raise Exception('No matching processes found from ps')
+
 			return data
 			
 if PLATFORM=='win32':
