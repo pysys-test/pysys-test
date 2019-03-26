@@ -27,7 +27,7 @@ information to a file.
 """
 
 
-import os, sys, string, time, threading, logging
+import os, sys, string, time, threading, logging, multiprocessing
 from pysys import process_lock
 from pysys.constants import *
 from pysys.utils.pycompat import *
@@ -55,7 +55,8 @@ class ProcessMonitorKey(object):
 	"""CPU utilization % scaled by the number of cores so that 100% indicates 
 	full use of one core, 200% indicates full use of two cores, etc. 
 	
-	The maximum value is the number of CPU cores times 100. 
+	The maximum value is 100 multiplied by the number of CPU cores 
+	(as given by `multiprocessing.cpu_count()`). 
 	"""
 
 	CPU_TOTAL_UTILIZATION = 'CPU total %'
@@ -165,9 +166,6 @@ class TabSeparatedFileHandler(BaseProcessMonitorHandler):
 		ProcessMonitorKey.CPU_CORE_UTILIZATION, 
 		ProcessMonitorKey.MEMORY_RESIDENT_KB,
 		ProcessMonitorKey.MEMORY_VIRTUAL_KB,
-		ProcessMonitorKey.MEMORY_PRIVATE_KB,
-		ProcessMonitorKey.THREADS,
-		ProcessMonitorKey.KERNEL_HANDLES
 		]
 	"""The default columns to write to the file.
 	
@@ -224,6 +222,7 @@ class TabSeparatedFileHandler(BaseProcessMonitorHandler):
 		default is taken from L{DEFAULT_WRITE_HEADER_LINE}.
 		"""
 		self.columns = columns or self.DEFAULT_COLUMNS
+		assert file, 'file must be specified'
 		if isstring(file):
 			assert os.path.isabs(file), 'File must be an absolute path: %s'%file
 			self.stream = openfile(file, 'w', encoding='utf-8')
@@ -305,6 +304,7 @@ class BaseProcessMonitor(object):
 		"""The pid to be monitored. """
 
 		self.owner = owner
+		"""The test object that owns this monitor. """
 		
 		assert handlers
 		self.handlers = handlers
@@ -312,6 +312,18 @@ class BaseProcessMonitor(object):
 		is polled for new data. """
 		
 		self.thread = None
+		"""
+		The background thread that responsible for monitoring the process. 
+		"""
+		
+		try:
+			self._cpuCount = multiprocessing.cpu_count()
+			"""The count of available CPU cores on this host, used 
+			for scaling up the CPU_TOTAL_UTILIZATION. 
+			"""
+		except Exception as ex:
+			log.debug('Failed to get multiprocessing.cpu_count: %s', ex)
+			self._cpuCount = 1
 		
 	def start(self):
 		"""
@@ -339,9 +351,13 @@ class BaseProcessMonitor(object):
 		data[ProcessMonitorKey.DATE_TIME_LEGACY] = time.strftime(
 			"%d/%m/%y %H:%M:%S" if IS_WINDOWS else "%m/%d/%y %H:%M:%S", datetime)
 		
-		if self.__numProcessors > 1 and data.get(ProcessMonitorKey.CPU_CORE_UTILIZATION,None):
-			# undocumented, for compatibility only
-			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = data[ProcessMonitorKey.CPU_CORE_UTILIZATION] / self.__numProcessors
+		if data.get(ProcessMonitorKey.CPU_CORE_UTILIZATION,None):
+
+			data[ProcessMonitorKey.CPU_TOTAL_UTILIZATION] = int(data[ProcessMonitorKey.CPU_CORE_UTILIZATION] / self._cpuCount)
+			
+			if self.__numProcessors > 1:
+				# undocumented, for compatibility only
+				data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = data[ProcessMonitorKey.CPU_CORE_UTILIZATION] / self.__numProcessors
 	
 	def __backgroundThread(self, log, stopping):
 		sample = 1
