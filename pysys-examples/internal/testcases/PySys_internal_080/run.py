@@ -5,12 +5,8 @@ from pysys.basetest import BaseTest
 class PySysTest(BaseTest):
 
 	def execute(self):
-		with open(self.output+'/wait.py', 'w') as f:
-			# spin, trying to use about 100% of a cpu
-			f.write('import time\ntime.sleep(5)\nwhile True: pass')
 		p = self.startProcess(command=sys.executable,
-						  arguments = [self.output+'/wait.py'],
-						  environs = dict(os.environ),
+						  arguments = [self.input+'/spinner.py'],
 						  stdout = "%s/test.out" % self.output,
 						  stderr = "%s/test.err" % self.output,
 						  state=BACKGROUND)
@@ -39,4 +35,4 @@ class PySysTest(BaseTest):
 		self.assertThat('%d >= 4', len(line)) # 4 columns on unix, more on windows
 		for i in range(len(line)):
 			if i > 0: # apart from the first column, every header should be a valid float or int
-				self.assertThat('float(%s) or True', repr(line[i]))
+				self.assertThat('float(%s) or True', repr(line[i])) # would raise an exception if not a float
