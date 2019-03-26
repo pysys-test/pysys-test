@@ -509,16 +509,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 			win32pdh.CollectQueryData(query)
 			
 			# format the counter value
-			value = None
-			try:
-				value =	 win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LONG)[1] # TODO: use LARGE?
-			except Exception: # TODO: surely we can't tolerate this happening?
-				pass
-			
-			# remove counter just to be on safe side, but CloseQuery should do it
-			win32pdh.RemoveCounter(hcounter)
-			
-			return value
+			return win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LARGE)[1]
 		finally:
 			win32pdh.CloseQuery(query)
 
