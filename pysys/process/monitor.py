@@ -514,7 +514,12 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 			win32pdh.CloseQuery(query)
 
 	def _getPerfCounters(self):
-		""" Get the list of string counter names to be monitored. These are passed to PdhMakeCounterPath. 
+		""" Get the list of string counter names to be monitored. 
+		
+		These are passed to PdhMakeCounterPath. 
+		
+		Override this and L{_perfCountersToData} if you wish to monitor additional 
+		performance counters. 
 		"""
 		return ["% Processor Time", "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count"]
 
@@ -543,6 +548,12 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		return data
 		
 	def _perfCountersToData(self, counterValues):
+		"""
+		Converts a dictionary of integer values keyed by pdh performance counter 
+		name to a dictionary of values keyed by L{ProcessMonitorKey}. 
+		
+		Also performs any required unit conversions. 
+		"""
 		data = {}
 		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = counterValues['% Processor Time']
 		
