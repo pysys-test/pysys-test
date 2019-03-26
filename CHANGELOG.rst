@@ -116,6 +116,12 @@ Changes affecting compatibility
            ProcessMonitorKey.MEMORY_VIRTUAL_KB,
         ], writeHeaderLine=False)
 
+  Also note that the numProcessors keyword argument to ProcessMonitor is 
+  deprecated. For now it can still be used to scale down the 
+  CPU_CORE_UTILIZATION value but it is no longer documented and may be 
+  removed in a future release. Use CPU_TOTAL_UTILIZATION if you wish to see 
+  total CPU usage across all cores. 
+
 New features
 ------------
 

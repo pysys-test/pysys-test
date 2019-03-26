@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 						  stderr = "%s/test.err" % self.output,
 						  state=BACKGROUND)
 		pm = self.startProcessMonitor(p, interval=0.1, file='monitor.tsv')
-		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.tsv', numProcessors=10)
+		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.tsv', numProcessors='10')
 
 
 		pidmonitor = self.startProcessMonitor(p.pid, interval=0.1, file=self.output+'/monitor-pid.tsv')
@@ -33,6 +33,9 @@ class PySysTest(BaseTest):
 						  
 		
 	def validate(self):
+		self.logFileContents('monitor.tsv')
+		self.logFileContents('monitor-numproc.tsv')
+	
 		with open(self.output+'/monitor.tsv') as f:
 			header = f.readline()
 			f.readline() # ignore first line of results

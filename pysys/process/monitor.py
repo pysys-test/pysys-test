@@ -266,10 +266,6 @@ class BaseProcessMonitor(object):
 	`ps` command line utility (Unix systems) to obtain statistics on a given 
 	process. Monitors are automatically terminated during cleanup at the end 
 	of a test, or can be manually stopped before that using the L{stop} method. 
-	
-	Both windows and unix operating systems support the numProcessors argument in the variable argument list in order 
-	to normalise the CPU statistics gathered by the number of available CPUs.
-
 	"""
 	
 	def __init__(self, owner, process, interval, handlers, **pmargs):
@@ -294,11 +290,12 @@ class BaseProcessMonitor(object):
 		
 		self.interval = interval
 		
-		# normalise the CPU readings by the supplied factor
-		self.numProcessors=1
+		# since 1.4.0 this is deprecated/undocumented, but keep it around 
+		# for compatibility
+		self.__numProcessors=1
 		if "numProcessors" in pmargs: 
-			self.numProcessors = int(pmargs.pop("numProcessors"))
-		self.pmargs = pmargs
+			self.__numProcessors = int(pmargs.pop("numProcessors"))
+		
 		assert not pmargs, 'Unknown process monitor options: %s'%pmargs.keys()
 
 		self.process = None if isinstance(process, int) else process
@@ -329,8 +326,8 @@ class BaseProcessMonitor(object):
 	
 	def _preprocessData(self, data):
 		""" Called in the background thread with the data dictionary from 
-		each poll of the process, to allow pre-processing and addition of 
-		derived data keys. 
+		each poll of the process, to allow OS-agnostic pre-processing and 
+		addition of derived data keys such as the date and time. 
 		
 		@param data: The dictionary of process monitoring data. This method 
 		may add or modify the contents of this dictionary. 
@@ -342,8 +339,9 @@ class BaseProcessMonitor(object):
 		data[ProcessMonitorKey.DATE_TIME_LEGACY] = time.strftime(
 			"%d/%m/%y %H:%M:%S" if IS_WINDOWS else "%m/%d/%y %H:%M:%S", datetime)
 		
-		# TODO: add normalization of CPU cores
-		pass
+		if self.__numProcessors > 1 and data.get(ProcessMonitorKey.CPU_CORE_UTILIZATION,None):
+			# undocumented, for compatibility only
+			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = data[ProcessMonitorKey.CPU_CORE_UTILIZATION] / self.__numProcessors
 	
 	def __backgroundThread(self, log, stopping):
 		sample = 1
