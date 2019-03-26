@@ -334,7 +334,9 @@ class BaseProcessMonitor(object):
 		"""
 		# executed on main thread - the best place to perform initial setup so we 
 		# get an immediate error if it fails
-		self.thread = self.owner.startBackgroundThread('ProcessMonitor<%s>'%('%s pid=%d'%(self.process,self.pid) if self.process else self.pid), self.__backgroundThread)
+		self.thread = self.owner.startBackgroundThread(str(self), self.__backgroundThread)
+	
+	def __str__(self): return 'ProcessMonitor<%s>'%('%s pid=%d'%(self.process,self.pid) if self.process else self.pid)
 	
 	def _preprocessData(self, data):
 		""" Called in the background thread with the data dictionary from 
@@ -442,6 +444,8 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 			time.sleep(1)
 			processInstanceName, processInstanceIndex = self.__win32GetInstance()
 		
+		log.info('Windows process monitor for %s is using %s #%d', self, processInstanceName, processInstanceIndex) # TODO: comment out
+		
 		# create the process performance counters
 		self._perfCounters={} # key=name, value=counter object
 		process_query=win32pdh.OpenQuery()
@@ -481,37 +485,46 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		for i in instances:
 			try: instanceDict[i] = instanceDict[i] + 1
 			except KeyError: instanceDict[i] = 0
+
+		def getpid(instance, inum):
+			object = "Process"
+			counter = "ID Process"
+			
+			# make the path, open and collect the query
+			path = win32pdh.MakeCounterPath((None, object, instance, None, inum, counter))
+			query = win32pdh.OpenQuery()
+			try:
+				hcounter = win32pdh.AddCounter(query, path)
+				win32pdh.CollectQueryData(query)
+				
+				# format the counter value
+				return win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LARGE)[1]
+			finally:
+				win32pdh.CloseQuery(query)
 			
 		# loop through to locate the instance and inum of the supplied pid
-		instance = None
-		inum = -1
-		for instance, numInstances in list(instanceDict.items()):
+		numberedinstances = instanceDict.items()
+		
+		# rather than exhaustively searching all processes, start with the ones that have the right name; 
+		# we append the others only as a fallback
+		if self.process and self.process.command:
+			numberedinstances = [i for i in numberedinstances if i[0].lower()==os.path.basename(os.path.splitext(self.process.command)[0]).lower()]+numberedinstances
+			#for instance, numInstances in numberedinstances:
+			#	for inum in range(numInstances+1):
+			#		log.debug('PID: %s #%d = %d', instance, inum, getpid(instance, inum))
+		#assert False, (self.process.command, instanceDict, numberedinstances)
+		
+		for instance, numInstances in numberedinstances:
 			for inum in range(numInstances+1):
 				try:
-					value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")
+					value = getpid(instance, inum)
 					if value == self.pid:
 						log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.pid, instance, inum)
 						return instance, inum
 				except Exception as ex:
 					log.debug('__win32GetInstance: failed to get process id for %s: %s', instance, ex)
 		
-		log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.pid, instance, inum)
 		raise Exception('Could not find running process %r'%(self.process or self.pid))
-
-	def __win32getProfileAttribute(self, object, instance, inum, counter):
-		# used during startup to get the pid
-		
-		# make the path, open and collect the query
-		path = win32pdh.MakeCounterPath((None, object, instance, None, inum, counter))
-		query = win32pdh.OpenQuery()
-		try:
-			hcounter = win32pdh.AddCounter(query, path)
-			win32pdh.CollectQueryData(query)
-			
-			# format the counter value
-			return win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LARGE)[1]
-		finally:
-			win32pdh.CloseQuery(query)
 
 	def _getPerfCounters(self):
 		""" Get the list of string counter names to be monitored. 
@@ -521,7 +534,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		Override this and L{_perfCountersToData} if you wish to monitor additional 
 		performance counters. 
 		"""
-		return ["% Processor Time", "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count"]
+		return ["% Processor Time", "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count", "ID Process"]
 
 	def __getPerfCounterValues(self):
 		""" Get a dictionary containing the formatted counter values.
@@ -545,6 +558,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 				data[key] = win32pdh.GetFormattedCounterValue(counter, win32pdh.PDH_FMT_LARGE)[1]
 			except win32api.error:
 				data[key] = None
+		assert data['ID Process'] == self.pid, 'Query is now pointing at the wrong process for %s' # TODO: rework
 		return data
 		
 	def _perfCountersToData(self, counterValues):
