@@ -12,10 +12,18 @@ class PySysTest(BaseTest):
 						  state=BACKGROUND)
 		pm = self.startProcessMonitor(p, interval=0.1, file='monitor.tsv')
 		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.tsv', numProcessors=10)
+
+
+		pidmonitor = self.startProcessMonitor(p.pid, interval=0.1, file=self.output+'/monitor-pid.tsv')
+
 		assert pm.running(), 'monitor is still running'
 		self.waitForSignal('monitor.tsv', expr='.', condition='>=5', ignores=['#.*'])
 		self.waitForSignal('monitor-numproc.tsv', expr='.', condition='>=5', ignores=['#.*'])
+		self.waitForSignal('monitor-pid.tsv', expr='.', condition='>=5', ignores=['#.*'])
 		assert pm.running(), 'monitor is still running'
+		assert pidmonitor.running(), 'pid monitor is still running'
+		self.stopProcessMonitor(pidmonitor)
+
 		self.stopProcessMonitor(pm)
 		pm.stop() # should silently do nothing
 		self.stopProcessMonitor(pm) # should silently do nothing
@@ -36,3 +44,7 @@ class PySysTest(BaseTest):
 		for i in range(len(line)):
 			if i > 0: # apart from the first column, every header should be a valid float or int
 				self.assertThat('float(%s) or True', repr(line[i])) # would raise an exception if not a float
+		
+		# check files have at least some valid (non -1 ) values
+		self.assertGrep('monitor.tsv', expr='\t[0-9]+')
+		self.assertGrep('monitor-pid.tsv', expr='\t[0-9]+')

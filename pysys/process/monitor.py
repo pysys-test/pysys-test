@@ -272,13 +272,19 @@ class BaseProcessMonitor(object):
 
 	"""
 	
-	def __init__(self, owner, process, interval, handlers, **kwargs):
+	def __init__(self, owner, process, interval, handlers, **pmargs):
 		"""Construct an instance of the process monitor.
 		
-		@param pid: The process id to monitor
-		@param interval:  The interval in seconds to record the process statistics
+		@param owner: The BaseTest owning this monitor. 
 		
-		@param kwargs: Keyword arguments to allow parameterization of the 
+		@param process: The process wrapper object. A numeric pid can be specified 
+		instead but with reduced functionality, so use a process object if you 
+		have one. 
+		
+		@param interval: The interval in seconds between polling for each data 
+		sample. 
+		
+		@param pmargs: Keyword arguments to allow parameterization of the 
 		returned data. An exception will be raised for any arguments not 
 		expected by this class. 
 		"""
@@ -286,16 +292,21 @@ class BaseProcessMonitor(object):
 		# NB: this could be subclassed to support different platforms and/or add extra 
 		# data
 		
-		self.pid = process.pid # just for compatibility
 		self.interval = interval
 		
 		# normalise the CPU readings by the supplied factor
 		self.numProcessors=1
-		if "numProcessors" in kwargs: 
-			self.numProcessors = int(kwargs.pop("numProcessors"))
-		assert not kwargs, 'Unknown process monitor options: %s'%kwargs.keys()
-		
-		self.process = process
+		if "numProcessors" in pmargs: 
+			self.numProcessors = int(pmargs.pop("numProcessors"))
+		self.pmargs = pmargs
+		assert not pmargs, 'Unknown process monitor options: %s'%pmargs.keys()
+
+		self.process = None if isinstance(process, int) else process
+		"""The process object. Can be None if a pid was passed directly. """
+
+		self.pid = process if isinstance(process, int) else process.pid
+		"""The pid to be monitored. """
+
 		self.owner = owner
 		
 		assert handlers
@@ -314,7 +325,7 @@ class BaseProcessMonitor(object):
 		"""
 		# executed on main thread - the best place to perform initial setup so we 
 		# get an immediate error if it fails
-		self.thread = self.owner.startBackgroundThread('ProcessMonitor.%s'%self.process, self.__backgroundThread)
+		self.thread = self.owner.startBackgroundThread('ProcessMonitor.%s'%(self.process or self.pid), self.__backgroundThread)
 	
 	def _preprocessData(self, data):
 		""" Called in the background thread with the data dictionary from 
@@ -349,7 +360,7 @@ class BaseProcessMonitor(object):
 				sample += 1
 				stopping.wait(self.interval)
 		except Exception as ex:
-			if not self.process.running():
+			if self.process and not self.process.running():
 				log.debug('Ignoring process monitor error as the monitored process %s has already terminated: %s', self.process, ex)
 			else:
 				raise
@@ -464,14 +475,14 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 			for inum in range(numInstances+1):
 				try:
 					value = self.__win32getProfileAttribute("Process", instance, inum, "ID Process")
-					if value == self.process.pid:
-						log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.process.pid, instance, inum)
+					if value == self.pid:
+						log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.pid, instance, inum)
 						return instance, inum
 				except Exception as ex:
 					log.debug('__win32GetInstance: failed to get process id for %s: %s', instance, ex)
 		
-		log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.process.pid, instance, inum)
-		raise Exception('Could not find running process %r'%self.process)
+		log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.pid, instance, inum)
+		raise Exception('Could not find running process %r'%(self.process or self.pid))
 
 	def __win32getProfileAttribute(self, object, instance, inum, counter):
 		# used during startup to get the pid
@@ -514,7 +525,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 			except Exception as ex:
 				if retries == 0: 
 					raise
-				if not self.process.running(): raise
+				if self.process and not self.process.running(): raise
 				log.debug('WindowsProcessMonitor: retrying getting perf counter values (%d remaining) after error: %s', retries, ex)
 				time.sleep(1)
 				
@@ -558,7 +569,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
 	def _getData(self, sample):
 		with process_lock:
-			with os.popen("ps -p %s -o pcpu,rss,vsz" % (self.process.pid)) as fp:
+			with os.popen("ps -p %s -o pcpu,rss,vsz" % (self.pid)) as fp:
 				# skip header line
 				info = fp.readlines()[1].strip()
 				return {
@@ -585,9 +596,9 @@ class LinuxProcessMonitor(BaseProcessMonitor):
 			with process_lock:
 				with os.popen("ps -o pid,ppid") as fp:
 					psList = fp.readlines()
-			self._pidTree = self.__findChildren(psList, self.process.pid)
+			self._pidTree = self.__findChildren(psList, self.pid)
 		else:
-			self._pidTree = [self.process.pid]
+			self._pidTree = [self.pid]
 
 		BaseProcessMonitor.start(self)
 	

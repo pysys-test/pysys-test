@@ -187,10 +187,10 @@ class BaseTest(ProcessUser):
 				self.stopManualTester()
 
 			# first request them all to stop
-			# although we don't yet state that cleanup() is fully thread-safe, 
-			# do our best (without holding locks while joining threads, obviously)
-			with self.lock:
-				threads, self.__backgroundThreads = list(self.__backgroundThreads), []
+			# although we don't yet state this method is thread-safe, make it 
+			# as thread-safe as possible by using swap operations
+			threads, self.__backgroundThreads = list(self.__backgroundThreads), []
+			self.__backgroundThreads = []
 			for th in threads: th.stop()
 			for th in threads: th.join(abortOnError=False)
 		
@@ -212,7 +212,7 @@ class BaseTest(ProcessUser):
 		self.resources.append(resource)
 
 
-	def startProcessMonitor(self, process, interval=5, file=None, handlers=[], **kwargs):
+	def startProcessMonitor(self, process, interval=5, file=None, handlers=[], **pmargs):
 		"""Start a separate thread to log process statistics to logfile, and return a handle to the process monitor.
 		
 		This method uses the L{pysys.process.monitor} module to perform logging of the process statistics, 
@@ -251,7 +251,9 @@ class BaseTest(ProcessUser):
 		used for recording results (for example in a file) or for dynamically 
 		analysing them and reporting problems. 
 		
-		@param kwargs: Keyword arguments to allow advanced parameterization of the process monitor. 
+		@param pmargs: Keyword arguments to allow advanced parameterization 
+		of the process monitor class. It is an error to specify any parameters 
+		not supported by the process monitor class on each platform. 
 				
 		@return: An object representing the process monitor (L{pysys.process.monitor.ProcessMonitor})
 		@rtype: pysys.process.monitor.ProcessMonitor
@@ -263,7 +265,7 @@ class BaseTest(ProcessUser):
 			handlers.append(TabSeparatedFileHandler(file))
 		
 		self.log.info("Starting process monitor for %r", process)
-		monitor = ProcessMonitor(owner=self, process=process, interval=interval, handlers=handlers, **kwargs)
+		monitor = ProcessMonitor(owner=self, process=process, interval=interval, handlers=handlers, **pmargs)
 		monitor.start()
 		self.monitorList.append(monitor)
 		return monitor
@@ -315,12 +317,11 @@ class BaseTest(ProcessUser):
 					t.stop() # requests thread to stop but doesn't wait for it to stop
 					t.join()
 		
-		Note that C{BaseTest} is not thread-safe (apart from C{addOutcome}, 
-		C{startProcess} and the reading of fields like self.output that don't 
-		change) so if you need to use its fields or methods from 
+		Note that C{BaseTest} is not thread-safe (apart from C{addOutcome} and 
+		the reading of fields like self.output that don't change) so if you 
+		need to use its fields or methods (such as C{startProcess}) from 
 		background threads, be sure to add your own locking to the foreground 
-		and background threads in your test, including any custom cleanup 
-		functions. 
+		and background threads in your test, including any cleanup functions. 
 		
 		The BaseTest will stop and join all running background threads at the 
 		beginning of cleanup. If a thread doesn't stop within the expected 
@@ -348,8 +349,7 @@ class BaseTest(ProcessUser):
 		"""
 		t = BackgroundThread(self, name=name, target=target, kwargsForTarget=kwargsForTarget)
 		t.thread.start()
-		with self.lock:
-			self.__backgroundThreads.append(t)
+		self.__backgroundThreads.append(t)
 		return t
 
 	# methods to control the manual tester user interface
