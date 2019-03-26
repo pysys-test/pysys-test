@@ -264,7 +264,7 @@ class BaseTest(ProcessUser):
 		if file:
 			handlers.append(TabSeparatedFileHandler(file))
 		
-		self.log.info("Starting process monitor for %r", process)
+		self.log.debug("Starting process monitor for %r", process)
 		monitor = ProcessMonitor(owner=self, process=process, interval=interval, handlers=handlers, **pmargs)
 		monitor.start()
 		self.monitorList.append(monitor)

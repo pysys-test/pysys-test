@@ -334,7 +334,7 @@ class BaseProcessMonitor(object):
 		"""
 		# executed on main thread - the best place to perform initial setup so we 
 		# get an immediate error if it fails
-		self.thread = self.owner.startBackgroundThread('ProcessMonitor.%s'%(self.process or self.pid), self.__backgroundThread)
+		self.thread = self.owner.startBackgroundThread('ProcessMonitor<%s>'%('%s pid=%d'%(self.process,self.pid) if self.process else self.pid), self.__backgroundThread)
 	
 	def _preprocessData(self, data):
 		""" Called in the background thread with the data dictionary from 
