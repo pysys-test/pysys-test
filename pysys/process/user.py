@@ -76,7 +76,12 @@ class ProcessUser(object):
 		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 		self.defaultIgnoreExitStatus = PROJECT.defaultIgnoreExitStatus.lower()=='true' if hasattr(PROJECT, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
+		
 		self.lock = threading.RLock()
+		"""
+		A recursive lock that can be used for protecting the fields of this instance 
+		from access by background threads, as needed. 
+		"""
 
 
 	def __getattr__(self, name):
@@ -200,14 +205,15 @@ class ProcessUser(object):
 			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			process.stop()
 		else:
-			self.processList.append(process)
-			try:
-				if displayName in self.processCount:
-					self.processCount[displayName] = self.processCount[displayName] + 1
-				else:
-			 		self.processCount[displayName] = 1
-			except Exception:
-				pass
+			with self.lock:
+				self.processList.append(process)
+				try:
+					if displayName in self.processCount:
+						self.processCount[displayName] = self.processCount[displayName] + 1
+					else:
+						self.processCount[displayName] = 1
+				except Exception:
+					pass
 		return process	
 
 	def getDefaultEnvirons(self, command=None, **kwargs):
@@ -724,8 +730,9 @@ class ProcessUser(object):
 		e.g. self.addCleanupFunction(lambda: self.cleanlyShutdownProcessX(params))
 		
 		"""
-		if fn and fn not in self.__cleanupFunctions: 
-			self.__cleanupFunctions.append(fn)
+		with self.lock:
+			if fn and fn not in self.__cleanupFunctions: 
+				self.__cleanupFunctions.append(fn)
 
 
 	def cleanup(self):
@@ -738,7 +745,8 @@ class ProcessUser(object):
 		try:
 			# although we don't yet state this method is thread-safe, make it 
 			# as thread-safe as possible by using swap operations
-			cleanupfunctions, self.__cleanupFunctions = self.__cleanupFunctions, []
+			with self.lock:
+				cleanupfunctions, self.__cleanupFunctions = self.__cleanupFunctions, []
 			if cleanupfunctions:
 				log.info('')
 				log.info('cleanup:')
@@ -749,7 +757,8 @@ class ProcessUser(object):
 				except Exception as e:
 					log.exception('Error while running cleanup function: ')
 		finally:
-			processes, self.processList = list(self.processList), []
+			with self.lock:
+				processes, self.processList = self.processList, []
 			for process in processes:
 				try:
 					if process.running(): process.stop()
