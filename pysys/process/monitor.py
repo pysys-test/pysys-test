@@ -34,7 +34,7 @@ from pysys.utils.pycompat import *
 
 
 if PLATFORM=='win32' and 'epydoc' not in sys.modules:
-	import win32api, win32pdh
+	import win32api, win32pdh, win32con, win32process
 
 log = logging.getLogger('pysys.processmonitor')
 
@@ -459,9 +459,24 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		# this will be dealt with in cleanup
 		self._perfQuery = process_query
 		
+		self._hPid = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, 0, self.pid)
+		self._lastValues = None
+
+		# in Python 3.7+ can use a more performant method
+		if hasattr(time, 'perf_counter_ns'):
+			self._timer_ns = lambda self: time.perf_counter_ns()
+		
 		BaseProcessMonitor.start(self)
 
+	def _timer_ns(self):
+		""" Return a monotonically incrementing clock value in nanoseconds (10**3) that 
+		can be used to calculate performance results. 
+		"""
+		return win32api.GetTickCount()*1000000 # millis->nanos
+
 	def _cleanup(self):
+		self._hPid.close()
+
 		win32pdh.CloseQuery(self._perfQuery)
 
 	def __win32GetInstance(self):
@@ -588,6 +603,42 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		data[ProcessMonitorKey.THREADS] = counterValues['Thread Count']
 		data[ProcessMonitorKey.KERNEL_HANDLES] = counterValues['Handle Count']
 		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = counterValues['% Processor Time']
+		
+		while True:
+			newvalues = {}
+			newvalues['timens'] = self._timer_ns()
+			cputimes = win32process.GetProcessTimes(self._hPid)
+			#cputimes['KernelTime']+
+			newvalues['cputime'] = (cputimes['UserTime'])/100.0 # comes in 100*ns units
+
+			if self._lastValues is not None:
+				lastvalues = self._lastValues
+				break
+			# first time we calculate anything, need to repeat this once so we have stats to compare to
+			self._lastValues = lastvalues = newvalues
+			time.sleep(min(self.interval, 1))
+		
+		memInfo = win32process.GetProcessMemoryInfo(self._hPid)
+		#perfinfo = win32process.GetPerformanceInfo(self._hPid)
+		
+		psdata = {}
+		psdata[ProcessMonitorKey.CPU_CORE_UTILIZATION] = 1000*1000*(newvalues['cputime']-lastvalues['cputime'])/(newvalues['timens']-lastvalues['timens'])
+		psdata[ProcessMonitorKey.MEMORY_RESIDENT_KB] = memInfo['WorkingSetSize']//1024
+		# todo: is this the right stat to return for virtual mem? not clear...
+		psdata[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = memInfo['PagefileUsage']//1024
+		if 'PrivateUsage' in memInfo:
+			psdata[ProcessMonitorKey.MEMORY_PRIVATE_KB] = memInfo['PrivateUsage']//1024
+		#psdata[ProcessMonitorKey.THREADS] = perfinfo['ThreadCount']
+		#psdata[ProcessMonitorKey.KERNEL_HANDLES] = perfinfo['HandleCount']
+		## TODO - remove temp code once this is working
+		log.info('time diff=%0.1f ms', (newvalues['timens']-lastvalues['timens'])/1000000.0)
+		s = ['\n  key %s: counter=%s new=%s'%(k, data.get(k), psdata.get(k)) for k in data ]
+		log.info('Got data for %s: %s', self, ''.join(s))
+		
+		self._lastValues = newvalues
+		STILL_ACTIVE = 259 # todo check if there's a constant for this
+		if win32process.GetExitCodeProcess(self._hPid) != STILL_ACTIVE: raise Exception('Process has terminated')
+		
 		return data
 
 	def _getData(self, sample):
@@ -603,9 +654,9 @@ class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
 				# skip header line
 				info = fp.readlines()[1].strip()
 				return {
-					ProcessMonitorKey.CPU_CORE_UTILIZATION: float(info[0]),
-					ProcessMonitorKey.MEMORY_RESIDENT_KB:   float(info[1]),
-					ProcessMonitorKey.MEMORY_VIRTUAL_KB:    float(info[2]),
+					ProcessMonitorKey.CPU_CORE_UTILIZATION: int(info[0]),
+					ProcessMonitorKey.MEMORY_RESIDENT_KB:   int(info[1]),
+					ProcessMonitorKey.MEMORY_VIRTUAL_KB:    int(info[2]),
 				}
 
 class LinuxProcessMonitor(BaseProcessMonitor):
