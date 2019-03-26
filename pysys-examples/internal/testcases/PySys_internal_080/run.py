@@ -85,3 +85,4 @@ class PySysTest(BaseTest):
 		
 		# should be nothing where we couldn't get the data
 		self.assertGrep('myoutdir/NestedTest/monitor-legacy.tsv', expr='\t-1', contains=False)
+		self.assertGrep('myoutdir/NestedTest/monitor-legacy.tsv', expr=r'^\d\d/\d\d/\d\d \d\d:\d\d:\d\d\t')
