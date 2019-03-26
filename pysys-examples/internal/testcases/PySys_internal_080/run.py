@@ -55,6 +55,7 @@ class PySysTest(BaseTest):
 		self.stopProcessMonitor(pm)
 		pm.stop() # should silently do nothing
 		self.stopProcessMonitor(pm) # should silently do nothing
+		assert p.exitStatus == None, 'spinner process terminated unexpectedly'
 		p.stop()
 		self.wait(1) # keep process monitor running after it to check it doesn't cause an error
 		self.stopProcessMonitor(pm2)
