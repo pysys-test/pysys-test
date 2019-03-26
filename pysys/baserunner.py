@@ -43,7 +43,7 @@ from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.pycompat import *
-from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, ThreadFilter
+from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, pysysLogHandler
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
 global_lock = threading.Lock()
@@ -164,38 +164,6 @@ class BaseRunner(ProcessUser):
 		
 		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
 		
-		class DelegatingPerThreadLogHandler(logging.Handler):
-			"""A log handler that delegates emits to a list of handlers, 
-			set on a per-thread basis. If no handlers are setup for this 
-			thread nothing is emitted.
-			
-			Note that calling close() on this handler does not call close 
-			on any of the delegated handlers (since they may 
-			be used by multiple threads, and to avoid leaks we don't keep a 
-			global list of them anyway). 
-			"""
-			def __init__(self):
-				super(DelegatingPerThreadLogHandler, self).__init__()
-				self.__threadLocals = threading.local()
-
-			def setLogHandlersForCurrentThread(self, handlers):
-				self.__threadLocals.handlers = handlers
-				self.__threadLocals.emitFunctions = [(h.level, h.emit) for h in handlers] if handlers else None
-			def getLogHandlersForCurrentThread(self):
-				return getattr(self.__threadLocals, 'handlers', None) or []
-			
-			def emit(self, record):
-				functions = getattr(self.__threadLocals, 'emitFunctions', None) 
-				if functions is not None: 
-					for (hdlrlevel, emitFunction) in functions:
-						# handlers can have different levels, so need to replicate the checking that callHandlers performs
-						if record.levelno >= hdlrlevel:
-							emitFunction(record)
-			def flush(self): 
-				for h in self.getLogHandlersForCurrentThread(): h.flush()
-		
-		self._testThreadsLogHandler = DelegatingPerThreadLogHandler()
-
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
 		suitable for diagnostic purposes and display to the test author. 
@@ -326,7 +294,6 @@ class BaseRunner(ProcessUser):
 		results.
 
 		"""
-		log.addHandler(self._testThreadsLogHandler)
 		if PROJECT.perfReporterConfig:
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet
@@ -384,10 +351,9 @@ class BaseRunner(ProcessUser):
 		try:
 
 			# for suppressing print-as-we-execute in single-threaded mode (at least until outcome is known)
-			if self.threads==1 and self.printLogs!=PrintLogs.ALL:
-				singleThreadStdoutDisable = ThreadFilter()
-			else:
-				singleThreadStdoutDisable = None
+			singleThreadStdoutDisable = self.threads==1 and self.printLogs!=PrintLogs.ALL
+			# the setLogHandlersForCurrentThread invocation below assumes this
+			assert pysysLogHandler.getLogHandlersForCurrentThread()==[stdoutHandler] 
 				
 			for cycle in range(self.cycle):
 				# loop through tests for the cycle
@@ -401,11 +367,11 @@ class BaseRunner(ProcessUser):
 							request = WorkRequest(container, callback=self.containerCallback, exc_callback=self.containerExceptionCallback)
 							threadPool.putRequest(request)
 						else:
-							if singleThreadStdoutDisable: stdoutHandler.addFilter(singleThreadStdoutDisable)
+							if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([])
 							try:
 								singleThreadedResult = container() # run test
 							finally:
-								if singleThreadStdoutDisable: stdoutHandler.removeFilter(singleThreadStdoutDisable)
+								if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
 							self.containerCallback(threading.current_thread().ident, singleThreadedResult)
 				except KeyboardInterrupt:
 					log.info("test interrupt from keyboard")
@@ -619,156 +585,161 @@ class TestContainer(object):
 		exc_info = []
 		self.testStart = time.time()
 		
+		defaultLogHandlersForCurrentThread = pysysLogHandler.getLogHandlersForCurrentThread()
 		try:
-			# stdout - set this up right at the very beginning to ensure we can see the log output in case any later step fails
-			# here we use UnicodeSafeStreamWrapper to ensure we get a buffer of unicode characters (mixing chars+bytes leads to exceptions), 
-			# from any supported character (utf-8 being pretty much a superset of all encodings)
-			self.testFileHandlerStdout = logging.StreamHandler(_UnicodeSafeStreamWrapper(self.testFileHandlerStdoutBuffer, writebytes=False, encoding='utf-8'))
-			self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
-			self.testFileHandlerStdout.setLevel(stdoutHandler.level)
-			self.runner._testThreadsLogHandler.setLogHandlersForCurrentThread([self.testFileHandlerStdout])
-
-			# set the output subdirectory and purge contents
-			if os.path.isabs(self.runner.outsubdir):
-				self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
-			else:
-				self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
-
-			if not self.runner.validateOnly: 
-				if self.runner.cycle <= 1: 
-					deletedir(self.outsubdir)
-				else:
-					# must use lock to avoid deleting the parent dir after we've started creating outdirs for some cycles
-					with global_lock:
-						if self.outsubdir not in TestContainer.__purgedOutputDirs:
-							deletedir(self.outsubdir)
-							TestContainer.__purgedOutputDirs.add(self.outsubdir)
-			
-			if self.runner.cycle > 1: 
-				self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
-			mkdir(self.outsubdir)
-
-			# run.log handler
-			runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or locale.getpreferredencoding()
-			self.testFileHandlerRunLog = logging.StreamHandler(_UnicodeSafeStreamWrapper(
-				io.open(os.path.join(self.outsubdir, 'run.log'), 'a', encoding=runLogEncoding), 
-				writebytes=False, encoding=runLogEncoding))
-			self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
-			self.testFileHandlerRunLog.setLevel(logging.INFO)
-			if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
-			self.runner._testThreadsLogHandler.setLogHandlersForCurrentThread([self.testFileHandlerStdout, self.testFileHandlerRunLog])
-
-			log.info(62*"=")
-			title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
-			log.info("Id   : %s", self.descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-			if len(title)>0:
-				log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-			for l in title[1:]:
-				log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-			if self.runner.cycle > 1:
-				log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-			log.info(62*"=")
-		except KeyboardInterrupt:
-			self.kbrdInt = True
-		
-		except Exception:
-			exc_info.append(sys.exc_info())
-			
-		# import the test class
-		with global_lock:
-			BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 			try:
-				runpypath = self.descriptor.module+'.py'
-				with open(runpypath, 'rb') as runpyfile:
-					runpycode = compile(runpyfile.read(), runpypath, 'exec')
-				runpy_namespace = {}
-				exec(runpycode, runpy_namespace)
-				self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, self.outsubdir, self.runner)
-				del runpy_namespace
-	
+				# stdout - set this up right at the very beginning to ensure we can see the log output in case any later step fails
+				# here we use UnicodeSafeStreamWrapper to ensure we get a buffer of unicode characters (mixing chars+bytes leads to exceptions), 
+				# from any supported character (utf-8 being pretty much a superset of all encodings)
+				self.testFileHandlerStdout = logging.StreamHandler(_UnicodeSafeStreamWrapper(self.testFileHandlerStdoutBuffer, writebytes=False, encoding='utf-8'))
+				self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
+				self.testFileHandlerStdout.setLevel(stdoutHandler.level)
+				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout])
+
+				# set the output subdirectory and purge contents
+				if os.path.isabs(self.runner.outsubdir):
+					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
+				else:
+					self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
+
+				if not self.runner.validateOnly: 
+					if self.runner.cycle <= 1: 
+						deletedir(self.outsubdir)
+					else:
+						# must use lock to avoid deleting the parent dir after we've started creating outdirs for some cycles
+						with global_lock:
+							if self.outsubdir not in TestContainer.__purgedOutputDirs:
+								deletedir(self.outsubdir)
+								TestContainer.__purgedOutputDirs.add(self.outsubdir)
+				
+				if self.runner.cycle > 1: 
+					self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
+				mkdir(self.outsubdir)
+
+				# run.log handler
+				runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or locale.getpreferredencoding()
+				self.testFileHandlerRunLog = logging.StreamHandler(_UnicodeSafeStreamWrapper(
+					io.open(os.path.join(self.outsubdir, 'run.log'), 'a', encoding=runLogEncoding), 
+					writebytes=False, encoding=runLogEncoding))
+				self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
+				self.testFileHandlerRunLog.setLevel(logging.INFO)
+				if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
+				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout, self.testFileHandlerRunLog])
+
+				log.info(62*"=")
+				title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
+				log.info("Id   : %s", self.descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+				if len(title)>0:
+					log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+				for l in title[1:]:
+					log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+				if self.runner.cycle > 1:
+					log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+				log.info(62*"=")
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 			
 			except Exception:
 				exc_info.append(sys.exc_info())
-				self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner)
-			# can't set this in constructor without breaking compatibility, but set it asap after construction
-			del BaseTest._currentTestCycle
-
-		for writer in self.runner.writers:
-			try: 
-				if hasattr(writer, 'processTestStarting'):
-					writer.processTestStarting(testObj=self.testObj, cycle=self.cycle)
-			except Exception: 
-				log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
-
-		# execute the test if we can
-		try:
-			if self.descriptor.state != 'runnable':
-				self.testObj.addOutcome(SKIPPED, 'Not runnable', abortOnError=False)
-						
-			elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
-				self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode, abortOnError=False)
-			
-			elif len(exc_info) > 0:
-				self.testObj.addOutcome(BLOCKED, 'Failed to set up test: %s'%exc_info[0][1], abortOnError=False)
-				for info in exc_info:
-					log.warn("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
-					
-			elif self.kbrdInt:
-				log.warn("test interrupt from keyboard")
-				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
-		
-			else:
+				
+			# import the test class
+			with global_lock:
+				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 				try:
-					if not self.runner.validateOnly:
-						self.testObj.setup()
-						self.testObj.execute()
-					self.testObj.validate()
-				except AbortExecution as e:
-					del self.testObj.outcome[:]
-					self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
-					log.warn('Aborted test due to abortOnError set to true')
+					runpypath = self.descriptor.module+'.py'
+					with open(runpypath, 'rb') as runpyfile:
+						runpycode = compile(runpyfile.read(), runpypath, 'exec')
+					runpy_namespace = {}
+					exec(runpycode, runpy_namespace)
+					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, self.outsubdir, self.runner)
+					del runpy_namespace
+		
+				except KeyboardInterrupt:
+					self.kbrdInt = True
+				
+				except Exception:
+					exc_info.append(sys.exc_info())
+					self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner)
+				# can't set this in constructor without breaking compatibility, but set it asap after construction
+				del BaseTest._currentTestCycle
 
-				if self.detectCore(self.outsubdir):
-					self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory', abortOnError=False)
-		
-		except KeyboardInterrupt:
-			self.kbrdInt = True
-			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
+			for writer in self.runner.writers:
+				try: 
+					if hasattr(writer, 'processTestStarting'):
+						writer.processTestStarting(testObj=self.testObj, cycle=self.cycle)
+				except Exception: 
+					log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
 
-		except Exception:
-			log.warn("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
-	
-		# call the cleanup method to tear down the test
-		try:
-			self.testObj.cleanup()
-		
-		except KeyboardInterrupt:
-			self.kbrdInt = True
-			self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
+			# execute the test if we can
+			try:
+				if self.descriptor.state != 'runnable':
+					self.testObj.addOutcome(SKIPPED, 'Not runnable', abortOnError=False)
+							
+				elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
+					self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode, abortOnError=False)
+				
+				elif len(exc_info) > 0:
+					self.testObj.addOutcome(BLOCKED, 'Failed to set up test: %s'%exc_info[0][1], abortOnError=False)
+					for info in exc_info:
+						log.warn("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
+						
+				elif self.kbrdInt:
+					log.warn("test interrupt from keyboard")
+					self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 			
-		# print summary and close file handles
-		try:
-			self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
-			log.info("")
-			log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
-			log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra=BaseLogFormatter.tag(LOOKUP[self.testObj.getOutcome()].lower(), 0))
-			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
-				log.info("Test failure reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
-			log.info("")
+				else:
+					try:
+						if not self.runner.validateOnly:
+							self.testObj.setup()
+							log.debug('--- test execute')
+							self.testObj.execute()
+						log.debug('--- test validate')
+						self.testObj.validate()
+					except AbortExecution as e:
+						del self.testObj.outcome[:]
+						self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
+						log.warn('Aborted test due to abortOnError set to true')
+
+					if self.detectCore(self.outsubdir):
+						self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory', abortOnError=False)
 			
-			self.runner._testThreadsLogHandler.flush()
-			if self.testFileHandlerRunLog: self.testFileHandlerRunLog.stream.close()
-			self.runner._testThreadsLogHandler.setLogHandlersForCurrentThread([])
-		except Exception as ex: # really should never happen so if it does make sure we know why
-			sys.stderr.write('Error in callback for %s: %s\n'%(self.descriptor.id, ex))
-			traceback.print_exc()
+			except KeyboardInterrupt:
+				self.kbrdInt = True
+				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
+
+			except Exception:
+				log.warn("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
 		
-		# return a reference to self
-		return self
-	
+			# call the cleanup method to tear down the test
+			try:
+				log.debug('--- test cleanup')
+				self.testObj.cleanup()
+			
+			except KeyboardInterrupt:
+				self.kbrdInt = True
+				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
+				
+			# print summary and close file handles
+			try:
+				self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
+				log.info("")
+				log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
+				log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra=BaseLogFormatter.tag(LOOKUP[self.testObj.getOutcome()].lower(), 0))
+				if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
+					log.info("Test failure reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
+				log.info("")
+				
+				pysysLogHandler.flush()
+				if self.testFileHandlerRunLog: self.testFileHandlerRunLog.stream.close()
+			except Exception as ex: # really should never happen so if it does make sure we know why
+				sys.stderr.write('Error in callback for %s: %s\n'%(self.descriptor.id, ex))
+				traceback.print_exc()
+			
+			# return a reference to self
+			return self
+		finally:
+			pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread)
 	
 	# utility methods
 	def purgeDirectory(self, dir, delTop=False):

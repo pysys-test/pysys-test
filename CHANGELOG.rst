@@ -153,6 +153,17 @@ New features
   the ability to write directly to stdout should be changed to use 
   `pysys.utils.logutils.stdoutPrint`. 
 
+- Added `BaseTest.startBackgroundThread` method which takes care of ensuring 
+  threads are stopped and joined during cleanup, that exceptions from threads 
+  result in BLOCKED outcomes and that logging output from background threads 
+  goes to the same handlers as foreground logging. The thread target can 
+  be either a simple function or an instance method (e.g. on the testcase). 
+  A Python `threading.Event` object called `stopped` is passed to the 
+  background thread to make it easy to determine when it should finish 
+  executing. Added documentation comments to make clear most of 
+  `BaseTest`/`ProcessUser` are still not thread-safe, but the all-important 
+  `addOutcome` method now is. 
+
 - Added new command line option `--printLogs all|failures|none` (default value 
   is `all`) which allows user to avoid the printing of run.log to the stdout 
   console either for all tests, or for tests that pass. This is useful to 

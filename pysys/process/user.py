@@ -22,6 +22,7 @@ to provide process-related capabilities including cleanup.
 """
 
 import time, collections, inspect, locale, fnmatch
+import threading
 
 from pysys import log, process_lock
 from pysys.constants import *
@@ -47,6 +48,10 @@ class ProcessUser(object):
 	execution, e.g. C{BLOCKED}, C{TIMEDOUT}, C{DUMPEDCORE} etc. As such the class additionally acts
 	as the container for storing the list of outcomes from all child test related actions.
 	
+	Apart from the C{addOutcome} method this class is not thread-safe, so if 
+	you need to access it from multiple threads be sure to add your own locking 
+	around use of its fields and methods, including any cleanup functions. 
+	
 	@ivar input: Location for input to any processes (defaults to current working directory) 
 	@type input: string
 	@ivar output: Location for output from any processes (defaults to current working directory)
@@ -71,6 +76,12 @@ class ProcessUser(object):
 		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 		self.defaultIgnoreExitStatus = PROJECT.defaultIgnoreExitStatus.lower()=='true' if hasattr(PROJECT, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
+		
+		self.lock = threading.RLock()
+		"""
+		A recursive lock that can be used for protecting the fields of this instance 
+		from access by background threads, as needed. 
+		"""
 
 
 	def __getattr__(self, name):
@@ -194,14 +205,15 @@ class ProcessUser(object):
 			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			process.stop()
 		else:
-			self.processList.append(process)
-			try:
-				if displayName in self.processCount:
-					self.processCount[displayName] = self.processCount[displayName] + 1
-				else:
-			 		self.processCount[displayName] = 1
-			except Exception:
-				pass
+			with self.lock:
+				self.processList.append(process)
+				try:
+					if displayName in self.processCount:
+						self.processCount[displayName] = self.processCount[displayName] + 1
+					else:
+						self.processCount[displayName] = 1
+				except Exception:
+					pass
 		return process	
 
 	def getDefaultEnvirons(self, command=None, **kwargs):
@@ -715,8 +727,9 @@ class ProcessUser(object):
 		e.g. self.addCleanupFunction(lambda: self.cleanlyShutdownProcessX(params))
 		
 		"""
-		if fn and fn not in self.__cleanupFunctions: 
-			self.__cleanupFunctions.append(fn)
+		with self.lock:
+			if fn and fn not in self.__cleanupFunctions: 
+				self.__cleanupFunctions.append(fn)
 
 
 	def cleanup(self):
@@ -727,23 +740,27 @@ class ProcessUser(object):
 		
 		"""
 		try:
-			if self.__cleanupFunctions:
+			# although we don't yet state this method is thread-safe, make it 
+			# as thread-safe as possible by using swap operations
+			with self.lock:
+				cleanupfunctions, self.__cleanupFunctions = self.__cleanupFunctions, []
+			if cleanupfunctions:
 				log.info('')
 				log.info('cleanup:')
-			for fn in reversed(self.__cleanupFunctions):
+			for fn in reversed(cleanupfunctions):
 				try:
 					log.debug('Running registered cleanup function: %r'%fn)
 					fn()
 				except Exception as e:
 					log.exception('Error while running cleanup function: ')
-			self.__cleanupFunctions = []
 		finally:
-			for process in self.processList:
+			with self.lock:
+				processes, self.processList = self.processList, []
+			for process in processes:
 				try:
 					if process.running(): process.stop()
 				except Exception:
 					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			self.processList = []
 			self.processCount = {}
 			
 			log.debug('ProcessUser cleanup function done.')
@@ -768,6 +785,8 @@ class ProcessUser(object):
 		above. Thus a C{BLOCKED} outcome has a higher precedence than a C{PASSED} outcome. The outcomes are defined 
 		in L{pysys.constants}. 
 		
+		This method is thread-safe. 
+		
 		@param outcome: The outcome to add
 		
 		@param outcomeReason: A string summarizing the reason for the outcome, 
@@ -784,39 +803,39 @@ class ProcessUser(object):
 		
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
-		if abortOnError == None: abortOnError = self.defaultAbortOnError
-		if outcomeReason is None:
-			outcomeReason = ''
-		else: 
-			outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
-			if PY2 and isinstance(outcomeReason, str): 
-				# The python2 logger is very unhappy about byte str objects containing 
-				# non-ascii characters (specifically it will fail to log them and dump a 
-				# traceback on stderr). Since it's pretty important that assertion 
-				# messages and test outcome reasons don't get swallowed, add a 
-				# workaround for this here. Not a problem in python 3. 
-				outcomeReason = outcomeReason.decode('ascii', errors='replace')
-		
-		old = self.getOutcome()
-		self.outcome.append(outcome)
+		with self.lock:
+			if abortOnError == None: abortOnError = self.defaultAbortOnError
+			if outcomeReason is None:
+				outcomeReason = ''
+			else: 
+				outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
+				if PY2 and isinstance(outcomeReason, str): 
+					# The python2 logger is very unhappy about byte str objects containing 
+					# non-ascii characters (specifically it will fail to log them and dump a 
+					# traceback on stderr). Since it's pretty important that assertion 
+					# messages and test outcome reasons don't get swallowed, add a 
+					# workaround for this here. Not a problem in python 3. 
+					outcomeReason = outcomeReason.decode('ascii', errors='replace')
+			
+			old = self.getOutcome()
+			self.outcome.append(outcome)
 
-		#store the reason of the highest precedent outcome
-		
-		# although we should print whatever is passed in, store a version with control characters stripped 
-		# out so that it's easier to read (e.g. coloring codes from third party tools)
-		if self.getOutcome() != old: self.__outcomeReason = re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F]', '', outcomeReason)
-		if outcome in FAILS and abortOnError:
-			if callRecord==None: callRecord = self.__callRecord()
-			self.abort(outcome, outcomeReason, callRecord)
-
-		if outcomeReason and printReason:
-			if outcome in FAILS:
+			#store the reason of the highest precedent outcome
+			
+			# although we should print whatever is passed in, store a version with control characters stripped 
+			# out so that it's easier to read (e.g. coloring codes from third party tools)
+			if self.getOutcome() != old: self.__outcomeReason = re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F]', '', outcomeReason)
+			if outcome in FAILS and abortOnError:
 				if callRecord==None: callRecord = self.__callRecord()
-				log.warn(u'%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
-						 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
-			else:
-				log.info(u'%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+				self.abort(outcome, outcomeReason, callRecord)
 
+			if outcomeReason and printReason:
+				if outcome in FAILS:
+					if callRecord==None: callRecord = self.__callRecord()
+					log.warn(u'%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
+							 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+				else:
+					log.info(u'%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
 		"""Raise an AbortException.
@@ -856,8 +875,9 @@ class ProcessUser(object):
 		@rtype:  integer
 
 		"""	
-		if len(self.outcome) == 0: return NOTVERIFIED
-		return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
+		with self.lock:
+			if len(self.outcome) == 0: return NOTVERIFIED
+			return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
 
 
 	def getOutcomeReason(self):
@@ -867,9 +887,10 @@ class ProcessUser(object):
 		@rtype:  string
 
 		"""	
-		fails = len([o for o in self.outcome if o in FAILS])
-		if self.__outcomeReason and (fails > 1): return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
-		return self.__outcomeReason
+		with self.lock:
+			fails = len([o for o in self.outcome if o in FAILS])
+			if self.__outcomeReason and (fails > 1): return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
+			return self.__outcomeReason
 
 
 	def getNextAvailableTCPPort(self):
