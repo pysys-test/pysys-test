@@ -6,7 +6,7 @@ from pysys.utils.filecopy import filecopy
 class PySysTest(BaseTest):
 	def execute(self):
 		try:
-			self.waitForSignal('input.log', filedir=self.input, expr='Foo', timeout=1, abortOnError=True)		
+			self.waitForSignal('input.log', filedir=self.input, expr='Foo', timeout=1, abortOnError=True, ignores=['line .s to be ignored'])
 		except AbortExecution as e:
 			self.log.info('%s [%s]' % (e.value, ','.join(e.callRecord)))
 

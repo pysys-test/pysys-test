@@ -244,6 +244,10 @@ New features
 - Added `ProcessUser.compareVersions()` static helper method for 
   comparing two alphanumeric dotted version strings. 
 
+- Added `ignores=` argument to `ProcessUser.waitForSignal()` method which 
+  excludes lines matching the specified expression from matching both the 
+  main `expr` match expression and any `errorExpr` expressions. 
+
 - Added `ProcessUser.getDefaultEnvirons()` method which is now used by 
   `startProcess()` to provide a minimal but clean set of environment variables 
   for launching a given process, and can also be used as a basis for creating 

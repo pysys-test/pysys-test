@@ -8,11 +8,11 @@ class PySysTest(BaseTest):
 		with open(self.output+'/success.txt', 'w') as f:
 			f.write('foobar\ngoodexpr\nfoobar')
 		with open(self.output+'/bad.txt', 'w') as f:
-			f.write('foobar\n2016-01-02 12:53:55 ERROR something terrible happened    \n')
+			f.write('foobar\ntimestamp ERROR should be ignored\n2016-01-02 12:53:55 ERROR something terrible happened    \n')
 			
 		self.waitForSignal('success.txt', expr='goodexpr', errorExpr=['badexpr'])
 		try:
-			self.waitForSignal('bad.txt', expr='goodexpr', errorExpr=['not found', ' ERROR '], abortOnError=True)
+			self.waitForSignal('bad.txt', expr='goodexpr', errorExpr=['not found', ' ERROR '], abortOnError=True, ignores=['should be ignore.'])
 			self.addOutcome(FAILED, 'Expected abort')
 		except AbortExecution as e:
 			del self.outcome[:]

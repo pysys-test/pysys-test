@@ -611,7 +611,7 @@ class ProcessUser(object):
 
 			
 	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
-			process=None, errorExpr=[], abortOnError=None, encoding=None):
+			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None):
 		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
 		
 		This method blocks until a particular regular expression is seen in a text file on a set
@@ -636,6 +636,9 @@ class ProcessUser(object):
 		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
 		
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
+		
+		@param ignores: A list of regular expressions used to denote lines in the files which should be ignored 
+		when matching both `expr` and `errorExpr`. 
 		
 		@param process: If a handle to the process object producing output is specified, the wait will abort if 
 		the process dies before the expected signal appears.
@@ -671,7 +674,7 @@ class ProcessUser(object):
 		msg = "Wait for signal \"%s\" %s in %s" % (expr, condition, os.path.basename(file))
 		while 1:
 			if os.path.exists(f):
-				matches = getmatches(f, expr, encoding=encoding or self.getDefaultFileEncoding(f))
+				matches = getmatches(f, expr, encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores)
 				if eval("%d %s" % (len(matches), condition)):
 					if PROJECT.verboseWaitForSignal.lower()=='true' if hasattr(PROJECT, 'verboseWaitForSignal') else False:
 						log.info("%s completed successfully", msg)
@@ -681,7 +684,7 @@ class ProcessUser(object):
 				
 				if errorExpr:
 					for err in errorExpr:
-						errmatches = getmatches(f, err+'.*', encoding=encoding or self.getDefaultFileEncoding(f)) # add .* to capture entire err msg for a better outcome reason
+						errmatches = getmatches(f, err+'.*', encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores) # add .* to capture entire err msg for a better outcome reason
 						if errmatches:
 							err = errmatches[0].group(0).strip()
 							msg = '%s found during %s'%(quotestring(err), msg)
