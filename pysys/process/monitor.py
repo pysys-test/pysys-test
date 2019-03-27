@@ -18,10 +18,10 @@
 from __future__ import print_function
 
 __all__ = ['BaseProcessMonitorHandler', 'BaseProcessMonitorHandler', 'ProcessMonitorTextFileHandler', 'ProcessMonitorKey', 
-	'ProcessMonitor', 'WindowsProcessMonitor', 'LinuxProcessMonitor', 'SolarisProcessMonitor']
+	'ProcessMonitor', 'WindowsProcessMonitor', 'UnixProcessMonitor']
 
 """
-Contains the L{BaseProcessMonitor}, L{ProcessMonitorKey} constants for identifying 
+Contains the L{BaseProcessMonitor} class, L{ProcessMonitorKey} constants for identifying 
 columns and the default L{ProcessMonitorTextFileHandler} class for writing monitoring 
 information to a file. 
 """
@@ -445,7 +445,7 @@ class BaseProcessMonitor(object):
 		
 class WindowsProcessMonitor(BaseProcessMonitor):
 	"""
-	Windows implementation of the process monitor. 
+	Windows implementation of a process monitor. 
 	
 	Uses the `GetProcessMemoryInfo`, and `GetProcessTimes` APIs. 
 	The UserTime and KernelTime are summed together to calculate the CPU 
@@ -502,30 +502,18 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		
 		return data
 
-class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
-	def _getData(self, sample):
-		with process_lock:
-			with os.popen("ps -p %s -o pcpu,rss,vsz" % (self.pid)) as fp:
-				# skip header line
-				info = fp.readlines()[1].strip()
-				return {
-					ProcessMonitorKey.CPU_CORE_UTILIZATION: int(info[0]),
-					ProcessMonitorKey.MEMORY_RESIDENT_KB:   int(info[1]),
-					ProcessMonitorKey.MEMORY_VIRTUAL_KB:    int(info[2]),
-				}
-
-class LinuxProcessMonitor(BaseProcessMonitor):
+class UnixProcessMonitor(BaseProcessMonitor):
 	"""
-	TODO
-	"""
-	# also used for macos/darwin
+	Unix implementation of a process monitor. 
 	
+	Uses the `ps` command line tool, reading columns `pcpu`, `rss` and `vsz`. 
+	"""
 	def _getData(self, sample):
 		with process_lock:
-			with os.popen("ps -o pid,pcpu,rss,vsz %d"%self.pid) as fp: 
+			with os.popen("ps -p %d -o pid,pcpu,rss,vsz"%self.pid) as fp: 
 				info = fp.readlines()
 			
-			if len(info) <= 1: raise Exception('No matching processes found from ps')
+			if len(info) <= 1: raise Exception('No matching processes found from ps; perhaps process has terminated')
 			assert len(info) == 2, 'Unexpected ps output: %s'%info
 			thisdata = info[1].split()
 			data = {}
@@ -538,7 +526,5 @@ class LinuxProcessMonitor(BaseProcessMonitor):
 if PLATFORM=='win32':
 	ProcessMonitor = WindowsProcessMonitor
 	"""Specifies the L{BaseProcessMonitor} subclass to be used for the current platform. """
-elif PLATFORM=='sunos':
-	ProcessMonitor = SolarisProcessMonitor
 else:
-	ProcessMonitor = LinuxProcessMonitor
+	ProcessMonitor = UnixProcessMonitor
