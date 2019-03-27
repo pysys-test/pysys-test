@@ -97,7 +97,7 @@ Changes affecting compatibility
   format is used, and only the columns supported on all operating systems are 
   included::
   
-     yyyy-mm-dd %H:%M:%S, CPU, Resident, Virtual
+     yyyy-mm-dd HH:MM:SS, CPU, Resident, Virtual
   
   This behaviour can be customized for all your testcases from your runner's 
   `setup` method. For example to go back to the previous file format (although 
