@@ -33,7 +33,7 @@ from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
 from pysys.utils.threadutils import BackgroundThread
-from pysys.process.monitor import ProcessMonitor, ProcessMonitorTextFileHandler
+from pysys.process.monitor import DEFAULT_PROCESS_MONITOR, ProcessMonitorTextFileHandler
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 from pysys.utils.pycompat import *
@@ -269,7 +269,7 @@ class BaseTest(ProcessUser):
 			handlers.append(ProcessMonitorTextFileHandler(file))
 		
 		self.log.debug("Starting process monitor for %r", process)
-		monitor = ProcessMonitor(owner=self, process=process, interval=interval, handlers=handlers, **pmargs).start()
+		monitor = DEFAULT_PROCESS_MONITOR(owner=self, process=process, interval=interval, handlers=handlers, **pmargs).start()
 		assert hasattr(monitor, '_getData'), 'Start did not return a process monitor instance'
 		self.monitorList.append(monitor)
 		return monitor

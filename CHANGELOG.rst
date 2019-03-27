@@ -64,46 +64,44 @@ Changes affecting compatibility
   See https://github.com/pysys-test/pysys-test/issues/9 for more information. 
 
 - If you have created a custom subclass of `ProcessMonitor` you will need to 
-  rework it, as this class has been rewritten in order to make it easier 
-  to maintain and extend. For example it is now easier to add extra 
-  monitoring statistics, or providing custom handlers for the data for 
-  different file formats or automated checking of results. There is now a 
-  common `BaseProcessMonitor` superclass and separate subclasses for each 
-  operating system, which expose the methods for getting data. 
-  `ProcessMonitor` is now an alias pointing to the current class for this 
-  operating system. If you have written a custom subclass of ProcessMonitor 
+  rework it, as this class no longer exists and the API has been rewritten in 
+  order to make it easier to maintain and extend. 
+  For example it is now easier to add extra monitoring statistics (by 
+  subclassing `BaseProcessMonitor`), or provide custom handlers for the data 
+  for different file formats or automated checking of results (by subclassing 
+  `BaseProcessMonitorHandler`; no longer requires subclassing the process 
+  monitor itself). If you have written a custom subclass of ProcessMonitor 
   to customize what data is gathered you will need to rework it when moving to 
   this version of PySys. If you need to provide custom code to handle the 
   generated statistics, you can now do that by passing a 
   `BaseProcessMonitorHandler` subclass to `BaseTest.startProcessMonitor`. 
   
 - The default process monitor file format has changed in this release to 
-  provide consistency across all operating systems, because it did not 
-  accurately match the documentation, and because some of the Windows-specific 
-  statistics such as thread/handle count were not correct and cannot easily be 
-  obtained. 
+  provide consistency across all operating systems, and because the 
+  Windows-specific statistics private/thread/handle count were not correct and 
+  cannot easily be obtained in a robust way. If you need these, or wish to 
+  use a wider set of monitoring statistics than PySys provides in the box, it 
+  is easy to create a custom `BaseProcessMonitor` subclass, perhaps using a 
+  cross-platform Python library such as `psutil` to gather the data. 
   
   Previously there was no header line, and on Windows the columns were::
   
-     %d/%m/%y %H:%M:%S CPU Resident Virtual Private Threads Handles
+     dd/mm/yy HH:MM:SS, CPU, Resident, Virtual, Private, Threads, Handles
   
   and on Linux::
 
-     %m/%d/%y %H:%M:%S CPU Resident Virtual
+     mm/dd/yy HH:MM:SS, CPU, Resident, Virtual
   
-  In this release of PySys the ISO standard date format is used and only the 
-  columns supported on all operating systems are included::
+  In this release there is header line comment at the start of the file 
+  beginning with `#` indicating the column headings. Also a standard date 
+  format is used, and only the columns supported on all operating systems are 
+  included::
   
-     %Y-%m-%d %H:%M:%S CPU Resident Virtual
+     yyyy-mm-dd %H:%M:%S, CPU, Resident, Virtual
   
-  Additional columns may be added to the default file in future releases. 
-  
-  There is also a (machine and human readable) header line beginning with `#` 
-  so that each file is self-explanatory. 
-  
-  This behaviour can be customized by adding code to your runner's `setup` 
-  method. For example to go back to the previous file format (although 
-  without the Windows-specific columns, which are no longer supported)::
+  This behaviour can be customized for all your testcases from your runner's 
+  `setup` method. For example to go back to the previous file format (although 
+  without the Windows-specific columns, which are no longer supported), add::
   
     TabSeparatedFileHandler.setDefaults(
         [
@@ -121,13 +119,11 @@ Changes affecting compatibility
   
   In the previous release, the Linux process monitor also gathered data 
   from child processes (that were running at the moment the monitor was 
-  started). As this functionality was not documented, was inconsistent with 
-  other platforms, and generated incorrect results (memory usage was reported 
-  for a random process from the list, not accumulated across them) this has 
-  been removed. Optional support for monitoring child processes may be re-added 
-  in a future PySys release. Although child process are not included in the 
-  statistics for each process, the contributions from its child threads are 
-  included. 
+  started). As this functionality was Linux-specific, not documented, and 
+  generated incorrect results this has been removed. Optional support for 
+  monitoring child processes may be re-added in a future PySys release. 
+  Although child process are not included in the statistics for each process, 
+  the contributions from its child threads are included. 
 
 New features
 ------------

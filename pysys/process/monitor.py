@@ -18,7 +18,7 @@
 from __future__ import print_function
 
 __all__ = ['BaseProcessMonitorHandler', 'BaseProcessMonitorHandler', 'ProcessMonitorTextFileHandler', 'ProcessMonitorKey', 
-	'ProcessMonitor', 'WindowsProcessMonitor', 'UnixProcessMonitor']
+	'DEFAULT_PROCESS_MONITOR', 'WindowsProcessMonitor', 'UnixProcessMonitor']
 
 """
 Contains the L{BaseProcessMonitor} class, L{ProcessMonitorKey} constants for identifying 
@@ -524,7 +524,7 @@ class UnixProcessMonitor(BaseProcessMonitor):
 			return data
 			
 if PLATFORM=='win32':
-	ProcessMonitor = WindowsProcessMonitor
-	"""Specifies the L{BaseProcessMonitor} subclass to be used for the current platform. """
+	DEFAULT_PROCESS_MONITOR = WindowsProcessMonitor
+	"""Specifies the default L{BaseProcessMonitor} subclass to be used for the current platform. """
 else:
-	ProcessMonitor = UnixProcessMonitor
+	DEFAULT_PROCESS_MONITOR = UnixProcessMonitor
