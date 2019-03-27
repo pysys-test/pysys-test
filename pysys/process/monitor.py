@@ -15,15 +15,12 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from __future__ import print_function
-
-__all__ = ['BaseProcessMonitor', 'BaseProcessMonitorHandler', 'ProcessMonitorTextFileHandler', 'ProcessMonitorKey']
-
 """
 Contains the process monitoring API - the L{BaseProcessMonitor} class, L{ProcessMonitorKey} constants for identifying 
 columns and the default L{ProcessMonitorTextFileHandler} class for writing monitoring information to a file. 
 """
 
+__all__ = ['BaseProcessMonitor', 'BaseProcessMonitorHandler', 'ProcessMonitorTextFileHandler', 'ProcessMonitorKey']
 
 import os, sys, string, time, threading, logging, multiprocessing
 from pysys import process_lock
@@ -55,23 +52,29 @@ class ProcessMonitorKey(object):
 	
 	The maximum value is 100 multiplied by the number of CPU cores 
 	(as given by `multiprocessing.cpu_count()`). 
+	
+	The type is C{int}. 
 	"""
 
 	CPU_TOTAL_UTILIZATION = 'CPU total %'
 	"""Total utilization % of all available CPU cores, with a maximum value of 100%.
 	
 	If you have 2 cores and one of them is 50% utilized, the value would be 25%.
+	
+	The type is C{int}. 
 	"""
 	
 	MEMORY_RESIDENT_KB = 'Resident memory kB'
 	"""
 	Resident / working set memory usage. 
 	
-	This is the non-swapped physical memory, and is usually a good key to use 
-	for checking for memory leaks and excessive memory usage. 
+	This is the non-swapped physical memory, and is usually a good statistic to 
+	use for checking for memory leaks and excessive memory usage. 
 
 	On Unix it is equivalent to `rss`/`RES` and on Windows to the working set 
 	memory usage.
+	
+	The type is C{int}. 
 	"""
 	
 	MEMORY_VIRTUAL_KB = 'Virtual memory kB'
@@ -79,7 +82,9 @@ class ProcessMonitorKey(object):
 	Virtual memory of the process including memory that is swapped out. 
 	
 	On Unix it is equivalent to `vsz`/`VIRT`, and on Windows to the 
-	current page file usage. . 
+	current page file usage. 
+	
+	The type is C{int}. 
 	"""
 	
 	DATE_TIME = 'Time'
@@ -89,7 +94,7 @@ class ProcessMonitorKey(object):
 
 	DATE_TIME_LEGACY = 'Time (legacy)'
 	"""String representation of the date and local time for this sample in 
-	a format compatible with older versions of PySys. 
+	a format compatible with v1.3.0 and earlier versions of PySys. 
 	
 	This is %d/%m/%y %H:%M:%S on Windows and %m/%d/%y %H:%M:%S on Unix. 
 	@deprecated: Use L{DATE_TIME} if possible. 
@@ -97,7 +102,10 @@ class ProcessMonitorKey(object):
 	
 	SAMPLE = 'Sample'
 	"""A counter starting from 1 and incrementing with each new set of 
-	sample data."""
+	sample data.
+	
+	The type is C{int}. 
+	"""
 	
 
 class BaseProcessMonitorHandler(object):
@@ -110,8 +118,9 @@ class BaseProcessMonitorHandler(object):
 		Called on a background thread each time a new sample of monitoring 
 		data is available. 
 		
-		@param data: a dictionary whose keys are from L{ProcessMonitorKeys} 
-		and values are int, float or string values. 
+		@param data: a dictionary whose keys are from L{ProcessMonitorKey} 
+		(or any new keys added by custom process monitor implementations). 
+		The dictionary values are of type C{int}, C{float} or C{string}. 
 		
 		@param kwargs: Reserved for future use. 
 		"""
@@ -144,6 +153,9 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 		]
 	"""The default columns to write to the file.
 	
+	If using a process monitor that comes with PySys, the values are from 
+	L{ProcessMonitorKey}.
+	
 	Additional columns may be added to the end of this list in future 
 	releases. 
 	
@@ -168,8 +180,8 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 	@staticmethod
 	def setDefaults(columns, delimiter=None, writeHeaderLine=None):
 		"""Static helper method for setting the default columns or 
-		writeHeaderLine setting for all tests that use the 
-		ProcessMonitorTextFileHandler. 
+		C{writeHeaderLine} setting for all tests that use the 
+		C{rocessMonitorTextFileHandler}. 
 		
 		This method could be called from a custom runner's 
 		L{pysys.baserunner.BaseRunner.setup} method in order to take effect 
@@ -179,7 +191,7 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 		could cause unwanted interference between different testcases. 
 		
 		@param columns: A list of the colums to be included, using values from
-		L{ProcessMonitorKeys}. Since additional columns may be added to the end 
+		L{ProcessMonitorKey}. Since additional columns may be added to the end 
 		of L{DEFAULT_COLUMNS} in future releases, when calling this method you 
 		should specify all the columns you want explicitly including the 
 		current defaults rather than writing `DEFAULT_COLUMNS+[...]`. 
@@ -203,12 +215,12 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 		@param file: An absolute path string or open file handle to which 
 		process monitor data lines will be written. 
 		
-		@param: An ordered list of the columns from L{ProcessMonitorKeys} that 
-		should be included in the file. If not specifed, the columns specified 
+		@param columns: An ordered list of the columns from L{ProcessMonitorKey} that 
+		should be included in the file. If not specified, the columns specified 
 		by L{DEFAULT_COLUMNS} will be used. 
 		
 		@param delimiter: The delimiter string used between each column. 
-		If not specifed, the string specified by L{DEFAULT_DELIMITER} will be 
+		If not specified, the string specified by L{DEFAULT_DELIMITER} will be 
 		used. 
 		
 		@param writeHeaderLine: Determines whether a header line prefixed 
@@ -250,7 +262,7 @@ class BaseProcessMonitor(object):
 	from a running process using a background thread. 
 	
 	For detail on the statistic keys available from the standard 
-	process monitor classes see L{ProcessMonitorKeys}.
+	process monitor classes see L{ProcessMonitorKey}.
 	
 	The most convenient way to start the default process monitor for this 
 	operating system is to use L{pysys.basetest.BaseTest.startProcessMonitor}.
@@ -340,6 +352,7 @@ class BaseProcessMonitor(object):
 		starts the background thread. 
 		
 		@returns: This instance. 
+		@rtype: L{BaseProcessMonitor}
 		"""
 		# executed on main thread - the best place to perform initial setup so we 
 		# get an immediate error if it fails
