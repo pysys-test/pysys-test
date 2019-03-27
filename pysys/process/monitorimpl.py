@@ -84,7 +84,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 		data = {}
 
 		# multiply by 100 to get utilization as a %
-		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = (100*(newvalues['cputime_ns']-lastvalues['cputime_ns']))/(newvalues['time_ns']-lastvalues['time_ns'])
+		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = (100*(newvalues['cputime_ns']-lastvalues['cputime_ns']))//(newvalues['time_ns']-lastvalues['time_ns'])
 
 		self._lastValues = newvalues
 		
