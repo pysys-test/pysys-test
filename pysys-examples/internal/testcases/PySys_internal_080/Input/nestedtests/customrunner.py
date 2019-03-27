@@ -7,7 +7,7 @@ class MyCustomRunner(BaseRunner):
 	def setup(self, **kwargs):
 		super(MyCustomRunner, self).setup(**kwargs)
 		# matches what we put into changelog to document how to go back to old behaviour
-		TabSeparatedFileHandler.setDefaults(
+		ProcessMonitorTextFileHandler.setDefaults(
         [
            ProcessMonitorKey.DATE_TIME_LEGACY, 
            ProcessMonitorKey.CPU_CORE_UTILIZATION, 

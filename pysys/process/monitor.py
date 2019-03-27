@@ -17,12 +17,12 @@
 
 from __future__ import print_function
 
-__all__ = ['BaseProcessMonitorHandler', 'BaseProcessMonitorHandler', 'TabSeparatedFileHandler', 'ProcessMonitorKey', 
+__all__ = ['BaseProcessMonitorHandler', 'BaseProcessMonitorHandler', 'ProcessMonitorTextFileHandler', 'ProcessMonitorKey', 
 	'ProcessMonitor', 'WindowsProcessMonitor', 'LinuxProcessMonitor', 'SolarisProcessMonitor']
 
 """
 Contains the L{BaseProcessMonitor}, L{ProcessMonitorKey} constants for identifying 
-columns and the default L{TabSeparatedFileHandler} class for writing monitoring 
+columns and the default L{ProcessMonitorTextFileHandler} class for writing monitoring 
 information to a file. 
 """
 
@@ -147,9 +147,9 @@ class BaseProcessMonitorHandler(object):
 		"""
 		pass
 
-class TabSeparatedFileHandler(BaseProcessMonitorHandler):
-	"""A ProcessMonitor handler that writes values to a file with 
-	tab separated values (.tsv). 
+class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
+	"""Handles process monitor data by writing the data as delimited values to 
+	a file, usually with tab separated values (.tsv). 
 	
 	A new line is written every time the process monitor polls for a new sample 
 	of data. By default a header line starting with `#` is included at the 
@@ -180,12 +180,19 @@ class TabSeparatedFileHandler(BaseProcessMonitorHandler):
 
 	See L{setDefaults}.
 	"""
+
+	DEFAULT_DELIMITER = u'\t'
+	"""
+	The delimiter used between each column. Usually a tab character. 
+
+	See L{setDefaults}.
+	"""
 	
 	@staticmethod
-	def setDefaults(columns, writeHeaderLine=None):
+	def setDefaults(columns, delimiter=None, writeHeaderLine=None):
 		"""Static helper method for setting the default columns or 
 		writeHeaderLine setting for all tests that use the 
-		TabSeparatedFileHandler. 
+		ProcessMonitorTextFileHandler. 
 		
 		This method could be called from a custom runner's 
 		L{pysys.baserunner.BaseRunner.setup} method in order to take effect 
@@ -200,14 +207,22 @@ class TabSeparatedFileHandler(BaseProcessMonitorHandler):
 		should specify all the columns you want explicitly including the 
 		current defaults rather than writing `DEFAULT_COLUMNS+[...]`. 
 		
+		@param delimiter: The delimiter string used between each column. 
+				
 		@param writeHeaderLine: Specifies whether a header line beginning 
 		with `#` should be written at the start of the file. 
 		"""
-		if columns: TabSeparatedFileHandler.DEFAULT_COLUMNS = list(columns)
-		if writeHeaderLine != None: TabSeparatedFileHandler.DEFAULT_WRITE_HEADER_LINE = writeHeaderLine
+		if columns: ProcessMonitorTextFileHandler.DEFAULT_COLUMNS = list(columns)
+		if writeHeaderLine is not None: ProcessMonitorTextFileHandler.DEFAULT_WRITE_HEADER_LINE = writeHeaderLine
+		if delimiter is not None: ProcessMonitorTextFileHandler.DEFAULT_DELIMITER = delimiter
 	
-	def __init__(self, file, columns=None, writeHeaderLine=None):
+	def __init__(self, file, columns=None, delimiter=None, writeHeaderLine=None):
 		"""
+		Constructor. 
+		
+		Uses default values set on the instance unless keyword overrides 
+		are provided; see L{setDefaults}.
+
 		@param file: An absolute path string or open file handle to which 
 		process monitor data lines will be written. 
 		
@@ -215,11 +230,16 @@ class TabSeparatedFileHandler(BaseProcessMonitorHandler):
 		should be included in the file. If not specifed, the columns specified 
 		by L{DEFAULT_COLUMNS} will be used. 
 		
+		@param delimiter: The delimiter string used between each column. 
+		If not specifed, the string specified by L{DEFAULT_DELIMITER} will be 
+		used. 
+		
 		@param writeHeaderLine: Determines whether a header line prefixed 
 		by `#` will be written at the start of the file. If not overridden, the 
 		default is taken from L{DEFAULT_WRITE_HEADER_LINE}.
 		"""
 		self.columns = columns or self.DEFAULT_COLUMNS
+		self.delimiter = delimiter or self.DEFAULT_DELIMITER
 		assert file, 'file must be specified'
 		if isstring(file):
 			assert os.path.isabs(file), 'File must be an absolute path: %s'%file
@@ -232,12 +252,12 @@ class TabSeparatedFileHandler(BaseProcessMonitorHandler):
 
 		if writeHeaderLine is None: writeHeaderLine = self.DEFAULT_WRITE_HEADER_LINE
 		if writeHeaderLine:
-			self.stream.write(u'#%s\n'%u'\t'.join(self.columns).replace(u' ',u'_'))
+			self.stream.write(u'#%s\n'%self.delimiter.join(self.columns).replace(u' ',u'_'))
 		self.stream.flush()
 	
 	def handleData(self, data):
 		values = [data.get(k,None) for k in self.columns]
-		line = u'\t'.join([
+		line = self.delimiter.join([
 			(str(d) if d is not None else u'-1')
 			for d in values])
 		self.stream.write(line)
@@ -447,7 +467,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 	"""
 	Windows implementation of the process monitor. 
 	
-	Uses the `GetProcessMemoryInfo`, and `GetProcessTimes APIs. 
+	Uses the `GetProcessMemoryInfo`, and `GetProcessTimes` APIs. 
 	The UserTime and KernelTime are summed together to calculate the CPU 
 	utilization for this process. 
 	"""
@@ -514,7 +534,7 @@ class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
 					ProcessMonitorKey.MEMORY_VIRTUAL_KB:    int(info[2]),
 				}
 
-class UnixProcessMonitor(BaseProcessMonitor):
+class LinuxProcessMonitor(BaseProcessMonitor):
 	"""
 	TODO
 	"""

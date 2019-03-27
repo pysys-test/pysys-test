@@ -33,7 +33,7 @@ from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
 from pysys.utils.threadutils import BackgroundThread
-from pysys.process.monitor import ProcessMonitor, TabSeparatedFileHandler
+from pysys.process.monitor import ProcessMonitor, ProcessMonitorTextFileHandler
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 from pysys.utils.pycompat import *
@@ -227,14 +227,15 @@ class BaseTest(ProcessUser):
 		and noise in the last few samples of the data. 
 		
 		You can specify a `file` and/or a list of `handlers`. If you use 
-		`file`, a default L{pysys.process.monitor.TabSeparatedFileHandler} 
-		instance is created with default columns specified by 
-		L{pysys.process.monitor.TabSeparatedFileHandler.DEFAULT_COLUMNS}; 
-		if you wish to customize this for an individual test create your own 
-		TabSeparatedFileHandler instance and pass it to handlers instead. 
-		Additional default columns be added in future releases. 
+		`file`, a default L{pysys.process.monitor.ProcessMonitorTextFileHandler} 
+		instance is created to produce tab-delimited lines with default columns 
+		specified by 
+		L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS}. 
+		If you wish to customize this for an individual test create your own 
+		C{ProcessMonitorTextFileHandler} instance and pass it to handlers instead. 
+		Additional default columns may be added in future releases. 
 		
-		@param process: The process handle returned from the L{startProcess} method
+		@param process: The process handle returned from the L{startProcess} method.
 		
 		@param interval: The polling interval in seconds between collection of 
 		monitoring statistics. 
@@ -242,12 +243,12 @@ class BaseTest(ProcessUser):
 		@param file: The name of a tab separated values (.tsv) file to write to, 
 		for example 'monitor-myprocess.tsv'. 
 		
-		A default L{pysys.process.monitor.TabSeparatedFileHandler} instance is 
+		A default L{pysys.process.monitor.ProcessMonitorTextFileHandler} instance is 
 		created if this parameter is specified, with default columns from 
-		L{pysys.process.monitor.TabSeparatedFileHandler.DEFAULT_COLUMNS} . 
+		L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS} . 
 		
 		@param handlers: A list of L{pysys.process.monitor.BaseProcessMonitorHandler} 
-		instances such as L{pysys.process.monitor.TabSeparatedFileHandler}, 
+		instances (such as L{pysys.process.monitor.ProcessMonitorTextFileHandler}), 
 		which will process monitoring data every polling interval. This can be 
 		used for recording results (for example in a file) or for dynamically 
 		analysing them and reporting problems. 
@@ -265,7 +266,7 @@ class BaseTest(ProcessUser):
 		if isstring(file): file = os.path.join(self.output, file)
 		handlers = [] if handlers is None else list(handlers)
 		if file:
-			handlers.append(TabSeparatedFileHandler(file))
+			handlers.append(ProcessMonitorTextFileHandler(file))
 		
 		self.log.debug("Starting process monitor for %r", process)
 		monitor = ProcessMonitor(owner=self, process=process, interval=interval, handlers=handlers, **pmargs).start()

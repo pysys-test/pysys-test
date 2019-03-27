@@ -22,10 +22,10 @@ class PySysTest(BaseTest):
 		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.tsv', numProcessors='10')
 
 		# test all supported stats, and also use of stream rather than filename
-		filehandle = openfile(self.output+'/monitor-all.tsv', 'w', encoding='utf-8')
+		filehandle = openfile(self.output+'/monitor-all.csv', 'w', encoding='utf-8')
 		self.addCleanupFunction(lambda: filehandle.close())
 		pm_all = self.startProcessMonitor(p, interval=0.1,handlers=[
-			TabSeparatedFileHandler(file=filehandle, columns=[
+			ProcessMonitorTextFileHandler(file=filehandle, columns=[
 				ProcessMonitorKey.DATE_TIME,
 				ProcessMonitorKey.SAMPLE,
 				ProcessMonitorKey.CPU_CORE_UTILIZATION,
@@ -35,7 +35,7 @@ class PySysTest(BaseTest):
 				ProcessMonitorKey.MEMORY_PRIVATE_KB,
 				ProcessMonitorKey.THREADS,
 				ProcessMonitorKey.KERNEL_HANDLES,
-			])
+			], delimiter=',')
 		])
 
 		pidmonitor = self.startProcessMonitor(p.pid, interval=0.1, file=self.output+'/monitor-pid.tsv')
@@ -44,7 +44,7 @@ class PySysTest(BaseTest):
 		self.waitForSignal('monitor-default.tsv', expr='.', condition='>=5', ignores=['#.*'])
 		self.waitForSignal('monitor-numproc.tsv', expr='.', condition='>=5', ignores=['#.*'])
 		self.waitForSignal('monitor-pid.tsv', expr='.', condition='>=5', ignores=['#.*'])
-		self.waitForSignal('monitor-all.tsv', expr='.', condition='>=5', ignores=['#.*'])
+		self.waitForSignal('monitor-all.csv', expr='.', condition='>=5', ignores=['#.*'])
 		assert pm.running(), 'monitor is still running'
 		assert pidmonitor.running(), 'pid monitor is still running'
 		self.stopProcessMonitor(pidmonitor)
@@ -64,7 +64,7 @@ class PySysTest(BaseTest):
 	def validate(self):
 		self.logFileContents('monitor-default.tsv')
 		self.logFileContents('monitor-numproc.tsv')
-		self.logFileContents('monitor-all.tsv')
+		self.logFileContents('monitor-all.csv')
 		self.logFileContents('myoutdir/NestedTest/monitor-legacy.tsv')
 
 		with open(self.output+'/myoutdir/NestedTest/monitor-legacy.tsv') as f:
@@ -97,21 +97,22 @@ class PySysTest(BaseTest):
 				except Exception:
 					self.addOutcome(FAILED, 'monitor-default.tsv sample line [%d] is not a number: "%s"'%line[i])
 
-		with open(self.output+'/monitor-all.tsv') as f:
+		with open(self.output+'/monitor-all.csv') as f:
 			header = f.readline()
 			self.assertTrue(header.startswith('#')) 
 			f.readline() # ignore first line of results
 			line = f.readline().strip() 
-		# ensure tab-delimited output has same number of items as header
-		line = line.split('\t')
+		# ensure delimited output has same number of items as header
+		self.assertGrep('monitor-all.csv', expr='\t', contains=False) # no tabs, since we use commas for this file
+		line = line.split(',')
 		self.log.info('Sample log line:   %s', line)
-		self.assertThat('%d == %d', len(line), len(header.split('\t'))) # same number of items in header line as normal lines
+		self.assertThat('%d == %d', len(line), len(header.split(','))) # same number of items in header line as normal lines
 		for i in range(len(line)):
 			if i > 0: # apart from the first column, every header should be a valid float or int
 				try:
 					float(line[i])
 				except Exception:
-					self.addOutcome(FAILED, 'monitor-default.tsv sample line [%d] is not a number: "%s"'%(i, line[i]))
+					self.addOutcome(FAILED, 'monitor-all.csv sample line [%d] is not a number: "%s"'%(i, line[i]))
 		
 		# check files have at least some valid (non -1 ) values
 		self.assertGrep('monitor-default.tsv', expr='\t[0-9]+')

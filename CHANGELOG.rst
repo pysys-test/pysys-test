@@ -326,9 +326,11 @@ Bug fixes
   especially on Windows where negative values were sometimes returned 
   (due to integer overflow), incorrect (and very time-consuming) aggregation 
   based on the child threads that existed at the time the process monitor was 
-  first started, and that the statistics might be returned for the 
-  wrong process due to the way the performance counter API changes which 
-  process is being monitored when processes of the same name terminate. 
+  first started, lack of support for non-English Windows installations 
+  (which have localized counter names) and that the statistics might be 
+  returned for the wrong process due to the way the performance counter API 
+  changes which process is being monitored when processes of the same name 
+  terminate. 
   On Linux the statistics were sometimes wrong due to undocumented and 
   in some cases incorrect aggregation across child processes, which has now 
   been removed. The values are now correct on all operating systems. 
