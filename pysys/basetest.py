@@ -215,8 +215,9 @@ class BaseTest(ProcessUser):
 	def startProcessMonitor(self, process, interval=5, file=None, handlers=[], **pmargs):
 		"""Start a separate thread to log process statistics to logfile, and return a handle to the process monitor.
 		
-		This method uses the L{pysys.process.monitor} module to perform logging of the process statistics, 
-		starting the monitor as a separate background thread. 
+		This method uses the L{pysys.process.monitor} module to perform logging 
+		of the process statistics, starting the monitor as a separate 
+		background thread. 
 		
 		All process monitors not explicitly stopped using the returned handle 
 		are automatically stopped on completion of the test via the L{cleanup} 
@@ -252,11 +253,13 @@ class BaseTest(ProcessUser):
 		analysing them and reporting problems. 
 		
 		@param pmargs: Keyword arguments to allow advanced parameterization 
-		of the process monitor class. It is an error to specify any parameters 
+		of the process monitor class, which will be passed to its 
+		constructor. It is an error to specify any parameters 
 		not supported by the process monitor class on each platform. 
 				
-		@return: An object representing the process monitor (L{pysys.process.monitor.ProcessMonitor})
-		@rtype: pysys.process.monitor.ProcessMonitor
+		@return: An object representing the process monitor 
+		(L{pysys.process.monitor.BaseProcessMonitor}).
+		@rtype: pysys.process.monitor.BaseProcessMonitor
 		
 		"""
 		if isstring(file): file = os.path.join(self.output, file)
