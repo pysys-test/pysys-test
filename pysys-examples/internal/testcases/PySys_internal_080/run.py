@@ -32,9 +32,6 @@ class PySysTest(BaseTest):
 				ProcessMonitorKey.CPU_TOTAL_UTILIZATION,
 				ProcessMonitorKey.MEMORY_RESIDENT_KB,
 				ProcessMonitorKey.MEMORY_VIRTUAL_KB,
-				ProcessMonitorKey.MEMORY_PRIVATE_KB,
-				ProcessMonitorKey.THREADS,
-				ProcessMonitorKey.KERNEL_HANDLES,
 			], delimiter=',')
 		])
 
@@ -74,10 +71,7 @@ class PySysTest(BaseTest):
 		# ensure tab-delimited output has same number of items as header
 		line = line.split('\t')
 		self.log.info('Sample legacy log line:   %s', line)
-		if IS_WINDOWS:
-			self.assertThat('%d == 7', len(line)) 
-		else:
-			self.assertThat('%d == 4', len(line)) 
+		self.assertThat('%d == 4', len(line)) 
 		self.assertGrep('myoutdir/NestedTest/monitor-legacy.tsv', expr='#.*', contains=False) # no header line
 		self.log.info('')
 		
@@ -113,6 +107,7 @@ class PySysTest(BaseTest):
 					float(line[i])
 				except Exception:
 					self.addOutcome(FAILED, 'monitor-all.csv sample line [%d] is not a number: "%s"'%(i, line[i]))
+		self.assertGrep('monitor-all.csv', expr='.*[.]', contains=False) # no floats, currently we expect all our stats to be integral
 		
 		# check files have at least some valid (non -1 ) values
 		self.assertGrep('monitor-default.tsv', expr='\t[0-9]+')

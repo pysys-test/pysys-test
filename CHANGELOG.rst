@@ -102,18 +102,11 @@ Changes affecting compatibility
   so that each file is self-explanatory. 
   
   This behaviour can be customized by adding code to your runner's `setup` 
-  method. For example to go back to the previous file format::
+  method. For example to go back to the previous file format (although 
+  without the Windows-specific columns, which are no longer supported)::
   
     TabSeparatedFileHandler.setDefaults(
         [
-           ProcessMonitorKey.DATE_TIME_LEGACY, 
-           ProcessMonitorKey.CPU_CORE_UTILIZATION, 
-           ProcessMonitorKey.MEMORY_RESIDENT_KB,
-           ProcessMonitorKey.MEMORY_VIRTUAL_KB,
-           ProcessMonitorKey.MEMORY_PRIVATE_KB,
-           #ProcessMonitorKey.THREADS,
-           #ProcessMonitorKey.KERNEL_HANDLES
-        ] if IS_WINDOWS else [
            ProcessMonitorKey.DATE_TIME_LEGACY, 
            ProcessMonitorKey.CPU_CORE_UTILIZATION, 
            ProcessMonitorKey.MEMORY_RESIDENT_KB,

@@ -84,27 +84,6 @@ class ProcessMonitorKey(object):
 	current page file usage. . 
 	"""
 	
-	MEMORY_PRIVATE_KB = 'Private memory kB'
-	"""
-	Memory allocated to this process that cannot be shared with other processes. Windows only. 
-
-	Calculated from the `Private Bytes` performance counter. 
-	"""
-	
-	THREADS = 'Threads' # TODO: remove this, can't support without pdh counters
-	"""
-	Total number of threads for this process. 
-	
-	Not available on all operating systems. 
-	"""
-	
-	KERNEL_HANDLES = 'Kernel handles' # TODO: remove this, can't support without pdh counters
-	"""
-	Total number of open kernel object handles. Windows-only.
-	
-	Corresponds to the 'Handle Count' performance counter. 
-	"""
-	
 	DATE_TIME = 'Time'
 	"""String representation of the date and local time for this sample 
 	in yyyy-mm-dd HH:MM:SS format. 
@@ -240,6 +219,7 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 		"""
 		self.columns = columns or self.DEFAULT_COLUMNS
 		self.delimiter = delimiter or self.DEFAULT_DELIMITER
+		if PY2 and isinstance(self.delimiter, str): self.delimiter=self.delimiter.decode('utf-8')
 		assert file, 'file must be specified'
 		if isstring(file):
 			assert os.path.isabs(file), 'File must be an absolute path: %s'%file
