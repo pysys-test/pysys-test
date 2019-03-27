@@ -297,7 +297,6 @@ def makeProject(args):
 		print("       -h | --help                 print this message")
 		print("       -d | --dir      STRING      root directory in which to create project configuration file")
 		print("                                   (default is current working dir)")
-		print("")
 		sys.exit()
 
 	optionString = 'hd:'
@@ -335,7 +334,7 @@ def makeProject(args):
 	if os.path.exists(dir):
 		for f in os.listdir(dir):
 			if f in DEFAULT_PROJECTFILE:
-				print("Project file already exists: %s"%f)
+				print("Cannot create as project file already exists: %s"%os.path.normpath(dir+'/'+f))
 				sys.exit(1)
 
 	createProjectConfigurationFile(templates[tmpl], dir)
@@ -656,18 +655,22 @@ def cleanTest(args):
 
 
 def main(args):
-
+	# load project only for options where it's necessary, otherwise we get 
+	# warnings about missing project file for first time users
 	if len(args) < 1: 
 		printUsage()
 	else:
 		mode = args[0]
 		if mode == "run":
+			loadproject(os.getcwd())
 			runTest(args[1:])
 		elif mode == "make":
+			loadproject(os.getcwd())
 			makeTest(args[1:])
 		elif mode == "makeproject":
 			makeProject(args[1:])
 		elif mode == "print":
+			loadproject(os.getcwd())
 			printTest(args[1:])
 		elif mode == "clean":
 			cleanTest(args[1:])

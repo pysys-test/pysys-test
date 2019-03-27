@@ -20,9 +20,6 @@ import pysys
 def main(args=None):
 	"""The entry-point for invoking PySys."""
 	import os, sys
-	from pysys.constants import loadproject
-	loadproject(os.getcwd())
-	
 	import pysys.launcher.console
 	return pysys.launcher.console.main(args or sys.argv[1:])
 if __name__ == "__main__": 
