@@ -24,6 +24,8 @@ from pysys import __version__
 from pysys.utils.loader import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.stringutils import compareVersions
+from pysys.utils.fileutils import mkdir
+from pysys.utils.pycompat import openfile
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
@@ -342,6 +344,27 @@ class XMLProjectParser(object):
 		cls = getattr(module, classname)
 		return cls, optionsDict
 
+def getProjectTemplates():
+	"""Get a list of available templates that can be used for creating a new project configuration. 
+	
+	@return: A dict, where each value is an absolute path to an XML template file 
+	and each key is the display name for that template. 
+	"""
+	templatedir = os.path.dirname(__file__)+'/templates/project'
+	templates = { t.replace('.xml',''): templatedir+'/'+t 
+		for t in os.listdir(templatedir) if t.endswith('.xml')}
+	assert templates, 'No project templates found in %s'%templatedir
+	return templates
+
+def createProjectConfigurationFile(templatepath, targetdir):
+	"""Create a new project configuration file in the specified targetdir. 
+	"""
+	mkdir(targetdir)
+	with openfile(templatepath, encoding='ascii') as src:
+		with openfile(os.path.abspath(targetdir+'/'+DEFAULT_PROJECTFILE[0]), 'w', encoding='ascii') as target:
+			for l in src:
+				# TODO: replacements
+				target.write(l)
 
 class Project(object):
 	"""Class detailing project specific information for a set of PySys tests.
