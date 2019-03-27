@@ -29,7 +29,7 @@ from pysys.utils.pycompat import *
 
 
 if PLATFORM=='win32' and 'epydoc' not in sys.modules:
-	import win32api, win32pdh, win32con, win32process
+	import win32api, win32pdh, win32con, win32process # pragma: no cover
 
 log = logging.getLogger('pysys.processmonitor')
 
@@ -340,7 +340,7 @@ class BaseProcessMonitor(object):
 			"""The count of available CPU cores on this host, used 
 			for scaling up the CPU_TOTAL_UTILIZATION. 
 			"""
-		except Exception as ex:
+		except Exception as ex: # pragma: no cover
 			log.debug('Failed to get multiprocessing.cpu_count: %s', ex)
 			self._cpuCount = 1
 		
