@@ -92,7 +92,7 @@ Changes affecting compatibility
 
      mm/dd/yy HH:MM:SS, CPU, Resident, Virtual
   
-  In this release there is header line comment at the start of the file 
+  In this release there is a header line comment at the start of the file 
   beginning with `#` indicating the column headings. Also a standard date 
   format is used, and only the columns supported on all operating systems are 
   included::
@@ -103,7 +103,7 @@ Changes affecting compatibility
   `setup` method. For example to go back to the previous file format (although 
   without the Windows-specific columns, which are no longer supported), add::
   
-    TabSeparatedFileHandler.setDefaults(
+    ProcessMonitorTextFileHandler.setDefaults(
         [
            ProcessMonitorKey.DATE_TIME_LEGACY, 
            ProcessMonitorKey.CPU_CORE_UTILIZATION, 
@@ -111,10 +111,10 @@ Changes affecting compatibility
            ProcessMonitorKey.MEMORY_VIRTUAL_KB,
         ], writeHeaderLine=False)
 
-  Also note that the numProcessors keyword argument to ProcessMonitor is 
+  Also note that the numProcessors keyword argument to `startProcessMonitor` is 
   deprecated. For now it can still be used to scale down the 
-  CPU_CORE_UTILIZATION value but it is not recommended for use and may be 
-  removed in a future release. Use CPU_TOTAL_UTILIZATION if you wish to see 
+  `CPU_CORE_UTILIZATION` value but it is not recommended for use and may be 
+  removed in a future release. Use `CPU_TOTAL_UTILIZATION` if you wish to see 
   total CPU usage across all cores. 
   
   In the previous release, the Linux process monitor also gathered data 
