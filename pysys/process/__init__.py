@@ -35,7 +35,7 @@ from pysys.constants import *
 
 # set the modules to import when imported the pysys.process package
 __all__ = [ "helper",
-			"monitor",
+			"monitor", "monitorimpl",
 			"user" ]
 
 # add to the __path__ to import the platform specific helper class

@@ -33,7 +33,8 @@ from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
 from pysys.utils.threadutils import BackgroundThread
-from pysys.process.monitor import DEFAULT_PROCESS_MONITOR, ProcessMonitorTextFileHandler
+from pysys.process.monitor import ProcessMonitorTextFileHandler
+from pysys.process.monitorimpl import DEFAULT_PROCESS_MONITOR
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 from pysys.utils.pycompat import *
