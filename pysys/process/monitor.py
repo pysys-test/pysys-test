@@ -69,21 +69,19 @@ class ProcessMonitorKey(object):
 	"""
 	Resident / working set memory usage. 
 	
-	This is usually a good way to check for memory leaks and excessive 
-	memory usage. 
+	This is the non-swapped physical memory, and is usually a good key to use 
+	for checking for memory leaks and excessive memory usage. 
 
-	Equivalent to `rss` on Unix; 
-	on Windows calculated from the `Working Set` performance counter. 
-
+	On Unix it is equivalent to `rss`/`RES` and on Windows to the working set 
+	memory usage.
 	"""
 	
 	MEMORY_VIRTUAL_KB = 'Virtual memory kB'
 	"""
-	Virtual memory / address space of the process. This can be significant larger than 
-	the amount actually allocated. 
+	Virtual memory of the process including memory that is swapped out. 
 	
-	Equivalent to `vsz` on Unix; 
-	on Windows calculated from the `Virtual Bytes` performance counter. 
+	On Unix it is equivalent to `vsz`/`VIRT`, and on Windows to the 
+	current page file usage. . 
 	"""
 	
 	MEMORY_PRIVATE_KB = 'Private memory kB'
@@ -259,11 +257,13 @@ class BaseProcessMonitor(object):
 	operating system is to use L{pysys.basetest.BaseTest.startProcessMonitor}.
 	
 	You can create a custom subclass if you need to add support for a new OS 
-	or return additional monitoring statistics.  
+	or return additional monitoring statistics. For example, you could 
+	create a custom process monitor for Java processes that returned 
+	heap size and thread count, or you could create a simple process monitor 
+	wrapper around a Python library that provides a wider set of monitoring 
+	statistics, such as psutil. 
 
-	The process monitor uses either the win32pdh module (on Windows) or the 
-	`ps` command line utility (Unix systems) to obtain statistics on a given 
-	process. Monitors are automatically terminated during cleanup at the end 
+	Monitors are automatically terminated during cleanup at the end 
 	of a test, or can be manually stopped before that using the L{stop} method. 
 	"""
 	
@@ -312,8 +312,12 @@ class BaseProcessMonitor(object):
 		is polled for new data. """
 		
 		self.thread = None
-		"""
-		The background thread that responsible for monitoring the process. 
+		""" The background thread that responsible for monitoring the process. """
+		
+		self._stopping = None
+		"""The C{threading.Event} that is set when the background thread 
+		should begin stopping. Call C{wait} on this object instead of sleeping 
+		to get fast wake-ups during cleanup. 
 		"""
 		
 		try:
@@ -331,10 +335,13 @@ class BaseProcessMonitor(object):
 		
 		Performs any required initialization of data structures then 
 		starts the background thread. 
+		
+		@returns: This instance. 
 		"""
 		# executed on main thread - the best place to perform initial setup so we 
 		# get an immediate error if it fails
 		self.thread = self.owner.startBackgroundThread(str(self), self.__backgroundThread)
+		return self
 	
 	def __str__(self): return 'ProcessMonitor<%s>'%('%s pid=%d'%(self.process,self.pid) if self.process else self.pid)
 	
@@ -362,6 +369,7 @@ class BaseProcessMonitor(object):
 				data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = data[ProcessMonitorKey.CPU_CORE_UTILIZATION] / self.__numProcessors
 	
 	def __backgroundThread(self, log, stopping):
+		self._stopping = stopping # for use by other process monitor methods
 		sample = 1
 		try:
 			while not stopping.is_set():
@@ -433,219 +441,61 @@ class BaseProcessMonitor(object):
 class WindowsProcessMonitor(BaseProcessMonitor):
 	"""
 	Windows implementation of the process monitor. 
+	
+	Uses the `GetProcessMemoryInfo`, and `GetProcessTimes APIs. 
+	The UserTime and KernelTime are summed together to calculate the CPU 
+	utilization for this process. 
 	"""
 	
 	def start(self):
-		# get the instance and instance number for this process id
-		try:
-			processInstanceName, processInstanceIndex = self.__win32GetInstance()
-		except Exception as ex: # happens occasionally for no good reason
-			log.debug('__win32GetInstance failed, will retry in case it was transient: %s', ex)
-			time.sleep(1)
-			processInstanceName, processInstanceIndex = self.__win32GetInstance()
-		
-		log.info('Windows process monitor for %s is using %s #%d', self, processInstanceName, processInstanceIndex) # TODO: remove
-		
-		# create the process performance counters
-		self._perfCounters={} # key=name, value=counter object
-		process_query=win32pdh.OpenQuery()
-		try:
-			for counter in self._getPerfCounters():
-				path = win32pdh.MakeCounterPath( (None, "Process", processInstanceName, None, processInstanceIndex, counter) )
-				self._perfCounters[counter] = win32pdh.AddCounter(process_query, path)
-		except Exception:
-			win32pdh.CloseQuery(process_query)
-		
-		# this will be dealt with in cleanup
-		self._perfQuery = process_query
-		
 		self._hPid = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, 0, self.pid)
 		self._lastValues = None
 
-		# in Python 3.7+ can use a more performant method
-		if hasattr(time, 'perf_counter_ns'):
-			self._timer_ns = lambda self: time.perf_counter_ns()
-		
-		BaseProcessMonitor.start(self)
+		return BaseProcessMonitor.start(self)
 
 	def _timer_ns(self):
-		""" Return a monotonically incrementing clock value in nanoseconds (10**3) that 
+		""" Return a monotonically incrementing clock value in nanoseconds (1000**3) that 
 		can be used to calculate performance results. 
 		"""
-		return win32api.GetTickCount()*1000000 # millis->nanos
+		return win32api.GetTickCount()*1000000 # millis->nanos.
 
 	def _cleanup(self):
 		self._hPid.close()
 
-		win32pdh.CloseQuery(self._perfQuery)
+	def _getData(self, sample):
+		while True: # loop until we have both a "new" and a "last" value for CPU time
+			if self._stopping.isSet(): raise Exception('Requested to stop')
 
-	def __win32GetInstance(self):
-		# used during startup to convert a pid to the (processInstanceName, processInstanceIndex) tuple that the PDH API uses to identify processes
-		
-		log.debug('WindowsProcessMonitor: enumerating processes')
-		
-		# EnumObjectItems just returns whatever data was retrieved by EnumObjects so must call this first
-		bRefresh = True
-		if bRefresh: win32pdh.EnumObjects(None, None, 0, 1)
-	
-		# get the list of running processes
-		log.debug('win32pdh.EnumObjectItems - getting process list')
-		counters, instances = win32pdh.EnumObjectItems(None, None, "Process", -1)
-		log.debug('win32pdh.EnumObjectItems - returned %d processes', len(instances))
-
-		log.debug('WindowsProcessMonitor: finding process')
-		
-		# convert to a dictionary of process instance, to number of instances
-		instanceDict = {}
-		for i in instances:
-			try: instanceDict[i] = instanceDict[i] + 1
-			except KeyError: instanceDict[i] = 0
-
-		def getpid(instance, inum):
-			object = "Process"
-			counter = "ID Process"
-			
-			# make the path, open and collect the query
-			path = win32pdh.MakeCounterPath((None, object, instance, None, inum, counter))
-			query = win32pdh.OpenQuery()
-			try:
-				hcounter = win32pdh.AddCounter(query, path)
-				win32pdh.CollectQueryData(query)
-				
-				# format the counter value
-				return win32pdh.GetFormattedCounterValue(hcounter, win32pdh.PDH_FMT_LARGE)[1]
-			finally:
-				win32pdh.CloseQuery(query)
-			
-		# loop through to locate the instance and inum of the supplied pid
-		numberedinstances = instanceDict.items()
-		
-		# rather than exhaustively searching all processes, start with the ones that have the right name; 
-		# we append the others only as a fallback
-		if self.process and self.process.command:
-			numberedinstances = [i for i in numberedinstances if i[0].lower()==os.path.basename(os.path.splitext(self.process.command)[0]).lower()]+numberedinstances
-			#for instance, numInstances in numberedinstances:
-			#	for inum in range(numInstances+1):
-			#		log.debug('PID: %s #%d = %d', instance, inum, getpid(instance, inum))
-		#assert False, (self.process.command, instanceDict, numberedinstances)
-		
-		for instance, numInstances in numberedinstances:
-			for inum in range(numInstances+1):
-				try:
-					value = getpid(instance, inum)
-					if value == self.pid:
-						log.debug('__win32GetInstance: pid %s has instance=%s, inum=%s', self.pid, instance, inum)
-						return instance, inum
-				except Exception as ex:
-					log.debug('__win32GetInstance: failed to get process id for %s: %s', instance, ex)
-		
-		raise Exception('Could not find running process %r'%(self.process or self.pid))
-
-	def _getPerfCounters(self):
-		""" Get the list of string counter names to be monitored. 
-		
-		These are passed to PdhMakeCounterPath. 
-		
-		Override this and L{_perfCountersToData} if you wish to monitor additional 
-		performance counters. 
-		"""
-		return ["% Processor Time", "Working Set", "Virtual Bytes", "Private Bytes", "Thread Count", "Handle Count", "ID Process"]
-
-	def __getPerfCounterValues(self):
-		""" Get a dictionary containing the formatted counter values.
-		"""
-		retries = 10
-		while True:
-			retries -= 1
-			try:
-				win32pdh.CollectQueryData(self._perfQuery)
-				break
-			except Exception as ex:
-				if retries == 0: 
-					raise
-				if self.process and not self.process.running(): raise
-				log.debug('WindowsProcessMonitor: retrying getting perf counter values (%d remaining) after error: %s', retries, ex)
-				time.sleep(1)
-				
-		data = {}
-		for key, counter in self._perfCounters.items():
-			try:
-				data[key] = win32pdh.GetFormattedCounterValue(counter, win32pdh.PDH_FMT_LARGE)[1]
-			except win32api.error:
-				data[key] = None
-		assert data['ID Process'] == self.pid, 'Query is now pointing at the wrong process for %s' # TODO: rework
-		return data
-		
-	def _perfCountersToData(self, counterValues):
-		"""
-		Converts a dictionary of integer values keyed by pdh performance counter 
-		name to a dictionary of values keyed by L{ProcessMonitorKey}. 
-		
-		Also performs any required unit conversions. 
-		"""
-		data = {}
-		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = counterValues['% Processor Time']
-		
-		# the values are all 64-bit integers
-		
-		v = counterValues.get('Working Set',None)
-		if v is not None: v = v//1024
-		data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = v
-
-		v = counterValues.get('Virtual Bytes',None)
-		if v is not None: v = v//1024
-		data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = v
-		
-		v = counterValues.get('Private Bytes',None)
-		if v is not None: v = v//1024
-		data[ProcessMonitorKey.MEMORY_PRIVATE_KB] = v
-		
-		#data[ProcessMonitorKey.THREADS] = counterValues['Thread Count']
-		#data[ProcessMonitorKey.KERNEL_HANDLES] = counterValues['Handle Count']
-		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = counterValues['% Processor Time']
-		
-		while True:
 			newvalues = {}
-			newvalues['timens'] = self._timer_ns()
+			newvalues['time_ns'] = self._timer_ns()
 			cputimes = win32process.GetProcessTimes(self._hPid)
-			#cputimes['KernelTime']+
-			newvalues['cputime'] = (cputimes['UserTime'])/100.0 # comes in 100*ns units
+			newvalues['cputime_ns'] = (cputimes['KernelTime']+cputimes['UserTime'])*100 # convert to ns; comes in 100*ns units
 
 			if self._lastValues is not None:
+				if newvalues['time_ns']-self._lastValues['time_ns'] <= 0:
+					# wait a bit longer to avoid div by zero error if the sleeping is somehow messed up
+					self._stopping.wait(min(self.interval, 1))
+					continue
+			
 				lastvalues = self._lastValues
 				break
-			# first time we calculate anything, need to repeat this once so we have stats to compare to
+			# this is just for the first time _getData is called; need to repeat this once so we have stats to compare to
 			self._lastValues = lastvalues = newvalues
-			time.sleep(min(self.interval, 1))
+			self._stopping.wait(min(self.interval, 1))
 		
 		memInfo = win32process.GetProcessMemoryInfo(self._hPid)
-		#perfinfo = win32process.GetPerformanceInfo(self._hPid)
 		
-		psdata = {}
-		psdata[ProcessMonitorKey.CPU_CORE_UTILIZATION] = 1000*1000*(newvalues['cputime']-lastvalues['cputime'])/(newvalues['timens']-lastvalues['timens'])
-		psdata[ProcessMonitorKey.MEMORY_RESIDENT_KB] = memInfo['WorkingSetSize']//1024
-		# todo: is this the right stat to return for virtual mem? not clear...
-		psdata[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = memInfo['PagefileUsage']//1024
-		if 'PrivateUsage' in memInfo:
-			psdata[ProcessMonitorKey.MEMORY_PRIVATE_KB] = memInfo['PrivateUsage']//1024
-		#psdata[ProcessMonitorKey.THREADS] = perfinfo['ThreadCount']
-		#psdata[ProcessMonitorKey.KERNEL_HANDLES] = perfinfo['HandleCount']
-		## TODO - remove temp code once this is working
-		#log.info('time diff=%0.1f ms', (newvalues['timens']-lastvalues['timens'])/1000000.0)
-		#s = ['\n  key %s: counter=%s new=%s'%(k, data.get(k), psdata.get(k)) for k in data ]
-		#log.info('Got data for %s: %s', self, ''.join(s))
-		
+		data = {}
+
+		# multiply by 100 to get utilization as a %
+		data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = (100*(newvalues['cputime_ns']-lastvalues['cputime_ns']))/(newvalues['time_ns']-lastvalues['time_ns'])
+
 		self._lastValues = newvalues
-		STILL_ACTIVE = 259 # todo check if there's a constant for this
-		if win32process.GetExitCodeProcess(self._hPid) != STILL_ACTIVE: raise Exception('Process has terminated')
+		
+		data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = memInfo['WorkingSetSize']//1024
+		data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = memInfo['PagefileUsage']//1024
 		
 		return data
-
-	def _getData(self, sample):
-		if sample == 1:
-			# some keys such as processor time do not work until the 2nd time
-			self.__getPerfCounterValues()
-		return self._perfCountersToData(self.__getPerfCounterValues())
 
 class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
 	def _getData(self, sample):
@@ -660,22 +510,21 @@ class SolarisProcessMonitor(BaseProcessMonitor): # pragma: no cover
 				}
 
 class LinuxProcessMonitor(BaseProcessMonitor):
+	"""
+	TODO
+	"""
 	# also used for macos/darwin
 	
 	def _getData(self, sample):
 		with process_lock:
-			with os.popen("ps -o pid,pcpu,rss,vsz") as fp: 
+			with os.popen("ps -o pid,pcpu,rss,vsz %d"%self.pid) as fp: 
 				info = fp.readlines()
 			
-			data = {
-				ProcessMonitorKey.CPU_CORE_UTILIZATION: 0,
-				ProcessMonitorKey.MEMORY_RESIDENT_KB: 0,
-				ProcessMonitorKey.MEMORY_VIRTUAL_KB: 0,
-			}
 			if len(info) <= 1: raise Exception('No matching processes found from ps')
-			gotdata = True
+			assert len(info) == 2, 'Unexpected ps output: %s'%info
 			thisdata = info[1].split()
-			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = float(thisdata[1])
+			data = {}
+			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = int(thisdata[1])
 			data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = int(thisdata[2])
 			data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = int(thisdata[3])
 			

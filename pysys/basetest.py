@@ -265,8 +265,8 @@ class BaseTest(ProcessUser):
 			handlers.append(TabSeparatedFileHandler(file))
 		
 		self.log.debug("Starting process monitor for %r", process)
-		monitor = ProcessMonitor(owner=self, process=process, interval=interval, handlers=handlers, **pmargs)
-		monitor.start()
+		monitor = ProcessMonitor(owner=self, process=process, interval=interval, handlers=handlers, **pmargs).start()
+		assert hasattr(monitor, '_getData'), 'Start did not return a process monitor instance'
 		self.monitorList.append(monitor)
 		return monitor
 

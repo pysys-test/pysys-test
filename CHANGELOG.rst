@@ -63,8 +63,9 @@ Changes affecting compatibility
 
   See https://github.com/pysys-test/pysys-test/issues/9 for more information. 
 
-- The `ProcessMonitor` class has been rewritten as the previous structure 
-  was not flexible enough to permit extensions, for example adding extra 
+- If you have created a custom subclass of `ProcessMonitor` you will need to 
+  rework it, as this class has been rewritten in order to make it easier 
+  to maintain and extend. For example it is now easier to add extra 
   monitoring statistics, or providing custom handlers for the data for 
   different file formats or automated checking of results. There is now a 
   common `BaseProcessMonitor` superclass and separate subclasses for each 
@@ -77,9 +78,12 @@ Changes affecting compatibility
   `BaseProcessMonitorHandler` subclass to `BaseTest.startProcessMonitor`. 
   
 - The default process monitor file format has changed in this release to 
-  provide consistency across all operating systems, and because it did not 
-  accurately match the documentation. Previously there was no header line, and 
-  on Windows the columns were::
+  provide consistency across all operating systems, because it did not 
+  accurately match the documentation, and because some of the Windows-specific 
+  statistics such as thread/handle count were not correct and cannot easily be 
+  obtained. 
+  
+  Previously there was no header line, and on Windows the columns were::
   
      %d/%m/%y %H:%M:%S CPU Resident Virtual Private Threads Handles
   
@@ -88,14 +92,14 @@ Changes affecting compatibility
      %m/%d/%y %H:%M:%S CPU Resident Virtual
   
   In this release of PySys the ISO standard date format is used and only the 
-  columns supported on all operating systems are included by default::
+  columns supported on all operating systems are included::
   
      %Y-%m-%d %H:%M:%S CPU Resident Virtual
   
   Additional columns may be added to the default file in future releases. 
   
-  There is also a machine and human readable header line beginning with `#` so 
-  that each file is self-explanatory. 
+  There is also a (machine and human readable) header line beginning with `#` 
+  so that each file is self-explanatory. 
   
   This behaviour can be customized by adding code to your runner's `setup` 
   method. For example to go back to the previous file format::
@@ -118,19 +122,19 @@ Changes affecting compatibility
 
   Also note that the numProcessors keyword argument to ProcessMonitor is 
   deprecated. For now it can still be used to scale down the 
-  CPU_CORE_UTILIZATION value but it is no longer documented and may be 
+  CPU_CORE_UTILIZATION value but it is not recommended for use and may be 
   removed in a future release. Use CPU_TOTAL_UTILIZATION if you wish to see 
   total CPU usage across all cores. 
   
-  It is no longer possible to get thread or handle count on Windows. 
-  
   In the previous release, the Linux process monitor also gathered data 
   from child processes (that were running at the moment the monitor was 
-  started). As this functinality was not documented, inconsistent with other 
-  platforms, and generated incorrect results (memory usage was reported for a 
-  random process from the list, not accumulated across them) this has been 
-  removed. Optional support for monitoring child processes may be re-added 
-  in a future PySys release. 
+  started). As this functionality was not documented, was inconsistent with 
+  other platforms, and generated incorrect results (memory usage was reported 
+  for a random process from the list, not accumulated across them) this has 
+  been removed. Optional support for monitoring child processes may be re-added 
+  in a future PySys release. Although child process are not included in the 
+  statistics for each process, the contributions from its child threads are 
+  included. 
 
 New features
 ------------
@@ -318,15 +322,17 @@ Bug fixes
 - Fixed rare condition in which performance result reporting would be prevented 
   due to spurious error about `resultKey` already being used. 
   
-- Fixed `startProcessMonitor()` on Windows to return correct values instead of 
-  negative values for large numbers (such as the virtual memory usage). 
+- Fixed a number of errors in the statistics reported by process monitors, 
+  especially on Windows where negative values were sometimes returned 
+  (due to integer overflow), incorrect (and very time-consuming) aggregation 
+  based on the child threads that existed at the time the process monitor was 
+  first started, and that the statistics might be returned for the 
+  wrong process due to the way the performance counter API changes which 
+  process is being monitored when processes of the same name terminate. 
+  On Linux the statistics were sometimes wrong due to undocumented and 
+  in some cases incorrect aggregation across child processes, which has now 
+  been removed. The values are now correct on all operating systems. 
   
-- Fixed `startProcessMonitor()` on Windows to take a few seconds instead of a 
-  few minutes, by using the `Process` performance counter to get 
-  `% Processor Time` instead of the `Thread` counter (the values reported by 
-  previous versions were probably not correct, as they only measured CPU for 
-  the threads that existed when the process monitor was started).
-
 - Significant improvements to robustness when testing support for international 
   (I18N) characters. This includes implementing fully safe logging of unicode 
   strings (with `?` replacements for any unsupported characters) that works 
