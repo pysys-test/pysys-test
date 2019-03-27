@@ -108,9 +108,9 @@ class UnixProcessMonitor(BaseProcessMonitor):
 			assert len(info) == 2, 'Unexpected ps output: %s'%info
 			thisdata = info[1].split()
 			data = {}
-			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = int(thisdata[1])
-			data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = int(thisdata[2])
-			data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = int(thisdata[3])
+			data[ProcessMonitorKey.CPU_CORE_UTILIZATION] = int(float(thisdata[1]))
+			data[ProcessMonitorKey.MEMORY_RESIDENT_KB] = int(float(thisdata[2]))
+			data[ProcessMonitorKey.MEMORY_VIRTUAL_KB] = int(float(thisdata[3]))
 			
 			return data
 			
