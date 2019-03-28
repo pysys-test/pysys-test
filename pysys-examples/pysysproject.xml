@@ -123,8 +123,10 @@
 
 	<!-- 
 	Set default LANG for child processes on Unix. 
+	Useful for making all machines behave the same. Ensure that the specified 
+	locale is installed on all machines. 
 	-->
-	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
+	<!-- <property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/> -->
 
 	<!-- 
 	Set temporary directory for child processes to the testcase output 
