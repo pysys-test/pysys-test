@@ -20,12 +20,9 @@
 Defines global constants that are used throughout the PySys framework. 
 
 The standard convention is to import all contents of the module so that the constants can 
-be referenced directly. The module also contains methods for locating and parsing the PySys 
-project file (L{pysys.constants.loadproject}). For more information 
-about the structure and contents of the project file, see the PySys examples 
-distribution. 
+be referenced directly. 
 
-@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE
+@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject
 """
 import sys, re, os, os.path, socket, traceback
 
@@ -222,50 +219,7 @@ PROJECT = None
 """ The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
 
 from pysys.xml.project import Project 
-
-# load the project specific details
+from pysys.xml.project import Project 
 def loadproject(start):
-	"""Load the PySys project file.
-	
-	The method walks up the directory tree from the supplied path until the 
-	PySys project file is found. The location of the project file defines
-	the project root location. The contents of the project file determine 
-	project specific constants as specified by property elements in the 
-	xml project file.
-	
-	To ensure that all loaded modules have a pre-initialised projects 
-	instance, any launching application should first import the loadproject
-	file, and then make a call to it prior to importing all names within the
-	constants module.
-
-	@param start: The initial path to start from when trying to locate the project file
-
-	"""
-
 	global PROJECT
-
-	projectFile = os.getenv('PYSYS_PROJECTFILE', None)
-	search = start
-	if not projectFile:
-		projectFileSet = set(DEFAULT_PROJECTFILE)
-		
-		drive, path = os.path.splitdrive(search)
-		while (not search == drive):
-			intersection =  projectFileSet & set(os.listdir(search))
-			if intersection : 
-				projectFile = intersection.pop()
-				break
-			else:
-				search, drop = os.path.split(search)
-				if not drop: search = drive
-	
-		if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))):
-			sys.stderr.write("WARNING: No project file found, taking project root to be '%s' \n" % (search or '.'))
-
-	try:
-		PROJECT = Project(search, projectFile)
-		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
-	except Exception as e:
-		sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
-		traceback.print_exc()
-		sys.exit(1)
+	PROJECT = Project.findAndLoadProject(start)
