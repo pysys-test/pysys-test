@@ -35,15 +35,16 @@ from pysys.constants import *
 
 # set the modules to import when imported the pysys.process package
 __all__ = [ "helper",
-			"monitor",
+			"monitor", 
+			"monitorimpl",
 			"user" ]
 
 # add to the __path__ to import the platform specific helper class
 dirname = __path__[0]
-if PLATFORM in [ "sunos", "linux", "darwin" ]:
-	__path__.append(os.path.join(dirname, "plat-unix"))
-else:
+if PLATFORM in [ "win32" ]:
 	__path__.append(os.path.join(dirname, "plat-win32"))
+else:
+	__path__.append(os.path.join(dirname, "plat-unix"))
 
 
 
