@@ -21,8 +21,7 @@ Defines global constants that are used throughout the PySys framework.
 
 The standard convention is to import all contents of the module so that the constants can 
 be referenced directly. The module also contains methods for locating and parsing the PySys 
-project file (L{pysys.constants.loadproject}), and the project class that provides an 
-abstraction over the contents of the file (L{pysys.constants.Project}). For more information 
+project file (L{pysys.constants.loadproject}). For more information 
 about the structure and contents of the project file, see the PySys examples 
 distribution. 
 

@@ -17,7 +17,7 @@
 
 
 """
-Contains the base class used to perform the execution and audit trail reporting of a set of tests. 
+Contains the L{BaseRunner} class which orchestrates the running of all test cases. 
 
 Test selection is by default performed through the pysys.py launch script, which locates and 
 creates a set of class instances representing the tests to be executed. These are passed to the 
@@ -25,6 +25,7 @@ base runner as a list of object references, so that the base runner can then ite
 list to perform the test execution. For more information see the L{pysys.baserunner.BaseRunner} 
 API documentation. 
 
+@undocumented: global_lock, N_CPUS
 """
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
@@ -57,8 +58,12 @@ except ImportError:
 	pass
 
 class BaseRunner(ProcessUser):
-	"""The base class for executing a set of PySys testcases.
-
+	"""A single instance of the runner class is responsible for orchestrating 
+	execution and outcome reporting of all testcases. 
+	
+	This class provides the default implementation, and can be subclassed 
+	if customizations are needed. 
+	
 	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
 	with a list of L{pysys.xml.descriptor.XMLDescriptorContainer} objects detailing the set of testcases to be run. 
 	The runner iterates through the descriptor list and for each entry imports the L{pysys.basetest.BaseTest}

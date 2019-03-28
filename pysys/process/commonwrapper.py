@@ -15,7 +15,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+"""
+Contains the L{CommonProcessWrapper} class that represents a running process. 
 
+@undocumented: _stringToUnicode
+"""
 
 import os.path, time, threading, sys, locale
 if sys.version_info[0] == 2:
