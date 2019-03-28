@@ -272,9 +272,8 @@ New features
   for launching a given process, and can also be used as a basis for creating 
   customized environments using the new `createEnvirons()` helper method. 
   There are some new project properties to control how this works, which 
-  are added to the sample `pysysproject.xml` and recommended for new projects, 
-  but are not enabled by default in existing projects to maintain 
-  compatibility::
+  you may wish to consider using for new projects, but are not enabled by 
+  default in existing projects to maintain compatibility::
   
 	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
 	<property name="defaultEnvironsTempDir" value="self.output'"/>  

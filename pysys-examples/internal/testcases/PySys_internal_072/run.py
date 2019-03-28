@@ -3,13 +3,13 @@ import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 
+if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
 class PySysTest(BaseTest):
 
 	def execute(self):
-		l = {}
-		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
-		
 		# should NOT need a project to display top-level usage
 		runPySys(self, 'noargs', [], projectfile='non-existent-project')
 		runPySys(self, 'toplevel', ['--help'], projectfile='non-existent-project')

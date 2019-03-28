@@ -1,22 +1,16 @@
 What is PySys?
 ==============
 PySys is an easy-to-use cross-platform framework for writing and orchestrating 
-all your system/integration tests, fully integrated with your unit and manual 
+all your system/integration tests, together with your unit and manual 
 tests. 
 
 It provides a comprehensive package of utility methods to make all the common 
 system/integration testing operations a breeze, as well as the flexibility to 
 add whatever test execution and validation logic you need using the full power 
-of the Python language. If you've ever tried to repurpose a unit-test oriented 
-framework such as JUnit/NUnit for writing system tests you'll find PySys makes 
-your life a lot easier - there's no need to wait for testcase code to compile, 
-put up with limited access to platform-specific APIs, or write a huge library 
-of custom helper classes to deal with the process orchestration and log file 
-checking aspects of integration testing. It's also a lot more powerful and easy 
-to maintain than writing platform-specific shell scripts. Whatever language the 
-application you're testing is written in, and whatever platforms it needs to 
-run on, PySys can help!
+of the Python language. 
 
+Whatever language the application you're testing is written in, and whatever 
+platforms it needs to run on, PySys can help!
 
 Key features include:
 
@@ -42,9 +36,10 @@ Key features include:
   including a standard JUnit-compatible XML results writer in the box.
 - Integrated support for running PyUnit tests, in case your application is also 
   written in Python.
-- Integrated support for executing manual interactively driven test cases.
+- Integrated support for executing manual/interactively driven test cases.
 - Test categorization and selective include/exclude execution, using per-test 
   classification groups.
+- Supports Windows, Linux, macOS and Solaris. 
 
 
 Project Links
@@ -106,7 +101,7 @@ Windows
 On Windows, pip will automatically install the 
 `pywin32 <https://pypi.org/project/pywin32/>`_ and 
 `colorama <https://pypi.org/project/colorama/>`_ 
-libraries that PySys depends upon, 
+libraries that PySys depends upon.
 
 The executable launcher script `pysys.py` is installed into the `Scripts\\` 
 directory of the Python installation, e.g. `c:\\Python\\Scripts\\pysys.py`. 
@@ -165,58 +160,4 @@ a good set of default settings which you can then customize as needed.
 
 For reference information about the PySys API, see
 https://pysys-test.github.io/pysys-test.
-
-
-How To Guide/FAQ
-================
-
-Platform detection
-------------------
-In addition to the features provided by Python itself, PySys includes some 
-constants to help quickly detect what platform is in use, such as OSFAMILY and 
-PLATFORM. It's very common to have one set of logic for Windows and another for 
-all non-Windows (Unix-based) platforms, and PySys has a dedicated constant for 
-that::
-
-	if IS_WINDOWS:
-		...
-	else:
-		...
-
-Skipping tests
---------------
-If your run.py logic detects that a test should not be executed for this 
-platform or mode, simply use this near the top of the `execute()` method, 
-specifying the reason for the skip::
-
-	self.skipTest('MyFeature is not supported on Windows') 
-	
-As well as setting the test outcome and reason, this will raise an exception 
-ensuring that the rest of `execute()` and `validate()` do not get executed. 
-
-Checking for error messages in log files
------------------------------------------
-The `assertGrep()` method is an easy way to check that there are no error 
-messages in log files from processes started by PySys. Rather than checking for 
-an expression such as `' ERROR: '`, it is recommended to define your expression 
-so that the error message itself is included, e.g.::
-
-	self.assertGrep('myprocess.log', expr=' ERROR: .*', contains=False)
-
-This approach ensures that the error message itself is included in the test's 
-console output, run.log and the summary of failed test outcomes, which avoids 
-the need to open up the individual logs to find out what happened, and makes it 
-much easier to triage test failures, especially if several tests fail for the 
-same reason. 
-
-Sharing logic for validation across tests
------------------------------------------
-Often you may have some standard logic that needs to be used in the validation 
-of many/all testcases, such as checking log files for errors. One recommended 
-pattern for this is to define a helper function in a custom `BaseTest` 
-subclassed by all your tests that is named after what is being checked - for 
-example `checkLogsForErrors()` - and explicitly call that method from 
-the `.validate()` method of each test. That approach allows you to later 
-customize the logic by changing just one single place, and also to omit it for 
-specific tests where it is not wanted. 
 
