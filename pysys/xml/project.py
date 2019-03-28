@@ -473,8 +473,20 @@ class Project(object):
 					search, drop = os.path.split(search)
 					if not drop: search = drive
 		
-			if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))):
-				sys.stderr.write("WARNING: No project file found, taking project root to be '%s' \n" % (search or '.'))
+			if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))): # pragma: no cover
+				if os.getenv('PYSYS_PERMIT_NO_PROJECTFILE','').lower()=='true':
+					sys.stderr.write("WARNING: No project file found; using default settings and taking project root to be '%s' \n" % (search or '.'))
+				else:
+					sys.stderr.write('\n'.join([
+						#                                                                               |
+						"WARNING: No PySys project file was found in this directory or its parents.",
+						"  - If you wish to start a new project, begin by running 'pysys makeproject'.",
+						"  - If you are trying to use an existing project, change directory to a ",
+						"    location under the root test directory that contains your project file.",
+						"  - If you wish to use an existing project that has no configuration file, ",
+						"    set the PYSYS_PERMIT_NO_PROJECTFILE=true environment variable to allow this."
+					]))
+					sys.exit(1)
 
 		try:
 			PROJECT = Project(search, projectFile)
