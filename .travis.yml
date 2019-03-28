@@ -159,7 +159,7 @@ script:
        mkdir dist/api-docs/
        epydoc --debug -v --html --no-private --fail-on-docstring-warning --name "PySys $PYSYS_VERSION" "--url=https://pypi.org/project/PySys" -o dist/api-docs "--exclude=.*([.]internal|__main__).*" pysys
        todos *.rst *.txt
-       cp README.rst CHANGELOG.rst LICENSE.txt dist/api-docs/
+       cp README.rst USERGUIDE.rst CHANGELOG.rst LICENSE.txt dist/api-docs/
        cd dist/api-docs
        # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions; use C locale to avoid ignoring __'s
        LC_ALL=C sort --unique -o api-objects.txt api-objects.txt
