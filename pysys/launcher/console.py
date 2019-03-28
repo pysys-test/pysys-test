@@ -339,7 +339,7 @@ def makeProject(args):
 
 	createProjectConfigurationFile(templates[tmpl], dir)
 	print("Successfully created project root directory in '%s'."%os.path.normpath(dir))
-	print("Now use 'pysys make' to create your first testcase")
+	print("Now change to that directory and use 'pysys make' to create your first testcase")
 		
 class ConsoleMakeTestHelper(object):
 	def __init__(self, name=""):
