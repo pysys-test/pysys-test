@@ -101,7 +101,7 @@ Windows
 On Windows, pip will automatically install the 
 `pywin32 <https://pypi.org/project/pywin32/>`_ and 
 `colorama <https://pypi.org/project/colorama/>`_ 
-libraries that PySys depends upon, 
+libraries that PySys depends upon.
 
 The executable launcher script `pysys.py` is installed into the `Scripts\\` 
 directory of the Python installation, e.g. `c:\\Python\\Scripts\\pysys.py`. 
