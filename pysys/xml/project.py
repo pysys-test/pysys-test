@@ -360,7 +360,7 @@ def createProjectConfigurationFile(templatepath, targetdir):
 	"""Create a new project configuration file in the specified targetdir. 
 	"""
 	mkdir(targetdir)
-	# using ascii ensures we don't unintentionally add weird characters to the default file
+	# using ascii ensures we don't unintentionally add weird characters to the default (utf-8) file
 	with openfile(templatepath, encoding='ascii') as src:
 		with openfile(os.path.abspath(targetdir+'/'+DEFAULT_PROJECTFILE[0]), 'w', encoding='ascii') as target:
 			for l in src:
@@ -479,12 +479,12 @@ class Project(object):
 				else:
 					sys.stderr.write('\n'.join([
 						#                                                                               |
-						"WARNING: No PySys project file was found in this directory or its parents.",
+						"WARNING: No PySys test project file exists in this directory (or its parents):",
 						"  - If you wish to start a new project, begin by running 'pysys makeproject'.",
 						"  - If you are trying to use an existing project, change directory to a ",
 						"    location under the root test directory that contains your project file.",
 						"  - If you wish to use an existing project that has no configuration file, ",
-						"    set the PYSYS_PERMIT_NO_PROJECTFILE=true environment variable to allow this."
+						"    set the PYSYS_PERMIT_NO_PROJECTFILE=true environment variable."
 					]))
 					sys.exit(1)
 

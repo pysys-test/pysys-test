@@ -10,7 +10,6 @@
 	<!-- User-defined properties -->
 
 	<!-- Standard default settings. See sample project file and API docs for more details. -->
-	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
 	<property name="defaultAbortOnError" value="true"/>	
 	<property name="defaultIgnoreExitStatus" value="false"/>
 	<property name="defaultEnvironsTempDir" value="self.output"/>
@@ -18,9 +17,9 @@
 
 	<!-- Custom test framework extensions, if needed -->
 	<!--
-	<path value="./test-framework-extensions" relative="true" />
-	<runner classname="MyRunner" module="com.company.test"/>
-	<maker classname="MyMaker" module="com.company.test"/>
+	<path value="../framework" relative="true" />
+	<runner classname="MyRunner" module="my.organization"/>
+	<maker classname="MyTestMaker" module="my.organization"/>
 	-->
 
 	<writers>

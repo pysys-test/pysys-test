@@ -287,7 +287,7 @@ class ConsolePrintHelper(object):
 def makeProject(args):
 	templatelist = ', '.join(sorted(getProjectTemplates().keys()))
 	def printUsage():
-		print("\nPySys System Test Framework (version %s): Console project configuration maker" % __version__) 
+		print("\nPySys System Test Framework (version %s): Project configuration file maker" % __version__) 
 		print("")
 		print("Usage: %s makeproject [option]* [TEMPLATE]" % (_PYSYS_SCRIPT_NAME))
 		print("")
@@ -339,7 +339,7 @@ def makeProject(args):
 
 	createProjectConfigurationFile(templates[tmpl], dir)
 	print("Successfully created project configuration in root directory '%s'."%os.path.normpath(dir))
-	print("Now change to that directory and use 'pysys make' to create your first testcase")
+	print("Now change to that directory and use 'pysys make' to create your first testcase.")
 		
 class ConsoleMakeTestHelper(object):
 	def __init__(self, name=""):
