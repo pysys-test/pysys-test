@@ -1,7 +1,7 @@
+import os, sys, re, shutil
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
-import os, sys, re, shutil
 
 class PySysTest(BaseTest):
 
@@ -9,10 +9,10 @@ class PySysTest(BaseTest):
 		l = {}
 		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
 		runPySys = l['runPySys']
-		runPySys(self, 'toplevel', ['--help'])
-		runPySys(self, 'run', ['run', '--help'])
-		runPySys(self, 'print', ['print', '-h'])
-		runPySys(self, 'make', ['make', '--help'])
+		runPySys(self, 'toplevel', ['--help'], defaultproject=True)
+		runPySys(self, 'run', ['run', '--help'], defaultproject=True)
+		runPySys(self, 'print', ['print', '-h'], defaultproject=True)
+		runPySys(self, 'make', ['make', '--help'], defaultproject=True)
 			
 	def validate(self):
 		for t in ['toplevel', 'run', 'print', 'make']:

@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 		runPySys = l['runPySys']
 
 		shutil.copytree(self.input, self.output+'/test')
-		runPySys(self, 'pysys', ['run', '-o', self.output+'/output', '--purge'])
+		runPySys(self, 'pysys', ['run', '-o', self.output+'/output', '--purge'], workingDir='test')
 	
 			
 	def validate(self):

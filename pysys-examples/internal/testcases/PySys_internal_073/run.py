@@ -6,7 +6,10 @@ import os, sys, re
 class PySysTest(BaseTest):
 
 	def execute(self):
-		testsdir = os.path.normpath(self.input+'/../../../..')
+		# use root pysys project so we can check all our own tests print ok
+		# it's safe to use project root because we are not enabling record mode
+		testsdir = os.path.normpath(PROJECT.rootdir)
+		
 		assert testsdir.endswith('pysys-examples'), testsdir
 		self.log.info('printing tests from: %s', testsdir)
 		
@@ -19,7 +22,8 @@ class PySysTest(BaseTest):
 		runPySys(self, 'groups', ['print', '--groups'], workingDir=testsdir)
 		runPySys(self, 'modes', ['print', '--modes'], workingDir=testsdir)
 		runPySys(self, 'nonexistent', ['print', 'non-existent'], workingDir=testsdir, ignoreExitStatus=True)
-		runPySys(self, 'emptydir', ['print'], workingDir=self.mkdir('emptydir'), ignoreExitStatus=True)
+		runPySys(self, 'emptydir', ['print'], workingDir=self.mkdir('emptydir'), ignoreExitStatus=True, 
+			projectfile=PROJECT.rootdir+'/pysysproject.xml')
 			
 	def validate(self):
 		for t in ['basic', 'thistest', 'full', 'groups', 'modes']:
