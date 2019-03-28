@@ -17,10 +17,12 @@
 
 
 """
-Contains the base test class for test execution and validation. 
+Contains the L{BaseTest} class that is subclassed by each individual testcase, 
+provides most of the assertion methods, and itself subclasses L{pysys.process.user.ProcessUser}. 
 
 For more information see the L{pysys.basetest.BaseTest} API documentation. 
 
+@undocumented: TEST_TEMPLATE
 """
 import os.path, time, threading, logging
 
@@ -214,16 +216,11 @@ class BaseTest(ProcessUser):
 
 
 	def startProcessMonitor(self, process, interval=5, file=None, handlers=[], **pmargs):
-		"""Start a separate thread to log process statistics to logfile, and return a handle to the process monitor.
+		"""Start a background thread to monitor process statistics such as memory and CPU usage.
 		
-		This method uses the L{pysys.process.monitor} module to perform logging 
-		of the process statistics, starting the monitor as a separate 
-		background thread. 
-		
-		All process monitors not explicitly stopped using the returned handle 
-		are automatically stopped on completion of the test via the L{cleanup} 
-		method of the BaseTest, but you may wish to explicitly stop your 
-		process monitors using L{stopProcessMonitor} before you begin 
+		All process monitors are automatically stopped on completion of 
+		the test by L{BaseTest.cleanup}, but you may also wish to explicitly stop 
+		your process monitors using L{stopProcessMonitor} before you begin 
 		shutting down processes at the end of a test to avoid unwanted spikes 
 		and noise in the last few samples of the data. 
 		

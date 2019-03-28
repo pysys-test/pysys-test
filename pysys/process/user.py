@@ -64,7 +64,10 @@ class ProcessUser(object):
 		
 		"""
 		self.log = log
+		"""The logger instance that should be used to log from this class. """
+		
 		self.project = PROJECT
+		"""The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
 		
 		self.processList = []
 		self.processCount = {}
