@@ -437,3 +437,50 @@ class Project(object):
 		if not runlogformatter: runlogformatter = BaseLogFormatter({})
 		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
+
+	@staticmethod
+	def findAndLoadProject(startdir):
+		"""Find and load a project file, starting from the specified directory. 
+		
+		If this fails an error is logged and the process is terminated. 
+		
+		The method walks up the directory tree from the supplied path until the 
+		PySys project file is found. The location of the project file defines
+		the project root location. The contents of the project file determine 
+		project specific constants as specified by property elements in the 
+		xml project file.
+		
+		To ensure that all loaded modules have a pre-initialised projects 
+		instance, any launching application should first import the loadproject
+		file, and then make a call to it prior to importing all names within the
+		constants module.
+
+		@param startdir: The initial path to start from when trying to locate the project file
+
+		"""
+		projectFile = os.getenv('PYSYS_PROJECTFILE', None)
+		search = startdir
+		if not projectFile:
+			projectFileSet = set(DEFAULT_PROJECTFILE)
+			
+			drive, path = os.path.splitdrive(search)
+			while (not search == drive):
+				intersection =  projectFileSet & set(os.listdir(search))
+				if intersection : 
+					projectFile = intersection.pop()
+					break
+				else:
+					search, drop = os.path.split(search)
+					if not drop: search = drive
+		
+			if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))):
+				sys.stderr.write("WARNING: No project file found, taking project root to be '%s' \n" % (search or '.'))
+
+		try:
+			PROJECT = Project(search, projectFile)
+			stdoutHandler.setFormatter(PROJECT.formatters.stdout)
+			return PROJECT
+		except Exception as e:
+			sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
+			traceback.print_exc()
+			sys.exit(1)

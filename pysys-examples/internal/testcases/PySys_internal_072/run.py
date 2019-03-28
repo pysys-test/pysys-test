@@ -27,3 +27,4 @@ class PySysTest(BaseTest):
 			self.assertGrep(t+'.out', expr='.') # check not empty
 			self.assertGrep(t+'.out', expr='.'*(120+1), contains=False) # check no lines are too long
 			self.assertGrep(t+'.out', expr='WARNING', contains=False) # make sure no warnings about missing project files
+			self.assertGrep(t+'.err', expr='WARNING', contains=False) # make sure no warnings about missing project files
