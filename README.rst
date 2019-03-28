@@ -1,22 +1,16 @@
 What is PySys?
 ==============
 PySys is an easy-to-use cross-platform framework for writing and orchestrating 
-all your system/integration tests, fully integrated with your unit and manual 
+all your system/integration tests, together with your unit and manual 
 tests. 
 
 It provides a comprehensive package of utility methods to make all the common 
 system/integration testing operations a breeze, as well as the flexibility to 
 add whatever test execution and validation logic you need using the full power 
-of the Python language. If you've ever tried to repurpose a unit-test oriented 
-framework such as JUnit/NUnit for writing system tests you'll find PySys makes 
-your life a lot easier - there's no need to wait for testcase code to compile, 
-put up with limited access to platform-specific APIs, or write a huge library 
-of custom helper classes to deal with the process orchestration and log file 
-checking aspects of integration testing. It's also a lot more powerful and easy 
-to maintain than writing platform-specific shell scripts. Whatever language the 
-application you're testing is written in, and whatever platforms it needs to 
-run on, PySys can help!
+of the Python language. 
 
+Whatever language the application you're testing is written in, and whatever 
+platforms it needs to run on, PySys can help!
 
 Key features include:
 
@@ -42,9 +36,10 @@ Key features include:
   including a standard JUnit-compatible XML results writer in the box.
 - Integrated support for running PyUnit tests, in case your application is also 
   written in Python.
-- Integrated support for executing manual interactively driven test cases.
+- Integrated support for executing manual/interactively driven test cases.
 - Test categorization and selective include/exclude execution, using per-test 
   classification groups.
+- Supports Windows, Linux, macOS and Solaris. 
 
 
 Project Links
