@@ -17,7 +17,7 @@
 
 
 
-import os, shutil
+import os, shutil, time
 
 def mkdir(path):
 	"""
@@ -30,7 +30,9 @@ def mkdir(path):
 		os.makedirs(path)
 	except Exception as e:
 		if not os.path.isdir(path):
-			raise
+			# occasionally fails on windows for no reason, so add retry
+			time.sleep(0.1)
+			os.makedirs(path)
 
 def deletedir(path):
 	"""

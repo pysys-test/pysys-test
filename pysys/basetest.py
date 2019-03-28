@@ -33,7 +33,8 @@ from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
 from pysys.utils.threadutils import BackgroundThread
-from pysys.process.monitor import ProcessMonitor
+from pysys.process.monitor import ProcessMonitorTextFileHandler
+from pysys.process.monitorimpl import DEFAULT_PROCESS_MONITOR
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 from pysys.utils.pycompat import *
@@ -187,8 +188,8 @@ class BaseTest(ProcessUser):
 				self.stopManualTester()
 
 			# first request them all to stop
-			# although we don't yet state that cleanup() is fully thread-safe, 
-			# do our best (without holding locks while joining threads, obviously)
+			# although we don't yet state this method is thread-safe, make it 
+			# as thread-safe as possible by using swap operations
 			with self.lock:
 				threads, self.__backgroundThreads = list(self.__backgroundThreads), []
 			for th in threads: th.stop()
@@ -212,43 +213,83 @@ class BaseTest(ProcessUser):
 		self.resources.append(resource)
 
 
-	def startProcessMonitor(self, process, interval, file, **kwargs):
+	def startProcessMonitor(self, process, interval=5, file=None, handlers=[], **pmargs):
 		"""Start a separate thread to log process statistics to logfile, and return a handle to the process monitor.
 		
-		This method uses the L{pysys.process.monitor} module to perform logging of the process statistics, 
-		starting the monitor as a seperate background thread. Should the request to log the statistics fail 
-		a C{BLOCKED} outcome will be added to the test outcome list. All process monitors not explicitly 
-		stopped using the returned handle are automatically stopped on completion of the test via the L{cleanup} 
-		method of the BaseTest. 
+		This method uses the L{pysys.process.monitor} module to perform logging 
+		of the process statistics, starting the monitor as a separate 
+		background thread. 
 		
-		@param process: The process handle returned from the L{startProcess} method
-		@param interval: The interval in seconds between collecting and logging the process statistics
-		@param file: The path to the filename used for logging the process statistics
-		@param kwargs: Keyword arguments to allow platform specific configurations
+		All process monitors not explicitly stopped using the returned handle 
+		are automatically stopped on completion of the test via the L{cleanup} 
+		method of the BaseTest, but you may wish to explicitly stop your 
+		process monitors using L{stopProcessMonitor} before you begin 
+		shutting down processes at the end of a test to avoid unwanted spikes 
+		and noise in the last few samples of the data. 
+		
+		You can specify a `file` and/or a list of `handlers`. If you use 
+		`file`, a default L{pysys.process.monitor.ProcessMonitorTextFileHandler} 
+		instance is created to produce tab-delimited lines with default columns 
+		specified by 
+		L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS}. 
+		If you wish to customize this for an individual test create your own 
+		C{ProcessMonitorTextFileHandler} instance and pass it to handlers instead. 
+		Additional default columns may be added in future releases. 
+		
+		@param process: The process handle returned from the L{startProcess} method.
+		
+		@param interval: The polling interval in seconds between collection of 
+		monitoring statistics. 
+		
+		@param file: The name of a tab separated values (.tsv) file to write to, 
+		for example 'monitor-myprocess.tsv'. 
+		
+		A default L{pysys.process.monitor.ProcessMonitorTextFileHandler} instance is 
+		created if this parameter is specified, with default columns from 
+		L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS} . 
+		
+		@param handlers: A list of L{pysys.process.monitor.BaseProcessMonitorHandler} 
+		instances (such as L{pysys.process.monitor.ProcessMonitorTextFileHandler}), 
+		which will process monitoring data every polling interval. This can be 
+		used for recording results (for example in a file) or for dynamically 
+		analysing them and reporting problems. 
+		
+		@param pmargs: Keyword arguments to allow advanced parameterization 
+		of the process monitor class, which will be passed to its 
+		constructor. It is an error to specify any parameters 
+		not supported by the process monitor class on each platform. 
 				
-		@return: A handle to the process monitor (L{pysys.process.monitor.ProcessMonitor})
-		@rtype: handle
+		@return: An object representing the process monitor 
+		(L{pysys.process.monitor.BaseProcessMonitor}).
+		@rtype: pysys.process.monitor.BaseProcessMonitor
 		
 		"""
 		if isstring(file): file = os.path.join(self.output, file)
-		monitor = ProcessMonitor(process.pid, interval, file, **kwargs)
-		try:
-			self.log.info("Starting process monitor on process with id = %d", process.pid)
-			monitor.start()
-		except ProcessError as e:
-			self.addOutcome(BLOCKED, 'Unable to start process monitor for %s: %s'%(process, e))
-		else:
-			self.monitorList.append(monitor)
-			return monitor
+		handlers = [] if handlers is None else list(handlers)
+		if file:
+			handlers.append(ProcessMonitorTextFileHandler(file))
+		
+		self.log.debug("Starting process monitor for %r", process)
+		monitor = DEFAULT_PROCESS_MONITOR(owner=self, process=process, interval=interval, handlers=handlers, **pmargs).start()
+		assert hasattr(monitor, '_getData'), 'Start did not return a process monitor instance'
+		self.monitorList.append(monitor)
+		return monitor
 
 	
 	def stopProcessMonitor(self, monitor):
-		"""Stop a process monitor.
+		"""Request a process monitor to stop.
+		
+		Does not wait for it to finish stopping. 
+
+		All process monitors are automatically stopped and joined during cleanup, 
+		however you may wish to explicitly stop your process monitors 
+		before you begin shutting down processes at the end of a test to avoid 
+		unwanted spikes and noise in the last few samples of the data. 
 		
 		@param monitor: The process monitor handle returned from the L{startProcessMonitor} method
 		
 		"""
-		if monitor.running: monitor.stop()
+		monitor.stop()
 
 	def startBackgroundThread(self, name, target, kwargsForTarget={}):
 		"""
