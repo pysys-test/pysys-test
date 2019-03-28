@@ -443,7 +443,7 @@ class BaseProcessMonitor(object):
 		L{ProcessMonitorKey}.
 		@rtype: dict
 		"""
-		raise NotImplementedError('_getData is not implemented yet')
+		raise NotImplementedError('_getData must be implemented by subclass')
 
 	def _cleanup(self):
 		"""Perform implementation-specific cleanup. 

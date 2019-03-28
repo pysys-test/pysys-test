@@ -74,6 +74,7 @@ class WindowsProcessMonitor(BaseProcessMonitor):
 			
 				lastvalues = self._lastValues
 				break
+			
 			# this is just for the first time _getData is called; need to repeat this once so we have stats to compare to
 			self._lastValues = lastvalues = newvalues
 			self._stopping.wait(min(self.interval, 1))
