@@ -338,7 +338,7 @@ def makeProject(args):
 				sys.exit(1)
 
 	createProjectConfigurationFile(templates[tmpl], dir)
-	print("Successfully created project root directory in '%s'."%os.path.normpath(dir))
+	print("Successfully created project configuration in root directory '%s'."%os.path.normpath(dir))
 	print("Now change to that directory and use 'pysys make' to create your first testcase")
 		
 class ConsoleMakeTestHelper(object):
