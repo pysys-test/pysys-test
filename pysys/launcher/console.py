@@ -30,7 +30,7 @@ from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
 
 """
-@undocumented: EXPR1, EXPR2, EXPR3, _PYSYS_SCRIPT_NAME
+@undocumented: EXPR1, EXPR2, EXPR3, _PYSYS_SCRIPT_NAME, main
 """
 
 EXPR1 = re.compile("^[\w\.]*=.*$")
@@ -300,7 +300,7 @@ def makeProject(args):
 		sys.exit()
 
 	optionString = 'hd:'
-	optionList = 'dir='
+	optionList = ['dir=', 'help']
 	
 	try:
 		optlist, arguments = getopt.getopt(args, optionString, optionList)
@@ -655,6 +655,7 @@ def cleanTest(args):
 
 
 def main(args):
+	# this is designed to be called from 
 	# load project only for options where it's necessary, otherwise we get 
 	# warnings about missing project file for first time users
 	if len(args) < 1: 
@@ -662,15 +663,12 @@ def main(args):
 	else:
 		mode = args[0]
 		if mode == "run":
-			loadproject(os.getcwd())
 			runTest(args[1:])
 		elif mode == "make":
-			loadproject(os.getcwd())
 			makeTest(args[1:])
 		elif mode == "makeproject":
 			makeProject(args[1:])
 		elif mode == "print":
-			loadproject(os.getcwd())
 			printTest(args[1:])
 		elif mode == "clean":
 			cleanTest(args[1:])

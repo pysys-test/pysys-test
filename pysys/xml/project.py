@@ -360,6 +360,7 @@ def createProjectConfigurationFile(templatepath, targetdir):
 	"""Create a new project configuration file in the specified targetdir. 
 	"""
 	mkdir(targetdir)
+	# using ascii ensures we don't unintentionally add weird characters to the default file
 	with openfile(templatepath, encoding='ascii') as src:
 		with openfile(os.path.abspath(targetdir+'/'+DEFAULT_PROJECTFILE[0]), 'w', encoding='ascii') as target:
 			for l in src:
