@@ -6,6 +6,9 @@ from pysys.basetest import BaseTest
 from pysys.utils.pycompat import *
 import os, sys, math, shutil, glob, locale
 
+if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
 
 class PySysTest(BaseTest):
 	# a unicode string; contains chars that are not representable in iso8859-1
@@ -21,9 +24,6 @@ class PySysTest(BaseTest):
 		# make rootdir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
-		l = {}
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
 		# use multiple cycles since the buffering is different
 		
 		runid = 'defaultrun'

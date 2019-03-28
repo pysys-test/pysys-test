@@ -3,6 +3,10 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, re, shutil
 
+if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
 class PySysTest(BaseTest):
 
 	def execute(self):
@@ -15,9 +19,6 @@ class PySysTest(BaseTest):
 		shutil.copyfile(self.input+'/pysysproject-notset.xml', self.output+'/test-notset/pysysproject.xml')
 		shutil.copyfile(self.input+'/../../../../pysysproject.xml', self.output+'/test-exampleproject/pysysproject.xml')
 		
-		l = {}
-		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
 		for t in ['notset', 'exampleproject']:
 			runPySys(self, 'pysys-%s'%t, ['run', '-o', self.output+'/output-%s'%t], workingDir='test-%s'%t, ignoreExitStatus=True)
 			self.logFileContents('pysys-%s.out'%t, maxLines=0)

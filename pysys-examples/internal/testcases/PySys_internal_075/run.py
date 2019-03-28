@@ -4,13 +4,14 @@ from pysys.basetest import BaseTest
 import os, sys, re
 from pysys.utils.filecopy import filecopy
 
+if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
 class PySysTest(BaseTest):
 
 	def execute(self):
 		filecopy(PROJECT.rootdir+'/pysysproject.xml', self.output+'/pysysproject.xml')
-		l = {}
-		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
 		runPySys(self, 'make1', ['make', 'mynewtest1'])
 		runPySys(self, 'make2', ['make', 'mynewtest2'])
 		runPySys(self, 'run1', ['run', '-o', 'cleaned'])

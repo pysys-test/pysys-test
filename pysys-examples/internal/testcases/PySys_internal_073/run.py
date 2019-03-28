@@ -3,6 +3,10 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, re
 
+if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
 class PySysTest(BaseTest):
 
 	def execute(self):
@@ -13,9 +17,6 @@ class PySysTest(BaseTest):
 		assert testsdir.endswith('pysys-examples'), testsdir
 		self.log.info('printing tests from: %s', testsdir)
 		
-		l = {}
-		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
 		runPySys(self, 'basic', ['print'], workingDir=testsdir)
 		runPySys(self, 'thistest', ['print', 'PySys_internal_073'], workingDir=testsdir)
 		runPySys(self, 'full', ['print', '--full'], workingDir=testsdir)

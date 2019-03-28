@@ -1,9 +1,10 @@
+import os, sys
+from pysys.constants import IS_WINDOWS, PROJECT
+
 def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError=True, environs=None, projectfile=None, defaultproject=False, **kwargs):
 	"""
 	Executes pysys from within pysys. Used only by internal pysys testcases. 
 	"""
-	import os, sys
-	from pysys.constants import IS_WINDOWS, PROJECT
 	if sys.argv[0].endswith('pysys.py'):
 		args = [os.path.abspath(sys.argv[0])]+args
 	else:
