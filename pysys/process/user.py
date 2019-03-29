@@ -31,7 +31,7 @@ from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
-from pysys.utils.fileutils import mkdir
+from pysys.utils.fileutils import mkdir, deletedir
 from pysys.utils.pycompat import *
 from pysys.utils.stringutils import compareVersions
 
@@ -1059,6 +1059,17 @@ class ProcessUser(object):
 		"""
 		mkdir(os.path.join(self.output, path))
 		return path
+		
+	def deletedir(self, path):
+		"""
+		Recursively delete the specified directory. 
+		
+		Does nothing if it does not exist. Raises an exception if the deletion fails. 
+		
+		@param path: The path to be deleted. This can be an absolute path or 
+		relative to the testcase output directory.
+		"""
+		deletedir(os.path.join(self.output, path))
 		
 	def getDefaultFileEncoding(self, file, **xargs):
 		"""

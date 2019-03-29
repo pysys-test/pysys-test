@@ -437,6 +437,25 @@ class BaseTest(ProcessUser):
 
 
 	# test validation methods.
+	
+	def assertPathExists(self, path, exists=True, abortOnError=False):
+		"""Perform a validation that the specified file or directory path exists 
+		(or does not exist). 
+		
+		@param path: The path to be checked. This can be an absolute path or 
+		relative to the testcase output directory.
+
+		@param exists: True if the path is asserted to exist, False if it 
+		should not. 
+		
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. 
+		
+		"""
+		self.addOutcome(PASSED if os.path.exists(os.path.join(self.output, path))==exists else FAILED, 
+			'Assertion that path exists=%s for "%s"'%(exists, os.path.normpath(path)), 
+			abortOnError=abortOnError)
+		
 	def assertThat(self, conditionstring, *args, **kwargs):
 		"""Perform a validation based on a python eval string.
 
@@ -456,11 +475,14 @@ class BaseTest(ProcessUser):
 		@param args: Zero or more arguments to be substituted into the format 
 		string
 		
-		@param kwargs: can include only `abortOnError`: Set to True to make the test immediately abort if the
+		@keyword abortOnError: Set to True to make the test immediately abort if the
 		assertion fails. 
 
+		@keyword assertMessage: Overrides the string used to describe this 
+		assertion in log messages and the outcome reason. 
 		"""
 		abortOnError = kwargs.pop('abortOnError',False)
+		assertMessage = kwargs.pop('assertMessage',None)
 		assert not kwargs, 'Invalid keyword arguments: %s'%kwargs.keys()
 		try:
 			expr = conditionstring
@@ -473,10 +495,9 @@ class BaseTest(ProcessUser):
 			return
 		
 		if result:
-			self.addOutcome(PASSED, 'Assertion on %s'%expr)
+			self.addOutcome(PASSED, assertMessage or ('Assertion on %s'%expr))
 		else:
-			self.addOutcome(FAILED, 'Assertion on %s'%expr, abortOnError=abortOnError)
-
+			self.addOutcome(FAILED, assertMessage or ('Assertion on %s'%expr), abortOnError=abortOnError)
 
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.

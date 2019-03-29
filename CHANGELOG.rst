@@ -220,6 +220,8 @@ New features
   feature, see comments in `pysysproject.xml` and in 
   `ProcessUser.getDefaultFileEncoding()`.
   
+- Added `BaseTest.assertPathExists` for checking that a file exists (or not). 
+
 - The default implementation of `BaseTest.getDefaultFileEncoding()` now 
   delegates to the runner's implementation, allowing customizations to be 
   performed in just one place if neede for both `BaseTest` and runner class.
@@ -270,6 +272,9 @@ New features
 
 - Added `ProcessUser.compareVersions()` static helper method for 
   comparing two alphanumeric dotted version strings. 
+
+- Added `ProcessUser.deletedir` which is more convenient that the associated 
+  `fileutils.deletedir` for paths under the `self.output` directory. 
 
 - Added `ignores=` argument to `ProcessUser.waitForSignal()` method which 
   excludes lines matching the specified expression from matching both the 
