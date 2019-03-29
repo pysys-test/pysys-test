@@ -93,10 +93,13 @@ setup(
 
 	python_requires=">=2.7, <4", # be flexible
 
-	install_requires=["pywin32;sys_platform=='win32'", "colorama;sys_platform=='win32'"],
+	install_requires=[
+		"pywin32;sys_platform=='win32'", 
+		"colorama;sys_platform=='win32'"
+	],
 
 	scripts = ['scripts/pysys.py'],
-	packages=find_packages(),
+	packages=find_packages()+['pysys.process.plat-win32', 'pysys.process.plat-unix'],
 	include_package_data=True,
 	)
 	
