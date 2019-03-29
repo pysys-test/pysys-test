@@ -39,7 +39,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
-from pysys.utils.fileutils import mkdir, deletedir
+from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
@@ -226,8 +226,8 @@ class BaseRunner(ProcessUser):
 			removeNonZero = False
 
 		try:
-			for file in os.listdir(dir):
-				path = "%s/%s" % (dir, file)
+			for file in os.listdir(toLongPathSafe(dir)):
+				path = toLongPathSafe("%s/%s" % (dir, file), onlyIfNeeded=True)
 				if PLATFORM in ['sunos', 'linux']:
 					size = os.lstat(path)[stat.ST_SIZE]
 				else:
@@ -624,7 +624,7 @@ class TestContainer(object):
 				# run.log handler
 				runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or locale.getpreferredencoding()
 				self.testFileHandlerRunLog = logging.StreamHandler(_UnicodeSafeStreamWrapper(
-					io.open(os.path.join(self.outsubdir, 'run.log'), 'a', encoding=runLogEncoding), 
+					io.open(toLongPathSafe(os.path.join(self.outsubdir, 'run.log')), 'a', encoding=runLogEncoding), 
 					writebytes=False, encoding=runLogEncoding))
 				self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
 				self.testFileHandlerRunLog.setLevel(logging.INFO)
@@ -756,8 +756,8 @@ class TestContainer(object):
 		@deprecated: Use L{pysys.utils.fileutils.deletedir} instead. 
 		"""
 		try:
-			for file in os.listdir(dir):
-				path = os.path.join(dir, file)
+			for file in os.listdir(toLongPathSafe(dir)):
+				path = toLongPathSafe(os.path.join(dir, file))
 				if PLATFORM in ['sunos', 'linux']:
 					mode = os.lstat(path)[stat.ST_MODE]
 				else:
@@ -769,7 +769,7 @@ class TestContainer(object):
 					os.remove(path)
 				elif stat.S_ISDIR(mode):
 					self.purgeDirectory(path, delTop=True)
-			if delTop: os.rmdir(dir)
+			if delTop: os.rmdir(toLongPathSafe(dir))
 
 		except OSError as ex:
 			log.warning("Caught OSError in purgeDirectory():")
@@ -785,8 +785,8 @@ class TestContainer(object):
 		@rtype: integer 
 		"""
 		try:
-			for file in os.listdir(dir):
-				path = os.path.join(dir, file)
+			for file in os.listdir(toLongPathSafe(dir)):
+				path = toLongPathSafe(os.path.join(dir, file))
 				mode = os.stat(path)[stat.ST_MODE]
 				if stat.S_ISREG(mode):
 					if re.search('^core', file): return True

@@ -31,7 +31,7 @@ from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
-from pysys.utils.fileutils import mkdir, deletedir
+from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe
 from pysys.utils.pycompat import *
 from pysys.utils.stringutils import compareVersions
 
@@ -98,7 +98,7 @@ class ProcessUser(object):
 
 
 	def getInstanceCount(self, displayName):
-		"""Return the number of processes started within the testcase matching the supplied displayName.
+		"""(Deprecated) Return the number of processes started within the testcase matching the supplied displayName.
 
 		The ProcessUser class maintains a reference count of processes started within the class instance 
 		via the L{startProcess()} method. The reference count is maintained against a logical name for 
@@ -597,7 +597,7 @@ class ProcessUser(object):
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
-		f = os.path.join(filedir, file)
+		f = toLongPathSafe(os.path.join(filedir, file))
 		
 		log.debug("Performing wait for file creation:")
 		log.debug("  file:       %s" % file)
@@ -671,7 +671,7 @@ class ProcessUser(object):
 		
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
-		f = os.path.join(filedir, file)
+		f = toLongPathSafe(os.path.join(filedir, file))
 		
 		log.debug("Performing wait for signal in file:")
 		log.debug("  file:       %s" % file)

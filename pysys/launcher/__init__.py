@@ -45,6 +45,7 @@ except NameError:
 
 from pysys.constants import *
 from pysys.xml.descriptor import XMLDescriptorParser
+from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
 
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
@@ -68,7 +69,11 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	
 	if dir is None: dir = os.getcwd()
 	projectfound = PROJECT.projectFile != None
-	for root, dirs, files in os.walk(dir):
+	
+	# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
+	# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
+	for root, dirs, files in os.walk(toLongPathSafe(dir)):
+		root = fromLongPathSafe(root)
 		intersection =  descriptorSet & set(files)
 		if intersection : descriptorfiles.append(os.path.join(root, intersection.pop()))
 		for ignore in (ignoreSet & set(dirs)): dirs.remove(ignore)

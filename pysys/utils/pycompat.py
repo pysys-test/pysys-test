@@ -69,6 +69,8 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	otherwise it returns a file stream yielding "str" bytes objects. 
 	
 	@param path: The path to open; must be an absolute path. 
+	Even on Windows this path can be long (e.g. more than the usual 256 
+	character Windows limit). 
 	
 	@param mode: The file mode, e.g. 'r' for reading, 'wb' for binary writing. 
 	
@@ -91,6 +93,9 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	assert path
 	# sanity check to avoid accidentally creating files in cwd rather than test output directory
 	assert os.path.isabs(path), path
+	
+	from pysys.utils.fileutils import toLongPathSafe # import here to avoid circular dependency
+	path = toLongPathSafe(path, onlyIfNeeded=True)
 	
 	if encoding or (not PY2):
 		if encoding: assert 'b' not in mode, 'cannot open file %s with binary mode %s as an encoding was specified'%(path, mode)

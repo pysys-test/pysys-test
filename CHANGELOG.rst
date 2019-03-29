@@ -280,6 +280,15 @@ New features
   excludes lines matching the specified expression from matching both the 
   main `expr` match expression and any `errorExpr` expressions. 
 
+- Added `fileutils.toLongPathSafe/fromLongPathSafe` which on Windows performs 
+  the necessary magic to allow Python to access paths longer than 256 
+  characters (and on other platforms are a no-op). Although long paths 
+  cannot be used everywhere (e.g. not for working directory in `startProcess`), 
+  PySys will now handle them correctly in the most critical places, such as 
+  `deletedir`, `logFileContents`, `openfile`, `assertPathExists`, when 
+  enumerating available tests, and during test cleanup. Test authors can make 
+  use of `toLongPathSafe` as needed in their own test cases. 
+
 - Added `ProcessUser.getDefaultEnvirons()` method which is now used by 
   `startProcess()` to provide a minimal but clean set of environment variables 
   for launching a given process, and can also be used as a basis for creating 
