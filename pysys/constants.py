@@ -22,7 +22,7 @@ Defines global constants that are used throughout the PySys framework.
 The standard convention is to import all contents of the module so that the constants can 
 be referenced directly. 
 
-@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject
+@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT
 """
 import sys, re, os, os.path, socket, traceback
 
@@ -216,9 +216,11 @@ class PrintLogs(Enum):
 	"""Detailed run.log output is only printed to the stdout console for failed testcases. """
 
 PROJECT = None
-""" The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
+""" The L{pysys.xml.project.Project} instance containing settings for this PySys project.
+Instead of using this constant, we recommend using the 
+L{pysys.basetest.BaseTest.project} (or L{pysys.process.user.ProcessUser.project}) 
+field to access this. """
 
-from pysys.xml.project import Project 
 from pysys.xml.project import Project 
 def loadproject(start):
 	global PROJECT

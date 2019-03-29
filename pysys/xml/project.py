@@ -15,7 +15,13 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+""" Contains the L{Project} class which holds configuration for the entire 
+test project. 
 
+@undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE
+"""
+
+__all__ = ['Project']
 
 import os.path, logging, xml.dom.minidom, collections, codecs
 
@@ -26,9 +32,10 @@ from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.stringutils import compareVersions
 from pysys.utils.fileutils import mkdir
 from pysys.utils.pycompat import openfile
+
 log = logging.getLogger('pysys.xml.project')
 
-DTD='''
+DTD='''xxx
 <!DOCTYPE pysysproject [
 <!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?) >
 <!ELEMENT property (#PCDATA)>
@@ -370,13 +377,22 @@ def createProjectConfig(targetdir, templatepath=None):
 				target.write(l)
 
 class Project(object):
-	"""Class detailing project specific information for a set of PySys tests.
+	"""Contains settings for the entire test project, as defined by the 
+	`pysysproject.xml` project configuration file.
 	
-	Reads and parses the PySys project file if it exists and translates property element 
-	name/value entries in the project file into data attributes of the class instance. 
+	To get a reference to the current C{Project} instance, use the 
+	L{pysys.basetest.BaseTest.project} 
+	(or L{pysys.process.user.ProcessUser.project}) field. 
 	
-	@ivar root: Full path to the project root, as specified by the first PySys project
-				file encountered when walking down the directory tree from the start directory  
+	This class reads and parses the PySys project file if it exists and sets 
+	an instance field for every::
+	
+	   <property name="...">value</property>
+	
+	element in the file. 
+	
+	@ivar root: Full path to the project root directory, as specified by the first PySys project
+	file encountered when walking down the directory tree from the start directory  
 	@type root: string
 	@ivar projectFile: Full path to the project file. May be None, though providing a file is recommended. 
 	@type projectFile: string
