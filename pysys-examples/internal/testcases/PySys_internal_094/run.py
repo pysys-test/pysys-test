@@ -1,6 +1,7 @@
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
+from pysys.xml.project import createProjectConfig
 import os, sys, re, shutil
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
@@ -21,9 +22,10 @@ class PySysTest(BaseTest):
 			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true'})
 
 		subtest = 'default-project' 
+		createProjectConfig(self.mkdir(self.output+'/defconfig'))
 		runPySys(self, subtest, ['run', '--record', '--printLogs', 'all', '--threads', '2', '-o', subtest], 
 			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true', 
-				'PYSYS_PROJECTFILE':PROJECT.testRootDir+'/pysysproject.xml'})
+				'PYSYS_PROJECTFILE':self.output+'/defconfig/pysysproject.xml'})
 
 			
 	def validate(self):

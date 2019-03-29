@@ -17,7 +17,7 @@ class PySysTest(BaseTest):
 		shutil.copytree(self.input+'/NestedTest', self.output+'/test-notset/NestedTest')
 		
 		shutil.copyfile(self.input+'/pysysproject-notset.xml', self.output+'/test-notset/pysysproject.xml')
-		shutil.copyfile(self.input+'/../../../../pysysproject.xml', self.output+'/test-exampleproject/pysysproject.xml')
+		createProjectConfig(self.output+'/test-exampleproject')
 		
 		for t in ['notset', 'exampleproject']:
 			runPySys(self, 'pysys-%s'%t, ['run', '-o', self.output+'/output-%s'%t], workingDir='test-%s'%t, ignoreExitStatus=True)
