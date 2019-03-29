@@ -125,6 +125,10 @@ Changes affecting compatibility
   Although child process are not included in the statistics for each process, 
   the contributions from its child threads are included. 
 
+- Removed `pysys.utils.smtpserver` which was never used by any part of PySys,  
+  does not really belong in this project, and adds little over Python's 
+  built-in `smtpd` module.
+
 New features
 ------------
 
