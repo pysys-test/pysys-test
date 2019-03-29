@@ -23,17 +23,6 @@ import os, shutil, time, locale
 from pysys.constants import IS_WINDOWS
 from pysys.utils.pycompat import PY2
 
-def fromLongPathSafe(path):
-	"""
-	Strip off \\?\ prefixes added by L{toLongPathSafe}. 
-	"""
-	if not path: return path
-	if not path.startswith('\\\\?\\'): return path
-	if path.startswith('\\\\?\\UNC\\'):
-		return '\\'+path[7:]
-	else:
-		return path[4:]
-
 def toLongPathSafe(path, onlyIfNeeded=False):
 	"""
 	Converts the specified path string to a form suitable for passing to API 
@@ -55,6 +44,10 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	@return: The passed-in path, possibly with a "\\?\" prefix added, 
 	forward slashes converted to backslashes on Windows, and converted to 
 	a unicode string. Trailing slashes may be removed. 
+	Note that the conversion to unicode requires a lot of care on Python 2 
+	where byte strings are more common, since it is not possible to combine 
+	unicode and byte strings (if tjhey have non-ascii characters), for example 
+	for a log statement. 
 	
 	"""
 	if (not IS_WINDOWS) or (not path): return path
@@ -79,6 +72,34 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	else:
 		path = u'\\\\?\\'+path
 	return path
+
+def fromLongPathSafe(path):
+	"""
+	Strip off \\?\ prefixes added by L{toLongPathSafe}. 
+	
+	Note that this function does not convert unicode strings back to byte 
+	strings, so if you want a complete reversal of toLongPathSafe you will 
+	additionally have to call C{result.encode(locale.getpreferredencoding())}.
+	"""
+	if not path: return path
+	if not path.startswith('\\\\?\\'): return path
+	if path.startswith('\\\\?\\UNC\\'):
+		result = '\\'+path[7:]
+	else:
+		result = path[4:]
+	return result
+
+def pathexists(path):
+	""" Returns True if the specified path is an existing file or directory, 
+	as returned by C{os.path.exists}. 
+	
+	This method is safe to call on paths that may be over the Windows 256 
+	character limit. 
+	
+	@param path: If None or empty, returns True. Only Python 2, can be a 
+	unicode or byte string. 
+	"""
+	return path and os.path.exists(toLongPathSafe(path))
 
 def mkdir(path):
 	"""

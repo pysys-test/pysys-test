@@ -24,7 +24,7 @@ from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.pycompat import openfile
-
+from pysys.utils.fileutils import pathexists
 
 def trimContents(contents, expressions, exclude=True):
 	"""Reduce a list of strings based by including/excluding lines which match any of a set of regular expressions, returning the processed list.
@@ -122,7 +122,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 
 	"""
 	for file in file1, file2:
-		if not os.path.exists(file):
+		if not pathexists(file):
 			raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		list1 = []

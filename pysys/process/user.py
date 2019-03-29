@@ -31,7 +31,7 @@ from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
-from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe
+from pysys.utils.fileutils import mkdir, deletedir, pathexists
 from pysys.utils.pycompat import *
 from pysys.utils.stringutils import compareVersions
 
@@ -597,7 +597,7 @@ class ProcessUser(object):
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
-		f = toLongPathSafe(os.path.join(filedir, file))
+		f = os.path.join(filedir, file)
 		
 		log.debug("Performing wait for file creation:")
 		log.debug("  file:       %s" % file)
@@ -617,7 +617,7 @@ class ProcessUser(object):
 					break
 					
 			time.sleep(0.01)
-			if os.path.exists(f):
+			if pathexists(f):
 				log.debug("Wait for '%s' file creation completed successfully", file)
 				return
 
@@ -671,7 +671,7 @@ class ProcessUser(object):
 		
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
-		f = toLongPathSafe(os.path.join(filedir, file))
+		f = os.path.join(filedir, file)
 		
 		log.debug("Performing wait for signal in file:")
 		log.debug("  file:       %s" % file)
@@ -685,7 +685,7 @@ class ProcessUser(object):
 		startTime = time.time()
 		msg = "Wait for signal \"%s\" %s in %s" % (expr, condition, os.path.basename(file))
 		while 1:
-			if os.path.exists(f):
+			if pathexists(f):
 				matches = getmatches(f, expr, encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores)
 				if eval("%d %s" % (len(matches), condition)):
 					if PROJECT.verboseWaitForSignal.lower()=='true' if hasattr(PROJECT, 'verboseWaitForSignal') else False:
@@ -707,7 +707,7 @@ class ProcessUser(object):
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
 				msg = "%s timed out after %d secs, %s"%(msg, timeout, 
-					("with %d matches"%len(matches)) if os.path.exists(f) else 'file does not exist')
+					("with %d matches"%len(matches)) if pathexists(f) else 'file does not exist')
 				
 				if abortOnError:
 					self.abort(TIMEDOUT, msg, self.__callRecord())
@@ -817,7 +817,6 @@ class ProcessUser(object):
 			if outcomeReason is None:
 				outcomeReason = ''
 			else: 
-				outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
 				if PY2 and isinstance(outcomeReason, str): 
 					# The python2 logger is very unhappy about byte str objects containing 
 					# non-ascii characters (specifically it will fail to log them and dump a 
@@ -825,6 +824,7 @@ class ProcessUser(object):
 					# messages and test outcome reasons don't get swallowed, add a 
 					# workaround for this here. Not a problem in python 3. 
 					outcomeReason = outcomeReason.decode('ascii', errors='replace')
+				outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
 			
 			old = self.getOutcome()
 			self.outcome.append(outcome)

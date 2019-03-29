@@ -35,6 +35,7 @@ from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
+import locale
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -46,7 +47,7 @@ except NameError:
 from pysys.constants import *
 from pysys.xml.descriptor import XMLDescriptorParser
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
-
+from pysys.utils.pycompat import PY2
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	"""Create a list of descriptor objects representing a set of tests to run, returning the list.
@@ -72,10 +73,16 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	
 	# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
 	# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
+	i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
 	for root, dirs, files in os.walk(toLongPathSafe(dir)):
-		root = fromLongPathSafe(root)
 		intersection =  descriptorSet & set(files)
-		if intersection : descriptorfiles.append(os.path.join(root, intersection.pop()))
+		if intersection: 
+			descriptorpath = fromLongPathSafe(os.path.join(root, intersection.pop()))
+			# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
+			# as it proliferates to all strings in each test
+			if i18n_reencode is not None: descriptorpath = descriptorpath.encode(i18n_reencode) 
+			descriptorfiles.append(descriptorpath)
+		
 		for ignore in (ignoreSet & set(dirs)): dirs.remove(ignore)
 		if not projectfound:
 			for p in DEFAULT_PROJECTFILE:

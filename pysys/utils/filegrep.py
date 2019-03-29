@@ -25,6 +25,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filediff import trimContents
 from pysys.utils.pycompat import openfile
+from pysys.utils.fileutils import pathexists
 
 def getmatches(file, regexpr, ignores=None, encoding=None):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches.
@@ -43,7 +44,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None):
 	
 	log.debug("Looking for expression \"%s\" in input file %s" %(regexpr, file))
 	
-	if not os.path.exists(file):
+	if not pathexists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
@@ -78,7 +79,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None):
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
-	if not os.path.exists(file):
+	if not pathexists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		f = openfile(file, 'r', encoding=encoding)
@@ -118,7 +119,7 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None):
 	@raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
-	if not os.path.exists(file):
+	if not pathexists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
@@ -165,7 +166,7 @@ def orderedgrep(file, exprList, encoding=None):
 	expr = list.pop()
 	regexpr = re.compile(expr)
 
-	if not os.path.exists(file):
+	if not pathexists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	
 	with openfile(file, 'r', encoding=encoding) as f:

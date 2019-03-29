@@ -282,7 +282,8 @@ New features
 
 - Added `fileutils.toLongPathSafe/fromLongPathSafe` which on Windows performs 
   the necessary magic to allow Python to access paths longer than 256 
-  characters (and on other platforms are a no-op). Although long paths 
+  characters (and on other platforms are a no-op), and `pathexists` which 
+  is a long path-safe version of `os.path.exists`. Although long paths still 
   cannot be used everywhere (e.g. not for working directory in `startProcess`), 
   PySys will now handle them correctly in the most critical places, such as 
   `deletedir`, `logFileContents`, `openfile`, `assertPathExists`, when 

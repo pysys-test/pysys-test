@@ -40,7 +40,7 @@ from pysys.process.monitorimpl import DEFAULT_PROCESS_MONITOR
 from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 from pysys.utils.pycompat import *
-from pysys.utils.fileutils import toLongPathSafe
+from pysys.utils.fileutils import pathexists
 
 TEST_TEMPLATE = '''%s
 %s
@@ -453,7 +453,7 @@ class BaseTest(ProcessUser):
 		assertion fails. 
 		
 		"""
-		self.addOutcome(PASSED if os.path.exists(toLongPathSafe(os.path.join(self.output, path)))==exists else FAILED, 
+		self.addOutcome(PASSED if pathexists(os.path.join(self.output, path))==exists else FAILED, 
 			'Assertion that path exists=%s for "%s"'%(exists, os.path.normpath(path)), 
 			abortOnError=abortOnError)
 		
@@ -588,7 +588,7 @@ class BaseTest(ProcessUser):
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
 		result = False
 		try:
-			result = filediff(toLongPathSafe(f1, onlyIfNeeded=True), toLongPathSafe(f2, onlyIfNeeded=True), 
+			result = filediff(f1, f2, 
 				ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
@@ -639,7 +639,7 @@ class BaseTest(ProcessUser):
 		assert expr, 'expr= argument must be specified'
 		
 		if filedir is None: filedir = self.output
-		f = toLongPathSafe(os.path.join(filedir, file), onlyIfNeeded=True)
+		f = os.path.join(filedir, file)
 
 		if literal:
 			def escapeRegex(expr):
@@ -707,7 +707,7 @@ class BaseTest(ProcessUser):
 		assert expr, 'expr= argument must be specified'
 		
 		if filedir is None: filedir = self.output
-		f = toLongPathSafe(os.path.join(filedir, file), onlyIfNeeded=True)
+		f = os.path.join(filedir, file)
 
 		log.debug("Performing grep on file:")
 		log.debug("  file:       %s" % file)
@@ -754,7 +754,7 @@ class BaseTest(ProcessUser):
 		assert exprList, 'expr= argument must be specified'
 		
 		if filedir is None: filedir = self.output
-		f = toLongPathSafe(os.path.join(filedir, file), onlyIfNeeded=True)
+		f = os.path.join(filedir, file)
 	
 		log.debug("Performing ordered grep on file:")
 		log.debug("  file:       %s" % file)
@@ -810,7 +810,7 @@ class BaseTest(ProcessUser):
 		assert expr, 'expr= argument must be specified'
 		
 		if filedir is None: filedir = self.output
-		f = toLongPathSafe(os.path.join(filedir, file), onlyIfNeeded=True)
+		f = os.path.join(filedir, file)
 
 		try:
 			numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f))

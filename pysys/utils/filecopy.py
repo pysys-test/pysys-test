@@ -20,6 +20,7 @@
 from __future__ import print_function
 import sys, os
 from pysys.exceptions import *
+from pysys.utils.fileutils import toLongPathSafe
 
 def copyfileobj(fsrc, fdst, length=16*1024):
 	"""Internal method to read bytes from a source file descriptor, and write to a destination file descriptor.
@@ -44,14 +45,14 @@ def filecopy(src, dst):
  	@raises FileNotFoundException: Raised if the source file does not exist
  
 	"""
-	if not os.path.exists(src):
+	if not pathexists(src):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(src)))
 	
 	fsrc = None
 	fdst = None
 	try:
-		fsrc = open(src, 'rb')
-		fdst = open(dst, 'wb')
+		fsrc = open(toLongPathSafe(src), 'rb')
+		fdst = open(toLongPathSafe(dst), 'wb')
 		copyfileobj(fsrc, fdst)
 	finally:
 		if fdst:
