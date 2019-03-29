@@ -28,7 +28,7 @@ def fromLongPathSafe(path):
 	Strip off \\?\ prefixes added by L{toLongPathSafe}. 
 	"""
 	if not path: return path
-	if not path.startswith('\\\\?\\'): return
+	if not path.startswith('\\\\?\\'): return path
 	if path.startswith('\\\\?\\UNC\\'):
 		return '\\'+path[7:]
 	else:
