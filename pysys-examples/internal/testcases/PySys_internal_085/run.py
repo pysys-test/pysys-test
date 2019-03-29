@@ -6,8 +6,8 @@ from pysys.basetest import BaseTest
 import os, sys, math, shutil, glob
 import locale
 
-# contains a non-ascii ï¿½ character that is different in utf-8 vs latin-1
-TEST_STR = u'Hello ï¿½ world' 
+# contains a non-ascii £ character that is different in utf-8 vs latin-1
+TEST_STR = u'Hello £ world' 
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
