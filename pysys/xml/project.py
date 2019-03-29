@@ -35,7 +35,7 @@ from pysys.utils.pycompat import openfile
 
 log = logging.getLogger('pysys.xml.project')
 
-DTD='''xxx
+DTD='''
 <!DOCTYPE pysysproject [
 <!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?) >
 <!ELEMENT property (#PCDATA)>
