@@ -344,7 +344,7 @@ class XMLProjectParser(object):
 		cls = getattr(module, classname)
 		return cls, optionsDict
 
-def getProjectTemplates():
+def getProjectConfigTemplates():
 	"""Get a list of available templates that can be used for creating a new project configuration. 
 	
 	@return: A dict, where each value is an absolute path to an XML template file 
@@ -356,15 +356,17 @@ def getProjectTemplates():
 	assert templates, 'No project templates found in %s'%templatedir
 	return templates
 
-def createProjectConfigurationFile(templatepath, targetdir):
+def createProjectConfig(targetdir, templatepath=None):
 	"""Create a new project configuration file in the specified targetdir. 
 	"""
+	if not templatepath: templatepath = getProjectConfigTemplates['default']
 	mkdir(targetdir)
 	# using ascii ensures we don't unintentionally add weird characters to the default (utf-8) file
 	with openfile(templatepath, encoding='ascii') as src:
 		with openfile(os.path.abspath(targetdir+'/'+DEFAULT_PROJECTFILE[0]), 'w', encoding='ascii') as target:
 			for l in src:
-				# TODO: replacements
+				l = l.replace('@PYTHON_VERSION@', '%s.%s'%sys.version_info[0:2])
+				l = l.replace('@PYSYS_VERSION@', '.'.join(__version__.split('.')[0:2]))
 				target.write(l)
 
 class Project(object):

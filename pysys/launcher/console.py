@@ -25,7 +25,7 @@ from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
-from pysys.xml.project import getProjectTemplates, createProjectConfigurationFile
+from pysys.xml.project import getProjectConfigTemplates, createProjectConfig
 from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
 
@@ -285,7 +285,7 @@ class ConsolePrintHelper(object):
 
 
 def makeProject(args):
-	templatelist = ', '.join(sorted(getProjectTemplates().keys()))
+	templatelist = ', '.join(sorted(getProjectConfigTemplates().keys()))
 	def printUsage():
 		print("\nPySys System Test Framework (version %s): Project configuration file maker" % __version__) 
 		print("")
@@ -297,6 +297,8 @@ def makeProject(args):
 		print("       -h | --help                 print this message")
 		print("       -d | --dir      STRING      root directory in which to create project configuration file")
 		print("                                   (default is current working dir)")
+		print("")
+		print("Project configuration templates are stored in: %s"%os.path.normpath(os.path.dirname(getProjectConfigTemplates()['default'])))
 		sys.exit()
 
 	optionString = 'hd:'
@@ -326,7 +328,7 @@ def makeProject(args):
 		print("Please specify just one template")
 		sys.exit(1)
 	
-	templates = getProjectTemplates()
+	templates = getProjectConfigTemplates()
 	tmpl = arguments[0]
 	if tmpl not in templates:
 		print("Unknown template '%s', please specify one of the following: %s"%(tmpl, templatelist))
@@ -337,7 +339,7 @@ def makeProject(args):
 				print("Cannot create as project file already exists: %s"%os.path.normpath(dir+'/'+f))
 				sys.exit(1)
 
-	createProjectConfigurationFile(templates[tmpl], dir)
+	createProjectConfig(dir, templates[tmpl])
 	print("Successfully created project configuration in root directory '%s'."%os.path.normpath(dir))
 	print("Now change to that directory and use 'pysys make' to create your first testcase.")
 		
