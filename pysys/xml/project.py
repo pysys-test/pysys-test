@@ -359,7 +359,7 @@ def getProjectConfigTemplates():
 def createProjectConfig(targetdir, templatepath=None):
 	"""Create a new project configuration file in the specified targetdir. 
 	"""
-	if not templatepath: templatepath = getProjectConfigTemplates['default']
+	if not templatepath: templatepath = getProjectConfigTemplates()['default']
 	mkdir(targetdir)
 	# using ascii ensures we don't unintentionally add weird characters to the default (utf-8) file
 	with openfile(templatepath, encoding='ascii') as src:
