@@ -42,7 +42,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('makeproject.out', expr='Successfully created project configuration')
 		self.logFileContents('makeproject.out')
 
-		self.assertGrep('pysysproject.xml', expr=r'<requires-pysys>\d+[.]\d+[.]\d+/requires-pysys>')
+		self.assertGrep('pysysproject.xml', expr=r'<requires-pysys>\d+[.]\d+[.]\d+</requires-pysys>')
 		self.assertGrep('pysysproject.xml', expr=r'<requires-python>\d+[.]\d+[.]\d+</requires-python>')
 		self.assertGrep('pysysproject.xml', expr=r'@.*', contains=False) # unsubstituted tokens
 		
