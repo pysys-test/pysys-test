@@ -75,7 +75,7 @@
 	stylesheets etc. Within a test class, the root location can be referenced using the 
 	PROJECT.root class variable. If not specified, defaults to "root".
 	-->
-	<property root="rootdir"/>
+	<property root="testRootDir"/>
 	
 	
 	<!-- 
@@ -206,7 +206,7 @@
 			from any location on the local disk, but cannot load resources when referenced by a
 			file URL. 
 
-			<property name="outputDir" value="${rootdir}"/>
+			<property name="outputDir" value="${testRootDir}"/>
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
 			-->
@@ -221,7 +221,7 @@
 		Add in the test results writer if straight text output is required 
 		
 		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
-			<property name="outputDir" value="${rootdir}"/>
+			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
 
@@ -230,7 +230,7 @@
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
 		<writer classname="CSVResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.csv">
-			<property name="outputDir" value="${rootdir}"/>
+			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
 
@@ -241,7 +241,7 @@
 		working directory.
 		-->
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${rootdir}/pysys-junit-report"/>
+			<property name="outputDir" value="${testRootDir}/pysys-junit-report"/>
 		</writer>
 		
 

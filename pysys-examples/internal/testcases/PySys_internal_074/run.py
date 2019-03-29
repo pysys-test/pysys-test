@@ -5,15 +5,15 @@ import os, sys, re
 
 from pysys.utils.filecopy import filecopy
 
-if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
-	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
 from pysysinternalhelpers import *
 
 class PySysTest(BaseTest):
 
 	def execute(self):
 		runPySys(self, 'makeproject', ['makeproject'])
-		runPySys(self, 'makeproject-custom', ['makeproject', '--dir', self.output+'/myrootdir', 'default'])
+		runPySys(self, 'makeproject-custom', ['makeproject', '--dir', self.output+'/mytestRootDir', 'default'])
 		
 		# should not overwrite even though filename is different
 		open(self.mkdir(self.output+'/fakeprojroot')+'/.pysysproject','w').close()
@@ -38,7 +38,7 @@ class PySysTest(BaseTest):
 		
 		# makeproject checks
 		self.assertGrep('makeproject-alreadyexists.out', expr='Cannot create as project file already exists: .+')
-		self.assertDiff(self.output+'/pysysproject.xml', self.output+'/myrootdir/pysysproject.xml')
+		self.assertDiff(self.output+'/pysysproject.xml', self.output+'/mytestRootDir/pysysproject.xml')
 		self.assertGrep('makeproject.out', expr='Successfully created project configuration')
 		self.logFileContents('makeproject.out')
 
