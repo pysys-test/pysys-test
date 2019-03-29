@@ -13,7 +13,7 @@
 	<property name="defaultAbortOnError" value="true"/>	
 	<property name="defaultIgnoreExitStatus" value="false"/>
 	<property name="defaultEnvironsTempDir" value="self.output"/>
-	<property name="redirectPrintToLogger" value="true"/>
+	<property name="redirectPrintToLogger" value="false"/>
 
 	<!-- Custom test framework extensions, if needed -->
 	<!--
@@ -44,12 +44,12 @@
 	</default-file-encodings>	
 	
 	<formatters>
-		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils" name="stdout" 
-			messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
+		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils" 
+			name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
 		</formatter>
 
-		<formatter classname="BaseLogFormatter" module="pysys.utils.logutils" name="runlog" 
-			messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
+		<formatter classname="BaseLogFormatter" module="pysys.utils.logutils" 
+			name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 	</formatters>
 	
 </pysysproject>
