@@ -3,8 +3,8 @@ from pysys.basetest import BaseTest
 from pysys.process.monitor import *
 from pysys.utils.pycompat import openfile
 
-if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
-	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
 from pysysinternalhelpers import *
 
 class PySysTest(BaseTest):

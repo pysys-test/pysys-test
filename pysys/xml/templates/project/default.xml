@@ -1,0 +1,55 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<requires-pysys>@PYSYS_VERSION@</requires-pysys>
+	<requires-python>@PYTHON_VERSION@</requires-python>
+	
+	<property root="testRootDir"/>
+	<property environment="env"/>
+	<property osfamily="osfamily"/>
+
+	<!-- User-defined properties -->
+
+	<!-- Standard default settings. See sample project file and API docs for more details. -->
+	<property name="defaultAbortOnError" value="true"/>	
+	<property name="defaultIgnoreExitStatus" value="false"/>
+	<property name="defaultEnvironsTempDir" value="self.output"/>
+	<property name="redirectPrintToLogger" value="false"/>
+
+	<!-- Custom test framework extensions, if needed -->
+	<!--
+	<path value="../framework" relative="true" />
+	<runner classname="MyRunner" module="my.organization"/>
+	<maker classname="MyTestMaker" module="my.organization"/>
+	-->
+
+	<writers>
+		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
+
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${testRootDir}/pysys-junit-report"/>
+		</writer>
+		
+		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+			<property name="showOutputDir" value="false"/>
+			<property name="showOutcomeReason" value="true"/>
+		</writer>
+	</writers>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml"  encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
+	</default-file-encodings>	
+	
+	<formatters>
+		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils" 
+			name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
+		</formatter>
+
+		<formatter classname="BaseLogFormatter" module="pysys.utils.logutils" 
+			name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
+	</formatters>
+	
+</pysysproject>

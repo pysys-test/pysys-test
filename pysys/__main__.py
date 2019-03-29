@@ -20,9 +20,13 @@ import pysys
 def main(args=None):
 	"""The entry-point for invoking PySys."""
 	import os, sys
-	from pysys.constants import loadproject
-	loadproject(os.getcwd())
-	
+
+	import pysys.constants
+	# if user selected an option that needs a project, must set 
+	# constants.PROJECT before any modules start importing * from constants
+	if len(sys.argv) >= 2 and sys.argv[1] in ['run', 'make', 'print', 'clean']:
+		pysys.constants.loadproject(os.getcwd())
+
 	import pysys.launcher.console
 	return pysys.launcher.console.main(args or sys.argv[1:])
 if __name__ == "__main__": 

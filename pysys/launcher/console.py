@@ -25,11 +25,12 @@ from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
+from pysys.xml.project import getProjectConfigTemplates, createProjectConfig
 from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
 
 """
-@undocumented: EXPR1, EXPR2, EXPR3, _PYSYS_SCRIPT_NAME
+@undocumented: EXPR1, EXPR2, EXPR3, _PYSYS_SCRIPT_NAME, main
 """
 
 EXPR1 = re.compile("^[\w\.]*=.*$")
@@ -283,6 +284,65 @@ class ConsolePrintHelper(object):
 
 
 
+def makeProject(args):
+	templatelist = ', '.join(sorted(getProjectConfigTemplates().keys()))
+	def printUsage():
+		print("\nPySys System Test Framework (version %s): Project configuration file maker" % __version__) 
+		print("")
+		print("Usage: %s makeproject [option]* [TEMPLATE]" % (_PYSYS_SCRIPT_NAME))
+		print("")
+		print("   where TEMPLATE can be: %s"%templatelist)
+		print("")
+		print("   and [option] includes:")
+		print("       -h | --help                 print this message")
+		print("       -d | --dir      STRING      root directory in which to create project configuration file")
+		print("                                   (default is current working dir)")
+		print("")
+		print("Project configuration templates are stored in: %s"%os.path.normpath(os.path.dirname(getProjectConfigTemplates()['default'])))
+		sys.exit()
+
+	optionString = 'hd:'
+	optionList = ['dir=', 'help']
+	
+	try:
+		optlist, arguments = getopt.getopt(args, optionString, optionList)
+	except Exception:
+		log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
+		sys.exit(1)
+
+	dir = '.'
+	for option, value in optlist:
+		if option in ["-h", "--help"]:
+			printUsage()	
+
+		elif option in ("-d", "--dir"):
+			dir = value
+			
+		else:
+			print("Unknown option: %s"%option)
+			sys.exit(1)
+
+	if not arguments: arguments = ['default']
+	
+	if len(arguments) != 1:
+		print("Please specify just one template")
+		sys.exit(1)
+	
+	templates = getProjectConfigTemplates()
+	tmpl = arguments[0]
+	if tmpl not in templates:
+		print("Unknown template '%s', please specify one of the following: %s"%(tmpl, templatelist))
+		sys.exit(1)
+	if os.path.exists(dir):
+		for f in os.listdir(dir):
+			if f in DEFAULT_PROJECTFILE:
+				print("Cannot create as project file already exists: %s"%os.path.normpath(dir+'/'+f))
+				sys.exit(1)
+
+	createProjectConfig(dir, templates[tmpl])
+	print("Successfully created project configuration in root directory '%s'."%os.path.normpath(dir))
+	print("Now change to that directory and use 'pysys make' to create your first testcase.")
+		
 class ConsoleMakeTestHelper(object):
 	def __init__(self, name=""):
 		self.name = name
@@ -549,10 +609,11 @@ def printUsage():
 		__version__, sys.version_info[0], sys.version_info[1], sys.version_info[2]))
 	sys.stdout.write("\nUsage: %s [mode] [option]* { [tests]* | [testId] }\n" % _PYSYS_SCRIPT_NAME)
 	sys.stdout.write("    where [mode] can be;\n")
-	sys.stdout.write("       run    - run a set of tests rooted from the current working directory\n")
-	sys.stdout.write("       make   - make a new testcase directory structure in the current working directory\n")
-	sys.stdout.write("       print  - print details of a set of tests rooted from the current working directory\n")
-	sys.stdout.write("       clean  - clean the output subdirectories of tests rooted from the current working directory\n")
+	sys.stdout.write("       makeproject - create the configuration file for a new project of PySys testcases\n")
+	sys.stdout.write("       make        - create a new testcase in the current project\n")
+	sys.stdout.write("       print       - print list or details of tests under the current working directory\n")
+	sys.stdout.write("       run         - run a set of tests under the current working directory\n")
+	sys.stdout.write("       clean       - clean the output subdirectories of tests under the current working directory\n")
 	sys.stdout.write("\n")
 	sys.stdout.write("    For more information on the options available to each mode, use the -h | --help option, e.g.\n")
 	sys.stdout.write("       %s run --help\n" % _PYSYS_SCRIPT_NAME)
@@ -596,7 +657,9 @@ def cleanTest(args):
 
 
 def main(args):
-
+	# this is designed to be called from 
+	# load project only for options where it's necessary, otherwise we get 
+	# warnings about missing project file for first time users
 	if len(args) < 1: 
 		printUsage()
 	else:
@@ -605,6 +668,8 @@ def main(args):
 			runTest(args[1:])
 		elif mode == "make":
 			makeTest(args[1:])
+		elif mode == "makeproject":
+			makeProject(args[1:])
 		elif mode == "print":
 			printTest(args[1:])
 		elif mode == "clean":

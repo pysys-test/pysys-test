@@ -8,8 +8,8 @@ import os, sys, math, shutil, glob, locale
 # contains a non-ascii £ character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello £ world' 
 
-if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
-	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
 from pysysinternalhelpers import *
 
 class PySysTest(BaseTest):
@@ -19,7 +19,7 @@ class PySysTest(BaseTest):
 		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
 		shutil.copytree(self.input, self.output+'/test')
-		# make rootdir and working dir be different
+		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
 		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)

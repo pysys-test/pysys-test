@@ -7,8 +7,8 @@ import os, sys, math, shutil, glob, re
 import xml.dom.minidom
 from pysys.utils.pycompat import PY2
 
-if PROJECT.rootdir+'/internal/utilities/extensions' not in sys.path:
-	sys.path.append(PROJECT.rootdir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
 from pysysinternalhelpers import *
 
 class PySysTest(BaseTest):
@@ -16,7 +16,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		
 		shutil.copytree(self.input, self.output+'/test')
-		# make rootdir and working dir be different
+		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
 		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record'], workingDir='test', ignoreExitStatus=True)

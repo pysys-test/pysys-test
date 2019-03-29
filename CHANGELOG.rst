@@ -125,10 +125,24 @@ Changes affecting compatibility
   Although child process are not included in the statistics for each process, 
   the contributions from its child threads are included. 
 
+- Although most real PySys projects had a `pysysproject.xml` file in the root 
+  directory specifying the configuration, PySys v1.3.0 and earlier treated 
+  this file as optional, resulting in confusing error messages, and 
+  long and sometimes disruptive searching of non-test directories if a user 
+  tried to run PySys from a non-test directory (e.g. from `c:`). To avoid 
+  user confusion, by default PySys will now terminate with an error if you 
+  try to run it from a directory which doesn't have a project file. Any users 
+  who found the ability to use it without a project file useful can enable 
+  it by setting the `PYSYS_PERMIT_NO_PROJECTFILE=true` environment variable. 
+
 New features
 ------------
 
 - PySys can now be installed simply by running `pip install PySys`. 
+
+- `pysys.py` has a new `makeproject` command that generates a default 
+  `pysysproject.xml` with some recommended defaults to make it easy to start a 
+  new project without needing to download the samples. 
 
 - Added optional `errors=` parameter to `pycompat.openfile()` to allow easily 
   enabling non-strict handling of unsupported characters for cases where it 

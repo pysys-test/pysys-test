@@ -8,5 +8,7 @@ include VERSION
 include MANIFEST.in
 include setup.*
 
+include pysys/xml/templates/project/*.xml
+
 # all testcases
 recursive-include pysys-examples *
