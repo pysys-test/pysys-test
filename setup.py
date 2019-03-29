@@ -21,7 +21,7 @@ import pysys
 
 import setuptools
 print('using setuptools v%s'%setuptools.__version__)
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # Conditional dependencies were added before v37, so need that version when building from source. 
 # (end-users should be using the wheel so won't be affected).
@@ -96,10 +96,7 @@ setup(
 	install_requires=["pywin32;sys_platform=='win32'", "colorama;sys_platform=='win32'"],
 
 	scripts = ['scripts/pysys.py'],
-	packages=['pysys', 'pysys.launcher',  'pysys.manual',
-			'pysys.process', 'pysys.process.plat-win32', 'pysys.internal',
-			'pysys.process.plat-unix', 'pysys.unit', 'pysys.utils',
-			'pysys.writer', 'pysys.xml'],
+	packages=find_packages(),
 	include_package_data=True,
 	)
 	
