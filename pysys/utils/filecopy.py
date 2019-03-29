@@ -20,7 +20,7 @@
 from __future__ import print_function
 import sys, os
 from pysys.exceptions import *
-from pysys.utils.fileutils import toLongPathSafe
+from pysys.utils.fileutils import toLongPathSafe, pathexists
 
 def copyfileobj(fsrc, fdst, length=16*1024):
 	"""Internal method to read bytes from a source file descriptor, and write to a destination file descriptor.
