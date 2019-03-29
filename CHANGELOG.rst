@@ -140,6 +140,10 @@ New features
 
 - PySys can now be installed simply by running `pip install PySys`. 
 
+- `pysys.py` has a new `makeproject` command that generates a default 
+  `pysysproject.xml` with some recommended defaults to make it easy to start a 
+  new project without needing to download the samples. 
+
 - Added optional `errors=` parameter to `pycompat.openfile()` to allow easily 
   enabling non-strict handling of unsupported characters for cases where it 
   does not matter (e.g. logging file contents), without needing caller to 

@@ -128,20 +128,47 @@ After installation, to see the available options to the pysys.py script use::
 
 	> pysys.py --help
   
-The script takes four main top level command line options to it: 
-`run`, `print`, `make` and `clean`, which are used to run a set of testcases, 
-print the metadata for a set of testcases, make a new testcase directory 
-structure, or clean all testcase output. For more information on the further 
-options available to each add --help after the top level option, e.g. ::
+The script has four main commands: 
+  - `makeproject` to create your top-level testing project configuration file, 
+  - `make` to create individual testcases, 
+  - `run` to execute them, and 
+  - `clean` to delete testcase output after execution.
 
-	> pysys.py run --help
+For detailed information, see the `--help` command line. 
+
+To get started, simply make a directory to hold your tests. Then run the 
+`makeproject` command from that directory to add a `pysysproject.xml` 
+file which holds default settings your all your tests::
+
+	> mkdir tests
+	> cd tests
+	> pysys.py makeproject
+
+Then to create your first test::
+
+	> pysys.py make MyApplication_001
+
+This will create a `MyApplication_001` subdirectory with a `pysystest.xml` 
+file holding metadata about the test such as its title, and a `run.py` 
+where you can add the logic to `execute` your test, and to `validate` that 
+the results are as expected. 
+
+To run your testcases, simply execute::
+
+	> pysys.py run
 
 
-PySys has a set of simple sample testcases to demonstrate its use for 
-running automated and manual testcases. 
+Next steps
+==========
+The methods you need for typical tasks like starting processes (`startProcess`), 
+waiting for messages in log files (`waitForSignal`) and of course validating 
+the results (various assert methods such as `assertGrep`) are 
+all defined on the `BaseTest` class, so look that up in the API documentation 
+for full details of what is possible - see https://pysys-test.github.io/pysys-test. 
 
-The samples can be downloaded as a `.tar.gz` containing files with Unix line 
-endings, or a `.zip` using Windows line endings from 
+You might also want to take a look at our sample testcases for some practical 
+examples. These can be downloaded as a `.tar.gz` containing files with Unix 
+line endings, or a `.zip` using Windows line endings from 
 https://github.com/pysys-test/pysys-test/releases.
 
 To unpack the tests on Unix systems, use::
@@ -149,15 +176,9 @@ To unpack the tests on Unix systems, use::
 	> tar zxvpf PySys-VERSION-sample-testcases-unix.tar.gz
 	> cd pysys-examples
 
-To run the testcases, after changing directory to the testcases location, 
+To run the testcases, after changing directory to the testcases location 
 simply execute::
 
 	> pysys.py run  
 
-When creating your own test suite you should copy the `pysysproject.xml` 
-file from the examples directory into the root of your tests directory to get 
-a good set of default settings which you can then customize as needed. 
-
-For reference information about the PySys API, see
-https://pysys-test.github.io/pysys-test.
-
+The `fibonacci` sample tests are a good place to start. 
