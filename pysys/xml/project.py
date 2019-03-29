@@ -15,7 +15,13 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+""" Contains the L{Project} class which holds configuration for the entire 
+test project. 
 
+@undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE
+"""
+
+__all__ = ['Project']
 
 import os.path, logging, xml.dom.minidom, collections, codecs
 
@@ -24,6 +30,9 @@ from pysys import __version__
 from pysys.utils.loader import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.stringutils import compareVersions
+from pysys.utils.fileutils import mkdir
+from pysys.utils.pycompat import openfile
+
 log = logging.getLogger('pysys.xml.project')
 
 DTD='''
@@ -342,15 +351,48 @@ class XMLProjectParser(object):
 		cls = getattr(module, classname)
 		return cls, optionsDict
 
+def getProjectConfigTemplates():
+	"""Get a list of available templates that can be used for creating a new project configuration. 
+	
+	@return: A dict, where each value is an absolute path to an XML template file 
+	and each key is the display name for that template. 
+	"""
+	templatedir = os.path.dirname(__file__)+'/templates/project'
+	templates = { t.replace('.xml',''): templatedir+'/'+t 
+		for t in os.listdir(templatedir) if t.endswith('.xml')}
+	assert templates, 'No project templates found in %s'%templatedir
+	return templates
+
+def createProjectConfig(targetdir, templatepath=None):
+	"""Create a new project configuration file in the specified targetdir. 
+	"""
+	if not templatepath: templatepath = getProjectConfigTemplates()['default']
+	mkdir(targetdir)
+	# using ascii ensures we don't unintentionally add weird characters to the default (utf-8) file
+	with openfile(templatepath, encoding='ascii') as src:
+		with openfile(os.path.abspath(targetdir+'/'+DEFAULT_PROJECTFILE[0]), 'w', encoding='ascii') as target:
+			for l in src:
+				l = l.replace('@PYTHON_VERSION@', '%s.%s.%s'%sys.version_info[0:3])
+				l = l.replace('@PYSYS_VERSION@', '.'.join(__version__.split('.')[0:3]))
+				target.write(l)
 
 class Project(object):
-	"""Class detailing project specific information for a set of PySys tests.
+	"""Contains settings for the entire test project, as defined by the 
+	`pysysproject.xml` project configuration file.
 	
-	Reads and parses the PySys project file if it exists and translates property element 
-	name/value entries in the project file into data attributes of the class instance. 
+	To get a reference to the current C{Project} instance, use the 
+	L{pysys.basetest.BaseTest.project} 
+	(or L{pysys.process.user.ProcessUser.project}) field. 
 	
-	@ivar root: Full path to the project root, as specified by the first PySys project
-				file encountered when walking down the directory tree from the start directory  
+	This class reads and parses the PySys project file if it exists and sets 
+	an instance field for every::
+	
+	   <property name="...">value</property>
+	
+	element in the file. 
+	
+	@ivar root: Full path to the project root directory, as specified by the first PySys project
+	file encountered when walking down the directory tree from the start directory  
 	@type root: string
 	@ivar projectFile: Full path to the project file. May be None, though providing a file is recommended. 
 	@type projectFile: string
@@ -413,3 +455,62 @@ class Project(object):
 		if not runlogformatter: runlogformatter = BaseLogFormatter({})
 		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
+
+	@staticmethod
+	def findAndLoadProject(startdir):
+		"""Find and load a project file, starting from the specified directory. 
+		
+		If this fails an error is logged and the process is terminated. 
+		
+		The method walks up the directory tree from the supplied path until the 
+		PySys project file is found. The location of the project file defines
+		the project root location. The contents of the project file determine 
+		project specific constants as specified by property elements in the 
+		xml project file.
+		
+		To ensure that all loaded modules have a pre-initialised projects 
+		instance, any launching application should first import the loadproject
+		file, and then make a call to it prior to importing all names within the
+		constants module.
+
+		@param startdir: The initial path to start from when trying to locate the project file
+
+		"""
+		projectFile = os.getenv('PYSYS_PROJECTFILE', None)
+		search = startdir
+		if not projectFile:
+			projectFileSet = set(DEFAULT_PROJECTFILE)
+			
+			drive, path = os.path.splitdrive(search)
+			while (not search == drive):
+				intersection =  projectFileSet & set(os.listdir(search))
+				if intersection : 
+					projectFile = intersection.pop()
+					break
+				else:
+					search, drop = os.path.split(search)
+					if not drop: search = drive
+		
+			if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))): # pragma: no cover
+				if os.getenv('PYSYS_PERMIT_NO_PROJECTFILE','').lower()=='true':
+					sys.stderr.write("WARNING: No project file found; using default settings and taking project root to be '%s' \n" % (search or '.'))
+				else:
+					sys.stderr.write('\n'.join([
+						#                                                                               |
+						"WARNING: No PySys test project file exists in this directory (or its parents):",
+						"  - If you wish to start a new project, begin by running 'pysys makeproject'.",
+						"  - If you are trying to use an existing project, change directory to a ",
+						"    location under the root test directory that contains your project file.",
+						"  - If you wish to use an existing project that has no configuration file, ",
+						"    set the PYSYS_PERMIT_NO_PROJECTFILE=true environment variable."
+					]))
+					sys.exit(1)
+
+		try:
+			PROJECT = Project(search, projectFile)
+			stdoutHandler.setFormatter(PROJECT.formatters.stdout)
+			return PROJECT
+		except Exception as e:
+			sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
+			traceback.print_exc()
+			sys.exit(1)

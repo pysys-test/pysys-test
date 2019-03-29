@@ -3,14 +3,15 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, math, shutil
 
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
 class PySysTest(BaseTest):
 
 	def execute(self):
 		shutil.copytree(self.input, self.output+'/test')
 
-		l = {}
-		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '-v', 'DEBUG'], workingDir='test', ignoreExitStatus=True, 
 			environs={
 				'PYSYS_COLOR': 'tRue',

@@ -9,6 +9,10 @@ import locale
 # contains a non-ascii £ character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello £ world' 
 
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
 class PySysTest(BaseTest):
 
 	def execute(self):
@@ -17,9 +21,6 @@ class PySysTest(BaseTest):
 
 		shutil.copytree(self.input, self.output+'/test')
 
-		l = {}
-		exec(open(self.input+'/../../../utilities/resources/runpysys.py').read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2', '-n', '2'], ignoreExitStatus=True, workingDir='test')
 		self.logFileContents('pysys.out', maxLines=0)
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)

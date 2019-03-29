@@ -125,6 +125,16 @@ Changes affecting compatibility
   Although child process are not included in the statistics for each process, 
   the contributions from its child threads are included. 
 
+- Although most real PySys projects had a `pysysproject.xml` file in the root 
+  directory specifying the configuration, PySys v1.3.0 and earlier treated 
+  this file as optional, resulting in confusing error messages, and 
+  long and sometimes disruptive searching of non-test directories if a user 
+  tried to run PySys from a non-test directory (e.g. from `c:`). To avoid 
+  user confusion, by default PySys will now terminate with an error if you 
+  try to run it from a directory which doesn't have a project file. Any users 
+  who found the ability to use it without a project file useful can enable 
+  it by setting the `PYSYS_PERMIT_NO_PROJECTFILE=true` environment variable. 
+
 - Removed `pysys.utils.smtpserver` which was never used by any part of PySys,  
   does not really belong in this project, and adds little over Python's 
   built-in `smtpd` module.
@@ -133,6 +143,10 @@ New features
 ------------
 
 - PySys can now be installed simply by running `pip install PySys`. 
+
+- `pysys.py` has a new `makeproject` command that generates a default 
+  `pysysproject.xml` with some recommended defaults to make it easy to start a 
+  new project without needing to download the samples. 
 
 - Added optional `errors=` parameter to `pycompat.openfile()` to allow easily 
   enabling non-strict handling of unsupported characters for cases where it 
@@ -266,9 +280,8 @@ New features
   for launching a given process, and can also be used as a basis for creating 
   customized environments using the new `createEnvirons()` helper method. 
   There are some new project properties to control how this works, which 
-  are added to the sample `pysysproject.xml` and recommended for new projects, 
-  but are not enabled by default in existing projects to maintain 
-  compatibility::
+  you may wish to consider using for new projects, but are not enabled by 
+  default in existing projects to maintain compatibility::
   
 	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
 	<property name="defaultEnvironsTempDir" value="self.output'"/>  

@@ -3,6 +3,10 @@ from pysys.basetest import BaseTest
 from pysys.process.monitor import *
 from pysys.utils.pycompat import openfile
 
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
 class PySysTest(BaseTest):
 
 	def execute(self):
@@ -12,9 +16,6 @@ class PySysTest(BaseTest):
 						  stderr = "%s/test.err" % self.output,
 						  state=BACKGROUND)
 						  
-		l = {}
-		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
 		childtest = runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '-X', 'pidToMonitor=%d'%p.pid], 
 			state=BACKGROUND, workingDir=self.input+'/nestedtests')
 

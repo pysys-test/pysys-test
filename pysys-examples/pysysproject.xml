@@ -75,7 +75,7 @@
 	stylesheets etc. Within a test class, the root location can be referenced using the 
 	PROJECT.root class variable. If not specified, defaults to "root".
 	-->
-	<property root="rootdir"/>
+	<property root="testRootDir"/>
 	
 	
 	<!-- 
@@ -106,6 +106,20 @@
 	<property name="defaultIgnoreExitStatus" value="false"/>
 
 	
+
+	<!-- 
+	Set default LANG for child processes on Unix. 
+	Useful for making all machines behave the same. Ensure that the specified 
+	locale is installed on all machines. 
+	-->
+	<!-- <property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/> -->
+
+	<!-- 
+	Set temporary directory for child processes to the testcase output 
+	directory to avoid cluttering up common file locations. 
+	-->
+	<property name="defaultEnvironsTempDir" value="self.output"/>
+
 	<!-- 
 	Controls whether print() and sys.stdout.write() statements will be 
 	converted into logger.info() calls. If redirection is enabled, output 
@@ -120,18 +134,6 @@
 	-->
 	<property name="redirectPrintToLogger" value="false"/>
 	
-
-	<!-- 
-	Set default LANG for child processes on Unix. 
-	-->
-	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
-
-	<!-- 
-	Set temporary directory for child processes to the testcase output 
-	directory to avoid cluttering up common file locations. 
-	-->
-	<property name="defaultEnvironsTempDir" value="self.output"/>
-
 
 	<!-- 
 	Import properties from file (fails silently if the file does not exist). The imported 
@@ -204,23 +206,22 @@
 			from any location on the local disk, but cannot load resources when referenced by a
 			file URL. 
 
-			<property name="outputDir" value="${rootdir}"/>
+			<property name="outputDir" value="${testRootDir}"/>
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
 			-->
 		</writer>
 		
-		<!-- CI writers do nothing unless running under the specified CI environment 
-			and also require that the "record" option is specified. 
+		<!-- CI writers automatically enable themselves only if running under 
+			the associated CI environment. 
 		-->
-		<writer classname="TravisCIWriter" module="pysys.writer.ci">
-		</writer>
+		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
 
 		<!--
 		Add in the test results writer if straight text output is required 
 		
 		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
-			<property name="outputDir" value="${rootdir}"/>
+			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
 
@@ -229,7 +230,7 @@
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
 		<writer classname="CSVResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.csv">
-			<property name="outputDir" value="${rootdir}"/>
+			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
 
@@ -240,7 +241,7 @@
 		working directory.
 		-->
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${rootdir}/pysys-junit-report"/>
+			<property name="outputDir" value="${testRootDir}/pysys-junit-report"/>
 		</writer>
 		
 

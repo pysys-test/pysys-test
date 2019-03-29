@@ -3,19 +3,20 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, re
 
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
 class PySysTest(BaseTest):
 
 	def execute(self):
 		# use root pysys project so we can check all our own tests print ok
 		# it's safe to use project root because we are not enabling record mode
-		testsdir = os.path.normpath(PROJECT.rootdir)
+		testsdir = os.path.normpath(PROJECT.testRootDir)
 		
 		assert testsdir.endswith('pysys-examples'), testsdir
 		self.log.info('printing tests from: %s', testsdir)
 		
-		l = {}
-		exec(open(os.path.normpath(self.input+'/../../../utilities/resources/runpysys.py')).read(), {}, l) # define runPySys
-		runPySys = l['runPySys']
 		runPySys(self, 'basic', ['print'], workingDir=testsdir)
 		runPySys(self, 'thistest', ['print', 'PySys_internal_073'], workingDir=testsdir)
 		runPySys(self, 'full', ['print', '--full'], workingDir=testsdir)
@@ -23,7 +24,7 @@ class PySysTest(BaseTest):
 		runPySys(self, 'modes', ['print', '--modes'], workingDir=testsdir)
 		runPySys(self, 'nonexistent', ['print', 'non-existent'], workingDir=testsdir, ignoreExitStatus=True)
 		runPySys(self, 'emptydir', ['print'], workingDir=self.mkdir('emptydir'), ignoreExitStatus=True, 
-			projectfile=PROJECT.rootdir+'/pysysproject.xml')
+			projectfile=PROJECT.testRootDir+'/pysysproject.xml')
 			
 	def validate(self):
 		for t in ['basic', 'thistest', 'full', 'groups', 'modes']:

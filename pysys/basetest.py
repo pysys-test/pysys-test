@@ -897,7 +897,7 @@ class BaseTest(ProcessUser):
 			
 			failures = []
 			lines = [] # accumulate each test
-			with open(os.path.join(self.output, output), encoding=locale.getpreferredencoding()) as f:
+			with openfile(os.path.join(self.output, output), encoding=locale.getpreferredencoding()) as f:
 				for line in f:
 					line = line.rstrip()
 					if line=='Trying:': # start of a new one, end of previous one
