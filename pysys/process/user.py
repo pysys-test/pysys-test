@@ -102,7 +102,7 @@ class ProcessUser(object):
 
 		The ProcessUser class maintains a reference count of processes started within the class instance 
 		via the L{startProcess()} method. The reference count is maintained against a logical name for 
-		the process, which is the displayName used in the method call to L{startProcess()}, or the 
+		the process, which is the C{displayName} used in the method call to L{startProcess()}, or the 
 		basename of the command if no displayName was supplied. The method returns the number of 
 		processes started with the supplied logical name, or 0 if no processes have been started. 
 
@@ -119,7 +119,13 @@ class ProcessUser(object):
 		
 	
 	def allocateUniqueStdOutErr(self, processKey):
-		"""Allocate filenames of the form processKey[.n].out (similarly for .err).
+		"""Allocate unique filenames of the form `processKey[.n].out/.err` 
+		which can be used for the L{startProcess} C{stdouterr} parameter. 
+		
+		The first time this is called it will return names like 
+		`('myprocess.out', 'myprocess.err')`, the second time it will return 
+		`('myprocess.1.out', 'myprocess.1.err')`, then 
+		`('myprocess.2.out', 'myprocess.2.err')` etc. 
 		
 		@param processKey: A user-defined identifier that will form the prefix onto which [.n].out is appended
 		@return: A STDOUTERR_TUPLE named tuple of (stdout, stderr)
@@ -138,20 +144,29 @@ class ProcessUser(object):
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, ignoreExitStatus=None):
+			abortOnError=None, ignoreExitStatus=None, stdouterr=None):
 		"""Start a process running in the foreground or background, and return 
 		the L{ProcessWrapper} process object.
+		
+		Typical use is::
+		
+			myexecutable = self.startProcess('path_to_my_executable', 
+				arguments=['myoperation', 'arg1','arg2'],
+				environs=self.createEnvirons(addToLibPath=['my_ld_lib_path']), # if a customized environment is needed
+				stdouterr=self.allocateUniqueStdOutErr('myoperation'), # for stdout/err files, pick a suitable logical name for what it's doing
+				state=BACKGROUND # or remove for default behaviour of executing in foreground
+				)
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments,
 		environment and working directory to run the process in can all be specified in the arguments to the
 		method, along with the filenames used for capturing the stdout and stderr of the process. Processes may
 		be started in the C{FOREGROUND}, in which case the method does not return until the process has completed
 		or a time out occurs, or in the C{BACKGROUND} in which case the method returns immediately to the caller
-		returning a handle to the process to allow manipulation at a later stage. All processes started in the
-		C{BACKGROUND} and not explicitly killed using the returned process handle are automatically killed on
-		completion of the test via the L{cleanup()} destructor.
+		returning a handle to the process to allow manipulation at a later stage, typically with L{waitProcess}. 
+		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process 
+		object are automatically killed on completion of the test via the L{cleanup()} destructor.
 
-		@param command: The command to start the process (should include the full path)
+		@param command: The path to the executable to be launched (should include the full path)
 		@param arguments: A list of arguments to pass to the command
 		
 		@param environs: A dictionary specifying the environment to run the process in. 
@@ -160,27 +175,63 @@ class ProcessUser(object):
 		If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
 		
 		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
+		
 		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
-		@param timeout: The timeout period after which to termintate processes running in the C{FOREGROUND}
-		@param stdout: The filename used to capture the stdout of the process. Consider using L{allocateUniqueStdOutErr} to get this. 
-		@param stderr: The filename user to capture the stderr of the process. Consider using L{allocateUniqueStdOutErr} to get this. 
-		@param displayName: Logical name of the process used for display and reference counting (defaults to the basename of the command)
+		
+		@param timeout: The timeout period after which to terminate processes running in the C{FOREGROUND}. 
+		
+		@param stdouterr: The filename prefix to use for the stdout and stderr of the process 
+		(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
+		L{allocateUniqueStdOutErr}. 
+		The stdouterr prefix is also used to form a default display name for 
+		the process if none is explicitly provided. 
+		The files are created relative to the test output directory. 
+		The filenames can be accessed from the returned process object using 
+		L{pysys.process.helper.CommonProcessWrapper.stdout} and 
+		L{pysys.process.helper.CommonProcessWrapper.stderr}.
+		
+		@param stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
+		@param stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
+		
+		@param displayName: Logical name of the process used for display 
+		(defaults to a string generated from the stdouterr and/or the command).
+		
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-			project setting)
+		project setting)
+		
 		@param ignoreExitStatus: If False, non-zero exit codes are reported as an error outcome. None means the value will 
 		be taken from defaultIgnoreExitStatus, which can be configured in the project XML, or is set to True if not specified there. 
-		@return: The process handle of the process (L{pysys.process.helper.ProcessWrapper})
-		@rtype: handle
+		
+		@return: The process handle of the process (L{ProcessWrapper}).
+		@rtype: L{ProcessWrapper}
 
 		"""
 		if ignoreExitStatus == None: ignoreExitStatus = self.defaultIgnoreExitStatus
 		workingDir = os.path.join(self.output, workingDir or '')
-		if not displayName: displayName = os.path.basename(command)
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
+		
+		if stdouterr:
+			if stdout or stderr: raise Exception('Cannot specify both stdouterr and stdout/stderr')
+			if isstring(stdouterr):
+				stdout = stdouterr+'.out'
+				stderr = stdouterr+'.err'
+			else:
+				stdout, stderr = stdouterr
+			if not displayName:
+				# Heuristically the name selected by the user for stdout/err usually represents the 
+				# logical purpose of the process so makes a great display name. 
+				# Also add the command (unless they're the same).
+				# NB: We do not do this if stdout/stderr are used since that could break 
+				# behaviour for old tests using getInstanceCount.  
+				displayName = os.path.basename(stdout.replace('.out',''))
+				if os.path.basename(command) not in displayName and displayName not in command:
+					displayName = '%s<%s>'%(os.path.basename(command), displayName)
 		
 		# in case stdout/err were given as non-absolute paths, make sure they go to the output dir not the cwd
 		if stdout: stdout = os.path.join(self.output, stdout)
 		if stderr: stderr = os.path.join(self.output, stderr)
+
+		if not displayName: displayName = os.path.basename(command)
 		
 		if not environs: # a truly empty env isn't really usable, so populate it with a minimal default environment instead
 			environs = self.getDefaultEnvirons(command=command)

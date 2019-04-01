@@ -290,6 +290,24 @@ New features
   enumerating available tests, and during test cleanup. Test authors can make 
   use of `toLongPathSafe` as needed in their own test cases. 
 
+- Added `ProcessUser.startProcess()` argument `stdouterr` which allows 
+  specifying the base prefix to use for writing process standard output and 
+  error using a single parameter, either as a string or from a tuple such 
+  as that returned from `allocateUniqueStdOutErr()`. As as result there is no 
+  longer a need to save the generated stdout and stderr to local variables 
+  before passing to startProcess; you can simply specify::
+  
+    self.startProcess(..., stdouterr=self.allocateUniqueStdOutErr('myprocess'))
+  
+  Alternatively if you don't care about allocating unique names (perhaps 
+  because you have only one instance of the process) a simple string prefix 
+  can be specified instead. The final `stdout` and `stderr` paths are available 
+  on the returned `ProcessWrapper` object. 
+  
+  If no displayName is provided, `startProcess` will generate one based on 
+  the `stdouterr` prefix so it's easy to identify which process is being 
+  started. 
+
 - Added `ProcessUser.getDefaultEnvirons()` method which is now used by 
   `startProcess()` to provide a minimal but clean set of environment variables 
   for launching a given process, and can also be used as a basis for creating 

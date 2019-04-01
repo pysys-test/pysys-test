@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 						  arguments = [script, "2", "3"],
 						  environs = os.environ,
 						  workingDir = self.output,
-						  stdout = "%s/counter.out" % self.output,
+						  stdout = "counter.out",
 						  stderr = "%s/counter.err" % self.output,
 						  ignoreExitStatus=True,
 						  state=FOREGROUND)

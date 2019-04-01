@@ -9,12 +9,13 @@ class PySysTest(BaseTest):
 	
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script, "10", "2"],
-						  environs = os.environ,
 						  workingDir = self.output,
-						  stdout = "%s/counter.out" % self.output,
-						  stderr = "%s/counter.err" % self.output,
+						  stdouterr = "counter",
 						  state=BACKGROUND)
-						  
+		
+		# display name should be set based on stdouterr and executable
+		self.assertThat('re.match("python.*<counter>", %s)', repr(self.hprocess.displayName))
+		
 		# check the process status
 		self.initialstatus = self.hprocess.running()
 		

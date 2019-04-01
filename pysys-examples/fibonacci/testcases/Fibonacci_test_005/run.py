@@ -15,8 +15,9 @@ class PySysTest(BaseTest):
 		# just to ensure we generate sensible results regardless of the hardware 
 		# we're running on
 		
-		self.startProcess(sys.executable, arguments=[self.output+'/fib.py'], environs=os.environ,
-			stdout='fib.out', stderr='fib.err', ignoreExitStatus=False, abortOnError=True)
+		self.startProcess(sys.executable, 
+			arguments=[self.output+'/fib.py'], 
+			stdouterr='fib')
 		
 	def validate(self):
 		'''Override the BaseTest.validate method to perform the test validation.
