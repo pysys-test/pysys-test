@@ -2,7 +2,7 @@
 PySys 1.4.0 Release Notes
 =========================
 
-PySys can be used with Python 3.5/3.6/3.7+ or Python 2.7. 
+PySys can be used with Python 3.7/3.6/3.5 or Python 2.7. 
 
 See installation notes in README.rst for more details.
 
@@ -10,19 +10,35 @@ See installation notes in README.rst for more details.
 What's new in this release
 --------------------------
 
-Changes affecting compatibility
--------------------------------
+In PySys 1.4.0 the installation mechanism has changed to use the standard `pip` 
+tool, so you can now install PySys and its dependencies on any platform 
+simply by running `pip install PySys`. 
 
-- Removed `DEFAULT_STYLESHEET` `pysys-log.xsl` as referenced in 
-  `XMLResultsWriter`, as it cannot be made to work in most modern browsers 
-  (e.g. Chrome, Firefox) for security reasons and is not widely used. If you 
-  need this functionality, the ability to specify a custom .xsl stylesheet for 
-  the `XMLResultsWriter` is still available as a configuration option in 
-  `pysysproject.xml`. 
+There are significant improvements to the writer API including integrated 
+support for running tests using Travis CI. New test projects can be created 
+with the new `pysys.py makeproject` command. Amongst many other additions 
+there's also support for creating background threads from testcases, for 
+executing Python DocTests, a new `skipTest()` method and an `IS_WINDOWS` 
+constant. 
+
+There are also some important bug fixes in areas such as international (I18N) 
+character support, logging, assertion error handling, cleanliness of the 
+startProcess environment, and process monitoring. 
+
+If you have existing PySys projects please see the `Upgrade guide and 
+compatibility` section, as this release contains some changes that may affect 
+existing users. 
+
+
+New features
+------------
+
+Installation:
 
 - The available options for installing PySys have been reworked and modernised. 
   The recommended way to install PySys is by running `pip install PySys`. 
-  A binary `.whl` wheel is now available for the first time, which is more 
+
+- A binary `.whl` wheel is now available for the first time, which is more 
   efficient, reliable and lightweight than other installation methods, and 
   is used by the pip installer. The `tar.gz` source distribution is still 
   available but is no longer a recommended installation mechanism. The Windows 
@@ -33,16 +49,214 @@ Changes affecting compatibility
   but is available on https://pysys-test.github.io/pysys-test website or as a 
   separate zip file available from 
   https://github.com/pysys-test/pysys-test/releases. 
+
+Improvements to the `pysys.py` tool:
+
+- `pysys.py` has a new `makeproject` command that generates a default 
+  `pysysproject.xml` with some recommended defaults to make it easy to start a 
+  new project without needing to download the samples. 
+
+- As an alternative to the usual `pysys.py` executable script, it is now also 
+  possible to launch PySys using::
   
-- Any custom performance reporter classes created using PySys 1.3.0 
-  and which provided a custom constructor should be updated to include the 
-  `**kwargs` parameter added in this version of PySys, as the old constructor 
-  signature is now deprecated. As this API was added in 1.3.0 no other versions 
-  are affected. 
+    python -m pysys
+
+- Added new command line option `--printLogs all|failures|none` (default value 
+  is `all`) which allows user to avoid the printing of run.log to the stdout 
+  console either for all tests, or for tests that pass. This is useful to 
+  avoid generating huge amounts of output during large test runs (which can 
+  be problematic when stdout is captured by a Continuous Integration system), 
+  or to show detailed information only for failing tests which makes it easier 
+  for a user to locate the diagnostic information they care about more quickly. 
+  The specified value is stored in `runner.printLogs` and can be changed by 
+  custom writer implementations if desired, for example to avoid duplicating 
+  information already being printed to stdout by the writer in a different 
+  format. 
+
+- PySys will now automatically enable colored output if there is no color 
+  setting in the `pysysproject.xml` or `PYSYS_COLOR` environment - provided 
+  PySys is running in an interactive terminal. On Windows the `colorama` 
+  library is now a dependency to ensure colored output is always possible. 
+
+- Added `--threads auto` which is equivalent to `--threads 0` and provides 
+  a clearer way to indicate that PySys will automatically determine how many 
+  threads to run tests with based on the number of available CPUs. 
+
+- The outcome reason string now has a suffix specifying how many additional 
+  failure outcomes were logged (so if you have a complex test you can see at a 
+  glance if there's just one problem to resolve, or 5, or 20!).
+
+
+New project options:
+
+- Added support for running PySys tests under Travis CI to the sample 
+  `pysysproject.xml` file. Travis support includes by default only printing 
+  `run.log` output for failed tests, and containing that detailed output within 
+  a folded section that can be expanded if needed. To enable this just ensure 
+  that the Travis CI writer is enabled in your project configuration file, 
+  which you can copy from the sample project configuration file if you already 
+  have an existing project file. 
+
+- Added support for configuring the default encodings to use for common file 
+  patterns in the `pysysproject.xml` configuration, e.g. ::
+  
+	<default-file-encoding pattern="*.yaml" encoding="utf-8"/>. 
+
+  The `pysys-examples/pysysproject.xml` sample project configuration file now 
+  sets utf-8 as the default encoding for XML, json and yaml files, and also 
+  for testcase run.log files (though run.log continues to be written in local 
+  encoding unless the project file is updated). For more information on this 
+  feature, see comments in `pysysproject.xml` and in 
+  `ProcessUser.getDefaultFileEncoding()`.
+
+- Use of `print()` rather than self.log is a common mistake that results in 
+  essential diagnostic information showing up on the console but not 
+  stored in `run.log`. A new project option `redirectPrintToLogger` 
+  can optionally be enabled to instruct PySys to catch output written using 
+  `print()` statements or to `sys.stdout` and redirect it to the logging 
+  framework, so it will show up in `run.log`. Writers that genuinely need 
+  the ability to write directly to stdout should be changed to use 
+  `pysys.utils.logutils.stdoutPrint`. 
+
+- There are new settings for customizing the default environment used by 
+  `startProcess`::
+
+	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
+	<property name="defaultEnvironsTempDir" value="self.output'"/>  
+
+  See `ProcessUser.getDefaultEnvirons()` for more information on these. 
+
+Main API improvements:
+
+- Added `ProcessUser.skipTest()` method, which can be used to avoid running the 
+  rest of the `execute()` or `validate()` method, if it is not appropriate for 
+  the test to execute on this platform/mode. 
+
+- Added boolean `IS_WINDOWS` constant, since conditionalizing logic for Windows 
+  versus all other Operating Systems is very common; this avoids the need for 
+  error-prone matching against string literals. 
+
+- Added `ProcessUser.startProcess()` argument `stdouterr` which allows 
+  specifying the base prefix to use for writing process standard output and 
+  error using a single parameter, either as a string or from a tuple such 
+  as that returned from `allocateUniqueStdOutErr()`. As as result there is no 
+  longer a need to save the generated stdout and stderr to local variables 
+  before passing to startProcess; you can simply specify::
+  
+    self.startProcess(..., stdouterr=self.allocateUniqueStdOutErr('myprocess'))
+  
+  Alternatively if you don't care about allocating unique names (perhaps 
+  because you have only one instance of the process) a simple string prefix 
+  can be specified instead. The final `stdout` and `stderr` paths are available 
+  on the returned `ProcessWrapper` object. 
+  
+  If no displayName is provided, `startProcess` will generate one based on 
+  the `stdouterr` prefix so it's easy to identify which process is being 
+  started. 
+
+- Added `ProcessUser.getDefaultEnvirons()` method which is now used by 
+  `startProcess()` to provide a minimal but clean set of environment variables 
+  for launching a given process, and can also be used as a basis for creating 
+  customized environments using the new `createEnvirons()` helper method. 
+  There are some new project properties to control how this works, which 
+  you may wish to consider using for new projects, but are not enabled by 
+  default in existing projects to maintain compatibility::
+  
+	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
+	<property name="defaultEnvironsTempDir" value="self.output'"/>  
+
+  See `ProcessUser.getDefaultEnvirons()` for more information on these. 
+  If needed you can further customize the environment by overriding 
+  `getDefaultEnvirons`. 
+
+- Extended the writers API:
+   - Added `runLogOutput=` parameter to the `processResult()` method of 
+     the `BaseResultsWriter` class so that writers such as the 
+     `JUnitXMLResultsWriter` can include the test output with no loss of unicode 
+     character information. 
+   - Added `testoutdir=` parameter to the `setup()` method so writers have 
+     a way to identify different test runs on the same machine. 
+   - Added `runner=` parameter to the `setup()` method so writers have 
+     access to the runner instance for reading/modifying configuration 
+     settings. 
+   - Added `isEnabled()` method that can optionally be used by a writer to 
+     disable itself based on the environment in which it is running, or 
+     to enable itself even when `--record` isn't specified, which is useful 
+     for writers that produce output for a CI system. 
+
+- Rewrote the process monitoring API to make it easier to add extra monitoring 
+  statistics (by subclassing the OS-specific `DEFAULT_PROCESS_MONITOR` or the 
+  superclass `BaseProcessMonitor`, or to add a custom handler for the 
+  generated statistics, by subclassing `BaseProcessMonitorHandler`. 
+
+- Added `BaseTest.startBackgroundThread` method which takes care of ensuring 
+  threads are stopped and joined during cleanup, that exceptions from threads 
+  result in BLOCKED outcomes and that logging output from background threads 
+  goes to the same handlers as foreground logging. The thread target can 
+  be either a simple function or an instance method (e.g. on the testcase). 
+  A Python `threading.Event` object called `stopped` is passed to the 
+  background thread to make it easy to determine when it should finish 
+  executing. The `ProcessUser.addOutcome()` method is now thread-safe 
+  (though most of the `ProcessUser` and `BaseTest` should still not be accessed 
+  from multiple threads without locking). 
+
+- Added `BaseTest.pythonDocTest()` method for executing the doctests in a 
+  Python file. 
+
+Minor API additions:
+
+- Added `PerformanceUnit.NANO_SECONDS` (with alias `ns`) which is now 
+  recommended when measuring the peformance of operations that take less than a 
+  second. 
+
+- Added `__str__` implementations for BaseTest and BaseRunner, which uniquely 
+  identify the test (and cycle, in multi-cycle runs). This may be useful for 
+  diagnostic and logging purposes. 
+
+- Performance reporter classes can now make use of `self.runner` to access 
+  information such as the mode in which the test is running for reporting 
+  purposes. 
+
+- Added `BaseTest.assertPathExists` for checking that a file exists (or not). 
+
+- The default implementation of `BaseTest.getDefaultFileEncoding()` now 
+  delegates to the runner's implementation, allowing customizations to be 
+  performed in just one place if neede for both `BaseTest` and runner class.
+
+- Added `ProcessUser.compareVersions()` static helper method for 
+  comparing two alphanumeric dotted version strings. 
+
+- Added `ProcessUser.deletedir` which is more convenient that the associated 
+  `fileutils.deletedir` for paths under the `self.output` directory. 
+
+- Added `ProcessUser.addOutcome(override=...)` argument which can be used to 
+  specify a new test outcome that replaces any existing outcomes even if 
+  they have a higher precedence. 
+
+- Added `ignores=` argument to `ProcessUser.waitForSignal()` method which 
+  excludes lines matching the specified expression from matching both the 
+  main `expr` match expression and any `errorExpr` expressions. 
+
+- Added `fileutils.toLongPathSafe/fromLongPathSafe` which on Windows performs 
+  the necessary magic to allow Python to access paths longer than 256 
+  characters (and on other platforms are a no-op), and `pathexists` which 
+  is a long path-safe version of `os.path.exists`. PySys will now handle long 
+  paths in the most critical places, such as `deletedir`, `logFileContents`, 
+  `openfile`, `assertPathExists`, when enumerating available tests, and during 
+  test cleanup. Test authors can make use of `toLongPathSafe` as needed in 
+  their own test cases. 
+
+
+Upgrade guide and compatibility
+-------------------------------
+It is pretty rare for a new PySys release to include changes that might change 
+or break the behaviour of existing test suites, but occasionally it is 
+necessary in order to fix bugs or allow us to provide new functionality. In 
+this release there are a few such changes:
 
 - In the previous release unknown or invalid keyword arguments passed to 
   assert* methods would be silently ignored (potentially masking mistakes); 
-  now it is an error to specify an invalid argument. 
+  now it is an error to specify an invalid argument.  
 
 - The environment `startProcess` uses by default if no `environs=` 
   parameter was specified has changed. Although the documentation states that 
@@ -63,19 +277,6 @@ Changes affecting compatibility
 
   See https://github.com/pysys-test/pysys-test/issues/9 for more information. 
 
-- If you have created a custom subclass of `ProcessMonitor` you will need to 
-  rework it, as this class no longer exists and the API has been rewritten in 
-  order to make it easier to maintain and extend. 
-  For example it is now easier to add extra monitoring statistics (by 
-  subclassing `BaseProcessMonitor`), or provide custom handlers for the data 
-  for different file formats or automated checking of results (by subclassing 
-  `BaseProcessMonitorHandler`; no longer requires subclassing the process 
-  monitor itself). If you have written a custom subclass of ProcessMonitor 
-  to customize what data is gathered you will need to rework it when moving to 
-  this version of PySys. If you need to provide custom code to handle the 
-  generated statistics, you can now do that by passing a 
-  `BaseProcessMonitorHandler` subclass to `BaseTest.startProcessMonitor`. 
-  
 - The default process monitor file format has changed in this release to 
   provide consistency across all operating systems, and because the 
   Windows-specific statistics private/thread/handle count were not correct and 
@@ -125,6 +326,27 @@ Changes affecting compatibility
   Although child process are not included in the statistics for each process, 
   the contributions from its child threads are included. 
 
+- If you have created a custom subclass of `ProcessMonitor` you will need to 
+  rework it, as this class no longer exists and the API has been rewritten in 
+  order to make it easier to maintain and extend. 
+  For example it is now easier to add extra monitoring statistics (by 
+  subclassing `BaseProcessMonitor`), or provide custom handlers for the data 
+  for different file formats or automated checking of results (by subclassing 
+  `BaseProcessMonitorHandler`; no longer requires subclassing the process 
+  monitor itself). If you have written a custom subclass of ProcessMonitor 
+  to customize what data is gathered you will need to rework it when moving to 
+  this version of PySys. If you need to provide custom code to handle the 
+  generated statistics, you can now do that by passing a 
+  `BaseProcessMonitorHandler` subclass to `BaseTest.startProcessMonitor`. 
+
+- Fixed bug in which symbols (classes, constants, imports) defined in one 
+  `run.py` could be seen by other run.py files, potentially causing test 
+  behaviour to vary based on what other tests had previously run, and/or 
+  race conditions seen only during parallel execution. Now every `run.py` file 
+  has its own independent namespace. It is possible some previously passing 
+  tests might fail as a result of this change, if they were relying on 
+  the buggy behaviour to implicitly import symbols. 
+
 - Although most real PySys projects had a `pysysproject.xml` file in the root 
   directory specifying the configuration, PySys v1.3.0 and earlier treated 
   this file as optional, resulting in confusing error messages, and 
@@ -139,41 +361,26 @@ Changes affecting compatibility
   does not really belong in this project, and adds little over Python's 
   built-in `smtpd` module.
 
-New features
-------------
+- Removed `DEFAULT_STYLESHEET` `pysys-log.xsl` as referenced in 
+  `XMLResultsWriter`, as it does not work in most modern browsers 
+  (e.g. Chrome, Firefox) for security reasons and is not widely used. If you 
+  need this functionality, the ability to specify a custom .xsl stylesheet for 
+  the `XMLResultsWriter` is still available as a configuration option in 
+  `pysysproject.xml`. 
 
-- PySys can now be installed simply by running `pip install PySys`. 
+- Any custom performance reporter classes created using PySys 1.3.0 
+  and which provided a custom constructor should be updated to include the 
+  `**kwargs` parameter added in this version of PySys, as the old constructor 
+  signature is now deprecated. As this API was added in 1.3.0 no other versions 
+  are affected. 
 
-- `pysys.py` has a new `makeproject` command that generates a default 
-  `pysysproject.xml` with some recommended defaults to make it easy to start a 
-  new project without needing to download the samples. 
 
-- Added optional `errors=` parameter to `pycompat.openfile()` to allow easily 
-  enabling non-strict handling of unsupported characters for cases where it 
-  does not matter (e.g. logging file contents), without needing caller to 
-  special-case for Python 2 where no encoding is performed and the parameter
-  is not available. `ProcessUser.logFileContents()` now uses `errors='replace'`
-  since for diagnostic logging a best-effort approach to non-ASCII characters 
-  is most helpful. 
+Bug fixes
+---------
 
-- Added `__str__` implementations for BaseTest and BaseRunner, which uniquely 
-  identify the test (and cycle, in multi-cycle runs), for diagnostic and 
-  logging purposes. 
-
-- Added `PerformanceUnit.NANO_SECONDS` (with alias `ns`) for use when 
-  measuring the peformance of operations that take less than a second. 
-
-- Performance reporter classes can now make use of `self.runner` to access 
-  information such as the mode in which the test is running for reporting 
-  purposes. 
-
-- Added boolean `IS_WINDOWS` constant, since conditionalizing logic for Windows 
-  versus all other Operating Systems is very common; this avoids the need for 
-  error-prone matching against string literals. 
-
-- Added `skipTest()` method, which can be used to avoid running the rest of the 
-  `execute()` or `validate()` method, if it is not appropriate for the test to 
-  execute on this platform/mode. 
+- Fixed bug in which random log lines might not be written to `run.log` and/or 
+  stdout when running tests multi-threaded (as a result of an underlying 
+  python bug https://bugs.python.org/issue35185).
 
 - Fixed bug in which symbols (classes, constants, imports) defined in one 
   `run.py` could be seen by other run.py files, potentially causing test 
@@ -182,159 +389,6 @@ New features
   has its own independent namespace. It is possible some previously passing 
   tests might fail as a result of this change, if they were relying on 
   the buggy behaviour to implicitly import symbols. 
-
-- Outcome reason now has a suffix specifying how many additional failure 
-  outcomes were logged (so if you have a complex test you can see at a glance 
-  if there's just one problem to resolve, or 5, or 20!).
-
-- Extended the writers API:
-   - Added `runLogOutput=` parameter to the `processResult()` method of 
-     the `BaseResultsWriter` class so that writers such as the 
-     `JUnitXMLResultsWriter` can include the test output with no loss of unicode 
-     character information. 
-   - Added `testoutdir=` parameter to the `setup()` method so writers have 
-     a way to identify different test runs on the same machine. 
-   - Added `runner=` parameter to the `setup()` method so writers have 
-     access to the runner instance for reading/modifying configuration 
-     settings. 
-   - Added `isEnabled()` method that can optionally be used by a writer to 
-     disable itself based on the environment in which it is running, or 
-     to enable itself even when `--record` isn't specified, which is useful 
-     for writers that produce output for a CI system. 
-
-- Added support for running PySys tests under Travis CI to the sample 
-  pysysproject.xml file, including by default only printing run.log output 
-  for failed tests, and containing that detailed output within a folded 
-  section that can be expanded if needed. To enable this just ensure that the 
-  Travis CI writer is enabled in your project configuration file. 
-
-- Added support for configuring the default encodings to use for common file 
-  patterns in the `pysysproject.xml` configuration, e.g. ::
-  
-	<default-file-encoding pattern="*.yaml" encoding="utf-8"/>. 
-
-  The `pysys-examples/pysysproject.xml` sample project configuration file now 
-  sets utf-8 as the default encoding for XML, json and yaml files, and also 
-  for testcase run.log files (though run.log continues to be written in local 
-  encoding unless the project file is updated). For more information on this 
-  feature, see comments in `pysysproject.xml` and in 
-  `ProcessUser.getDefaultFileEncoding()`.
-  
-- Added `BaseTest.assertPathExists` for checking that a file exists (or not). 
-
-- The default implementation of `BaseTest.getDefaultFileEncoding()` now 
-  delegates to the runner's implementation, allowing customizations to be 
-  performed in just one place if neede for both `BaseTest` and runner class.
-
-- Use of `print()` rather than self.log is a common mistake that results in 
-  essential diagnostic information showing up on the console but not 
-  stored in `run.log`. A new project option `redirectPrintToLogger` 
-  can optionally be enabled to instruct PySys to catch output written using 
-  `print()` statements or to `sys.stdout` and redirect it to the logging 
-  framework, so it will show up in `run.log`. Writers that genuinely need 
-  the ability to write directly to stdout should be changed to use 
-  `pysys.utils.logutils.stdoutPrint`. 
-
-- Added `BaseTest.startBackgroundThread` method which takes care of ensuring 
-  threads are stopped and joined during cleanup, that exceptions from threads 
-  result in BLOCKED outcomes and that logging output from background threads 
-  goes to the same handlers as foreground logging. The thread target can 
-  be either a simple function or an instance method (e.g. on the testcase). 
-  A Python `threading.Event` object called `stopped` is passed to the 
-  background thread to make it easy to determine when it should finish 
-  executing. Added documentation comments to make clear most of 
-  `BaseTest`/`ProcessUser` are still not thread-safe, but the all-important 
-  `addOutcome` method now is. 
-
-- Added new command line option `--printLogs all|failures|none` (default value 
-  is `all`) which allows user to avoid the printing of run.log to the stdout 
-  console either for all tests, or for tests that pass. This is useful to 
-  avoid generating huge amounts of output during large test runs (which can 
-  be problematic when stdout is captured by a Continuous Integration system), 
-  or to show detailed information only for failing tests which makes it easier 
-  for a user to locate the diagnostic information they care about more quickly. 
-  The `printLogs` option is stored in runner.printLogs` and can be changed by 
-  custom writer implementations if desired, for example to avoid duplicating 
-  information already being printed to stdout by the writer in a different 
-  format. 
-
-- PySys will now automatically enable colored output if there is no color 
-  setting in the `pysysproject.xml` or `PYSYS_COLOR` environment - provided 
-  PySys is running in an interactive terminal. On Windows the `colorama` 
-  library is now a dependency to ensure colored output is always possible. 
-
-- Added `--threads auto` which is equivalent to `--threads 0` and provides 
-  a clearer way to indicate that PySys will automatically determine how many 
-  threads to run tests with based on the number of available CPUs. 
-
-- Added `BaseTest.pythonDocTest()` method for executing the doctests in a 
-  Python file. 
-
-- Added `ProcessUser.compareVersions()` static helper method for 
-  comparing two alphanumeric dotted version strings. 
-
-- Added `ProcessUser.deletedir` which is more convenient that the associated 
-  `fileutils.deletedir` for paths under the `self.output` directory. 
-
-- Added `ProcessUser.addOutcome(override=...)` argument which can be used to 
-  specify a new test outcome that replaces any existing outcomes even if 
-  they have a higher precedence. 
-
-- Added `ignores=` argument to `ProcessUser.waitForSignal()` method which 
-  excludes lines matching the specified expression from matching both the 
-  main `expr` match expression and any `errorExpr` expressions. 
-
-- Added `fileutils.toLongPathSafe/fromLongPathSafe` which on Windows performs 
-  the necessary magic to allow Python to access paths longer than 256 
-  characters (and on other platforms are a no-op), and `pathexists` which 
-  is a long path-safe version of `os.path.exists`. Although long paths still 
-  cannot be used everywhere (e.g. not for working directory in `startProcess`), 
-  PySys will now handle them correctly in the most critical places, such as 
-  `deletedir`, `logFileContents`, `openfile`, `assertPathExists`, when 
-  enumerating available tests, and during test cleanup. Test authors can make 
-  use of `toLongPathSafe` as needed in their own test cases. 
-
-- Added `ProcessUser.startProcess()` argument `stdouterr` which allows 
-  specifying the base prefix to use for writing process standard output and 
-  error using a single parameter, either as a string or from a tuple such 
-  as that returned from `allocateUniqueStdOutErr()`. As as result there is no 
-  longer a need to save the generated stdout and stderr to local variables 
-  before passing to startProcess; you can simply specify::
-  
-    self.startProcess(..., stdouterr=self.allocateUniqueStdOutErr('myprocess'))
-  
-  Alternatively if you don't care about allocating unique names (perhaps 
-  because you have only one instance of the process) a simple string prefix 
-  can be specified instead. The final `stdout` and `stderr` paths are available 
-  on the returned `ProcessWrapper` object. 
-  
-  If no displayName is provided, `startProcess` will generate one based on 
-  the `stdouterr` prefix so it's easy to identify which process is being 
-  started. 
-
-- Added `ProcessUser.getDefaultEnvirons()` method which is now used by 
-  `startProcess()` to provide a minimal but clean set of environment variables 
-  for launching a given process, and can also be used as a basis for creating 
-  customized environments using the new `createEnvirons()` helper method. 
-  There are some new project properties to control how this works, which 
-  you may wish to consider using for new projects, but are not enabled by 
-  default in existing projects to maintain compatibility::
-  
-	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
-	<property name="defaultEnvironsTempDir" value="self.output'"/>  
-
-  See `ProcessUser.getDefaultEnvirons()` for more information on these. 
-  If needed you can further customize the environment by overriding 
-  `getDefaultEnvirons`. 
-
-- As an alternative to the usual `pysys.py` executable script, it is now also 
-  possible to launch PySys using::
-  
-    python -m pysys
-
-
-Bug fixes
----------
 
 - Fixed `startProcess()` to use a clean and minimal set of environment 
   variables on Windows if no `environs=` parameter was specified, rather than 
@@ -347,24 +401,11 @@ Bug fixes
   this flag only affected non-zero exit codes, resulting in `ProcessError` 
   failures getting ignored. 
 
-- `JUnitXMLResultsWriter` and `XMLResultsWriter` now write using UTF-8 
-  encoding rather than local/default encoding, and also include the 
-  `encoding="utf-8"` header in the XML header. Since previously there was no
-  `encoding` header many tools would have interpreted them as UTF-8 already, 
-  and now the behaviour is consistent with that expectation. 
-
-- Fix bug in which non-ASCII characters in test outcome reasons could 
-  prevent the test log being written to disk if executed in multi-threaded 
-  mode. Only affects Python 2. 
-
 - Fixed `startProcess()` to correctly handle passing empty arguments, 
   and arguments containing spaces, quotes and glob characters on Windows. 
   Previously, empty arguments were skipped, and arguments containing spaces 
   were only handled correctly if first character was not a space. 
 
-- Fixed rare condition in which performance result reporting would be prevented 
-  due to spurious error about `resultKey` already being used. 
-  
 - Fixed a number of errors in the statistics reported by process monitors, 
   especially on Windows where negative values were sometimes returned 
   (due to integer overflow), incorrect (and very time-consuming) aggregation 
@@ -377,6 +418,10 @@ Bug fixes
   On Linux the statistics were sometimes wrong due to undocumented and 
   in some cases incorrect aggregation across child processes, which has now 
   been removed. The values are now correct on all operating systems. 
+
+- Fix bug in which non-ASCII characters in test outcome reasons could 
+  prevent the test log being written to disk if executed in multi-threaded 
+  mode. Only affects Python 2. 
   
 - Significant improvements to robustness when testing support for international 
   (I18N) characters. This includes implementing fully safe logging of unicode 
@@ -388,6 +433,12 @@ Bug fixes
   if it was not mentioned in the project config). Fixed `logFileContents` to 
   more robustly handle files containing I18N/non-ASCII characters. 
 
+- `JUnitXMLResultsWriter` and `XMLResultsWriter` now write using UTF-8 
+  encoding rather than local/default encoding, and also include the 
+  `encoding="utf-8"` header in the XML header. Since previously there was no
+  `encoding` header many tools would have interpreted them as UTF-8 already, 
+  and now the behaviour is consistent with that expectation. 
+
 - Added `pysys.writers.replaceIllegalXMLCharacters()` utility function, and use 
   it to avoid `XMLResultsWriter` and `JUnitXMLResultsWriter` from generating 
   invalid XML if `run.log` or outcome reason contain characters not permitted 
@@ -395,11 +446,10 @@ Bug fixes
   from other tools) are now stripped out of all outcome reason strings 
   (including in run.log and non-XML based writers) since such characters 
   are not useful and make summary test results harder to read. 
-  
-- Fixed bug in which random log lines might not be written to `run.log` and/or 
-  stdout when running tests multi-threaded (as a result of an underlying 
-  python bug https://bugs.python.org/issue35185).
 
+- Fixed rare condition in which performance result reporting would be prevented 
+  due to spurious error about `resultKey` already being used. 
+  
 
 ---------------
 Release History
