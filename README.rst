@@ -1,8 +1,8 @@
 What is PySys?
 ==============
 PySys is an easy-to-use cross-platform framework for writing and orchestrating 
-all your system/integration tests, together with your unit and manual 
-tests. 
+all your system/integration tests, combined seamlessly with your unit and 
+manual tests. 
 
 It provides a comprehensive package of utility methods to make all the common 
 system/integration testing operations a breeze, as well as the flexibility to 
@@ -33,27 +33,28 @@ Key features include:
 - A performance monitoring framework for recording and aggregating latency, 
   throughput and other performance metrics.
 - A pluggable "writers" framework for recording test outcomes in any format, 
-  including a standard JUnit-compatible XML results writer in the box.
-- Integrated support for running PyUnit tests, in case your application is also 
-  written in Python.
+  including a standard JUnit-compatible XML results writer in the box, and 
+  support for running tests under Travis CI.
+- Integrated support for running PyUnit tests and doctests, in case your 
+  application is also written in Python.
 - Integrated support for executing manual/interactively driven test cases.
 - Test categorization and selective include/exclude execution, using per-test 
   classification groups.
-- Supports Windows, Linux, macOS and Solaris. 
+- Support for Windows, Linux, macOS and Solaris. 
 
 
 Project Links
 =============
-.. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=latest
+.. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=release
 	:target: https://travis-ci.com/pysys-test/pysys-test
 
-.. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/latest/graph/badge.svg
+.. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/release/graph/badge.svg
 	:target: https://codecov.io/gh/pysys-test/pysys-test
 
 - API documentation: https://pysys-test.github.io/pysys-test
 - Download releases, including sample testcases: https://github.com/pysys-test/pysys-test/releases
 - Stackoverflow tag for questions: https://stackoverflow.com/tags/pysys
-- Change log: https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst
+- Change log: https://github.com/pysys-test/pysys-test/blob/release/CHANGELOG.rst
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
 - Source repository: https://github.com/pysys-test/pysys-test
 
@@ -71,22 +72,13 @@ enhancement issues or GitHub pull requests!
 Installation
 ============
 
-.. warning:: 
-	This document describes how the upcoming PySys version 1.4.0 can be 
-	installed, but as it has not yet been released on PyPi these instructions 
-	do not yet work. 
+PySys can be installed into Python 3.7/3.6/3.5 (recommended) or Python 2.7. 
 
-	To install PySys 1.3.0 or earlier, see the README provided with the 
-	release you're installing instead. 
-
-
-PySys can be installed into Python 3.5/3.6/3.7+ (recommended) or Python 2.7. 
-
-The best way to install PySys is using the standard `pip` installer 
-to download and install the binary package (`.whl`) for the current PySys 
+The best way to install PySys is using the standard `pip` installer which 
+downloads and install the binary package (`.whl`) for the current PySys 
 release, by executing::
 
-	> python -m pip install pysys
+	> python -m pip install PySys
 
 Alternatively, you can download the binary .whl distribution from 
 https://github.com/pysys-test/pysys-test/releases and use 
@@ -112,14 +104,14 @@ already on `PATH`. Alternatively you can run PySys using `python -m pysys`.
 
 Unix
 ----
-On Unix, those wishing to use the manual tester should ensure they have 
-installed the tcl/tk libraries on the host machine and are using a Python 
-version that was compiled with tcl/tk support.
-
 The executable launcher script `pysys.py` is installed into Python's binary 
 directory, e.g. `/usr/local/bin`, and hence should be on the current user's 
 `PATH` automatically; if not, just add it. Alternatively you can run PySys 
 using `python -m pysys`.
+
+Those wishing to use the manual tester should ensure they have 
+installed the tcl/tk libraries on the host machine and are using a Python 
+version that was compiled with tcl/tk support.
 
 
 Getting Started
@@ -127,7 +119,7 @@ Getting Started
 After installation, to see the available options to the pysys.py script use::
 
 	> pysys.py --help
-  
+ 
 The script has four main commands: 
   - `makeproject` to create your top-level testing project configuration file, 
   - `make` to create individual testcases, 
@@ -136,15 +128,15 @@ The script has four main commands:
 
 For detailed information, see the `--help` command line. 
 
-To get started, simply make a directory to hold your tests. Then run the 
+To get started, create a new directory to hold your tests. Then run the 
 `makeproject` command from that directory to add a `pysysproject.xml` 
-file which holds default settings your all your tests::
+file which will hold default settings your all your tests::
 
 	> mkdir tests
 	> cd tests
 	> pysys.py makeproject
 
-Then to create your first test::
+Then to create your first test, run::
 
 	> pysys.py make MyApplication_001
 
