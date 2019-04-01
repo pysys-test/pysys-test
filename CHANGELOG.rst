@@ -246,6 +246,9 @@ Minor API additions:
   test cleanup. Test authors can make use of `toLongPathSafe` as needed in 
   their own test cases. 
 
+- Added `pysys.utils.logutils.stdoutPrint` for writers that genuinely need 
+  the ability to write directly to stdout without using a logger. 
+  
 
 Upgrade guide and compatibility
 -------------------------------
