@@ -84,6 +84,9 @@ class ConsoleCleanTestHelper(object):
 					stdoutHandler.setLevel(logging.WARN)	
 				elif value.upper() == "CRIT":
 					stdoutHandler.setLevel(logging.CRITICAL)
+				else:
+					log.warn('Invalid log level "%s"'%value)
+					sys.exit(1)
 				
 			elif option in ("-o", "--outdir"):
 				self.outsubdir = value
@@ -532,6 +535,9 @@ class ConsoleLaunchHelper(object):
 					stdoutHandler.setLevel(logging.WARN)
 				elif self.verbosity.upper() == "CRIT":					
 					stdoutHandler.setLevel(logging.CRITICAL)	
+				else:
+					log.warn('Invalid log level "%s"'%value)
+					sys.exit(1)
 
 			elif option in ("-a", "--type"):
 				self.type = value
