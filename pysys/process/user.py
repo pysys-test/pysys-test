@@ -826,7 +826,7 @@ class ProcessUser(object):
 			log.debug('ProcessUser cleanup function done.')
 		
 
-	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None):
+	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None, override=False):
 		"""Add a validation outcome (and optionally a reason string) to the validation list.
 		
 		The method provides the ability to add a validation outcome to the internal data structure 
@@ -861,6 +861,9 @@ class ProcessUser(object):
 		@param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
 		to the log output for better test triage.
 		
+		@param override: Remove any existing test outcomes when adding this one, ensuring 
+		that this outcome is the one and only one reported even if an existing outcome 
+		has higher precedence. 
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
 		with self.lock:
@@ -877,7 +880,11 @@ class ProcessUser(object):
 					outcomeReason = outcomeReason.decode('ascii', errors='replace')
 				outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
 			
+			if override: 
+				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', [LOOKUP[o] for o in self.outcome], self.__outcomeReason)
+				del self.outcome[:]
 			old = self.getOutcome()
+			if (old == NOTVERIFIED and not self.__outcomeReason): old = None
 			self.outcome.append(outcome)
 
 			#store the reason of the highest precedent outcome

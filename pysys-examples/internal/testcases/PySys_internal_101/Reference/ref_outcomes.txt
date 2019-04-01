@@ -1,0 +1,7 @@
+NOT VERIFIED: ""
+NOT VERIFIED: "My not verified reason"
+BLOCKED: "My blocked reason"
+PASSED: "My passed reason"
+SKIPPED: "My skipped reason"
+FAILED: "My failed reason 1 (+1 other failures)"
+PASSED: "My passed reason"

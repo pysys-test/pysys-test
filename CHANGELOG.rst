@@ -276,6 +276,10 @@ New features
 - Added `ProcessUser.deletedir` which is more convenient that the associated 
   `fileutils.deletedir` for paths under the `self.output` directory. 
 
+- Added `ProcessUser.addOutcome(override=...)` argument which can be used to 
+  specify a new test outcome that replaces any existing outcomes even if 
+  they have a higher precedence. 
+
 - Added `ignores=` argument to `ProcessUser.waitForSignal()` method which 
   excludes lines matching the specified expression from matching both the 
   main `expr` match expression and any `errorExpr` expressions. 
