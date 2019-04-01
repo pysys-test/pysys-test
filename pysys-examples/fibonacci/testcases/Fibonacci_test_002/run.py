@@ -1,4 +1,4 @@
-import os.path
+import io
 from pysys.constants import *
 from pysys.basetest import BaseTest
 
@@ -23,10 +23,9 @@ class PySysTest(BaseTest):
 			fib.append(fib[i-1] + fib[i-2])
 
 		self.log.info("Writting fibonacci series to test output subdirectory")
-		f=open(os.path.join(self.output, 'fibonacci.txt'), 'w')
-		for line in fib:
-			f.write('%s\n' % line)
-		f.close()
+		with io.open(self.output+'/fibonacci.txt', 'w', encoding='utf-8') as f:
+			for line in fib:
+				f.write(u'%s\n' % line)
 
 
 	def validate(self):
@@ -43,7 +42,7 @@ class PySysTest(BaseTest):
 
 		# next validation looks for regexps in the output file
 		self.assertGrep('fibonacci.txt', expr='34')
-		self.assertGrep('fibonacci.txt', expr='55', contains=FALSE)
+		self.assertGrep('fibonacci.txt', expr='55', contains=False)
 
 		# next validation looks for an ordered sequence of regexp
 		self.assertOrderedGrep('fibonacci.txt', exprList=['0', '1', '1', '5'])
