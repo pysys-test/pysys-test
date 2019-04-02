@@ -35,6 +35,7 @@ PLATFORMS_CLASSIFIERS = [
 	"Operating System :: POSIX :: SunOS/Solaris",
 	"Operating System :: POSIX :: Linux",
 	"Operating System :: OS Independent",
+	"Operating System :: MacOS",
 ]
 CLASSIFIERS = [
 	"License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
@@ -71,12 +72,12 @@ setup(
 	
 	url="https://github.com/pysys-test/pysys-test",
 	project_urls={ # see PEP-0459
-		'Documentation': 'https://pysys-test.github.io/pysys-test',
-		'Repository': 'https://github.com/pysys-test/pysys-test',
-		'Tracker': 'https://github.com/pysys-test/pysys-test/issues',
-		'Change Log': 'https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst',
+		'Documentation':     'https://pysys-test.github.io/pysys-test',
+		'Repository':        'https://github.com/pysys-test/pysys-test',
+		'Tracker':           'https://github.com/pysys-test/pysys-test/issues',
+		'Change Log':        'https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst',
+		'Download Samples':  'https://github.com/pysys-test/pysys-test/releases',
 		'Stackoverflow Tag': 'https://stackoverflow.com/tags/pysys', 
-		'Download Samples': 'https://github.com/pysys-test/pysys-test/releases',
 	},
 
 	version=pysys.__version__,
