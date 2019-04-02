@@ -84,7 +84,7 @@ __all__  = [
 
 # initialize the Python logging system for PySys
 from pysys.internal.initlogging import rootLogger, stdoutHandler, log
-from pysys.internal.initlogging import ThreadedStreamHandler, ThreadFilter
+from pysys.internal.initlogging import ThreadedStreamHandler, ThreadedFileHandler, ThreadFilter
 
 import threading
 process_lock = threading.Lock()
