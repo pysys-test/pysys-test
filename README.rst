@@ -45,16 +45,16 @@ Key features include:
 
 Project Links
 =============
-.. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=release
+.. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=master
 	:target: https://travis-ci.com/pysys-test/pysys-test
 
-.. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/release/graph/badge.svg
+.. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/master/graph/badge.svg
 	:target: https://codecov.io/gh/pysys-test/pysys-test
 
 - API documentation: https://pysys-test.github.io/pysys-test
 - Download releases, including sample testcases: https://github.com/pysys-test/pysys-test/releases
 - Stackoverflow tag for questions: https://stackoverflow.com/tags/pysys
-- Change log: https://github.com/pysys-test/pysys-test/blob/release/CHANGELOG.rst
+- Change log: https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
 - Source repository: https://github.com/pysys-test/pysys-test
 
