@@ -75,7 +75,7 @@ setup(
 		'Documentation':     'https://pysys-test.github.io/pysys-test',
 		'Repository':        'https://github.com/pysys-test/pysys-test',
 		'Tracker':           'https://github.com/pysys-test/pysys-test/issues',
-		'Change Log':        'https://github.com/pysys-test/pysys-test/blob/master/CHANGELOG.rst',
+		'Change Log':        'https://github.com/pysys-test/pysys-test/blob/release/CHANGELOG.rst',
 		'Download Samples':  'https://github.com/pysys-test/pysys-test/releases',
 		'Stackoverflow Tag': 'https://stackoverflow.com/tags/pysys', 
 	},
