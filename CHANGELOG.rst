@@ -1,5 +1,5 @@
 =========================
-PySys 1.4.0 Release Notes
+PySys 1.4.1 Release Notes
 =========================
 
 PySys can be used with Python 3.7/3.6/3.5 or Python 2.7. 
@@ -10,28 +10,26 @@ See installation notes in README.rst for more details.
 What's new in this release
 --------------------------
 
-In PySys 1.4.0 the installation mechanism has changed to use the standard `pip` 
-tool, so you can now install PySys and its dependencies on any platform 
-simply by running `pip install PySys`. 
+<highlights here>
 
-There are significant improvements to the writer API including integrated 
-support for running tests using Travis CI. New test projects can be created 
-with the new `pysys.py makeproject` command. Amongst many other additions 
-there's also support for creating background threads from testcases, for 
-executing Python DocTests, a new `skipTest()` method and an `IS_WINDOWS` 
-constant. 
+New features:
 
-There are also some important bug fixes in areas such as international (I18N) 
-character support, logging, assertion error handling, cleanliness of the 
-startProcess environment, and process monitoring. 
+- ...
 
-If you have existing PySys projects please see the `Upgrade guide and 
-compatibility` section, as this release contains some changes that may affect 
-existing users. 
+Upgrade guide and compatibility:
 
+- ...
 
-New features
-------------
+Bug fixes:
+
+- ...
+
+---------------
+Release History
+---------------
+
+1.3.0 to 1.4.0
+--------------
 
 Installation:
 
@@ -250,8 +248,8 @@ Minor API additions:
   the ability to write directly to stdout without using a logger. 
   
 
-Upgrade guide and compatibility
--------------------------------
+Upgrade guide and compatibility:
+
 It is pretty rare for a new PySys release to include changes that might change 
 or break the behaviour of existing test suites, but occasionally it is 
 necessary in order to fix bugs or allow us to provide new functionality. In 
@@ -378,8 +376,7 @@ this release there are a few such changes:
   are affected. 
 
 
-Bug fixes
----------
+Bug fixes:
 
 - Fixed bug in which random log lines might not be written to `run.log` and/or 
   stdout when running tests multi-threaded (as a result of an underlying 
@@ -452,12 +449,8 @@ Bug fixes
 
 - Fixed rare condition in which performance result reporting would be prevented 
   due to spurious error about `resultKey` already being used. 
+
   
-
----------------
-Release History
----------------
-
 1.2.0 to 1.3.0
 --------------
 Changes affecting compatibility:
