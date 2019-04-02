@@ -502,7 +502,8 @@ class Project(object):
 						"  - If you are trying to use an existing project, change directory to a ",
 						"    location under the root test directory that contains your project file.",
 						"  - If you wish to use an existing project that has no configuration file, ",
-						"    set the PYSYS_PERMIT_NO_PROJECTFILE=true environment variable."
+						"    set the PYSYS_PERMIT_NO_PROJECTFILE=true environment variable.",
+						""
 					]))
 					sys.exit(1)
 
