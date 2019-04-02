@@ -14,15 +14,15 @@ What's new in this release
 
 New features:
 
-- ...
+- TODO
 
 Upgrade guide and compatibility:
 
-- ...
+- TODO
 
 Bug fixes:
 
-- ...
+- TODO
 
 ---------------
 Release History
