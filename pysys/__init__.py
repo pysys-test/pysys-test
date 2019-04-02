@@ -20,9 +20,16 @@
 """
 PySys System Test Framework.
 
-PySys has been designed to provide a generic extensible multi-threaded framework for the organisation and execution of system 
-level testcases. It provides a clear model of what a testcases is, how it is structured on disk, how it is executed and validated, 
-and how the outcome is reported for test auditing purposes. 
+PySys is an easy-to-use cross-platform framework for writing and orchestrating 
+all your system/integration tests, combined seamlessly with your unit and 
+manual tests. 
+
+It provides a comprehensive package of utility methods to make all the common 
+system/integration testing operations a breeze, as well as the flexibility to 
+add whatever test execution and validation logic you need using the full power 
+of the Python language. 
+
+For more information see https://pypi.org/project/PySys/
 
 Testcases are instances of a base test class (L{pysys.basetest.BaseTest}) which provides core functionality for cross platform 
 process management, monitoring and manipulation; in this manner an application under test (AUT) can be started and interacted with 

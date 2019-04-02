@@ -58,7 +58,7 @@ Project Links
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
 - Source repository: https://github.com/pysys-test/pysys-test
 
-License and credits
+License and Credits
 ===================
 PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. See 
 LICENSE.txt for details. 
@@ -150,7 +150,7 @@ To run your testcases, simply execute::
 	> pysys.py run
 
 
-Next steps
+Next Steps
 ==========
 The methods you need for typical tasks like starting processes (`startProcess`), 
 waiting for messages in log files (`waitForSignal`) and of course validating 
