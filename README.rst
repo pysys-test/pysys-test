@@ -84,7 +84,7 @@ Alternatively, you can download the binary .whl distribution from
 https://github.com/pysys-test/pysys-test/releases and use 
 `python -m pip install PySys-<VERSION>.whl` instead. 
 
-Make you have an up-to-date pip using `python -m pip install --upgrade pip`.
+Make sure you have an up-to-date pip using `python -m pip install --upgrade pip`.
 See https://packaging.python.org/tutorials/installing-packages for 
 more information about using `pip`.
 
