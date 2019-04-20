@@ -243,36 +243,45 @@ class BaseRunner(ProcessUser):
 			removeNonZero = False
 
 		try:
-			for file in os.listdir(toLongPathSafe(dir)):
-				path = toLongPathSafe("%s/%s" % (dir, file), onlyIfNeeded=True)
-				
-				for collect in self.__collectTestOutput:
-					if fnmatch.fnmatch(os.path.basename(file), collect['pattern']):
-						collectdest = mkdir(collect['outputDir'])+'/'+(collect['outputPattern']
-							.replace('@TESTID@', str(testObj))
-							.replace('@FILENAME@', os.path.basename(file))
-							)
-						i = 1
-						while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
-							i += 1
-						collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
-						filecopy(path, collectdest)
-				
-				if PLATFORM in ['sunos', 'linux']:
-					size = os.lstat(path)[stat.ST_SIZE]
-				else:
-					size = os.stat(path)[stat.ST_SIZE]
-
-				if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
-					count = 0
-					while count < 3:
-						try:
-							os.remove(path)
-							break
-						except Exception:
-							if not os.path.exists(path): break
-							time.sleep(0.1)
-							count = count + 1
+			for (dirpath, dirnames, filenames) in os.walk(toLongPathSafe(dir), topdown=False):
+				deleted = 0
+				for file in filenames:
+					path = os.path.join(dirpath, file)
+					for collect in self.__collectTestOutput:
+						if fnmatch.fnmatch(os.path.basename(file), collect['pattern']):
+							collectdest = os.path.join(mkdir(collect['outputDir']), (collect['outputPattern']
+								.replace('@TESTID@', str(testObj))
+								.replace('@FILENAME@', os.path.basename(file))
+								.replace('\\','_').replace('/','_')
+								))
+							i = 1
+							while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
+								i += 1
+							collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
+							filecopy(path, collectdest)
+							
+					size = os.path.getsize(path)
+					
+					if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
+						count = 0
+						while count < 3:
+							try:
+								os.remove(path)
+								deleted += 1
+								break
+							except Exception:
+								if not os.path.exists(path): break
+								time.sleep(0.1)
+								count = count + 1
+								
+				# always try to delete empty directories (just as we do for empty files)
+				if deleted == len(filenames):
+					try:
+						os.rmdir(dirpath)
+					except Exception as ex:
+						# there might be non-empty subdirectories, so don't raise this as an error
+						log.debug("Did not delete directory '%s': %s", dirpath, ex)
+						
 
 		except OSError as ex:
 			log.warning("Caught OSError while cleaning output directory after test completed:")

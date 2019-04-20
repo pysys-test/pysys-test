@@ -40,7 +40,10 @@ Upgrade guide and compatibility:
 
 Bug fixes:
 
-- TODO
+- Fixed `--purge` to delete files in nested subdirectories of the output 
+  directory not just direct children of the output directory. Also, non-empty 
+  directories are now deleted after test execution (regardless of whether 
+  `--purge` is set or not), just as zero-byte files are.  
 
 ---------------
 Release History

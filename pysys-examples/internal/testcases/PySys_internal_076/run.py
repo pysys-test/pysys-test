@@ -12,12 +12,14 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		shutil.copytree(self.input, self.output+'/test')
-		runPySys(self, 'pysys', ['run', '-o', self.output+'/output', '--purge'], workingDir='test')
+		runPySys(self, 'pysys', ['run', '-o', self.output+'/output', '--purge', '-v', 'debug'], workingDir='test')
 	
 			
 	def validate(self):
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)')
 		
-		self.assertThat('os.path.exists(%s)', repr(self.output+'/output/PySys_NestedTestcase/run.log'))
-		self.assertThat('not os.path.exists(%s)', repr(self.output+'/output/PySys_NestedTestcase/nonempty.txt'))
-		self.assertThat('not os.path.exists(%s)', repr(self.output+'/output/PySys_NestedTestcase/empty.txt'))
+		self.assertPathExists('output/PySys_NestedTestcase/run.log')
+		self.assertPathExists('output/PySys_NestedTestcase/nonempty.txt', exists=False)
+		self.assertPathExists('output/PySys_NestedTestcase/empty.txt', exists=False)
+		self.assertPathExists('output/PySys_NestedTestcase/dir1', exists=False)
+		self.assertPathExists('output/PySys_NestedTestcase/dir2', exists=False)
