@@ -119,7 +119,7 @@ class BaseRunner(ProcessUser):
 		self.xargs = xargs
 		self.validateOnly = False
 
-		self.startTime = time.time()
+		self.startTime = self.project.startTimestamp
 		
 		extraOptions = xargs.pop('__extraRunnerOptions', {})
 		
@@ -169,8 +169,6 @@ class BaseRunner(ProcessUser):
 			c = dict(c)
 			c['outputDir'] = os.path.join(self.project.root, c['outputDir']\
 				.replace('@OUTDIR@', os.path.basename(self.outsubdir)) \
-				.replace('@DATE@', time.strftime('%Y-%m-%d', time.gmtime(self.startTime))) \
-				.replace('@TIME@', time.strftime('%H.%M.%S', time.gmtime(self.startTime)))
 				)
 			self.__collectTestOutput.append(c)
 			deletedir(c['outputDir']) # clean output dir between runs

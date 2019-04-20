@@ -31,8 +31,10 @@ New features:
   first matching output file is found, so the directory will not be created if 
   there is no matching output. 
 
-- Added `hostname` project property which can be used in any `pysysproject.xml` 
-  configuration file using `${hostname}`. 
+- Added `hostname`, `startTime` and `startDate` project properties which can be 
+  used in any `pysysproject.xml` configuration file. The start time/date 
+  gives the UTC time when the test run began, using the yyyy-mm-dd HH.MM.SS 
+  format which is suitable for inclusion in file/directory names. 
 
 Upgrade guide and compatibility:
 

@@ -16,10 +16,14 @@ class PySysTest(BaseTest):
 		self.logFileContents('pysys.out', maxLines=0)
 		
 		with io.open(self.output+'/collected_files.txt', 'w', encoding='utf-8') as f:
-			for c in sorted(glob.glob(self.output+'/test/mydir-pysys-output-*/*')):
+			for c in sorted(os.listdir(self.output+'/test/mydir-pysys-output')):
 				f.write(os.path.basename(c)+u'\n')
 
 	def validate(self):
 		self.logFileContents('collected_files.txt')
 		self.assertDiff('collected_files.txt', 'ref_collected_files.txt')
-		self.assertGrep('pysys.out', expr=r'Collected test output to directory: .*mydir-pysys-output-\d\d\d\d-\d\d-\d\d')
+		self.assertGrep('pysys.out', expr=r'Collected test output to directory: .*mydir-pysys-output$')
+		self.assertGrep('pysys.out', expr=r'Collected test output to directory: .*mydir2[/\\]\d\d\d\d-\d\d-\d\d_\d\d.\d\d.\d\d')
+		mydirs = glob.glob(self.output+'/mydir2/*')[0]
+		self.assertPathExists(mydirs+'/1.myfile')
+		self.assertPathExists(mydirs+'/2.myfile')

@@ -16,6 +16,8 @@ class PySysTest(BaseTest):
 		self.assertThat('%s != ""', repr(self.proj.os)) # renamed from osfamily by config
 		self.assertThat('%s != ""', repr(self.proj.root))
 		self.assertThat('%s != ""', repr(self.proj.hostname))
+		self.assertThat('re.match(r"\d\d\d\d-\d\d-\d\d$", %s)', repr(self.proj.startDate))
+		self.assertThat('re.match(r"\d\d\.\d\d\.\d\d$", %s)', repr(self.proj.startTime))
 		
 	def validate(self):
 		self.assertTrue(self.proj.lib == 'lib_%s_1.0.so'%OSFAMILY)

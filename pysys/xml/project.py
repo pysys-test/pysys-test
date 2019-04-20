@@ -23,7 +23,7 @@ test project.
 
 __all__ = ['Project']
 
-import os.path, logging, xml.dom.minidom, collections, codecs
+import os.path, logging, xml.dom.minidom, collections, codecs, time
 
 from pysys.constants import *
 from pysys import __version__
@@ -92,10 +92,17 @@ class XMLProjectParser(object):
 		self.rootdir = 'root'
 		self.environment = 'env'
 		self.osfamily = 'osfamily'
+		
+		# project load time is a reasonable proxy for test start time, 
+		# and we might want to substitute the date/time into property values
+		self.startTimestamp = time.time()
+		
 		self.properties = {
 			self.rootdir:self.dirname, 
 			self.osfamily:OSFAMILY, 
 			'hostname':HOSTNAME.lower().split('.')[0],
+			'startDate':time.strftime('%Y-%m-%d', time.gmtime(self.startTimestamp)),
+			'startTime':time.strftime('%H.%M.%S', time.gmtime(self.startTimestamp)),
 		}
 		
 		if not os.path.exists(self.xmlfile):
@@ -422,7 +429,7 @@ class Project(object):
 	
 	def __init__(self, root, projectFile):
 		self.root = root
-
+		self.startTimestamp = time.time()
 		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
 		self.makerClassname, self.makerModule = DEFAULT_MAKER
 		self.writers = [DEFAULT_WRITER]
@@ -444,6 +451,8 @@ class Project(object):
 			else:
 				parser.checkVersions()
 				self.projectFile = os.path.join(root, projectFile)
+				
+				self.startTimestamp = parser.startTimestamp
 				
 				# get the properties
 				properties = parser.getProperties()
