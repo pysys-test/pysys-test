@@ -99,7 +99,7 @@ class CSVPerformanceReporter(object):
 		self.summaryfile = summaryfile
 		self.project = project
 		self.hostname = HOSTNAME.lower().split('.')[0]
-		self.runStartTime = time.time()
+		self.runStartTime = self.runner.startTime
 		
 		self._lock = threading.RLock()
 		self.__previousResultKeys = {} # value = (testid, testobjhash, resultDetails)

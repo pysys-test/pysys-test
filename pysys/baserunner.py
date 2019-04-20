@@ -116,6 +116,8 @@ class BaseRunner(ProcessUser):
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
+
+		self.startTime = time.time()
 		
 		extraOptions = xargs.pop('__extraRunnerOptions', {})
 		
@@ -344,7 +346,6 @@ class BaseRunner(ProcessUser):
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
 
 		# loop through each cycle
-		self.startTime = time.time()
 		
 		fatalerrors = []
 		

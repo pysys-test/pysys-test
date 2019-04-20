@@ -14,7 +14,8 @@ What's new in this release
 
 New features:
 
-- TODO
+- Added `hostname` project property which can be used in any `pysysproject.xml` 
+  configuration file using `${hostname}`. 
 
 Upgrade guide and compatibility:
 

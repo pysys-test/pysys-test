@@ -91,7 +91,11 @@ class XMLProjectParser(object):
 		self.rootdir = 'root'
 		self.environment = 'env'
 		self.osfamily = 'osfamily'
-		self.properties = {self.rootdir:self.dirname, self.osfamily:OSFAMILY}
+		self.properties = {
+			self.rootdir:self.dirname, 
+			self.osfamily:OSFAMILY, 
+			'hostname':HOSTNAME.lower().split('.')[0],
+		}
 		
 		if not os.path.exists(self.xmlfile):
 			raise Exception("Unable to find supplied project file \"%s\"" % self.xmlfile)
