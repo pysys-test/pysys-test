@@ -386,7 +386,6 @@ class ProcessUser(object):
 			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
 			e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e[LIBRARY_PATH_ENV_VAR]
 			e['PYTHONHOME'] = sys.prefix
-		
 		return e
 
 	def createEnvirons(self, overrides=None, addToLibPath=[], addToExePath=[], command=None, **kwargs):
@@ -1076,7 +1075,7 @@ class ProcessUser(object):
 			tolog = []
 			
 			for l in f:
-				l = l.strip()
+				l = l.rstrip()
 				if not l: continue
 				if includes:
 					l = matchesany(l, includes)
