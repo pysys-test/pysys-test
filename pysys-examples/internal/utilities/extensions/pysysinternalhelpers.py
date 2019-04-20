@@ -55,5 +55,8 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 			stdout=stdouterr+'.out', stderr=stdouterr+'.err', 
 			displayName='pysys %s'%stdouterr, 
 			**kwargs)
+	except Exception:
+		processowner.logFileContents(stdouterr+'.out')
+		raise
 	finally: # in case there was any error printed to stderr
 		processowner.logFileContents(stdouterr+'.err')
