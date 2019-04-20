@@ -14,6 +14,23 @@ What's new in this release
 
 New features:
 
+- Added a project configuration option that collects a copy of all test output 
+  files matching a specified pattern into a single directory. This is useful 
+  for collecting together code coverage files from all tests into one place, 
+  and could also be used for collating other outputs such as performance or 
+  memory usage graphs. Files are copied from the output directory at the 
+  end of each test's execution, and before any files are purged. The sample 
+  project file shows how to use this feature to collect Python code 
+  coverage files::
+  
+     <property name="pythonCoverageDir" value="coverage-python-@OUTDIR@"/>
+	 <collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
+
+  The output directory is wiped clean at the start of each test run to prevent 
+  unwanted interference between test runs, and is created on demand when the 
+  first matching output file is found, so the directory will not be created if 
+  there is no matching output. 
+
 - Added `hostname` project property which can be used in any `pysysproject.xml` 
   configuration file using `${hostname}`. 
 

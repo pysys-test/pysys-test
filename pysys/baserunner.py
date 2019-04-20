@@ -29,6 +29,7 @@ API documentation.
 """
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
+import fnmatch
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -39,7 +40,8 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
-from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe
+from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, pathexists
+from pysys.utils.filecopy import filecopy
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
@@ -162,6 +164,17 @@ class BaseRunner(ProcessUser):
 		else:
 			self.writers.append(ConsoleSummaryResultsWriter())
 		
+		self.__collectTestOutput = []
+		for c in self.project.collectTestOutput:
+			c = dict(c)
+			c['outputDir'] = os.path.join(self.project.root, c['outputDir']\
+				.replace('@OUTDIR@', os.path.basename(self.outsubdir)) \
+				.replace('@DATE@', time.strftime('%Y-%m-%d', time.gmtime(self.startTime))) \
+				.replace('@TIME@', time.strftime('%H.%M.%S', time.gmtime(self.startTime)))
+				)
+			self.__collectTestOutput.append(c)
+			deletedir(c['outputDir']) # clean output dir between runs
+		
 		# duration and results used to be used for printing summary info, now (in 1.3.0) replaced by 
 		# more extensible ConsoleSummaryResultsWriter implementation. Keeping these around for 
 		# a bit to allow overlap before removal
@@ -232,6 +245,19 @@ class BaseRunner(ProcessUser):
 		try:
 			for file in os.listdir(toLongPathSafe(dir)):
 				path = toLongPathSafe("%s/%s" % (dir, file), onlyIfNeeded=True)
+				
+				for collect in self.__collectTestOutput:
+					if fnmatch.fnmatch(os.path.basename(file), collect['pattern']):
+						collectdest = mkdir(collect['outputDir'])+'/'+(collect['outputPattern']
+							.replace('@TESTID@', str(testObj))
+							.replace('@FILENAME@', os.path.basename(file))
+							)
+						i = 1
+						while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
+							i += 1
+						collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
+						filecopy(path, collectdest)
+				
 				if PLATFORM in ['sunos', 'linux']:
 					size = os.lstat(path)[stat.ST_SIZE]
 				else:
@@ -413,6 +439,10 @@ class BaseRunner(ProcessUser):
 					log.info("test interrupt from keyboard - joining threads ... ")
 					threadPool.dismissWorkers(self.threads, True)
 					self.handleKbrdInt(prompt=False)
+
+			for collect in self.__collectTestOutput:
+				if pathexists(collect['outputDir']):
+					self.log.info('Collected test output to directory: %s', os.path.normpath(collect['outputDir']))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			for writer in self.writers:
@@ -437,6 +467,7 @@ class BaseRunner(ProcessUser):
 			except Exception as ex:
 				log.warn("caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
+
 		
 		if fatalerrors:
 			# these are so serious we need to make sure the user notices

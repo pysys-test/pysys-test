@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property osfamily="osfamily"/>
+
+	<property name="defaultAbortOnError" value="true"/>
+
+	<property name="myDir" value="mydir-@OUTDIR@-@DATE@"/>
+	<collect-test-output pattern="*foo*" outputDir="${myDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
+
+</pysysproject>

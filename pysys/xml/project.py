@@ -37,7 +37,7 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?) >
+<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?), collect-test-output* >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requires-python (#PCDATA)>
@@ -76,6 +76,7 @@ DTD='''
 <!ATTLIST writer file CDATA #IMPLIED>
 <!ATTLIST default-file-encoding pattern CDATA #REQUIRED>
 <!ATTLIST default-file-encoding encoding CDATA #REQUIRED>
+<!ATTLIST collect-test-output pattern outputDir outputPattern #REQUIRED>
 ]>
 '''
 
@@ -216,6 +217,22 @@ class XMLProjectParser(object):
 			return [runnerNodeList.getAttribute('classname'), runnerNodeList.getAttribute('module')]
 		except Exception:
 			return DEFAULT_RUNNER
+
+
+	def getCollectTestOutputDetails(self):
+		r = []
+		for n in self.root.getElementsByTagName('collect-test-output'):
+			x = {
+				'pattern':n.getAttribute('pattern'),
+				'outputDir':self.expandFromProperty(n.getAttribute('outputDir'), n.getAttribute('outputDir')),
+				'outputPattern':n.getAttribute('outputPattern'),
+			}
+			assert 'pattern' in x, x
+			assert 'outputDir' in x, x
+			assert 'outputPattern' in x, x
+			assert '@UNIQUE@' in x['outputPattern'], 'collect-test-output outputPattern must include @UNIQUE@'
+			r.append(x)
+		return r
 
 
 	def getPerformanceReporterDetails(self):
@@ -411,6 +428,7 @@ class Project(object):
 		self.writers = [DEFAULT_WRITER]
 		self.perfReporterConfig = None
 		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
+		self.collectTestOutput = []
 
 		stdoutformatter, runlogformatter = None, None
 
@@ -451,6 +469,8 @@ class Project(object):
 				stdoutformatter, runlogformatter = parser.createFormatters()
 				
 				self.defaultFileEncodings = parser.getDefaultFileEncodings()
+				
+				self.collectTestOutput = parser.getCollectTestOutputDetails()
 				
 				# set the data attributes
 				parser.unlink()
