@@ -22,6 +22,11 @@ class PySysTest(BaseTest):
 		
 		self.startProcess(command=sys.executable, arguments=[self.input+'/test.py'], 
 			stdout='python.out', stderr='python.err')#, ignoreExitStatus=True)
+		
+		if os.path.exists(self.output+'/mytemp'): # prevent it getting purged
+			with openfile(self.output+'/mytemp'+'/tmpfile.txt', 'w', encoding='ascii') as f:
+				f.write(u'xxx')
+
 
 	def validate(self):
 		pass 
