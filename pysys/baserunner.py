@@ -212,6 +212,8 @@ class BaseRunner(ProcessUser):
 		try...finally block. Do not put logic which could change the test outcome in testComplete - 
 		use L{BaseTest.cleanup} instead. 
 		
+		This method is always invoked from a single thread, even in multi-threaded mode. 
+		
 		@param testObj: Reference to the L{pysys.basetest.BaseTest} instance of the test just completed
 		@param dir: The directory to perform the purge on
 				
