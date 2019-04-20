@@ -278,7 +278,7 @@ class BaseRunner(ProcessUser):
 						os.rmdir(dirpath)
 					except Exception as ex:
 						# there might be non-empty subdirectories, so don't raise this as an error
-						log.debug("Did not delete directory '%s': %s", dirpath, ex)
+						pass
 						
 
 		except OSError as ex:
