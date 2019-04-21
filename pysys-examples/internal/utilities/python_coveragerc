@@ -4,8 +4,9 @@
 # just the "pysys" module; ignore tests
 source=pysys
 
-[report]
 omit=*/testcases/*
+
+[report]
 
 [html]
 title=PySys coverage
