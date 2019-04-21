@@ -167,9 +167,11 @@ class BaseRunner(ProcessUser):
 		self.__collectTestOutput = []
 		for c in self.project.collectTestOutput:
 			c = dict(c)
+			assert c['outputDir'], 'collect-test-output outputDir cannot be empty'
 			c['outputDir'] = os.path.join(self.project.root, c['outputDir']\
 				.replace('@OUTDIR@', os.path.basename(self.outsubdir)) \
 				)
+			assert os.path.normpath(c['outputDir']) != os.path.normpath(self.project.root), 'Must set outputDir to a new subdirectory'
 			self.__collectTestOutput.append(c)
 			deletedir(c['outputDir']) # clean output dir between runs
 		
