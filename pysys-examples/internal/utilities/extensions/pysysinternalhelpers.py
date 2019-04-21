@@ -39,16 +39,8 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 	# since we might be running this from not an installation
 	environs['PYTHONPATH'] = os.pathsep.join(sys.path)
 
-	try: 
-		import coverage
-	except ImportError: pass
-	else:
-		# if this python has the "coverage" package installed, use it to generate 
-		# output for child processes; otherwise we'd only get coverage for things 
-		# that can be tested using the top-level pysys invocation
-		args = ['-m', 'coverage', 'run', '--parallel-mode']+args
 	try:
-		return processowner.startProcess(command=sys.executable,
+		return processowner.startPython(
 			arguments = args,
 			environs = environs,
 			ignoreExitStatus=ignoreExitStatus, abortOnError=abortOnError, 

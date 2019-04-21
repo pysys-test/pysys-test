@@ -884,21 +884,21 @@ class BaseTest(ProcessUser):
 		@param output: the output file; if not specified, '%s-doctest.txt' is used with 
 		the basename of the python file. 
 		
-		@param kwargs: extra arguments are passed to startProcess
+		@param kwargs: extra arguments are passed to startProcess/startPython. 
 		"""
 		assert os.path.exists(os.path.abspath(pythonFile)), os.path.abspath(pythonFile)
 		
 		if not output: output = '%s-doctest.txt'%os.path.basename(pythonFile).replace('.py','')
 		
-		p = self.startProcess(
-			sys.executable, 
+		p = self.startPython(
 			arguments=['-m', 'doctest', '-v', os.path.normpath(pythonFile)],
 			environs=self.createEnvirons(overrides=[environs, {'PYTHONPATH':os.pathsep.join(pythonPath or [])}]),
 			stdout=output, 
 			stderr=output+'.err', 
 			displayName='Python doctest %s'%os.path.basename(pythonFile),
 			ignoreExitStatus=True,
-			abortOnError=False
+			abortOnError=False, 
+			**kwargs
 			)
 		msg = 'Python doctest for %s'%(os.path.basename(pythonFile))
 		try:

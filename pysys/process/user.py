@@ -142,6 +142,50 @@ class ProcessUser(object):
 			os.path.join(self.output, processKey+suffix+'.err'), 
 			)	
 
+	def getBool(self, propertyName, default=False):
+		"""
+		Get a True/False indicating whether the specified property is set 
+		on this object (typically as a result of specifying -X on the command 
+		line), or else from the project configuration. 
+		
+		@param propertyName: The name of a property set on the command line 
+		or project configuration.
+		"""
+		val = getattr(self, propertyName, None)
+		if val is None: val = getattr(self.project, propertyName, None)
+		if val is None: return default
+		return val.lower()=='true'
+
+	def startPython(self, arguments, disableCoverage=False, **kwargs):
+		"""
+		Start a Python process with the specified arguments. 
+		
+		Uses the same Python process the tests are running under. 
+		
+		If PySys was run with the arguments `-X pythonCoverage=true` then 
+		`startPython` will add the necessary arguments to enable generation of 
+		code coverage. Note that this requried the coverage.py library to be 
+		installed. If a project property called `pythonCoverageArgs` exists 
+		then its value will be added as (space-delimited) arguments to the 
+		coverage tool. 
+		
+		@param arguments: The arguments to pass to the Python executable. 
+		Typically the first one be either the name of a Python script 
+		to execute, or '-m' followed by a module name. 
+		@param kwargs: See L{startProcess} for detail on available arguments.
+		@param disableCoverage: Disables code coverage for this specific 
+		process. 
+		@return: The process handle of the process (L{ProcessWrapper}).
+		@rtype: L{ProcessWrapper}
+		
+		"""
+		args = arguments
+		if self.getBool('pythonCoverage') and not disableCoverage:
+			if hasattr(self.project, 'pythonCoverageArgs'):
+				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
+			args = ['-m', 'coverage', 'run', '--parallel-mode']+args
+		return self.startProcess(sys.executable, arguments=args, **kwargs)
+
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
 			abortOnError=None, ignoreExitStatus=None, stdouterr=None):

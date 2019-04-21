@@ -467,6 +467,7 @@ class BaseRunner(ProcessUser):
 						log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 		
+			self.processCoverageData()
 		finally:
 			# call the hook to cleanup after running tests
 			try:
@@ -483,6 +484,41 @@ class BaseRunner(ProcessUser):
 		# return the results dictionary
 		return self.results
 
+	def processCoverageData(self):
+		""" Called after execution of all tests has completed to allow 
+		processing of coverage data (if enabled), for example generating 
+		reports etc. 
+		
+		The default implementation collates Python coverage data from 
+		coverage.py and produces an HTML report. It assumes a project property 
+		`pythonCoverageDir` is set to the directory coverage files are 
+		collected into, and that PySys was run with `-X pythonCoverage=true`. 
+		If a property named pythonCoverageArgs exists then its value will be 
+		added to the arguments passed to the run and html report coverage 
+		commands. 
+		
+		Custom runner subclasses may replace or add to this by processing 
+		coverage data from other languages, e.g. Java. 		
+		"""
+		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
+		if self.getBool('pythonCoverage') and pythonCoverageDir is not None:
+			pythonCoverageDir = os.path.join(self.project.root, pythonCoverageDir
+				.replace('@OUTDIR@', os.path.basename(self.outsubdir))) # matches collect-test-output logic
+			if not pathexists(pythonCoverageDir):
+				self.log.info('No Python coverage files were generated.')
+			else:
+				if self.startPython(['-m', 'coverage', 'combine'], abortOnError=False, 
+					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
+					disableCoverage=True).exitStatus != 0: return
+					
+				args = []
+				if hasattr(self.project, 'pythonCoverageArgs'):
+					args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]
+			
+				self.startPython(['-m', 'coverage', 'html']+args, abortOnError=False, 
+					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
+					disableCoverage=True)
+	
 
 	def containerCallback(self, thread, container):
 		"""Callback method on completion of running a test.

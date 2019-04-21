@@ -31,10 +31,34 @@ New features:
   first matching output file is found, so the directory will not be created if 
   there is no matching output. 
 
+- Added support for generating code coverage reports for programs written in 
+  Python, using the coverage.py library. To enable this, ensure the coverage 
+  library is installed (`pip install coverage`), add collecting of test output 
+  files named `.coverage*` to a directory stored in the `pythonCoverageDir` 
+  project property (see above example), and run the tests with 
+  `-X pythonCoverage=true`. You can optionally set a project property 
+  `pythonCoverageArgs` to pass arguments to the coverage tool, such as which 
+  modules/files to include or omit. After all tests have been executed, the 
+  runner calls a new method `processCoverageData` which combines all the 
+  collected coverage files into a single file and produces an HTML report 
+  from it, within the pythonCoverageDir directory. If you wish to produce 
+  coverage reports using other tools or languages (such as Java), this 
+  should be easy to achieve by following the same pattern - using 
+  `<collect-test-output>` to gather the coverage files and providing a 
+  custom implementation of `BaseRunner.processCoverageData`.  
+
+- Added `ProcessUser.startPython` method has similar options to `startProcess` 
+  and should be used for starting Python. 
+
 - Added `hostname`, `startTime` and `startDate` project properties which can be 
   used in any `pysysproject.xml` configuration file. The start time/date 
   gives the UTC time when the test run began, using the yyyy-mm-dd HH.MM.SS 
   format which is suitable for inclusion in file/directory names. 
+
+- Added `ProcessUser.getBool()` helper method which provides a simple way to 
+  get a True/False value indicating whether a setting is enabled, either 
+  directly using a `-X prop=value` argument, or with a property set in the 
+  `pysysproject.xml` configuration file.
 
 Upgrade guide and compatibility:
 
