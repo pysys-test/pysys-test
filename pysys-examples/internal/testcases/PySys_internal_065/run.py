@@ -21,7 +21,6 @@ class PySysTest(BaseTest):
 		
 		# test standalone entrypoint
 		perfreporterexe = os.path.dirname(pysys.utils.perfreporter.__file__)+'/perfreporter.py'
-		self.log.info('perf reporter exe: %s', perfreporterexe)
 		self.startPython([perfreporterexe, '--help'], stdouterr='perfreporter-help', ignoreExitStatus=True)
 		self.logFileContents('perfreporter-help.err')
 		self.logFileContents('perfreporter-help.out')
