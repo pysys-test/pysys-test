@@ -16,5 +16,11 @@ class PySysTest(BaseTest):
 		self.assertTrue(self.proj.user_title == "Professor")
 		self.assertTrue(self.proj.user_full == "Professor Simon Smith")
 
+		for p in ['projectbool', 'projectbooloverride', 'cmdlineoverride']:
+			self.log.info('getBool %s=%r', p, self.getBool(p))
+
+		self.log.info('getBool %s=%r', 'booldeftrue', self.getBool('bool-not-defined', True))
+		self.log.info('getBool %s=%r', 'booldeffalse', self.getBool('bool-not-defined', False))		
+
 	def validate(self):
 		pass 
