@@ -361,9 +361,8 @@ class XMLDescriptorParser(object):
 			return []
 					
 
-# entry point when running the class from the command line
-# (used for development, testing, demonstration etc)
-if __name__ == "__main__":
+
+if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 
 	if ( len(sys.argv) < 2 ) or ( sys.argv[1] not in ("create", "parse", "validate") ):
 		print("Usage: %s (create | parse ) filename" % os.path.basename(sys.argv[0]))

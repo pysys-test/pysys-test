@@ -89,7 +89,7 @@ class PyUnitTest(BaseTest):
 		"""
 		return []
 
-class __PysysTestResult(unittest.TestResult):
+class __PysysTestResult(unittest.TestResult): # pragma: no cover (undocumented, little used executable entry point)
 	
 	def __init__(self):
 		unittest.TestResult.__init__(self)
@@ -98,7 +98,7 @@ class __PysysTestResult(unittest.TestResult):
 	def addSuccess(self, test):
 		self.successes.append(test)
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover (undocumented, little used executable entry point)
 
 	def getTestClasses(testFile):
 		globals = {}
