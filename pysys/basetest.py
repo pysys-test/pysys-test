@@ -892,7 +892,8 @@ class BaseTest(ProcessUser):
 		
 		p = self.startPython(
 			arguments=['-m', 'doctest', '-v', os.path.normpath(pythonFile)],
-			environs=self.createEnvirons(overrides=[environs, {'PYTHONPATH':os.pathsep.join(pythonPath or [])}]),
+			environs=self.createEnvirons(overrides=[environs, {
+				'PYTHONPATH':None if not pythonPath else os.pathsep.join(pythonPath or [])}]),
 			stdout=output, 
 			stderr=output+'.err', 
 			displayName='Python doctest %s'%os.path.basename(pythonFile),
