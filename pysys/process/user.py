@@ -438,7 +438,7 @@ class ProcessUser(object):
 			isvirtualenv = hasattr(sys, 'real_prefix') or (
 				hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix)
 			if not isvirtualenv:
-				e['PYTHONHOME'] = sys.prefix+os.pathsep+sys.exec_prefix
+				e['PYTHONHOME'] = sys.prefix#+os.pathsep+sys.exec_prefix
 		return e
 
 	def createEnvirons(self, overrides=None, addToLibPath=[], addToExePath=[], command=None, **kwargs):
