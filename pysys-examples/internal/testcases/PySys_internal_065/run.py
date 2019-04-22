@@ -20,8 +20,11 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 		
 		# test standalone entrypoint
-		perfreporterexe = pysys.utils.perfreporter.__file__
+		perfreporterexe = os.path.dirname(pysys.utils.perfreporter.__file__)+'/perfreporter.py'
+		self.log.info('perf reporter exe: %s', perfreporterexe)
 		self.startPython([perfreporterexe, '--help'], stdouterr='perfreporter-help', ignoreExitStatus=True)
+		self.logFileContents('perfreporter-help.err')
+		self.logFileContents('perfreporter-help.out')
 		self.startPython([perfreporterexe, 'aggregate', self.input+'/sample.csv'], stdouterr='perfreporter-aggregate', abortOnError=False)
 		
 	def validate(self):
