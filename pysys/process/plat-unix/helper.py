@@ -113,7 +113,7 @@ class ProcessWrapper(CommonProcessWrapper):
 				stdin_r, stdin_w = os.pipe()
 				self.pid = os.fork()
 
-				if self.pid == 0:
+				if self.pid == 0: # pragma: no cover
 					# change working directory of the child process
 					os.chdir(self.workingDir)
 						
@@ -171,7 +171,7 @@ class ProcessWrapper(CommonProcessWrapper):
 							self.exitStatus = status
 						self._outQueue = None
 					retries=0
-				except OSError as e:
+				except OSError as e: # pragma: no cover
 					if e.errno == errno.ECHILD:
 						time.sleep(0.01)
 						retries=retries-1

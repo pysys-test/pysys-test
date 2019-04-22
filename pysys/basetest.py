@@ -358,7 +358,7 @@ class BaseTest(ProcessUser):
 		return t
 
 	# methods to control the manual tester user interface
-	def startManualTester(self, file, filedir=None, state=FOREGROUND, timeout=TIMEOUTS['ManualTester']):
+	def startManualTester(self, file, filedir=None, state=FOREGROUND, timeout=TIMEOUTS['ManualTester']): # pragma: no cover
 		"""Start the manual tester.
 		
 		The manual tester user interface (UI) is used to describe a series of manual steps to be performed 
@@ -398,7 +398,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(BLOCKED, 'Manual tester failed')
 
 
-	def stopManualTester(self):
+	def stopManualTester(self):  # pragma: no cover
 		"""Stop the manual tester if running.
 		
 		"""
@@ -409,7 +409,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(BLOCKED, 'Manual tester could not be stopped')
 
 
-	def waitManualTester(self, timeout=TIMEOUTS['ManualTester']):
+	def waitManualTester(self, timeout=TIMEOUTS['ManualTester']):  # pragma: no cover
 		"""Wait for the manual tester to be stopped via user interaction.
 		
 		"""

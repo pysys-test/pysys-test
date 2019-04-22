@@ -314,13 +314,10 @@ class ProcessUser(object):
 		else:
 			with self.lock:
 				self.processList.append(process)
-				try:
-					if displayName in self.processCount:
-						self.processCount[displayName] = self.processCount[displayName] + 1
-					else:
-						self.processCount[displayName] = 1
-				except Exception:
-					pass
+				if displayName in self.processCount:
+					self.processCount[displayName] = self.processCount[displayName] + 1
+				else:
+					self.processCount[displayName] = 1
 		return process	
 
 	def getDefaultEnvirons(self, command=None, **kwargs):

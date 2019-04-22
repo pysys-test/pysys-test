@@ -595,7 +595,7 @@ class BaseRunner(ProcessUser):
 		log.warn("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 
 
-	def handleKbrdInt(self, prompt=True):
+	def handleKbrdInt(self, prompt=True): # pragma: no cover (can't auto-test keyboard interrupt handling)
 		"""Handle a keyboard exception caught during running of a set of testcases.
 		
 		"""
@@ -826,7 +826,7 @@ class TestContainer(object):
 			pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread)
 	
 	# utility methods
-	def purgeDirectory(self, dir, delTop=False):
+	def purgeDirectory(self, dir, delTop=False): # pragma: no cover (deprecated, no longer used)
 		"""Recursively purge a directory removing all files and sub-directories.
 		
 		@param dir: The top level directory to be purged
