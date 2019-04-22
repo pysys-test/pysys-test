@@ -435,7 +435,7 @@ class ProcessUser(object):
 			# keep it as clean as possible by not passing sys.path/PYTHONPATH
 			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
 			e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e[LIBRARY_PATH_ENV_VAR]
-			e['PYTHONHOME'] = sys.prefix
+			#e['PYTHONHOME'] = sys.prefix
 		return e
 
 	def createEnvirons(self, overrides=None, addToLibPath=[], addToExePath=[], command=None, **kwargs):
