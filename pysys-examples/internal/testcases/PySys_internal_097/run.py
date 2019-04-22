@@ -20,6 +20,10 @@ class PySysTest(BaseTest):
 			self.logFileContents('pysys-%s.out'%subtest, maxLines=0)
 			
 	def validate(self):
+		env = self.createEnvirons(addToLibPath='my-lib-path', addToExePath=['my-exe-path1', 'my-exe-path2'])
+		self.assertThat('"my-exe-path1'+os.pathsep+'my-exe-path2" in %s', repr(env['PATH']))
+		self.assertThat('"my-lib-path" in %s', repr(env[LIBRARY_PATH_ENV_VAR]))
+	
 		# inherited environment not passed on, unles in legacy mode on Windows
 		self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='SOME_OVERRIDE=', contains=False)
 
