@@ -79,6 +79,7 @@ class ProcessUser(object):
 		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 		self.defaultIgnoreExitStatus = PROJECT.defaultIgnoreExitStatus.lower()=='true' if hasattr(PROJECT, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
+		self.__pythonCoverageFile = 0
 		
 		self.lock = threading.RLock()
 		"""
@@ -187,12 +188,9 @@ class ProcessUser(object):
 			args = ['-m', 'coverage', 'run']+args
 			if 'COVERAGE_FILE' not in environs:
 				kwargs['environs'] = dict(environs)
-				i = 0
-				while True:
-					i += 1
-					# override the file to make it unique and ensure it goes into the main test output dir
-					kwargs['environs']['COVERAGE_FILE'] = self.output+'/.coverage.python.%02d'%(i)
-					if not pathexists(kwargs['environs']['COVERAGE_FILE']): break
+				with self.lock:
+					self.__pythonCoverageFile += 1
+				kwargs['environs']['COVERAGE_FILE'] = self.output+'/.coverage.python.%02d'%(self.__pythonCoverageFile)
 		return self.startProcess(sys.executable, arguments=args, **kwargs)
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
