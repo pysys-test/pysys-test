@@ -7,14 +7,14 @@ class PySysTest(BaseTest):
 		self.pythonDocTest(self.input+'/test.py', disableCoverage=True)
 
 		# temp debugging:
-		import pysys
+		import pysys, sys
 		self.pythonDocTest(self.input+'/test.py')
 
 		self.pythonDocTest(self.input+'/test.py', disableCoverage=True, pythonPath=sys.path)
 		
 		self.pythonDocTest(os.path.dirname(pysys.__file__)+'/process/user.py', 
 			pythonPath=sys.path)
-
+		self.log.info('prefix=%s, exec=%s', sys.prefix, sys.exec_prefix)
 		
 		assert self.getOutcome() == FAILED, 'expected to fail'
 		reason = self.getOutcomeReason()
