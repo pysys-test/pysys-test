@@ -1,20 +1,15 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.manual.ui import ManualTester
+from pysys.utils.pycompat import PY2
 
 class PySysTest(BaseTest):
 	def execute(self):
-		self.pythonDocTest(self.input+'/test.py', disableCoverage=True)
-
-		# temp debugging:
-		import pysys, sys
-		self.pythonDocTest(self.input+'/test.py')
-
-		self.pythonDocTest(self.input+'/test.py', disableCoverage=True, pythonPath=sys.path)
-		
-		self.pythonDocTest(os.path.dirname(pysys.__file__)+'/process/user.py', 
-			pythonPath=sys.path)
-		self.log.info('prefix=%s, exec=%s', sys.prefix, sys.exec_prefix)
+		self.pythonDocTest(self.input+'/test.py', disableCoverage=True, 
+			# this is an unfortunate hack - Python 2 seems broken on Ubuntu Linux 
+			# due to https://bugs.launchpad.net/ubuntu/+source/python2.7/+bug/1115466 
+			# and needs PYTHONPATH to be set as a workaround
+			pythonPath=sys.path if PY2 else None)
 		
 		assert self.getOutcome() == FAILED, 'expected to fail'
 		reason = self.getOutcomeReason()
