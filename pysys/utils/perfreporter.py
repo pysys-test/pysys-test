@@ -17,7 +17,10 @@
 
 
 
-import collections, threading, time, math
+import collections, threading, time, math, sys, os
+
+if __name__ == "__main__":
+	sys.path.append(os.path.dirname( __file__)+'/../..')
 
 from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
