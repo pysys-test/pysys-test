@@ -58,7 +58,6 @@ class PyUnitTest(BaseTest):
 	def _runTestFile(self, testFile):
 		globals = {}
 		locals = {}
-		command = sys.executable
 		displayName = 'PyUnit'
 		instance = self.getInstanceCount(displayName)
 		dstdout = os.path.join(self.output, 'pyunit.out')
@@ -70,7 +69,10 @@ class PyUnitTest(BaseTest):
 		self.log.addFilter(filter)
 		environ = os.environ.copy()
 		environ['PYTHONPATH'] = os.pathsep.join(self.getPythonPath() + sys.path)
-		process = self.startProcess(command, arguments, environ, self.output, FOREGROUND, DEFAULT_TIMEOUT, dstdout, dstderr, displayName, ignoreExitStatus=True)
+		process = self.startPython(arguments, environs=environ, workingDir=self.output, 
+			state=FOREGROUND, timeout=DEFAULT_TIMEOUT, 
+			stdout=dstdout, stderr=dstderr, 
+			displayName=displayName, ignoreExitStatus=True)
 		self.log.removeFilter(filter)		
 		if process.exitStatus:
 			self.addOutcome(FAILED, 'Non-zero exit code from %s'%os.path.basename(testFile), printReason=False)
