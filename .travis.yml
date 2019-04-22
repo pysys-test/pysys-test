@@ -129,7 +129,9 @@ script:
   # upload Python code coverage - since we're measuring PySys itself, include both 
   # top-level .coverage file and the files collected by PySys from its PySys subprocesses
   - mv .coverage ./coverage-python-main/.coverage.toplevel
-  - codecov --root coverage-python-main
+  - cd coverage-python-main
+  - codecov
+  - cd ..
   
   # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
   # it's hard to override language on many OSes so just do this on linux
