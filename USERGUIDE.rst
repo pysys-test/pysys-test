@@ -62,9 +62,10 @@ as Java), this is easy to achieve by following the same pattern:
 - When your tests start the program(s) whose coverage is to be measured, 
   add the required arguments or environment variables to enable coverage 
   using the coverage tool of your choice. PySys does this by adding 
-  `-m coverage run --parallel-mode` to the command line of Python programs 
-  started using the `startPython` method, when the `pythonCoverage` property 
-  is set to true (typically by pysys.py run -X pythonCoverage=true). The 
+  `-m coverage run` to the command line of Python programs 
+  started using the `startPython` method (and setting COVERAGE_FILE to a 
+  unique filename in the test output directory), when the `pythonCoverage` 
+  property is set to true (typically by pysys.py run -X pythonCoverage=true). The 
   `pythonCoverageArgs` project property can be set to provide customized 
   arguments to the coverage tool, such as which files to include/exclude, or 
   a `--rcfile=` specifying a coverage configuration file. 

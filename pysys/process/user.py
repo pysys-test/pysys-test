@@ -180,10 +180,19 @@ class ProcessUser(object):
 		
 		"""
 		args = arguments
+		environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
 		if self.getBool('pythonCoverage') and not disableCoverage:
 			if hasattr(self.project, 'pythonCoverageArgs'):
 				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
-			args = ['-m', 'coverage', 'run', '--parallel-mode']+args
+			args = ['-m', 'coverage', 'run']+args
+			if 'COVERAGE_FILE' not in environs:
+				kwargs['environs'] = dict(environs)
+				i = 0
+				while True:
+					i += 1
+					# override the file to make it unique and ensure it goes into the main test output dir
+					kwargs['environs']['COVERAGE_FILE'] = self.output+'/.coverage.python.%02d'%(i)
+					if not pathexists(kwargs['environs']['COVERAGE_FILE']): break
 		return self.startProcess(sys.executable, arguments=args, **kwargs)
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
