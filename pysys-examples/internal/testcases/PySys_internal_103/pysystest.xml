@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Python doctest - failure handling</title>    
+    <purpose><![CDATA[Check our logic for handling failures in doctests doesn't throw. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group></group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+
+</pysystest>
