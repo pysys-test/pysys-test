@@ -19,6 +19,9 @@ class PySysTest(BaseTest):
 		childtest = runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '-X', 'pidToMonitor=%d'%p.pid], 
 			state=BACKGROUND, workingDir=self.input+'/nestedtests')
 
+		# should be a no-op, just check it doesn't throw
+		ProcessMonitorTextFileHandler.setDefaults(ProcessMonitorTextFileHandler.DEFAULT_COLUMNS)
+
 		pm = self.startProcessMonitor(p, interval=0.1, file='monitor-default.tsv')
 		pm2 = self.startProcessMonitor(p, interval=0.1, file=self.output+'/monitor-numproc.tsv', numProcessors='10')
 
