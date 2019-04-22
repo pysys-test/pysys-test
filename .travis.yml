@@ -19,6 +19,8 @@ matrix:
   
   - name: Python 2.7 Linux + doc + deploy
     os: linux
+    # use older precise version as xenial has a bug (1115466)
+    dist: precise
     python: 2.7
     env: PYSYS_DOC_AND_DEPLOY=true
   
