@@ -6,10 +6,10 @@ from pysys.utils.pycompat import PY2
 class PySysTest(BaseTest):
 	def execute(self):
 		self.pythonDocTest(self.input+'/test.py', disableCoverage=True, 
-			# this is an unfortunate hack - Python 2 seems broken on Ubuntu Linux 
+			# this is an unfortunate hack - Python 2 and 3.5 seems broken on Ubuntu Linux 
 			# due to https://bugs.launchpad.net/ubuntu/+source/python2.7/+bug/1115466 
 			# and needs PYTHONPATH to be set as a workaround
-			pythonPath=sys.path if PY2 else None)
+			pythonPath=sys.path if PLATFORM=='linux' else None)
 		
 		assert self.getOutcome() == FAILED, 'expected to fail'
 		reason = self.getOutcomeReason()
