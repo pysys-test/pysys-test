@@ -1,43 +1,4 @@
 <?xml version="1.0" standalone="yes"?>
-<!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, formatters?, performance-reporter?) >
-<!ELEMENT property (#PCDATA)>
-<!ELEMENT path (#PCDATA)>
-<!ELEMENT requires-python (#PCDATA)>
-<!ELEMENT requires-pysys (#PCDATA)>
-<!ELEMENT runner (#PCDATA)>
-<!ELEMENT performance-reporter (property*)>
-<!ELEMENT maker (#PCDATA)>
-<!ELEMENT formatters (formatter+) >
-<!ELEMENT formatter (property*) >
-<!ELEMENT writers (writer+) >
-<!ELEMENT writer (property*) >
-<!ATTLIST property root CDATA #IMPLIED>
-<!ATTLIST property environment CDATA #IMPLIED>
-<!ATTLIST property osfamily CDATA #IMPLIED>
-<!ATTLIST property file CDATA #IMPLIED>
-<!ATTLIST property name CDATA #IMPLIED>
-<!ATTLIST property value CDATA #IMPLIED>
-<!ATTLIST property default CDATA #IMPLIED>
-<!ATTLIST path value CDATA #REQUIRED>
-<!ATTLIST path relative CDATA #IMPLIED>
-<!ATTLIST runner classname CDATA #REQUIRED>
-<!ATTLIST runner module CDATA #REQUIRED>
-<!ATTLIST performance-reporter classname CDATA #REQUIRED>
-<!ATTLIST performance-reporter module CDATA #REQUIRED>
-<!ATTLIST performance-reporter summaryfile CDATA #REQUIRED>
-<!ATTLIST maker classname CDATA #REQUIRED>
-<!ATTLIST maker module CDATA #REQUIRED>
-<!ATTLIST formatter name CDATA #REQUIRED>
-<!ATTLIST formatter messagefmt CDATA #IMPLIED>
-<!ATTLIST formatter datefmt CDATA #IMPLIED>
-<!ATTLIST formatter classname CDATA #IMPLIED>
-<!ATTLIST formatter module CDATA #IMPLIED>
-<!ATTLIST writer classname CDATA #REQUIRED>
-<!ATTLIST writer module CDATA #REQUIRED>
-<!ATTLIST writer file CDATA #IMPLIED>
-]>
-
 <pysysproject>
 
 	<!--
