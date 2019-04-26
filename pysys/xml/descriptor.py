@@ -83,24 +83,31 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
 
 
 class XMLDescriptorContainer(object):
-	"""Holder class for the contents of a testcase descriptor. """
+	"""Contains descriptor metadata about an individual testcase. 
+	
+	Also used for descriptors specifying defaults for a directory subtree 
+	containing a related set of testcases. 
+	
+	@ivar id: The testcase identifier; has the value None if this is a 
+	directory config descriptor rather than a testcase descriptor. 
+	@ivar type: The type of the testcase (automated or manual)
+	@ivar state: The state of the testcase (runable, deprecated or skipped)
+	@ivar title: The title of the testcase
+	@ivar purpose: The purpose of the testcase
+	@ivar groups: A list of the user defined groups the testcase belongs to
+	@ivar modes: A list of the user defined modes the testcase can be run in
+	@ivar classname: The classname of the testcase
+	@ivar module: The full path to the python module containing the testcase class
+	@ivar input: The full path to the input directory of the testcase
+	@ivar output: The full path to the output parent directory of the testcase
+	@ivar reference: The full path to the reference directory of the testcase
+	@ivar traceability: A list of the requirements covered by the testcase
+
+	"""
+
 
 	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
 		"""Create an instance of the XMLDescriptorContainer class.
-		
-		@param id: The testcase identifier
-		@param type: The type of the testcase (automated or manual)
-		@param state: The state of the testcase (runable, deprecated or skipped)
-		@param title: The title of the testcase
-		@param purpose: The purpose of the testcase
-		@param groups: A list of the user defined groups the testcase belongs to
-		@param modes: A list of the user defined modes the testcase can be run in
-		@param classname: The classname of the testcase
-		@param module: The full path to the python module containing the testcase class
-		@param input: The full path to the input directory of the testcase
-		@param output: The full path to the output parent directory of the testcase
-		@param reference: The full path to the reference directory of the testcase
-		@param traceability: A list of the requirements covered by the testcase
 		
 		"""
 		self.file = file
@@ -117,7 +124,6 @@ class XMLDescriptorContainer(object):
 		self.output = output
 		self.reference = reference
 		self.traceability = traceability
-
 		
 	def __str__(self):
 		"""Return an informal string representation of the xml descriptor container object
@@ -131,7 +137,7 @@ class XMLDescriptorContainer(object):
 		str=str+"Test state:        %s\n" % self.state
 		str=str+"Test title:        %s\n" % self.title
 		str=str+"Test purpose:      "
-		purpose = self.purpose.split('\n')
+		purpose = self.purpose.split('\n') if self.purpose is not None else ['']
 		for index in range(0, len(purpose)):
 			if index == 0: str=str+"%s\n" % purpose[index]
 			if index != 0: str=str+"                   %s\n" % purpose[index] 
@@ -145,7 +151,6 @@ class XMLDescriptorContainer(object):
 		str=str+"Test traceability: %s\n" % self.traceability
 		str=str+""
 		return str
-
 
 class XMLDescriptorCreator(object):
 	'''Helper class to create a test descriptor template.'''
@@ -167,7 +172,8 @@ class XMLDescriptorCreator(object):
 
 
 class XMLDescriptorParser(object):
-	'''Helper class to parse an XML test descriptor.
+	'''Helper class to parse an XML test descriptor - either for a testcase, 
+	or for defaults for a (sub-)directory of testcases.
 
 	The class uses the minidom DOM (Document Object Model) non validating
 	parser to provide accessor methods to return element attributes	and character
@@ -178,10 +184,12 @@ class XMLDescriptorParser(object):
 	
 	'''
 
-	def __init__(self, xmlfile):
-		'''Class constructor.'''	
+	def __init__(self, xmlfile, istest=True, parentDirDefaults=None):
 		self.file = xmlfile
 		self.dirname = os.path.dirname(xmlfile)
+		self.istest = istest
+		self.defaults = self.DEFAULT_DESCRIPTOR if parentDirDefaults is None else parentDirDefaults
+		roottag = 'pysystest' if istest else 'pysysdir'
 		if not os.path.exists(xmlfile):
 			raise Exception("Unable to find supplied test descriptor \"%s\"" % xmlfile)
 		
@@ -190,22 +198,53 @@ class XMLDescriptorParser(object):
 		except Exception:
 			raise Exception("%s " % (sys.exc_info()[1]))
 		else:
-			if self.doc.getElementsByTagName('pysystest') == []:
-				raise Exception("No <pysystest> element supplied in XML descriptor")
+			if self.doc.getElementsByTagName(roottag) == []:
+				raise Exception("No <%s> element supplied in XML descriptor"%roottag)
 			else:
-				self.root = self.doc.getElementsByTagName('pysystest')[0]
+				self.root = self.doc.getElementsByTagName(roottag)[0]
+
+	@staticmethod
+	def parse(xmlfile, istest=True, parentDirDefaults=None):
+		"""
+		Parses the test/dir descriptor in the specified path and returns the 
+		XMLDescriptorContainer object. 
+		
+		@param istest: True if this is a pysystest.xml file, false if it is 
+		a descritor giving defaults for a directory of testcases.  
+		@param parentDirDefaults: Optional XMLDescriptorContainer instance 
+		specifying default values to be filtered in from the parent 
+		directory.
+		"""
+		p = XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults)
+		try:
+			return p.getContainer()
+		finally:
+			p.unlink()
+
+	DEFAULT_DESCRIPTOR = XMLDescriptorContainer(
+		file=None, id=None, type="auto", state="runnable", 
+		title='', purpose='', groups=[], modes=[], 
+		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
+		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
+		traceability=[])
+	"""
+	A directory config descriptor instance of XMLDescriptorContainer holding 
+	the default values to be used if there is no directory config descriptor. 
+	"""
 
 
 	def getContainer(self):
 		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
-		return XMLDescriptorContainer(self.getFile(), self.getID(), self.getType(), self.getState(),
-										self.getTitle(), self.getPurpose(),
+		# some elements that are mandatory for an individual test and not used for test dirs
+		return XMLDescriptorContainer(self.getFile(), self.getID() if self.istest else None, self.getType(), self.getState(),
+										self.getTitle() if self.istest else None, self.getPurpose() if self.istest else None,
 										self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
-										os.path.join(self.dirname, self.getClassDetails()[1]),
-										os.path.join(self.dirname, self.getTestInput()),
-										os.path.join(self.dirname, self.getTestOutput()),
-										os.path.join(self.dirname, self.getTestReference()),
+										# don't absolutize for dir config descriptors, since we don't yet know the test's dirname
+										os.path.join(self.dirname if self.istest else '', self.getClassDetails()[1]),
+										os.path.join(self.dirname if self.istest else '', self.getTestInput()),
+										os.path.join(self.dirname if self.istest else '', self.getTestOutput()),
+										os.path.join(self.dirname if self.istest else '', self.getTestReference()),
 										self.getRequirements())
 
 
@@ -226,23 +265,18 @@ class XMLDescriptorParser(object):
 
 	def getType(self):
 		'''Return the type attribute of the test element.'''
-		type = self.root.getAttribute("type")	
-		if type == "":
-			type = "auto"
-		elif type not in ["auto", "manual"]:
+		type = self.root.getAttribute("type") or self.defaults.type
+		if type not in ["auto", "manual"]:
 			raise Exception("The type attribute of the test element should be \"auto\" or \"manual\"")
 		return type
 
 
 	def getState(self):
 		'''Return the state attribute of the test element.'''
-		state = self.root.getAttribute("state")	
-		if state == "":
-			state = "runnable"
-		elif state not in ["runnable", "deprecated", "skipped"]: 
+		state = self.root.getAttribute("state")	 or self.defaults.state
+		if state not in ["runnable", "deprecated", "skipped"]: 
 			raise Exception("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\"")
 		return state 
-	
 
 	def getTitle(self):
 		'''Return the test titlecharacter data of the description element.'''
@@ -255,9 +289,9 @@ class XMLDescriptorParser(object):
 		else:
 			try:
 				title = descriptionNodeList[0].getElementsByTagName('title')[0]
-				return title.childNodes[0].data
+				return title.childNodes[0].data.strip()
 			except Exception:
-				return ""
+				return self.defaults.title
 				
 				
 	def getPurpose(self):
@@ -271,9 +305,9 @@ class XMLDescriptorParser(object):
 		else:
 			try:
 				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
-				return purpose.childNodes[0].data
+				return purpose.childNodes[0].data.strip()
 			except Exception:
-				return ""
+				return self.defaults.purpose
 			
 				
 	def getGroups(self):
@@ -287,9 +321,10 @@ class XMLDescriptorParser(object):
 			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
 			for node in groups.getElementsByTagName('group'):
 				groupList.append(node.childNodes[0].data)
-			return groupList
 		except Exception:
-			return []
+			pass
+		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
+		return groupList
 	
 				
 	def getModes(self):
@@ -303,9 +338,10 @@ class XMLDescriptorParser(object):
 			modes = classificationNodeList[0].getElementsByTagName('modes')[0]
 			for node in modes.getElementsByTagName('mode'):
 				modeList.append(node.childNodes[0].data)
-			return modeList
 		except Exception:
-			return []
+			pass
+		modeList = [x for x in self.defaults.modes if x not in modeList]+modeList
+		return modeList
 
 				
 	def getClassDetails(self):
@@ -315,7 +351,7 @@ class XMLDescriptorParser(object):
 			el = dataNodeList[0].getElementsByTagName('class')[0]
 			return [el.getAttribute('name'), el.getAttribute('module')]
 		except Exception:
-			return [DEFAULT_TESTCLASS, DEFAULT_MODULE]
+			return [self.defaults.classname, self.defaults.module]
 
 			
 	def getTestInput(self):
@@ -325,7 +361,7 @@ class XMLDescriptorParser(object):
 			input = dataNodeList[0].getElementsByTagName('input')[0]
 			return input.getAttribute('path')
 		except Exception:
-			return DEFAULT_INPUT
+			return self.defaults.input
 
 			
 	def getTestOutput(self):
@@ -335,7 +371,7 @@ class XMLDescriptorParser(object):
 			output = dataNodeList[0].getElementsByTagName('output')[0]
 			return output.getAttribute('path')
 		except Exception:
-			return DEFAULT_OUTPUT
+			return self.defaults.output
 
 
 	def getTestReference(self):
@@ -345,7 +381,7 @@ class XMLDescriptorParser(object):
 			ref = dataNodeList[0].getElementsByTagName('reference')[0]
 			return ref.getAttribute('path')
 		except Exception:
-			return DEFAULT_REFERENCE
+			return self.defaults.reference
 
 
 	def getRequirements(self):
@@ -355,11 +391,11 @@ class XMLDescriptorParser(object):
 			traceabilityNodeList = self.root.getElementsByTagName('traceability')
 			requirements = traceabilityNodeList[0].getElementsByTagName('requirements')[0]
 			for node in requirements.getElementsByTagName('requirement'):
-				reqList.append(node.getAttribute('id'))
-			return reqList
+				if node.getAttribute('id'): reqList.append(node.getAttribute('id'))
 		except Exception:
-			return []
-					
+			pass
+		reqList = [x for x in self.defaults.traceability if x not in reqList]+reqList
+		return reqList
 
 # entry point when running the class from the command line
 # (used for development, testing, demonstration etc)

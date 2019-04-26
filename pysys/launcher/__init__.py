@@ -46,7 +46,7 @@ except NameError:
 
 from pysys.constants import *
 from pysys.xml.descriptor import XMLDescriptorParser
-from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
+from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.utils.pycompat import PY2
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
@@ -90,12 +90,42 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 					projectfound = True
 					sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
 
+	if projectfound and os.path.normpath(dir).startswith(os.path.normpath(PROJECT.root)):
+		# find directory config descriptors between the project root and the testcase 
+		# dirs. We deliberately use project root not current working dir since 
+		# we don't want descriptors to be loaded differently depending on where the 
+		# tests are run from. 
+		dirconfigs = {}
+		projectroot = PROJECT.root.replace('\\','/').split('/')
+	else:
+		dirconfigs = None
+
+	log = logging.getLogger('pysys.launcher')
+	
+	DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
+	def getParentDirConfig(descriptorfile):
+		if dirconfigs is None: return None
+		testdir = os.path.dirname(descriptorfile).replace('\\','/').split('/')
+		currentconfig = None
+		for i in range(len(projectroot), len(testdir)):
+			currentdir = '/'.join(testdir[:i])
+			if currentdir in dirconfigs:
+				currentconfig = dirconfigs[currentdir]
+			else:
+				if pathexists(currentdir+'/'+DIR_CONFIG_DESCRIPTOR):
+					currentconfig = XMLDescriptorParser.parse(currentdir+'/'+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
+					log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
+				dirconfigs[currentdir] = currentconfig
+		return currentconfig
+	
 	for descriptorfile in descriptorfiles:
+		parentconfig = getParentDirConfig(descriptorfile)
 		try:
-			descriptors.append(XMLDescriptorParser(descriptorfile).getContainer())
+			descriptors.append(XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=getParentDirConfig(descriptorfile)))
 		except Exception as value:
 			print('%s - %s'%(sys.exc_info()[0], sys.exc_info()[1]))
-			logging.getLogger('pysys').info("Error reading descriptorfile %s" % descriptorfile)
+			log.info("Error reading descriptor file %s" % descriptorfile)
+			
 	descriptors = sorted(descriptors, key=lambda x: x.file)
 
 	# trim down the list for those tests in the test specifiers 
