@@ -53,7 +53,7 @@ DTD='''
 '''
 
 
-DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
+DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
 <pysystest type="%s" state="runnable">
     
   <description> 
