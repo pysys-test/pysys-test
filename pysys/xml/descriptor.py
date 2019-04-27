@@ -142,14 +142,14 @@ class XMLDescriptorContainer(object):
 		for index in range(0, len(purpose)):
 			if index == 0: str=str+"%s\n" % purpose[index]
 			if index != 0: str=str+"                   %s\n" % purpose[index] 
-		str=str+"Test groups:       %s\n" % u', '.join(self.groups)
-		str=str+"Test modes:        %s\n" % u', '.join(self.modes)
+		str=str+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
+		str=str+"Test modes:        %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.modes) or u'<none>')
 		str=str+"Test classname:    %s\n" % self.classname
 		str=str+"Test module:       %s\n" % self.module
 		str=str+"Test input:        %s\n" % self.input
 		str=str+"Test output:       %s\n" % self.output
 		str=str+"Test reference:    %s\n" % self.reference
-		str=str+"Test traceability: %s\n" % u', '.join(u"'%s'"%x for x in self.traceability)
+		str=str+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		str=str+""
 		return str
 
@@ -190,7 +190,7 @@ class XMLDescriptorParser(object):
 		self.dirname = os.path.dirname(xmlfile)
 		self.istest = istest
 		self.defaults = self.DEFAULT_DESCRIPTOR if parentDirDefaults is None else parentDirDefaults
-		roottag = 'pysystest' if istest else 'pysysdir'
+		roottag = 'pysystest' if istest else 'pysysdirconfig'
 		if not os.path.exists(xmlfile):
 			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
 		
