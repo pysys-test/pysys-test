@@ -91,19 +91,19 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 					projectfound = True
 					sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
 
-	if projectfound and os.path.normpath(dir).startswith(os.path.normpath(PROJECT.root)):
+	log = logging.getLogger('pysys.launcher')
+	DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
+	if PROJECT.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(PROJECT.projectFile))):
 		# find directory config descriptors between the project root and the testcase 
-		# dirs. We deliberately use project root not current working dir since 
+		# dirs. We deliberately use project dir not current working dir since 
 		# we don't want descriptors to be loaded differently depending on where the 
-		# tests are run from. 
+		# tests are run from (i.e. should be independent of cwd). 
 		dirconfigs = {}
-		projectroot = PROJECT.root.replace('\\','/').split('/')
+		projectroot = os.path.dirname(PROJECT.projectFile).replace('\\','/').split('/')
 	else:
 		dirconfigs = None
-
-	log = logging.getLogger('pysys.launcher')
+		log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
 	
-	DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
 	def getParentDirConfig(descriptorfile):
 		if dirconfigs is None: return None
 		testdir = os.path.dirname(descriptorfile).replace('\\','/').split('/')
