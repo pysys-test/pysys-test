@@ -9,6 +9,7 @@
     </modes>
   </classification>
 
+  <id-prefix>dir3prefix_</id-prefix>
   <run-order-priority></run-order-priority>
 
   <data>

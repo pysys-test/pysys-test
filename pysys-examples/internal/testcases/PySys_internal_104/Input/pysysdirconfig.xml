@@ -11,6 +11,7 @@
     </modes>
   </classification>
 
+  <id-prefix>rootprefix_</id-prefix>
   <run-order-priority>+4.1</run-order-priority>
 
   <data>

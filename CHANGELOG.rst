@@ -14,6 +14,24 @@ What's new in this release
 
 New features:
 
+- Added support for specifying a prefix that will be added to start of the 
+  testcase directory name to form the testcase identifier. This can be 
+  specified in `pysystest.xml` testcase descriptor files and/or in 
+  directory-level `pysysdirconfig.xml` files like this:
+
+    <id-prefix>MyComponent_Performance_</id-prefix>
+
+  Large test projects may benefit from setting prefixes in `pysysdirconfig.xml` 
+  to provide automatic namespacing of testcases, ensuring there are no name 
+  clashes across different test directories, and providing a way to group 
+  together related test ids without the need to use very long names for 
+  each individual testcase directory. Prefixes can be specified cumulatively, 
+  so with the final testcase id generated from adding the prefix from each 
+  parent directory, finishing with the name of the testcase directory itself. 
+  
+  We recommend using an underscore or dot character for separating test 
+  prefixes. 
+
 - Added support for specifying the order in which testcases are run. To do 
   this, specify a floating point value in any `pysystest.xml` testcase 
   descriptor, or `pysysdirconfig.xml` descriptor (which provides a default for 

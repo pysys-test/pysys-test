@@ -26,12 +26,13 @@ from pysys.exceptions import UserError
 log = logging.getLogger('pysys.xml.descriptor')
 
 DTD='''
-<!ELEMENT pysystest (description, classification?, run-order-priority?, data?, traceability?) > 
+<!ELEMENT pysystest (description, classification?, run-order-priority?, id-prefix?, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
 <!ELEMENT classification (groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
 <!ELEMENT traceability (requirements) >
 <!ELEMENT run-order-priority (#PCDATA) >
+<!ELEMENT id-prefix (#PCDATA) >
 <!ELEMENT title (#PCDATA) >
 <!ELEMENT purpose (#PCDATA) >
 <!ELEMENT groups (group)+ >
@@ -229,7 +230,7 @@ class XMLDescriptorParser(object):
 			p.unlink()
 
 	DEFAULT_DESCRIPTOR = XMLDescriptorContainer(
-		file=None, id=None, type="auto", state="runnable", 
+		file=None, id=u'', type="auto", state="runnable", 
 		title='', purpose='', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
@@ -248,7 +249,7 @@ class XMLDescriptorParser(object):
 				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
 		
 		# some elements that are mandatory for an individual test and not used for dir config
-		return XMLDescriptorContainer(self.getFile(), self.getID() if self.istest else None, self.getType(), self.getState(),
+		return XMLDescriptorContainer(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else None, self.getPurpose() if self.istest else None,
 										self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
@@ -272,8 +273,19 @@ class XMLDescriptorParser(object):
 
 	
 	def getID(self):
-		'''Return the id of the test.'''
-		return os.path.basename(self.dirname)
+		'''Return the id of the test, or for a pysysdirconfig, the id prefix.'''
+		id = self.defaults.id
+		for e in self.root.getElementsByTagName('id-prefix'):
+			id = id+self.getText(e)
+		
+		for c in u'\\/:~#<>':
+			# reserve a few characters that we might need for other purposes; _ and . can be used however
+			if c in id:
+				raise UserError('The <id-prefix> is not permitted to contain "%s"; error in "%s"'%(c, self.file))
+		
+		if self.istest: id = id+os.path.basename(self.dirname)
+		
+		return id
 
 
 	def getType(self):

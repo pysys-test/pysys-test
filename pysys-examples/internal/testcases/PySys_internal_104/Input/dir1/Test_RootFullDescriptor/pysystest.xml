@@ -17,6 +17,8 @@
     </modes>
   </classification>
 
+  <id-prefix>testprefix.</id-prefix>
+
   <run-order-priority>-9.9</run-order-priority>
 
   <data>
