@@ -9,6 +9,8 @@
     </modes>
   </classification>
 
+  <run-order-priority>+5.2</run-order-priority>
+
   <data>
     <class name="PySysTest-dir2" module="run_dir2"/>
     <input path="Input-dir2"/>

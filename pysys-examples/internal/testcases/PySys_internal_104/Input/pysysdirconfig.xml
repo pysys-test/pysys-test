@@ -11,6 +11,8 @@
     </modes>
   </classification>
 
+  <run-order-priority>+4.1</run-order-priority>
+
   <data>
     <class name="PySysTest-root" module="run_root"/>
     <input path="Input-root"/>

@@ -26,11 +26,12 @@ from pysys.exceptions import UserError
 log = logging.getLogger('pysys.xml.descriptor')
 
 DTD='''
-<!ELEMENT pysystest (description, classification?, data?, traceability?) > 
+<!ELEMENT pysystest (description, classification?, run-order-priority?, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
 <!ELEMENT classification (groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
 <!ELEMENT traceability (requirements) >
+<!ELEMENT run-order-priority (#PCDATA) >
 <!ELEMENT title (#PCDATA) >
 <!ELEMENT purpose (#PCDATA) >
 <!ELEMENT groups (group)+ >
@@ -103,11 +104,14 @@ class XMLDescriptorContainer(object):
 	@ivar output: The full path to the output parent directory of the testcase
 	@ivar reference: The full path to the reference directory of the testcase
 	@ivar traceability: A list of the requirements covered by the testcase
+	@ivar runOrderPriority: A float priority value used to determine the 
+	order in which testcases will be run; higher values are executed before 
+	low values. The default is 0.0. 
 
 	"""
 
 
-	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
+	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability, runOrderPriority=0.0):
 		"""Create an instance of the XMLDescriptorContainer class.
 		
 		"""
@@ -125,6 +129,7 @@ class XMLDescriptorContainer(object):
 		self.output = output
 		self.reference = reference
 		self.traceability = traceability
+		self.runOrderPriority = runOrderPriority
 		
 	def __str__(self):
 		"""Return an informal string representation of the xml descriptor container object
@@ -142,6 +147,7 @@ class XMLDescriptorContainer(object):
 		for index in range(0, len(purpose)):
 			if index == 0: str=str+"%s\n" % purpose[index]
 			if index != 0: str=str+"                   %s\n" % purpose[index] 
+		str=str+"Test run order:    %s%s\n" % ('+' if self.runOrderPriority>0.0 else '', self.runOrderPriority)
 		str=str+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
 		str=str+"Test modes:        %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.modes) or u'<none>')
 		str=str+"Test classname:    %s\n" % self.classname
@@ -227,7 +233,7 @@ class XMLDescriptorParser(object):
 		title='', purpose='', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
-		traceability=[])
+		traceability=[], runOrderPriority=0.0)
 	"""
 	A directory config descriptor instance of XMLDescriptorContainer holding 
 	the default values to be used if there is no directory config descriptor. 
@@ -251,7 +257,8 @@ class XMLDescriptorParser(object):
 										os.path.join(self.dirname if self.istest else '', self.getTestInput()),
 										os.path.join(self.dirname if self.istest else '', self.getTestOutput()),
 										os.path.join(self.dirname if self.istest else '', self.getTestReference()),
-										self.getRequirements())
+										self.getRequirements(), 
+										self.getRunOrderPriority())
 
 
 	def unlink(self):
@@ -326,7 +333,7 @@ class XMLDescriptorParser(object):
 		try:
 			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
 			for node in groups.getElementsByTagName('group'):
-				if node.childNodes[0].data: groupList.append(node.childNodes[0].data)
+				if self.getText(node): groupList.append(self.getText(node))
 		except Exception:
 			pass
 		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
@@ -343,7 +350,7 @@ class XMLDescriptorParser(object):
 		try:
 			modes = classificationNodeList[0].getElementsByTagName('modes')[0]
 			for node in modes.getElementsByTagName('mode'):
-				if node.childNodes[0].data: modeList.append(node.childNodes[0].data)
+				if self.getText(node): modeList.append(self.getText(node))
 		except Exception:
 			pass
 		modeList = [x for x in self.defaults.modes if x not in modeList]+modeList
@@ -359,6 +366,19 @@ class XMLDescriptorParser(object):
 		except Exception:
 			return [self.defaults.classname, self.defaults.module]
 
+	def getRunOrderPriority(self):
+		r = None
+		for e in self.root.getElementsByTagName('run-order-priority'):
+			r = self.getText(e)
+			if r:
+				try:
+					r = float(r)
+				except Exception:
+					raise UserError('Invalid float value specified for run-order-priority in "%s"'%self.file)
+		if r is None or r == '': 
+			return self.defaults.runOrderPriority
+		else:
+			return r
 			
 	def getTestInput(self):
 		'''Return the test input path, contained in the input element.'''
@@ -402,6 +422,17 @@ class XMLDescriptorParser(object):
 			pass
 		reqList = [x for x in self.defaults.traceability if x not in reqList]+reqList
 		return reqList
+
+	@staticmethod
+	def getText(element):
+		"""Utility method that reads text from the specified element and 
+		strips leading/trailing whitespace from it. Returns an empty string if none. """
+		t = u''
+		if not element: return t
+		for n in element.childNodes:
+			if (n.nodeType == element.TEXT_NODE) and n.data:
+				t += n.data
+		return t.strip()
 
 # entry point when running the class from the command line
 # (used for development, testing, demonstration etc)

@@ -126,6 +126,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 		except UserError:
 			raise # no stack trace needed, will already include descriptorfile name
 		except Exception as e:
+			log.info('Failed to read descriptor: ', exc_info=True)
 			raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
 			
 	descriptors = sorted(descriptors, key=lambda x: x.file)

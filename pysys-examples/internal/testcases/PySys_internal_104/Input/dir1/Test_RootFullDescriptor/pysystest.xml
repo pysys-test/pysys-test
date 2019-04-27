@@ -17,6 +17,8 @@
     </modes>
   </classification>
 
+  <run-order-priority>-9.9</run-order-priority>
+
   <data>
     <class name="PySysTest-testcase" module="run_testcase"/>
     <input path="Input-testcase"/>

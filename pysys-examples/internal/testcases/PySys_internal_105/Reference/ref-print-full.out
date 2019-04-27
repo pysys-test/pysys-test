@@ -6,7 +6,6 @@ Test type:         manual
 Test state:        deprecated
 Test title:        Nested testcase
 Test purpose:      Nested purpose
-Test run order:    -9.9
 Test groups:       root-group1, root-group2, testcase-group1, testcase-group2
 Test modes:        root-mode1, root-mode2, testcase-mode1, testcase-mode2
 Test classname:    PySysTest-testcase
@@ -24,7 +23,6 @@ Test type:         auto
 Test state:        runnable
 Test title:        Nested testcase
 Test purpose:      Nested purpose
-Test run order:    +4.1
 Test groups:       root-group1, root-group2
 Test modes:        root-mode1, root-mode2
 Test classname:    PySysTest-root
@@ -42,7 +40,6 @@ Test type:         manual
 Test state:        skipped
 Test title:        Nested testcase
 Test purpose:      Nested purpose
-Test run order:    +5.2
 Test groups:       root-group1, root-group2, dir2-group, dir3-group
 Test modes:        root-mode1, root-mode2, dir2-mode, dir3-mode
 Test classname:    PySysTest-dir3

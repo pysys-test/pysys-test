@@ -9,6 +9,8 @@
     </modes>
   </classification>
 
+  <run-order-priority></run-order-priority>
+
   <data>
     <class name="PySysTest-dir3" module="run_dir3"/>
     <input path="Input-dir3"/>

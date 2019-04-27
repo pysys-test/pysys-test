@@ -14,7 +14,17 @@ What's new in this release
 
 New features:
 
-- TODO
+- Added support for specifying the order in which testcases are run. To do 
+  this, specify a floating point value in any `pysystest.xml` testcase 
+  descriptor, or `pysysdirconfig.xml` descriptor (which provides a default for 
+  all testcases under that directory)::
+  
+    <run-order-priority>+100.0</run-order-priority>
+
+  Tests with a higher priority values are executed ahead of tests with lower 
+  values. The default priority value is 0.0, and values can be positive or 
+  negative. Tests with the same priority value are executed based on the 
+  sort order of the testcase directories. 
 
 Upgrade guide and compatibility:
 
