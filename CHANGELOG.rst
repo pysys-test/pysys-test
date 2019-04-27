@@ -26,6 +26,11 @@ New features:
   negative. Tests with the same priority value are executed based on the 
   sort order of the testcase directories. 
 
+- Added support for running tests by specifying just a (non-numeric) suffix 
+  without needing to include the entire id. Although support for specifying a 
+  pure numeric suffix (e.g. `pysys.py run 10`) has been around for a long time, 
+  you can now do the same with strings such as `pysys.py run foo_10`. 
+
 Upgrade guide and compatibility:
 
 - Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 

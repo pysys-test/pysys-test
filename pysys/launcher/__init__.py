@@ -136,8 +136,15 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	if testIdSpecs == []:
 		tests = descriptors
 	else:
+		testids = set([d.id for d in descriptors])
 		def idMatch(descriptorId, specId):
-			return specId==descriptorId or (specId.isdigit() and re.match('.+_0*%s$'%specId, descriptorId))
+			# permit specifying suffix at end of testcase only, which is 
+			# important to allow directory completion to be used if a prefix is 
+			# being added on artificially; but only if spec is non-numeric 
+			# since we don't want to match test_104 against spec 04
+			return specId==descriptorId or (
+				descriptorId.endswith(specId) and not specId.isdigit() and specId not in testids) or (
+				specId.isdigit() and re.match('.+_0*%s$'%specId, descriptorId))
 
 		for t in testIdSpecs:
 			try:
