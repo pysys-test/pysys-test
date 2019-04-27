@@ -326,7 +326,7 @@ class XMLDescriptorParser(object):
 		try:
 			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
 			for node in groups.getElementsByTagName('group'):
-				groupList.append(node.childNodes[0].data)
+				if node.childNodes[0].data: groupList.append(node.childNodes[0].data)
 		except Exception:
 			pass
 		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
@@ -343,7 +343,7 @@ class XMLDescriptorParser(object):
 		try:
 			modes = classificationNodeList[0].getElementsByTagName('modes')[0]
 			for node in modes.getElementsByTagName('mode'):
-				modeList.append(node.childNodes[0].data)
+				if node.childNodes[0].data: modeList.append(node.childNodes[0].data)
 		except Exception:
 			pass
 		modeList = [x for x in self.defaults.modes if x not in modeList]+modeList
