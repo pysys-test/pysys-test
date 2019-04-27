@@ -28,6 +28,7 @@ from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
 from pysys.xml.project import getProjectConfigTemplates, createProjectConfig
 from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
+from pysys.exceptions import UserError
 
 """
 @undocumented: EXPR1, EXPR2, EXPR3, _PYSYS_SCRIPT_NAME, main
@@ -639,7 +640,7 @@ def runTest(args):
 		sys.exit(0)
 	except Exception as e:
 		sys.stderr.write('\nPYSYS FATAL ERROR: %s\n' % e)
-		traceback.print_exc()
+		if not isinstance(e, UserError): traceback.print_exc()
 		sys.exit(10)
 
 def printTest(args):
@@ -648,7 +649,9 @@ def printTest(args):
 		printer.parseArgs(args)
 		printer.printTests()
 	except Exception as e:
-		sys.stderr.write('\nWARN: %s\n\n' % e)
+		sys.stderr.write('\nERROR: %s\n' % e)
+		if not isinstance(e, UserError): traceback.print_exc()
+		sys.exit(10)
 
 def makeTest(args):
 	module = import_module(PROJECT.makerModule, sys.path)

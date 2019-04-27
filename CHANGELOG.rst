@@ -18,7 +18,10 @@ New features:
 
 Upgrade guide and compatibility:
 
-- TODO
+- Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 
+  from running, whereas previously they would just be logged. Since an invalid 
+  descriptor prevents the associated testcase from reporting a result, the 
+  new behaviour ensures such mistakes will be spotted and fixed promptly. 
 
 Bug fixes:
 

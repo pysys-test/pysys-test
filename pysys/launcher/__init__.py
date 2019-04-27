@@ -48,6 +48,7 @@ from pysys.constants import *
 from pysys.xml.descriptor import XMLDescriptorParser
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.utils.pycompat import PY2
+from pysys.exceptions import UserError
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	"""Create a list of descriptor objects representing a set of tests to run, returning the list.
@@ -60,7 +61,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	@param dir: The parent directory to search for runnable tests
 	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
 	@rtype: list
-	@raises Exception: Raised if not testcases can be found or are returned by the requested input parameters
+	@raises UserError: Raised if not testcases can be found or are returned by the requested input parameters
 	
 	"""
 	descriptors = []
@@ -122,9 +123,10 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 		parentconfig = getParentDirConfig(descriptorfile)
 		try:
 			descriptors.append(XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=getParentDirConfig(descriptorfile)))
-		except Exception as value:
-			print('%s - %s'%(sys.exc_info()[0], sys.exc_info()[1]))
-			log.info("Error reading descriptor file %s" % descriptorfile)
+		except UserError:
+			raise # no stack trace needed, will already include descriptorfile name
+		except Exception as e:
+			raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
 			
 	descriptors = sorted(descriptors, key=lambda x: x.file)
 

@@ -21,6 +21,7 @@ from __future__ import print_function
 import os.path, logging, xml.dom.minidom
 
 from pysys.constants import *
+from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.descriptor')
 
@@ -191,15 +192,15 @@ class XMLDescriptorParser(object):
 		self.defaults = self.DEFAULT_DESCRIPTOR if parentDirDefaults is None else parentDirDefaults
 		roottag = 'pysystest' if istest else 'pysysdir'
 		if not os.path.exists(xmlfile):
-			raise Exception("Unable to find supplied test descriptor \"%s\"" % xmlfile)
+			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
 		
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
-		except Exception:
-			raise Exception("%s " % (sys.exc_info()[1]))
+		except Exception as ex:
+			raise UserError("Invalid XML in descriptor '%s': %s" % (xmlfile, ex))
 		else:
 			if self.doc.getElementsByTagName(roottag) == []:
-				raise Exception("No <%s> element supplied in XML descriptor"%roottag)
+				raise UserError("No <%s> element supplied in XML descriptor '%s'"%(roottag, xmlfile))
 			else:
 				self.root = self.doc.getElementsByTagName(roottag)[0]
 
@@ -235,7 +236,12 @@ class XMLDescriptorParser(object):
 
 	def getContainer(self):
 		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
-		# some elements that are mandatory for an individual test and not used for test dirs
+		
+		for attrName, attrValue in self.root.attributes.items():
+			if attrName not in ['state', 'type']:
+				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
+		
+		# some elements that are mandatory for an individual test and not used for dir config
 		return XMLDescriptorContainer(self.getFile(), self.getID() if self.istest else None, self.getType(), self.getState(),
 										self.getTitle() if self.istest else None, self.getPurpose() if self.istest else None,
 										self.getGroups(), self.getModes(),
@@ -267,7 +273,7 @@ class XMLDescriptorParser(object):
 		'''Return the type attribute of the test element.'''
 		type = self.root.getAttribute("type") or self.defaults.type
 		if type not in ["auto", "manual"]:
-			raise Exception("The type attribute of the test element should be \"auto\" or \"manual\"")
+			raise UserError("The type attribute of the test element should be \"auto\" or \"manual\" in \"%s\""%self.file)
 		return type
 
 
@@ -275,17 +281,17 @@ class XMLDescriptorParser(object):
 		'''Return the state attribute of the test element.'''
 		state = self.root.getAttribute("state")	 or self.defaults.state
 		if state not in ["runnable", "deprecated", "skipped"]: 
-			raise Exception("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\"")
+			raise UserError("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\" in \"%s\""%self.file)
 		return state 
 
 	def getTitle(self):
 		'''Return the test titlecharacter data of the description element.'''
 		descriptionNodeList = self.root.getElementsByTagName('description')
 		if descriptionNodeList == []:
-			raise Exception("No <description> element supplied in XML descriptor")
+			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
 		
 		if descriptionNodeList[0].getElementsByTagName('title') == []:
-			raise Exception("No <title> child element of <description> supplied in XML descriptor")
+			raise UserError("No <title> child element of <description> supplied in XML descriptor \"%s\""%self.file)
 		else:
 			try:
 				title = descriptionNodeList[0].getElementsByTagName('title')[0]
@@ -298,10 +304,10 @@ class XMLDescriptorParser(object):
 		'''Return the test purpose character data of the description element.'''
 		descriptionNodeList = self.root.getElementsByTagName('description')
 		if descriptionNodeList == []:
-			raise Exception("No <description> element supplied in XML descriptor")
+			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
 		
 		if descriptionNodeList[0].getElementsByTagName('purpose') == []:
-			raise Exception("No <purpose> child element of <description> supplied in XML descriptor")
+			raise UserError("No <purpose> child element of <description> supplied in XML descriptor \"%s\""%self.file)
 		else:
 			try:
 				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
@@ -314,7 +320,7 @@ class XMLDescriptorParser(object):
 		'''Return a list of the group names, contained in the character data of the group elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
 		if classificationNodeList == []:
-			raise Exception("No <classification> element supplied in XML descriptor")
+			raise UserError("No <classification> element supplied in XML descriptor \"%s\""%self.file)
 		
 		groupList = []
 		try:
@@ -331,7 +337,7 @@ class XMLDescriptorParser(object):
 		'''Return a list of the mode names, contained in the character data of the mode elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
 		if classificationNodeList == []:
-			raise Exception("No <classification> element supplied in XML descriptor")
+			raise UserError("No <classification> element supplied in XML descriptor \"%s\""%self.file)
 		
 		modeList = []
 		try:
