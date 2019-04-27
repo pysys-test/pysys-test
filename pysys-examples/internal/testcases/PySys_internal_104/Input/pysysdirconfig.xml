@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+  <classification>
+    <groups>
+      <group>root-group1</group>
+      <group>root-group2</group>
+    </groups>
+    <modes>
+      <mode>root-mode1</mode>
+      <mode>root-mode2</mode>
+    </modes>
+  </classification>
+
+  <data>
+    <class name="PySysTest-root" module="run_root"/>
+    <input path="Input-root"/>
+    <output path="Output-root"/>
+    <reference path="Reference-root"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id="root-req1"/>     
+      <requirement id="root-req2"/>
+    </requirements>
+  </traceability>
+</pysysdirconfig>
