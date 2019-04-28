@@ -162,8 +162,9 @@ class ConsolePrintHelper(object):
 		self.tests = None
 		self.name = name
 		self.sort = None
-		self.optionString = 'hfgdrm:a:t:i:e:s:'
-		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json", "sort="] 
+		self.grep = None
+		self.optionString = 'hfgdrm:a:t:i:e:s:G:'
+		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
 		
 
 	def printUsage(self):
@@ -181,6 +182,8 @@ class ConsolePrintHelper(object):
 		print("            --json                 print full information as JSON")
 		print("")
 		print("    selection/filtering options:")
+		print("       -G | --grep      STRING     print tests whose title or id contains the specified regex")
+		print("                                   (matched case insensitively)")
 		print("       -m | --mode      STRING     print tests that run in user defined mode ")
 		print("       -a | --type      STRING     print tests of supplied type (auto or manual, default all)")
 		print("       -t | --trace     STRING     print tests which cover requirement id ") 
@@ -247,6 +250,9 @@ class ConsolePrintHelper(object):
 			elif option in ("-s", "--sort"):
 				self.sort = value
 
+			elif option in ("-G", "--grep"):
+				self.grep = value
+
 			elif option == '--json':
 				self.json = True
 
@@ -256,6 +262,10 @@ class ConsolePrintHelper(object):
 
 	def printTests(self):
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
+			
+			if self.grep:
+				regex = re.compile(self.grep, flags=re.IGNORECASE)
+				descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
 			
 			if self.sort:
 				if self.sort.lower()=='id':
@@ -496,8 +506,9 @@ class ConsoleLaunchHelper(object):
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:g'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=']
+		self.grep = None
+		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:gG:'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=']
 
 
 	def printUsage(self, printXOptions):
@@ -508,10 +519,6 @@ class ConsoleLaunchHelper(object):
 		print("       -r | --record               record test results using all configured record writers")
 		print("       -p | --purge                purge the output subdirectory on test pass")
 		print("       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)")
-		print("       -a | --type      STRING     set the test type to run (auto or manual, default is both)") 
-		print("       -t | --trace     STRING     set the requirement id for the test run")
-		print("       -i | --include   STRING     set the test groups to include (can be specified multiple times)")
-		print("       -e | --exclude   STRING     set the test groups to exclude (can be specified multiple times)")
 		print("       -c | --cycle     INT        set the the number of cycles to run the tests")
 		print("       -o | --outdir    STRING     set the name of the directory to use for this run's test output")
 		print("       -m | --mode      STRING     set the user defined mode to run the tests")
@@ -528,6 +535,14 @@ class ConsoleLaunchHelper(object):
 		print("       -X               KEY=VALUE  set user defined options to be passed through to the test and ")
 		print("                                   runner classes. The left hand side string is the data attribute ")
 		print("                                   to set, the right hand side string the value (True if not specified) ")
+		print("")
+		print("    selection/filtering options:")
+		print("       -G | --grep      STRING     run only tests whose title or id contains the specified regex")
+		print("                                   (matched case insensitively)")
+		print("       -a | --type      STRING     set the test type to run (auto or manual, default is both)") 
+		print("       -t | --trace     STRING     set the requirement id for the test run")
+		print("       -i | --include   STRING     set the test groups to include (can be specified multiple times)")
+		print("       -e | --exclude   STRING     set the test groups to exclude (can be specified multiple times)")
 		if printXOptions: printXOptions()
 		print("")
 		print("   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, ")
@@ -638,6 +653,9 @@ class ConsoleLaunchHelper(object):
 			elif option in ("-y", "--validateOnly"):
 				self.userOptions['validateOnly'] = True
 
+			elif option in ("-G", "--grep"):
+				self.grep = value
+
 			else:
 				print("Unknown option: %s"%option)
 				sys.exit(1)
@@ -657,6 +675,10 @@ class ConsoleLaunchHelper(object):
 
 		# No exception handler above, as any createDescriptors failure is really a fatal problem that should cause us to 
 		# terminate with a non-zero exit code; we don't want to run no tests without realizing it and return success
+
+		if self.grep:
+			regex = re.compile(self.grep, flags=re.IGNORECASE)
+			descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
 		
 		return self.record, self.purge, self.cycle, self.mode, self.threads, self.outsubdir, descriptors, self.userOptions
 		

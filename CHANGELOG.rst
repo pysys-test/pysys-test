@@ -59,11 +59,10 @@ New features:
   these options is specified continues to be based on the full path of the 
   `pysystest.xml` files. 
 
-dumps full information 
-  about the available tests in JSON format suitable for reading in from other 
-  programs. 
-
-
+- Added `--grep`/`-G` filtering option to `pysys.py print` and `pysys.py run` 
+  which selects testcases that have the specific regular expression (matched 
+  case insensitively) in their `id` or `title`. This can be a convenient way 
+  to quickly run a set of tests related to a particular feature area.  
 
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
