@@ -50,18 +50,13 @@ from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.utils.pycompat import PY2
 from pysys.exceptions import UserError
 
-def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
-	"""Create a list of descriptor objects representing a set of tests to run, returning the list.
+def loadDescriptors(dir=None):
+	"""Load descriptor objects representing a set of tests to run, returning the list.
 	
-	@param testIdSpecs: A list of strings specifying the set of testcase identifiers
-	@param type: The type of the tests to run (manual | auto)
-	@param includes: A list of test groups to include in the returned set
-	@param excludes: A list of test groups to exclude in the returned set
-	@param trace: A list of requirements to indicate tests to include in the returned set
 	@param dir: The parent directory to search for runnable tests
 	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
 	@rtype: list
-	@raises UserError: Raised if not testcases can be found or are returned by the requested input parameters
+	@raises UserError: Raised if no testcases can be found.
 	
 	"""
 	descriptors = []
@@ -130,6 +125,23 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 			raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
 			
 	descriptors = sorted(descriptors, key=lambda x: x.file)
+	return descriptors
+
+def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
+	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
+	
+	@param testIdSpecs: A list of strings specifying the set of testcase identifiers
+	@param type: The type of the tests to run (manual | auto)
+	@param includes: A list of test groups to include in the returned set
+	@param excludes: A list of test groups to exclude in the returned set
+	@param trace: A list of requirements to indicate tests to include in the returned set
+	@param dir: The parent directory to search for runnable tests
+	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
+	@rtype: list
+	@raises UserError: Raised if not testcases can be found or are returned by the requested input parameters
+	
+	"""
+	descriptors = loadDescriptors(dir=dir)
 
 	# trim down the list for those tests in the test specifiers 
 	tests = []
@@ -180,8 +192,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 				tests.extend(matches)
 
 			except Exception:
-				sys.exit("Unable to locate requested testcase(s): '%s'"%t)
-
+				raise UserError("Unable to locate requested testcase(s): '%s'"%t)
 				
 	# trim down the list based on the type
 	if type:
@@ -233,7 +244,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 				index = index + 1
 	
 	if len(tests) == 0:
-		sys.exit("The supplied options did not result in the selection of any tests")
+		raise UserError("The supplied options did not result in the selection of any tests")
 	else:
 		return tests
 
