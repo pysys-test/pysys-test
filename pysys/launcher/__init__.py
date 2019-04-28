@@ -142,6 +142,22 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	
 	"""
 	descriptors = loadDescriptors(dir=dir)
+	
+	# first check for duplicate ids
+	ids = {}
+	dups = []
+	for d in descriptors:
+		if d.id in ids:
+			dups.append('%s - in %s and %s'%(d.id, ids[d.id], d.file))
+		else:
+			ids[d.id] = d.file
+	if dups:
+		dupmsg = 'Found %d duplicate descriptor ids: %s'%(len(dups), '\n'.join(dups))
+		if os.getenv('PYSYS_ALLOW_DUPLICATE_IDS','').lower()=='true':
+			logging.getLogger('pysys').warn(dupmsg) # undocumented option just in case anyone complains
+		else:
+			raise UserError(dupmsg)
+	
 
 	# trim down the list for those tests in the test specifiers 
 	tests = []

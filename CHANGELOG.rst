@@ -124,7 +124,14 @@ Upgrade guide and compatibility:
 
 Bug fixes:
 
-- TODO
+- Previous versions of PySys did not complain if you created multiple tests 
+  with the same id (in different parent directories under the same project). 
+  This was dangerous as the results would overwrite each other, so in this 
+  version PySys checks for this condition and will terminate with an error 
+  if it is detected. If you indentionally multiple test with the same name 
+  in different directories, add an `<id-prefix>` element to the `pysystest.xml` 
+  or (better) to a `pysysdirconfig.xml` file to provide separate namespaces 
+  for the tests in each directory and avoid colliding ids. 
 
 ---------------
 Release History
