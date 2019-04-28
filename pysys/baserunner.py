@@ -679,7 +679,10 @@ class TestContainer(object):
 
 			# execute the test if we can
 			try:
-				if self.descriptor.state != 'runnable':
+				if self.descriptor.skippedReason:
+					self.testObj.addOutcome(SKIPPED, self.descriptor.skippedReason, abortOnError=False)
+				
+				elif self.descriptor.state != 'runnable':
 					self.testObj.addOutcome(SKIPPED, 'Not runnable', abortOnError=False)
 							
 				elif self.runner.mode and self.runner.mode not in self.descriptor.modes:

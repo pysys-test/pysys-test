@@ -27,7 +27,7 @@ from pysys.exceptions import UserError
 log = logging.getLogger('pysys.xml.descriptor')
 
 DTD='''
-<!ELEMENT pysystest (description, classification?, run-order-priority?, id-prefix?, data?, traceability?) > 
+<!ELEMENT pysystest (description, classification?, skipped?, run-order-priority?, id-prefix?, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
 <!ELEMENT classification (groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
@@ -48,6 +48,7 @@ DTD='''
 <!ELEMENT requirement EMPTY >
 <!ATTLIST pysystest type (auto | manual ) "auto" >
 <!ATTLIST pysystest state (runnable | deprecated | skipped) "runnable" >
+<!ATTLIST skipped reason >
 <!ATTLIST class name CDATA #REQUIRED
                 module CDATA #REQUIRED >
 <!ATTLIST input path CDATA #REQUIRED >
@@ -58,20 +59,22 @@ DTD='''
 
 
 DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
-<pysystest type="%s" state="runnable">
-    
+<pysystest type="%s">
+  
   <description> 
     <title></title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
   </description>
-
+  
   <classification>
     <groups>
       <group>%s</group>
     </groups>
   </classification>
+
+  <!-- <skipped reason=""/> -->
 
   <data>
     <class name="%s" module="%s"/>
@@ -95,7 +98,10 @@ class XMLDescriptorContainer(object):
 	@ivar id: The testcase identifier; has the value None if this is a 
 	directory config descriptor rather than a testcase descriptor. 
 	@ivar type: The type of the testcase (automated or manual)
-	@ivar state: The state of the testcase (runable, deprecated or skipped)
+	@ivar state: The state of the testcase (runnable, deprecated or skipped)
+	@ivar skippedReason: If set to a non-empty string, indicates that this 
+	testcase is skipped and provides the reason. If this is set then the test 
+	is skipped regardless of the value of `state`. 
 	@ivar title: The title of the testcase
 	@ivar purpose: The purpose of the testcase
 	@ivar groups: A list of the user defined groups the testcase belongs to
@@ -113,10 +119,12 @@ class XMLDescriptorContainer(object):
 	"""
 
 
-	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability, runOrderPriority=0.0):
+	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability, runOrderPriority=0.0, skippedReason=None):
 		"""Create an instance of the XMLDescriptorContainer class.
 		
 		"""
+		if skippedReason: state = 'skipped'
+		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
 		self.file = file
 		self.id = id
 		self.type = type
@@ -132,6 +140,7 @@ class XMLDescriptorContainer(object):
 		self.reference = reference
 		self.traceability = traceability
 		self.runOrderPriority = runOrderPriority
+		self.skippedReason = skippedReason
 	
 	def toDict(self):
 		"""Converts this descriptor to an (ordered) dict suitable for serialization."""
@@ -140,6 +149,7 @@ class XMLDescriptorContainer(object):
 		d['xmlDescriptor'] = self.file
 		d['type'] = self.type
 		d['state'] = self.state
+		d['skippedReason'] = self.skippedReason
 		d['title'] = self.title
 		d['purpose'] = self.purpose
 		d['groups'] = self.groups
@@ -164,6 +174,7 @@ class XMLDescriptorContainer(object):
 		str=    "Test id:           %s\n" % self.id
 		str=str+"Test type:         %s\n" % self.type
 		str=str+"Test state:        %s\n" % self.state
+		if self.skippedReason: str=str+"Test skip reason:  %s\n" % self.skippedReason
 		str=str+"Test title:        %s\n" % self.title
 		str=str+"Test purpose:      "
 		purpose = self.purpose.split('\n') if self.purpose is not None else ['']
@@ -256,7 +267,7 @@ class XMLDescriptorParser(object):
 		title='', purpose='', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
-		traceability=[], runOrderPriority=0.0)
+		traceability=[], runOrderPriority=0.0, skippedReason=None)
 	"""
 	A directory config descriptor instance of XMLDescriptorContainer holding 
 	the default values to be used if there is no directory config descriptor. 
@@ -281,7 +292,8 @@ class XMLDescriptorParser(object):
 										os.path.join(self.dirname if self.istest else '', self.getTestOutput()),
 										os.path.join(self.dirname if self.istest else '', self.getTestReference()),
 										self.getRequirements(), 
-										self.getRunOrderPriority())
+										self.getRunOrderPriority(), 
+										skippedReason=self.getSkippedReason())
 
 
 	def unlink(self):
@@ -325,6 +337,14 @@ class XMLDescriptorParser(object):
 			raise UserError("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\" in \"%s\""%self.file)
 		return state 
 
+	def getSkippedReason(self):
+		for e in self.root.getElementsByTagName('skipped'):
+			r = (e.getAttribute('reason') or '').strip() 
+			# make this mandatory, to encourage good practice
+			if not r: raise UserError('Missing reason= attribute in <skipped> element of "%s"'%self.file)
+			return r
+		return self.defaults.skippedReason
+
 	def getTitle(self):
 		'''Return the test titlecharacter data of the description element.'''
 		descriptionNodeList = self.root.getElementsByTagName('description')
@@ -360,9 +380,6 @@ class XMLDescriptorParser(object):
 	def getGroups(self):
 		'''Return a list of the group names, contained in the character data of the group elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
-		if classificationNodeList == []:
-			raise UserError("No <classification> element supplied in XML descriptor \"%s\""%self.file)
-		
 		groupList = []
 		try:
 			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
@@ -377,8 +394,6 @@ class XMLDescriptorParser(object):
 	def getModes(self):
 		'''Return a list of the mode names, contained in the character data of the mode elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
-		if classificationNodeList == []:
-			raise UserError("No <classification> element supplied in XML descriptor \"%s\""%self.file)
 		
 		modeList = []
 		try:

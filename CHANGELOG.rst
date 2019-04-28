@@ -67,6 +67,19 @@ New features:
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
   programs. 
+  
+- Added a new way to skip tests, by adding this element to the `pysystest.xml` 
+  descriptor::
+
+    <skipped reason="Skipped due to open bug ABC-123"/>
+
+  Although tests can still be skipped by setting the `state="skipped"` 
+  attribute, the use of the `skipped` element is recommended as it provides a 
+  way to specify the reason the test has been skipped, and also allows a 
+  whole directory of tests to be skipped by adding the element to a 
+  `pysysdirconfig.xml` file. The default `pysystest.xml` template generated 
+  for new testcases now contains a commented-out `skipped` element instead of 
+  a `state=` attribute. 
 
 Upgrade guide and compatibility:
 
