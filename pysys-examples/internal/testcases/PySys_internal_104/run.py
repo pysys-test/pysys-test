@@ -30,4 +30,5 @@ class PySysTest(BaseTest):
 			])
 			
 		with open(self.output+'/print-full.out', 'rb') as f:
-			self.assertTrue(json.load(f)!=None) # check it's valid JSON - would throw if not
+			if sys.version_info[:2] != (3, 5): # 3.x before 3.6 didn't support reading binary
+				self.assertTrue(json.load(f)!=None) # check it's valid JSON - would throw if not
