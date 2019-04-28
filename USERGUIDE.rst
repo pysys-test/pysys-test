@@ -131,16 +131,20 @@ file containing::
 	</pysysdirconfig>
 
 This serves several useful purposes:
+
 - It adds a prefix "SubSystem1_perf." to the beginning of the test directory 
   names to ensure there's a unique id for each one with no chance of conflicts 
   across different directories. 
+
 - It adds groups that make it possible to run all your performance tests, or 
   all your tests for a particular part of the application, in a single command. 
+
 - It specifies that the performance tests will be run with a lower priority, 
   so they execute after more urgent (and quicker) tests such as unit tests. 
+
 - It provides the ability to temporarily skip a set of tests if they are 
   broken temporarily pending a bug fix. 
 
-See the `pysysdirconfig.xml` sample in pysys-examples/fibonacci/testcases` and 
-also in `pysys/xml/templates/dirconfig' for a full example of a directory 
+See the `pysysdirconfig.xml` sample in `pysys-examples/fibonacci/testcases` and 
+also in `pysys/xml/templates/dirconfig` for a full example of a directory 
 configuration file. 

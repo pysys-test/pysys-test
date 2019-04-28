@@ -37,7 +37,7 @@ Improvements to the XML descriptors that provide information about tests:
   a `pysystest.xml` file except the `description/title/purpose`. a sample 
   `pysysdirconfig.xml` file is provided in 
   `pysys-examples/fibonacci/testcases` and also in 
-  `pysys/xml/templates/dirconfig'. 
+  `pysys/xml/templates/dirconfig`. 
 
 - Added support for specifying a prefix that will be added to start of the 
   testcase directory name to form the testcase identifier. This can be 
