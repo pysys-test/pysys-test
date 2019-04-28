@@ -161,8 +161,9 @@ class ConsolePrintHelper(object):
 		self.excludes = []
 		self.tests = None
 		self.name = name
-		self.optionString = 'hfgdrm:a:t:i:e:'
-		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json"] 
+		self.sort = None
+		self.optionString = 'hfgdrm:a:t:i:e:s:'
+		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json", "sort="] 
 		
 
 	def printUsage(self):
@@ -176,6 +177,7 @@ class ConsolePrintHelper(object):
 		print("       -g | --groups               print test groups defined")
 		print("       -d | --modes                print test modes defined")
 		print("       -r | --requirements         print test requirements covered")
+		print("       -s | --sort   STRING        sort by: title, id, runOrderPriority")
 		print("            --json                 print full information as JSON")
 		print("")
 		print("    selection/filtering options:")
@@ -241,14 +243,29 @@ class ConsolePrintHelper(object):
 
 			elif option in ("-e", "--exclude"):
 				self.excludes.append(value)
+
+			elif option in ("-s", "--sort"):
+				self.sort = value
+
 			elif option == '--json':
 				self.json = True
+
 			else:
 				print("Unknown option: %s"%option)
 				sys.exit(1)
 
 	def printTests(self):
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
+			
+			if self.sort:
+				if self.sort.lower()=='id':
+					descriptors.sort(key=lambda d: d.id)
+				elif self.sort.lower().replace('-','') in ['runorderpriority', 'runorder', 'order']:
+					descriptors.sort(key=lambda d: [-d.runOrderPriority, d.file])
+				elif self.sort.lower()=='title':
+					descriptors.sort(key=lambda d: [d.title, d.file])
+				else:
+					raise UserError('Unknown sort key: %s'%self.sort)
 			
 			if self.json:
 				print(json.dumps([d.toDict() for d in descriptors], indent=3, sort_keys=False))

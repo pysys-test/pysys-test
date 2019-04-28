@@ -14,6 +14,7 @@ What's new in this release
 
 New features:
 
+
 - Added support for specifying a prefix that will be added to start of the 
   testcase directory name to form the testcase identifier. This can be 
   specified in `pysystest.xml` testcase descriptor files and/or in 
@@ -48,6 +49,21 @@ New features:
   without needing to include the entire id. Although support for specifying a 
   pure numeric suffix (e.g. `pysys.py run 10`) has been around for a long time, 
   you can now do the same with strings such as `pysys.py run foo_10`. 
+
+- Added `--sort` option to `pysys.py print`. This allows sorting by `title` 
+  which is very helpful for displaying related testcases together (especially 
+  if the titles are written carefully with common information at the beginning 
+  of each one) and therefore for more easily locating testcases of interest. 
+  It can also sort by `id` or `runOrderPriority` which indicates the order 
+  in which the testcases will be executed. The default sort order if none of 
+  these options is specified continues to be based on the full path of the 
+  `pysystest.xml` files. 
+
+dumps full information 
+  about the available tests in JSON format suitable for reading in from other 
+  programs. 
+
+
 
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
