@@ -55,7 +55,7 @@ class ConsoleCleanTestHelper(object):
 	def printUsage(self, printXOptions):
 		print("\nPySys System Test Framework (version %s): Console clean test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
-		print("   where [option] includes;")
+		print("   where [option] includes:")
 		print("       -h | --help                 print this message")
 		print("       -a | --all                  clean all compiled testclass files")
 		print("       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)")
@@ -405,7 +405,7 @@ class ConsoleMakeTestHelper(object):
 	def printUsage(self):
 		print("\nPySys System Test Framework (version %s): Console make test helper" % __version__) 
 		print("\nUsage: %s %s [option]+ [testid]" % (_PYSYS_SCRIPT_NAME, self.name))
-		print("   where [option] includes;")
+		print("   where [option] includes:")
 		print("       -h | --help                 print this message")
 		print("       -a | --type     STRING      set the test type (auto or manual, default is auto)")
 		print("       -d | --dir      STRING      base path to testcase (default is current working dir)")
@@ -514,7 +514,7 @@ class ConsoleLaunchHelper(object):
 	def printUsage(self, printXOptions):
 		print("\nPySys System Test Framework (version %s): Console run test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
-		print("   where [option] includes;")
+		print("   where [option] includes:")
 		print("       -h | --help                 print this message")
 		print("       -r | --record               record test results using all configured record writers")
 		print("       -p | --purge                purge the output subdirectory on test pass")
@@ -549,7 +549,7 @@ class ConsoleLaunchHelper(object):
 		print("   where none are given all available tests will be run. If an include group is given, only tests that ")
 		print("   belong to that group will be run. If an exclude group is given, tests in the group will not be run. ")
 		print("   Tests should contain only alphanumeric and the underscore characters. The following syntax is used ")
-		print("   to select a test set;")
+		print("   to select a test set:")
 		print("")
 		print("       test1                     - a single testcase with id test1")
 		print("       :test2                    - up to testcase with id test2")
@@ -686,7 +686,7 @@ def printUsage():
 	sys.stdout.write("\nPySys System Test Framework (version %s on Python %s.%s.%s)\n" % (
 		__version__, sys.version_info[0], sys.version_info[1], sys.version_info[2]))
 	sys.stdout.write("\nUsage: %s [mode] [option]* { [tests]* | [testId] }\n" % _PYSYS_SCRIPT_NAME)
-	sys.stdout.write("    where [mode] can be;\n")
+	sys.stdout.write("    where [mode] can be:\n")
 	sys.stdout.write("       makeproject - create the configuration file for a new project of PySys testcases\n")
 	sys.stdout.write("       make        - create a new testcase in the current project\n")
 	sys.stdout.write("       print       - print list or details of tests under the current working directory\n")
