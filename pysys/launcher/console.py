@@ -18,6 +18,7 @@
 
 from __future__ import print_function
 import os.path, stat, getopt, logging, traceback, sys
+import json
 
 from pysys import log
 
@@ -92,6 +93,10 @@ class ConsoleCleanTestHelper(object):
 			elif option in ("-o", "--outdir"):
 				self.outsubdir = value
 
+			else:
+				print("Unknown option: %s"%option)
+				sys.exit(1)
+
 
 	def clean(self):
 			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir)		
@@ -148,6 +153,7 @@ class ConsolePrintHelper(object):
 		self.groups = False
 		self.modes = False
 		self.requirements = False
+		self.json = False
 		self.mode = None
 		self.type = None
 		self.trace = None
@@ -156,18 +162,23 @@ class ConsolePrintHelper(object):
 		self.tests = None
 		self.name = name
 		self.optionString = 'hfgdrm:a:t:i:e:'
-		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude="] 
+		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json"] 
 		
 
 	def printUsage(self):
 		print("\nPySys System Test Framework (version %s): Console print test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
-		print("    where options include;")
+		print("    where options include:")
 		print("       -h | --help                 print this message")
+		print("")
+		print("    output options:")
 		print("       -f | --full                 print full information")
 		print("       -g | --groups               print test groups defined")
 		print("       -d | --modes                print test modes defined")
 		print("       -r | --requirements         print test requirements covered")
+		print("            --json                 print full information as JSON")
+		print("")
+		print("    selection/filtering options:")
 		print("       -m | --mode      STRING     print tests that run in user defined mode ")
 		print("       -a | --type      STRING     print tests of supplied type (auto or manual, default all)")
 		print("       -t | --trace     STRING     print tests which cover requirement id ") 
@@ -204,13 +215,13 @@ class ConsolePrintHelper(object):
 			elif option in ("-f", "--full"):
 				self.full = True
 				
-			if option in ("-g", "--groups"):
+			elif option in ("-g", "--groups"):
 				self.groups = True
 				
-			if option in ("-d", "--modes"):
+			elif option in ("-d", "--modes"):
 				self.modes = True
 			
-			if option in ("-r", "--requirements"):
+			elif option in ("-r", "--requirements"):
 				self.requirements = True
 				
 			elif option in ("-m", "--mode"):
@@ -230,10 +241,19 @@ class ConsolePrintHelper(object):
 
 			elif option in ("-e", "--exclude"):
 				self.excludes.append(value)
-
+			elif option == '--json':
+				self.json = True
+			else:
+				print("Unknown option: %s"%option)
+				sys.exit(1)
 
 	def printTests(self):
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
+			
+			if self.json:
+				print(json.dumps([d.toDict() for d in descriptors], indent=3, sort_keys=False))
+				return
+			
 			exit = 0
 			if self.groups == True:
 				groups = []
@@ -386,6 +406,11 @@ class ConsoleMakeTestHelper(object):
 
 			elif option in ("-d", "--dir"):
 				self.testdir = value		
+
+			else:
+				print("Unknown option: %s"%option)
+				sys.exit(1)
+
 
 		if arguments == []:
 			print("A valid string test id must be supplied")
@@ -595,6 +620,11 @@ class ConsoleLaunchHelper(object):
 			
 			elif option in ("-y", "--validateOnly"):
 				self.userOptions['validateOnly'] = True
+
+			else:
+				print("Unknown option: %s"%option)
+				sys.exit(1)
+
 			
 		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True
 		

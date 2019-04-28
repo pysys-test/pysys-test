@@ -19,10 +19,10 @@ New features:
   specified in `pysystest.xml` testcase descriptor files and/or in 
   directory-level `pysysdirconfig.xml` files like this:
 
-    <id-prefix>MyComponent_Performance_</id-prefix>
+    <id-prefix>MyComponent.Performance.</id-prefix>
 
   Large test projects may benefit from setting prefixes in `pysysdirconfig.xml` 
-  to provide automatic namespacing of testcases, ensuring there are no name 
+  files to provide automatic namespacing of testcases, ensuring there are no name 
   clashes across different test directories, and providing a way to group 
   together related test ids without the need to use very long names for 
   each individual testcase directory. Prefixes can be specified cumulatively, 
@@ -48,6 +48,10 @@ New features:
   without needing to include the entire id. Although support for specifying a 
   pure numeric suffix (e.g. `pysys.py run 10`) has been around for a long time, 
   you can now do the same with strings such as `pysys.py run foo_10`. 
+
+- Added `--json` output mode to `pysys.py print` which dumps full information 
+  about the available tests in JSON format suitable for reading in from other 
+  programs. 
 
 Upgrade guide and compatibility:
 

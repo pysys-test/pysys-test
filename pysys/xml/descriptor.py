@@ -19,6 +19,7 @@
 
 from __future__ import print_function
 import os.path, logging, xml.dom.minidom
+import collections
 
 from pysys.constants import *
 from pysys.exceptions import UserError
@@ -131,6 +132,27 @@ class XMLDescriptorContainer(object):
 		self.reference = reference
 		self.traceability = traceability
 		self.runOrderPriority = runOrderPriority
+	
+	def toDict(self):
+		"""Converts this descriptor to an (ordered) dict suitable for serialization."""
+		d = collections.OrderedDict()
+		d['id'] = self.id
+		d['xmlDescriptor'] = self.file
+		d['type'] = self.type
+		d['state'] = self.state
+		d['title'] = self.title
+		d['purpose'] = self.purpose
+		d['groups'] = self.groups
+		d['modes'] = self.modes
+		d['requirements'] = self.traceability
+		d['runOrderPriority'] = self.runOrderPriority
+		d['classname'] = self.classname
+		d['module'] = self.module
+		d['input'] = self.input
+		d['output'] = self.output
+		d['reference'] = self.reference
+		
+		return d
 		
 	def __str__(self):
 		"""Return an informal string representation of the xml descriptor container object
