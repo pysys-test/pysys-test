@@ -14,6 +14,30 @@ What's new in this release
 
 New features:
 
+- TODO
+
+Improvements to the XML descriptors that provide information about tests:
+
+- Added a new XML file called `pysysdirconfig.xml` which is similar to 
+  `pysystest.xml` and allows setting configuration options that affect all 
+  tests under the directory containing the `pysysdirconfig.xml` file.
+   
+  This allows setting things like groups, test id prefix, execution order, 
+  and skipping of tests for a set of related testcases without needing to 
+  add the options to each and every individual `pysystest.xml` file. For 
+  example, if you have a couple of directories containing performance tests 
+  you could add `pysysdirconfig.xml` files to each with a 
+  `<group>performance</group>` element so it's easy to include/exclude all 
+  your performance when you invoke `pysys.py run`. You could also include 
+  a `<run-order-priority>-100</run-order-priority>` to specify that performance 
+  tests should be run with a lower priority than normal, so they're executed 
+  at the end of your test run after all correctness tests. 
+  
+  The `pysysdirconfig.xml` file can contain any option that's valid in 
+  a `pysystest.xml` file except the `description/title/purpose`. a sample 
+  `pysysdirconfig.xml` file is provided in 
+  `pysys-examples/fibonacci/testcases` and also in 
+  `pysys/xml/templates/dirconfig'. 
 
 - Added support for specifying a prefix that will be added to start of the 
   testcase directory name to form the testcase identifier. This can be 
@@ -44,6 +68,28 @@ New features:
   values. The default priority value is 0.0, and values can be positive or 
   negative. Tests with the same priority value are executed based on the 
   sort order of the testcase directories. 
+  
+  You might want to specify a low priority for long-running performance or 
+  robustness tests to ensure they execute after more important unit/correctness 
+  tests. You might want to specify a higher priority for individual tests that 
+  are known to take a long time, if you're running with multiple threads, to 
+  ensure they get an early start and don't hold up the completion of the test 
+  run. 
+
+- Added a new way to skip tests, by adding this element to the `pysystest.xml` 
+  descriptor::
+
+    <skipped reason="Skipped due to open bug ABC-123"/>
+
+  Although tests can still be skipped by setting the `state="skipped"` 
+  attribute, the use of the `skipped` element is recommended as it provides a 
+  way to specify the reason the test has been skipped, and also allows a 
+  whole directory of tests to be skipped by adding the element to a 
+  `pysysdirconfig.xml` file. The default `pysystest.xml` template generated 
+  for new testcases now contains a commented-out `skipped` element instead of 
+  a `state=` attribute. 
+
+Improvements to the `pysys.py` command line tool:
 
 - Added support for running tests by specifying just a (non-numeric) suffix 
   without needing to include the entire id. Although support for specifying a 
@@ -68,18 +114,6 @@ New features:
   about the available tests in JSON format suitable for reading in from other 
   programs. 
   
-- Added a new way to skip tests, by adding this element to the `pysystest.xml` 
-  descriptor::
-
-    <skipped reason="Skipped due to open bug ABC-123"/>
-
-  Although tests can still be skipped by setting the `state="skipped"` 
-  attribute, the use of the `skipped` element is recommended as it provides a 
-  way to specify the reason the test has been skipped, and also allows a 
-  whole directory of tests to be skipped by adding the element to a 
-  `pysysdirconfig.xml` file. The default `pysystest.xml` template generated 
-  for new testcases now contains a commented-out `skipped` element instead of 
-  a `state=` attribute. 
 
 Upgrade guide and compatibility:
 
