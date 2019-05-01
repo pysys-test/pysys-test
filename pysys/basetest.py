@@ -124,7 +124,7 @@ class BaseTest(ProcessUser):
 		self.__backgroundThreads = []
 		self.manualTester = None
 		self.resources = []
-		self.testCycle = BaseTest._currentTestCycle
+		self.testCycle = getattr(BaseTest, '_currentTestCycle', None) # set when constructed by runner
 	
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
