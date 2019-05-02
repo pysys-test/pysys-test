@@ -241,7 +241,6 @@ class BaseTest(ProcessUser):
 		
 		@param file: The name of a tab separated values (.tsv) file to write to, 
 		for example 'monitor-myprocess.tsv'. 
-		
 		A default L{pysys.process.monitor.ProcessMonitorTextFileHandler} instance is 
 		created if this parameter is specified, with default columns from 
 		L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS} . 
