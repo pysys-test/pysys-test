@@ -889,8 +889,6 @@ class BaseTest(ProcessUser):
 		assert os.path.exists(os.path.abspath(pythonFile)), os.path.abspath(pythonFile)
 		
 		if not output: output = '%s-doctest.txt'%os.path.basename(pythonFile).replace('.py','')
-		self.log.info('Starting with env: %s', self.createEnvirons(overrides=[environs, {
-				'PYTHONPATH':None if not pythonPath else os.pathsep.join(pythonPath or [])}]))
 		p = self.startPython(
 			arguments=['-m', 'doctest', '-v', os.path.normpath(pythonFile)],
 			environs=self.createEnvirons(overrides=[environs, {
