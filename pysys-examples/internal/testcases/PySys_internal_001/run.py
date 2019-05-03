@@ -14,7 +14,9 @@ class PySysTest(BaseTest):
 		
 		shutil.copytree(self.input, self.output+'/test')
 		try:
-			runPySys(self, 'pysys', ['run', '-o', 'myoutdir'], workingDir='test', environs={
+			runPySys(self, 'pysys', ['run', '-o', 'myoutdir', 
+				'-X', 'projectbooloverride=fAlse', 
+				'-X', 'cmdlineoverride=tRue'], workingDir='test', environs={
 				'TEST_USER':"Felicity Kendal"
 			})
 		finally:
@@ -23,4 +25,10 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 
 	def validate(self):
-		pass # checked by nested testcase
+		# mostly checked by nested testcase, but also:
+		self.assertGrep('pysys.out', expr='projectbool=True')
+		self.assertGrep('pysys.out', expr='projectbooloverride=False')
+		self.assertGrep('pysys.out', expr='booldeftrue=True')
+		self.assertGrep('pysys.out', expr='booldeffalse=False')
+		self.assertGrep('pysys.out', expr='cmdlineoverride=True')
+		

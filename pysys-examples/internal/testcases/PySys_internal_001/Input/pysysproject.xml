@@ -9,4 +9,8 @@
 	<property name="user_lastname" value="Smith" />
 	<property name="user_title" value="Professor" />
 	<property name="user_full" value="${user_title} ${user_firstname} ${user_lastname}" />
+	
+	<property name="projectbool" value="tRue"/>
+	<property name="projectbooloverride" value="tRue"/>
+	
 </pysysproject>

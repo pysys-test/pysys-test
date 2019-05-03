@@ -2,20 +2,16 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Project Loading - check correct data attributes set in project class, and getBool</title>    
+    <title>Nested testcase</title>    
     <purpose><![CDATA[
-Checks the correct extraction of project variables from a project file. Specifically 
-checks for property name expansions from both the environment, and from previously 
-defined properties.
 
-Also checks getting boolean values works. 
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group>project</group>
+      <group>outcomes</group>
     </groups>
   </classification>
 

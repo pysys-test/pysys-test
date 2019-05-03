@@ -106,8 +106,10 @@ def mkdir(path):
 	Create a directory, with recursive creation of any parent directories.
 	
 	This function is a no-op (does not throw) if the directory already exists. 
-	
+
+	@return: Returns the path passed in. 
 	"""
+	origpath = path
 	path = toLongPathSafe(path, onlyIfNeeded=True)
 	try:
 		os.makedirs(path)
@@ -116,6 +118,7 @@ def mkdir(path):
 			# occasionally fails on windows for no reason, so add retry
 			time.sleep(0.1)
 			os.makedirs(path)
+	return origpath
 
 def deletedir(path):
 	"""

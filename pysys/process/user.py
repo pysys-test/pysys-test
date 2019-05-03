@@ -79,6 +79,7 @@ class ProcessUser(object):
 		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
 		self.defaultIgnoreExitStatus = PROJECT.defaultIgnoreExitStatus.lower()=='true' if hasattr(PROJECT, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
+		self.__pythonCoverageFile = 0
 		
 		self.lock = threading.RLock()
 		"""
@@ -141,6 +142,56 @@ class ProcessUser(object):
 			os.path.join(self.output, processKey+suffix+'.out'), 
 			os.path.join(self.output, processKey+suffix+'.err'), 
 			)	
+
+	def getBool(self, propertyName, default=False):
+		"""
+		Get a True/False indicating whether the specified property is set 
+		on this object (typically as a result of specifying -X on the command 
+		line), or else from the project configuration. 
+		
+		@param propertyName: The name of a property set on the command line 
+		or project configuration.
+		"""
+		val = getattr(self, propertyName, None)
+		if val is None: val = getattr(self.project, propertyName, None)
+		if val is None: return default
+		return val.lower()=='true'
+
+	def startPython(self, arguments, disableCoverage=False, **kwargs):
+		"""
+		Start a Python process with the specified arguments. 
+		
+		Uses the same Python process the tests are running under. 
+		
+		If PySys was run with the arguments `-X pythonCoverage=true` then 
+		`startPython` will add the necessary arguments to enable generation of 
+		code coverage. Note that this requried the coverage.py library to be 
+		installed. If a project property called `pythonCoverageArgs` exists 
+		then its value will be added as (space-delimited) arguments to the 
+		coverage tool. 
+		
+		@param arguments: The arguments to pass to the Python executable. 
+		Typically the first one be either the name of a Python script 
+		to execute, or '-m' followed by a module name. 
+		@param kwargs: See L{startProcess} for detail on available arguments.
+		@param disableCoverage: Disables code coverage for this specific 
+		process. 
+		@return: The process handle of the process (L{ProcessWrapper}).
+		@rtype: L{ProcessWrapper}
+		
+		"""
+		args = arguments
+		environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
+		if self.getBool('pythonCoverage') and not disableCoverage:
+			if hasattr(self.project, 'pythonCoverageArgs'):
+				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
+			args = ['-m', 'coverage', 'run']+args
+			if 'COVERAGE_FILE' not in environs:
+				kwargs['environs'] = dict(environs)
+				with self.lock:
+					self.__pythonCoverageFile += 1
+				kwargs['environs']['COVERAGE_FILE'] = self.output+'/.coverage.python.%02d'%(self.__pythonCoverageFile)
+		return self.startProcess(sys.executable, arguments=args, **kwargs)
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
@@ -261,13 +312,10 @@ class ProcessUser(object):
 		else:
 			with self.lock:
 				self.processList.append(process)
-				try:
-					if displayName in self.processCount:
-						self.processCount[displayName] = self.processCount[displayName] + 1
-					else:
-						self.processCount[displayName] = 1
-				except Exception:
-					pass
+				if displayName in self.processCount:
+					self.processCount[displayName] = self.processCount[displayName] + 1
+				else:
+					self.processCount[displayName] = 1
 		return process	
 
 	def getDefaultEnvirons(self, command=None, **kwargs):
@@ -385,7 +433,10 @@ class ProcessUser(object):
 			# keep it as clean as possible by not passing sys.path/PYTHONPATH
 			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
 			e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e[LIBRARY_PATH_ENV_VAR]
-			e['PYTHONHOME'] = sys.prefix
+			isvirtualenv = hasattr(sys, 'real_prefix') or (
+				hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix)
+			if not isvirtualenv:
+				e['PYTHONHOME'] = sys.prefix
 		return e
 
 	def createEnvirons(self, overrides=None, addToLibPath=[], addToExePath=[], command=None, **kwargs):

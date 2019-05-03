@@ -14,7 +14,51 @@ What's new in this release
 
 New features:
 
-- TODO
+- Added a project configuration option that collects a copy of all test output 
+  files matching a specified pattern into a single directory. This is useful 
+  for collecting together code coverage files from all tests into one place, 
+  and could also be used for collating other outputs such as performance or 
+  memory usage graphs. Files are copied from the output directory at the 
+  end of each test's execution, and before any files are purged. The sample 
+  project file shows how to use this feature to collect Python code 
+  coverage files::
+  
+     <property name="pythonCoverageDir" value="coverage-python-@OUTDIR@"/>
+	 <collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
+
+  The output directory is wiped clean at the start of each test run to prevent 
+  unwanted interference between test runs, and is created on demand when the 
+  first matching output file is found, so the directory will not be created if 
+  there is no matching output. 
+
+- Added support for generating code coverage reports for programs written in 
+  Python, using the coverage.py library. To enable this, ensure the coverage 
+  library is installed (`pip install coverage`), add collecting of test output 
+  files named `.coverage*` to a directory stored in the `pythonCoverageDir` 
+  project property (see above example), and run the tests with 
+  `-X pythonCoverage=true`. You can optionally set a project property 
+  `pythonCoverageArgs` to pass arguments to the coverage tool, such as which 
+  modules/files to include or omit. After all tests have been executed, the 
+  runner calls a new method `processCoverageData` which combines all the 
+  collected coverage files into a single file and produces an HTML report 
+  from it, within the pythonCoverageDir directory. If you wish to produce 
+  coverage reports using other tools or languages (such as Java), this 
+  should be easy to achieve by following the same pattern - using 
+  `<collect-test-output>` to gather the coverage files and providing a 
+  custom implementation of `BaseRunner.processCoverageData`.  
+
+- Added `ProcessUser.startPython` method has similar options to `startProcess` 
+  and should be used for starting Python. 
+
+- Added `hostname`, `startTime` and `startDate` project properties which can be 
+  used in any `pysysproject.xml` configuration file. The start time/date 
+  gives the UTC time when the test run began, using the yyyy-mm-dd HH.MM.SS 
+  format which is suitable for inclusion in file/directory names. 
+
+- Added `ProcessUser.getBool()` helper method which provides a simple way to 
+  get a True/False value indicating whether a setting is enabled, either 
+  directly using a `-X prop=value` argument, or with a property set in the 
+  `pysysproject.xml` configuration file.
 
 Improvements to the XML descriptors that provide information about tests:
 
@@ -135,6 +179,11 @@ Upgrade guide and compatibility:
   PySys looking in that part of the directory tree. 
 
 Bug fixes:
+
+- Fixed `--purge` to delete files in nested subdirectories of the output 
+  directory not just direct children of the output directory. Also, non-empty 
+  directories are now deleted after test execution (regardless of whether 
+  `--purge` is set or not), just as zero-byte files are.  
 
 - Previous versions of PySys did not complain if you created multiple tests 
   with the same id (in different parent directories under the same project). 

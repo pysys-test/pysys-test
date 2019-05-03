@@ -17,7 +17,10 @@
 
 
 
-import collections, threading, time, math
+import collections, threading, time, math, sys, os
+
+if __name__ == "__main__":
+	sys.path.append(os.path.dirname( __file__)+'/../..')
 
 from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
@@ -99,7 +102,7 @@ class CSVPerformanceReporter(object):
 		self.summaryfile = summaryfile
 		self.project = project
 		self.hostname = HOSTNAME.lower().split('.')[0]
-		self.runStartTime = time.time()
+		self.runStartTime = self.runner.startTime
 		
 		self._lock = threading.RLock()
 		self.__previousResultKeys = {} # value = (testid, testobjhash, resultDetails)

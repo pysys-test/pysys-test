@@ -173,7 +173,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 
 
 # entry point for running the script as an executable
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 	if len(sys.argv) < 3:
 			print("Usage: filediff.py <file1> <file2> [regexpr1 [regexp2]...]")
 			sys.exit()

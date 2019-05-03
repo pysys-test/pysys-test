@@ -1,0 +1,4 @@
+# resultKey,testId,value,unit,biggerIsBetter,toleranceStdDevs,samples,stdDev,#runDetails:#,outdir=myoutdir,hostname=myhost,time=2019-04-22 18:08:11,myBuildNumber=1.23.45X
+Sample small integer performance result,PySys_NestedTestcase,140,s,FALSE,,1,0,#resultDetails:#,someResultDetail=value;yesitis,someResultDetail=value;yesitis
+Sample small integer performance result,PySys_NestedTestcase,150,s,FALSE,,1,0,#resultDetails:#,someResultDetail=value;yesitis,someResultDetail=value;yesitis
+Sample small integer performance result,PySys_NestedTestcase,160,s,FALSE,,1,0,#resultDetails:#,someResultDetail=value;yesitis,someResultDetail=value;yesitis

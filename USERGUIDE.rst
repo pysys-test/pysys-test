@@ -56,6 +56,68 @@ the `.validate()` method of each test. That approach allows you to later
 customize the logic by changing just one single place, and also to omit it for 
 specific tests where it is not wanted. 
 
+Producing code coverage reports
+-------------------------------
+PySys includes built-in support for producing coverage reports for programs 
+written in Python, using the `coverage.py` library. 
+
+If you wish to produce coverage reports using any other tool or language (such 
+as Java), this is easy to achieve by following the same pattern:
+
+- When your tests start the program(s) whose coverage is to be measured, 
+  add the required arguments or environment variables to enable coverage 
+  using the coverage tool of your choice. PySys does this by adding 
+  `-m coverage run` to the command line of Python programs 
+  started using the `startPython` method (and setting COVERAGE_FILE to a 
+  unique filename in the test output directory), when the `pythonCoverage` 
+  property is set to true (typically by pysys.py run -X pythonCoverage=true). The 
+  `pythonCoverageArgs` project property can be set to provide customized 
+  arguments to the coverage tool, such as which files to include/exclude, or 
+  a `--rcfile=` specifying a coverage configuration file. 
+
+- Configure your `pysysproject.xml` to collect the coverage files generated in 
+  your testcase output directories and put them into a single directory. Add a 
+  project property to specify the directory location so it can be located 
+  by the code that will generate the report. For Python programs, you'd 
+  configure PySys to do it like this::
+  
+  	<property name="pythonCoverageDir" value="coverage-python-@OUTDIR@"/>
+	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
+
+  Note that `collect-test-output` will delete the specified outputDir each 
+  time PySys runs some tests. If you wish to preserve output from previous 
+  runs, you could add a property such as `${startDate}_${startTime}` to the 
+  directory name to make it unique each time. 
+  
+  In addition to any standard ${...} property variables from the project 
+  configuration, the output pattern can contain these three `@...@` 
+  substitutions which are specific to the collect-test-output `outputPattern`:
+  
+    - `@FILENAME@` is the original base filename, to which you 
+      can add prefixes or suffixes as desired. 
+
+    - `@TESTID@` is replaced by the identifier of the test that generated the 
+      output file, which may be useful for tracking where each one came from. 
+
+    - `@UNIQUE@` is replaced by a number that ensures the file does not clash 
+      with any other collected output file from another test. The `@UNIQUE@` 
+      substitution variable is mandatory. 
+    
+- Add a custom runner class, and provide a `BaseRunner.processCoverageData()` 
+  implementation that combines the coverage files from the directory 
+  where they were collected and generates any required reports. The default 
+  implementation already does this for Python programs. Note that when reading 
+  the property value specifying the output directory any `${...}` 
+  property values will be substituted automatically, but any `@...@` values 
+  such as `@OUTDIR@` must be replaced manually (since the value of 
+  `runner.outsubdir` is not available when the project properties are 
+  resolved). 
+  
+- If using a continuous integration system or centralized code coverage 
+  database, you could optionally upload the coverage data there from the 
+  directory PySys collected it into, so there is a permanent record of 
+  any changes in coverage over time. 
+
 Test ids and structuring large projects
 ---------------------------------------
 Each test has a unique `id` which is used in various places such as when 

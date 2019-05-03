@@ -23,7 +23,7 @@ test project.
 
 __all__ = ['Project']
 
-import os.path, logging, xml.dom.minidom, collections, codecs
+import os.path, logging, xml.dom.minidom, collections, codecs, time
 
 from pysys.constants import *
 from pysys import __version__
@@ -37,7 +37,7 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?) >
+<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?), collect-test-output* >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requires-python (#PCDATA)>
@@ -76,6 +76,7 @@ DTD='''
 <!ATTLIST writer file CDATA #IMPLIED>
 <!ATTLIST default-file-encoding pattern CDATA #REQUIRED>
 <!ATTLIST default-file-encoding encoding CDATA #REQUIRED>
+<!ATTLIST collect-test-output pattern outputDir outputPattern #REQUIRED>
 ]>
 '''
 
@@ -91,7 +92,18 @@ class XMLProjectParser(object):
 		self.rootdir = 'root'
 		self.environment = 'env'
 		self.osfamily = 'osfamily'
-		self.properties = {self.rootdir:self.dirname, self.osfamily:OSFAMILY}
+		
+		# project load time is a reasonable proxy for test start time, 
+		# and we might want to substitute the date/time into property values
+		self.startTimestamp = time.time()
+		
+		self.properties = {
+			self.rootdir:self.dirname, 
+			self.osfamily:OSFAMILY, 
+			'hostname':HOSTNAME.lower().split('.')[0],
+			'startDate':time.strftime('%Y-%m-%d', time.gmtime(self.startTimestamp)),
+			'startTime':time.strftime('%H.%M.%S', time.gmtime(self.startTimestamp)),
+		}
 		
 		if not os.path.exists(self.xmlfile):
 			raise Exception("Unable to find supplied project file \"%s\"" % self.xmlfile)
@@ -212,6 +224,22 @@ class XMLProjectParser(object):
 			return [runnerNodeList.getAttribute('classname'), runnerNodeList.getAttribute('module')]
 		except Exception:
 			return DEFAULT_RUNNER
+
+
+	def getCollectTestOutputDetails(self):
+		r = []
+		for n in self.root.getElementsByTagName('collect-test-output'):
+			x = {
+				'pattern':n.getAttribute('pattern'),
+				'outputDir':self.expandFromProperty(n.getAttribute('outputDir'), n.getAttribute('outputDir')),
+				'outputPattern':n.getAttribute('outputPattern'),
+			}
+			assert 'pattern' in x, x
+			assert 'outputDir' in x, x
+			assert 'outputPattern' in x, x
+			assert '@UNIQUE@' in x['outputPattern'], 'collect-test-output outputPattern must include @UNIQUE@'
+			r.append(x)
+		return r
 
 
 	def getPerformanceReporterDetails(self):
@@ -402,12 +430,13 @@ class Project(object):
 	
 	def __init__(self, root, projectFile):
 		self.root = root
-
+		self.startTimestamp = time.time()
 		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
 		self.makerClassname, self.makerModule = DEFAULT_MAKER
 		self.writers = [DEFAULT_WRITER]
 		self.perfReporterConfig = None
 		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
+		self.collectTestOutput = []
 
 		stdoutformatter, runlogformatter = None, None
 
@@ -423,6 +452,8 @@ class Project(object):
 			else:
 				parser.checkVersions()
 				self.projectFile = os.path.join(root, projectFile)
+				
+				self.startTimestamp = parser.startTimestamp
 				
 				# get the properties
 				properties = parser.getProperties()
@@ -448,6 +479,8 @@ class Project(object):
 				stdoutformatter, runlogformatter = parser.createFormatters()
 				
 				self.defaultFileEncodings = parser.getDefaultFileEncodings()
+				
+				self.collectTestOutput = parser.getCollectTestOutputDetails()
 				
 				# set the data attributes
 				parser.unlink()

@@ -44,7 +44,7 @@ def linecount(file, regexpr=None, ignores=None, encoding=None):
 
 
 # entry point for running the script as an executable
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 	try:
 		if len(sys.argv) == 3:
 			count = linecount(sys.argv[1], sys.argv[2])
