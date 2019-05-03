@@ -1,0 +1,51 @@
+==========================================
+		Test_RootFullDescriptor
+==========================================
+Test id:           Test_RootFullDescriptor
+Test type:         manual
+Test state:        deprecated
+Test title:        Nested testcase
+Test purpose:      Nested purpose
+Test groups:       root-group1, root-group2, testcase-group1, testcase-group2
+Test modes:        root-mode1, root-mode2, testcase-mode1, testcase-mode2
+Test classname:    PySysTest-testcase
+Test module:       c:\dev\pysys-test\pysys-examplesXXX\internal\testcases\PySys_internal_104\Input\dir1\Test_RootFullDescriptor/run_testcase
+Test input:        c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\Test_RootFullDescriptor\Input-testcase
+Test output:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\Test_RootFullDescriptor\Output-testcase
+Test reference:    c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\Test_RootFullDescriptor\Reference-testcase
+Test traceability: root-req1, root-req2, testcase-req1, testcase-req2
+
+==========================================
+		Test_RootMinimalDescriptor
+==========================================
+Test id:           Test_RootMinimalDescriptor
+Test type:         auto
+Test state:        runnable
+Test title:        Nested testcase
+Test purpose:      Nested purpose
+Test groups:       root-group1, root-group2
+Test modes:        root-mode1, root-mode2
+Test classname:    PySysTest-root
+Test module:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\Test_RootMinimalDescriptor\run_root
+Test input:        c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\Test_RootMinimalDescriptor\Input-root
+Test output:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\Test_RootMinimalDescriptor\Output-root
+Test reference:    c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\Test_RootMinimalDescriptor\Reference-root
+Test traceability: root-req1, root-req2
+
+==========================================
+		Test_SubdirMinimalDescriptor
+==========================================
+Test id:           Test_SubdirMinimalDescriptor
+Test type:         manual
+Test state:        skipped
+Test title:        Nested testcase
+Test purpose:      Nested purpose
+Test groups:       root-group1, root-group2, dir2-group, dir3-group
+Test modes:        root-mode1, root-mode2, dir2-mode, dir3-mode
+Test classname:    PySysTest-dir3
+Test module:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\dir2\dir3\Test_SubdirMinimalDescriptor\run_dir3
+Test input:        c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\dir2\dir3\Test_SubdirMinimalDescriptor\Input-dir3
+Test output:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\dir2\dir3\Test_SubdirMinimalDescriptor\Output-dir3
+Test reference:    c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_104\Input\dir1\dir2\dir3\Test_SubdirMinimalDescriptor\Reference-dir3
+Test traceability: root-req1, root-req2, dir2-req, dir3-req
+

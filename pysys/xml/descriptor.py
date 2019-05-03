@@ -19,17 +19,21 @@
 
 from __future__ import print_function
 import os.path, logging, xml.dom.minidom
+import collections
 
 from pysys.constants import *
+from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.descriptor')
 
 DTD='''
-<!ELEMENT pysystest (description, classification?, data?, traceability?) > 
+<!ELEMENT pysystest (description, classification?, skipped?, run-order-priority?, id-prefix?, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
 <!ELEMENT classification (groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
 <!ELEMENT traceability (requirements) >
+<!ELEMENT run-order-priority (#PCDATA) >
+<!ELEMENT id-prefix (#PCDATA) >
 <!ELEMENT title (#PCDATA) >
 <!ELEMENT purpose (#PCDATA) >
 <!ELEMENT groups (group)+ >
@@ -44,6 +48,7 @@ DTD='''
 <!ELEMENT requirement EMPTY >
 <!ATTLIST pysystest type (auto | manual ) "auto" >
 <!ATTLIST pysystest state (runnable | deprecated | skipped) "runnable" >
+<!ATTLIST skipped reason >
 <!ATTLIST class name CDATA #REQUIRED
                 module CDATA #REQUIRED >
 <!ATTLIST input path CDATA #REQUIRED >
@@ -53,21 +58,23 @@ DTD='''
 '''
 
 
-DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
-<pysystest type="%s" state="runnable">
-    
+DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="%s">
+  
   <description> 
     <title></title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
   </description>
-
+  
   <classification>
     <groups>
       <group>%s</group>
     </groups>
   </classification>
+
+  <!-- <skipped reason=""/> -->
 
   <data>
     <class name="%s" module="%s"/>
@@ -83,26 +90,41 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" standalone="yes"?>
 
 
 class XMLDescriptorContainer(object):
-	"""Holder class for the contents of a testcase descriptor. """
+	"""Contains descriptor metadata about an individual testcase. 
+	
+	Also used for descriptors specifying defaults for a directory subtree 
+	containing a related set of testcases. 
+	
+	@ivar id: The testcase identifier; has the value None if this is a 
+	directory config descriptor rather than a testcase descriptor. 
+	@ivar type: The type of the testcase (automated or manual)
+	@ivar state: The state of the testcase (runnable, deprecated or skipped)
+	@ivar skippedReason: If set to a non-empty string, indicates that this 
+	testcase is skipped and provides the reason. If this is set then the test 
+	is skipped regardless of the value of `state`. 
+	@ivar title: The title of the testcase
+	@ivar purpose: The purpose of the testcase
+	@ivar groups: A list of the user defined groups the testcase belongs to
+	@ivar modes: A list of the user defined modes the testcase can be run in
+	@ivar classname: The classname of the testcase
+	@ivar module: The full path to the python module containing the testcase class
+	@ivar input: The full path to the input directory of the testcase
+	@ivar output: The full path to the output parent directory of the testcase
+	@ivar reference: The full path to the reference directory of the testcase
+	@ivar traceability: A list of the requirements covered by the testcase
+	@ivar runOrderPriority: A float priority value used to determine the 
+	order in which testcases will be run; higher values are executed before 
+	low values. The default is 0.0. 
 
-	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability):
+	"""
+
+
+	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability, runOrderPriority=0.0, skippedReason=None):
 		"""Create an instance of the XMLDescriptorContainer class.
 		
-		@param id: The testcase identifier
-		@param type: The type of the testcase (automated or manual)
-		@param state: The state of the testcase (runable, deprecated or skipped)
-		@param title: The title of the testcase
-		@param purpose: The purpose of the testcase
-		@param groups: A list of the user defined groups the testcase belongs to
-		@param modes: A list of the user defined modes the testcase can be run in
-		@param classname: The classname of the testcase
-		@param module: The full path to the python module containing the testcase class
-		@param input: The full path to the input directory of the testcase
-		@param output: The full path to the output parent directory of the testcase
-		@param reference: The full path to the reference directory of the testcase
-		@param traceability: A list of the requirements covered by the testcase
-		
 		"""
+		if skippedReason: state = 'skipped'
+		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
 		self.file = file
 		self.id = id
 		self.type = type
@@ -117,7 +139,30 @@ class XMLDescriptorContainer(object):
 		self.output = output
 		self.reference = reference
 		self.traceability = traceability
-
+		self.runOrderPriority = runOrderPriority
+		self.skippedReason = skippedReason
+	
+	def toDict(self):
+		"""Converts this descriptor to an (ordered) dict suitable for serialization."""
+		d = collections.OrderedDict()
+		d['id'] = self.id
+		d['xmlDescriptor'] = self.file
+		d['type'] = self.type
+		d['state'] = self.state
+		d['skippedReason'] = self.skippedReason
+		d['title'] = self.title
+		d['purpose'] = self.purpose
+		d['groups'] = self.groups
+		d['modes'] = self.modes
+		d['requirements'] = self.traceability
+		d['runOrderPriority'] = self.runOrderPriority
+		d['classname'] = self.classname
+		d['module'] = self.module
+		d['input'] = self.input
+		d['output'] = self.output
+		d['reference'] = self.reference
+		
+		return d
 		
 	def __str__(self):
 		"""Return an informal string representation of the xml descriptor container object
@@ -129,23 +174,24 @@ class XMLDescriptorContainer(object):
 		str=    "Test id:           %s\n" % self.id
 		str=str+"Test type:         %s\n" % self.type
 		str=str+"Test state:        %s\n" % self.state
+		if self.skippedReason: str=str+"Test skip reason:  %s\n" % self.skippedReason
 		str=str+"Test title:        %s\n" % self.title
 		str=str+"Test purpose:      "
-		purpose = self.purpose.split('\n')
+		purpose = self.purpose.split('\n') if self.purpose is not None else ['']
 		for index in range(0, len(purpose)):
 			if index == 0: str=str+"%s\n" % purpose[index]
 			if index != 0: str=str+"                   %s\n" % purpose[index] 
-		str=str+"Test groups:       %s\n" % self.groups
-		str=str+"Test modes:        %s\n" % self.modes
+		str=str+"Test run order:    %s%s\n" % ('+' if self.runOrderPriority>0.0 else '', self.runOrderPriority)
+		str=str+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
+		str=str+"Test modes:        %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.modes) or u'<none>')
 		str=str+"Test classname:    %s\n" % self.classname
 		str=str+"Test module:       %s\n" % self.module
 		str=str+"Test input:        %s\n" % self.input
 		str=str+"Test output:       %s\n" % self.output
 		str=str+"Test reference:    %s\n" % self.reference
-		str=str+"Test traceability: %s\n" % self.traceability
+		str=str+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		str=str+""
 		return str
-
 
 class XMLDescriptorCreator(object):
 	'''Helper class to create a test descriptor template.'''
@@ -167,7 +213,8 @@ class XMLDescriptorCreator(object):
 
 
 class XMLDescriptorParser(object):
-	'''Helper class to parse an XML test descriptor.
+	'''Helper class to parse an XML test descriptor - either for a testcase, 
+	or for defaults for a (sub-)directory of testcases.
 
 	The class uses the minidom DOM (Document Object Model) non validating
 	parser to provide accessor methods to return element attributes	and character
@@ -178,35 +225,75 @@ class XMLDescriptorParser(object):
 	
 	'''
 
-	def __init__(self, xmlfile):
-		'''Class constructor.'''	
+	def __init__(self, xmlfile, istest=True, parentDirDefaults=None):
 		self.file = xmlfile
 		self.dirname = os.path.dirname(xmlfile)
+		self.istest = istest
+		self.defaults = self.DEFAULT_DESCRIPTOR if parentDirDefaults is None else parentDirDefaults
+		roottag = 'pysystest' if istest else 'pysysdirconfig'
 		if not os.path.exists(xmlfile):
-			raise Exception("Unable to find supplied test descriptor \"%s\"" % xmlfile)
+			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
 		
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
-		except Exception:
-			raise Exception("%s " % (sys.exc_info()[1]))
+		except Exception as ex:
+			raise UserError("Invalid XML in descriptor '%s': %s" % (xmlfile, ex))
 		else:
-			if self.doc.getElementsByTagName('pysystest') == []:
-				raise Exception("No <pysystest> element supplied in XML descriptor")
+			if self.doc.getElementsByTagName(roottag) == []:
+				raise UserError("No <%s> element supplied in XML descriptor '%s'"%(roottag, xmlfile))
 			else:
-				self.root = self.doc.getElementsByTagName('pysystest')[0]
+				self.root = self.doc.getElementsByTagName(roottag)[0]
+
+	@staticmethod
+	def parse(xmlfile, istest=True, parentDirDefaults=None):
+		"""
+		Parses the test/dir descriptor in the specified path and returns the 
+		XMLDescriptorContainer object. 
+		
+		@param istest: True if this is a pysystest.xml file, false if it is 
+		a descritor giving defaults for a directory of testcases.  
+		@param parentDirDefaults: Optional XMLDescriptorContainer instance 
+		specifying default values to be filtered in from the parent 
+		directory.
+		"""
+		p = XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults)
+		try:
+			return p.getContainer()
+		finally:
+			p.unlink()
+
+	DEFAULT_DESCRIPTOR = XMLDescriptorContainer(
+		file=None, id=u'', type="auto", state="runnable", 
+		title='', purpose='', groups=[], modes=[], 
+		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
+		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
+		traceability=[], runOrderPriority=0.0, skippedReason=None)
+	"""
+	A directory config descriptor instance of XMLDescriptorContainer holding 
+	the default values to be used if there is no directory config descriptor. 
+	"""
 
 
 	def getContainer(self):
 		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
+		
+		for attrName, attrValue in self.root.attributes.items():
+			if attrName not in ['state', 'type']:
+				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
+		
+		# some elements that are mandatory for an individual test and not used for dir config
 		return XMLDescriptorContainer(self.getFile(), self.getID(), self.getType(), self.getState(),
-										self.getTitle(), self.getPurpose(),
+										self.getTitle() if self.istest else None, self.getPurpose() if self.istest else None,
 										self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
-										os.path.join(self.dirname, self.getClassDetails()[1]),
-										os.path.join(self.dirname, self.getTestInput()),
-										os.path.join(self.dirname, self.getTestOutput()),
-										os.path.join(self.dirname, self.getTestReference()),
-										self.getRequirements())
+										# don't absolutize for dir config descriptors, since we don't yet know the test's dirname
+										os.path.join(self.dirname if self.istest else '', self.getClassDetails()[1]),
+										os.path.join(self.dirname if self.istest else '', self.getTestInput()),
+										os.path.join(self.dirname if self.istest else '', self.getTestOutput()),
+										os.path.join(self.dirname if self.istest else '', self.getTestReference()),
+										self.getRequirements(), 
+										self.getRunOrderPriority(), 
+										skippedReason=self.getSkippedReason())
 
 
 	def unlink(self):
@@ -220,92 +307,103 @@ class XMLDescriptorParser(object):
 
 	
 	def getID(self):
-		'''Return the id of the test.'''
-		return os.path.basename(self.dirname)
+		'''Return the id of the test, or for a pysysdirconfig, the id prefix.'''
+		id = self.defaults.id
+		for e in self.root.getElementsByTagName('id-prefix'):
+			id = id+self.getText(e)
+		
+		for c in u'\\/:~#<>':
+			# reserve a few characters that we might need for other purposes; _ and . can be used however
+			if c in id:
+				raise UserError('The <id-prefix> is not permitted to contain "%s"; error in "%s"'%(c, self.file))
+		
+		if self.istest: id = id+os.path.basename(self.dirname)
+		
+		return id
 
 
 	def getType(self):
 		'''Return the type attribute of the test element.'''
-		type = self.root.getAttribute("type")	
-		if type == "":
-			type = "auto"
-		elif type not in ["auto", "manual"]:
-			raise Exception("The type attribute of the test element should be \"auto\" or \"manual\"")
+		type = self.root.getAttribute("type") or self.defaults.type
+		if type not in ["auto", "manual"]:
+			raise UserError("The type attribute of the test element should be \"auto\" or \"manual\" in \"%s\""%self.file)
 		return type
 
 
 	def getState(self):
 		'''Return the state attribute of the test element.'''
-		state = self.root.getAttribute("state")	
-		if state == "":
-			state = "runnable"
-		elif state not in ["runnable", "deprecated", "skipped"]: 
-			raise Exception("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\"")
+		state = self.root.getAttribute("state")	 or self.defaults.state
+		if state not in ["runnable", "deprecated", "skipped"]: 
+			raise UserError("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\" in \"%s\""%self.file)
 		return state 
-	
+
+	def getSkippedReason(self):
+		for e in self.root.getElementsByTagName('skipped'):
+			r = (e.getAttribute('reason') or '').strip() 
+			# make this mandatory, to encourage good practice
+			if not r: raise UserError('Missing reason= attribute in <skipped> element of "%s"'%self.file)
+			return r
+		return self.defaults.skippedReason
 
 	def getTitle(self):
 		'''Return the test titlecharacter data of the description element.'''
 		descriptionNodeList = self.root.getElementsByTagName('description')
 		if descriptionNodeList == []:
-			raise Exception("No <description> element supplied in XML descriptor")
+			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
 		
 		if descriptionNodeList[0].getElementsByTagName('title') == []:
-			raise Exception("No <title> child element of <description> supplied in XML descriptor")
+			raise UserError("No <title> child element of <description> supplied in XML descriptor \"%s\""%self.file)
 		else:
 			try:
 				title = descriptionNodeList[0].getElementsByTagName('title')[0]
-				return title.childNodes[0].data
+				return title.childNodes[0].data.strip()
 			except Exception:
-				return ""
+				return self.defaults.title
 				
 				
 	def getPurpose(self):
 		'''Return the test purpose character data of the description element.'''
 		descriptionNodeList = self.root.getElementsByTagName('description')
 		if descriptionNodeList == []:
-			raise Exception("No <description> element supplied in XML descriptor")
+			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
 		
 		if descriptionNodeList[0].getElementsByTagName('purpose') == []:
-			raise Exception("No <purpose> child element of <description> supplied in XML descriptor")
+			raise UserError("No <purpose> child element of <description> supplied in XML descriptor \"%s\""%self.file)
 		else:
 			try:
 				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
-				return purpose.childNodes[0].data
+				return purpose.childNodes[0].data.strip()
 			except Exception:
-				return ""
+				return self.defaults.purpose
 			
 				
 	def getGroups(self):
 		'''Return a list of the group names, contained in the character data of the group elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
-		if classificationNodeList == []:
-			raise Exception("No <classification> element supplied in XML descriptor")
-		
 		groupList = []
 		try:
 			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
 			for node in groups.getElementsByTagName('group'):
-				groupList.append(node.childNodes[0].data)
-			return groupList
+				if self.getText(node): groupList.append(self.getText(node))
 		except Exception:
-			return []
+			pass
+		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
+		return groupList
 	
 				
 	def getModes(self):
 		'''Return a list of the mode names, contained in the character data of the mode elements.'''
 		classificationNodeList = self.root.getElementsByTagName('classification')
-		if classificationNodeList == []:
-			raise Exception("No <classification> element supplied in XML descriptor")
 		
 		modeList = []
 		try:
 			modes = classificationNodeList[0].getElementsByTagName('modes')[0]
 			for node in modes.getElementsByTagName('mode'):
-				modeList.append(node.childNodes[0].data)
-			return modeList
+				if self.getText(node): modeList.append(self.getText(node))
 		except Exception:
-			return []
+			pass
+		modeList = [x for x in self.defaults.modes if x not in modeList]+modeList
+		return modeList
 
 				
 	def getClassDetails(self):
@@ -315,8 +413,21 @@ class XMLDescriptorParser(object):
 			el = dataNodeList[0].getElementsByTagName('class')[0]
 			return [el.getAttribute('name'), el.getAttribute('module')]
 		except Exception:
-			return [DEFAULT_TESTCLASS, DEFAULT_MODULE]
+			return [self.defaults.classname, self.defaults.module]
 
+	def getRunOrderPriority(self):
+		r = None
+		for e in self.root.getElementsByTagName('run-order-priority'):
+			r = self.getText(e)
+			if r:
+				try:
+					r = float(r)
+				except Exception:
+					raise UserError('Invalid float value specified for run-order-priority in "%s"'%self.file)
+		if r is None or r == '': 
+			return self.defaults.runOrderPriority
+		else:
+			return r
 			
 	def getTestInput(self):
 		'''Return the test input path, contained in the input element.'''
@@ -325,7 +436,7 @@ class XMLDescriptorParser(object):
 			input = dataNodeList[0].getElementsByTagName('input')[0]
 			return input.getAttribute('path')
 		except Exception:
-			return DEFAULT_INPUT
+			return self.defaults.input
 
 			
 	def getTestOutput(self):
@@ -335,7 +446,7 @@ class XMLDescriptorParser(object):
 			output = dataNodeList[0].getElementsByTagName('output')[0]
 			return output.getAttribute('path')
 		except Exception:
-			return DEFAULT_OUTPUT
+			return self.defaults.output
 
 
 	def getTestReference(self):
@@ -345,7 +456,7 @@ class XMLDescriptorParser(object):
 			ref = dataNodeList[0].getElementsByTagName('reference')[0]
 			return ref.getAttribute('path')
 		except Exception:
-			return DEFAULT_REFERENCE
+			return self.defaults.reference
 
 
 	def getRequirements(self):
@@ -355,11 +466,22 @@ class XMLDescriptorParser(object):
 			traceabilityNodeList = self.root.getElementsByTagName('traceability')
 			requirements = traceabilityNodeList[0].getElementsByTagName('requirements')[0]
 			for node in requirements.getElementsByTagName('requirement'):
-				reqList.append(node.getAttribute('id'))
-			return reqList
+				if node.getAttribute('id'): reqList.append(node.getAttribute('id'))
 		except Exception:
-			return []
-					
+			pass
+		reqList = [x for x in self.defaults.traceability if x not in reqList]+reqList
+		return reqList
+
+	@staticmethod
+	def getText(element):
+		"""Utility method that reads text from the specified element and 
+		strips leading/trailing whitespace from it. Returns an empty string if none. """
+		t = u''
+		if not element: return t
+		for n in element.childNodes:
+			if (n.nodeType == element.TEXT_NODE) and n.data:
+				t += n.data
+		return t.strip()
 
 
 if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)

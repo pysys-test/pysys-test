@@ -92,3 +92,17 @@ class AbortExecution(Exception):
 		
 	def __str__(self):
 		return self.value
+
+class UserError(Exception):
+	"""Exception raised when the user has made a mistake, for example 
+	specifying a wrong value or providing an invalid file.
+	
+	This exception should be raised with a user-friendly error message, 
+	and indicates that there is no need to display a Python stack trace.
+	Do not use this exception type for non-user errors, in which case a stack 
+	trace could be important for debugging the problem. 
+	"""
+
+	def __init__(self, message):
+		super(UserError, self).__init__(message)
+	

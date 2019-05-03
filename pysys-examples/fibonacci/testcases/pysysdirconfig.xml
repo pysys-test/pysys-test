@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+  <!-- This file provides default configuration for all tests under this directory. -->
+
+  <!-- Specify a prefix to be added to the id of all tests under this directory.
+      This is in addition to any defined by individual tests. 
+      Example: <id-prefix>MySubSystem.Performance.</id-prefix> -->
+  <id-prefix></id-prefix>
+
+  <classification>
+    <!-- Specify the groups that all tests under this directory will be 
+      tagged with. 
+      This is in addition to any defined by individual tests. -->
+    <groups>
+      <group></group>
+    </groups>
+
+    <!-- Specify modes supported by all tests under this directory. 
+      This is in addition to any defined by individual tests. -->
+    <modes>
+      <mode></mode>
+    </modes>
+  </classification>
+
+  <!-- Specify as a floating point number the default priority for tests under 
+    this directory, which determines the order in which they're run relative 
+    to other tests/directories with a higher or lower priority. The default 
+    priority is 0.0. This can be overridden by individual tests. -->
+  <run-order-priority></run-order-priority>
+
+  <!-- Uncomment this to mark all tests under this directory as skipped 
+    (overrides the state= attribute on individual tests). -->
+  <!-- <skipped reason=""/> -->
+
+  <data>
+    <!-- Uncomment this to customize the directory to which test output is 
+       written. Can be overridden by individual tests. -->
+    <!-- <output path="Output"/>-->
+  </data>
+
+  <traceability>
+    <requirements>
+      <!-- Specify traceability requirements implemented by the tests 
+        under this directory. 
+        This is in addition to any defined by individual tests. -->
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+  
+</pysysdirconfig>

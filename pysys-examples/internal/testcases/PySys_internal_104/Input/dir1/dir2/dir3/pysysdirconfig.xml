@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig type="manual">
+  <classification>
+    <groups>
+      <group>dir3-group</group>
+    </groups>
+    <modes>
+      <mode>dir3-mode</mode>
+    </modes>
+  </classification>
+
+  <id-prefix>dir3prefix_</id-prefix>
+  <run-order-priority></run-order-priority>
+
+  <data>
+    <class name="PySysTest-dir3" module="run_dir3"/>
+    <input path="Input-dir3"/>
+    <output path="Output-dir3"/>
+    <reference path="Reference-dir3"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id="dir3-req"/>     
+    </requirements>
+  </traceability>
+</pysysdirconfig>

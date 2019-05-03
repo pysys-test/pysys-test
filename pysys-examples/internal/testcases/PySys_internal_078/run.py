@@ -17,10 +17,11 @@ class PySysTest(BaseTest):
 		runPySys(self, 'include', ['print', '--include', 'group1', '--include', 'group2'], workingDir='test')
 		runPySys(self, 'exclude', ['print', '--exclude', 'group3', '--exclude', 'group4'], workingDir='test')
 		runPySys(self, 'ranges', ['print', ':1', '3:04', '007:'], workingDir='test')
+		runPySys(self, 'suffix-ranges', ['print', ':test_01', 'test_03:est_04', 'test_07:'], workingDir='test')
 		runPySys(self, 'type', ['print', '--type', 'manual'], workingDir='test')	
 		# currently trace only works on its first argument, not sure if that's intended or not
 		runPySys(self, 'trace', ['print', '--trace', 'requirement-1', '--trace', 'requirement-2'], workingDir='test')	
 		
 	def validate(self):
-		for f in ['all.out', 'include.out', 'exclude.out', 'ranges.out', 'type.out', 'trace.out']:
+		for f in ['all.out', 'include.out', 'exclude.out', 'ranges.out',  'suffix-ranges.out', 'type.out', 'trace.out']:
 			self.assertDiff(f, f)

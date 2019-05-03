@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="manual" state="deprecated">
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>testcase-group1</group>
+      <group>testcase-group2</group>
+    </groups>
+    <modes>
+      <mode>testcase-mode1</mode>
+      <mode>testcase-mode2</mode>
+    </modes>
+  </classification>
+
+  <id-prefix>testprefix.</id-prefix>
+
+  <run-order-priority>-9.9</run-order-priority>
+
+  <data>
+    <class name="PySysTest-testcase" module="run_testcase"/>
+    <input path="Input-testcase"/>
+    <output path="Output-testcase"/>
+    <reference path="Reference-testcase"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id="testcase-req1"/>
+      <requirement id="testcase-req2"/>
+    </requirements>
+  </traceability>
+</pysystest>

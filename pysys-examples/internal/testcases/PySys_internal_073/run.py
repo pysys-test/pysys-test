@@ -18,6 +18,8 @@ class PySysTest(BaseTest):
 		self.log.info('printing tests from: %s', testsdir)
 		
 		runPySys(self, 'basic', ['print'], workingDir=testsdir)
+		runPySys(self, 'sort-by-id', ['print', '--sort', 'id'], workingDir=testsdir) # just check for no exceptions, no validation
+		runPySys(self, 'sort-by-title', ['print', '--sort', 'title'], workingDir=testsdir) # just check for no exceptions, no validation
 		runPySys(self, 'thistest', ['print', 'PySys_internal_073'], workingDir=testsdir)
 		runPySys(self, 'full', ['print', '--full'], workingDir=testsdir)
 		runPySys(self, 'groups', ['print', '--groups'], workingDir=testsdir)
