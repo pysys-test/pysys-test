@@ -18,6 +18,14 @@ New features:
 
 Improvements to the XML descriptors that provide information about tests:
 
+- Added support for disabling search for testcases in part of a directory tree 
+  by adding a `.pysysignore` or `pysysignore` file. This is just an empty file 
+  that prevents searching inside the directory tree that contains it for tests. 
+  This could be useful for reducing time taken to locate testcase and also for 
+  avoiding errors if a subdirectory of your PySys project directory contains 
+  any non-PySys files with filenames that PySys would normally interpret 
+  as a testcase such as `descriptor.xml`. 
+
 - Added a new XML file called `pysysdirconfig.xml` which is similar to 
   `pysystest.xml` and allows setting configuration options that affect all 
   tests under the directory containing the `pysysdirconfig.xml` file.
@@ -121,6 +129,10 @@ Upgrade guide and compatibility:
   from running, whereas previously they would just be logged. Since an invalid 
   descriptor prevents the associated testcase from reporting a result, the 
   new behaviour ensures such mistakes will be spotted and fixed promptly. 
+  If you have any non-PySys files under your PySys project root directory 
+  with names such as `descriptor.xml` which PySys would normally recognise 
+  as testcases, you can avoid errors by adding a `.pysysignore` file to prevent 
+  PySys looking in that part of the directory tree. 
 
 Bug fixes:
 

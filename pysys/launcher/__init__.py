@@ -66,11 +66,13 @@ def loadDescriptors(dir=None):
 	
 	if dir is None: dir = os.getcwd()
 	projectfound = PROJECT.projectFile != None
-	
+	log = logging.getLogger('pysys.launcher')
+
 	# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
 	# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
 	i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
 	for root, dirs, files in os.walk(toLongPathSafe(dir)):
+		log.info('Scanning directory: %s', root)
 		intersection =  descriptorSet & set(files)
 		if intersection: 
 			descriptorpath = fromLongPathSafe(os.path.join(root, intersection.pop()))
@@ -78,15 +80,26 @@ def loadDescriptors(dir=None):
 			# as it proliferates to all strings in each test
 			if i18n_reencode is not None: descriptorpath = descriptorpath.encode(i18n_reencode) 
 			descriptorfiles.append(descriptorpath)
+			# if this is a test dir, it never makes sense to look at sub directories
+			del dirs[:]
+			continue
 		
-		for ignore in (ignoreSet & set(dirs)): dirs.remove(ignore)
+		thisignoreset = ignoreSet # sub-directories to be ignored
+		
+		for ignorefile in ['.pysysignore', 'pysysignore']:
+			for d in dirs:
+				if pathexists(os.path.join(root, d, ignorefile)):
+					thisignoreset = set(thisignoreset) # copy on write (this is a rare operation)
+					thisignoreset.add(d)
+					log.debug('Skipping directory %s due to ignore file %s', root+os.sep+ignorefile)
+		
+		for ignore in (thisignoreset & set(dirs)): dirs.remove(ignore)
 		if not projectfound:
 			for p in DEFAULT_PROJECTFILE:
 				if p in files:
 					projectfound = True
 					sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
 
-	log = logging.getLogger('pysys.launcher')
 	DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
 	if PROJECT.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(PROJECT.projectFile))):
 		# find directory config descriptors between the project root and the testcase 
