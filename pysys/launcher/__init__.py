@@ -72,7 +72,6 @@ def loadDescriptors(dir=None):
 	# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
 	i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
 	for root, dirs, files in os.walk(toLongPathSafe(dir)):
-		log.info('Scanning directory: %s', root)
 		intersection =  descriptorSet & set(files)
 		if intersection: 
 			descriptorpath = fromLongPathSafe(os.path.join(root, intersection.pop()))
