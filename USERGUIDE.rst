@@ -83,7 +83,21 @@ as Java), this is easy to achieve by following the same pattern:
   time PySys runs some tests. If you wish to preserve output from previous 
   runs, you could add a property such as `${startDate}_${startTime}` to the 
   directory name to make it unique each time. 
+  
+  In addition to any standard ${...} property variables from the project 
+  configuration, the output pattern can contain these three `@...@` 
+  substitutions which are specific to the collect-test-output `outputPattern`:
+  
+    - `@FILENAME@` is the original base filename, to which you 
+      can add prefixes or suffixes as desired. 
 
+    - `@TESTID@` is replaced by the identifier of the test that generated the 
+      output file, which may be useful for tracking where each one came from. 
+
+    - `@UNIQUE@` is replaced by a number that ensures the file does not clash 
+      with any other collected output file from another test. The `@UNIQUE@` 
+      substitution variable is mandatory. 
+    
 - Add a custom runner class, and provide a `BaseRunner.processCoverageData()` 
   implementation that combines the coverage files from the directory 
   where they were collected and generates any required reports. The default 
