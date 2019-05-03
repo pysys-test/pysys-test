@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest>
+    
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose
+
+]]>
+    </purpose>
+  </description>
+
+  <!--<run-order-priority></run-order-priority>-->
+
+  <classification>
+  </classification>
+
+</pysystest>

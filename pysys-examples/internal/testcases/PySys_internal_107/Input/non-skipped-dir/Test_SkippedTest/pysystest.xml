@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="manual" state="runnable">
+  <!-- will be skipped despite the state -->
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose]]>
+    </purpose>
+  </description>
+  <classification/>
+  <skipped reason="Skipped by pysystest.xml"/>
+</pysystest>

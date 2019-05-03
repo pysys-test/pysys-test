@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig state="skipped">
+  <classification>
+    <groups>
+      <group>dir2-group</group>
+    </groups>
+    <modes>
+      <mode>dir2-mode</mode>
+    </modes>
+  </classification>
+
+  <run-order-priority>+5.2</run-order-priority>
+
+  <data>
+    <class name="PySysTest-dir2" module="run_dir2"/>
+    <input path="Input-dir2"/>
+    <output path="Output-dir2"/>
+    <reference path="Reference-dir2"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id="dir2-req"/>     
+    </requirements>
+  </traceability>
+</pysysdirconfig>

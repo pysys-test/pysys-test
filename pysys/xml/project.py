@@ -392,7 +392,8 @@ class Project(object):
 	element in the file. 
 	
 	@ivar root: Full path to the project root directory, as specified by the first PySys project
-	file encountered when walking down the directory tree from the start directory  
+	file encountered when walking up the directory tree from the start directory. 
+	If no project file was found, this is just the start directory PySys was run from.
 	@type root: string
 	@ivar projectFile: Full path to the project file. May be None, though providing a file is recommended. 
 	@type projectFile: string

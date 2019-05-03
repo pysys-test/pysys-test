@@ -16,13 +16,134 @@ New features:
 
 - TODO
 
+Improvements to the XML descriptors that provide information about tests:
+
+- Added support for disabling search for testcases in part of a directory tree 
+  by adding a `.pysysignore` or `pysysignore` file. This is just an empty file 
+  that prevents searching inside the directory tree that contains it for tests. 
+  This could be useful for reducing time taken to locate testcase and also for 
+  avoiding errors if a subdirectory of your PySys project directory contains 
+  any non-PySys files with filenames that PySys would normally interpret 
+  as a testcase such as `descriptor.xml`. 
+
+- Added a new XML file called `pysysdirconfig.xml` which is similar to 
+  `pysystest.xml` and allows setting configuration options that affect all 
+  tests under the directory containing the `pysysdirconfig.xml` file.
+   
+  This allows setting things like groups, test id prefix, execution order, 
+  and skipping of tests for a set of related testcases without needing to 
+  add the options to each and every individual `pysystest.xml` file. For 
+  example, if you have a couple of directories containing performance tests 
+  you could add `pysysdirconfig.xml` files to each with a 
+  `<group>performance</group>` element so it's easy to include/exclude all 
+  your performance when you invoke `pysys.py run`. You could also include 
+  a `<run-order-priority>-100</run-order-priority>` to specify that performance 
+  tests should be run with a lower priority than normal, so they're executed 
+  at the end of your test run after all correctness tests. 
+  
+  The `pysysdirconfig.xml` file can contain any option that's valid in 
+  a `pysystest.xml` file except the `description/title/purpose`. a sample 
+  `pysysdirconfig.xml` file is provided in 
+  `pysys-examples/fibonacci/testcases` and also in 
+  `pysys/xml/templates/dirconfig`. 
+
+- Added support for specifying a prefix that will be added to start of the 
+  testcase directory name to form the testcase identifier. This can be 
+  specified in `pysystest.xml` testcase descriptor files and/or in 
+  directory-level `pysysdirconfig.xml` files like this:
+
+    <id-prefix>MyComponent.Performance.</id-prefix>
+
+  Large test projects may benefit from setting prefixes in `pysysdirconfig.xml` 
+  files to provide automatic namespacing of testcases, ensuring there are no name 
+  clashes across different test directories, and providing a way to group 
+  together related test ids without the need to use very long names for 
+  each individual testcase directory. Prefixes can be specified cumulatively, 
+  so with the final testcase id generated from adding the prefix from each 
+  parent directory, finishing with the name of the testcase directory itself. 
+  
+  We recommend using an underscore or dot character for separating test 
+  prefixes. 
+
+- Added support for specifying the order in which testcases are run. To do 
+  this, specify a floating point value in any `pysystest.xml` testcase 
+  descriptor, or `pysysdirconfig.xml` descriptor (which provides a default for 
+  all testcases under that directory)::
+  
+    <run-order-priority>+100.0</run-order-priority>
+
+  Tests with a higher priority values are executed ahead of tests with lower 
+  values. The default priority value is 0.0, and values can be positive or 
+  negative. Tests with the same priority value are executed based on the 
+  sort order of the testcase directories. 
+  
+  You might want to specify a low priority for long-running performance or 
+  robustness tests to ensure they execute after more important unit/correctness 
+  tests. You might want to specify a higher priority for individual tests that 
+  are known to take a long time, if you're running with multiple threads, to 
+  ensure they get an early start and don't hold up the completion of the test 
+  run. 
+
+- Added a new way to skip tests, by adding this element to the `pysystest.xml` 
+  descriptor::
+
+    <skipped reason="Skipped due to open bug ABC-123"/>
+
+  Although tests can still be skipped by setting the `state="skipped"` 
+  attribute, the use of the `skipped` element is recommended as it provides a 
+  way to specify the reason the test has been skipped, and also allows a 
+  whole directory of tests to be skipped by adding the element to a 
+  `pysysdirconfig.xml` file. The default `pysystest.xml` template generated 
+  for new testcases now contains a commented-out `skipped` element instead of 
+  a `state=` attribute. 
+
+Improvements to the `pysys.py` command line tool:
+
+- Added support for running tests by specifying just a (non-numeric) suffix 
+  without needing to include the entire id. Although support for specifying a 
+  pure numeric suffix (e.g. `pysys.py run 10`) has been around for a long time, 
+  you can now do the same with strings such as `pysys.py run foo_10`. 
+
+- Added `--sort` option to `pysys.py print`. This allows sorting by `title` 
+  which is very helpful for displaying related testcases together (especially 
+  if the titles are written carefully with common information at the beginning 
+  of each one) and therefore for more easily locating testcases of interest. 
+  It can also sort by `id` or `runOrderPriority` which indicates the order 
+  in which the testcases will be executed. The default sort order if none of 
+  these options is specified continues to be based on the full path of the 
+  `pysystest.xml` files. 
+
+- Added `--grep`/`-G` filtering option to `pysys.py print` and `pysys.py run` 
+  which selects testcases that have the specific regular expression (matched 
+  case insensitively) in their `id` or `title`. This can be a convenient way 
+  to quickly run a set of tests related to a particular feature area.  
+
+- Added `--json` output mode to `pysys.py print` which dumps full information 
+  about the available tests in JSON format suitable for reading in from other 
+  programs. 
+  
+
 Upgrade guide and compatibility:
 
-- TODO
+- Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 
+  from running, whereas previously they would just be logged. Since an invalid 
+  descriptor prevents the associated testcase from reporting a result, the 
+  new behaviour ensures such mistakes will be spotted and fixed promptly. 
+  If you have any non-PySys files under your PySys project root directory 
+  with names such as `descriptor.xml` which PySys would normally recognise 
+  as testcases, you can avoid errors by adding a `.pysysignore` file to prevent 
+  PySys looking in that part of the directory tree. 
 
 Bug fixes:
 
-- TODO
+- Previous versions of PySys did not complain if you created multiple tests 
+  with the same id (in different parent directories under the same project). 
+  This was dangerous as the results would overwrite each other, so in this 
+  version PySys checks for this condition and will terminate with an error 
+  if it is detected. If you indentionally multiple test with the same name 
+  in different directories, add an `<id-prefix>` element to the `pysystest.xml` 
+  or (better) to a `pysysdirconfig.xml` file to provide separate namespaces 
+  for the tests in each directory and avoid colliding ids. 
 
 ---------------
 Release History

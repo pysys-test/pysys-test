@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Test Loading - inheriting defaults from pysysdirconfig.xml, print --json</title>    
+    <purpose><![CDATA[
+Shows we correctly merge in defaults from pysysdirconfig.xml files located between the 
+project root dir and the testcase dir. 
+
+Also tests the printing in JSON format
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group></group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

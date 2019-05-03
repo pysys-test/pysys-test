@@ -25,6 +25,11 @@ specifying the reason for the skip::
 As well as setting the test outcome and reason, this will raise an exception 
 ensuring that the rest of `execute()` and `validate()` do not get executed. 
 
+Alternatively if the test should be skipped regardless of platform/mode etc, 
+it is best to specify that statically in your `pysystest.xml` file::
+
+	<skipped reason="Skipped until bug #12345 is fixed"/>
+
 Checking for error messages in log files
 -----------------------------------------
 The `assertGrep()` method is an easy way to check that there are no error 
@@ -51,3 +56,95 @@ the `.validate()` method of each test. That approach allows you to later
 customize the logic by changing just one single place, and also to omit it for 
 specific tests where it is not wanted. 
 
+Test ids and structuring large projects
+---------------------------------------
+Each test has a unique `id` which is used in various places such as when 
+reporting passed/failed outcomes. By default the id is just the name of the 
+directory containing the `pysystest.xml` file. 
+
+You can choose a suitable naming convention for your tests. For example, 
+you might wish to differentiate with just a numeric suffix such as::
+
+  MyApp_001
+  MyApp_002
+  MyApp_003
+
+This has the benefit that it's easy to refer to tests when communicating with 
+other developers, and that you can run tests on the command line by specifying 
+just a number, but you have to look at the test title to discover what it does. 
+
+Alternatively you could choose to use a semantically meaningful name for each 
+test::
+
+  MyApp_TimeoutValueWorks
+  MyApp_TimeoutInvalidValuesAreRejected
+  MyApp_ValidCredentialsAreAccepted
+  
+These test ids are easier to understand but can't be referred to as concisely. 
+
+Whatever scheme you use for naming test ids, if you have a large set of tests 
+you will want to separate them out into different directories, so that 
+related tests can be executed and maintained together. You might have 
+different directories for different subsystems/parts of your application, 
+and/or for different kinds of testing::
+
+  /  (root dir containing pysysproject.xml)
+  
+  /SubSystem1/unit/
+  /SubSystem1/correctness/
+  /SubSystem1/long-running/
+  /SubSystem1/performance/
+  
+  /SubSystem2/unit/
+  /SubSystem2/correctness/
+  /SubSystem2/long-running/
+  /SubSystem2/performance/
+  etc.
+
+It is important to ensure every test has a unique id. Although it would be 
+possible to do this by convention in the individual test directory names, 
+this is fragile and could lead to clashes if someone forgets. Therefore for 
+large projects it is usually best to add a `pysysdirconfig.xml` file to 
+provide default configuration for each directory of testcases. 
+
+For example, in SubSystem1/performance you could create a `pysysdirconfig.xml` 
+file containing::
+
+	<?xml version="1.0" encoding="utf-8"?>
+	<pysysdirconfig>
+	  <id-prefix>SubSystem1_perf.</id-prefix>
+
+	  <classification>
+		<groups>
+		  <group>subsystem1</group>
+		  <group>performance</group>
+		</groups>
+
+	  </classification>
+
+	  <run-order-priority>-100.0</run-order-priority>
+
+	  <!-- Uncomment this to mark all tests under this directory as skipped 
+		(overrides the state= attribute on individual tests). -->
+	  <!-- <skipped reason=""/> -->
+
+	</pysysdirconfig>
+
+This serves several useful purposes:
+
+- It adds a prefix "SubSystem1_perf." to the beginning of the test directory 
+  names to ensure there's a unique id for each one with no chance of conflicts 
+  across different directories. 
+
+- It adds groups that make it possible to run all your performance tests, or 
+  all your tests for a particular part of the application, in a single command. 
+
+- It specifies that the performance tests will be run with a lower priority, 
+  so they execute after more urgent (and quicker) tests such as unit tests. 
+
+- It provides the ability to temporarily skip a set of tests if they are 
+  broken temporarily pending a bug fix. 
+
+See the `pysysdirconfig.xml` sample in `pysys-examples/fibonacci/testcases` and 
+also in `pysys/xml/templates/dirconfig` for a full example of a directory 
+configuration file. 
