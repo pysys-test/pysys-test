@@ -118,7 +118,10 @@ class BaseTest(ProcessUser):
 		self.output = os.path.join(descriptor.output, outsubdir)
 		self.reference = descriptor.reference
 		self.runner = runner
-		self.mode = runner.mode
+		if runner.supportMultipleModesPerRun:
+			self.mode = descriptor.mode
+		else:
+			self.mode = runner.mode 
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
 		self.__backgroundThreads = []

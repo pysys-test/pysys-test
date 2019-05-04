@@ -141,6 +141,10 @@ class XMLDescriptorContainer(object):
 		self.traceability = traceability
 		self.runOrderPriority = runOrderPriority
 		self.skippedReason = skippedReason
+		
+		# these are used only when supportMultipleModesPerRun=true
+		self.idWithoutMode = self.id
+		self.mode = None
 	
 	def toDict(self):
 		"""Converts this descriptor to an (ordered) dict suitable for serialization."""
@@ -154,6 +158,7 @@ class XMLDescriptorContainer(object):
 		d['purpose'] = self.purpose
 		d['groups'] = self.groups
 		d['modes'] = self.modes
+		if self.mode: d['mode'] = self.mode # only if supportMultipleModesPerRun=true
 		d['requirements'] = self.traceability
 		d['runOrderPriority'] = self.runOrderPriority
 		d['classname'] = self.classname

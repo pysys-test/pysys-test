@@ -36,6 +36,7 @@ __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
 import locale
+import copy
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -154,6 +155,27 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	
 	"""
 	descriptors = loadDescriptors(dir=dir)
+
+	supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
+	if supportMultipleModesPerRun: 
+		# expand out for modes
+		MODE_ID_SEPARATOR = '~'
+		allmodes = set()
+		expanded_descriptors = []
+		for d in descriptors:
+			if not d.modes:
+				expanded_descriptors.append(d)
+			else:
+				for m in d.modes: 
+					allmodes.add(m)
+					newdescr = copy.copy(d)
+					newdescr.mode = m # TODO: put this into the base one too
+					newdescr.idWithoutMode = d.id
+					newdescr.id = d.id+MODE_ID_SEPARATOR+m
+					expanded_descriptors.append(newdescr)
+		descriptors = expanded_descriptors
+	
+	# TODO: add logic below for selecting multi-mode tests using either syntax
 	
 	# first check for duplicate ids
 	ids = {}

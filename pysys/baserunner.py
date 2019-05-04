@@ -118,6 +118,7 @@ class BaseRunner(ProcessUser):
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
+		self.supportMultipleModesPerRun = getattr(self.project, 'supportMultipleModesPerRun', '').lower()=='true'
 
 		self.startTime = self.project.startTimestamp
 		
@@ -735,7 +736,10 @@ class TestContainer(object):
 						runpycode = compile(runpyfile.read(), runpypath, 'exec')
 					runpy_namespace = {}
 					exec(runpycode, runpy_namespace)
-					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, self.outsubdir, self.runner)
+					outsubdir = self.outsubdir
+					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
+						outsubdir += '~'+self.descriptor.mode
+					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, outsubdir, self.runner)
 					del runpy_namespace
 		
 				except KeyboardInterrupt:
