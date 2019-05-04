@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Runner - modes pre-1.4.1 behaviour</title>    
+    <purpose><![CDATA[
+Check that the modes behaviour that's been present for a while still works, i.e. 
+a single test id and execution per PySys invocation for each test with multiple 
+modes, with self.mode assigned to one of the modes. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group></group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
