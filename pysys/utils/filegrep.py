@@ -195,7 +195,7 @@ def logContents(message, list):
 		
 
 # entry point for running the script as an executable
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 	if len(sys.argv) < 3:
 		print("Usage: filegrep.py <file> <regexpr>")
 		sys.exit()
@@ -210,10 +210,3 @@ if __name__ == "__main__":
 				print("Matches found")
 			else:
 				print("No matches found")
-			
-				
-
-
-
-
-

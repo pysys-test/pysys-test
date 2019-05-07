@@ -52,7 +52,7 @@ if re.search('win32', sys.platform):
 	LIBRARY_PATH_ENV_VAR = 'PATH'
 	SITE_PACKAGES_DIR =  os.path.join(sys.prefix, "Lib", "site-packages")
 	
-elif re.search('sunos', sys.platform):
+elif re.search('sunos', sys.platform): # pragma: no cover
 	PLATFORM='sunos'
 	OSFAMILY='unix'
 	DEVNULL = '/dev/null'
@@ -81,7 +81,7 @@ elif re.search('darwin', sys.platform):
 	DYLD_LIBRARY_PATH = '/usr/lib:/usr/local/lib'
 	LIBRARY_PATH_ENV_VAR = 'DYLD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
-else:
+else:  # pragma: no cover
 	# Fall back to assumed UNIX-like platform
 	PLATFORM=sys.platform
 	OSFAMILY='unix'

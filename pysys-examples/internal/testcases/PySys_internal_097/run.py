@@ -20,6 +20,10 @@ class PySysTest(BaseTest):
 			self.logFileContents('pysys-%s.out'%subtest, maxLines=0)
 			
 	def validate(self):
+		env = self.createEnvirons(addToLibPath='my-lib-path', addToExePath=['my-exe-path1', 'my-exe-path2'])
+		self.assertThat('"my-exe-path1'+os.pathsep+'my-exe-path2" in %s', repr(env['PATH']))
+		self.assertThat('"my-lib-path" in %s', repr(env[LIBRARY_PATH_ENV_VAR]))
+	
 		# inherited environment not passed on, unles in legacy mode on Windows
 		self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='SOME_OVERRIDE=', contains=False)
 
@@ -47,7 +51,7 @@ class PySysTest(BaseTest):
 			self.logFileContents('pysys-none/PySys_NestedTestcase/env-python.txt')
 		self.assertGrep('pysys-none/PySys_NestedTestcase/python.out', expr='Python executed successfully')
 
-		self.assertTrue(os.path.exists(self.output+'/pysys-tempdir/PySys_NestedTestcase/mytemp'), assertMessage='tempdir was created')
+		self.assertPathExists('pysys-tempdir/PySys_NestedTestcase/mytemp')
 		self.assertGrep('pysys-tempdir/PySys_NestedTestcase/python.out', expr='TempDir=.*[Nn]ested[Tt]estcase.mytemp')
 
 		if IS_WINDOWS:

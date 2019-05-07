@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="manual" state="runnable">
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose]]>
+    </purpose>
+  </description>
+  <classification/>
+</pysystest>

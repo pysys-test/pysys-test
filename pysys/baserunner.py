@@ -29,6 +29,7 @@ API documentation.
 """
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
+import fnmatch
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -39,7 +40,8 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
-from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe
+from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, pathexists
+from pysys.utils.filecopy import filecopy
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
@@ -116,6 +118,8 @@ class BaseRunner(ProcessUser):
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
+
+		self.startTime = self.project.startTimestamp
 		
 		extraOptions = xargs.pop('__extraRunnerOptions', {})
 		
@@ -159,6 +163,17 @@ class BaseRunner(ProcessUser):
 			self.writers.extend(summarywriters)
 		else:
 			self.writers.append(ConsoleSummaryResultsWriter())
+		
+		self.__collectTestOutput = []
+		for c in self.project.collectTestOutput:
+			c = dict(c)
+			assert c['outputDir'], 'collect-test-output outputDir cannot be empty'
+			c['outputDir'] = os.path.join(self.project.root, c['outputDir']\
+				.replace('@OUTDIR@', os.path.basename(self.outsubdir)) \
+				)
+			assert os.path.normpath(c['outputDir']) != os.path.normpath(self.project.root), 'Must set outputDir to a new subdirectory'
+			self.__collectTestOutput.append(c)
+			deletedir(c['outputDir']) # clean output dir between runs
 		
 		# duration and results used to be used for printing summary info, now (in 1.3.0) replaced by 
 		# more extensible ConsoleSummaryResultsWriter implementation. Keeping these around for 
@@ -228,23 +243,45 @@ class BaseRunner(ProcessUser):
 			removeNonZero = False
 
 		try:
-			for file in os.listdir(toLongPathSafe(dir)):
-				path = toLongPathSafe("%s/%s" % (dir, file), onlyIfNeeded=True)
-				if PLATFORM in ['sunos', 'linux']:
-					size = os.lstat(path)[stat.ST_SIZE]
-				else:
-					size = os.stat(path)[stat.ST_SIZE]
-
-				if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
-					count = 0
-					while count < 3:
-						try:
-							os.remove(path)
-							break
-						except Exception:
-							if not os.path.exists(path): break
-							time.sleep(0.1)
-							count = count + 1
+			for (dirpath, dirnames, filenames) in os.walk(toLongPathSafe(dir), topdown=False):
+				deleted = 0
+				for file in filenames:
+					path = os.path.join(dirpath, file)
+					for collect in self.__collectTestOutput:
+						if fnmatch.fnmatch(os.path.basename(file), collect['pattern']):
+							collectdest = os.path.join(mkdir(collect['outputDir']), (collect['outputPattern']
+								.replace('@TESTID@', str(testObj))
+								.replace('@FILENAME@', os.path.basename(file))
+								.replace('\\','_').replace('/','_')
+								))
+							i = 1
+							while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
+								i += 1
+							collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
+							filecopy(path, collectdest)
+							
+					size = os.path.getsize(path)
+					
+					if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
+						count = 0
+						while count < 3:
+							try:
+								os.remove(path)
+								deleted += 1
+								break
+							except Exception:
+								if not os.path.exists(path): break
+								time.sleep(0.1)
+								count = count + 1
+								
+				# always try to delete empty directories (just as we do for empty files)
+				if deleted == len(filenames):
+					try:
+						os.rmdir(dirpath)
+					except Exception as ex:
+						# there might be non-empty subdirectories, so don't raise this as an error
+						pass
+						
 
 		except OSError as ex:
 			log.warning("Caught OSError while cleaning output directory after test completed:")
@@ -344,7 +381,6 @@ class BaseRunner(ProcessUser):
 		if self.threads > 1: threadPool = ThreadPool(self.threads)
 
 		# loop through each cycle
-		self.startTime = time.time()
 		
 		fatalerrors = []
 		
@@ -412,6 +448,10 @@ class BaseRunner(ProcessUser):
 					log.info("test interrupt from keyboard - joining threads ... ")
 					threadPool.dismissWorkers(self.threads, True)
 					self.handleKbrdInt(prompt=False)
+
+			for collect in self.__collectTestOutput:
+				if pathexists(collect['outputDir']):
+					self.log.info('Collected test output to directory: %s', os.path.normpath(collect['outputDir']))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			for writer in self.writers:
@@ -429,6 +469,7 @@ class BaseRunner(ProcessUser):
 						log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 		
+			self.processCoverageData()
 		finally:
 			# call the hook to cleanup after running tests
 			try:
@@ -436,6 +477,7 @@ class BaseRunner(ProcessUser):
 			except Exception as ex:
 				log.warn("caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
+
 		
 		if fatalerrors:
 			# these are so serious we need to make sure the user notices
@@ -444,6 +486,41 @@ class BaseRunner(ProcessUser):
 		# return the results dictionary
 		return self.results
 
+	def processCoverageData(self):
+		""" Called after execution of all tests has completed to allow 
+		processing of coverage data (if enabled), for example generating 
+		reports etc. 
+		
+		The default implementation collates Python coverage data from 
+		coverage.py and produces an HTML report. It assumes a project property 
+		`pythonCoverageDir` is set to the directory coverage files are 
+		collected into, and that PySys was run with `-X pythonCoverage=true`. 
+		If a property named pythonCoverageArgs exists then its value will be 
+		added to the arguments passed to the run and html report coverage 
+		commands. 
+		
+		Custom runner subclasses may replace or add to this by processing 
+		coverage data from other languages, e.g. Java. 		
+		"""
+		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
+		if self.getBool('pythonCoverage') and pythonCoverageDir is not None:
+			pythonCoverageDir = os.path.join(self.project.root, pythonCoverageDir
+				.replace('@OUTDIR@', os.path.basename(self.outsubdir))) # matches collect-test-output logic
+			if not pathexists(pythonCoverageDir):
+				self.log.info('No Python coverage files were generated.')
+			else:
+				if self.startPython(['-m', 'coverage', 'combine'], abortOnError=False, 
+					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
+					disableCoverage=True).exitStatus != 0: return
+					
+				args = []
+				if hasattr(self.project, 'pythonCoverageArgs'):
+					args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]
+			
+				self.startPython(['-m', 'coverage', 'html']+args, abortOnError=False, 
+					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
+					disableCoverage=True)
+	
 
 	def containerCallback(self, thread, container):
 		"""Callback method on completion of running a test.
@@ -518,7 +595,7 @@ class BaseRunner(ProcessUser):
 		log.warn("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 
 
-	def handleKbrdInt(self, prompt=True):
+	def handleKbrdInt(self, prompt=True): # pragma: no cover (can't auto-test keyboard interrupt handling)
 		"""Handle a keyboard exception caught during running of a set of testcases.
 		
 		"""
@@ -679,7 +756,10 @@ class TestContainer(object):
 
 			# execute the test if we can
 			try:
-				if self.descriptor.state != 'runnable':
+				if self.descriptor.skippedReason:
+					self.testObj.addOutcome(SKIPPED, self.descriptor.skippedReason, abortOnError=False)
+				
+				elif self.descriptor.state != 'runnable':
 					self.testObj.addOutcome(SKIPPED, 'Not runnable', abortOnError=False)
 							
 				elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
@@ -749,7 +829,7 @@ class TestContainer(object):
 			pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread)
 	
 	# utility methods
-	def purgeDirectory(self, dir, delTop=False):
+	def purgeDirectory(self, dir, delTop=False): # pragma: no cover (deprecated, no longer used)
 		"""Recursively purge a directory removing all files and sub-directories.
 		
 		@param dir: The top level directory to be purged

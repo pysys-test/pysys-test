@@ -62,7 +62,7 @@ def filecopy(src, dst):
 
 
 # entry point for running the script as an executable
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 	if len(sys.argv) < 2:
 		print("Usage: filecopy <src> <dst>")
 		sys.exit()

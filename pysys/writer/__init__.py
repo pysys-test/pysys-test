@@ -620,7 +620,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def _serializeXMLDocumentToBytes(self, document):
 		return replaceIllegalXMLCharacters(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep).decode('utf-8')).encode('utf-8')
 
-	def purgeDirectory(self, dir, delTop=False):
+	def purgeDirectory(self, dir, delTop=False): # pragma: no cover
 		"""
 		@deprecated: Use L{pysys.utils.fileutils.deletedir} instead. 
 		"""

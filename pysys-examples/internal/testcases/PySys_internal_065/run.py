@@ -1,6 +1,7 @@
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
+import pysys.utils.perfreporter
 from pysys.utils.perfreporter import CSVPerformanceFile
 import os, sys, math, shutil
 
@@ -17,8 +18,19 @@ class PySysTest(BaseTest):
 		self.logFileContents('pysys.out', maxLines=0)
 		self.logFileContents('pysys.err')
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
-			
+		
+		# test standalone entrypoint
+		perfreporterexe = os.path.dirname(pysys.utils.perfreporter.__file__)+'/perfreporter.py'
+		self.startPython([perfreporterexe, '--help'], stdouterr='perfreporter-help', ignoreExitStatus=True)
+		self.logFileContents('perfreporter-help.err')
+		self.logFileContents('perfreporter-help.out')
+		self.startPython([perfreporterexe, 'aggregate', self.input+'/sample.csv'], stdouterr='perfreporter-aggregate', abortOnError=False)
+		
 	def validate(self):
+		self.assertGrep('perfreporter-aggregate.out', expr='# resultKey,.*')
+		self.assertLineCount('perfreporter-aggregate.out', expr='Sample small integer performance result', condition='==1')
+		self.assertGrep('perfreporter-aggregate.out', expr=',150.0,') # average value
+	
 		perfdir = self.output+'/test/perfsummary'
 		summ = os.listdir(perfdir)[0]
 		self.logFileContents(perfdir+'/'+summ)

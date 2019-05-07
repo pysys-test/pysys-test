@@ -18,10 +18,13 @@ class PySysTest(BaseTest):
 		self.log.info('printing tests from: %s', testsdir)
 		
 		runPySys(self, 'basic', ['print'], workingDir=testsdir)
+		runPySys(self, 'sort-by-id', ['print', '--sort', 'id'], workingDir=testsdir) # just check for no exceptions, no validation
+		runPySys(self, 'sort-by-title', ['print', '--sort', 'title'], workingDir=testsdir) # just check for no exceptions, no validation
 		runPySys(self, 'thistest', ['print', 'PySys_internal_073'], workingDir=testsdir)
 		runPySys(self, 'full', ['print', '--full'], workingDir=testsdir)
 		runPySys(self, 'groups', ['print', '--groups'], workingDir=testsdir)
 		runPySys(self, 'modes', ['print', '--modes'], workingDir=testsdir)
+		runPySys(self, 'requirements', ['print', '--requirements'], workingDir=testsdir)
 		runPySys(self, 'nonexistent', ['print', 'non-existent'], workingDir=testsdir, ignoreExitStatus=True)
 		runPySys(self, 'emptydir', ['print'], workingDir=self.mkdir('emptydir'), ignoreExitStatus=True, 
 			projectfile=PROJECT.testRootDir+'/pysysproject.xml')
@@ -36,6 +39,7 @@ class PySysTest(BaseTest):
 		self.assertLineCount('thistest.out', expr='.', condition='==1')
 		
 		self.assertGrep('groups.out', expr='examples') # just pick one example
+		self.assertGrep('requirements.out', expr='AL1') # just pick one example
 
 		self.assertGrep('emptydir.err', expr='The supplied options did not result in the selection of any tests')
 		self.assertGrep('nonexistent.err', expr='Unable to locate requested testcase')

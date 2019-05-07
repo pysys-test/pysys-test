@@ -34,7 +34,7 @@ DTD='''
 '''
 
 
-class XMLManualTestStep(object):
+class XMLManualTestStep(object): # pragma: no cover
 	def __init__(self, number, title, validate, wrap, description, expectedResult):
 		self.number = number
 		self.title = title
@@ -56,7 +56,7 @@ class XMLManualTestStep(object):
 			if index != 0: print("                   %s" % desc[index])
 		print("Expected result:   %s" % self.expectedResult)
 
-class XMLManualTestParser(object):
+class XMLManualTestParser(object): # pragma: no cover
 	def __init__(self, xmlfile):
 		self.dirname = os.path.dirname(xmlfile)
 		self.xmlfile = xmlfile

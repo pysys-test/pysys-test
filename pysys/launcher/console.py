@@ -18,6 +18,7 @@
 
 from __future__ import print_function
 import os.path, stat, getopt, logging, traceback, sys
+import json
 
 from pysys import log
 
@@ -28,6 +29,7 @@ from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
 from pysys.xml.project import getProjectConfigTemplates, createProjectConfig
 from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
+from pysys.exceptions import UserError
 
 """
 @undocumented: EXPR1, EXPR2, EXPR3, _PYSYS_SCRIPT_NAME, main
@@ -53,7 +55,7 @@ class ConsoleCleanTestHelper(object):
 	def printUsage(self, printXOptions):
 		print("\nPySys System Test Framework (version %s): Console clean test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
-		print("   where [option] includes;")
+		print("   where [option] includes:")
 		print("       -h | --help                 print this message")
 		print("       -a | --all                  clean all compiled testclass files")
 		print("       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)")
@@ -90,6 +92,10 @@ class ConsoleCleanTestHelper(object):
 				
 			elif option in ("-o", "--outdir"):
 				self.outsubdir = value
+
+			else:
+				print("Unknown option: %s"%option)
+				sys.exit(1)
 
 
 	def clean(self):
@@ -147,6 +153,7 @@ class ConsolePrintHelper(object):
 		self.groups = False
 		self.modes = False
 		self.requirements = False
+		self.json = False
 		self.mode = None
 		self.type = None
 		self.trace = None
@@ -154,19 +161,29 @@ class ConsolePrintHelper(object):
 		self.excludes = []
 		self.tests = None
 		self.name = name
-		self.optionString = 'hfgdrm:a:t:i:e:'
-		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude="] 
+		self.sort = None
+		self.grep = None
+		self.optionString = 'hfgdrm:a:t:i:e:s:G:'
+		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
 		
 
 	def printUsage(self):
 		print("\nPySys System Test Framework (version %s): Console print test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
-		print("    where options include;")
+		print("    where options include:")
 		print("       -h | --help                 print this message")
+		print("")
+		print("    output options:")
 		print("       -f | --full                 print full information")
 		print("       -g | --groups               print test groups defined")
 		print("       -d | --modes                print test modes defined")
 		print("       -r | --requirements         print test requirements covered")
+		print("       -s | --sort   STRING        sort by: title, id, runOrderPriority")
+		print("            --json                 print full information as JSON")
+		print("")
+		print("    selection/filtering options:")
+		print("       -G | --grep      STRING     print tests whose title or id contains the specified regex")
+		print("                                   (matched case insensitively)")
 		print("       -m | --mode      STRING     print tests that run in user defined mode ")
 		print("       -a | --type      STRING     print tests of supplied type (auto or manual, default all)")
 		print("       -t | --trace     STRING     print tests which cover requirement id ") 
@@ -203,13 +220,13 @@ class ConsolePrintHelper(object):
 			elif option in ("-f", "--full"):
 				self.full = True
 				
-			if option in ("-g", "--groups"):
+			elif option in ("-g", "--groups"):
 				self.groups = True
 				
-			if option in ("-d", "--modes"):
+			elif option in ("-d", "--modes"):
 				self.modes = True
 			
-			if option in ("-r", "--requirements"):
+			elif option in ("-r", "--requirements"):
 				self.requirements = True
 				
 			elif option in ("-m", "--mode"):
@@ -230,9 +247,40 @@ class ConsolePrintHelper(object):
 			elif option in ("-e", "--exclude"):
 				self.excludes.append(value)
 
+			elif option in ("-s", "--sort"):
+				self.sort = value
+
+			elif option in ("-G", "--grep"):
+				self.grep = value
+
+			elif option == '--json':
+				self.json = True
+
+			else:
+				print("Unknown option: %s"%option)
+				sys.exit(1)
 
 	def printTests(self):
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
+			
+			if self.grep:
+				regex = re.compile(self.grep, flags=re.IGNORECASE)
+				descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
+			
+			if self.sort:
+				if self.sort.lower()=='id':
+					descriptors.sort(key=lambda d: d.id)
+				elif self.sort.lower().replace('-','') in ['runorderpriority', 'runorder', 'order']:
+					descriptors.sort(key=lambda d: [-d.runOrderPriority, d.file])
+				elif self.sort.lower()=='title':
+					descriptors.sort(key=lambda d: [d.title, d.file])
+				else:
+					raise UserError('Unknown sort key: %s'%self.sort)
+			
+			if self.json:
+				print(json.dumps([d.toDict() for d in descriptors], indent=3, sort_keys=False))
+				return
+			
 			exit = 0
 			if self.groups == True:
 				groups = []
@@ -357,7 +405,7 @@ class ConsoleMakeTestHelper(object):
 	def printUsage(self):
 		print("\nPySys System Test Framework (version %s): Console make test helper" % __version__) 
 		print("\nUsage: %s %s [option]+ [testid]" % (_PYSYS_SCRIPT_NAME, self.name))
-		print("   where [option] includes;")
+		print("   where [option] includes:")
 		print("       -h | --help                 print this message")
 		print("       -a | --type     STRING      set the test type (auto or manual, default is auto)")
 		print("       -d | --dir      STRING      base path to testcase (default is current working dir)")
@@ -385,6 +433,11 @@ class ConsoleMakeTestHelper(object):
 
 			elif option in ("-d", "--dir"):
 				self.testdir = value		
+
+			else:
+				print("Unknown option: %s"%option)
+				sys.exit(1)
+
 
 		if arguments == []:
 			print("A valid string test id must be supplied")
@@ -453,22 +506,19 @@ class ConsoleLaunchHelper(object):
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
-		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:g'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=']
+		self.grep = None
+		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:gG:'
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=']
 
 
 	def printUsage(self, printXOptions):
 		print("\nPySys System Test Framework (version %s): Console run test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
-		print("   where [option] includes;")
+		print("   where [option] includes:")
 		print("       -h | --help                 print this message")
 		print("       -r | --record               record test results using all configured record writers")
 		print("       -p | --purge                purge the output subdirectory on test pass")
 		print("       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)")
-		print("       -a | --type      STRING     set the test type to run (auto or manual, default is both)") 
-		print("       -t | --trace     STRING     set the requirement id for the test run")
-		print("       -i | --include   STRING     set the test groups to include (can be specified multiple times)")
-		print("       -e | --exclude   STRING     set the test groups to exclude (can be specified multiple times)")
 		print("       -c | --cycle     INT        set the the number of cycles to run the tests")
 		print("       -o | --outdir    STRING     set the name of the directory to use for this run's test output")
 		print("       -m | --mode      STRING     set the user defined mode to run the tests")
@@ -485,13 +535,21 @@ class ConsoleLaunchHelper(object):
 		print("       -X               KEY=VALUE  set user defined options to be passed through to the test and ")
 		print("                                   runner classes. The left hand side string is the data attribute ")
 		print("                                   to set, the right hand side string the value (True if not specified) ")
+		print("")
+		print("    selection/filtering options:")
+		print("       -G | --grep      STRING     run only tests whose title or id contains the specified regex")
+		print("                                   (matched case insensitively)")
+		print("       -a | --type      STRING     set the test type to run (auto or manual, default is both)") 
+		print("       -t | --trace     STRING     set the requirement id for the test run")
+		print("       -i | --include   STRING     set the test groups to include (can be specified multiple times)")
+		print("       -e | --exclude   STRING     set the test groups to exclude (can be specified multiple times)")
 		if printXOptions: printXOptions()
 		print("")
 		print("   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, ")
 		print("   where none are given all available tests will be run. If an include group is given, only tests that ")
 		print("   belong to that group will be run. If an exclude group is given, tests in the group will not be run. ")
 		print("   Tests should contain only alphanumeric and the underscore characters. The following syntax is used ")
-		print("   to select a test set;")
+		print("   to select a test set:")
 		print("")
 		print("       test1                     - a single testcase with id test1")
 		print("       :test2                    - up to testcase with id test2")
@@ -594,6 +652,14 @@ class ConsoleLaunchHelper(object):
 			
 			elif option in ("-y", "--validateOnly"):
 				self.userOptions['validateOnly'] = True
+
+			elif option in ("-G", "--grep"):
+				self.grep = value
+
+			else:
+				print("Unknown option: %s"%option)
+				sys.exit(1)
+
 			
 		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True
 		
@@ -605,8 +671,14 @@ class ConsoleLaunchHelper(object):
 		}
 				
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
+		descriptors = sorted(descriptors, key=lambda x: (-x.runOrderPriority, x.file))
+
 		# No exception handler above, as any createDescriptors failure is really a fatal problem that should cause us to 
 		# terminate with a non-zero exit code; we don't want to run no tests without realizing it and return success
+
+		if self.grep:
+			regex = re.compile(self.grep, flags=re.IGNORECASE)
+			descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
 		
 		return self.record, self.purge, self.cycle, self.mode, self.threads, self.outsubdir, descriptors, self.userOptions
 		
@@ -614,7 +686,7 @@ def printUsage():
 	sys.stdout.write("\nPySys System Test Framework (version %s on Python %s.%s.%s)\n" % (
 		__version__, sys.version_info[0], sys.version_info[1], sys.version_info[2]))
 	sys.stdout.write("\nUsage: %s [mode] [option]* { [tests]* | [testId] }\n" % _PYSYS_SCRIPT_NAME)
-	sys.stdout.write("    where [mode] can be;\n")
+	sys.stdout.write("    where [mode] can be:\n")
 	sys.stdout.write("       makeproject - create the configuration file for a new project of PySys testcases\n")
 	sys.stdout.write("       make        - create a new testcase in the current project\n")
 	sys.stdout.write("       print       - print list or details of tests under the current working directory\n")
@@ -639,7 +711,7 @@ def runTest(args):
 		sys.exit(0)
 	except Exception as e:
 		sys.stderr.write('\nPYSYS FATAL ERROR: %s\n' % e)
-		traceback.print_exc()
+		if not isinstance(e, UserError): traceback.print_exc()
 		sys.exit(10)
 
 def printTest(args):
@@ -648,7 +720,9 @@ def printTest(args):
 		printer.parseArgs(args)
 		printer.printTests()
 	except Exception as e:
-		sys.stderr.write('\nWARN: %s\n\n' % e)
+		sys.stderr.write('\nERROR: %s\n' % e)
+		if not isinstance(e, UserError): traceback.print_exc()
+		sys.exit(10)
 
 def makeTest(args):
 	module = import_module(PROJECT.makerModule, sys.path)

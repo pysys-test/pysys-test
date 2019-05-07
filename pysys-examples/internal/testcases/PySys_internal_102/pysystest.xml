@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Runner - collect-test-output</title>    
+    <purpose><![CDATA[
+Check this project setting works correctly
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+</pysystest>

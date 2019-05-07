@@ -19,9 +19,10 @@ class PySysTest(BaseTest):
 		runPySys(self, 'run', ['run', '--help'], defaultproject=True)
 		runPySys(self, 'print', ['print', '-h'], defaultproject=True)
 		runPySys(self, 'make', ['make', '--help'], defaultproject=True)
+		runPySys(self, 'clean', ['clean', '--help'], defaultproject=True)
 			
 	def validate(self):
-		for t in ['noargs', 'toplevel', 'run', 'print', 'make']:
+		for t in ['noargs', 'toplevel', 'run', 'print', 'make', 'clean']:
 			self.assertGrep(t+'.err', expr='.', contains=False)
 			self.assertGrep(t+'.out', expr='Exception', contains=False)
 			self.assertGrep(t+'.out', expr='.') # check not empty

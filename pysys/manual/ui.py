@@ -29,7 +29,7 @@ except Exception:
 from pysys.xml.manual import *
 
 
-class ManualTester(object):
+class ManualTester(object):  # pragma: no cover
 	def __init__(self, owner, filename, logname=None):
 		self.parentContainer = None
 		self.owner = owner

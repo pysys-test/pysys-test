@@ -92,7 +92,7 @@ class _UnicodeSafeStreamWrapper(object):
 		stream.flush()
 		stream.close()
 
-class ThreadedStreamHandler(logging.StreamHandler):
+class ThreadedStreamHandler(logging.StreamHandler): # pragma: no cover
 	"""Stream handler to only log from the creating thread.
 	
 	Overrides logging.StreamHandler to only allow logging to a stream 
@@ -118,7 +118,7 @@ class ThreadedStreamHandler(logging.StreamHandler):
 		logging.StreamHandler.emit(self, record)
 
 
-class ThreadedFileHandler(logging.FileHandler):
+class ThreadedFileHandler(logging.FileHandler): # pragma: no cover
 	"""File handler to only log from the creating thread.
 	
 	Overrides logging.FileHandler to only allow logging to file from 
