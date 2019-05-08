@@ -181,7 +181,6 @@ class BaseRunner(ProcessUser):
 		# a bit to allow overlap before removal
 		self.duration = 0 # no longer needed
 		self.results = {}
-		self.__remainingTests = self.cycle * len(self.descriptors)
 		
 		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
 		
@@ -369,6 +368,7 @@ class BaseRunner(ProcessUser):
 		self.setup()
 
 		# call the hook to setup the test output writers
+		self.__remainingTests = self.cycle * len(self.descriptors)
 		for writer in list(self.writers):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
 				testoutdir=self.outsubdir, runner=self)
