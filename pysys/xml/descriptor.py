@@ -283,7 +283,8 @@ class XMLDescriptorParser(object):
 		
 		# some elements that are mandatory for an individual test and not used for dir config
 		return XMLDescriptorContainer(self.getFile(), self.getID(), self.getType(), self.getState(),
-										self.getTitle() if self.istest else None, self.getPurpose() if self.istest else None,
+										self.getTitle() if self.istest else '', 
+										self.getPurpose() if self.istest else '',
 										self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
 										# don't absolutize for dir config descriptors, since we don't yet know the test's dirname
