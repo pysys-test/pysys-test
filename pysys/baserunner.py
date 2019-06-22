@@ -100,7 +100,8 @@ class BaseRunner(ProcessUser):
 		@param record: Indicates if the test results should be recorded 
 		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
 		@param cycle: The number of times to execute the set of requested testcases
-		@param mode: The user defined mode to run the testcases in
+		@param mode: The user defined mode to run the testcases in as a string, or 
+		a list of the modes we're running with if supportMultipleModesPerRun=True. 
 		@param threads: The number of worker threads to execute the requested testcases
 		@param outsubdir: The name of the output subdirectory
 		@param descriptors: List of XML descriptor containers detailing the set of testcases to be run

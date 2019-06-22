@@ -55,7 +55,8 @@ def loadDescriptors(dir=None):
 	"""Load descriptor objects representing a set of tests to run, returning the list.
 	
 	@param dir: The parent directory to search for runnable tests
-	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
+	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects. 
+	Caller must sort this list to ensure deterministic behaviour. 
 	@rtype: list
 	@raises UserError: Raised if no testcases can be found.
 	
@@ -137,10 +138,9 @@ def loadDescriptors(dir=None):
 			log.info('Failed to read descriptor: ', exc_info=True)
 			raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
 			
-	descriptors = sorted(descriptors, key=lambda x: x.file)
 	return descriptors
 
-def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
+def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[]):
 	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
 	
 	@param testIdSpecs: A list of strings specifying the set of testcase identifiers
@@ -149,6 +149,10 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	@param excludes: A list of test groups to exclude in the returned set
 	@param trace: A list of requirements to indicate tests to include in the returned set
 	@param dir: The parent directory to search for runnable tests
+	@param modeincludes: A list specifying the modes to be included; 
+	must contain at most one entry unless supportMultipleModesPerRun=True. 
+	@param modeexcludes: A list specifying the modes to be excluded; 
+	only supported if supportMultipleModesPerRun=True. 
 	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
 	@rtype: list
 	@raises UserError: Raised if not testcases can be found or are returned by the requested input parameters
@@ -156,26 +160,68 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	"""
 	descriptors = loadDescriptors(dir=dir)
 
+	MODE_ID_SEPARATOR = '~'
 	supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
-	if supportMultipleModesPerRun: 
-		# expand out for modes
-		MODE_ID_SEPARATOR = '~'
-		allmodes = set()
-		expanded_descriptors = []
+	
+	# as a convenience support !mode syntax in the includes
+	modeexcludes = modeexcludes+[x[1:] for x in modeincludes if x.startswith('!')]
+	modeincludes = [x for x in modeincludes if not x.startswith('!')]
+	for x in modeexcludes: 
+		if x.startswith('!'): raise UserError('Cannot use ! in a mode exclusion: "%s"'%x)
+
+	def makeNewDescriptorForMode(descriptor, mode):
+		newdescr = copy.copy(descriptor)
+		newdescr.mode = mode
+		newdescr.id = descriptor.id+MODE_ID_SEPARATOR+mode
+		return newdescr
+
+	if not supportMultipleModesPerRun: 
+		if len(modeincludes)>1: raise UserError('Cannot specify multiple modes unless supportMultipleModesPerRun=True')
+		if modeexcludes: raise UserError('Cannot specify mode exclusions unless supportMultipleModesPerRun=True')
+	else: 
+		# populate modedescriptors data structure for supportMultipleModesPerRun=True
+		MODES_ALL = 'ALL'
+		MODES_PRIMARY = 'PRIMARY'
+		assert MODES_ALL not in modeexcludes, "Cannot exclude all modes, that doesn't make sense"
+		if not modeincludes: # pick a useful default
+			if modeexcludes:
+				modeincludes = [MODES_ALL]
+			else:
+				modeincludes = [MODES_PRIMARY]
+
+		modedescriptors = {} # populate this with testid:[descriptors list]
 		for d in descriptors:
 			if not d.modes:
-				expanded_descriptors.append(d)
+				# for tests that have no modes, there is only one descriptor and it's treated as the primary mode; 
+				# user can also specify '' to indicate no mode
+				if ((MODES_ALL in modeincludes or MODES_PRIMARY in modeincludes or '' in modeincludes) and 
+					(MODES_PRIMARY not in modeexcludes and '' not in modeexcludes)):
+					d.mode = None
+					modedescriptors[d.id] = [d]
+				else:
+					modedescriptors[d.id] = []
 			else:
+				thisdescriptorlist = []
+				modedescriptors[d.id] = thisdescriptorlist # even if it ends up being empty
+				
+				# create a copy of the descriptor for each selected mode
 				for m in d.modes: 
-					allmodes.add(m)
-					newdescr = copy.copy(d)
-					newdescr.mode = m # TODO: put this into the base one too
-					newdescr.idWithoutMode = d.id
-					newdescr.id = d.id+MODE_ID_SEPARATOR+m
-					expanded_descriptors.append(newdescr)
-		descriptors = expanded_descriptors
-	
-	# TODO: add logic below for selecting multi-mode tests using either syntax
+					if m in [MODES_ALL, MODES_PRIMARY]: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
+					# apply modes filter
+					isprimary = m==d.primaryMode
+					
+					# excludes 
+					if isprimary and MODES_PRIMARY in modeexcludes: continue
+					if m in modeexcludes: continue
+					
+					# includes
+					if not (MODES_ALL in modeincludes or 
+						m in modeincludes or 
+						(isprimary and MODES_PRIMARY in modeincludes)
+						): 
+						continue
+					
+					thisdescriptorlist.append(makeNewDescriptorForMode(d, m))
 	
 	# first check for duplicate ids
 	ids = {}
@@ -194,6 +240,8 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	
 
 	# trim down the list for those tests in the test specifiers 
+	# unless user the testspec includes a mode suffix, this stage ignores modes, 
+	# and then we expand the modes out afterwards
 	tests = []
 	if testIdSpecs == []:
 		tests = descriptors
@@ -205,42 +253,64 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 			# being added on artificially; but only if spec is non-numeric 
 			# since we don't want to match test_104 against spec 04
 			return specId==descriptorId or (
-				descriptorId.endswith(specId) and not specId.isdigit() and specId not in testids) or (
+				#descriptorId.endswith(specId) and not specId.isdigit() and specId not in testids) or (
 				specId.isdigit() and re.match('.+_0*%s$'%specId, descriptorId))
 
 		for t in testIdSpecs:
 			try:
+				matches = None
 				index = index1 = index2 = -1
 				t = t.rstrip('/\\')
 
-				if re.search('^[\w_]*$', t):
-					for i in range(0,len(descriptors)):
-						if idMatch(descriptors[i].id, t): index = i
-					matches = descriptors[index:index+1]
+				if re.search('^[\w_.'+MODE_ID_SEPARATOR+']*$', t): # single test id (not a range or regex)
+					if MODE_ID_SEPARATOR in t:
+						testspecid, testspecmode = t.split(MODE_ID_SEPARATOR)
+						# first match the id, then the mode
+						for i in range(0,len(descriptors)):
+							if idMatch(descriptors[i].id, testspecid): 
+								index = i
+								break
+						if index >= 0:
+							matches = [makeNewDescriptorForMode(descriptors[index], testspecmode)]
+							# note test id+mode combinations selected explicitly like this way are included regardless of what modes are enabled/disabled
 
-				elif re.search('^:[\w_]*', t):
+					else: # normal case where it's not a mode
+						for i in range(0,len(descriptors)):
+							if idMatch(descriptors[i].id, t): 
+								index = i
+								break
+						matches = descriptors[index:index+1]
+						if supportMultipleModesPerRun and not modedescriptors[matches[0].id]:
+							# if user explicitly specified an individual test and excluded all modes it can run in, we shouldn't silently skip/exclude it
+							raise UserError('Test "%s" cannot be selected with the specified mode(s).')
+
+				# numeric ranges (inline mode specifiers not permitted from here on, in the interests of simplicity)
+				elif re.search('^:[\w_.]*', t):
 					for i in range(0,len(descriptors)):
 						if idMatch(descriptors[i].id, t.split(':')[1]): index = i
 					matches = descriptors[:index+1]
 
-				elif re.search('^[\w_]*:$', t):
+				elif re.search('^[\w_.]*:$', t):
 					for i in range(0,len(descriptors)):
 					  	if idMatch(descriptors[i].id, t.split(':')[0]): index = i
 					matches = descriptors[index:]
 
-				elif re.search('^[\w_]*:[\w_]*$', t):
+				elif re.search('^[\w_.]*:[\w_.]*$', t):
 					for i in range(0,len(descriptors)):
 					  	if idMatch(descriptors[i].id, t.split(':')[0]): index1 = i
 					  	if idMatch(descriptors[i].id, t.split(':')[1]): index2 = i
 					matches = descriptors[index1:index2+1]
 
-				else:
+				else: 
+					# regex match
 					matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
 
 				# each specified test patten must match something, else probably user made a typo
 				if not matches: raise Exception("No matches for: '%s'", t)
 				tests.extend(matches)
 
+			except UserError:
+				raise
 			except Exception:
 				raise UserError("Unable to locate requested testcase(s): '%s'"%t)
 				
@@ -292,6 +362,16 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 				tests.pop(index)
 			else:
 				index = index + 1
+	
+	# expand based on modes
+	if supportMultipleModesPerRun: 
+		expandedtests = []
+		for t in tests:
+			if getattr(t, 'mode', None): # this indicates a test id~mode that was explicitly specified, so does not need expanding
+				expandedtests.append(t)
+			else:
+				expandedtests.extend(modedescriptors[t.id])
+		tests = expandedtests
 	
 	if len(tests) == 0:
 		raise UserError("The supplied options did not result in the selection of any tests")

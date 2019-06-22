@@ -151,10 +151,11 @@ class ConsolePrintHelper(object):
 		self.arguments = []
 		self.full = False
 		self.groups = False
-		self.modes = False
+		self.modes = False # print list of available modes
 		self.requirements = False
 		self.json = False
-		self.mode = None
+		self.modeinclude = [] # select based on mode
+		self.modeexclude = []
 		self.type = None
 		self.trace = None
 		self.includes = []
@@ -164,10 +165,11 @@ class ConsolePrintHelper(object):
 		self.sort = None
 		self.grep = None
 		self.optionString = 'hfgdrm:a:t:i:e:s:G:'
-		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
+		self.optionList = ["help","full","groups","modes","requirements","mode=","modeinclude=","modeexclude=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
 		
 
 	def printUsage(self):
+		#######                                                                                |
 		print("\nPySys System Test Framework (version %s): Console print test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("    where options include:")
@@ -184,7 +186,14 @@ class ConsolePrintHelper(object):
 		print("    selection/filtering options:")
 		print("       -G | --grep      STRING     print tests whose title or id contains the specified regex")
 		print("                                   (matched case insensitively)")
-		print("       -m | --mode      STRING     print tests that run in user defined mode ")
+		print("       -m | --mode | --modeinclude ALL,PRIMARY,!PRIMARY,my-mode1,!my-mode2,...")
+		print("                                   print tests that run in the specifies mode(s):")
+		print("                                    - use PRIMARY to select the test's")
+		print("                                      first/default mode")
+		print("                                    - use ALL to select all modes")
+		print("                                    - use !MODE as an alias for modeexclude")
+		print("          | --modeexclude          my-mode1,my-mode2,...")
+		print("                                   print tests that do not run in these mode(s)")
 		print("       -a | --type      STRING     print tests of supplied type (auto or manual, default all)")
 		print("       -t | --trace     STRING     print tests which cover requirement id ") 
 		print("       -i | --include   STRING     print tests in included group (can be specified multiple times)")
@@ -229,8 +238,11 @@ class ConsolePrintHelper(object):
 			elif option in ("-r", "--requirements"):
 				self.requirements = True
 				
-			elif option in ("-m", "--mode"):
-				self.mode = value
+			elif option in ("-m", "--mode", "--modeinclude"):
+				self.modeinclude = self.modeinclude+[x.strip() for x in value.split(',')]
+
+			elif option in ["--modeexclude"]:
+				self.modeexclude = self.modeexclude+[x.strip() for x in value.split(',')]
 
 			elif option in ("-a", "--type"):
 				self.type = value
@@ -261,21 +273,21 @@ class ConsolePrintHelper(object):
 				sys.exit(1)
 
 	def printTests(self):
-			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)		
+			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, modeincludes=self.modeinclude, modeexcludes=self.modeexclude)
 			
 			if self.grep:
 				regex = re.compile(self.grep, flags=re.IGNORECASE)
 				descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
 			
-			if self.sort:
-				if self.sort.lower()=='id':
-					descriptors.sort(key=lambda d: d.id)
-				elif self.sort.lower().replace('-','') in ['runorderpriority', 'runorder', 'order']:
-					descriptors.sort(key=lambda d: [-d.runOrderPriority, d.file])
-				elif self.sort.lower()=='title':
-					descriptors.sort(key=lambda d: [d.title, d.file])
-				else:
-					raise UserError('Unknown sort key: %s'%self.sort)
+			# note that file is not a unique key if running a test in multiple modes
+			if (not self.sort) or (self.sort.lower()=='id'):
+				descriptors.sort(key=lambda d: d.id)
+			elif self.sort.lower().replace('-','') in ['runorderpriority', 'runorder', 'order']:
+				descriptors.sort(key=lambda d: [-d.runOrderPriority, d.file, d.id])
+			elif self.sort.lower()=='title':
+				descriptors.sort(key=lambda d: [d.title, d.file, d.id])
+			else:
+				raise UserError('Unknown sort key: %s'%self.sort)
 			
 			if self.json:
 				print(json.dumps([d.toDict() for d in descriptors], indent=3, sort_keys=False))
@@ -322,8 +334,10 @@ class ConsolePrintHelper(object):
 				if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
 			maxsize = maxsize + 2
 			
+			supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
+
 			for descriptor in descriptors:
-				if self.mode and not self.mode in descriptor.modes: continue
+				if not supportMultipleModesPerRun and len(self.modeinclude)==1 and not self.modeinclude[0] in descriptor.modes: continue
 				padding = " " * (maxsize - len(descriptor.id))
 				if not self.full:
 					print("%s:%s%s" % (descriptor.id, padding, descriptor.title))
@@ -501,48 +515,56 @@ class ConsoleLaunchHelper(object):
 		self.excludes = []
 		self.cycle = 1
 		self.outsubdir = PLATFORM
-		self.mode = None
+		self.modeinclude = []
+		self.modeexclude = []
 		self.threads = 1
 		self.name=name
 		self.userOptions = {}
 		self.descriptors = []
 		self.grep = None
 		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:gG:'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=']
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=']
 
 
 	def printUsage(self, printXOptions):
 		print("\nPySys System Test Framework (version %s): Console run test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes:")
-		print("       -h | --help                 print this message")
-		print("       -r | --record               record test results using all configured record writers")
-		print("       -p | --purge                purge the output subdirectory on test pass")
-		print("       -v | --verbosity STRING     set the verbosity level (CRIT, WARN, INFO, DEBUG)")
-		print("       -c | --cycle     INT        set the the number of cycles to run the tests")
-		print("       -o | --outdir    STRING     set the name of the directory to use for this run's test output")
-		print("       -m | --mode      STRING     set the user defined mode to run the tests")
-		print("       -n | --threads   INT|auto   set the number of worker threads to run the tests (defaults to 1). ")
-		print("                                   A value of 'auto' sets to the number of available CPUs")
-		print("       -g | --progress             print progress updates after completion of each test (or set")
-		print("                                   the PYSYS_PROGRESS=true environment variable)")
-		print("       -b | --abort     STRING     set the default abort on error property (true|false, overrides ")
-		print("                                   that specified in the project properties)")
-		print("            --printLogs STRING     indicates for which outcome types the run.log output ")
-		print("                                   will be printed to the stdout console; ")
-		print("                                   options are: all|none|failures, default is all.")
-		print("       -y | --validateOnly         test the validate() method without re-running execute()")
-		print("       -X               KEY=VALUE  set user defined options to be passed through to the test and ")
-		print("                                   runner classes. The left hand side string is the data attribute ")
-		print("                                   to set, the right hand side string the value (True if not specified) ")
+		print("     -h | --help                  print this message")
+		print("     -r | --record                record test results using all configured record writers")
+		print("     -p | --purge                 purge the output subdirectory on test pass")
+		print("     -v | --verbosity STRING      set the verbosity level (CRIT, WARN, INFO, DEBUG)")
+		print("     -c | --cycle     INT         set the the number of cycles to run the tests")
+		print("     -o | --outdir    STRING      set the name of the directory to use for this run's test output")
+		print("     -n | --threads   INT|auto    set the number of worker threads to run the tests (defaults to 1). ")
+		print("                                  A value of 'auto' sets to the number of available CPUs")
+		print("     -g | --progress              print progress updates after completion of each test (or set")
+		print("                                  the PYSYS_PROGRESS=true environment variable)")
+		print("     -b | --abort     STRING      set the default abort on error property (true|false, overrides ")
+		print("                                  that specified in the project properties)")
+		print("          --printLogs STRING      indicates for which outcome types the run.log output ")
+		print("                                  will be printed to the stdout console; ")
+		print("                                  options are: all|none|failures, default is all.")
+		print("     -y | --validateOnly          test the validate() method without re-running execute()")
+		print("     -X               KEY=VALUE   set user defined options to be passed through to the test and ")
+		print("                                  runner classes. The left hand side string is the data attribute ")
+		print("                                  to set, the right hand side string the value (True if not specified) ")
 		print("")
 		print("    selection/filtering options:")
-		print("       -G | --grep      STRING     run only tests whose title or id contains the specified regex")
-		print("                                   (matched case insensitively)")
-		print("       -a | --type      STRING     set the test type to run (auto or manual, default is both)") 
-		print("       -t | --trace     STRING     set the requirement id for the test run")
-		print("       -i | --include   STRING     set the test groups to include (can be specified multiple times)")
-		print("       -e | --exclude   STRING     set the test groups to exclude (can be specified multiple times)")
+		print("     -G | --grep      STRING      run only tests whose title or id contains the specified regex")
+		print("                                  (matched case insensitively)")
+		print("     -m | --mode | --modeinclude ALL,PRIMARY,!PRIMARY,my-mode1,!my-mode2,...")
+		print("                                  run tests in the specifies mode(s):")
+		print("                                   - use PRIMARY to select the test's")
+		print("                                     first/default mode")
+		print("                                   - use ALL to select all modes")
+		print("                                   - use !MODE as an alias for modeexclude")
+		print("        | --modeexclude           my-mode1,my-mode2,...")
+		print("                                  run tests excluding specified mode(s)")
+		print("     -a | --type      STRING      set the test type to run (auto or manual, default is both)") 
+		print("     -t | --trace     STRING      set the requirement id for the test run")
+		print("     -i | --include   STRING      set the test groups to include (can be specified multiple times)")
+		print("     -e | --exclude   STRING      set the test groups to exclude (can be specified multiple times)")
 		if printXOptions: printXOptions()
 		print("")
 		print("   and where [tests] describes a set of tests to be run. Note that multiple test sets can be specified, ")
@@ -551,12 +573,12 @@ class ConsoleLaunchHelper(object):
 		print("   Tests should contain only alphanumeric and the underscore characters. The following syntax is used ")
 		print("   to select a test set:")
 		print("")
-		print("       test1                     - a single testcase with id test1")
-		print("       :test2                    - up to testcase with id test2")
-		print("       test1:                    - from testcase with id test1 onwards")
-		print("       test1:test2               - all tests between tests with ids test1 and test2")
-		print("       test1 test 2 test5:test9  - test1, test2 and all tests between test5 and test9")
-		print("       ^test*                    - all tests matching the regex ^test*")
+		print("     test1                     - a single testcase with id test1")
+		print("     :test2                    - up to testcase with id test2")
+		print("     test1:                    - from testcase with id test1 onwards")
+		print("     test1:test2               - all tests between tests with ids test1 and test2")
+		print("     test1 test 2 test5:test9  - test1, test2 and all tests between test5 and test9")
+		print("     ^test*                    - all tests matching the regex ^test*")
 		print("")
 		print("   e.g. ")
 		print("       %s -vDEBUG --include MYTESTS test1:test4 test7" % _PYSYS_SCRIPT_NAME)
@@ -622,8 +644,11 @@ class ConsoleLaunchHelper(object):
 			elif option in ("-o", "--outdir"):
 				self.outsubdir = value
 					
-			elif option in ("-m", "--mode"):
-				self.mode = value
+			elif option in ("-m", "--mode", "--modeinclude"):
+				self.modeinclude = self.modeinclude+[x.strip() for x in value.split(',')]
+
+			elif option in ["--modeexclude"]:
+				self.modeexclude = self.modeexclude+[x.strip() for x in value.split(',')]
 
 			elif option in ("-n", "--threads"):
 				try:
@@ -669,9 +694,10 @@ class ConsoleLaunchHelper(object):
 			'progressWritersEnabled':self.progress,
 			'printLogs': printLogs,
 		}
-				
-		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir)
-		descriptors = sorted(descriptors, key=lambda x: (-x.runOrderPriority, x.file))
+		
+		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, 
+			modeincludes=self.modeinclude, modeexcludes=self.modeexclude)
+		descriptors = sorted(descriptors, key=lambda x: (-x.runOrderPriority, x.file, x.id))
 
 		# No exception handler above, as any createDescriptors failure is really a fatal problem that should cause us to 
 		# terminate with a non-zero exit code; we don't want to run no tests without realizing it and return success
@@ -680,7 +706,8 @@ class ConsoleLaunchHelper(object):
 			regex = re.compile(self.grep, flags=re.IGNORECASE)
 			descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
 		
-		return self.record, self.purge, self.cycle, self.mode, self.threads, self.outsubdir, descriptors, self.userOptions
+		runnermode = self.modeinclude[0] if len(self.modeinclude)==1 else None # used when supportMultipleModesPerRun=False
+		return self.record, self.purge, self.cycle, runnermode, self.threads, self.outsubdir, descriptors, self.userOptions
 		
 def printUsage():
 	sys.stdout.write("\nPySys System Test Framework (version %s on Python %s.%s.%s)\n" % (

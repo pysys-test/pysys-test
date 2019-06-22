@@ -97,6 +97,9 @@ class XMLDescriptorContainer(object):
 	
 	@ivar id: The testcase identifier; has the value None if this is a 
 	directory config descriptor rather than a testcase descriptor. 
+	Includes a mode suffix if this is a multi-mode test and 
+	supportMultipleModesPerRun=True.
+	@ivar idWithoutMode: The raw testcase identifier with no mode suffix. 
 	@ivar type: The type of the testcase (automated or manual)
 	@ivar state: The state of the testcase (runnable, deprecated or skipped)
 	@ivar skippedReason: If set to a non-empty string, indicates that this 
@@ -106,6 +109,10 @@ class XMLDescriptorContainer(object):
 	@ivar purpose: The purpose of the testcase
 	@ivar groups: A list of the user defined groups the testcase belongs to
 	@ivar modes: A list of the user defined modes the testcase can be run in
+	@ivar primaryMode: Specifies the primary mode for this test id (which may be None 
+	if this test has no modes). 
+	@ivar mode: Specifies which of the possible modes this descriptor represents, or None if this 
+	descriptor has no modes. Only available if supportMultipleModesPerRun=True. 
 	@ivar classname: The classname of the testcase
 	@ivar module: The full path to the python module containing the testcase class
 	@ivar input: The full path to the input directory of the testcase
@@ -116,12 +123,15 @@ class XMLDescriptorContainer(object):
 	order in which testcases will be run; higher values are executed before 
 	low values. The default is 0.0. 
 
+
 	"""
 
 
 	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability, runOrderPriority=0.0, skippedReason=None):
 		"""Create an instance of the XMLDescriptorContainer class.
 		
+		After construction the self.mode attribute is not set until 
+		later cloning and expansion of each container for the supported modes. 
 		"""
 		if skippedReason: state = 'skipped'
 		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
@@ -142,9 +152,11 @@ class XMLDescriptorContainer(object):
 		self.runOrderPriority = runOrderPriority
 		self.skippedReason = skippedReason
 		
-		# these are used only when supportMultipleModesPerRun=true
+		self.primaryMode = None if not self.modes else self.modes[0]
+		
+		# NB: self.mode is set after construction and 
+		# cloning for each supported mode when supportMultipleModesPerRun=true
 		self.idWithoutMode = self.id
-		self.mode = None
 	
 	def toDict(self):
 		"""Converts this descriptor to an (ordered) dict suitable for serialization."""
@@ -158,7 +170,8 @@ class XMLDescriptorContainer(object):
 		d['purpose'] = self.purpose
 		d['groups'] = self.groups
 		d['modes'] = self.modes
-		if self.mode: d['mode'] = self.mode # only if supportMultipleModesPerRun=true
+		d['primaryMode'] = self.primaryMode
+		if hasattr(self, 'mode'): d['mode'] = self.mode # only if supportMultipleModesPerRun=true
 		d['requirements'] = self.traceability
 		d['runOrderPriority'] = self.runOrderPriority
 		d['classname'] = self.classname
@@ -188,7 +201,10 @@ class XMLDescriptorContainer(object):
 			if index != 0: str=str+"                   %s\n" % purpose[index] 
 		str=str+"Test run order:    %s%s\n" % ('+' if self.runOrderPriority>0.0 else '', self.runOrderPriority)
 		str=str+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
-		str=str+"Test modes:        %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.modes) or u'<none>')
+		if getattr(self, 'mode',None): # multi mode per run
+			str=str+"Test mode:         %s\n" % self.mode
+		else: # print available modes instead
+			str=str+"Test modes:        %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.modes) or u'<none>')
 		str=str+"Test classname:    %s\n" % self.classname
 		str=str+"Test module:       %s\n" % self.module
 		str=str+"Test input:        %s\n" % self.input
@@ -197,6 +213,8 @@ class XMLDescriptorContainer(object):
 		str=str+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		str=str+""
 		return str
+	
+	def __repr__(self): return str(self)
 
 class XMLDescriptorCreator(object):
 	'''Helper class to create a test descriptor template.'''
