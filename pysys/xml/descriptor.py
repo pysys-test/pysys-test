@@ -98,6 +98,7 @@ class XMLDescriptorContainer(object):
 	Also used for descriptors specifying defaults for a directory subtree 
 	containing a related set of testcases. 
 	
+	@ivar file: The full path of the testcase descriptor file. 
 	@ivar id: The testcase identifier; has the value None if this is a 
 	directory config descriptor rather than a testcase descriptor. 
 	Includes a mode suffix if this is a multi-mode test and 
@@ -108,16 +109,17 @@ class XMLDescriptorContainer(object):
 	@ivar skippedReason: If set to a non-empty string, indicates that this 
 	testcase is skipped and provides the reason. If this is set then the test 
 	is skipped regardless of the value of `state`. 
-	@ivar title: The title of the testcase
-	@ivar purpose: The purpose of the testcase
+	@ivar title: The one-line title summarizing this testcase
+	@ivar purpose: A detailed description of the purpose of the testcase
 	@ivar groups: A list of the user defined groups the testcase belongs to
 	@ivar modes: A list of the user defined modes the testcase can be run in
 	@ivar primaryMode: Specifies the primary mode for this test id (which may be None 
-	if this test has no modes). 
-	@ivar mode: Specifies which of the possible modes this descriptor represents, or None if the 
-	mode-specific descriptors for this test have not yet been created, or the 
-	descriptor has no modes. Only available if supportMultipleModesPerRun=True. 
-	@ivar classname: The classname of the testcase
+	if this test has no modes). Usually this is the first mode in the list. 
+	@ivar mode: Specifies which of the possible modes this descriptor represents or None if the 
+	the descriptor has no modes. This field is only present after the 
+	raw descriptors have been expanded into multiple mode-specific 
+	descriptors, and only if supportMultipleModesPerRun=True. 
+	@ivar classname: The Python classname to be executed for this testcase
 	@ivar module: The full path to the python module containing the testcase class
 	@ivar input: The full path to the input directory of the testcase
 	@ivar output: The full path to the output parent directory of the testcase
@@ -131,7 +133,8 @@ class XMLDescriptorContainer(object):
 	"""
 
 
-	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability, runOrderPriority=0.0, skippedReason=None):
+	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, 
+			reference=None, traceability=[], runOrderPriority=0.0, skippedReason=None):
 		"""Create an instance of the XMLDescriptorContainer class.
 		
 		After construction the self.mode attribute is not set until 
@@ -169,7 +172,7 @@ class XMLDescriptorContainer(object):
 		"""
 		assert mode, 'Mode must be specified'
 		assert not hasattr(self, 'mode'), 'Cannot create a mode descriptor from a descriptor that already has its mode set'
-		newdescr = copy.copy(self)
+		newdescr = copy.deepcopy(self)
 		newdescr.mode = mode
 		newdescr.id = self.id+'~'+mode
 		return newdescr
