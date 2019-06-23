@@ -16,7 +16,7 @@ tenth entry is equal to 34.
       <group>examples</group>
     </groups>
     <modes>
-        <mode>mode1</mode>
+        <mode>FibonacciMode1</mode>
     </modes>
   </classification>
 

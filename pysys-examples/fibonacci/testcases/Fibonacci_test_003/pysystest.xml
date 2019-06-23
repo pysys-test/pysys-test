@@ -19,8 +19,8 @@ testcase validation to determine that the correct values are calculated.
       <group>external</group>
     </groups>
     <modes>
-        <mode>mode1</mode>
-        <mode>mode2</mode>
+        <mode>FibonacciMode1</mode>
+        <mode>FibonacciMode2</mode>
     </modes>
   </classification>
 

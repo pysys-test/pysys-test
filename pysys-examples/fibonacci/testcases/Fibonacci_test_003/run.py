@@ -3,12 +3,16 @@ from pysys.basetest import BaseTest
 
 class PySysTest(BaseTest):
 	def execute(self):
-		self.startProcess(
-			command=sys.executable, # This program uses the python executable
-			arguments=[self.input+'/fibonacci.py'],
-			stdouterr=self.allocateUniqueStdOutErr('fibonacci'),
-			state=FOREGROUND)
-
+		if self.mode in ['FibonacciMode1', 'FibonacciMode2']:
+			# in a real application, the modes could be different
+			self.startProcess(
+				command=sys.executable, # This program uses the python executable
+				arguments=[self.input+'/fibonacci.py'],
+				stdouterr=self.allocateUniqueStdOutErr('fibonacci'),
+				state=FOREGROUND)
+		else:
+			raise Exception('Unknown mode: "%s"'%self.mode)
+		
 	def validate(self):
 		# first validation diffs the output with the reference
 		self.assertDiff('fibonacci.out', 'ref_fibonacci.out')

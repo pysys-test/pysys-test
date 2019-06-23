@@ -240,17 +240,16 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 			if allmodes.get(m.lower(),None) != m:
 				raise UserError('Unknown mode "%s": the available modes for descriptors in this directory are: %s'%(
 					m, ', '.join(sorted(allmodes.values() or ['<none>']))))
-		del m
 		
 	# first check for duplicate ids
 	ids = {}
 	dups = []
+	d = None
 	for d in descriptors:
 		if d.id in ids:
 			dups.append('%s - in %s and %s'%(d.id, ids[d.id], d.file))
 		else:
 			ids[d.id] = d.file
-	del d
 	if dups:
 		dupmsg = 'Found %d duplicate descriptor ids: %s'%(len(dups), '\n'.join(dups))
 		if os.getenv('PYSYS_ALLOW_DUPLICATE_IDS','').lower()=='true':
@@ -342,7 +341,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				raise
 			except Exception:
 				raise UserError("Unable to locate requested testcase(s): '%s'"%t)
-		del t		
+
 	# trim down the list based on the type
 	if type:
 		index = 0

@@ -65,9 +65,7 @@
 	parameter to the function is not specified. 
 	-->
 	<property name="defaultIgnoreExitStatus" value="false"/>
-
 	
-
 	<!-- 
 	Set default LANG for child processes on Unix. 
 	Useful for making all machines behave the same. Ensure that the specified 
@@ -95,6 +93,8 @@
 	-->
 	<property name="redirectPrintToLogger" value="false"/>
 	
+	<!-- Set this to true unless you need pre-1.4.1 mode behaviour for compatibility reasons. -->
+	<property name="supportMultipleModesPerRun" value="true"/>
 
 	<!-- 
 	Import properties from file (fails silently if the file does not exist). The imported 
