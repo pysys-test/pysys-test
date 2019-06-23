@@ -247,7 +247,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 			# being added onto the directory id; but only do this if spec is non-numeric 
 			# since we don't want to match test_104 against spec 04
 			if specId.isdigit():
-				return re.match('.+_0*%s$'%re.escape(specId), descriptorId))
+				return re.match('.+_0*%s$'%re.escape(specId), descriptorId)
 			else:
 				return descriptorId.endswith(specId) and specId not in testids
 
