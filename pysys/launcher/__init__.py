@@ -161,6 +161,8 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	
 	"""
 	descriptors = loadDescriptors(dir=dir)
+	# must sort by id for range matching and dup detection to work deterministically
+	descriptors.sort(key=lambda d: d.id)
 	
 	supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
 	
@@ -241,9 +243,6 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	if testIdSpecs == []:
 		tests = descriptors
 	else:
-		# must sort by id for range matching to work deterministically
-		descriptors.sort(key=lambda d: d.id)
-
 		testids = set([d.id for d in descriptors])
 		def idMatch(descriptorId, specId):
 			if specId==descriptorId: return True
