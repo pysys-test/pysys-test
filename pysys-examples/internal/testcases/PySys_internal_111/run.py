@@ -13,28 +13,28 @@ class PySysTest(BaseTest):
 	SUBTESTS = [ # name, args, expectedoutput tests (comma-separated)
 	
 		# test the --mode/modeincludes options (including the ! syntax for excludes)
-		('print-noargs', ['print'], 'Test_WithModes~mode1,Test_WithNoModes'),
-		('print-primary', ['print', '--mode', 'PRIMARY'], 'Test_WithModes~mode1,Test_WithNoModes'),
-		('print-all', ['print', '--mode', 'ALL'], 'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithModes~mode3,Test_WithNoModes'),
-		('print-not-primary', ['print', '--mode', '!PRIMARY'], 'Test_WithModes~mode2,Test_WithModes~mode3'),
-		('print-not-mode1', ['print', '--mode', '!mode1,!mode3'], 'Test_WithModes~mode2,Test_WithNoModes'),
-		('print-modes-1-3', ['print', '--modeinclude', 'mode1,mode3'], 'Test_WithModes~mode1,Test_WithModes~mode3'),
-		('print-primary-and-mode', ['print', '--mode', 'PRIMARY,mode2'], 'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithNoModes'),
-		('print-positive-and-negative', ['print', '--mode', 'PRIMARY,mode2,!mode1'], 'Test_WithModes~mode2,Test_WithNoModes'),
-		('print-no-modes', ['print', '--mode', ''], 'Test_WithNoModes'),
-		('print-not-no-modes', ['print', '--mode', '!'], 'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithModes~mode3'),
+		('run-noargs', ['run'], 'Test_WithModes~mode1,Test_WithNoModes'),
+		('run-primary', ['run', '--mode', 'PRIMARY'], 'Test_WithModes~mode1,Test_WithNoModes'),
+		('run-all', ['run', '--mode', 'ALL'], 'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithModes~mode3,Test_WithNoModes'),
+		('run-not-primary', ['run', '--mode', '!PRIMARY'], 'Test_WithModes~mode2,Test_WithModes~mode3'),
+		('run-not-mode1', ['run', '--mode', '!mode1,!mode3'], 'Test_WithModes~mode2,Test_WithNoModes'),
+		('run-modes-1-3', ['run', '--modeinclude', 'mode1,mode3'], 'Test_WithModes~mode1,Test_WithModes~mode3'),
+		('run-primary-and-mode', ['run', '--mode', 'PRIMARY,mode2'], 'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithNoModes'),
+		('run-positive-and-negative', ['run', '--mode', 'PRIMARY,mode2,!mode1'], 'Test_WithModes~mode2,Test_WithNoModes'),
+		('run-no-modes', ['run', '--mode', ''], 'Test_WithNoModes'),
+		('run-not-no-modes', ['run', '--mode', '!'], 'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithModes~mode3'),
 		
 		# test --modeexcludes
-		('print-positive-and-negative-modeexclude', ['print', '--mode', 'PRIMARY', '--mode', 'mode2', '--modeexclude','mode1'], 
+		('run-positive-and-negative-modeexclude', ['run', '--mode', 'PRIMARY', '--mode', 'mode2', '--modeexclude','mode1'], 
 			'Test_WithModes~mode2,Test_WithNoModes'),
-		('print-not-no-modes-modeexclude', ['print', '--modeexclude', ''], 
+		('run-not-no-modes-modeexclude', ['run', '--modeexclude', ''], 
 			'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithModes~mode3'),
 		
 		# testid~mode test specs
-		('print-standard-spec', ['print', '--mode', 'PRIMARY', '--mode', 'mode2', '--modeexclude','mode1', 'Test_WithNoModes', 'Test_WithModes'], 
+		('run-standard-spec', ['run', '--mode', 'PRIMARY', '--mode', 'mode2', '--modeexclude','mode1', 'Test_WithNoModes', 'Test_WithModes'], 
 			'Test_WithModes~mode2,Test_WithNoModes'),
 
-		('print-mode-spec', ['print', 'Test_WithModes~mode2', 'Test_WithModes~mode3'], 
+		('run-mode-spec', ['run', 'Test_WithModes~mode2', 'Test_WithModes~mode3'], 
 			'Test_WithModes~mode2,Test_WithModes~mode3'),
 		
 		# TODO: check for no duplication
@@ -49,7 +49,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		shutil.copytree(self.input, self.output+'/test')
 		
-		# use "pysys print"	to deeply test mode selection and expansion logic
+		# use "pysys run"	to deeply test mode selection and expansion logic
 		for subid, args, _ in reversed(self.SUBTESTS):
 			runPySys(self, subid, args, workingDir='test')
 		
@@ -62,9 +62,9 @@ class PySysTest(BaseTest):
 	def validate(self):
 		for subid, args, expectedids in self.SUBTESTS:
 			self.log.info('%s:', subid)
-			actualids = []
-			with io.open(self.output+'/'+subid+'.out', encoding='ascii') as f:
-				for l in f:
-					if ':' in l: l = l.split(':')[0].strip()
-					if l.strip(): actualids.append(l.strip())
+			actualids = self.getExprFromFile(subid+'.out', expr='Id   *: *([^ \n]+)', returnAll=True)
 			self.assertThat('%r == %r', expectedids, ','.join(actualids))
+			self.assertLineCount(subid+'.out', expr='Test final outcome: *PASSED', condition='==%d'%len(actualids))
+			self.log.info('')
+		
+		#self.assertGrep('run-primary.out', expr=

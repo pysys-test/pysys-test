@@ -82,7 +82,8 @@ class BaseRunner(ProcessUser):
 	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
 	etc), and subsequently cleaned up after test execution. 
 	      
-	@ivar mode: The user defined modes to run the tests within
+	@ivar mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
+	tests will be run with. 
 	@type mode: string
 	@ivar outsubdir: The directory name for the output subdirectory. Typically a relative path,
 	but can also be an absolute path. 
@@ -100,8 +101,8 @@ class BaseRunner(ProcessUser):
 		@param record: Indicates if the test results should be recorded 
 		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
 		@param cycle: The number of times to execute the set of requested testcases
-		@param mode: The user defined mode to run the testcases in as a string, or 
-		a list of the modes we're running with if supportMultipleModesPerRun=True. 
+		@param mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
+		tests will be run with. 
 		@param threads: The number of worker threads to execute the requested testcases
 		@param outsubdir: The name of the output subdirectory
 		@param descriptors: List of XML descriptor containers detailing the set of testcases to be run
@@ -113,13 +114,14 @@ class BaseRunner(ProcessUser):
 		self.record = record
 		self.purge = purge
 		self.cycle = cycle
-		self.mode = mode
 		self.threads = threads
 		self.outsubdir = outsubdir
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
 		self.supportMultipleModesPerRun = getattr(self.project, 'supportMultipleModesPerRun', '').lower()=='true'
+		if not self.supportMultipleModesPerRun:
+			self.mode = mode
 
 		self.startTime = self.project.startTimestamp
 		
@@ -634,8 +636,8 @@ class BaseRunner(ProcessUser):
 
 
 class TestContainer(object):
-	"""Class used for co-ordinating the execution of a single test case.
-	
+	"""Internal class used for co-ordinating the execution of a single test case.
+	@undocumented
 	"""
 
 	__purgedOutputDirs = set() # static field
@@ -684,7 +686,7 @@ class TestContainer(object):
 
 				# set the output subdirectory and purge contents
 				if os.path.isabs(self.runner.outsubdir):
-					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
+					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id) # TODO: without mode?
 				else:
 					self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
 
@@ -767,7 +769,7 @@ class TestContainer(object):
 				elif self.descriptor.state != 'runnable':
 					self.testObj.addOutcome(SKIPPED, 'Not runnable', abortOnError=False)
 							
-				elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
+				elif self.runner.supportMultipleModesPerRun==False and self.runner.mode and self.runner.mode not in self.descriptor.modes:
 					self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode, abortOnError=False)
 				
 				elif len(exc_info) > 0:
