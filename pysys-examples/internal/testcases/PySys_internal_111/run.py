@@ -10,7 +10,7 @@ from pysysinternalhelpers import *
 
 class PySysTest(BaseTest):
 
-	SUBTESTS = [ # name, args, expectedoutput tests (comma-separated)
+	RUN_SUBTESTS = [ # name, args, expectedoutput tests (comma-separated)
 	
 		# test the --mode/modeincludes options (including the ! syntax for excludes)
 		('run-noargs', ['run'], 'Test_WithModes~mode1,Test_WithNoModes'),
@@ -25,7 +25,7 @@ class PySysTest(BaseTest):
 		('run-not-no-modes', ['run', '--mode', '!'], 'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithModes~mode3'),
 		
 		# test --modeexcludes
-		('run-positive-and-negative-modeexclude', ['run', '--mode', 'PRIMARY', '--mode', 'mode2', '--modeexclude','mode1'], 
+		('run-positive-and-negative-modeexclude', ['run', '-m', 'PRIMARY', '--mode', 'mode2', '--modeexclude','mode1'], 
 			'Test_WithModes~mode2,Test_WithNoModes'),
 		('run-not-no-modes-modeexclude', ['run', '--modeexclude', ''], 
 			'Test_WithModes~mode1,Test_WithModes~mode2,Test_WithModes~mode3'),
@@ -45,13 +45,26 @@ class PySysTest(BaseTest):
 		# todo: decide about case sensitivity
 		# check hyphens, dots and other chars in mode strings
 	]
+	
+	PRINT_SUBTESTS = [ # name, args, exectedoutput
+		('print-test-with-modes', ['print', '-m', 'mode3'], 'Test_WithModes'),
+		('print-test-with-modes-none', ['print', '--mode', ''], 'Test_WithModes,Test_WithNoModes'),
+		('print-test-spec-with-modes', ['print', 'Test_WithModes~mode2', 'Test_WithModes~mode3'], 'Test_WithModes~mode2,Test_WithModes~mode3'),
+	
+	]
 
 	def execute(self):
 		shutil.copytree(self.input, self.output+'/test')
 		
-		# use "pysys run"	to deeply test mode selection and expansion logic
-		for subid, args, _ in reversed(self.SUBTESTS):
+		for subid, args, _ in reversed(self.RUN_SUBTESTS):
+			runPySys(self, subid, [args[0]]+['--outdir', 'out-%s'%subid]+args[1:], workingDir='test')
+	
+		for subid, args, _ in reversed(self.PRINT_SUBTESTS):
 			runPySys(self, subid, args, workingDir='test')
+	
+
+		runPySys(self, 'run-specific-test-with-mode-exclusion', ['run', '-m', '!mode1,!mode2,!mode3', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
+		self.assertGrep('run-specific-test-with-mode-exclusion.err', expr='Test "Test_WithModes" cannot be selected with the specified mode(s).')
 		
 		# finally use "pysys run" to touch-test the above for test execution, 
 		# and check correct output dir selection (both relative and absolute) 
@@ -60,11 +73,17 @@ class PySysTest(BaseTest):
 		# TODO; check code coverage
 		
 	def validate(self):
-		for subid, args, expectedids in self.SUBTESTS:
+		for subid, args, expectedids in self.RUN_SUBTESTS:
 			self.log.info('%s:', subid)
 			actualids = self.getExprFromFile(subid+'.out', expr='Id   *: *([^ \n]+)', returnAll=True)
 			self.assertThat('%r == %r', expectedids, ','.join(actualids))
 			self.assertLineCount(subid+'.out', expr='Test final outcome: *PASSED', condition='==%d'%len(actualids))
+			self.log.info('')
+
+		for subid, args, expectedids in self.PRINT_SUBTESTS:
+			self.log.info('%s:', subid)
+			actualids = self.getExprFromFile(subid+'.out', expr='(.[^:]+):', returnAll=True)
+			self.assertThat('%r == %r', expectedids, ','.join(actualids))
 			self.log.info('')
 		
 		#self.assertGrep('run-primary.out', expr=

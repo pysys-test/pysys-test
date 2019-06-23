@@ -37,8 +37,7 @@ class ConsolePrintHelper(object):
 		self.modes = False # print list of available modes
 		self.requirements = False
 		self.json = False
-		self.modeinclude = [] # select based on mode
-		self.modeexclude = []
+		self.modefilter = None # select based on mode
 		self.type = None
 		self.trace = None
 		self.includes = []
@@ -48,13 +47,13 @@ class ConsolePrintHelper(object):
 		self.sort = None
 		self.grep = None
 		self.optionString = 'hfgdrm:a:t:i:e:s:G:'
-		self.optionList = ["help","full","groups","modes","requirements","mode=","modeinclude=","modeexclude=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
+		self.optionList = ["help","full","groups","modes","requirements","mode=","type=","trace=","include=","exclude=", "json", "sort=", "grep="] 
 		
 
 	def printUsage(self):
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
 
-		#######                                                                                |
+		#######                                                                                                                       |
 		print("\nPySys System Test Framework (version %s): Console print test helper" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("    where options include:")
@@ -69,19 +68,12 @@ class ConsolePrintHelper(object):
 		print("            --json                 print full information as JSON")
 		print("")
 		print("    selection/filtering options:")
-		print("       -G | --grep      STRING     print tests whose title or id contains the specified regex")
+		print("       -G | --grep      STRING     print only tests whose title or id contains the specified regex")
 		print("                                   (matched case insensitively)")
-		print("       -m | --mode | --modeinclude ALL,PRIMARY,!PRIMARY,my-mode1,!my-mode2,...")
-		print("                                   print tests that run in the specifies mode(s):")
-		print("                                    - use PRIMARY to select the test's")
-		print("                                      first/default mode")
-		print("                                    - use ALL to select all modes")
-		print("                                    - use !MODE as an alias for modeexclude")
-		print("          | --modeexclude          my-mode1,my-mode2,...")
-		print("                                   print tests that do not run in these mode(s)")
-		print("       -a | --type      STRING     print tests of supplied type (auto or manual, default all)")
-		print("       -t | --trace     STRING     print tests which cover requirement id ") 
-		print("       -i | --include   STRING     print tests in included group (can be specified multiple times)")
+		print("       -m | --mode                 print only tests that run in the specifies mode")
+		print("       -a | --type      STRING     print only tests of supplied type (auto or manual, default all)")
+		print("       -t | --trace     STRING     print only tests which cover requirement id ") 
+		print("       -i | --include   STRING     print only tests in included group (can be specified multiple times)")
 		print("       -e | --exclude   STRING     do not print tests in excluded group (can be specified multiple times)")
 		print("")
 		print("   and where [tests] describes a set of tests to be printed to the console. Note that multiple test ")
@@ -123,11 +115,9 @@ class ConsolePrintHelper(object):
 			elif option in ("-r", "--requirements"):
 				self.requirements = True
 				
-			elif option in ("-m", "--mode", "--modeinclude"):
-				self.modeinclude = self.modeinclude+[x.strip() for x in value.split(',')]
-
-			elif option in ["--modeexclude"]:
-				self.modeexclude = self.modeexclude+[x.strip() for x in value.split(',')]
+			elif option in ("-m", "--mode"):
+				self.modefilter = value
+				if ',' in value or '!' in value: raise UserError('Only one mode can be specified when printing tests')
 
 			elif option in ("-a", "--type"):
 				self.type = value
@@ -158,7 +148,8 @@ class ConsolePrintHelper(object):
 				sys.exit(1)
 
 	def printTests(self):
-			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, modeincludes=self.modeinclude, modeexcludes=self.modeexclude)
+			# nb: mode filtering happens later
+			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, expandmodes=False)
 			
 			if self.grep:
 				regex = re.compile(self.grep, flags=re.IGNORECASE)
@@ -223,7 +214,7 @@ class ConsolePrintHelper(object):
 			supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
 
 			for descriptor in descriptors:
-				if not supportMultipleModesPerRun and len(self.modeinclude)==1 and not self.modeinclude[0] in descriptor.modes: continue
+				if self.modefilter and self.modefilter not in descriptor.modes: continue
 				padding = " " * (maxsize - len(descriptor.id))
 				if not self.full:
 					print("%s:%s%s" % (descriptor.id, padding, descriptor.title))

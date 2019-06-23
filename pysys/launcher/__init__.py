@@ -139,7 +139,7 @@ def loadDescriptors(dir=None):
 			
 	return descriptors
 
-def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[]):
+def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[], expandmodes=True):
 	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
 	
 	@param testIdSpecs: A list of strings specifying the set of testcase identifiers
@@ -152,6 +152,9 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	must contain at most one entry unless supportMultipleModesPerRun=True. 
 	@param modeexcludes: A list specifying the modes to be excluded; 
 	only supported if supportMultipleModesPerRun=True. 
+	@param expandmodes: Set to False to disable expanding a test with multiple
+	modes into separate descriptors for each one (used for pysys print) 
+	if supportMultipleModesPerRun=True. 
 	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
 	@rtype: list
 	@raises UserError: Raised if not testcases can be found or are returned by the requested input parameters
@@ -279,8 +282,9 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 								break
 						matches = descriptors[index:index+1]
 						if supportMultipleModesPerRun and not modedescriptors[matches[0].id]:
-							# if user explicitly specified an individual test and excluded all modes it can run in, we shouldn't silently skip/exclude it
-							raise UserError('Test "%s" cannot be selected with the specified mode(s).')
+							# if user explicitly specified an individual test and excluded all modes it can run in, 
+							# we shouldn't silently skip/exclude it as they clearly made a mistake
+							raise UserError('Test "%s" cannot be selected with the specified mode.s..'%matches[0].id)
 
 				# numeric ranges (inline mode specifiers not permitted from here on, in the interests of simplicity)
 				elif re.search('^:[\w_.]*', t):
@@ -362,7 +366,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				index = index + 1
 	
 	# expand based on modes
-	if supportMultipleModesPerRun: 
+	if supportMultipleModesPerRun and expandmodes: 
 		expandedtests = []
 		for t in tests:
 			if getattr(t, 'mode', None): # this indicates a test id~mode that was explicitly specified, so does not need expanding
