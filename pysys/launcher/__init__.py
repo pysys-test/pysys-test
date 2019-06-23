@@ -162,7 +162,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	"""
 	descriptors = loadDescriptors(dir=dir)
 	# must sort by id for range matching and dup detection to work deterministically
-	descriptors.sort(key=lambda d: d.id)
+	descriptors.sort(key=lambda d: [d.id, d.file])
 	
 	supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
 	
