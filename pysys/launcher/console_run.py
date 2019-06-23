@@ -80,7 +80,7 @@ class ConsoleLaunchHelper(object):
 		print("    selection/filtering options:")
 		print("     -G | --grep      STRING      run only tests whose title or id contains the specified regex")
 		print("                                  (matched case insensitively)")
-		print("     -m | --mode | --modeinclude ALL,PRIMARY,!PRIMARY,my-mode1,!my-mode2,...")
+		print("     -m | --mode | --modeinclude  ALL,PRIMARY,!PRIMARY,my-mode1,!my-mode2,...")
 		print("                                  run tests in the specifies mode(s):")
 		print("                                   - use PRIMARY to select the test's")
 		print("                                     first/main mode (this is the default)")
