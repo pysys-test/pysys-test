@@ -118,6 +118,87 @@ as Java), this is easy to achieve by following the same pattern:
   directory PySys collected it into, so there is a permanent record of 
   any changes in coverage over time. 
 
+Running tests in multiple modes
+-------------------------------
+One of the most powerful features of PySys is the ability to run the same test 
+in multiple modes from a single execution. This could be useful for cases such 
+as a web test that needs to pass against multiple supported web browsers, 
+or a set of tests that should be run against various different database but 
+can also be run against a mocked database for quick local development. 
+
+Using modes is fairly straightforward. First make sure your project 
+configuration includes::
+
+   <property name="supportMultipleModesPerRun" value="true"/>
+   
+If you created your project using PySys 1.4.1 or later this will already be 
+present. Next you should edit the `pysystest.xml` files for tests that 
+need to run in multiple modes, and add a list of the supported modes::
+
+   <classification>
+	<groups>...</groups>
+	<modes>
+		<mode>MockDatabase</mode>
+		<mode>MyDatabase_2.0</mode>
+	</modes>
+   </classification>
+
+When naming modes, TitleCase is recommended, and dot and underscore characters 
+may be used. PySys will give an error if you use different capitalization for 
+the same mode in different places, as this would likely result in test bugs. 
+
+The first mode listed is designated the "primary" mode which means it's the 
+one that is used by default when running your tests without a `--mode` 
+argument. It's best to choose either the fastest mode or else the one that 
+is most likely to show up interesting issues as the primary mode. 
+
+In large projects you may wish to configure modes in a `pysysdirconfig.xml` 
+file in a parent directory rather than in `pysystest.xml`, so that they apply 
+automatically to all the nested testcases, and so there's a single place to 
+edit the modes list if you need to change them later. 
+
+In your test case `run.py` (and/or in your test's base class if you have 
+customized it) you can use `self.mode` to detect which mode the test is running 
+in and alter your behaviour accordingly::
+
+  if self.mode == 'MockDatabase': 
+	return MockDB()
+  elif self.mode == 'MyDatabase_2.0': 
+    return startMyDatabase()
+  else: raise Exception('Unknown mode: "%s"'%self.mode)
+
+Finally, PySys provides a rich variety of `pysys run` arguments to control 
+which modes your tests will run with. By default it will run every test in its 
+primary mode (for tests with no mode, the primary mode is `self.mode==None`) - 
+which is great for quick checks during development of your application and 
+testcases. 
+
+Your main test run (perhaps in a CI job) probably wants to run tests in all 
+modes::
+
+  pysys run --mode ALL --threads auto
+
+You can also specify specifies modes to run in, or to run everything except 
+specified modes::
+
+  pysys run --mode MyMode1,MyMode2
+  pysys run --mode !MyMode3,!MyMode4
+
+After running all your tests in their primary mode, it could 
+be useful to run them in every mode other than the primary one::
+
+  pysys run --mode !PRIMARY
+
+For reporting purposes, all testcases must have a unique id. With a multiple 
+mode test this is achieved by having the id automatically include a ~Mode 
+suffix. 
+
+In addition to the `--mode` argument, it is possible to run a specific test in 
+a specific mode. This can be useful when you have a few miscellaneous test 
+failures and just want to re-run the failing tests::
+
+  pysys run MyTest_001~MockDatabase MyTest_020~MyDatabase_2.0
+
 Test ids and structuring large projects
 ---------------------------------------
 Each test has a unique `id` which is used in various places such as when 
