@@ -64,7 +64,7 @@ class PySysTest(BaseTest):
 	
 
 		runPySys(self, 'run-specific-test-with-mode-exclusion', ['run', '-m', '!mode1,!mode2,!mode3', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('run-specific-test-with-mode-exclusion.err', expr='Test "Test_WithModes" cannot be selected with the specified mode(s).')
+		self.assertGrep('run-specific-test-with-mode-exclusion.err', expr='Test "Test_WithModes" cannot be selected with the specified mode[(]s[)].')
 		
 		# finally use "pysys run" to touch-test the above for test execution, 
 		# and check correct output dir selection (both relative and absolute) 
