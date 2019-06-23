@@ -127,7 +127,7 @@ class XMLDescriptorContainer(object):
 	order in which testcases will be run; higher values are executed before 
 	low values. The default is 0.0. 
 
-
+	@undocumented: _createDescriptorForMode
 	"""
 
 
@@ -166,7 +166,6 @@ class XMLDescriptorContainer(object):
 		"""
 		Internal API for creating a test descriptor for a specific mode of this test.
 		
-		@undocumented
 		"""
 		assert mode, 'Mode must be specified'
 		assert not hasattr(self, 'mode'), 'Cannot create a mode descriptor from a descriptor that already has its mode set'

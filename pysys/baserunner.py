@@ -25,7 +25,7 @@ base runner as a list of object references, so that the base runner can then ite
 list to perform the test execution. For more information see the L{pysys.baserunner.BaseRunner} 
 API documentation. 
 
-@undocumented: global_lock, N_CPUS
+@undocumented: global_lock, N_CPUS, TestContainer
 """
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
@@ -637,7 +637,7 @@ class BaseRunner(ProcessUser):
 
 class TestContainer(object):
 	"""Internal class used for co-ordinating the execution of a single test case.
-	@undocumented
+	
 	"""
 
 	__purgedOutputDirs = set() # static field
