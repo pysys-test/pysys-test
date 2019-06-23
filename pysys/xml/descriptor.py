@@ -20,6 +20,7 @@
 from __future__ import print_function
 import os.path, logging, xml.dom.minidom
 import collections
+import copy
 
 from pysys.constants import *
 from pysys.exceptions import UserError
@@ -72,6 +73,8 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
     <groups>
       <group>%s</group>
     </groups>
+    <modes>
+    </modes>
   </classification>
 
   <!-- <skipped reason=""/> -->
@@ -111,7 +114,8 @@ class XMLDescriptorContainer(object):
 	@ivar modes: A list of the user defined modes the testcase can be run in
 	@ivar primaryMode: Specifies the primary mode for this test id (which may be None 
 	if this test has no modes). 
-	@ivar mode: Specifies which of the possible modes this descriptor represents, or None if this 
+	@ivar mode: Specifies which of the possible modes this descriptor represents, or None if the 
+	mode-specific descriptors for this test have not yet been created, or the 
 	descriptor has no modes. Only available if supportMultipleModesPerRun=True. 
 	@ivar classname: The classname of the testcase
 	@ivar module: The full path to the python module containing the testcase class
@@ -153,10 +157,23 @@ class XMLDescriptorContainer(object):
 		self.skippedReason = skippedReason
 		
 		self.primaryMode = None if not self.modes else self.modes[0]
+		self.idWithoutMode = self.id
 		
 		# NB: self.mode is set after construction and 
 		# cloning for each supported mode when supportMultipleModesPerRun=true
-		self.idWithoutMode = self.id
+	
+	def _createDescriptorForMode(self, mode):
+		"""
+		Internal API for creating a test descriptor for a specific mode of this test.
+		
+		@undocumented
+		"""
+		assert mode, 'Mode must be specified'
+		assert not hasattr(self, 'mode'), 'Cannot create a mode descriptor from a descriptor that already has its mode set'
+		newdescr = copy.copy(self)
+		newdescr.mode = mode
+		newdescr.id = self.id+'~'+mode
+		return newdescr
 	
 	def toDict(self):
 		"""Converts this descriptor to an (ordered) dict suitable for serialization."""

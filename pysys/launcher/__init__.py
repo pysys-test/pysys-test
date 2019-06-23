@@ -36,7 +36,6 @@ __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
 import locale
-import copy
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -160,7 +159,6 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	"""
 	descriptors = loadDescriptors(dir=dir)
 
-	MODE_ID_SEPARATOR = '~'
 	supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
 	
 	# as a convenience support !mode syntax in the includes
@@ -168,13 +166,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	modeincludes = [x for x in modeincludes if not x.startswith('!')]
 	for x in modeexcludes: 
 		if x.startswith('!'): raise UserError('Cannot use ! in a mode exclusion: "%s"'%x)
-
-	def makeNewDescriptorForMode(descriptor, mode):
-		newdescr = copy.copy(descriptor)
-		newdescr.mode = mode
-		newdescr.id = descriptor.id+MODE_ID_SEPARATOR+mode
-		return newdescr
-
+		
 	if not supportMultipleModesPerRun: 
 		if len(modeincludes)>1: raise UserError('Cannot specify multiple modes unless supportMultipleModesPerRun=True')
 		if modeexcludes: raise UserError('Cannot specify mode exclusions unless supportMultipleModesPerRun=True')
@@ -221,7 +213,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 						): 
 						continue
 					
-					thisdescriptorlist.append(makeNewDescriptorForMode(d, m))
+					thisdescriptorlist.append(d._createDescriptorForMode(m))
 	
 	# first check for duplicate ids
 	ids = {}
@@ -262,16 +254,16 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				index = index1 = index2 = -1
 				t = t.rstrip('/\\')
 
-				if re.search('^[\w_.'+MODE_ID_SEPARATOR+']*$', t): # single test id (not a range or regex)
-					if MODE_ID_SEPARATOR in t:
-						testspecid, testspecmode = t.split(MODE_ID_SEPARATOR)
+				if re.search('^[\w_.~]*$', t): # single test id (not a range or regex)
+					if '~' in t:
+						testspecid, testspecmode = t.split('~')
 						# first match the id, then the mode
 						for i in range(0,len(descriptors)):
 							if idMatch(descriptors[i].id, testspecid): 
 								index = i
 								break
 						if index >= 0:
-							matches = [makeNewDescriptorForMode(descriptors[index], testspecmode)]
+							matches = [descriptors[index]._createDescriptorForMode(testspecmode)]
 							# note test id+mode combinations selected explicitly like this way are included regardless of what modes are enabled/disabled
 
 					else: # normal case where it's not a mode
