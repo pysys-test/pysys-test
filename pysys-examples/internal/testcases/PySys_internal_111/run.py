@@ -35,10 +35,7 @@ class PySysTest(BaseTest):
 			'Test_WithModes~mode2,Test_WithNoModes'),
 
 		('run-mode-spec', ['run', 'Test_WithModes~mode2', 'Test_WithModes~mode3'], 
-			'Test_WithModes~mode2,Test_WithModes~mode3'),
-		
-		# todo: decide about case sensitivity
-		# check hyphens, dots and other chars in mode strings
+			'Test_WithModes~mode2,Test_WithModes~mode3'),		
 	]
 	
 	PRINT_SUBTESTS = [ # name, args, exectedoutput
@@ -51,6 +48,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		shutil.copytree(self.input, self.output+'/test')
 
+		# output directory handling with modes
 		runPySys(self, 'run-relative-outdir', 
 			['run', '--outdir', 'outdir-relative', '--mode=ALL'], workingDir='test')
 
@@ -59,7 +57,8 @@ class PySysTest(BaseTest):
 
 		runPySys(self, 'run-absolute-outdir-cycles', 
 			['run', '--outdir', self.output+'/outdir-absolute-cycles', '-c', '2'], workingDir='test')
-				
+			
+		# detailed testcase selection testing
 		for subid, args, _ in reversed(self.RUN_SUBTESTS):
 			runPySys(self, subid, [args[0]]+['--outdir', 'out-%s'%subid]+args[1:], workingDir='test')
 	
@@ -67,17 +66,31 @@ class PySysTest(BaseTest):
 			runPySys(self, subid, args, workingDir='test')
 	
 		# failure cases
-		runPySys(self, 'run-specific-test-with-mode-exclusion-error', 
+		runPySys(self, 'error-run-specific-test-with-mode-exclusion', 
 			['run', '-m', '!mode1,!mode2,!mode3', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('run-specific-test-with-mode-exclusion-error.err', 
+		self.assertGrep('error-run-specific-test-with-mode-exclusion.err', 
 			expr='Test "Test_WithModes" cannot be selected with the specified mode[(]s[)].')
 
-		runPySys(self, 'run-mode-with-range-error', 
+		runPySys(self, 'error-run-mode-with-range', 
 			['run', 'SomeId1:2~MyMode'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('run-mode-with-range-error.err', 
+		self.assertGrep('error-run-mode-with-range.err', 
 			expr='A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
+
+		runPySys(self, 'error-run-nonexistent-mode', 
+			['run', '--mode', 'MyNonExistentMode', 'MyTest'], workingDir='test', expectedExitStatus=10)
+		self.assertGrep('error-run-nonexistent-mode.err', 
+			expr='ERROR: Unknown mode "MyNonExistentMode": the available modes for descriptors in this directory are: mode1, mode2, mode3')
+
+		runPySys(self, 'error-run-wrong-case', 
+			['run', '--mode', 'mOde1', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
+		self.assertGrep('error-run-wrong-case.err', 
+			expr='ERROR: Unknown mode "mOde1": the available modes for descriptors in this directory are: mode1, mode2, mode3')
+
+		runPySys(self, 'error-run-nonexistent-spec-mode', 
+			['run', 'Test_WithModes~NonExistentMode', ], workingDir='test', expectedExitStatus=10)
+		self.assertGrep('error-run-nonexistent-spec-mode.err', 
+			expr='ERROR: Unknown mode "NonExistentMode": the available modes for this test are: mode1, mode2, mode3')
 		
-		# TODO; check code coverage
 		
 	def validate(self):
 		for subid, args, expectedids in self.RUN_SUBTESTS:

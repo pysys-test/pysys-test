@@ -171,7 +171,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	modeincludes = [x for x in modeincludes if not x.startswith('!')]
 	for x in modeexcludes: 
 		if x.startswith('!'): raise UserError('Cannot use ! in a mode exclusion: "%s"'%x)
-		
+	
 	if not supportMultipleModesPerRun: 
 		if len(modeincludes)>1: raise UserError('Cannot specify multiple modes unless supportMultipleModesPerRun=True')
 		if modeexcludes: raise UserError('Cannot specify mode exclusions unless supportMultipleModesPerRun=True')
@@ -187,6 +187,10 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				modeincludes = [MODES_PRIMARY]
 
 		modedescriptors = {} # populate this with testid:[descriptors list]
+		
+		allmodes = {} # populate this as we go; could have used a set, but instead use a dict so we can check or capitalization mismatches easily at the same time; 
+		#the key is a lowercase version of mode name, value is the canonical capitalized name
+		
 		for d in descriptors:
 			if not d.modes:
 				# for tests that have no modes, there is only one descriptor and it's treated as the primary mode; 
@@ -203,7 +207,17 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				
 				# create a copy of the descriptor for each selected mode
 				for m in d.modes: 
-					if m in [MODES_ALL, MODES_PRIMARY]: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
+					if m.upper() in [MODES_ALL, MODES_PRIMARY]: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
+					try:
+						canonicalmodecapitalization = allmodes[m.lower()]
+					except KeyError:
+						allmodes[m.lower()] = m
+					else:
+						if m != canonicalmodecapitalization:
+							# this is useful to detect early; it's almost certain to lead to buggy tests 
+							# since people would be comparing self.mode to a string that might have different capitalization
+							raise UserError('Cannot have multiple modes with same name but different capitalization: "%s" and "%s"'%(m, canonicalmodecapitalization))
+					
 					# apply modes filter
 					isprimary = m==d.primaryMode
 					
@@ -219,7 +233,15 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 						continue
 					
 					thisdescriptorlist.append(d._createDescriptorForMode(m))
-	
+		
+		# don't permit the user to specify a non existent mode by mistake
+		for m in modeincludes+modeexcludes:
+			if (not m) or m.upper() in [MODES_ALL, MODES_PRIMARY]: continue
+			if allmodes.get(m.lower(),None) != m:
+				raise UserError('Unknown mode "%s": the available modes for descriptors in this directory are: %s'%(
+					m, ', '.join(sorted(allmodes.values() or ['<none>']))))
+		del m
+		
 	# first check for duplicate ids
 	ids = {}
 	dups = []
@@ -228,6 +250,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 			dups.append('%s - in %s and %s'%(d.id, ids[d.id], d.file))
 		else:
 			ids[d.id] = d.file
+	del d
 	if dups:
 		dupmsg = 'Found %d duplicate descriptor ids: %s'%(len(dups), '\n'.join(dups))
 		if os.getenv('PYSYS_ALLOW_DUPLICATE_IDS','').lower()=='true':
@@ -271,6 +294,10 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 								index = i
 								break
 						if index >= 0:
+							if testspecmode not in descriptors[index].modes:
+								raise UserError('Unknown mode "%s": the available modes for this test are: %s'%(
+									testspecmode, ', '.join(sorted(descriptors[index].modes or ['<none>']))))
+
 							matches = [descriptors[index]._createDescriptorForMode(testspecmode)]
 							# note test id+mode combinations selected explicitly like this way are included regardless of what modes are enabled/disabled
 
@@ -315,7 +342,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				raise
 			except Exception:
 				raise UserError("Unable to locate requested testcase(s): '%s'"%t)
-				
+		del t		
 	# trim down the list based on the type
 	if type:
 		index = 0
