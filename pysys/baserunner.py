@@ -684,11 +684,14 @@ class TestContainer(object):
 				self.testFileHandlerStdout.setLevel(stdoutHandler.level)
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout])
 
-				# set the output subdirectory and purge contents
+				# set the output subdirectory and purge contents; must be unique per mode (but not per cycle)
 				if os.path.isabs(self.runner.outsubdir):
-					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id) # TODO: without mode?
+					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
+					# don't need to add mode to this path as it's already in the id
 				else:
 					self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
+					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
+						self.outsubdir += '~'+self.descriptor.mode
 
 				if not self.runner.validateOnly: 
 					if self.runner.cycle <= 1: 
@@ -740,8 +743,6 @@ class TestContainer(object):
 					runpy_namespace = {}
 					exec(runpycode, runpy_namespace)
 					outsubdir = self.outsubdir
-					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
-						outsubdir += '~'+self.descriptor.mode
 					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, outsubdir, self.runner)
 					del runpy_namespace
 		

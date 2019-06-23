@@ -50,7 +50,16 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		shutil.copytree(self.input, self.output+'/test')
-		
+
+		runPySys(self, 'run-relative-outdir', 
+			['run', '--outdir', 'outdir-relative', '--mode=ALL'], workingDir='test')
+
+		runPySys(self, 'run-absolute-outdir', 
+			['run', '--outdir', self.output+'/outdir-absolute', '--mode=ALL'], workingDir='test')
+
+		runPySys(self, 'run-absolute-outdir-cycles', 
+			['run', '--outdir', self.output+'/outdir-absolute-cycles', '-c', '2'], workingDir='test')
+				
 		for subid, args, _ in reversed(self.RUN_SUBTESTS):
 			runPySys(self, subid, [args[0]]+['--outdir', 'out-%s'%subid]+args[1:], workingDir='test')
 	
@@ -58,15 +67,15 @@ class PySysTest(BaseTest):
 			runPySys(self, subid, args, workingDir='test')
 	
 		# failure cases
-		runPySys(self, 'run-specific-test-with-mode-exclusion-error', ['run', '-m', '!mode1,!mode2,!mode3', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('run-specific-test-with-mode-exclusion-error.err', expr='Test "Test_WithModes" cannot be selected with the specified mode[(]s[)].')
+		runPySys(self, 'run-specific-test-with-mode-exclusion-error', 
+			['run', '-m', '!mode1,!mode2,!mode3', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
+		self.assertGrep('run-specific-test-with-mode-exclusion-error.err', 
+			expr='Test "Test_WithModes" cannot be selected with the specified mode[(]s[)].')
 
-		runPySys(self, 'run-mode-with-range-error', ['run', 'SomeId1:2~MyMode'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('run-mode-with-range-error.err', expr='A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
-		
-		# finally use "pysys run" to touch-test the above for test execution, 
-		# and check correct output dir selection (both relative and absolute) 
-		# and multi-cyle behaviour
+		runPySys(self, 'run-mode-with-range-error', 
+			['run', 'SomeId1:2~MyMode'], workingDir='test', expectedExitStatus=10)
+		self.assertGrep('run-mode-with-range-error.err', 
+			expr='A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
 		
 		# TODO; check code coverage
 		
@@ -83,5 +92,15 @@ class PySysTest(BaseTest):
 			actualids = self.getExprFromFile(subid+'.out', expr='(.[^:]+):', returnAll=True)
 			self.assertThat('%r == %r', expectedids, ','.join(actualids))
 			self.log.info('')
+			
+		# test output dirs must be unique; mode gets added somewhere different for relative vs absolue outdirs
+		self.assertPathExists('outdir-absolute/Test_WithNoModes/run.log')
+		self.assertPathExists('outdir-absolute/Test_WithModes~mode1/run.log')
+		self.assertPathExists('outdir-absolute/Test_WithModes~mode2/run.log')
 		
-		#self.assertGrep('run-primary.out', expr=
+		self.assertPathExists('test/Test_WithNoModes/Output/outdir-relative/run.log')
+		self.assertPathExists('test/Test_WithModes/Output/outdir-relative~mode1/run.log')
+		self.assertPathExists('test/Test_WithModes/Output/outdir-relative~mode2/run.log')
+
+		self.assertPathExists('outdir-absolute-cycles/Test_WithModes~mode1/cycle2/run.log')
+		
