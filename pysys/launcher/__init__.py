@@ -284,8 +284,9 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 							# if user explicitly specified an individual test and excluded all modes it can run in, 
 							# we shouldn't silently skip/exclude it as they clearly made a mistake
 							raise UserError('Test "%s" cannot be selected with the specified mode(s).'%matches[0].id)
-
-				# numeric ranges (inline mode specifiers not permitted from here on, in the interests of simplicity)
+				elif '~' in t:
+					# The utility of this would be close to zero and lots more to implement/test, so not worth it
+					raise UserError('A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
 				elif re.search('^:[\w_.]*', t):
 					for i in range(0,len(descriptors)):
 						if idMatch(descriptors[i].id, t.split(':')[1]): index = i

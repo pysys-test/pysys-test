@@ -37,11 +37,6 @@ class PySysTest(BaseTest):
 		('run-mode-spec', ['run', 'Test_WithModes~mode2', 'Test_WithModes~mode3'], 
 			'Test_WithModes~mode2,Test_WithModes~mode3'),
 		
-		# TODO: check for no duplication
-		
-		# todo: no modes
-		# interaction with test ids, and regexes, and suffix matching
-		# ensure error handling if someone tries a range spec or similar with a ~
 		# todo: decide about case sensitivity
 		# check hyphens, dots and other chars in mode strings
 	]
@@ -62,9 +57,12 @@ class PySysTest(BaseTest):
 		for subid, args, _ in reversed(self.PRINT_SUBTESTS):
 			runPySys(self, subid, args, workingDir='test')
 	
+		# failure cases
+		runPySys(self, 'run-specific-test-with-mode-exclusion-error', ['run', '-m', '!mode1,!mode2,!mode3', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
+		self.assertGrep('run-specific-test-with-mode-exclusion-error.err', expr='Test "Test_WithModes" cannot be selected with the specified mode[(]s[)].')
 
-		runPySys(self, 'run-specific-test-with-mode-exclusion', ['run', '-m', '!mode1,!mode2,!mode3', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('run-specific-test-with-mode-exclusion.err', expr='Test "Test_WithModes" cannot be selected with the specified mode[(]s[)].')
+		runPySys(self, 'run-mode-with-range-error', ['run', 'SomeId1:2~MyMode'], workingDir='test', expectedExitStatus=10)
+		self.assertGrep('run-mode-with-range-error.err', expr='A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
 		
 		# finally use "pysys run" to touch-test the above for test execution, 
 		# and check correct output dir selection (both relative and absolute) 
