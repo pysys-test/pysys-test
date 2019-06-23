@@ -283,7 +283,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 						if supportMultipleModesPerRun and not modedescriptors[matches[0].id]:
 							# if user explicitly specified an individual test and excluded all modes it can run in, 
 							# we shouldn't silently skip/exclude it as they clearly made a mistake
-							raise UserError('Test "%s" cannot be selected with the specified mode.s..'%matches[0].id)
+							raise UserError('Test "%s" cannot be selected with the specified mode(s).'%matches[0].id)
 
 				# numeric ranges (inline mode specifiers not permitted from here on, in the interests of simplicity)
 				elif re.search('^:[\w_.]*', t):
