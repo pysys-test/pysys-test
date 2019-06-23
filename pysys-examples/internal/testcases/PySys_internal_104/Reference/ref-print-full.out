@@ -18,7 +18,8 @@
          "root-mode2", 
          "testcase-mode1", 
          "testcase-mode2"
-      ], 
+      ],
+      "primaryMode": "root-mode1",
       "requirements": [
          "root-req1", 
          "root-req2", 
@@ -47,7 +48,8 @@
       "modes": [
          "root-mode1", 
          "root-mode2"
-      ], 
+      ],
+      "primaryMode": "root-mode1",
       "requirements": [
          "root-req1", 
          "root-req2"
@@ -79,6 +81,7 @@
          "dir2-mode",
          "dir3-mode"
       ],
+      "primaryMode": "root-mode1",
       "requirements": [
          "root-req1",
          "root-req2",

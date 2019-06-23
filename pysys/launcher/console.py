@@ -279,8 +279,9 @@ class ConsolePrintHelper(object):
 				regex = re.compile(self.grep, flags=re.IGNORECASE)
 				descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
 			
-			# note that file is not a unique key if running a test in multiple modes
-			if (not self.sort) or (self.sort.lower()=='id'):
+			if not self.sort:
+				descriptors.sort(key=lambda d: d.file)
+			elif (self.sort.lower()=='id'):
 				descriptors.sort(key=lambda d: d.id)
 			elif self.sort.lower().replace('-','') in ['runorderpriority', 'runorder', 'order']:
 				descriptors.sort(key=lambda d: [-d.runOrderPriority, d.file, d.id])

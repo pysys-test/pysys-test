@@ -53,5 +53,6 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		raise
 	finally: # in case there was any error printed to stderr
 		processowner.logFileContents(stdouterr+'.err')
-	if result.exitStatus!=0 and result.exitStatus!=expectedExitStatus: processowner.addOutcome(FAILED, 'Expected exit status %d but got %s for %s'%(expectedExitStatus, result.exitStatus, result), abortOnError=False)
+	# checking for zero exit status happens in startProcess so no need to replicate here
+	if expectedExitStatus!=0 and result.exitStatus!=expectedExitStatus: processowner.addOutcome(FAILED, 'Expected exit status %d but got %s for %s'%(expectedExitStatus, result.exitStatus, result), abortOnError=False)
 	return result
