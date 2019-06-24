@@ -231,7 +231,7 @@ class ConsoleLaunchHelper(object):
 		
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, 
 			modeincludes=self.modeinclude, modeexcludes=self.modeexclude)
-		descriptors = sorted(descriptors, key=lambda x: (-x.runOrderPriority, x.file, x.id))
+		descriptors.sort(key=lambda x: (-x.runOrderPriority, x._defaultSortKey))
 
 		# No exception handler above, as any createDescriptors failure is really a fatal problem that should cause us to 
 		# terminate with a non-zero exit code; we don't want to run no tests without realizing it and return success

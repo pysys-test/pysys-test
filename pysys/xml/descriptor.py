@@ -168,6 +168,12 @@ class XMLDescriptorContainer(object):
 		self.primaryMode = None if not self.modes else self.modes[0]
 		self.idWithoutMode = self.id
 		
+		# for internal use only (we cache this to speed up sorting based on path), 
+		# and only for tests not dir configs; 
+		# convert to lowercase to ensure a canonical sort order on case insensitive OSes; 
+		# add id to be sure they're unique (e.g. including mode)
+		if self.file: self._defaultSortKey = self.file.lower()+'/'+self.id
+		
 		# NB: self.mode is set after construction and 
 		# cloning for each supported mode when supportMultipleModesPerRun=true
 	
@@ -181,6 +187,7 @@ class XMLDescriptorContainer(object):
 		newdescr = copy.deepcopy(self)
 		newdescr.mode = mode
 		newdescr.id = self.id+'~'+mode
+		newdescr._defaultSortKey = self._defaultSortKey+'~'+mode
 		return newdescr
 	
 	def toDict(self):

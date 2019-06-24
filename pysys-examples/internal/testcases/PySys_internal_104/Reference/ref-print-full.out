@@ -1,5 +1,39 @@
 [
    {
+      "id": "rootprefix_dir3prefix_Test_SubdirMinimalDescriptor", 
+      "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml", 
+      "type": "manual", 
+      "state": "skipped", 
+      "skippedReason": "<unknown skipped reason>", 
+      "title": "Nested testcase", 
+      "purpose": "Nested purpose", 
+      "groups": [
+         "root-group1",
+         "root-group2",
+         "dir2-group",
+         "dir3-group"
+      ],
+      "modes": [
+         "root-mode1",
+         "root-mode2",
+         "dir2-mode",
+         "dir3-mode"
+      ],
+      "primaryMode": "root-mode1",
+      "requirements": [
+         "root-req1",
+         "root-req2",
+         "dir2-req",
+         "dir3-req"
+      ],
+      "runOrderPriority": 5.2,
+      "classname": "PySysTest-dir3",
+      "module": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\run_dir3",
+      "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Input-dir3",
+      "output": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Output-dir3",
+      "reference": "c:\\dev/xxxx/pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Reference-dir3"
+   },
+   {
       "id": "rootprefix_testprefix.Test_RootFullDescriptor", 
       "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml", 
       "type": "manual", 
@@ -60,39 +94,5 @@
       "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Input-root", 
       "output": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Output-root", 
       "reference": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Reference-root"
-   }, 
-   {
-      "id": "rootprefix_dir3prefix_Test_SubdirMinimalDescriptor", 
-      "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml", 
-      "type": "manual", 
-      "state": "skipped", 
-      "skippedReason": "<unknown skipped reason>", 
-      "title": "Nested testcase", 
-      "purpose": "Nested purpose", 
-      "groups": [
-         "root-group1",
-         "root-group2",
-         "dir2-group",
-         "dir3-group"
-      ],
-      "modes": [
-         "root-mode1",
-         "root-mode2",
-         "dir2-mode",
-         "dir3-mode"
-      ],
-      "primaryMode": "root-mode1",
-      "requirements": [
-         "root-req1",
-         "root-req2",
-         "dir2-req",
-         "dir3-req"
-      ],
-      "runOrderPriority": 5.2,
-      "classname": "PySysTest-dir3",
-      "module": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\run_dir3",
-      "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Input-dir3",
-      "output": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Output-dir3",
-      "reference": "c:\\dev/xxxx/pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Reference-dir3"
    }
 ]
