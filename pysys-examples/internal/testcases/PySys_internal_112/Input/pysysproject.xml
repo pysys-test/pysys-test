@@ -17,6 +17,8 @@
 		</writer>
 	</writers>		
 
+	<path value="." relative="true" />
+
 	<descriptor-loader module="mypkg.custom" classname="CustomDescriptorLoader"/>
 	<runner module="mypkg.custom" classname="CustomRunner"/>
 	
