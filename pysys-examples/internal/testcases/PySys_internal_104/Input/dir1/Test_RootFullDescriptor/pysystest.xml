@@ -19,7 +19,7 @@
 
   <id-prefix>testprefix.</id-prefix>
 
-  <run-order-priority>-9.9</run-order-priority>
+  <execution-order-hint>+9.9</execution-order-hint>
 
   <data>
     <class name="PySysTest-testcase" module="run_testcase"/>

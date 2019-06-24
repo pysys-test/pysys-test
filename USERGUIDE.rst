@@ -274,7 +274,7 @@ file containing::
 
 	  </classification>
 
-	  <run-order-priority>-100.0</run-order-priority>
+	  <execution-order-hint>-100.0</execution-order-hint>
 
 	  <!-- Uncomment this to mark all tests under this directory as skipped 
 		(overrides the state= attribute on individual tests). -->

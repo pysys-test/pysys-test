@@ -25,7 +25,7 @@
          "testcase-req1", 
          "testcase-req2"
       ], 
-      "runOrderPriority": -9.9, 
+      "executionOrderHint": 9.9, 
       "classname": "PySysTest-testcase", 
       "module": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\run_testcase", 
       "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\Input-testcase", 
@@ -52,7 +52,7 @@
          "root-req1", 
          "root-req2"
       ], 
-      "runOrderPriority": 4.1, 
+      "executionOrderHint": -4.1, 
       "classname": "PySysTest-root", 
       "module": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\run_root", 
       "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Input-root", 
@@ -85,7 +85,7 @@
          "dir2-req",
          "dir3-req"
       ],
-      "runOrderPriority": 5.2,
+      "executionOrderHint": -5.2,
       "classname": "PySysTest-dir3",
       "module": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\run_dir3",
       "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Input-dir3",

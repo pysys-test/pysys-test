@@ -31,12 +31,12 @@ from pysys.utils.pycompat import PY2
 log = logging.getLogger('pysys.xml.descriptor')
 
 DTD='''
-<!ELEMENT pysystest (description, classification?, skipped?, run-order-priority?, id-prefix?, data?, traceability?) > 
+<!ELEMENT pysystest (description, classification?, skipped?, execution-order-hint?, id-prefix?, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
 <!ELEMENT classification (groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
 <!ELEMENT traceability (requirements) >
-<!ELEMENT run-order-priority (#PCDATA) >
+<!ELEMENT execution-order-hint (#PCDATA) >
 <!ELEMENT id-prefix (#PCDATA) >
 <!ELEMENT title (#PCDATA) >
 <!ELEMENT purpose (#PCDATA) >
@@ -131,7 +131,7 @@ class XMLDescriptorContainer(object):
 	@ivar output: The full path to the output parent directory of the testcase
 	@ivar reference: The full path to the reference directory of the testcase
 	@ivar traceability: A list of the requirements covered by the testcase
-	@ivar runOrderPriority: A float priority value used to determine the 
+	@ivar executionOrderHint: A float priority value used to determine the 
 	order in which testcases will be run; higher values are executed before 
 	low values. The default is 0.0. 
 
@@ -140,7 +140,7 @@ class XMLDescriptorContainer(object):
 
 
 	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, 
-			reference=None, traceability=[], runOrderPriority=0.0, skippedReason=None):
+			reference=None, traceability=[], executionOrderHint=0.0, skippedReason=None):
 		"""Create an instance of the XMLDescriptorContainer class.
 		
 		After construction the self.mode attribute is not set until 
@@ -162,7 +162,7 @@ class XMLDescriptorContainer(object):
 		self.output = output
 		self.reference = reference
 		self.traceability = traceability
-		self.runOrderPriority = runOrderPriority
+		self.executionOrderHint = executionOrderHint
 		self.skippedReason = skippedReason
 		
 		self.primaryMode = None if not self.modes else self.modes[0]
@@ -205,7 +205,7 @@ class XMLDescriptorContainer(object):
 		d['primaryMode'] = self.primaryMode
 		if hasattr(self, 'mode'): d['mode'] = self.mode # only if supportMultipleModesPerRun=true
 		d['requirements'] = self.traceability
-		d['runOrderPriority'] = self.runOrderPriority
+		d['executionOrderHint'] = self.executionOrderHint
 		d['classname'] = self.classname
 		d['module'] = self.module
 		d['input'] = self.input
@@ -231,7 +231,7 @@ class XMLDescriptorContainer(object):
 		for index in range(0, len(purpose)):
 			if index == 0: str=str+"%s\n" % purpose[index]
 			if index != 0: str=str+"                   %s\n" % purpose[index] 
-		str=str+"Test run order:    %s%s\n" % ('+' if self.runOrderPriority>0.0 else '', self.runOrderPriority)
+		str=str+"Test order hint:   %s%s\n" % ('+' if self.executionOrderHint>0.0 else '', self.executionOrderHint)
 		str=str+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
 		if getattr(self, 'mode',None): # multi mode per run
 			str=str+"Test mode:         %s\n" % self.mode
@@ -322,7 +322,7 @@ class XMLDescriptorParser(object):
 		title='', purpose='', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
-		traceability=[], runOrderPriority=0.0, skippedReason=None)
+		traceability=[], executionOrderHint=0.0, skippedReason=None)
 	"""
 	A directory config descriptor instance of XMLDescriptorContainer holding 
 	the default values to be used if there is no directory config descriptor. 
@@ -347,7 +347,7 @@ class XMLDescriptorParser(object):
 										os.path.join(self.dirname if self.istest else '', self.getTestOutput()),
 										os.path.join(self.dirname if self.istest else '', self.getTestReference()),
 										self.getRequirements(), 
-										self.getRunOrderPriority(), 
+										self.getExecutionOrderHint(), 
 										skippedReason=self.getSkippedReason())
 
 
@@ -470,17 +470,17 @@ class XMLDescriptorParser(object):
 		except Exception:
 			return [self.defaults.classname, self.defaults.module]
 
-	def getRunOrderPriority(self):
+	def getExecutionOrderHint(self):
 		r = None
-		for e in self.root.getElementsByTagName('run-order-priority'):
+		for e in self.root.getElementsByTagName('execution-order-hint'):
 			r = self.getText(e)
 			if r:
 				try:
 					r = float(r)
 				except Exception:
-					raise UserError('Invalid float value specified for run-order-priority in "%s"'%self.file)
+					raise UserError('Invalid float value specified for execution-order-hint in "%s"'%self.file)
 		if r is None or r == '': 
-			return self.defaults.runOrderPriority
+			return self.defaults.executionOrderHint
 		else:
 			return r
 			
@@ -553,7 +553,7 @@ class DescriptorLoader(object):
 	
 	Another key use case would be dynamically adding or changing descriptor 
 	settings such as the list of modes for each testcase or the 
-	runOrderPriority, perhaps based on a per-group basis. For example, 
+	executionOrderHint, perhaps based on a per-group basis. For example, 
 	you could modify descriptors in the "database-tests" group to have a 
 	dynamically generated list of modes identifying the possible database 
 	servers supported without having to hardcode that list into any descriptor 

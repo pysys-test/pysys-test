@@ -30,7 +30,7 @@ class CustomRunner(BaseRunner):
 		for d in self.descriptors:
 			# run all the mock database tests early
 			if 'database-test' in d.groups and 'MockDatabase' in d.mode:
-				d.runOrderPriority = +10
+				d.executionOrderHint = +10
 
-		self.descriptors.sort(key=lambda d: (-d.runOrderPriority, d.file.lower(), d.id))
+		self.descriptors.sort(key=lambda d: (d.executionOrderHint, d.file.lower(), d.id))
 		"""

@@ -81,9 +81,8 @@ Improvements to the XML descriptors that provide information about tests:
   you could add `pysysdirconfig.xml` files to each with a 
   `<group>performance</group>` element so it's easy to include/exclude all 
   your performance when you invoke `pysys.py run`. You could also include 
-  a `<run-order-priority>-100</run-order-priority>` to specify that performance 
-  tests should be run with a lower priority than normal, so they're executed 
-  at the end of your test run after all correctness tests. 
+  a `<execution-order-hint>+100</execution-order-hint>` to specify that performance 
+  tests should be run after your other tests(the default order hint is 0.0).
   
   The `pysysdirconfig.xml` file can contain any option that's valid in 
   a `pysystest.xml` file except the `description/title/purpose`. a sample 
@@ -114,17 +113,17 @@ Improvements to the XML descriptors that provide information about tests:
   descriptor, or `pysysdirconfig.xml` descriptor (which provides a default for 
   all testcases under that directory)::
   
-    <run-order-priority>+100.0</run-order-priority>
+    <execution-order-hint>+100.0</execution-order-hint>
 
-  Tests with a higher priority values are executed ahead of tests with lower 
-  values. The default priority value is 0.0, and values can be positive or 
-  negative. Tests with the same priority value are executed based on the 
+  Tests with a higher ordering hint are executed after tests with lower 
+  values. The default order value is 0.0, and values can be positive or 
+  negative. Tests with the same order hint are executed based on the 
   sort order of the testcase directories. 
   
-  You might want to specify a low priority for long-running performance or 
+  You might want to specify a large order hint for long-running performance or 
   robustness tests to ensure they execute after more important unit/correctness 
-  tests. You might want to specify a higher priority for individual tests that 
-  are known to take a long time, if you're running with multiple threads, to 
+  tests. You might want to specify a negative hint for individual tests that 
+  are known to take a long time (if you're running with multiple threads), to 
   ensure they get an early start and don't hold up the completion of the test 
   run. 
 
@@ -152,7 +151,7 @@ Improvements to the `pysys.py` command line tool:
   which is very helpful for displaying related testcases together (especially 
   if the titles are written carefully with common information at the beginning 
   of each one) and therefore for more easily locating testcases of interest. 
-  It can also sort by `id` or `runOrderPriority` which indicates the order 
+  It can also sort by `id` or `executionOrderHint` which indicates the order 
   in which the testcases will be executed. The default sort order if none of 
   these options is specified continues to be based on the full path of the 
   `pysystest.xml` files. 

@@ -64,7 +64,7 @@ class ConsolePrintHelper(object):
 		print("       -g | --groups               print test groups defined")
 		print("       -d | --modes                print test modes defined")
 		print("       -r | --requirements         print test requirements covered")
-		print("       -s | --sort   STRING        sort by: title, id, runOrderPriority")
+		print("       -s | --sort   STRING        sort by: title, id, executionOrderHint")
 		print("            --json                 print full information as JSON")
 		print("")
 		print("    selection/filtering options:")
@@ -159,8 +159,8 @@ class ConsolePrintHelper(object):
 				descriptors.sort(key=lambda d: d._defaultSortKey)
 			elif (self.sort.lower()=='id'):
 				descriptors.sort(key=lambda d: d.id)
-			elif self.sort.lower().replace('-','') in ['runorderpriority', 'runorder', 'order']:
-				descriptors.sort(key=lambda d: [-d.runOrderPriority, d._defaultSortKey])
+			elif self.sort.lower().replace('-','') in ['executionorderhint', 'orderhint', 'order']:
+				descriptors.sort(key=lambda d: [d.executionOrderHint, d._defaultSortKey])
 			elif self.sort.lower()=='title':
 				descriptors.sort(key=lambda d: [d.title, d._defaultSortKey])
 			else:

@@ -727,7 +727,7 @@ class TestContainer(object):
 					log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 				if self.runner.cycle > 1:
 					log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-				log.debug('Run order: %s', self.descriptor.runOrderPriority)
+				log.debug('Execution order hint: %s', self.descriptor.executionOrderHint)
 				log.info(62*"=")
 			except KeyboardInterrupt:
 				self.kbrdInt = True
