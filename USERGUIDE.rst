@@ -194,7 +194,9 @@ be useful to run them in every mode other than the primary one::
 
 For reporting purposes, all testcases must have a unique id. With a multiple 
 mode test this is achieved by having the id automatically include a ~Mode 
-suffix. 
+suffix. If you are reporting performance results from a multi-mode test, make 
+sure you include the mode in the `resultKey`, since the `resultKey` must be 
+globally unique. 
 
 In addition to the `--mode` argument, it is possible to run a specific test in 
 a specific mode. This can be useful when you have a few miscellaneous test 
