@@ -18,10 +18,6 @@ testcase validation to determine that the correct values are calculated.
       <group>examples</group>
       <group>external</group>
     </groups>
-    <modes>
-        <mode>FibonacciMode1</mode>
-        <mode>FibonacciMode2</mode>
-    </modes>
   </classification>
 
   <data>

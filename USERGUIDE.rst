@@ -187,7 +187,7 @@ specified modes::
   pysys run --mode MyMode1,MyMode2
   pysys run --mode !MyMode3,!MyMode4
 
-After running all your tests in their primary mode, it could 
+After sucessfully getting all your tests passing in their primary mode, it could 
 be useful to run them in every mode other than the primary one::
 
   pysys run --mode !PRIMARY
@@ -198,11 +198,15 @@ suffix. If you are reporting performance results from a multi-mode test, make
 sure you include the mode in the `resultKey`, since the `resultKey` must be 
 globally unique. 
 
-In addition to the `--mode` argument, it is possible to run a specific test in 
-a specific mode. This can be useful when you have a few miscellaneous test 
-failures and just want to re-run the failing tests::
+In addition to the `--mode` argument which affects all selected tests, it is 
+possible to run a specific test in a specific mode. This can be useful when you 
+have a few miscellaneous test failures and just want to re-run the failing 
+tests::
 
   pysys run MyTest_001~MockDatabase MyTest_020~MyDatabase_2.0
+
+See sample test Fibonacci_test_005 for an example of using modes for a 
+performance test. 
 
 Test ids and structuring large projects
 ---------------------------------------

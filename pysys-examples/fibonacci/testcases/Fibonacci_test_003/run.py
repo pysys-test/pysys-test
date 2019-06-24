@@ -4,7 +4,7 @@ from pysys.basetest import BaseTest
 class PySysTest(BaseTest):
 	def execute(self):
 		if self.mode in ['FibonacciMode1', 'FibonacciMode2']:
-			# in a real application, the modes would have different implementation
+			# in a real application, the modes would have different implementations
 			self.startProcess(
 				command=sys.executable, # This program uses the python executable
 				arguments=[self.input+'/fibonacci.py'],
