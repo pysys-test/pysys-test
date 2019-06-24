@@ -9,7 +9,7 @@
     </modes>
   </classification>
 
-  <execution-order-hint>-5.2</execution-order-hint>
+  <execution-order hint="-5.2"/>
 
   <data>
     <class name="PySysTest-dir2" module="run_dir2"/>

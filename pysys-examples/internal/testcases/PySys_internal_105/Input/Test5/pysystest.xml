@@ -9,7 +9,7 @@
     </purpose>
   </description>
 
-  <execution-order-hint>+7.2</execution-order-hint>
+  <execution-order hint="+7.2"/>
 
   <classification>
   </classification>

@@ -81,7 +81,7 @@ Improvements to the XML descriptors that provide information about tests:
   you could add `pysysdirconfig.xml` files to each with a 
   `<group>performance</group>` element so it's easy to include/exclude all 
   your performance when you invoke `pysys.py run`. You could also include 
-  a `<execution-order-hint>+100</execution-order-hint>` to specify that performance 
+  a `<execution-order hint="+100"/>` to specify that performance 
   tests should be run after your other tests(the default order hint is 0.0).
   
   The `pysysdirconfig.xml` file can contain any option that's valid in 
@@ -113,7 +113,7 @@ Improvements to the XML descriptors that provide information about tests:
   descriptor, or `pysysdirconfig.xml` descriptor (which provides a default for 
   all testcases under that directory)::
   
-    <execution-order-hint>+100.0</execution-order-hint>
+    <execution-order hint="+100.0"/>
 
   Tests with a higher ordering hint are executed after tests with lower 
   values. The default order value is 0.0, and values can be positive or 

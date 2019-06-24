@@ -31,12 +31,11 @@ from pysys.utils.pycompat import PY2
 log = logging.getLogger('pysys.xml.descriptor')
 
 DTD='''
-<!ELEMENT pysystest (description, classification?, skipped?, execution-order-hint?, id-prefix?, data?, traceability?) > 
+<!ELEMENT pysystest (description, classification?, skipped?, execution-order?, id-prefix?, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
 <!ELEMENT classification (groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
 <!ELEMENT traceability (requirements) >
-<!ELEMENT execution-order-hint (#PCDATA) >
 <!ELEMENT id-prefix (#PCDATA) >
 <!ELEMENT title (#PCDATA) >
 <!ELEMENT purpose (#PCDATA) >
@@ -52,6 +51,7 @@ DTD='''
 <!ELEMENT requirement EMPTY >
 <!ATTLIST pysystest type (auto | manual ) "auto" >
 <!ATTLIST pysystest state (runnable | deprecated | skipped) "runnable" >
+<!ATTLIST execution-order hint>
 <!ATTLIST skipped reason >
 <!ATTLIST class name CDATA #REQUIRED
                 module CDATA #REQUIRED >
@@ -472,13 +472,13 @@ class XMLDescriptorParser(object):
 
 	def getExecutionOrderHint(self):
 		r = None
-		for e in self.root.getElementsByTagName('execution-order-hint'):
-			r = self.getText(e)
+		for e in self.root.getElementsByTagName('execution-order'):
+			r = e.getAttribute('hint')
 			if r:
 				try:
 					r = float(r)
 				except Exception:
-					raise UserError('Invalid float value specified for execution-order-hint in "%s"'%self.file)
+					raise UserError('Invalid float value specified for execution-order hint in "%s"'%self.file)
 		if r is None or r == '': 
 			return self.defaults.executionOrderHint
 		else:

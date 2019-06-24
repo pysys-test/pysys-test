@@ -12,7 +12,7 @@
   </classification>
 
   <id-prefix>rootprefix_</id-prefix>
-  <execution-order-hint>-4.1</execution-order-hint>
+  <execution-order hint="-4.1"/>
 
   <data>
     <class name="PySysTest-root" module="run_root"/>
