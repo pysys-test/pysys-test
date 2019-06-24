@@ -21,7 +21,7 @@ Contains the L{ProcessUser} class used by both L{BaseTest} and L{BaseRunner}
 to provide process-related capabilities including cleanup. 
 """
 
-import time, collections, inspect, locale, fnmatch
+import time, collections, inspect, locale, fnmatch, sys
 import threading
 
 from pysys import log, process_lock
@@ -66,6 +66,8 @@ class ProcessUser(object):
 		self.log = log
 		"""The logger instance that should be used to log from this class. """
 		
+		assert PROJECT or 'doctest' in sys.argv[0], 'constants.PROJECT was not assigned yet, probably due to a change in module dependencies causing constants to be imported before the project was loaded' # allow it only during doctest-ing
+
 		self.project = PROJECT
 		"""The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
 		

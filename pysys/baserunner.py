@@ -344,13 +344,14 @@ class BaseRunner(ProcessUser):
 		if PROJECT.perfReporterConfig:
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet
+			from pysys.utils.perfreporter import CSVPerformanceReporter
 			try:
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir, runner=self)]
 			except Exception:
 				# support for passing kwargs was added in 1.4.0; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
-				PROJECT.perfReporterConfig[0]._runnerSingleton = self
+				CSVPerformanceReporter._runnerSingleton = self
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir)]
-				del PROJECT.perfReporterConfig[0]._runnerSingleton
+				del CSVPerformanceReporter._runnerSingleton
 		
 		class PySysPrintRedirector(object):
 			def __init__(self):
@@ -726,6 +727,7 @@ class TestContainer(object):
 					log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 				if self.runner.cycle > 1:
 					log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+				log.debug('Run order: %s', self.descriptor.runOrderPriority)
 				log.info(62*"=")
 			except KeyboardInterrupt:
 				self.kbrdInt = True

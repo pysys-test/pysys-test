@@ -155,7 +155,10 @@ is most likely to show up interesting issues as the primary mode.
 In large projects you may wish to configure modes in a `pysysdirconfig.xml` 
 file in a parent directory rather than in `pysystest.xml`, so that they apply 
 automatically to all the nested testcases, and so there's a single place to 
-edit the modes list if you need to change them later. 
+edit the modes list if you need to change them later. It's also possible to 
+create a custom DescriptorLoader subclass that dynamically adds modes 
+from Python code, perhaps based on the groups specified in each descriptor 
+or runtime information such as the current operating system.  
 
 In your test case `run.py` (and/or in your test's base class if you have 
 customized it) you can use `self.mode` to detect which mode the test is running 

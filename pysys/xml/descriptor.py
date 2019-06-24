@@ -21,9 +21,12 @@ from __future__ import print_function
 import os.path, logging, xml.dom.minidom
 import collections
 import copy
+import locale
 
 from pysys.constants import *
 from pysys.exceptions import UserError
+from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
+from pysys.utils.pycompat import PY2
 
 log = logging.getLogger('pysys.xml.descriptor')
 
@@ -97,6 +100,9 @@ class XMLDescriptorContainer(object):
 	
 	Also used for descriptors specifying defaults for a directory subtree 
 	containing a related set of testcases. 
+	
+	The L{DescriptorLoader} class is responsible for determining the available 
+	descriptor instances. 
 	
 	@ivar file: The full path of the testcase descriptor file. 
 	@ivar id: The testcase identifier; has the value None if this is a 
@@ -525,6 +531,165 @@ class XMLDescriptorParser(object):
 				t += n.data
 		return t.strip()
 
+
+class DescriptorLoader(object):
+	"""
+	This class is responsible for locating and loading all available testcase 
+	descriptors. 
+	
+	A custom DescriptorLoader subclass can be provided to provide more dynamic 
+	behaviour, typically by overriding L{loadDescriptors} and modifying the 
+	returned list of descriptors. 
+	
+	You could use this approach to add additional descriptor instances 
+	to represent non-PySys testcases found under the search directory. 
+	
+	Another key use case would be dynamically adding or changing descriptor 
+	settings such as the list of modes for each testcase or the 
+	runOrderPriority, perhaps based on a per-group basis. For example, 
+	you could modify descriptors in the "database-tests" group to have a 
+	dynamically generated list of modes identifying the possible database 
+	servers supported without having to hardcode that list into any descriptor 
+	files on disk, and allowing for different database modes on different 
+	platforms. 
+
+	@ivar project: The L{Project} instance. 
+	"""
+	def __init__(self, project, **kwargs): 
+		assert project, 'project must be specified'
+		self.project = project
+		
+
+	def loadDescriptors(self, dir, **kwargs):
+		"""Find all descriptors located under the specified directory, and 
+		return them as a list.
+		
+		Subclasses may change the returned descriptors and/or add additional 
+		instances of their own to the list after calling the super implementation::
+		
+		  descriptors = super(CustomDescriptorLoader, self).loadDescriptors(dir, **kwargs)
+		  ...
+		  return descriptors
+		
+		@param dir: The parent directory to search for runnable tests. 
+		
+		@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects 
+		which could be selected for execution. 
+		If a test can be run in multiple modes there must be a single descriptor 
+		for it in this list; these are expanded out into separate mode-specific 
+		descriptors later at the same time as descriptor filtering based on 
+		command line arguments before the final list is passed to 
+		L{pysys.baserunner.BaseRunner}. 
+		
+		The order of the list is random, so the caller is responsible for sorting this list 
+		to ensure deterministic behaviour. 
+		
+		@rtype: list
+		@raises UserError: Raised if no testcases can be found.
+		
+		"""
+		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
+		assert self.project, 'project must be specified'
+		assert dir, 'dir must be specified'
+		
+		project = self.project
+		
+		descriptors = []
+		descriptorfiles = []
+		ignoreSet = set(OSWALK_IGNORES)
+		descriptorSet =set(DEFAULT_DESCRIPTOR)
+		
+		projectfound = project.projectFile != None
+		log = logging.getLogger('pysys.launcher')
+
+		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
+		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
+		i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
+		for root, dirs, files in os.walk(toLongPathSafe(dir)):
+			intersection =  descriptorSet & set(files)
+			if intersection: 
+				descriptorpath = fromLongPathSafe(os.path.join(root, intersection.pop()))
+				# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
+				# as it proliferates to all strings in each test
+				if i18n_reencode is not None: descriptorpath = descriptorpath.encode(i18n_reencode) 
+				descriptorfiles.append(descriptorpath)
+				# if this is a test dir, it never makes sense to look at sub directories
+				del dirs[:]
+				continue
+			
+			thisignoreset = ignoreSet # sub-directories to be ignored
+			
+			for ignorefile in ['.pysysignore', 'pysysignore']:
+				for d in dirs:
+					if pathexists(os.path.join(root, d, ignorefile)):
+						thisignoreset = set(thisignoreset) # copy on write (this is a rare operation)
+						thisignoreset.add(d)
+						log.debug('Skipping directory %s due to ignore file %s', root+os.sep+ignorefile)
+			
+			for ignore in (thisignoreset & set(dirs)): dirs.remove(ignore)
+			if not projectfound:
+				for p in DEFAULT_PROJECTFILE:
+					if p in files:
+						projectfound = True
+						sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
+
+		DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
+		if project.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(project.projectFile))):
+			# find directory config descriptors between the project root and the testcase 
+			# dirs. We deliberately use project dir not current working dir since 
+			# we don't want descriptors to be loaded differently depending on where the 
+			# tests are run from (i.e. should be independent of cwd). 
+			dirconfigs = {}
+			projectroot = os.path.dirname(project.projectFile).replace('\\','/').split('/')
+		else:
+			dirconfigs = None
+			log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
+		
+		def getParentDirConfig(descriptorfile):
+			if dirconfigs is None: return None
+			testdir = os.path.dirname(descriptorfile).replace('\\','/').split('/')
+			currentconfig = None
+			for i in range(len(projectroot), len(testdir)):
+				currentdir = '/'.join(testdir[:i])
+				if currentdir in dirconfigs:
+					currentconfig = dirconfigs[currentdir]
+				else:
+					if pathexists(currentdir+'/'+DIR_CONFIG_DESCRIPTOR):
+						currentconfig = XMLDescriptorParser.parse(currentdir+'/'+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
+						log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
+					dirconfigs[currentdir] = currentconfig
+			return currentconfig
+		
+		for descriptorfile in descriptorfiles:
+			parentconfig = getParentDirConfig(descriptorfile)
+			try:
+				parsed = self.parseTestDescriptor(project, descriptorfile, parentDirDefaults=getParentDirConfig(descriptorfile))
+				if parsed:
+					descriptors.append(parsed)
+			except UserError:
+				raise # no stack trace needed, will already include descriptorfile name
+			except Exception as e:
+				log.info('Failed to read descriptor: ', exc_info=True)
+				raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
+				
+		return descriptors
+
+	def parseTestDescriptor(self, project, descriptorfile, parentDirDefaults=None, **kwargs):
+		""" Parses a single XML descriptor file for a testcase and returns the result. 
+		
+		@param project: The L{Project} instance associated with these descriptors. 
+		@param descriptorfile: The absolute path of the descriptor file. 
+		@param parentDirDefaults: A L{XMLDescriptorContainer} instance containing 
+		defaults to inherit from the parent directory, or None if none was found. 
+		@return: The L{XMLDescriptorContainer} instance, or None if none should be 
+		added for this descriptor file. Note that subclasses may modify the 
+		contents of the returned instance. 
+		@raises UserError: If the descriptor is invalid and an error should be 
+		displayed to the user without any Python stacktrace. 
+		The exception message must contain the path of the descriptorfile.
+		"""
+		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
+		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults)
 
 if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 

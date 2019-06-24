@@ -17,25 +17,12 @@
 
 
 """
-Contains utilities used by test launchers when running, printing, cleaning or making new tests. 
-
-The module includes the L{pysys.launcher.createDescriptors} method which locates test 
-descriptors based upon a given starting location on the file system, the chosen range 
-of test ids, the test type, the specified requirements, and the include and exclude lists.
-
-Utilities defined in the module can be used by any launchers, either distributed
-with the framework, or created as an extension to it. Currently the framework 
-distributes the console launcher module only - see L{pysys.launcher.console}. This 
-module uses the current working directory in a command shell as the starting location 
-on the file system, and provides utilities for parsing command line arguments in order
-to launch operations against a set of tests etc.  
-
+@undocumented: createDescriptors, loadDescriptors
 """
 from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
-import locale
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -45,13 +32,13 @@ except NameError:
 	from sets import Set as set
 
 from pysys.constants import *
-from pysys.xml.descriptor import XMLDescriptorParser
-from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2
 from pysys.exceptions import UserError
 
 def loadDescriptors(dir=None):
-	"""Load descriptor objects representing a set of tests to run, returning the list.
+	"""Load descriptor objects representing a set of tests to run for 
+	the current project, returning the list.
+	
+	Deprecated, use L{pysys.xml.descriptor.DescriptorLoader} instead.
 	
 	@param dir: The parent directory to search for runnable tests
 	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects. 
@@ -60,84 +47,9 @@ def loadDescriptors(dir=None):
 	@raises UserError: Raised if no testcases can be found.
 	
 	"""
-	descriptors = []
-	descriptorfiles = []
-	ignoreSet = set(OSWALK_IGNORES)
-	descriptorSet =set(DEFAULT_DESCRIPTOR)
-	
 	if dir is None: dir = os.getcwd()
-	projectfound = PROJECT.projectFile != None
-	log = logging.getLogger('pysys.launcher')
-
-	# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
-	# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
-	i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
-	for root, dirs, files in os.walk(toLongPathSafe(dir)):
-		intersection =  descriptorSet & set(files)
-		if intersection: 
-			descriptorpath = fromLongPathSafe(os.path.join(root, intersection.pop()))
-			# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
-			# as it proliferates to all strings in each test
-			if i18n_reencode is not None: descriptorpath = descriptorpath.encode(i18n_reencode) 
-			descriptorfiles.append(descriptorpath)
-			# if this is a test dir, it never makes sense to look at sub directories
-			del dirs[:]
-			continue
-		
-		thisignoreset = ignoreSet # sub-directories to be ignored
-		
-		for ignorefile in ['.pysysignore', 'pysysignore']:
-			for d in dirs:
-				if pathexists(os.path.join(root, d, ignorefile)):
-					thisignoreset = set(thisignoreset) # copy on write (this is a rare operation)
-					thisignoreset.add(d)
-					log.debug('Skipping directory %s due to ignore file %s', root+os.sep+ignorefile)
-		
-		for ignore in (thisignoreset & set(dirs)): dirs.remove(ignore)
-		if not projectfound:
-			for p in DEFAULT_PROJECTFILE:
-				if p in files:
-					projectfound = True
-					sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
-
-	DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
-	if PROJECT.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(PROJECT.projectFile))):
-		# find directory config descriptors between the project root and the testcase 
-		# dirs. We deliberately use project dir not current working dir since 
-		# we don't want descriptors to be loaded differently depending on where the 
-		# tests are run from (i.e. should be independent of cwd). 
-		dirconfigs = {}
-		projectroot = os.path.dirname(PROJECT.projectFile).replace('\\','/').split('/')
-	else:
-		dirconfigs = None
-		log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
-	
-	def getParentDirConfig(descriptorfile):
-		if dirconfigs is None: return None
-		testdir = os.path.dirname(descriptorfile).replace('\\','/').split('/')
-		currentconfig = None
-		for i in range(len(projectroot), len(testdir)):
-			currentdir = '/'.join(testdir[:i])
-			if currentdir in dirconfigs:
-				currentconfig = dirconfigs[currentdir]
-			else:
-				if pathexists(currentdir+'/'+DIR_CONFIG_DESCRIPTOR):
-					currentconfig = XMLDescriptorParser.parse(currentdir+'/'+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
-					log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
-				dirconfigs[currentdir] = currentconfig
-		return currentconfig
-	
-	for descriptorfile in descriptorfiles:
-		parentconfig = getParentDirConfig(descriptorfile)
-		try:
-			descriptors.append(XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=getParentDirConfig(descriptorfile)))
-		except UserError:
-			raise # no stack trace needed, will already include descriptorfile name
-		except Exception as e:
-			log.info('Failed to read descriptor: ', exc_info=True)
-			raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
-			
-	return descriptors
+	loader = PROJECT.descriptorLoaderClass(PROJECT)
+	return loader.loadDescriptors(dir)
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[], expandmodes=True):
 	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
@@ -157,7 +69,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	if supportMultipleModesPerRun=True. 
 	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
 	@rtype: list
-	@raises UserError: Raised if not testcases can be found or are returned by the requested input parameters
+	@raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
 	
 	"""
 	descriptors = loadDescriptors(dir=dir)

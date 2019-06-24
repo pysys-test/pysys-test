@@ -252,6 +252,13 @@ class XMLProjectParser(object):
 		
 		return cls, summaryfile
 
+	def getDescriptorLoaderClass(self):
+		nodeList = self.root.getElementsByTagName('descriptor-loader')
+		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.xml.descriptor.DescriptorLoader')
+		
+		if optionsDict: raise Exception('Unexpected descriptor-loader attribute(s): '+', '.join(list(optionsDict.keys())))
+		
+		return cls
 
 	def getMakerDetails(self):
 		try:
@@ -360,7 +367,7 @@ class XMLProjectParser(object):
 
 		@param node: The node, may be None
 		@param defaultClass: a string specifying the default fully-qualified class
-		@return: a tuple of (pythonclass, propertiesdict)
+		@return: a tuple of (pythonclassconstructor, propertiesdict)
 		"""
 		optionsDict = {}
 		if node:
@@ -375,9 +382,15 @@ class XMLProjectParser(object):
 		classname = optionsDict.pop('classname', defaultClass)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
 		classname = classname.split('.')[-1]
-		module = import_module(mod, sys.path)
-		cls = getattr(module, classname)
-		return cls, optionsDict
+
+		# defer importing the module until we actually need to instantiate the 
+		# class, to avoid introducing tricky module import order problems, given 
+		# that the project itself needs loading very early
+		def classConstructor(*args, **kwargs):
+			module = import_module(mod, sys.path)
+			cls = getattr(module, classname)
+			return cls(*args, **kwargs) # invoke the constructor for this class
+		return classConstructor, optionsDict
 
 def getProjectConfigTemplates():
 	"""Get a list of available templates that can be used for creating a new project configuration. 
@@ -474,6 +487,8 @@ class Project(object):
 				self.writers = parser.getWriterDetails()
 
 				self.perfReporterConfig = parser.getPerformanceReporterDetails()
+				
+				self.descriptorLoaderClass = parser.getDescriptorLoaderClass()
 
 				# get the stdout and runlog formatters
 				stdoutformatter, runlogformatter = parser.createFormatters()
