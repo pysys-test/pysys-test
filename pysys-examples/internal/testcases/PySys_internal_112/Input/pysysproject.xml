@@ -19,6 +19,12 @@
 
 	<path value="." relative="true" />
 
+	<!-- This is a convenient test to check we can disable this delta, which results in each test executing in 
+	all modes before moving on to the next test 
+	-->
+	<execution-order-hints secondaryModesHintDelta="0"/>
+
+
 	<descriptor-loader module="mypkg.custom" classname="CustomDescriptorLoader"/>
 	<runner module="mypkg.custom" classname="CustomRunner"/>
 	

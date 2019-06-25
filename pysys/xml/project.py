@@ -301,6 +301,43 @@ class XMLProjectParser(object):
 			result.append({'pattern':pattern, 'encoding':encoding})
 		return result
 
+	def getExecutionOrderHints(self):
+		result = []
+		secondaryModesHintDelta = None
+		
+		def makeregex(s):
+			if not s: return None
+			if s.startswith('!'): raise UserError('Exclusions such as !xxx are not permitted in execution-order-hints configuration')
+			
+			# make a regex that will match either the entire expression as a literal 
+			# or the entire expression as a regex
+			s = s.rstrip('$')
+			try:
+				#return re.compile('(%s|%s)$'%(re.escape(s), s))
+				return re.compile('%s$'%(s))
+			except Exception as ex:
+				raise UserError('Invalid regular expression in execution-order-hints "%s": %s'%(s, ex))
+		
+		for parent in self.root.getElementsByTagName('execution-order-hints'):
+			if parent.getAttribute('secondaryModesHintDelta'):
+				secondaryModesHintDelta = float(parent.getAttribute('secondaryModesHintDelta'))
+			for n in parent.getElementsByTagName('execution-order'):
+				moderegex = makeregex(n.getAttribute('forMode'))
+				groupregex = makeregex(n.getAttribute('forGroup'))
+				if not (moderegex or groupregex): raise UserError('Must specify either forMode, forGroup or both')
+				
+				hintmatcher = lambda groups, mode, moderegex=moderegex, groupregex=groupregex: (
+					(moderegex is None or moderegex.match(mode or '')) and
+					(groupregex is None or any(groupregex.match(group) for group in groups))
+					)
+				
+				result.append( 
+					(float(n.getAttribute('hint')), hintmatcher )
+					)
+		if secondaryModesHintDelta is None: 
+			secondaryModesHintDelta = +100.0 # default value
+		return result, secondaryModesHintDelta
+
 	def getWriterDetails(self):
 		writersNodeList = self.root.getElementsByTagName('writers')
 		if writersNodeList == []: return [DEFAULT_WRITER]
@@ -494,6 +531,8 @@ class Project(object):
 				stdoutformatter, runlogformatter = parser.createFormatters()
 				
 				self.defaultFileEncodings = parser.getDefaultFileEncodings()
+				
+				self.executionOrderHints, self.executionOrderSecondaryModesHintDelta = parser.getExecutionOrderHints()
 				
 				self.collectTestOutput = parser.getCollectTestOutputDetails()
 				

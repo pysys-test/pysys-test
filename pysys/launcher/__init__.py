@@ -72,11 +72,13 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	@raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
 	
 	"""
+	project = PROJECT
+	
 	descriptors = loadDescriptors(dir=dir)
 	# must sort by id for range matching and dup detection to work deterministically
 	descriptors.sort(key=lambda d: [d.id, d.file])
 	
-	supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
+	supportMultipleModesPerRun = getattr(project, 'supportMultipleModesPerRun', '').lower()=='true'
 	
 	# as a convenience support !mode syntax in the includes
 	modeexcludes = modeexcludes+[x[1:] for x in modeincludes if x.startswith('!')]
@@ -307,16 +309,39 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 			else:
 				index = index + 1
 	
-	# expand based on modes
+	# expand based on modes (unless we're printing in which case expandmodes=False)
 	if supportMultipleModesPerRun and expandmodes: 
 		expandedtests = []
 		for t in tests:
-			if getattr(t, 'mode', None): # this indicates a test id~mode that was explicitly specified, so does not need expanding
+			if hasattr(t, 'mode'): 
+				# if mode if set it has no modes or has a test id~mode that was explicitly specified in a testspec, so does not need expanding
 				expandedtests.append(t)
 			else:
 				expandedtests.extend(modedescriptors[t.id])
 		tests = expandedtests
 	
+	# combine execution order hints from descriptors with global project configuration; 
+	# we only need to do this if there are any executionOrderHints defined (may be pure group hints not for modes) 
+	# or if there are any tests with multiple modes (since then the secondary hint mode delta applies)
+	if (supportMultipleModesPerRun and len(allmodes)>0) or project.executionOrderHints:
+		def calculateNewHint(d, mode):
+			hint = d.executionOrderHint
+			for hintdelta, hintmatcher in project.executionOrderHints:
+				if hintmatcher(d.groups, mode): hint += hintdelta
+			if mode: 
+				hint += project.executionOrderSecondaryModesHintDelta * (d.modes.index(mode))
+			return hint
+		
+		for d in tests:
+			hintspermode = []
+			if expandmodes: # used for pysys run; d.mode will have been set
+				d.executionOrderHint = calculateNewHint(d, d.mode)
+			else:
+				modes = [None] if len(d.modes)==0 else d.modes
+				# set this for the benefit of pysys print
+				d.executionOrderHintsByMode = [calculateNewHint(d, m) for m in modes]
+				d.executionOrderHint = d.executionOrderHintsByMode[0]
+		
 	if len(tests) == 0:
 		raise UserError("The supplied options did not result in the selection of any tests")
 	else:

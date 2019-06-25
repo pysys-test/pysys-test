@@ -205,7 +205,12 @@ class XMLDescriptorContainer(object):
 		d['primaryMode'] = self.primaryMode
 		if hasattr(self, 'mode'): d['mode'] = self.mode # only if supportMultipleModesPerRun=true
 		d['requirements'] = self.traceability
-		d['executionOrderHint'] = self.executionOrderHint
+		
+		# this is always a list with at least one item, or more if there are multiple modes
+		d['executionOrderHint'] = (self.executionOrderHintsByMode
+			if hasattr(self, 'executionOrderHintsByMode') else [self.executionOrderHint])
+
+		self.executionOrderHint
 		d['classname'] = self.classname
 		d['module'] = self.module
 		d['input'] = self.input
@@ -231,7 +236,11 @@ class XMLDescriptorContainer(object):
 		for index in range(0, len(purpose)):
 			if index == 0: str=str+"%s\n" % purpose[index]
 			if index != 0: str=str+"                   %s\n" % purpose[index] 
-		str=str+"Test order hint:   %s%s\n" % ('+' if self.executionOrderHint>0.0 else '', self.executionOrderHint)
+
+		str=str+"Test order hint:   %s\n" % (
+			u', '.join('%s'%hint for hint in self.executionOrderHintsByMode) # for multi-mode tests
+			if hasattr(self, 'executionOrderHintsByMode') else self.executionOrderHint)	
+
 		str=str+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
 		if getattr(self, 'mode',None): # multi mode per run
 			str=str+"Test mode:         %s\n" % self.mode
@@ -582,14 +591,17 @@ class DescriptorLoader(object):
 		
 		@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects 
 		which could be selected for execution. 
+		
 		If a test can be run in multiple modes there must be a single descriptor 
-		for it in this list; these are expanded out into separate mode-specific 
-		descriptors later at the same time as descriptor filtering based on 
-		command line arguments before the final list is passed to 
+		for it in the list returned from this method. Each multi-mode 
+		descriptor is later expanded out into separate mode-specific 
+		descriptors (at the same time as descriptor filtering based on 
+		command line arguments, and addition of project-level 
+		execution-order-hints), before the final list is sorted and passed to 
 		L{pysys.baserunner.BaseRunner}. 
 		
-		The order of the list is random, so the caller is responsible for sorting this list 
-		to ensure deterministic behaviour. 
+		The order of the list is random, so the caller is responsible for 
+		sorting this list to ensure deterministic behaviour. 
 		
 		@rtype: list
 		@raises UserError: Raised if no testcases can be found.

@@ -249,8 +249,11 @@
 		which ensures the modes are spaced out. To disable this behaviour and execute all modes of each test 
 		before moving on to the next test set it to 0.0. If not specified, the default value is +100.0.
 		-->
+		
+		<!--
 		<execution-order hint="+20.0" forMode="MyMode_.*"/>
 		<execution-order hint="-10.5" forGroup="performance" forMode="MyMode"/>
+		-->
 	</execution-order-hints>
 	
 	<!--

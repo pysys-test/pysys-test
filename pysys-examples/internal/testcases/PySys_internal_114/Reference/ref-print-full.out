@@ -1,0 +1,72 @@
+==========================================
+		Test1
+==========================================
+Test id:           Test1
+Test type:         auto
+Test state:        runnable
+Test title:        Test
+Test purpose:      
+Test order hint:   1.0
+Test groups:       <none>
+Test modes:        <none>
+Test classname:    PySysTest
+Test module:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test1\run
+Test input:        c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test1\Input
+Test output:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test1\Output
+Test reference:    c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test1\Reference
+Test traceability: <none>xxx
+
+==========================================
+		Test2
+==========================================
+Test id:           Test2
+Test type:         auto
+Test state:        runnable
+Test title:        Test
+Test purpose:      
+Test order hint:   62.0
+Test groups:       Group_2a, Group_2b
+Test modes:        <none>
+Test classname:    PySysTest
+Test module:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test2\run
+Test input:        c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test2\Input
+Test output:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test2\Output
+Test reference:    c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test2\Reference
+Test traceability: <none>
+
+==========================================
+		Test3
+==========================================
+Test id:           Test3
+Test type:         auto
+Test state:        runnable
+Test title:        Test
+Test purpose:      
+Test order hint:   -7.5
+Test groups:       <none>
+Test modes:        Mode_3
+Test classname:    PySysTest
+Test module:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test3\run
+Test input:        c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test3\Input
+Test output:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test3\Output
+Test reference:    c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test3\Reference
+Test traceability: <none>
+
+==========================================
+		Test4
+==========================================
+Test id:           Test4
+Test type:         auto
+Test state:        runnable
+Test title:        Test
+Test purpose:      
+Test order hint:   34.0, 1054.0, 2024.0
+Test groups:       Group_4a, Group_4b
+Test modes:        Mode_4a, Mode_4b, Mode_4c
+Test classname:    PySysTest
+Test module:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test4\run
+Test input:        c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test4\Input
+Test output:       c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test4\Output
+Test reference:    c:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_114\Output\win32\test\Test4\Reference
+Test traceability: <none>
+
