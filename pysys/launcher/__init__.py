@@ -103,12 +103,14 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 		allmodes = {} # populate this as we go; could have used a set, but instead use a dict so we can check or capitalization mismatches easily at the same time; 
 		#the key is a lowercase version of mode name, value is the canonical capitalized name
 		
+		modeincludesnone = ((MODES_ALL in modeincludes or MODES_PRIMARY in modeincludes or '' in modeincludes) and 
+					(MODES_PRIMARY not in modeexcludes and '' not in modeexcludes))
+		
 		for d in descriptors:
 			if not d.modes:
 				# for tests that have no modes, there is only one descriptor and it's treated as the primary mode; 
 				# user can also specify '' to indicate no mode
-				if ((MODES_ALL in modeincludes or MODES_PRIMARY in modeincludes or '' in modeincludes) and 
-					(MODES_PRIMARY not in modeexcludes and '' not in modeexcludes)):
+				if modeincludesnone:
 					d.mode = None
 					modedescriptors[d.id] = [d]
 				else:
@@ -119,7 +121,6 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				
 				# create a copy of the descriptor for each selected mode
 				for m in d.modes: 
-					if m.upper() in [MODES_ALL, MODES_PRIMARY]: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
 					try:
 						canonicalmodecapitalization = allmodes[m.lower()]
 					except KeyError:
@@ -145,6 +146,9 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 						continue
 					
 					thisdescriptorlist.append(d._createDescriptorForMode(m))
+
+		for m in [MODES_ALL, MODES_PRIMARY]:
+			if m.lower() in allmodes: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
 		
 		# don't permit the user to specify a non existent mode by mistake
 		for m in modeincludes+modeexcludes:
