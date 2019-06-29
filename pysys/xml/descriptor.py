@@ -95,7 +95,7 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
 ''' 
 
 
-class XMLDescriptorContainer(object):
+class TestDescriptor(object):
 	"""Contains descriptor metadata about an individual testcase. 
 	
 	Also used for descriptors specifying defaults for a directory subtree 
@@ -141,7 +141,7 @@ class XMLDescriptorContainer(object):
 
 	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, 
 			reference=None, traceability=[], executionOrderHint=0.0, skippedReason=None):
-		"""Create an instance of the XMLDescriptorContainer class.
+		"""Create an instance of the class.
 		
 		After construction the self.mode attribute is not set until 
 		later cloning and expansion of each container for the supported modes. 
@@ -273,8 +273,11 @@ class XMLDescriptorCreator(object):
 		fp = open(self.file, 'w')
 		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.group, self.testclass, self.module))
 		fp.close
-
-
+		
+XMLDescriptorContainer = TestDescriptor
+""" XMLDescriptorContainer is an alias for the TestDescriptor class, which 
+exists for compatibility reasons only. 
+"""
 
 class XMLDescriptorParser(object):
 	'''Helper class to parse an XML test descriptor - either for a testcase, 
@@ -312,11 +315,11 @@ class XMLDescriptorParser(object):
 	def parse(xmlfile, istest=True, parentDirDefaults=None):
 		"""
 		Parses the test/dir descriptor in the specified path and returns the 
-		XMLDescriptorContainer object. 
+		TestDescriptor object. 
 		
 		@param istest: True if this is a pysystest.xml file, false if it is 
 		a descritor giving defaults for a directory of testcases.  
-		@param parentDirDefaults: Optional XMLDescriptorContainer instance 
+		@param parentDirDefaults: Optional TestDescriptor instance 
 		specifying default values to be filtered in from the parent 
 		directory.
 		"""
@@ -326,27 +329,27 @@ class XMLDescriptorParser(object):
 		finally:
 			p.unlink()
 
-	DEFAULT_DESCRIPTOR = XMLDescriptorContainer(
+	DEFAULT_DESCRIPTOR = TestDescriptor(
 		file=None, id=u'', type="auto", state="runnable", 
 		title='', purpose='', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None)
 	"""
-	A directory config descriptor instance of XMLDescriptorContainer holding 
+	A directory config descriptor instance of TestDescriptor holding 
 	the default values to be used if there is no directory config descriptor. 
 	"""
 
 
 	def getContainer(self):
-		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
+		'''Create and return an instance of TestDescriptor for the contents of the descriptor.'''
 		
 		for attrName, attrValue in self.root.attributes.items():
 			if attrName not in ['state', 'type']:
 				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
 		
 		# some elements that are mandatory for an individual test and not used for dir config
-		return XMLDescriptorContainer(self.getFile(), self.getID(), self.getType(), self.getState(),
+		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else None, self.getPurpose() if self.istest else None,
 										self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
@@ -589,7 +592,7 @@ class DescriptorLoader(object):
 		
 		@param dir: The parent directory to search for runnable tests. 
 		
-		@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects 
+		@return: List of L{pysys.xml.descriptor.TestDescriptor} objects 
 		which could be selected for execution. 
 		
 		If a test can be run in multiple modes there must be a single descriptor 
@@ -700,9 +703,9 @@ class DescriptorLoader(object):
 		
 		@param project: The L{Project} instance associated with these descriptors. 
 		@param descriptorfile: The absolute path of the descriptor file. 
-		@param parentDirDefaults: A L{XMLDescriptorContainer} instance containing 
+		@param parentDirDefaults: A L{TestDescriptor} instance containing 
 		defaults to inherit from the parent directory, or None if none was found. 
-		@return: The L{XMLDescriptorContainer} instance, or None if none should be 
+		@return: The L{TestDescriptor} instance, or None if none should be 
 		added for this descriptor file. Note that subclasses may modify the 
 		contents of the returned instance. 
 		@raises UserError: If the descriptor is invalid and an error should be 

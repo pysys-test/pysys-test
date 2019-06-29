@@ -67,7 +67,7 @@ class BaseRunner(ProcessUser):
 	if customizations are needed. 
 	
 	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
-	with a list of L{pysys.xml.descriptor.XMLDescriptorContainer} objects detailing the set of testcases to be run. 
+	with a list of L{pysys.xml.descriptor.TestDescriptor} objects detailing the set of testcases to be run. 
 	The runner iterates through the descriptor list and for each entry imports the L{pysys.basetest.BaseTest}
 	subclass for the testcase, creates an instance of the test class and then calls the setup, execute, validate 
 	and cleanup methods of the test class instance. The runner is responsible for ensuring the output 

@@ -41,7 +41,7 @@ def loadDescriptors(dir=None):
 	Deprecated, use L{pysys.xml.descriptor.DescriptorLoader} instead.
 	
 	@param dir: The parent directory to search for runnable tests
-	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects. 
+	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects. 
 	Caller must sort this list to ensure deterministic behaviour. 
 	@rtype: list
 	@raises UserError: Raised if no testcases can be found.
@@ -67,7 +67,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	@param expandmodes: Set to False to disable expanding a test with multiple
 	modes into separate descriptors for each one (used for pysys print) 
 	if supportMultipleModesPerRun=True. 
-	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
+	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects
 	@rtype: list
 	@raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
 	

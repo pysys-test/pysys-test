@@ -97,7 +97,7 @@ class BaseTest(ProcessUser):
 	@ivar project: Reference to the project details as set on the module load of the launching executable  
 	@type project: L{Project}
 	@ivar descriptor: Information about this testcase, with fields such as id, title, etc
-	@type descriptor: L{pysys.xml.descriptor.XMLDescriptorContainer}
+	@type descriptor: L{pysys.xml.descriptor.TestDescriptor}
 	@ivar testCycle: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
 	The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
 	@type testCycle: int
