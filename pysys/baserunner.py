@@ -33,8 +33,10 @@ import fnmatch
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
+	import Queue as queue
 else:
 	from io import StringIO
+	import queue
 
 from pysys.constants import *
 from pysys.exceptions import *
@@ -186,6 +188,10 @@ class BaseRunner(ProcessUser):
 		self.results = {}
 		
 		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
+		
+		# (initially) undocumented hook for customizing which jobs the threadpool takes 
+		# off the queue and when. Standard implementation is a simple blocking queue. 
+		self._testScheduler = queue.Queue()
 		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -383,7 +389,8 @@ class BaseRunner(ProcessUser):
 		if self.printLogs is None: self.printLogs = PrintLogs.ALL # default value, unless overridden by user or writer.setup
 		
 		# create the thread pool if running with more than one thread
-		if self.threads > 1: threadPool = ThreadPool(self.threads)
+		if self.threads > 1: 
+			threadPool = ThreadPool(self.threads, requests_queue=self._testScheduler)
 
 		# loop through each cycle
 		
@@ -664,6 +671,7 @@ class TestContainer(object):
 		self.testFileHandlerStdoutBuffer = StringIO() # unicode characters written to the output for this testcase
 		self.kbrdInt = False
 
+	def __str__(self): return self.descriptor.id+('' if self.runner.cycle <= 1 else '.cycle%03d'%(self.cycle+1))
 		
 	def __call__(self, *args, **kwargs):
 		"""Over-ridden call builtin to allow the class instance to be called directly.
