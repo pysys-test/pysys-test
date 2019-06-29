@@ -127,7 +127,7 @@ class BaseTest(ProcessUser):
 		self.__backgroundThreads = []
 		self.manualTester = None
 		self.resources = []
-		self.testCycle = BaseTest._currentTestCycle
+		self.testCycle = getattr(BaseTest, '_currentTestCycle', None) # set when constructed by runner
 	
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
@@ -244,7 +244,6 @@ class BaseTest(ProcessUser):
 		
 		@param file: The name of a tab separated values (.tsv) file to write to, 
 		for example 'monitor-myprocess.tsv'. 
-		
 		A default L{pysys.process.monitor.ProcessMonitorTextFileHandler} instance is 
 		created if this parameter is specified, with default columns from 
 		L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS} . 

@@ -988,7 +988,7 @@ class ProcessUser(object):
 		the overall outcome would be C{BLOCKED}. 
 		
 		The method returns the integer value of the outcome as defined in L{pysys.constants}. To convert this 
-		to a string representation use the C{LOOKUP} dictionary i.e. C{LOOKUP}[test.getOutcome()]
+		to a string representation use the L{pysys.constants.LOOKUP} dictionary i.e. C{LOOKUP[test.getOutcome()]}.
 		
 		@return: The overall outcome
 		@rtype:  integer
@@ -1236,13 +1236,6 @@ class ProcessUser(object):
 		lexicographically with other strings, and compared to numbers 
 		strings are always considered greater. 
 
-		@param v1: A string containing a version number, with any number of components. 
-		@param v2: A string containing a version number, with any number of components. 
-
-		@return: an integer > 0 if v1>v2, 
-		an integer < 0 if v1<v2, 
-		or 0 if they are semantically the same.
-		
 		>>> ProcessUser.compareVersions('10-alpha5.dev10', '10alpha-5-dEv_10') == 0 # normalization of case and separators
 		True
 
@@ -1282,5 +1275,11 @@ class ProcessUser(object):
 		>>> ProcessUser.compareVersions('1', '')
 		1
 
+		@param v1: A string containing a version number, with any number of components. 
+		@param v2: A string containing a version number, with any number of components. 
+
+		@return: an integer > 0 if v1>v2, 
+		an integer < 0 if v1<v2, 
+		or 0 if they are semantically the same.
 		"""
 		return compareVersions(v1, v2)
