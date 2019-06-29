@@ -95,6 +95,7 @@ class BaseRunner(ProcessUser):
 	@ivar project: Reference to the project details as set on the module load of the launching executable  
 	@type project: L{Project}
 	
+	@undocumented: _testScheduler
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
