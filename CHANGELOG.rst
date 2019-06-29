@@ -194,6 +194,9 @@ Bug fixes:
   `pysystest.xml` or (better) to a `pysysdirconfig.xml` file to provide 
   separate namespaces for the tests in each directory and avoid colliding ids. 
 
+- Fixed CSV performance reporter runDetails which was including each item 
+  twice. 
+
 ---------------
 Release History
 ---------------
