@@ -2,7 +2,9 @@
 PySys 1.4.1 Release Notes
 =========================
 
-PySys can be used with Python 3.7/3.6/3.5 or Python 2.7. 
+PySys can be used with Python 3.7/3.6/3.5. PySys also retains compatibility 
+with Python 2.7 though users are encouraged to move to Python 3 when possible 
+as 2.7 will soon be at the end of it support lifetime. 
 
 See installation notes in README.rst for more details.
 
@@ -13,6 +15,20 @@ What's new in this release
 <highlights here>
 
 New features:
+
+- Added support for running tests in multiple modes from within a single PySys 
+  execution. To make use of this, add the following property to your 
+  `pysysproject.xml`::
+  
+	<property name="supportMultipleModesPerRun" value="true"/>
+
+  The old concept of modes within PySys is now deprecated in favour of the 
+  more powerful features of `supportMultipleModesPerRun=True` so we recommend 
+  all users to add this project setting when possible. Please note though that 
+  it will result in slightly different behaviour (e.g. different output 
+  directory names) if you have any tests with `<mode>...</mode>` in their 
+  descriptor. See the user guide for detailed information about running tests 
+  in multiple modes.
 
 - Added a project configuration option that collects a copy of all test output 
   files matching a specified pattern into a single directory. This is useful 
@@ -120,7 +136,9 @@ Improvements to the XML descriptors that provide information about tests:
   Tests with a higher ordering hint are executed after tests with lower 
   values. The default order value is 0.0, and values can be positive or 
   negative. Tests with the same order hint are executed based on the 
-  sort order of the testcase directories. 
+  sort order of the testcase directories. It is also possible to configure 
+  hints at a project level for specific modes or groups. See the user guide 
+  for more information. 
   
   You might want to specify a large order hint for long-running performance or 
   robustness tests to ensure they execute after more important unit/correctness 
@@ -141,6 +159,13 @@ Improvements to the XML descriptors that provide information about tests:
   `pysysdirconfig.xml` file. The default `pysystest.xml` template generated 
   for new testcases now contains a commented-out `skipped` element instead of 
   a `state=` attribute. 
+
+- Added a new API for overriding the way test descriptors are loaded from a 
+  directory on the file system. This allows for programmatic customization 
+  of descriptor settings such as the supported modes for each testcase, and 
+  also provides a way to make PySys capable of finding and running non-PySys 
+  tests (by programmatically creating PySys TestDescriptor objects for them).
+  See the `pysys.xml.descriptor.DescriptorLoader` class for more details. 
 
 Improvements to the `pysys.py` command line tool:
 
