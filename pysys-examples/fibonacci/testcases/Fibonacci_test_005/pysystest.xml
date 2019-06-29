@@ -11,11 +11,11 @@ the time taken to calculate fibonacci numbers.
   </description>
 
   <classification>
-    <groups>
+    <groups inherit="true">
       <group>examples</group>
       <group>performance</group>
     </groups>
-     <modes>
+     <modes inherit="true">
         <mode>FibonacciMode1</mode>
         <mode>FibonacciMode2</mode>
     </modes>

@@ -14,7 +14,7 @@ testcase validation to determine that the correct values are calculated.
   </description>
 
   <classification>
-    <groups>
+    <groups inherit="true">
       <group>examples</group>
       <group>external</group>
     </groups>

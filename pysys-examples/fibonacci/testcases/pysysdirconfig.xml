@@ -11,13 +11,13 @@
     <!-- Specify the groups that all tests under this directory will be 
       tagged with. 
       This is in addition to any defined by individual tests. -->
-    <groups>
+    <groups inherit="true">
       <group></group>
     </groups>
 
     <!-- Specify modes supported by all tests under this directory. 
       This is in addition to any defined by individual tests. -->
-    <modes>
+    <modes inherit="true">
       <mode></mode>
     </modes>
   </classification>
