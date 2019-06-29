@@ -138,9 +138,11 @@ class TestDescriptor(object):
 	@undocumented: _createDescriptorForMode
 	"""
 
-
-	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, 
-			reference=None, traceability=[], executionOrderHint=0.0, skippedReason=None):
+	def __init__(self, file, id, 
+		type="auto", state="runnable", title=u'(no title)', purpose=u'', groups=[], modes=[], 
+		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE, 
+		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
+		traceability=[], executionOrderHint=0.0, skippedReason=None):
 		"""Create an instance of the class.
 		
 		After construction the self.mode attribute is not set until 
@@ -154,13 +156,22 @@ class TestDescriptor(object):
 		self.state = state
 		self.title = title
 		self.purpose = purpose
-		self.groups = groups
-		self.modes = modes
+		# copy groups/modes so we can safely mutate them later if desired
+		self.groups = list(groups)
+		self.modes = list(modes)
 		self.classname = classname
 		self.module = module
+		
+		# absolutize these paths if something relative was passed in
 		self.input = input
 		self.output = output
 		self.reference = reference
+		if file:
+			dirname = os.path.dirname(file)
+			self.input = os.path.join(dirname, self.input)
+			self.output = os.path.join(dirname, self.output)
+			self.reference = os.path.join(dirname, self.reference)
+
 		self.traceability = traceability
 		self.executionOrderHint = executionOrderHint
 		self.skippedReason = skippedReason
@@ -578,7 +589,6 @@ class DescriptorLoader(object):
 		assert project, 'project must be specified'
 		self.project = project
 		
-
 	def loadDescriptors(self, dir, **kwargs):
 		"""Find all descriptors located under the specified directory, and 
 		return them as a list.
@@ -603,8 +613,8 @@ class DescriptorLoader(object):
 		execution-order-hints), before the final list is sorted and passed to 
 		L{pysys.baserunner.BaseRunner}. 
 		
-		The order of the list is random, so the caller is responsible for 
-		sorting this list to ensure deterministic behaviour. 
+		The order of the returned list is random, so the caller is responsible 
+		for sorting this list to ensure deterministic behaviour. 
 		
 		@rtype: list
 		@raises UserError: Raised if no testcases can be found.
@@ -630,7 +640,11 @@ class DescriptorLoader(object):
 		i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
 		assert os.path.exists(toLongPathSafe(dir)), dir
 		for root, dirs, files in os.walk(toLongPathSafe(dir)):
-			intersection =  descriptorSet & set(files)
+			if self._handleSubDirectory(root, dirs, files, descriptors):
+				del dirs[:]
+				continue
+		
+			intersection = descriptorSet & set(files)
 			if intersection: 
 				descriptorpath = fromLongPathSafe(os.path.join(root, intersection.pop()))
 				# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
@@ -687,7 +701,7 @@ class DescriptorLoader(object):
 		for descriptorfile in descriptorfiles:
 			parentconfig = getParentDirConfig(descriptorfile)
 			try:
-				parsed = self.parseTestDescriptor(project, descriptorfile, parentDirDefaults=getParentDirConfig(descriptorfile))
+				parsed = self._parseTestDescriptor(project, descriptorfile, parentDirDefaults=getParentDirConfig(descriptorfile))
 				if parsed:
 					descriptors.append(parsed)
 			except UserError:
@@ -698,7 +712,35 @@ class DescriptorLoader(object):
 				
 		return descriptors
 
-	def parseTestDescriptor(self, project, descriptorfile, parentDirDefaults=None, **kwargs):
+	def _handleSubDirectory(self, dir, subdirs, files, descriptors, **kwargs):
+		"""Overrides the handling of each sub-directory found while walking 
+		the directory tree during L{loadDescriptors}. 
+		
+		Can be used to add test descriptors, and/or add custom logic for 
+		preventing PySys searching a particular part of the directory tree 
+		perhaps based on the presence of specific files or subdirectories 
+		within it. 
+
+		This method is called before directories containing pysysignore 
+		files are stripped out. 
+		
+		@param dir: The full path of the directory to be processed.
+		On Windows, this will be a long-path safe unicode string. 
+		@param subdirs: a list of the subdirectories under dir, which 
+		can be used to detect what kind of directory this is. 
+		@param files: a list of the files under dir, which 
+		can be used to detect what kind of directory this is. 
+		@param descriptors: A list of L{TestDescriptor} items which this method 
+		can add to if desired. 
+		@param kwargs: Reserved for future use. Pass this to the base class 
+		implementation when calling it. 
+		@return True: If True, this part of the directory tree has been fully 
+		handled and PySys will not search under it any more. False to allow 
+		normal PySys handling of the directory to proceed. 
+		"""
+		return False
+
+	def _parseTestDescriptor(self, project, descriptorfile, parentDirDefaults=None, **kwargs):
 		""" Parses a single XML descriptor file for a testcase and returns the result. 
 		
 		@param project: The L{Project} instance associated with these descriptors. 

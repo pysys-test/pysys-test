@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+	<property root="testRootDir"/>
+
+	<property name="defaultAbortOnError" value="true"/>
+	<property name="supportMultipleModesPerRun" value="true"/>
+
+	<path value="." relative="true" />
+
+	<descriptor-loader module="mypkg.custom" classname="CustomDescriptorLoader"/>
+	
+</pysysproject>
