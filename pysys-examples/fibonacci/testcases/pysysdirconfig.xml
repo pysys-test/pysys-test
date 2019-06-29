@@ -24,8 +24,9 @@
 
   <!-- Specify as a floating point number the default priority for tests under 
     this directory, which determines the order in which they're run relative 
-    to other tests/directories with a higher or lower priority. The default 
-    priority is 0.0. This can be overridden by individual tests. -->
+    to other tests/directories with a higher or lower priority. 
+    Empty string means inherit. The default priority is 0.0. 
+  -->
   <execution-order hint=""/>
 
   <!-- Uncomment this to mark all tests under this directory as skipped 
