@@ -137,7 +137,7 @@ need to run in multiple modes, and add a list of the supported modes::
 
    <classification>
 	<groups>...</groups>
-	<modes>
+	<modes inherit="true">
 		<mode>MockDatabase</mode>
 		<mode>MyDatabase_2.0</mode>
 	</modes>
@@ -153,8 +153,9 @@ argument. It's best to choose either the fastest mode or else the one that
 is most likely to show up interesting issues as the primary mode. 
 
 In large projects you may wish to configure modes in a `pysysdirconfig.xml` 
-file in a parent directory rather than in `pysystest.xml`, so that they apply 
-automatically to all the nested testcases, and so there's a single place to 
+file in a parent directory rather than in `pysystest.xml`, which will by 
+default be inherited by all nested testcases (unless inherit="false" is 
+specified in the `<modes>` element), and so there's a single place to 
 edit the modes list if you need to change them later. It's also possible to 
 create a custom DescriptorLoader subclass that dynamically adds modes 
 from Python code, perhaps based on the groups specified in each descriptor 
@@ -267,10 +268,13 @@ file containing::
 	  <id-prefix>SubSystem1_perf.</id-prefix>
 
 	  <classification>
-		<groups>
+		<groups inherit="true">
 		  <group>subsystem1</group>
 		  <group>performance</group>
 		</groups>
+
+		<modes inherit="true">
+		</modes>
 
 	  </classification>
 
@@ -296,6 +300,13 @@ This serves several useful purposes:
 
 - It provides the ability to temporarily skip a set of tests if they are 
   broken temporarily pending a bug fix. 
+
+By default both modes and groups are inherited from `pysysdirconfig.xml` files 
+in parent directories, but inheriting can be disabled in an individual 
+descriptor by setting inherit="false", in case you have a few tests that only 
+make sense in one mode. Alternatively, you could allow the tests to exist 
+in all modes but call `self.skipTest` at the start of the test `execute` method 
+if the test cannot execute in the current mode. 
 
 See the `pysysdirconfig.xml` sample in `pysys-examples/fibonacci/testcases` and 
 also in `pysys/xml/templates/dirconfig` for a full example of a directory 

@@ -100,5 +100,33 @@
       "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Input-root", 
       "output": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Output-root", 
       "reference": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Reference-root"
+   }, 
+   {
+      "id": "rootprefix_Test_RootNoInheritDescriptor", 
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml", 
+      "type": "auto", 
+      "state": "runnable", 
+      "skippedReason": null, 
+      "title": "Nested testcase", 
+      "purpose": "Nested purpose", 
+      "groups": [
+         "TestSpecificGroup"
+      ], 
+      "modes": [
+         "TestSpecificMode"
+      ], 
+      "primaryMode": "TestSpecificMode", 
+      "requirements": [
+         "root-req1", 
+         "root-req2"
+      ], 
+      "executionOrderHint": [
+         -4.1
+      ], 
+      "classname": "PySysTest-root", 
+      "module": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\run_root", 
+      "input": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\Input-root", 
+      "output": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\Output-root", 
+      "reference": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\Reference-root"
    }
 ]

@@ -58,6 +58,8 @@ DTD='''
 <!ATTLIST input path CDATA #REQUIRED >
 <!ATTLIST output path CDATA #REQUIRED >
 <!ATTLIST reference path CDATA #REQUIRED >
+<!ATTLIST groups inherit (true | false) "true" >
+<!ATTLIST modes inherit (true | false) "true" >
 <!ATTLIST requirement id CDATA #REQUIRED >
 '''
 
@@ -73,10 +75,10 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
   </description>
   
   <classification>
-    <groups>
+    <groups inherit="true">
       <group>%s</group>
     </groups>
-    <modes>
+    <modes inherit="true">
     </modes>
   </classification>
 
@@ -468,8 +470,12 @@ class XMLDescriptorParser(object):
 			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
 			for node in groups.getElementsByTagName('group'):
 				if self.getText(node): groupList.append(self.getText(node))
+
+			if (groups.getAttribute('inherit') or 'true').lower()!='true':
+				return groupList
 		except Exception:
 			pass
+			
 		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
 		return groupList
 	
@@ -483,6 +489,10 @@ class XMLDescriptorParser(object):
 			modes = classificationNodeList[0].getElementsByTagName('modes')[0]
 			for node in modes.getElementsByTagName('mode'):
 				if self.getText(node): modeList.append(self.getText(node))
+
+			if (modes.getAttribute('inherit') or 'true').lower()!='true':
+				return modeList
+
 		except Exception:
 			pass
 		modeList = [x for x in self.defaults.modes if x not in modeList]+modeList
