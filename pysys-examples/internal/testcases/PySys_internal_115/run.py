@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 			['run', '--outdir', self.output+'/outdir-absolute', '--mode=ALL'], workingDir='test')
 
 		runPySys(self, 'clean-relative-outdir', 
-			['clean', '-v', 'DEBUG', '--outdir', 'outdir-relative', #'--mode=ALL'
+			['clean', '-v', 'DEBUG', '--all', '--outdir', 'outdir-relative', #'--mode=ALL'
 			], workingDir='test')
 		runPySys(self, 'clean-absolute-outdir', 
 			['clean', '-vDEBUG', '--outdir', self.output+'/outdir-absolute', #'--mode=ALL'

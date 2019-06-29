@@ -95,22 +95,18 @@ class ConsoleCleanTestHelper(object):
 
 			for descriptor in descriptors:
 				if self.all:
-					if sys.version_info >= (3,):
-						cache=os.path.join(os.path.dirname(descriptor.module),"__pycache__")
-						if os.path.exists(cache):
-							log.info("Deleting pycache: " + cache)
-							self.purgeDirectory(cache, True)
+					cache=os.path.join(os.path.dirname(descriptor.module),"__pycache__")
+					if os.path.isdir(cache):
+						log.info("Deleting pycache: " + cache)
+						deletedir(cache)
 					else:
-						path = descriptor.module + ".pyc"
-						try:
-							mode = os.stat(path)[stat.ST_MODE]
-							if stat.S_ISLNK(mode):
-								os.unlink(path)
-							if stat.S_ISREG(mode):
-								os.remove(path)
-							log.info("Deleting compiled module: " + path)
-						except Exception:
-							log.debug("Error deleting compiled module: " + path)
+						log.debug('__pycache__ does not exist: %s', cache)
+					path = descriptor.module + ".pyc"
+					if os.path.exists(path):
+						log.info("Deleting compiled Python module: " + path)
+						os.remove(path)
+					else:
+						log.debug('.pyc does not exist: %s', path)
 
 				for mode in (descriptor.modes or [None]):
 					pathToDelete = os.path.join(descriptor.output, self.outsubdir)
