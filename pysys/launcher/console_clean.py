@@ -21,11 +21,11 @@ import os.path, stat, getopt, logging, traceback, sys
 import json
 
 from pysys import log
-
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.exceptions import UserError
+from pysys.utils.fileutils import deletedir
 
 class ConsoleCleanTestHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -57,6 +57,7 @@ class ConsoleCleanTestHelper(object):
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 
+		from pysys.internal.initlogging import pysysLogHandler, stdoutHandler
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage(printXOptions)	  
@@ -76,6 +77,8 @@ class ConsoleCleanTestHelper(object):
 				else:
 					log.warn('Invalid log level "%s"'%value)
 					sys.exit(1)
+				# refresh handler levels
+				pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
 				
 			elif option in ("-o", "--outdir"):
 				self.outsubdir = value
@@ -86,7 +89,10 @@ class ConsoleCleanTestHelper(object):
 
 
 	def clean(self):
-			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir)		
+			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir, expandmodes=False)
+			from pysys.constants import PROJECT
+			supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
+
 			for descriptor in descriptors:
 				if self.all:
 					if sys.version_info >= (3,):
@@ -106,31 +112,20 @@ class ConsoleCleanTestHelper(object):
 						except Exception:
 							log.debug("Error deleting compiled module: " + path)
 
-				pathToDelete = os.path.join(descriptor.output, self.outsubdir)
-				if os.path.exists(pathToDelete):
-					log.info("Deleting output directory: " + pathToDelete)
-					self.purgeDirectory(pathToDelete, True)
-				else:
-					log.debug("Output directory does not exist: " + pathToDelete)
+				for mode in (descriptor.modes or [None]):
+					pathToDelete = os.path.join(descriptor.output, self.outsubdir)
 
+					if os.path.isabs(self.outsubdir): # must delete only the selected testcase
+						pathToDelete += "/"+descriptor.id
+						
+					if supportMultipleModesPerRun and mode:
+						pathToDelete += '~'+mode
 
-	def purgeDirectory(self, dir, delTop=False):
-		for file in os.listdir(dir):
-			path = os.path.join(dir, file)
-			if PLATFORM in ['sunos', 'linux']:
-				mode = os.lstat(path)[stat.ST_MODE]
-			else:
-				mode = os.stat(path)[stat.ST_MODE]
-		
-			if stat.S_ISLNK(mode):
-				os.unlink(path)
-			if stat.S_ISREG(mode):
-				os.remove(path)
-			elif stat.S_ISDIR(mode):
-				self.purgeDirectory(path, delTop=True)
-
-		if delTop: os.rmdir(dir)
-
+					if os.path.exists(pathToDelete):
+						log.info("Deleting output directory: " + pathToDelete)
+						deletedir(pathToDelete)
+					else:
+						log.debug("Output directory does not exist: " + pathToDelete)
 
 def cleanTest(args):
 	cleaner = ConsoleCleanTestHelper(os.getcwd(), "clean")

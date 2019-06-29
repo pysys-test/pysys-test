@@ -230,7 +230,7 @@ class ConsoleLaunchHelper(object):
 		}
 		
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, 
-			modeincludes=self.modeinclude, modeexcludes=self.modeexclude)
+			modeincludes=self.modeinclude, modeexcludes=self.modeexclude, expandmodes=True)
 		descriptors.sort(key=lambda d: [d.executionOrderHint, d._defaultSortKey])
 
 		# No exception handler above, as any createDescriptors failure is really a fatal problem that should cause us to 
