@@ -56,6 +56,73 @@ the `.validate()` method of each test. That approach allows you to later
 customize the logic by changing just one single place, and also to omit it for 
 specific tests where it is not wanted. 
 
+Configuring and overriding test options
+---------------------------------------
+PySys provides two mechanisms for specifying options such as credentials, 
+hostnames, or test duration/iteration that you might want to change or 
+override when running tests:
+
+- *Testcase attributes*, which are just variables on the Python testcase 
+  instance (or a BaseTest subclass shared by many tests). 
+  Attributes can be overridden on the command line when executing `pysys run`. 
+  
+  Attributes are useful for settings specific to an individual testcase such as 
+  the number of iterations or time duration to use for a performance test. 
+  A user running the test locally you might want to temporarily set to a lower 
+  iteration count while getting the test right, or perhaps try 
+  a higher value to get a more stable performance result. 
+  
+- *Project properties*. The default value is specified in the `pysysproject.xml` 
+  file or in a `.properties` file. 
+  
+  Properties can be overridden using an environment variable. 
+  Project properties are useful for things like credentials and hostnames that 
+  are shared across many testcases, and where you might want to set up 
+  customizations in your shell so that you don't need to keep specifying them 
+  every time you invoke `pysys run`. 
+
+To use an attribute, set the default value as a Python string on your test 
+or basetest before `BaseTest.__init__()` is called. The easiest way to do this 
+in an individual testcase is usually to use a static variable, e.g.::
+
+	class PySysTest(BaseTest):
+
+		myIterationCount = str(100*1000) # can be overridden with -XmyIterationCount=
+		
+		def execute(self):
+			self.log.info('Using iterations=%d', int(self.myIterationCount))
+			...
+	
+If you have a custom BaseTest subclass then you need to set the defaults in 
+your `__init__ before calling the super implementation of `__init__`. 
+
+To override the value of an attribute use the `-X` option::
+
+	pysys run -XmyIterationCount=10
+
+To use a project property that can be overridden with an environment variable, 
+add a `property` element to your `pysysproject.xml` file::
+
+	<property name="myCredentials" value="${env.MYCOMPANY_CREDENTIALS}" default="testuser:testpassword"/>
+
+This property can will take the value of the specified environment variable, 
+or else the default if not set. 
+
+Another way to specify default project property values is to put them into a 
+Java-style `.properties` file. You can use properties to specify which file is 
+loaded, so it would be possible to customize using environment variables::
+
+	<property name="myProjectPropertiesFile" value="${env.MYCOMPANY_CUSTOM_PROJECT_PROPERTIES}" default="${testRootDir}/default-config.properties"/>
+	<property file="${myProjectPropertiesFile}"/>
+
+To use projects properties in your testcase, just access the attributes on 
+`self.project` from either a test instance or a runner::
+
+	def execute(self):
+		self.log.info('Using username=%s and password %s' % self.project.myCredentials.split(':'))
+
+Remember that they will all be of string type. 
+
 Producing code coverage reports
 -------------------------------
 PySys includes built-in support for producing coverage reports for programs 
