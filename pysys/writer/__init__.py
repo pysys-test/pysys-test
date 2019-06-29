@@ -157,7 +157,7 @@ class BaseResultsWriter(object):
 		can extract data from this object but should not store a reference to it. 
 		The testObj.descriptor.id indicates the test that ran. 
 		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
-		@param testTime: Duration of the test in seconds. 
+		@param testTime: Duration of the test in seconds as a floating point number. 
 		@param testStart: The time when the test started. 
 		@param runLogOutput: The logging output written to run.log, as a unicode character string. 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
@@ -577,10 +577,13 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		attr3.value = '%d'%(int)(testObj.getOutcome() in FAILS)	
 		attr4 = document.createAttribute('skipped')	
 		attr4.value = '%d'%(int)(testObj.getOutcome() == SKIPPED)		
+		attr5 = document.createAttribute('time')	
+		attr5.value = '%s'%kwargs['testTime']
 		rootElement.setAttributeNode(attr1)
 		rootElement.setAttributeNode(attr2)
 		rootElement.setAttributeNode(attr3)
 		rootElement.setAttributeNode(attr4)
+		rootElement.setAttributeNode(attr5)
 		
 		# add the testcase information
 		testcase = document.createElement('testcase')

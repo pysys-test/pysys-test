@@ -57,6 +57,7 @@ class PySysTest(BaseTest):
 
 
 		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"', encoding='utf-8')
+		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='<testsuite .* time="[0-9.]+"', encoding='utf-8')
 		self.assertGrep('target/pysys-reports/TEST-NestedPass.2.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"', encoding='utf-8')
 		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='failures="1" name="NestedTimedout" skipped="0" tests="1"', encoding='utf-8')
 		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness - %s</failure>'%TEST_STR, encoding='utf-8')
