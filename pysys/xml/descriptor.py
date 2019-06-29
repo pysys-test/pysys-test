@@ -610,6 +610,7 @@ class DescriptorLoader(object):
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
 		assert self.project, 'project must be specified'
 		assert dir, 'dir must be specified'
+		assert os.path.isabs(dir), 'dir must be an absolute path: %s'%dir
 		
 		project = self.project
 		
@@ -624,6 +625,7 @@ class DescriptorLoader(object):
 		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
 		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
 		i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
+		assert os.path.exists(toLongPathSafe(dir)), dir
 		for root, dirs, files in os.walk(toLongPathSafe(dir)):
 			intersection =  descriptorSet & set(files)
 			if intersection: 
