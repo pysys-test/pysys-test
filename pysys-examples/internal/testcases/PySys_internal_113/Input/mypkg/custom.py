@@ -11,11 +11,14 @@ class MyTestClass(BaseTest):
 
 class CustomDescriptorLoader(DescriptorLoader):
 
-	def _handleSubDirectory(self, dir, subdirs, files, descriptors, **kwargs):
+	def _handleSubDirectory(self, dir, subdirs, files, descriptors, parentDirDefaults, **kwargs):
+		# can merge in defaults from parent dir if desired
+		idprefix = '' if parentDirDefaults is None else parentDirDefaults.id
+	
 		if 'ace_descriptor.json' in files:
 			descriptors.append(TestDescriptor(
 				file=dir+'/ace_descriptor.json', 
-				id=os.path.basename(dir), 
+				id=idprefix+os.path.basename(dir), 
 				title=u"My ace test",
 				groups=[u'ace-tests'], 
 				modes=[u'MyMode1', u'MyMode2'],
@@ -30,7 +33,7 @@ class CustomDescriptorLoader(DescriptorLoader):
 			if f.endswith('.funky'):
 				descriptors.append(TestDescriptor(
 					file=dir+'/'+f, 
-					id=f.split('.')[0], # get the test id from the filename 
+					id=idprefix+f.split('.')[0], # get the test id from the filename 
 					title=u"My funky test",
 					groups=[u'funky-tests'], 
 					classname="MyTestClass",

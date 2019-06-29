@@ -105,7 +105,7 @@ class TestDescriptor(object):
 	descriptor instances. 
 	
 	@ivar file: The full path of the testcase descriptor file. 
-	@ivar id: The testcase identifier; has the value None if this is a 
+	@ivar id: The testcase identifier, or the id prefix if this is a 
 	directory config descriptor rather than a testcase descriptor. 
 	Includes a mode suffix if this is a multi-mode test and 
 	supportMultipleModesPerRun=True.
@@ -134,6 +134,8 @@ class TestDescriptor(object):
 	@ivar executionOrderHint: A float priority value used to determine the 
 	order in which testcases will be run; higher values are executed before 
 	low values. The default is 0.0. 
+	@ivar isDirConfig: True if this is a directory configuration, or False if 
+	it's a normal testcase. 
 
 	@undocumented: _createDescriptorForMode
 	"""
@@ -142,7 +144,8 @@ class TestDescriptor(object):
 		type="auto", state="runnable", title=u'(no title)', purpose=u'', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE, 
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
-		traceability=[], executionOrderHint=0.0, skippedReason=None):
+		traceability=[], executionOrderHint=0.0, skippedReason=None, 
+		isDirConfig=False):
 		"""Create an instance of the class.
 		
 		After construction the self.mode attribute is not set until 
@@ -150,6 +153,7 @@ class TestDescriptor(object):
 		"""
 		if skippedReason: state = 'skipped'
 		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
+		self.isDirConfig = isDirConfig
 		self.file = file
 		self.id = id
 		self.type = type
@@ -166,7 +170,7 @@ class TestDescriptor(object):
 		self.input = input
 		self.output = output
 		self.reference = reference
-		if file:
+		if file and not isDirConfig: 
 			dirname = os.path.dirname(file)
 			self.input = os.path.join(dirname, self.input)
 			self.output = os.path.join(dirname, self.output)
@@ -371,7 +375,8 @@ class XMLDescriptorParser(object):
 										os.path.join(self.dirname if self.istest else '', self.getTestReference()),
 										self.getRequirements(), 
 										self.getExecutionOrderHint(), 
-										skippedReason=self.getSkippedReason())
+										skippedReason=self.getSkippedReason(), 
+										isDirConfig=not self.istest)
 
 
 	def unlink(self):
@@ -628,7 +633,6 @@ class DescriptorLoader(object):
 		project = self.project
 		
 		descriptors = []
-		descriptorfiles = []
 		ignoreSet = set(OSWALK_IGNORES)
 		descriptorSet =set(DEFAULT_DESCRIPTOR)
 		
@@ -639,18 +643,60 @@ class DescriptorLoader(object):
 		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
 		i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
 		assert os.path.exists(toLongPathSafe(dir)), dir
+
+		DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
+		if project.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(project.projectFile))):
+			# find directory config descriptors between the project root and the testcase 
+			# dirs. We deliberately use project dir not current working dir since 
+			# we don't want descriptors to be loaded differently depending on where the 
+			# tests are run from (i.e. should be independent of cwd). 
+			dirconfigs = {}
+			projectroot = os.path.dirname(project.projectFile).replace('\\','/').split('/')
+		else:
+			dirconfigs = None
+			log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
+
+		def getParentDirConfig(testdir):
+			if dirconfigs is None: return None
+			testdir = testdir.replace('\\','/').split('/')
+			currentconfig = None
+			for i in range(len(projectroot), len(testdir)):
+				currentdir = '/'.join(testdir[:i])
+				if currentdir in dirconfigs:
+					currentconfig = dirconfigs[currentdir]
+				else:
+					if pathexists(currentdir+'/'+DIR_CONFIG_DESCRIPTOR):
+						currentconfig = XMLDescriptorParser.parse(currentdir+'/'+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
+						log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
+					dirconfigs[currentdir] = currentconfig
+			return currentconfig
+
 		for root, dirs, files in os.walk(toLongPathSafe(dir)):
-			if self._handleSubDirectory(root, dirs, files, descriptors):
+			parentconfig = getParentDirConfig(fromLongPathSafe(root))
+
+			# allow subclasses to modify descriptors list and/or avoid processing 
+			# subdirectories
+			if self._handleSubDirectory(root, dirs, files, descriptors, parentDirDefaults=parentconfig):
 				del dirs[:]
 				continue
 		
 			intersection = descriptorSet & set(files)
 			if intersection: 
-				descriptorpath = fromLongPathSafe(os.path.join(root, intersection.pop()))
+				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
 				# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
 				# as it proliferates to all strings in each test
-				if i18n_reencode is not None: descriptorpath = descriptorpath.encode(i18n_reencode) 
-				descriptorfiles.append(descriptorpath)
+				if i18n_reencode is not None: descriptorfile = descriptorfile.encode(i18n_reencode) 
+
+				try:
+					parsed = self._parseTestDescriptor(project, descriptorfile, parentDirDefaults=parentconfig)
+					if parsed:
+						descriptors.append(parsed)
+				except UserError:
+					raise # no stack trace needed, will already include descriptorfile name
+				except Exception as e:
+					log.info('Failed to read descriptor: ', exc_info=True)
+					raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
+
 				# if this is a test dir, it never makes sense to look at sub directories
 				del dirs[:]
 				continue
@@ -670,49 +716,10 @@ class DescriptorLoader(object):
 					if p in files:
 						projectfound = True
 						sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
-
-		DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
-		if project.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(project.projectFile))):
-			# find directory config descriptors between the project root and the testcase 
-			# dirs. We deliberately use project dir not current working dir since 
-			# we don't want descriptors to be loaded differently depending on where the 
-			# tests are run from (i.e. should be independent of cwd). 
-			dirconfigs = {}
-			projectroot = os.path.dirname(project.projectFile).replace('\\','/').split('/')
-		else:
-			dirconfigs = None
-			log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
-		
-		def getParentDirConfig(descriptorfile):
-			if dirconfigs is None: return None
-			testdir = os.path.dirname(descriptorfile).replace('\\','/').split('/')
-			currentconfig = None
-			for i in range(len(projectroot), len(testdir)):
-				currentdir = '/'.join(testdir[:i])
-				if currentdir in dirconfigs:
-					currentconfig = dirconfigs[currentdir]
-				else:
-					if pathexists(currentdir+'/'+DIR_CONFIG_DESCRIPTOR):
-						currentconfig = XMLDescriptorParser.parse(currentdir+'/'+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
-						log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
-					dirconfigs[currentdir] = currentconfig
-			return currentconfig
-		
-		for descriptorfile in descriptorfiles:
-			parentconfig = getParentDirConfig(descriptorfile)
-			try:
-				parsed = self._parseTestDescriptor(project, descriptorfile, parentDirDefaults=getParentDirConfig(descriptorfile))
-				if parsed:
-					descriptors.append(parsed)
-			except UserError:
-				raise # no stack trace needed, will already include descriptorfile name
-			except Exception as e:
-				log.info('Failed to read descriptor: ', exc_info=True)
-				raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
 				
 		return descriptors
 
-	def _handleSubDirectory(self, dir, subdirs, files, descriptors, **kwargs):
+	def _handleSubDirectory(self, dir, subdirs, files, descriptors, parentDirDefaults, **kwargs):
 		"""Overrides the handling of each sub-directory found while walking 
 		the directory tree during L{loadDescriptors}. 
 		
@@ -732,12 +739,17 @@ class DescriptorLoader(object):
 		can be used to detect what kind of directory this is. 
 		@param descriptors: A list of L{TestDescriptor} items which this method 
 		can add to if desired. 
+		@param parentDirDefaults: A L{TestDescriptor} containing defaults 
+		from the parent directory, or None if there are none. Test loaders may 
+		optionally merge some of this information with test-specific 
+		information when creating test descriptors. 
 		@param kwargs: Reserved for future use. Pass this to the base class 
 		implementation when calling it. 
-		@return True: If True, this part of the directory tree has been fully 
+		@return: If True, this part of the directory tree has been fully 
 		handled and PySys will not search under it any more. False to allow 
 		normal PySys handling of the directory to proceed. 
 		"""
+		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
 		return False
 
 	def _parseTestDescriptor(self, project, descriptorfile, parentDirDefaults=None, **kwargs):

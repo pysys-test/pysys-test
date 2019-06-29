@@ -20,6 +20,6 @@ class PySysTest(BaseTest):
 	def validate(self):
 		self.assertDiff('pysys-print.out', 'ref-pysys-print.out')
 		self.assertGrep('pysys-run.out', expr='Id *: *MyTest')
-		self.assertGrep('pysys-run.out', expr='Id *: *MyCustomTest_002~MyMode1')
-		self.assertGrep('pysys-run.out', expr='Id *: *MyCustomTest_002~MyMode2')
-		self.assertGrep('pysys-run.out', expr='Id *: *PySys_cor_001')
+		self.assertGrep('pysys-run.out', expr='Id *: *dirprefix_MyCustomTest_002~MyMode1')
+		self.assertGrep('pysys-run.out', expr='Id *: *dirprefix_MyCustomTest_002~MyMode2')
+		self.assertGrep('pysys-run.out', expr='Id *: *dirprefix_PySys_cor_001')
