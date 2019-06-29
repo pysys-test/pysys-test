@@ -235,7 +235,7 @@
 		
 	</default-file-encodings>	
 	
-	<execution-order-hints secondaryModesHintDelta="+100.0">
+	<execution-order secondaryModesHintDelta="+100.0">
 		<!-- 
 		The execution-order elements provide a way to globally change the ordering hints specified on individual 
 		tests by adding or subtracting a value from the hints specified on test descriptors in a specified group 
@@ -254,7 +254,7 @@
 		<execution-order hint="+20.0" forMode="MyMode_.*"/>
 		<execution-order hint="-10.5" forGroup="performance" forMode="MyMode"/>
 		-->
-	</execution-order-hints>
+	</execution-order>
 	
 	<!--
 	Specify custom formatters for logging to the console or run.log, and/or configure the formatter

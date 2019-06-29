@@ -307,7 +307,7 @@ class XMLProjectParser(object):
 		
 		def makeregex(s):
 			if not s: return None
-			if s.startswith('!'): raise UserError('Exclusions such as !xxx are not permitted in execution-order-hints configuration')
+			if s.startswith('!'): raise UserError('Exclusions such as !xxx are not permitted in execution-order configuration')
 			
 			# make a regex that will match either the entire expression as a literal 
 			# or the entire expression as a regex
@@ -316,9 +316,9 @@ class XMLProjectParser(object):
 				#return re.compile('(%s|%s)$'%(re.escape(s), s))
 				return re.compile('%s$'%(s))
 			except Exception as ex:
-				raise UserError('Invalid regular expression in execution-order-hints "%s": %s'%(s, ex))
+				raise UserError('Invalid regular expression in execution-order "%s": %s'%(s, ex))
 		
-		for parent in self.root.getElementsByTagName('execution-order-hints'):
+		for parent in self.root.getElementsByTagName('execution-order'):
 			if parent.getAttribute('secondaryModesHintDelta'):
 				secondaryModesHintDelta = float(parent.getAttribute('secondaryModesHintDelta'))
 			for n in parent.getElementsByTagName('execution-order'):

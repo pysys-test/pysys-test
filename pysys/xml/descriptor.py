@@ -615,7 +615,7 @@ class DescriptorLoader(object):
 		descriptor is later expanded out into separate mode-specific 
 		descriptors (at the same time as descriptor filtering based on 
 		command line arguments, and addition of project-level 
-		execution-order-hints), before the final list is sorted and passed to 
+		execution-order), before the final list is sorted and passed to 
 		L{pysys.baserunner.BaseRunner}. 
 		
 		The order of the returned list is random, so the caller is responsible 

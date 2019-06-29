@@ -2,7 +2,7 @@
 <pysysproject>
 	<property name="supportMultipleModesPerRun" value="true"/>
 	
-	<execution-order-hints secondaryModesHintDelta="+1000.0">
+	<execution-order secondaryModesHintDelta="+1000.0">
 		<!-- 
 		The execution-order elements provide a way to globally change the ordering hints specified on individual 
 		tests by adding or subtracting a value from the hints specified on test descriptors in a specified group 
@@ -30,6 +30,6 @@
 		<execution-order hint="+999999" forGroup="Group"/> <!-- Matches start of expression but not whole expression -->
 		<execution-order hint="+999999" forMode="Mode_4"/> <!-- Matches start of expression but not whole expression -->
 		
-	</execution-order-hints>
+	</execution-order>
 	
 </pysysproject>

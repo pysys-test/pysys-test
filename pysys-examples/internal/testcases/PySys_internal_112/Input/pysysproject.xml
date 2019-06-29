@@ -22,7 +22,7 @@
 	<!-- This is a convenient test to check we can disable this delta, which results in each test executing in 
 	all modes before moving on to the next test 
 	-->
-	<execution-order-hints secondaryModesHintDelta="0"/>
+	<execution-order secondaryModesHintDelta="0"/>
 
 
 	<descriptor-loader module="mypkg.custom" classname="CustomDescriptorLoader"/>
