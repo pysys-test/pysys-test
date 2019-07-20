@@ -458,9 +458,69 @@ class BaseTest(ProcessUser):
 		self.addOutcome(PASSED if pathexists(os.path.join(self.output, path))==exists else FAILED, 
 			'Assertion that path exists=%s for "%s"'%(exists, os.path.normpath(path)), 
 			abortOnError=abortOnError)
+
+	def assertEval(self, evalstring, abortOnError=False, **formatparams):
+		"""Perform a validation based on substituting values into 
+		a .format() string with named {} placeholders and then evaluating it with eval. 
 		
+		Example use::
+		
+			self.assertEval('os.path.size({filename}) > {origFileSize}', 	
+				filename=self.output+'/file.txt', origFileSize=1000)
+		
+		@param evalstring: a string that will be formatted using .format(...) 
+		with the specified parameters, and result in failure outcome if not true. 
+		
+		Parameters should be specified using {name} syntax, and quoting is not 
+		required as string values are automatically escaped using repr. 
+		e.g. 'os.path.size({filename}) > {origFileSize}'. 
+		
+		Do not use an f-string instead of explicitly passing formatparams, as 
+		with an f-string this method will not know the names of the substituted 
+		parameters which makes the intention of the assertion harder to 
+		understand from looking at the test output. 
+
+		@param formatparams: Named parameters for the format string, which 
+		can be of any type. Use descriptive names for the parameters to produce 
+		an assertion message that makes it really clear what is being checked. 
+		
+		String parameters will be automatically passed through `repr()` before 
+		being formatted, so there is no need to perform additional 
+		quoting or escaping of strings. 
+		
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. Unless abortOnError=True this method only throws 
+		an exception if the format string is invalid; failure to execute the 
+		eval(...) results in a BLOCKED outcome but no exception. 
+		
+		"""
+		formatparams = {k: (repr(v) if isstring(v) else v) for (k,v) in formatparams.items()}
+		toeval = evalstring.format(**formatparams)
+		
+		display = 'with: %s'%', '.join(['%s=%s'%(k, 
+			# avoid excessively long messages by removing self.output (slightly complicated by the fact we called repr recently above)
+			str(formatparams[k]).replace(self.output.replace('\\','\\\\'), '<outputdir>') 
+			) for k in sorted(formatparams.keys())])
+		
+		try:
+			result = bool(eval(toeval))
+		except Exception as e:
+			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" due to %s - %s'%(toeval, e.__class__.__name__, e), abortOnError=abortOnError)
+			return False
+		
+		if result:
+			self.addOutcome(PASSED, 'Assertion %s passed %s'%(evalstring, display))
+			return True
+		else:
+			self.addOutcome(FAILED, 'Assertion %s failed %s'%(evalstring, display), abortOnError=abortOnError)
+			return False
+			
 	def assertThat(self, conditionstring, *args, **kwargs):
-		"""Perform a validation based on a python eval string.
+		"""[DEPRECATED] Perform a validation based on substituting values into 
+		an old-style % format string and then evaluating it with eval. 
+		
+		This method is deprecated in favour of L{assertEval} which produces 
+		more useful assertion failure messages and automatic quoting of strings. 
 
 		The eval string should be specified as a format string, with zero or more %s-style
 		arguments. This provides an easy way to check conditions that also produces clear
@@ -470,6 +530,8 @@ class BaseTest(ProcessUser):
 		repr() function to add appropriate quotes and escaping. 
 
 		e.g. self.assertThat('%d >= 5 or %s=="foobar"', myvalue, repr(mystringvalue))
+		
+		@deprecated: Use L{assertEval} instead. 
 		
 		@param conditionstring: A string will have any following args 
 		substituted into it and then be evaluated as a boolean python 
@@ -505,6 +567,9 @@ class BaseTest(ProcessUser):
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
+		Consider using L{assertEval} instead of this method, which produces 
+		clearer assertion failure messages. 
+		
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
 		
@@ -525,6 +590,9 @@ class BaseTest(ProcessUser):
 
 	def assertFalse(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to false.
+		
+		Consider using L{assertEval} instead of this method, which produces 
+		clearer assertion failure messages. 
 		
 		If the supplied expression evaluates to false a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to true, a C{FAILED} outcome is added.

@@ -63,6 +63,10 @@ New features:
   `<collect-test-output>` to gather the coverage files and providing a 
   custom implementation of `BaseRunner.processCoverageData`.  
 
+- Added `BaseTest.assertEval` method which supercedes `assertThat` and provides 
+  a convenient way to assert an arbitrary Python expression, with generation of 
+  a clear outcome reason that is easy to understand and debug. 
+
 - Added `ProcessUser.startPython` method has similar options to `startProcess` 
   and should be used for starting Python. 
 
