@@ -137,23 +137,25 @@ class WorkRequest(object):
 		self.args = args or []
 		self.kwds = kwds or {}
 
-
+	def __str__(self): return str(self.callable) # typically a TestContainer
 
 class ThreadPool(object):
 	"""Main pool to manage worker threads processing an internal request queue.
 
 	"""
 
-	def __init__(self, num_workers, q_size=0, resq_size=0, poll_timeout=5):
+	def __init__(self, num_workers, q_size=0, resq_size=0, poll_timeout=5, requests_queue=None):
 		"""Class constructor.
 		
 		@param num_workers: The number of worker threads processing the queue
-		@param q_size: The request queue size
+		@param q_size: The request queue size; ignored if a custom requests_queue is specified
 		@param resq_size: The response queue size
+		@param requests_queue: a custom queue instance which can be used to implement any desired logic 
+		for deciding which job to execute next. Must implement the get() and put() methods 
+		from the queue.Queue class.
 		@param poll_timeout: The polling timeout of worker threads when getting requests from the queue
-		
 		"""
-		self._requests_queue = Queue.Queue(q_size)
+		self._requests_queue = Queue.Queue(q_size) if requests_queue is None else requests_queue
 		self._results_queue = Queue.Queue(resq_size)
 		self.workers = []
 		self.dismissedWorkers = []

@@ -1,0 +1,37 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+	<property root="testRootDir"/>
+
+	<property name="defaultAbortOnError" value="true"/>
+	<property name="supportMultipleModesPerRun" value="true"/>
+
+	<!-- Project config to specify what modes the descriptor-loader will create for MyDatabase -->
+	<property name="supportedMyDatabaseVersions" value="2012,2016"/>
+
+	<writers>
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${testRootDir}/pysys-junit-report"/>
+		</writer>
+	</writers>		
+
+	<path value="." relative="true" />
+
+	<!-- This is a convenient test to check we can disable this delta, which results in each test executing in 
+	all modes before moving on to the next test 
+	-->
+	<execution-order secondaryModesHintDelta="0"/>
+
+
+	<descriptor-loader module="mypkg.custom" classname="CustomDescriptorLoader"/>
+	<runner module="mypkg.custom" classname="CustomRunner"/>
+	
+	<formatters>
+		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
+				name="stdout" messagefmt="%(levelname)-5s %(message)s" datefmt="%H:%M:%S">
+		</formatter>
+
+	</formatters>
+</pysysproject>

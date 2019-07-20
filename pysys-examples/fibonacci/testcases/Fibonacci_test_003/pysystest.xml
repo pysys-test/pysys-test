@@ -14,14 +14,10 @@ testcase validation to determine that the correct values are calculated.
   </description>
 
   <classification>
-    <groups>
+    <groups inherit="true">
       <group>examples</group>
       <group>external</group>
     </groups>
-    <modes>
-        <mode>mode1</mode>
-        <mode>mode2</mode>
-    </modes>
   </classification>
 
   <data>

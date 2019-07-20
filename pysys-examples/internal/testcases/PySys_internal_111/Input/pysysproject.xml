@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysproject>
+	<property name="supportMultipleModesPerRun" value="true"/>
+	<execution-order secondaryModesHintDelta="0"/>
+
+</pysysproject>

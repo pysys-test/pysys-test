@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 			arguments=[self.input+'/fibonacci.py'],
 			stdouterr=self.allocateUniqueStdOutErr('fibonacci'),
 			state=FOREGROUND)
-
+		
 	def validate(self):
 		# first validation diffs the output with the reference
 		self.assertDiff('fibonacci.out', 'ref_fibonacci.out')

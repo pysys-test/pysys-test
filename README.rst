@@ -27,7 +27,9 @@ Key features include:
    * aborting early if an error message is detected
 
 - Support for executing tests in parallel to significantly speed up execution 
-  time.
+  time, with a flexible mechanism for controlling execution order.
+- Support for executing the same test in several modes during your test 
+  run (for example against different web browsers, databases, etc). 
 - A process memory monitoring framework to check for memory leaks when soak 
   testing your application.
 - A performance monitoring framework for recording and aggregating latency, 
@@ -72,7 +74,8 @@ enhancement issues or GitHub pull requests!
 Installation
 ============
 
-PySys can be installed into Python 3.7/3.6/3.5 (recommended) or Python 2.7. 
+PySys can be installed into Python 3.7/3.6/3.5 (recommended) or Python 2.7 
+(though note that Python 2.7 will soon be out of support from the Python team). 
 
 The best way to install PySys is using the standard `pip` installer which 
 downloads and install the binary package (`.whl`) for the current PySys 

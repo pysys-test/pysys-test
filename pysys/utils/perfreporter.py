@@ -120,7 +120,7 @@ class CSVPerformanceReporter(object):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
 		
 		Subclasses may wish to override this to add additional items such as 
-		version, build number, or mode information obtained from self.runner.
+		version, build number, or configuration information obtained from self.runner.
 
 		"""
 		d = collections.OrderedDict()

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysproject>
+	<property name="supportMultipleModesPerRun" value="true"/>
+	
+	<execution-order secondaryModesHintDelta="+1000.0">
+		<!-- 
+		The execution-order elements provide a way to globally change the ordering hints specified on individual 
+		tests by adding or subtracting a value from the hints specified on test descriptors in a specified group 
+		and/or mode.
+		 
+		Groups and modes can be identified with a full name or a regular expression.  
+
+		The secondaryModesHintDelta value is used to order tests so that all tests execute in their primary 
+		mode before any secondary modes are executed. The 2nd mode (the one following the primary mode) has its 
+		execution order hint incremented by secondaryModesHintDelta, the third by 2*secondaryModesHintDelta etc, 
+		which ensures the modes are spaced out. To disable this behaviour and execute all modes of each test 
+		before moving on to the next test set it to 0.0. If not specified, the default value is +100.0.
+		-->
+		<execution-order hint="+10" forGroup="Group_2.*"/> <!-- matches Group2a and Group2b -->
+		<execution-order hint="+50" forGroup="Group_2a"/>
+
+		<execution-order hint="-10.5" forMode="Mod._3"/>
+		
+		<execution-order hint="+10"   forGroup="Group_4b" forMode="Mode_4a"/>
+		<execution-order hint="+20"   forMode="Mod[e]_4.+"/>
+		<execution-order hint="+30"   forMode="^Mode_4b$"/> 
+		
+		<!-- These should do nothing -->
+		<execution-order hint="+999999" forGroup="Group_2" forMode="NonExistentMode"/> <!-- only matches one condition -->
+		<execution-order hint="+999999" forGroup="Group"/> <!-- Matches start of expression but not whole expression -->
+		<execution-order hint="+999999" forMode="Mode_4"/> <!-- Matches start of expression but not whole expression -->
+		
+	</execution-order>
+	
+</pysysproject>

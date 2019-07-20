@@ -2,9 +2,9 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Test Loading - run-order-priority</title>    
+    <title>Test Loading - execution-order-hint</title>    
     <purpose><![CDATA[
-Shows we select the order to run tests in based on run-order-priority when it is set. 
+Shows we select the order to run tests in based on execution-order-hint when it is set. 
 ]]>
     </purpose>
   </description>

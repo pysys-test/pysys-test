@@ -65,9 +65,7 @@
 	parameter to the function is not specified. 
 	-->
 	<property name="defaultIgnoreExitStatus" value="false"/>
-
 	
-
 	<!-- 
 	Set default LANG for child processes on Unix. 
 	Useful for making all machines behave the same. Ensure that the specified 
@@ -95,6 +93,8 @@
 	-->
 	<property name="redirectPrintToLogger" value="false"/>
 	
+	<!-- Set this to true unless you need pre-1.4.1 mode behaviour for compatibility reasons. -->
+	<property name="supportMultipleModesPerRun" value="true"/>
 
 	<!-- 
 	Import properties from file (fails silently if the file does not exist). The imported 
@@ -234,6 +234,27 @@
 		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
 		
 	</default-file-encodings>	
+	
+	<execution-order secondaryModesHintDelta="+100.0">
+		<!-- 
+		The execution-order elements provide a way to globally change the ordering hints specified on individual 
+		tests by adding or subtracting a value from the hints specified on test descriptors in a specified group 
+		and/or mode.
+		 
+		Groups and modes can be identified with a full name or a regular expression.  
+
+		The secondaryModesHintDelta value is used to order tests so that all tests execute in their primary 
+		mode before any secondary modes are executed. The 2nd mode (the one following the primary mode) has its 
+		execution order hint incremented by secondaryModesHintDelta, the third by 2*secondaryModesHintDelta etc, 
+		which ensures the modes are spaced out. To disable this behaviour and execute all modes of each test 
+		before moving on to the next test set it to 0.0. If not specified, the default value is +100.0.
+		-->
+		
+		<!--
+		<execution-order hint="+20.0" forMode="MyMode_.*"/>
+		<execution-order hint="-10.5" forGroup="performance" forMode="MyMode"/>
+		-->
+	</execution-order>
 	
 	<!--
 	Specify custom formatters for logging to the console or run.log, and/or configure the formatter

@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/test'], workingDir=self.input)
-		runPySys(self, 'pysys-print', ['print', '-s', 'runorderprioRity'], workingDir=self.input)
+		runPySys(self, 'pysys-print', ['print', '-s', 'eXecutionOrderHint'], workingDir=self.input)
 			
 	def validate(self):
 		self.assertOrderedGrep('pysys.out', exprList=['Id *: *Test%d'%x for x in [
