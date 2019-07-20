@@ -211,9 +211,9 @@ class PrintLogs(Enum):
 	"""
 	NONE = 'PrintLogs.NONE'
 	"""Detailed run.log output is not printed to the stdout console. """
-	ALL = 'PrintLog.ALL'
+	ALL = 'PrintLogs.ALL'
 	"""Detailed run.log output is always printed to the stdout console, for both passed and failed testcases. """
-	FAILURES = 'PrintLog.FAILURES'
+	FAILURES = 'PrintLogs.FAILURES'
 	"""Detailed run.log output is only printed to the stdout console for failed testcases. """
 
 PROJECT = None
