@@ -196,12 +196,12 @@ class PySysTest(BaseTest):
 				if not PY2: # in python2 this would give an exception in the run.py so we don't even attempt it
 					self.assertGrep(outfile, expr='Log bytes message including i18n string .+ end', encoding=enc)
 				self.assertGrep(outfile, expr='Other log message', encoding=enc)
-				self.assertGrep(outfile, expr='Test failure reason: %soutcome reason.*end'%('.*' if outfile.endswith('.out') else ''), encoding=enc)
+				self.assertGrep(outfile, expr='Test outcome reason: %soutcome reason.*end'%('.*' if outfile.endswith('.out') else ''), encoding=enc)
 
 				if enc == 'utf-8':
-					self.assertGrep(outfile, expr=u'Test failure reason: .*outcome reason %s end'%self.utf8teststring, encoding=enc)
+					self.assertGrep(outfile, expr=u'Test outcome reason: .*outcome reason %s end'%self.utf8teststring, encoding=enc)
 				elif enc == 'ascii': # ensure we have some suitable replacement chars
-					self.assertGrep(outfile, expr='Test failure reason: .*outcome reason utf8_European[?][?].*_Katakana[?].*_Hiragana[?].* end', encoding=enc)
+					self.assertGrep(outfile, expr='Test outcome reason: .*outcome reason utf8_European[?][?].*_Katakana[?].*_Hiragana[?].* end', encoding=enc)
 	
 				# logFileContents:
 				if enc == 'utf-8':

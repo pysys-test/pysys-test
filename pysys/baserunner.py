@@ -835,7 +835,7 @@ class TestContainer(object):
 				log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
 				log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra=BaseLogFormatter.tag(LOOKUP[self.testObj.getOutcome()].lower(), 0))
 				if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
-					log.info("Test failure reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
+					log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
 				log.info("")
 				
 				pysysLogHandler.flush()

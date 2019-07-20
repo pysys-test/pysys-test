@@ -218,6 +218,10 @@ Upgrade guide and compatibility:
 
 Bug fixes:
 
+- PySys now uses `Test outcome reason:` rather than `Test failure reason:` 
+  to display the outcome, since there is sometimes a reason for non-failure 
+  outcomes such as SKIPPED. 
+
 - Fixed `--purge` to delete files in nested subdirectories of the output 
   directory not just direct children of the output directory. Also, non-empty 
   directories are now deleted after test execution (regardless of whether 

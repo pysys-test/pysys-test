@@ -29,4 +29,4 @@ class PySysTest(BaseTest):
 		
 		# to encourage best practice for new pysys configurations, in the default example configuration file we do not ignore process failures
 		self.assertGrep('pysys-exampleproject.out', expr='Test final outcome:.*BLOCKED')
-		self.assertGrep('pysys-exampleproject.out', expr='Test failure reason:.*python failer returned non-zero exit code 100')
+		self.assertGrep('pysys-exampleproject.out', expr='Test outcome reason:.*python failer returned non-zero exit code 100')

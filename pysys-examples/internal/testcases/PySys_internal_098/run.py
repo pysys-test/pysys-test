@@ -47,7 +47,7 @@ class PySysTest(BaseTest):
 			r'End of execute',
 			])
 		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'Test final outcome:.*BLOCKED')
-		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'Test failure reason:.*Background thread FunctionThread failed with Exception: Simulated exception from background thread')
+		self.assertGrep('pysys-output/JoinCleanupException/run.log', expr=r'Test outcome reason:.*Background thread FunctionThread failed with Exception: Simulated exception from background thread')
 		self.log.info('')
 		
 		self.assertOrderedGrep('pysys-output/JoinExecuteException/run.log', exprList=[
@@ -58,7 +58,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys-output/JoinExecuteException/run.log', expr=r'End of execute', contains=False) # since we aborted on error
 
 		self.assertGrep('pysys-output/JoinExecuteException/run.log', expr=r'Test final outcome:.*BLOCKED')
-		self.assertGrep('pysys-output/JoinExecuteException/run.log', expr=r'Test failure reason:.*Background thread FunctionThread failed with Exception: Simulated exception from background thread')
+		self.assertGrep('pysys-output/JoinExecuteException/run.log', expr=r'Test outcome reason:.*Background thread FunctionThread failed with Exception: Simulated exception from background thread')
 		self.log.info('')
 
 		self.assertOrderedGrep('pysys-output/JoinCleanupTimeout/run.log', exprList=[
@@ -70,7 +70,7 @@ class PySysTest(BaseTest):
 			'functionThatAppearsToHang',
 			])
 		self.assertGrep('pysys-output/JoinCleanupTimeout/run.log', expr=r'Test final outcome:.*TIMED OUT')
-		self.assertGrep('pysys-output/JoinCleanupTimeout/run.log', expr=r'Test failure reason:.*Background thread FunctionThread is still running after waiting for allocated timeout period')
+		self.assertGrep('pysys-output/JoinCleanupTimeout/run.log', expr=r'Test outcome reason:.*Background thread FunctionThread is still running after waiting for allocated timeout period')
 		self.log.info('')
 
 		self.assertOrderedGrep('pysys-output/JoinExecuteTimeout/run.log', exprList=[
@@ -79,7 +79,7 @@ class PySysTest(BaseTest):
 			r'End of execute', 
 			])
 		self.assertGrep('pysys-output/JoinExecuteTimeout/run.log', expr=r'Test final outcome:.*TIMED OUT')
-		self.assertGrep('pysys-output/JoinExecuteTimeout/run.log', expr=r'Test failure reason:.*Background thread FunctionThread is still running after waiting for allocated timeout period')
+		self.assertGrep('pysys-output/JoinExecuteTimeout/run.log', expr=r'Test outcome reason:.*Background thread FunctionThread is still running after waiting for allocated timeout period')
 		self.log.info('')
 
 		# check we don't have any errors as a result of writing output from background thread 
