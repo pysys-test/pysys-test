@@ -14,5 +14,6 @@ class PySysTest(BaseTest):
 		with open(self.output+'/empty.txt', 'w') as f:
 			pass
 
+		self.addOutcome(INSPECT, 'inspect')
 	def validate(self):
 		pass 

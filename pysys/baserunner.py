@@ -287,7 +287,7 @@ class BaseRunner(ProcessUser):
 				# always try to delete empty directories (just as we do for empty files); 
 				# until we have some kind of internal option for disabling this for debugging 
 				# purpose only delete dirs when we've just deleted the contents ourselves 
-				if deleted > 0 and deleted == len(filenames):
+				if removeNonZero or (deleted > 0 and deleted == len(filenames)):
 					try:
 						os.rmdir(dirpath)
 					except Exception as ex:
