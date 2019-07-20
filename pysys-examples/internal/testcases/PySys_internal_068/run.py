@@ -55,7 +55,6 @@ class PySysTest(BaseTest):
 			'<results cycle="2">',
 			], encoding='utf-8')
 
-
 		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"', encoding='utf-8')
 		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='<testsuite .* time="[0-9.]+"', encoding='utf-8')
 		self.assertGrep('target/pysys-reports/TEST-NestedPass.2.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"', encoding='utf-8')
@@ -76,3 +75,5 @@ class PySysTest(BaseTest):
 			'CYCLE 1.*FAILED.*NestedFail',
 			'CYCLE 2.*TIMED OUT.*NestedTimedout',
 		])
+		# check the option works to disable this
+		self.assertGrep('pysys.out', expr='List of non passing test ids:', contains=False)

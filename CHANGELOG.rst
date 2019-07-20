@@ -188,6 +188,11 @@ Improvements to the `pysys.py` command line tool:
   case insensitively) in their `id` or `title`. This can be a convenient way 
   to quickly run a set of tests related to a particular feature area.  
 
+- Added a concise summary of the test ids for any non-passes in a format that's 
+  easy to copy and paste into a new command, such as for re-running the failed 
+  tests. This can be disabled using the `ConsoleSummaryResultsWriter` property 
+  `showTestIdList` if desired. 
+  
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
   programs. 

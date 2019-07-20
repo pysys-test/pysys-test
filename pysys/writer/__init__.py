@@ -720,6 +720,7 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 	"""
 	def __init__(self, **kwargs):
 		self.showOutcomeReason = self.showOutputDir = False # option added in 1.3.0. May soon change the default to True. 
+		self.showTestIdList = True
 	
 	def setup(self, cycles=0, threads=0, **kwargs):
 		self.results = {}
@@ -749,7 +750,8 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 	def printNonPassesSummary(self, log):
 		showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
 		showOutputDir = str(self.showOutputDir).lower() == 'true'
-		
+		showNonPassingTestIds = str(self.showTestIdList).lower() == 'true'
+
 		log.critical("Summary of non passes: ")
 		fails = 0
 		for cycle in list(self.results.keys()):
@@ -758,17 +760,28 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 		if fails == 0:
 			log.critical("	THERE WERE NO NON PASSES", extra=ColorLogFormatter.tag(LOG_PASSES))
 		else:
+			failedids = set()
 			for cycle in list(self.results.keys()):
 				cyclestr = ''
 				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
 				for outcome in FAILS:
 					for (id, reason, outputdir) in self.results[cycle][outcome]: 
+						failedids.add(id)
 						log.critical("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra=ColorLogFormatter.tag(LOOKUP[outcome].lower()))
 						if showOutputDir:
 							log.critical("      %s", os.path.normpath(os.path.relpath(outputdir)))
 						if showOutcomeReason and reason:
 							log.critical("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
-
+		
+			if showNonPassingTestIds and len(failedids) > 1:
+				# display just the ids, in a way that's easy to copy and paste into a command line
+				failedids = list(failedids)
+				failedids.sort()
+				if len(failedids) > 20: # this feature is only useful for small test runs
+					failedids = failedids[:20]+['...']
+				log.critical('')
+				log.critical('List of non passing test ids:')
+				log.critical('%s', ' '.join(failedids))
 
 class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 	"""Default progress writer that logs a summary of progress so far to the console, after each test completes.
