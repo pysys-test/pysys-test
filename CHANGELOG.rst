@@ -207,6 +207,10 @@ Upgrade guide and compatibility:
   as testcases, you can avoid errors by adding a `.pysysignore` file to prevent 
   PySys looking in that part of the directory tree. 
 
+- The format of `pysys print` has changed to use a `|` character instead of a 
+  colon to separate the test id and titles. This makes it easier to copy and 
+  paste test ids from `pysys print` into the command line. 
+
 Bug fixes:
 
 - Fixed `--purge` to delete files in nested subdirectories of the output 

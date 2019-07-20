@@ -102,7 +102,7 @@ class PySysTest(BaseTest):
 
 		for subid, args, expectedids in self.PRINT_SUBTESTS:
 			self.log.info('%s:', subid)
-			actualids = self.getExprFromFile(subid+'.out', expr='(.[^:]+):', returnAll=True)
+			actualids = self.getExprFromFile(subid+'.out', expr='(.[^| ]+) *|', returnAll=True)
 			self.assertThat('%r == %r', expectedids, ','.join(actualids))
 			self.log.info('')
 			

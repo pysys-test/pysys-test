@@ -217,7 +217,7 @@ class ConsolePrintHelper(object):
 				if self.modefilter and self.modefilter not in descriptor.modes: continue
 				padding = " " * (maxsize - len(descriptor.id))
 				if not self.full:
-					print("%s:%s%s" % (descriptor.id, padding, descriptor.title))
+					print("%s%s| %s" % (descriptor.id, padding, descriptor.title))
 				else:
 					print("==========================================")
 					print("		" + descriptor.id)

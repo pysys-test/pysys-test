@@ -33,7 +33,7 @@ class PySysTest(BaseTest):
 		for t in ['basic', 'thistest', 'full', 'groups', 'modes']:
 			self.assertGrep(t+'.err', expr='.*', contains=False) # no errors
 
-		self.assertGrep('basic.out', expr='Fibonacci_test_001 *: *[^ ]+')
+		self.assertGrep('basic.out', expr='Fibonacci_test_001 *[|] *[^ ]+')
 		self.assertGrep('full.out', expr='Test id *: *Fibonacci_test_001') # just pick one example
 		self.assertGrep('modes.out', expr='FibonacciMode1') # just pick one example
 		self.assertLineCount('thistest.out', expr='.', condition='==1')
