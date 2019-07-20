@@ -185,6 +185,97 @@ as Java), this is easy to achieve by following the same pattern:
   directory PySys collected it into, so there is a permanent record of 
   any changes in coverage over time. 
 
+Running tests in multiple modes
+-------------------------------
+One of the most powerful features of PySys is the ability to run the same test 
+in multiple modes from a single execution. This could be useful for cases such 
+as a web test that needs to pass against multiple supported web browsers, 
+or a set of tests that should be run against various different database but 
+can also be run against a mocked database for quick local development. 
+
+Using modes is fairly straightforward. First make sure your project 
+configuration includes::
+
+   <property name="supportMultipleModesPerRun" value="true"/>
+   
+If you created your project using PySys 1.4.1 or later this will already be 
+present. Next you should edit the `pysystest.xml` files for tests that 
+need to run in multiple modes, and add a list of the supported modes::
+
+   <classification>
+	<groups>...</groups>
+	<modes inherit="true">
+		<mode>MockDatabase</mode>
+		<mode>MyDatabase_2.0</mode>
+	</modes>
+   </classification>
+
+When naming modes, TitleCase is recommended, and dot and underscore characters 
+may be used. PySys will give an error if you use different capitalization for 
+the same mode in different places, as this would likely result in test bugs. 
+
+The first mode listed is designated the "primary" mode which means it's the 
+one that is used by default when running your tests without a `--mode` 
+argument. It's best to choose either the fastest mode or else the one that 
+is most likely to show up interesting issues as the primary mode. 
+
+In large projects you may wish to configure modes in a `pysysdirconfig.xml` 
+file in a parent directory rather than in `pysystest.xml`, which will by 
+default be inherited by all nested testcases (unless inherit="false" is 
+specified in the `<modes>` element), and so there's a single place to 
+edit the modes list if you need to change them later. It's also possible to 
+create a custom DescriptorLoader subclass that dynamically adds modes 
+from Python code, perhaps based on the groups specified in each descriptor 
+or runtime information such as the current operating system.  
+
+In your test case `run.py` (and/or in your test's base class if you have 
+customized it) you can use `self.mode` to detect which mode the test is running 
+in and alter your behaviour accordingly::
+
+  if self.mode == 'MockDatabase': 
+	return MockDB()
+  elif self.mode == 'MyDatabase_2.0': 
+    return startMyDatabase()
+  else: raise Exception('Unknown mode: "%s"'%self.mode)
+
+Finally, PySys provides a rich variety of `pysys run` arguments to control 
+which modes your tests will run with. By default it will run every test in its 
+primary mode (for tests with no mode, the primary mode is `self.mode==None`) - 
+which is great for quick checks during development of your application and 
+testcases. 
+
+Your main test run (perhaps in a CI job) probably wants to run tests in all 
+modes::
+
+  pysys run --mode ALL --threads auto
+
+You can also specify specifies modes to run in, or to run everything except 
+specified modes::
+
+  pysys run --mode MyMode1,MyMode2
+  pysys run --mode !MyMode3,!MyMode4
+
+After sucessfully getting all your tests passing in their primary mode, it could 
+be useful to run them in every mode other than the primary one::
+
+  pysys run --mode !PRIMARY
+
+For reporting purposes, all testcases must have a unique id. With a multiple 
+mode test this is achieved by having the id automatically include a ~Mode 
+suffix. If you are reporting performance results from a multi-mode test, make 
+sure you include the mode in the `resultKey`, since the `resultKey` must be 
+globally unique. 
+
+In addition to the `--mode` argument which affects all selected tests, it is 
+possible to run a specific test in a specific mode. This can be useful when you 
+have a few miscellaneous test failures and just want to re-run the failing 
+tests::
+
+  pysys run MyTest_001~MockDatabase MyTest_020~MyDatabase_2.0
+
+See sample test Fibonacci_test_005 for an example of using modes for a 
+performance test. 
+
 Test ids and structuring large projects
 ---------------------------------------
 Each test has a unique `id` which is used in various places such as when 
@@ -244,14 +335,17 @@ file containing::
 	  <id-prefix>SubSystem1_perf.</id-prefix>
 
 	  <classification>
-		<groups>
+		<groups inherit="true">
 		  <group>subsystem1</group>
 		  <group>performance</group>
 		</groups>
 
+		<modes inherit="true">
+		</modes>
+
 	  </classification>
 
-	  <run-order-priority>-100.0</run-order-priority>
+	  <execution-order hint="-100.0"/>
 
 	  <!-- Uncomment this to mark all tests under this directory as skipped 
 		(overrides the state= attribute on individual tests). -->
@@ -274,6 +368,67 @@ This serves several useful purposes:
 - It provides the ability to temporarily skip a set of tests if they are 
   broken temporarily pending a bug fix. 
 
+By default both modes and groups are inherited from `pysysdirconfig.xml` files 
+in parent directories, but inheriting can be disabled in an individual 
+descriptor by setting inherit="false", in case you have a few tests that only 
+make sense in one mode. Alternatively, you could allow the tests to exist 
+in all modes but call `self.skipTest` at the start of the test `execute` method 
+if the test cannot execute in the current mode. 
+
 See the `pysysdirconfig.xml` sample in `pysys-examples/fibonacci/testcases` and 
 also in `pysys/xml/templates/dirconfig` for a full example of a directory 
 configuration file. 
+
+Controlling execution order
+---------------------------
+In large projects where the test run takes several hours or days, you may wish 
+to control the order that PySys executes different groups of tests - or tests 
+with different modes, to maximize the chance of finding out quickly if 
+something has gone wrong, and perhaps to prioritize running fast unit and 
+correctness tests before commencing on longer running performance or soak tests. 
+
+By default, PySys runs tests based on the sorting them by the full path of 
+the `pysystest.xml` files. If you have tests with multiple modes, PySys will 
+run all tests in their primary mode first, then any/all tests which list a 
+second mode, followed by 3rd, 4th, etc. 
+
+All of this can be customized using the concept of an execution order hint. 
+Every test descriptor is assigned an execution order hint, which is a positive
+or negative floating point number which defaults to 0.0, and is used to sort 
+the descriptors before execution. Higher execution order hints mean later 
+execution. If two tests have the same hint, PySys falls back on using the 
+path of the `pysystest.xml` file to determine a canonical order. 
+
+The hint for each test is generated by adding together hint components from the 
+following:
+
+  - A test-specific hint from the `pysystest.xml` file's 
+    `<execution-order hint="..."/>`. If the hint is 
+    blank (the default), the test inherits any hint specified in a 
+    `pysysdirconfig.xml` file in an ancestor folder, or 0.0 if there aren't 
+    any. Note that hints from `pysysdirconfig.xml` files are not added 
+    together; instead, the most specific wins. 
+
+  - All <execution-order> elements in the project configuration file which 
+    match the mode and/or group of the test. The project configuration 
+    is the place to put mode-specific execution order hints, such as putting 
+    a particular database or web browser mode earlier/later. See the 
+    sample `pysysproject.xml` file for details. 
+  
+  - For multi-mode tests, the `secondaryModesHintDelta` specified in the project 
+    configuration (unless it's set to zero), multiplied by a number indicating 
+    which mode this is. If a test had 3 modes Mode1, Mode2 and Mode3 then 
+    the primary mode (Mode1) would get no additional hint, Mode2 would get 
+    `secondaryModesHintDelta` added to its hint and Mode3 would get
+    `2 x secondaryModesHintDelta` added to its hint. This is the mechanism 
+    PySys uses to ensure all tests run first in their primary mode before 
+    any tests run in their secondary modes. Usually the default value of 
+    `secondaryModesHintDelta = +100.0` is useful and avoids the need for too 
+    much mode-specific hint configuration (see above). However if you prefer to 
+    turn it off to have more manual control - or you prefer each test to run 
+    in all modes before moving on to the next test - then simply set 
+    `secondaryModesHintDelta` to `0`.
+
+For really advanced cases, you can programmatically set the 
+`executionOrderHint` on each descriptor by providing a custom 
+`DescriptorLoader` or in the constructor of a custom runner class. 

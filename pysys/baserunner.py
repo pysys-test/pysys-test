@@ -25,7 +25,7 @@ base runner as a list of object references, so that the base runner can then ite
 list to perform the test execution. For more information see the L{pysys.baserunner.BaseRunner} 
 API documentation. 
 
-@undocumented: global_lock, N_CPUS
+@undocumented: global_lock, N_CPUS, TestContainer
 """
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
@@ -33,8 +33,10 @@ import fnmatch
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
+	import Queue as queue
 else:
 	from io import StringIO
+	import queue
 
 from pysys.constants import *
 from pysys.exceptions import *
@@ -67,7 +69,7 @@ class BaseRunner(ProcessUser):
 	if customizations are needed. 
 	
 	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
-	with a list of L{pysys.xml.descriptor.XMLDescriptorContainer} objects detailing the set of testcases to be run. 
+	with a list of L{pysys.xml.descriptor.TestDescriptor} objects detailing the set of testcases to be run. 
 	The runner iterates through the descriptor list and for each entry imports the L{pysys.basetest.BaseTest}
 	subclass for the testcase, creates an instance of the test class and then calls the setup, execute, validate 
 	and cleanup methods of the test class instance. The runner is responsible for ensuring the output 
@@ -82,7 +84,8 @@ class BaseRunner(ProcessUser):
 	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
 	etc), and subsequently cleaned up after test execution. 
 	      
-	@ivar mode: The user defined modes to run the tests within
+	@ivar mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
+	tests will be run with. 
 	@type mode: string
 	@ivar outsubdir: The directory name for the output subdirectory. Typically a relative path,
 	but can also be an absolute path. 
@@ -92,6 +95,7 @@ class BaseRunner(ProcessUser):
 	@ivar project: Reference to the project details as set on the module load of the launching executable  
 	@type project: L{Project}
 	
+	@undocumented: _testScheduler
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
@@ -100,7 +104,8 @@ class BaseRunner(ProcessUser):
 		@param record: Indicates if the test results should be recorded 
 		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
 		@param cycle: The number of times to execute the set of requested testcases
-		@param mode: The user defined mode to run the testcases in
+		@param mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
+		tests will be run with. 
 		@param threads: The number of worker threads to execute the requested testcases
 		@param outsubdir: The name of the output subdirectory
 		@param descriptors: List of XML descriptor containers detailing the set of testcases to be run
@@ -112,12 +117,14 @@ class BaseRunner(ProcessUser):
 		self.record = record
 		self.purge = purge
 		self.cycle = cycle
-		self.mode = mode
 		self.threads = threads
 		self.outsubdir = outsubdir
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
+		self.supportMultipleModesPerRun = getattr(self.project, 'supportMultipleModesPerRun', '').lower()=='true'
+		if not self.supportMultipleModesPerRun:
+			self.mode = mode
 
 		self.startTime = self.project.startTimestamp
 		
@@ -180,9 +187,12 @@ class BaseRunner(ProcessUser):
 		# a bit to allow overlap before removal
 		self.duration = 0 # no longer needed
 		self.results = {}
-		self.__remainingTests = self.cycle * len(self.descriptors)
 		
 		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
+		
+		# (initially) undocumented hook for customizing which jobs the threadpool takes 
+		# off the queue and when. Standard implementation is a simple blocking queue. 
+		self._testScheduler = queue.Queue()
 		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -341,13 +351,14 @@ class BaseRunner(ProcessUser):
 		if PROJECT.perfReporterConfig:
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet
+			from pysys.utils.perfreporter import CSVPerformanceReporter
 			try:
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir, runner=self)]
 			except Exception:
 				# support for passing kwargs was added in 1.4.0; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
-				PROJECT.perfReporterConfig[0]._runnerSingleton = self
+				CSVPerformanceReporter._runnerSingleton = self
 				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir)]
-				del PROJECT.perfReporterConfig[0]._runnerSingleton
+				del CSVPerformanceReporter._runnerSingleton
 		
 		class PySysPrintRedirector(object):
 			def __init__(self):
@@ -368,6 +379,7 @@ class BaseRunner(ProcessUser):
 		self.setup()
 
 		# call the hook to setup the test output writers
+		self.__remainingTests = self.cycle * len(self.descriptors)
 		for writer in list(self.writers):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
 				testoutdir=self.outsubdir, runner=self)
@@ -378,7 +390,8 @@ class BaseRunner(ProcessUser):
 		if self.printLogs is None: self.printLogs = PrintLogs.ALL # default value, unless overridden by user or writer.setup
 		
 		# create the thread pool if running with more than one thread
-		if self.threads > 1: threadPool = ThreadPool(self.threads)
+		if self.threads > 1: 
+			threadPool = ThreadPool(self.threads, requests_queue=self._testScheduler)
 
 		# loop through each cycle
 		
@@ -632,7 +645,7 @@ class BaseRunner(ProcessUser):
 
 
 class TestContainer(object):
-	"""Class used for co-ordinating the execution of a single test case.
+	"""Internal class used for co-ordinating the execution of a single test case.
 	
 	"""
 
@@ -659,6 +672,7 @@ class TestContainer(object):
 		self.testFileHandlerStdoutBuffer = StringIO() # unicode characters written to the output for this testcase
 		self.kbrdInt = False
 
+	def __str__(self): return self.descriptor.id+('' if self.runner.cycle <= 1 else '.cycle%03d'%(self.cycle+1))
 		
 	def __call__(self, *args, **kwargs):
 		"""Over-ridden call builtin to allow the class instance to be called directly.
@@ -680,11 +694,14 @@ class TestContainer(object):
 				self.testFileHandlerStdout.setLevel(stdoutHandler.level)
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout])
 
-				# set the output subdirectory and purge contents
+				# set the output subdirectory and purge contents; must be unique per mode (but not per cycle)
 				if os.path.isabs(self.runner.outsubdir):
 					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
+					# don't need to add mode to this path as it's already in the id
 				else:
 					self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
+					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
+						self.outsubdir += '~'+self.descriptor.mode
 
 				if not self.runner.validateOnly: 
 					if self.runner.cycle <= 1: 
@@ -719,6 +736,7 @@ class TestContainer(object):
 					log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 				if self.runner.cycle > 1:
 					log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+				log.debug('Execution order hint: %s', self.descriptor.executionOrderHint)
 				log.info(62*"=")
 			except KeyboardInterrupt:
 				self.kbrdInt = True
@@ -735,7 +753,8 @@ class TestContainer(object):
 						runpycode = compile(runpyfile.read(), runpypath, 'exec')
 					runpy_namespace = {}
 					exec(runpycode, runpy_namespace)
-					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, self.outsubdir, self.runner)
+					outsubdir = self.outsubdir
+					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, outsubdir, self.runner)
 					del runpy_namespace
 		
 				except KeyboardInterrupt:
@@ -762,7 +781,7 @@ class TestContainer(object):
 				elif self.descriptor.state != 'runnable':
 					self.testObj.addOutcome(SKIPPED, 'Not runnable', abortOnError=False)
 							
-				elif self.runner.mode and self.runner.mode not in self.descriptor.modes:
+				elif self.runner.supportMultipleModesPerRun==False and self.runner.mode and self.runner.mode not in self.descriptor.modes:
 					self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode, abortOnError=False)
 				
 				elif len(exc_info) > 0:

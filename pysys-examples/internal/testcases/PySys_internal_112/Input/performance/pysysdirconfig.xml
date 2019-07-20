@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+  <classification>
+    <groups>
+      <group>performance</group>
+    </groups>
+    <modes>
+    </modes>
+  </classification>
+
+  <id-prefix></id-prefix>
+
+</pysysdirconfig>

@@ -10,7 +10,7 @@
   </classification>
 
   <id-prefix>dir3prefix_</id-prefix>
-  <run-order-priority></run-order-priority>
+  <execution-order hint=""/>
 
   <data>
     <class name="PySysTest-dir3" module="run_dir3"/>

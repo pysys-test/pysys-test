@@ -7,11 +7,11 @@
   </description>
 
   <classification>
-    <groups>
+    <groups inherit="TRUE">
       <group>testcase-group1</group>
       <group>testcase-group2</group>
     </groups>
-    <modes>
+    <modes inherit="true">
       <mode>testcase-mode1</mode>
       <mode>testcase-mode2</mode>
     </modes>
@@ -19,7 +19,7 @@
 
   <id-prefix>testprefix.</id-prefix>
 
-  <run-order-priority>-9.9</run-order-priority>
+  <execution-order hint="+9.9"/>
 
   <data>
     <class name="PySysTest-testcase" module="run_testcase"/>
