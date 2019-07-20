@@ -178,7 +178,8 @@ DEFAULT_TIMEOUT = 600
 """Deprecated. 
 @deprecated: Use a specific member of TIMEOUTS instead."""
 TIMEOUTS = {}
-""" Default timeouts used for various operations. """
+""" Default timeouts used for various operations. 
+Each timeout is given as a floating point number of seconds. """
 TIMEOUTS['WaitForSocket'] = 60
 TIMEOUTS['WaitForFile'] = 30
 TIMEOUTS['WaitForSignal'] = 60
