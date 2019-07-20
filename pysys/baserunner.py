@@ -133,7 +133,7 @@ class BaseRunner(ProcessUser):
 		self.setKeywordArgs(xargs)
 
 		if self.threads <= 0:
-			self.threads = N_CPUS
+			self.threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS)) 
 		if self.threads > 1: log.info('Running tests with %d threads', self.threads)
 	
 		self.writers = []

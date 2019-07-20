@@ -192,7 +192,11 @@ Improvements to the `pysys.py` command line tool:
   easy to copy and paste into a new command, such as for re-running the failed 
   tests. This can be disabled using the `ConsoleSummaryResultsWriter` property 
   `showTestIdList` if desired. 
-  
+
+- Added an environment variable PYSYS_DEFAULT_THREADS which can be used to set 
+  the number of threads to use with `--threads auto` is specified on a 
+  per-machine or per-user basis. 
+
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
   programs. 
