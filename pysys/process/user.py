@@ -935,6 +935,7 @@ class ProcessUser(object):
 			if override: 
 				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', [LOOKUP[o] for o in self.outcome], self.__outcomeReason)
 				del self.outcome[:]
+				self.__outcomeReason = None
 			old = self.getOutcome()
 			if (old == NOTVERIFIED and not self.__outcomeReason): old = None
 			self.outcome.append(outcome)
