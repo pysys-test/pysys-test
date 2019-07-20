@@ -120,16 +120,22 @@ def mkdir(path):
 			os.makedirs(path)
 	return origpath
 
-def deletedir(path):
+def deletedir(path, retries=1):
 	"""
 	Recursively delete the specified directory. 
 	
 	Does nothing if it does not exist. Raises an exception if the deletion fails. 
+	
+	@param retries: The number of retries to attempt. This can be useful to 
+	work around temporary failures causes by Windows file locking. 
 	"""
 	path = toLongPathSafe(path)
 	try:
 		shutil.rmtree(path)
-	except Exception:
+	except Exception: # pragma: no cover
 		if not os.path.exists(path): return # nothing to do
-		raise
+		if retries <= 0:
+			raise
+		time.sleep(0.5) # work around windows file-locking issues
+		deletedir(path, retries = retries-1)
 
