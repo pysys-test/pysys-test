@@ -1165,9 +1165,10 @@ class ProcessUser(object):
 		@param path: The path to be created. This can be an absolute path or 
 		relative to the testcase output directory.
 		
-		@return: the same path passed, to facilitate fluent-style method calling. 
+		@return: the absolutized path of the new directory, to facilitate fluent-style method calling. 
 		"""
-		mkdir(os.path.join(self.output, path))
+		path = os.path.join(self.output, path)
+		mkdir(path)
 		return path
 		
 	def deletedir(self, path):

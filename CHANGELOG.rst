@@ -244,6 +244,11 @@ Bug fixes:
 
 - Fixed CSV performance reporter runDetails which was including each item 
   twice. 
+  
+- `ProcessUser.mkdir` now returns the absolutized path (including the output 
+  directory) instead of just the relative path passed in. This make it easier 
+  to use in-line while performing operations such as creating a file in the 
+  new directory, 
 
 ---------------
 Release History
