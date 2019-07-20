@@ -191,6 +191,9 @@ Improvements to the `pysys.py` command line tool:
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
   programs. 
+
+- Change `makeproject` so that templates must be specified with an explicit 
+  argument `--template=NAME`. 
   
 
 Upgrade guide and compatibility:

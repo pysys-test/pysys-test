@@ -35,7 +35,7 @@ def makeProject(args):
 	def printUsage():
 		print("\nPySys System Test Framework (version %s): Project configuration file maker" % __version__) 
 		print("")
-		print("Usage: %s makeproject [option]* [TEMPLATE]" % (_PYSYS_SCRIPT_NAME))
+		print("Usage: %s makeproject [option]* [--template=TEMPLATE]" % (_PYSYS_SCRIPT_NAME))
 		print("")
 		print("   where TEMPLATE can be: %s"%templatelist)
 		print("")
@@ -48,7 +48,7 @@ def makeProject(args):
 		sys.exit()
 
 	optionString = 'hd:'
-	optionList = ['dir=', 'help']
+	optionList = ['dir=', 'help', 'template=']
 	
 	try:
 		optlist, arguments = getopt.getopt(args, optionString, optionList)
@@ -57,25 +57,26 @@ def makeProject(args):
 		sys.exit(1)
 
 	dir = '.'
+	tmpl = 'default'
 	for option, value in optlist:
 		if option in ["-h", "--help"]:
-			printUsage()	
+			printUsage()
+			
+		if option in ["--template"]:
+			tmpl = value	
 
-		elif option in ("-d", "--dir"):
+		elif option in ["-d", "--dir"]:
 			dir = value
 			
 		else:
 			print("Unknown option: %s"%option)
 			sys.exit(1)
 
-	if not arguments: arguments = ['default']
-	
-	if len(arguments) != 1:
-		print("Please specify just one template")
+	if arguments:
+		print("Unexpected argument '%s'; maybe you meant to use --template"%arguments[0])
 		sys.exit(1)
 	
 	templates = getProjectConfigTemplates()
-	tmpl = arguments[0]
 	if tmpl not in templates:
 		print("Unknown template '%s', please specify one of the following: %s"%(tmpl, templatelist))
 		sys.exit(1)
