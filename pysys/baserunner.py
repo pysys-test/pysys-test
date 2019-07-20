@@ -108,7 +108,7 @@ class BaseRunner(ProcessUser):
 		tests will be run with. 
 		@param threads: The number of worker threads to execute the requested testcases
 		@param outsubdir: The name of the output subdirectory
-		@param descriptors: List of XML descriptor containers detailing the set of testcases to be run
+		@param descriptors: List of L{pysys.xml.descriptor.TestDescriptor} descriptors specifying the set of testcases to be run
 		@param xargs: The dictionary of additional "-X" user-defined arguments to be set as data attributes on the class
 		
 		"""
