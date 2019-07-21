@@ -23,6 +23,7 @@ to provide process-related capabilities including cleanup.
 
 import time, collections, inspect, locale, fnmatch, sys
 import threading
+import shutil
 
 from pysys import log, process_lock
 from pysys.constants import *
@@ -31,7 +32,7 @@ from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
-from pysys.utils.fileutils import mkdir, deletedir, pathexists
+from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe
 from pysys.utils.pycompat import *
 from pysys.utils.stringutils import compareVersions
 
@@ -1316,4 +1317,65 @@ class ProcessUser(object):
 		
 		with openfile(os.path.join(self.output, file), 'w', encoding=encoding or self.getDefaultFileEncoding(file)) as f:
 			f.write(text)
+	
+	def copy(self, src, dest, mappers=[], encoding=None):
+		"""Copy a single text or binary file, optionally tranforming the 
+		contents by filtering each line through a list of mapping functions. 
+		
+		If any mappers are provided, the file is copied in text mode and 
+		each mapper is given the chance to modify or omit each line. 
+		If no mappers are provided, the file is copied in binary mode. 
+		
+		In addition to the file contents the mode is also copied, for example 
+		the executable permission will be retained. 
+		
+		This function is useful both for creating a modified version of an 
+		output file that's more suitable for later validation steps such as 
+		diff-ing, and also for copying required files from the input to the 
+		output directory. 
+		
+		For example::
+		
+			self.copy('output-raw.txt', 'output-processed.txt', encoding='utf-8', 
+				mappers=[
+					lambda line: None if ('Timestamp: ' in line) else line, 
+					lambda line: line.replace('foo', 'bar'), 
+				])
+		
+		@param src: The source filename, which can be an absolute path, or 
+		a path relative to the `self.output` directory. 
+		Use `src=self.input+'/myfile'` if you wish to copy a file from the test 
+		input directory. 
+		
+		@param dest: The source filename, which can be an absolute path, or 
+		a path relative to the `self.output` directory. If this is a directory 
+		name, the file is copied to this directory with the same basename as src. 
+		
+		@param mappers: A list of filter functions that will be applied, 
+		in order, to each line read from the file. Each function accepts a string for 
+		the current line as input and returns either a string to write or 
+		None if the line is to be omitted. 
+		
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
+		"""
+		src = toLongPathSafe(os.path.join(self.output, src))
+		dest = toLongPathSafe(os.path.join(self.output, dest))
+		if os.path.isdir(dest): dest = toLongPathSafe(dest+'/'+os.path.basename(src))
+		assert src != dest, 'Source and destination file cannot be the same'
+		
+		if not mappers:
+			# simple binary copy
+			shutil.copyfile(src, dest)
+		else:
+			with openfile(src, 'r', encoding=encoding or self.getDefaultFileEncoding(src)) as srcf:
+				with openfile(dest, 'w', encoding=encoding or self.getDefaultFileEncoding(dest)) as destf:
+					for line in srcf:
+						for mapper in mappers:
+							line = mapper(line)
+							if line is None: break
+						if line is not None: destf.write(line)
+			
+		shutil.copymode(src, dest)
 		

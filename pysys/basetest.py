@@ -468,6 +468,9 @@ class BaseTest(ProcessUser):
 			self.assertEval('os.path.size({filename}) > {origFileSize}', 	
 				filename=self.output+'/file.txt', origFileSize=1000)
 		
+		See also L{getExprFromFile} which is often used to extract a piece of 
+		data from a log file which can then be checked using this method. 
+		
 		@param evalstring: a string that will be formatted using .format(...) 
 		with the specified parameters, and result in failure outcome if not true. 
 		
@@ -621,6 +624,11 @@ class BaseTest(ProcessUser):
 		expressions in a line with an alternate value, or to only include particular lines. Should the files 
 		after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, otherwise
 		a C{FAILED} outcome is added.
+		
+		Although this method can perform transformation of the files directly, it is often easier to instead use 
+		L{copy} to perform the transformation (e.g. stripping out timestamps, finding lines of interest etc)
+		and then separately call assertDiff on the processed file. This makes it easier to generate a suitable 
+		reference file and to diagnose test failures. 
 		
 		@param file1: The basename of the first file used in the file comparison
 		@param file2: The basename of the second file used in the file comparison (often a reference file)

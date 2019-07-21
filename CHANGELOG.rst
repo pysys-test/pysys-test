@@ -67,6 +67,12 @@ New features:
   a convenient way to assert an arbitrary Python expression, with generation of 
   a clear outcome reason that is easy to understand and debug. 
 
+- Added `ProcessUser.copy` method for copying a binary or text file, with 
+  optional transformation of the contents by a series of mapping functions. 
+  This can be used to extract information of interest from a log file before 
+  diff-ing with a reference copy, for example by stripping out timestamps 
+  and irrelevant information. 
+
 - Added `ProcessUser.write_text` method for writing characters to a text file 
   in the output directory using a single line of Python. 
   
