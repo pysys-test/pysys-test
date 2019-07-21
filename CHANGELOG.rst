@@ -2,7 +2,9 @@
 PySys 1.4.1 Release Notes
 =========================
 
-PySys can be used with Python 3.7/3.6/3.5 or Python 2.7. 
+PySys can be used with Python 3.7/3.6/3.5. PySys also retains compatibility 
+with Python 2.7 though users are encouraged to move to Python 3 when possible 
+as 2.7 will soon be at the end of it support lifetime. 
 
 See installation notes in README.rst for more details.
 
@@ -13,6 +15,20 @@ What's new in this release
 <highlights here>
 
 New features:
+
+- Added support for running tests in multiple modes from within a single PySys 
+  execution. To make use of this, add the following property to your 
+  `pysysproject.xml`::
+  
+	<property name="supportMultipleModesPerRun" value="true"/>
+
+  The old concept of modes within PySys is now deprecated in favour of the 
+  more powerful features of `supportMultipleModesPerRun=True` so we recommend 
+  all users to add this project setting when possible. Please note though that 
+  it will result in slightly different behaviour (e.g. different output 
+  directory names) if you have any tests with `<mode>...</mode>` in their 
+  descriptor. See the user guide for detailed information about running tests 
+  in multiple modes.
 
 - Added a project configuration option that collects a copy of all test output 
   files matching a specified pattern into a single directory. This is useful 
@@ -81,15 +97,16 @@ Improvements to the XML descriptors that provide information about tests:
   you could add `pysysdirconfig.xml` files to each with a 
   `<group>performance</group>` element so it's easy to include/exclude all 
   your performance when you invoke `pysys.py run`. You could also include 
-  a `<run-order-priority>-100</run-order-priority>` to specify that performance 
-  tests should be run with a lower priority than normal, so they're executed 
-  at the end of your test run after all correctness tests. 
+  a `<execution-order hint="+100"/>` to specify that performance 
+  tests should be run after your other tests(the default order hint is 0.0).
   
   The `pysysdirconfig.xml` file can contain any option that's valid in 
   a `pysystest.xml` file except the `description/title/purpose`. a sample 
   `pysysdirconfig.xml` file is provided in 
   `pysys-examples/fibonacci/testcases` and also in 
   `pysys/xml/templates/dirconfig`. 
+  
+  See the PySys user guide for more information. 
 
 - Added support for specifying a prefix that will be added to start of the 
   testcase directory name to form the testcase identifier. This can be 
@@ -114,17 +131,19 @@ Improvements to the XML descriptors that provide information about tests:
   descriptor, or `pysysdirconfig.xml` descriptor (which provides a default for 
   all testcases under that directory)::
   
-    <run-order-priority>+100.0</run-order-priority>
+    <execution-order hint="+100.0"/>
 
-  Tests with a higher priority values are executed ahead of tests with lower 
-  values. The default priority value is 0.0, and values can be positive or 
-  negative. Tests with the same priority value are executed based on the 
-  sort order of the testcase directories. 
+  Tests with a higher ordering hint are executed after tests with lower 
+  values. The default order value is 0.0, and values can be positive or 
+  negative. Tests with the same order hint are executed based on the 
+  sort order of the testcase directories. It is also possible to configure 
+  hints at a project level for specific modes or groups. See the user guide 
+  for more information. 
   
-  You might want to specify a low priority for long-running performance or 
+  You might want to specify a large order hint for long-running performance or 
   robustness tests to ensure they execute after more important unit/correctness 
-  tests. You might want to specify a higher priority for individual tests that 
-  are known to take a long time, if you're running with multiple threads, to 
+  tests. You might want to specify a negative hint for individual tests that 
+  are known to take a long time (if you're running with multiple threads), to 
   ensure they get an early start and don't hold up the completion of the test 
   run. 
 
@@ -141,6 +160,13 @@ Improvements to the XML descriptors that provide information about tests:
   for new testcases now contains a commented-out `skipped` element instead of 
   a `state=` attribute. 
 
+- Added a new API for overriding the way test descriptors are loaded from a 
+  directory on the file system. This allows for programmatic customization 
+  of descriptor settings such as the supported modes for each testcase, and 
+  also provides a way to make PySys capable of finding and running non-PySys 
+  tests (by programmatically creating PySys TestDescriptor objects for them).
+  See the `pysys.xml.descriptor.DescriptorLoader` class for more details. 
+
 Improvements to the `pysys.py` command line tool:
 
 - Added support for running tests by specifying just a (non-numeric) suffix 
@@ -152,7 +178,7 @@ Improvements to the `pysys.py` command line tool:
   which is very helpful for displaying related testcases together (especially 
   if the titles are written carefully with common information at the beginning 
   of each one) and therefore for more easily locating testcases of interest. 
-  It can also sort by `id` or `runOrderPriority` which indicates the order 
+  It can also sort by `id` or `executionOrderHint` which indicates the order 
   in which the testcases will be executed. The default sort order if none of 
   these options is specified continues to be based on the full path of the 
   `pysystest.xml` files. 

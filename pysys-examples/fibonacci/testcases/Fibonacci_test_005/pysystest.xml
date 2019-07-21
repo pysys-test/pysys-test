@@ -11,9 +11,15 @@ the time taken to calculate fibonacci numbers.
   </description>
 
   <classification>
-    <groups>
+    <groups inherit="true">
       <group>examples</group>
+      <group>performance</group>
     </groups>
+     <modes inherit="true">
+        <mode>FibonacciMode1</mode>
+        <mode>FibonacciMode2</mode>
+    </modes>
+
   </classification>
 
   <data>
@@ -22,7 +28,7 @@ the time taken to calculate fibonacci numbers.
   
   <traceability>
     <requirements>  
-      <requirement id="AL2" />    
+      <requirement id="Performance" />    
     </requirements>
   </traceability>
   

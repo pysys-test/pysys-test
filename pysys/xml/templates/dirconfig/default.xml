@@ -11,22 +11,23 @@
     <!-- Specify the groups that all tests under this directory will be 
       tagged with. 
       This is in addition to any defined by individual tests. -->
-    <groups>
+    <groups inherit="true">
       <group></group>
     </groups>
 
     <!-- Specify modes supported by all tests under this directory. 
       This is in addition to any defined by individual tests. -->
-    <modes>
+    <modes inherit="true">
       <mode></mode>
     </modes>
   </classification>
 
   <!-- Specify as a floating point number the default priority for tests under 
     this directory, which determines the order in which they're run relative 
-    to other tests/directories with a higher or lower priority. The default 
-    priority is 0.0. This can be overridden by individual tests. -->
-  <run-order-priority></run-order-priority>
+    to other tests/directories with a higher or lower priority. 
+    Empty string means inherit. The default priority is 0.0. 
+    -->
+  <execution-order hint=""/>
 
   <!-- Uncomment this to mark all tests under this directory as skipped 
     (overrides the state= attribute on individual tests). -->

@@ -97,7 +97,7 @@ class BaseTest(ProcessUser):
 	@ivar project: Reference to the project details as set on the module load of the launching executable  
 	@type project: L{Project}
 	@ivar descriptor: Information about this testcase, with fields such as id, title, etc
-	@type descriptor: L{pysys.xml.descriptor.XMLDescriptorContainer}
+	@type descriptor: L{pysys.xml.descriptor.TestDescriptor}
 	@ivar testCycle: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
 	The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
 	@type testCycle: int
@@ -118,7 +118,10 @@ class BaseTest(ProcessUser):
 		self.output = os.path.join(descriptor.output, outsubdir)
 		self.reference = descriptor.reference
 		self.runner = runner
-		self.mode = runner.mode
+		if runner.supportMultipleModesPerRun:
+			self.mode = descriptor.mode
+		else:
+			self.mode = runner.mode 
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
 		self.__backgroundThreads = []
@@ -837,7 +840,7 @@ class BaseTest(ProcessUser):
 
 		@param resultKey: A unique string that fully identifies what was measured, which will be
 		used to compare results from different test runs. For example "HTTP transport message sending throughput
-		using with 3 connections". The resultKey must be unique across all test cases and modes. It should be fully
+		using with 3 connections in SSL mode". The resultKey must be unique across all test cases and modes. It should be fully
 		self-describing (without the need to look up extra information such as the associated testId). Do not include
 		the test id or units in the resultKey string. It must be stable across different runs, so cannot contain
 		process identifiers, date/times or other numbers that will vary. If possible resultKeys should be written
@@ -855,8 +858,10 @@ class BaseTest(ProcessUser):
 		result needs to be to be considered a regression.
 		
 		@param resultDetails: (optional) A dictionary of detailed information about this specific result 
-		and/or test that should be recorded together with the result, for example information about what mode the 
-		test is running in.
+		and/or test that should be recorded together with the result, for example detailed information about what mode 
+		or versions the test is measuring. Note this is separate from the global run details shared across 
+		all tests in this PySys execution, which can be customized by overriding 
+		L{pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails}.
 
 		"""
 		for p in self.runner.performanceReporters:

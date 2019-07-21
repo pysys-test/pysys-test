@@ -252,6 +252,13 @@ class XMLProjectParser(object):
 		
 		return cls, summaryfile
 
+	def getDescriptorLoaderClass(self):
+		nodeList = self.root.getElementsByTagName('descriptor-loader')
+		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.xml.descriptor.DescriptorLoader')
+		
+		if optionsDict: raise Exception('Unexpected descriptor-loader attribute(s): '+', '.join(list(optionsDict.keys())))
+		
+		return cls
 
 	def getMakerDetails(self):
 		try:
@@ -293,6 +300,43 @@ class XMLProjectParser(object):
 				encoding=None
 			result.append({'pattern':pattern, 'encoding':encoding})
 		return result
+
+	def getExecutionOrderHints(self):
+		result = []
+		secondaryModesHintDelta = None
+		
+		def makeregex(s):
+			if not s: return None
+			if s.startswith('!'): raise UserError('Exclusions such as !xxx are not permitted in execution-order configuration')
+			
+			# make a regex that will match either the entire expression as a literal 
+			# or the entire expression as a regex
+			s = s.rstrip('$')
+			try:
+				#return re.compile('(%s|%s)$'%(re.escape(s), s))
+				return re.compile('%s$'%(s))
+			except Exception as ex:
+				raise UserError('Invalid regular expression in execution-order "%s": %s'%(s, ex))
+		
+		for parent in self.root.getElementsByTagName('execution-order'):
+			if parent.getAttribute('secondaryModesHintDelta'):
+				secondaryModesHintDelta = float(parent.getAttribute('secondaryModesHintDelta'))
+			for n in parent.getElementsByTagName('execution-order'):
+				moderegex = makeregex(n.getAttribute('forMode'))
+				groupregex = makeregex(n.getAttribute('forGroup'))
+				if not (moderegex or groupregex): raise UserError('Must specify either forMode, forGroup or both')
+				
+				hintmatcher = lambda groups, mode, moderegex=moderegex, groupregex=groupregex: (
+					(moderegex is None or moderegex.match(mode or '')) and
+					(groupregex is None or any(groupregex.match(group) for group in groups))
+					)
+				
+				result.append( 
+					(float(n.getAttribute('hint')), hintmatcher )
+					)
+		if secondaryModesHintDelta is None: 
+			secondaryModesHintDelta = +100.0 # default value
+		return result, secondaryModesHintDelta
 
 	def getWriterDetails(self):
 		writersNodeList = self.root.getElementsByTagName('writers')
@@ -360,7 +404,7 @@ class XMLProjectParser(object):
 
 		@param node: The node, may be None
 		@param defaultClass: a string specifying the default fully-qualified class
-		@return: a tuple of (pythonclass, propertiesdict)
+		@return: a tuple of (pythonclassconstructor, propertiesdict)
 		"""
 		optionsDict = {}
 		if node:
@@ -375,9 +419,15 @@ class XMLProjectParser(object):
 		classname = optionsDict.pop('classname', defaultClass)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
 		classname = classname.split('.')[-1]
-		module = import_module(mod, sys.path)
-		cls = getattr(module, classname)
-		return cls, optionsDict
+
+		# defer importing the module until we actually need to instantiate the 
+		# class, to avoid introducing tricky module import order problems, given 
+		# that the project itself needs loading very early
+		def classConstructor(*args, **kwargs):
+			module = import_module(mod, sys.path)
+			cls = getattr(module, classname)
+			return cls(*args, **kwargs) # invoke the constructor for this class
+		return classConstructor, optionsDict
 
 def getProjectConfigTemplates():
 	"""Get a list of available templates that can be used for creating a new project configuration. 
@@ -474,11 +524,15 @@ class Project(object):
 				self.writers = parser.getWriterDetails()
 
 				self.perfReporterConfig = parser.getPerformanceReporterDetails()
+				
+				self.descriptorLoaderClass = parser.getDescriptorLoaderClass()
 
 				# get the stdout and runlog formatters
 				stdoutformatter, runlogformatter = parser.createFormatters()
 				
 				self.defaultFileEncodings = parser.getDefaultFileEncodings()
+				
+				self.executionOrderHints, self.executionOrderSecondaryModesHintDelta = parser.getExecutionOrderHints()
 				
 				self.collectTestOutput = parser.getCollectTestOutputDetails()
 				

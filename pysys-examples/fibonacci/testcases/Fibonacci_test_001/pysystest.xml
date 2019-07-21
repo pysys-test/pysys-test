@@ -12,11 +12,11 @@ tenth entry is equal to 34.
   </description>
 
   <classification>
-    <groups>
+    <groups inherit="true">
       <group>examples</group>
     </groups>
-    <modes>
-        <mode>mode1</mode>
+    <modes inherit="true">
+        <mode>FibonacciMode1</mode>
     </modes>
   </classification>
 

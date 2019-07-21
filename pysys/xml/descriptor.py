@@ -20,19 +20,22 @@
 from __future__ import print_function
 import os.path, logging, xml.dom.minidom
 import collections
+import copy
+import locale
 
 from pysys.constants import *
 from pysys.exceptions import UserError
+from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
+from pysys.utils.pycompat import PY2
 
 log = logging.getLogger('pysys.xml.descriptor')
 
 DTD='''
-<!ELEMENT pysystest (description, classification?, skipped?, run-order-priority?, id-prefix?, data?, traceability?) > 
+<!ELEMENT pysystest (description, classification?, skipped?, execution-order?, id-prefix?, data?, traceability?) > 
 <!ELEMENT description (title, purpose) >
 <!ELEMENT classification (groups?, modes?) >
 <!ELEMENT data (class?, input?, output?, reference?) >
 <!ELEMENT traceability (requirements) >
-<!ELEMENT run-order-priority (#PCDATA) >
 <!ELEMENT id-prefix (#PCDATA) >
 <!ELEMENT title (#PCDATA) >
 <!ELEMENT purpose (#PCDATA) >
@@ -48,12 +51,15 @@ DTD='''
 <!ELEMENT requirement EMPTY >
 <!ATTLIST pysystest type (auto | manual ) "auto" >
 <!ATTLIST pysystest state (runnable | deprecated | skipped) "runnable" >
+<!ATTLIST execution-order hint>
 <!ATTLIST skipped reason >
 <!ATTLIST class name CDATA #REQUIRED
                 module CDATA #REQUIRED >
 <!ATTLIST input path CDATA #REQUIRED >
 <!ATTLIST output path CDATA #REQUIRED >
 <!ATTLIST reference path CDATA #REQUIRED >
+<!ATTLIST groups inherit (true | false) "true" >
+<!ATTLIST modes inherit (true | false) "true" >
 <!ATTLIST requirement id CDATA #REQUIRED >
 '''
 
@@ -69,9 +75,11 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
   </description>
   
   <classification>
-    <groups>
+    <groups inherit="true">
       <group>%s</group>
     </groups>
+    <modes inherit="true">
+    </modes>
   </classification>
 
   <!-- <skipped reason=""/> -->
@@ -89,58 +97,115 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
 ''' 
 
 
-class XMLDescriptorContainer(object):
+class TestDescriptor(object):
 	"""Contains descriptor metadata about an individual testcase. 
 	
 	Also used for descriptors specifying defaults for a directory subtree 
 	containing a related set of testcases. 
 	
-	@ivar id: The testcase identifier; has the value None if this is a 
+	The L{DescriptorLoader} class is responsible for determining the available 
+	descriptor instances. 
+	
+	@ivar file: The full path of the testcase descriptor file. 
+	@ivar id: The testcase identifier, or the id prefix if this is a 
 	directory config descriptor rather than a testcase descriptor. 
+	Includes a mode suffix if this is a multi-mode test and 
+	supportMultipleModesPerRun=True.
+	@ivar idWithoutMode: The raw testcase identifier with no mode suffix. 
 	@ivar type: The type of the testcase (automated or manual)
 	@ivar state: The state of the testcase (runnable, deprecated or skipped)
 	@ivar skippedReason: If set to a non-empty string, indicates that this 
 	testcase is skipped and provides the reason. If this is set then the test 
 	is skipped regardless of the value of `state`. 
-	@ivar title: The title of the testcase
-	@ivar purpose: The purpose of the testcase
+	@ivar title: The one-line title summarizing this testcase
+	@ivar purpose: A detailed description of the purpose of the testcase
 	@ivar groups: A list of the user defined groups the testcase belongs to
 	@ivar modes: A list of the user defined modes the testcase can be run in
-	@ivar classname: The classname of the testcase
+	@ivar primaryMode: Specifies the primary mode for this test id (which may be None 
+	if this test has no modes). Usually this is the first mode in the list. 
+	@ivar mode: Specifies which of the possible modes this descriptor represents or None if the 
+	the descriptor has no modes. This field is only present after the 
+	raw descriptors have been expanded into multiple mode-specific 
+	descriptors, and only if supportMultipleModesPerRun=True. 
+	@ivar classname: The Python classname to be executed for this testcase
 	@ivar module: The full path to the python module containing the testcase class
 	@ivar input: The full path to the input directory of the testcase
 	@ivar output: The full path to the output parent directory of the testcase
 	@ivar reference: The full path to the reference directory of the testcase
 	@ivar traceability: A list of the requirements covered by the testcase
-	@ivar runOrderPriority: A float priority value used to determine the 
+	@ivar executionOrderHint: A float priority value used to determine the 
 	order in which testcases will be run; higher values are executed before 
 	low values. The default is 0.0. 
+	@ivar isDirConfig: True if this is a directory configuration, or False if 
+	it's a normal testcase. 
 
+	@undocumented: _createDescriptorForMode
 	"""
 
-
-	def __init__(self, file, id, type, state, title, purpose, groups, modes, classname, module, input, output, reference, traceability, runOrderPriority=0.0, skippedReason=None):
-		"""Create an instance of the XMLDescriptorContainer class.
+	def __init__(self, file, id, 
+		type="auto", state="runnable", title=u'(no title)', purpose=u'', groups=[], modes=[], 
+		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE, 
+		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
+		traceability=[], executionOrderHint=0.0, skippedReason=None, 
+		isDirConfig=False):
+		"""Create an instance of the class.
 		
+		After construction the self.mode attribute is not set until 
+		later cloning and expansion of each container for the supported modes. 
 		"""
 		if skippedReason: state = 'skipped'
 		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
+		self.isDirConfig = isDirConfig
 		self.file = file
 		self.id = id
 		self.type = type
 		self.state = state
 		self.title = title
 		self.purpose = purpose
-		self.groups = groups
-		self.modes = modes
+		# copy groups/modes so we can safely mutate them later if desired
+		self.groups = list(groups)
+		self.modes = list(modes)
 		self.classname = classname
 		self.module = module
+		
+		# absolutize these paths if something relative was passed in
 		self.input = input
 		self.output = output
 		self.reference = reference
+		if file and not isDirConfig: 
+			dirname = os.path.dirname(file)
+			self.input = os.path.join(dirname, self.input)
+			self.output = os.path.join(dirname, self.output)
+			self.reference = os.path.join(dirname, self.reference)
+
 		self.traceability = traceability
-		self.runOrderPriority = runOrderPriority
+		self.executionOrderHint = executionOrderHint
 		self.skippedReason = skippedReason
+		
+		self.primaryMode = None if not self.modes else self.modes[0]
+		self.idWithoutMode = self.id
+		
+		# for internal use only (we cache this to speed up sorting based on path), 
+		# and only for tests not dir configs; 
+		# convert to lowercase to ensure a canonical sort order on case insensitive OSes; 
+		# add id to be sure they're unique (e.g. including mode)
+		if self.file: self._defaultSortKey = self.file.lower()+'/'+self.id
+		
+		# NB: self.mode is set after construction and 
+		# cloning for each supported mode when supportMultipleModesPerRun=true
+	
+	def _createDescriptorForMode(self, mode):
+		"""
+		Internal API for creating a test descriptor for a specific mode of this test.
+		
+		"""
+		assert mode, 'Mode must be specified'
+		assert not hasattr(self, 'mode'), 'Cannot create a mode descriptor from a descriptor that already has its mode set'
+		newdescr = copy.deepcopy(self)
+		newdescr.mode = mode
+		newdescr.id = self.id+'~'+mode
+		newdescr._defaultSortKey = self._defaultSortKey+'~'+mode
+		return newdescr
 	
 	def toDict(self):
 		"""Converts this descriptor to an (ordered) dict suitable for serialization."""
@@ -154,8 +219,15 @@ class XMLDescriptorContainer(object):
 		d['purpose'] = self.purpose
 		d['groups'] = self.groups
 		d['modes'] = self.modes
+		d['primaryMode'] = self.primaryMode
+		if hasattr(self, 'mode'): d['mode'] = self.mode # only if supportMultipleModesPerRun=true
 		d['requirements'] = self.traceability
-		d['runOrderPriority'] = self.runOrderPriority
+		
+		# this is always a list with at least one item, or more if there are multiple modes
+		d['executionOrderHint'] = (self.executionOrderHintsByMode
+			if hasattr(self, 'executionOrderHintsByMode') else [self.executionOrderHint])
+
+		self.executionOrderHint
 		d['classname'] = self.classname
 		d['module'] = self.module
 		d['input'] = self.input
@@ -181,9 +253,16 @@ class XMLDescriptorContainer(object):
 		for index in range(0, len(purpose)):
 			if index == 0: str=str+"%s\n" % purpose[index]
 			if index != 0: str=str+"                   %s\n" % purpose[index] 
-		str=str+"Test run order:    %s%s\n" % ('+' if self.runOrderPriority>0.0 else '', self.runOrderPriority)
+
+		str=str+"Test order hint:   %s\n" % (
+			u', '.join('%s'%hint for hint in self.executionOrderHintsByMode) # for multi-mode tests
+			if hasattr(self, 'executionOrderHintsByMode') else self.executionOrderHint)	
+
 		str=str+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
-		str=str+"Test modes:        %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.modes) or u'<none>')
+		if getattr(self, 'mode',None): # multi mode per run
+			str=str+"Test mode:         %s\n" % self.mode
+		else: # print available modes instead
+			str=str+"Test modes:        %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.modes) or u'<none>')
 		str=str+"Test classname:    %s\n" % self.classname
 		str=str+"Test module:       %s\n" % self.module
 		str=str+"Test input:        %s\n" % self.input
@@ -192,6 +271,8 @@ class XMLDescriptorContainer(object):
 		str=str+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		str=str+""
 		return str
+	
+	def __repr__(self): return str(self)
 
 class XMLDescriptorCreator(object):
 	'''Helper class to create a test descriptor template.'''
@@ -209,8 +290,11 @@ class XMLDescriptorCreator(object):
 		fp = open(self.file, 'w')
 		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.group, self.testclass, self.module))
 		fp.close
-
-
+		
+XMLDescriptorContainer = TestDescriptor
+""" XMLDescriptorContainer is an alias for the TestDescriptor class, which 
+exists for compatibility reasons only. 
+"""
 
 class XMLDescriptorParser(object):
 	'''Helper class to parse an XML test descriptor - either for a testcase, 
@@ -248,11 +332,11 @@ class XMLDescriptorParser(object):
 	def parse(xmlfile, istest=True, parentDirDefaults=None):
 		"""
 		Parses the test/dir descriptor in the specified path and returns the 
-		XMLDescriptorContainer object. 
+		TestDescriptor object. 
 		
 		@param istest: True if this is a pysystest.xml file, false if it is 
 		a descritor giving defaults for a directory of testcases.  
-		@param parentDirDefaults: Optional XMLDescriptorContainer instance 
+		@param parentDirDefaults: Optional TestDescriptor instance 
 		specifying default values to be filtered in from the parent 
 		directory.
 		"""
@@ -262,29 +346,28 @@ class XMLDescriptorParser(object):
 		finally:
 			p.unlink()
 
-	DEFAULT_DESCRIPTOR = XMLDescriptorContainer(
+	DEFAULT_DESCRIPTOR = TestDescriptor(
 		file=None, id=u'', type="auto", state="runnable", 
 		title='', purpose='', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
-		traceability=[], runOrderPriority=0.0, skippedReason=None)
+		traceability=[], executionOrderHint=0.0, skippedReason=None)
 	"""
-	A directory config descriptor instance of XMLDescriptorContainer holding 
+	A directory config descriptor instance of TestDescriptor holding 
 	the default values to be used if there is no directory config descriptor. 
 	"""
 
 
 	def getContainer(self):
-		'''Create and return an instance of XMLDescriptorContainer for the contents of the descriptor.'''
+		'''Create and return an instance of TestDescriptor for the contents of the descriptor.'''
 		
 		for attrName, attrValue in self.root.attributes.items():
 			if attrName not in ['state', 'type']:
 				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
 		
 		# some elements that are mandatory for an individual test and not used for dir config
-		return XMLDescriptorContainer(self.getFile(), self.getID(), self.getType(), self.getState(),
-										self.getTitle() if self.istest else '', 
-										self.getPurpose() if self.istest else '',
+		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
+										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
 										self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
 										# don't absolutize for dir config descriptors, since we don't yet know the test's dirname
@@ -293,8 +376,9 @@ class XMLDescriptorParser(object):
 										os.path.join(self.dirname if self.istest else '', self.getTestOutput()),
 										os.path.join(self.dirname if self.istest else '', self.getTestReference()),
 										self.getRequirements(), 
-										self.getRunOrderPriority(), 
-										skippedReason=self.getSkippedReason())
+										self.getExecutionOrderHint(), 
+										skippedReason=self.getSkippedReason(), 
+										isDirConfig=not self.istest)
 
 
 	def unlink(self):
@@ -386,8 +470,12 @@ class XMLDescriptorParser(object):
 			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
 			for node in groups.getElementsByTagName('group'):
 				if self.getText(node): groupList.append(self.getText(node))
+
+			if (groups.getAttribute('inherit') or 'true').lower()!='true':
+				return groupList
 		except Exception:
 			pass
+			
 		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
 		return groupList
 	
@@ -401,6 +489,10 @@ class XMLDescriptorParser(object):
 			modes = classificationNodeList[0].getElementsByTagName('modes')[0]
 			for node in modes.getElementsByTagName('mode'):
 				if self.getText(node): modeList.append(self.getText(node))
+
+			if (modes.getAttribute('inherit') or 'true').lower()!='true':
+				return modeList
+
 		except Exception:
 			pass
 		modeList = [x for x in self.defaults.modes if x not in modeList]+modeList
@@ -416,17 +508,17 @@ class XMLDescriptorParser(object):
 		except Exception:
 			return [self.defaults.classname, self.defaults.module]
 
-	def getRunOrderPriority(self):
+	def getExecutionOrderHint(self):
 		r = None
-		for e in self.root.getElementsByTagName('run-order-priority'):
-			r = self.getText(e)
+		for e in self.root.getElementsByTagName('execution-order'):
+			r = e.getAttribute('hint')
 			if r:
 				try:
 					r = float(r)
 				except Exception:
-					raise UserError('Invalid float value specified for run-order-priority in "%s"'%self.file)
+					raise UserError('Invalid float value specified for execution-order hint in "%s"'%self.file)
 		if r is None or r == '': 
-			return self.defaults.runOrderPriority
+			return self.defaults.executionOrderHint
 		else:
 			return r
 			
@@ -484,6 +576,208 @@ class XMLDescriptorParser(object):
 				t += n.data
 		return t.strip()
 
+
+class DescriptorLoader(object):
+	"""
+	This class is responsible for locating and loading all available testcase 
+	descriptors. 
+	
+	A custom DescriptorLoader subclass can be provided to provide more dynamic 
+	behaviour, typically by overriding L{loadDescriptors} and modifying the 
+	returned list of descriptors. 
+	
+	You could use this approach to add additional descriptor instances 
+	to represent non-PySys testcases found under the search directory. 
+	
+	Another key use case would be dynamically adding or changing descriptor 
+	settings such as the list of modes for each testcase or the 
+	executionOrderHint, perhaps based on a per-group basis. For example, 
+	you could modify descriptors in the "database-tests" group to have a 
+	dynamically generated list of modes identifying the possible database 
+	servers supported without having to hardcode that list into any descriptor 
+	files on disk, and allowing for different database modes on different 
+	platforms. 
+
+	@ivar project: The L{Project} instance. 
+	"""
+	def __init__(self, project, **kwargs): 
+		assert project, 'project must be specified'
+		self.project = project
+		
+	def loadDescriptors(self, dir, **kwargs):
+		"""Find all descriptors located under the specified directory, and 
+		return them as a list.
+		
+		Subclasses may change the returned descriptors and/or add additional 
+		instances of their own to the list after calling the super implementation::
+		
+		  descriptors = super(CustomDescriptorLoader, self).loadDescriptors(dir, **kwargs)
+		  ...
+		  return descriptors
+		
+		@param dir: The parent directory to search for runnable tests. 
+		
+		@return: List of L{pysys.xml.descriptor.TestDescriptor} objects 
+		which could be selected for execution. 
+		
+		If a test can be run in multiple modes there must be a single descriptor 
+		for it in the list returned from this method. Each multi-mode 
+		descriptor is later expanded out into separate mode-specific 
+		descriptors (at the same time as descriptor filtering based on 
+		command line arguments, and addition of project-level 
+		execution-order), before the final list is sorted and passed to 
+		L{pysys.baserunner.BaseRunner}. 
+		
+		The order of the returned list is random, so the caller is responsible 
+		for sorting this list to ensure deterministic behaviour. 
+		
+		@rtype: list
+		@raises UserError: Raised if no testcases can be found.
+		
+		"""
+		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
+		assert self.project, 'project must be specified'
+		assert dir, 'dir must be specified'
+		assert os.path.isabs(dir), 'dir must be an absolute path: %s'%dir
+		
+		project = self.project
+		
+		descriptors = []
+		ignoreSet = set(OSWALK_IGNORES)
+		descriptorSet =set(DEFAULT_DESCRIPTOR)
+		
+		projectfound = project.projectFile != None
+		log = logging.getLogger('pysys.launcher')
+
+		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
+		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
+		i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
+		assert os.path.exists(toLongPathSafe(dir)), dir
+
+		DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
+		if project.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(project.projectFile))):
+			# find directory config descriptors between the project root and the testcase 
+			# dirs. We deliberately use project dir not current working dir since 
+			# we don't want descriptors to be loaded differently depending on where the 
+			# tests are run from (i.e. should be independent of cwd). 
+			dirconfigs = {}
+			projectroot = os.path.dirname(project.projectFile).replace('\\','/').split('/')
+		else:
+			dirconfigs = None
+			log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
+
+		def getParentDirConfig(testdir):
+			if dirconfigs is None: return None
+			testdir = testdir.replace('\\','/').split('/')
+			currentconfig = None
+			for i in range(len(projectroot), len(testdir)):
+				currentdir = '/'.join(testdir[:i])
+				if currentdir in dirconfigs:
+					currentconfig = dirconfigs[currentdir]
+				else:
+					if pathexists(currentdir+'/'+DIR_CONFIG_DESCRIPTOR):
+						currentconfig = XMLDescriptorParser.parse(currentdir+'/'+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
+						log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
+					dirconfigs[currentdir] = currentconfig
+			return currentconfig
+
+		for root, dirs, files in os.walk(toLongPathSafe(dir)):
+			parentconfig = getParentDirConfig(fromLongPathSafe(root))
+
+			# allow subclasses to modify descriptors list and/or avoid processing 
+			# subdirectories
+			if self._handleSubDirectory(root, dirs, files, descriptors, parentDirDefaults=parentconfig):
+				del dirs[:]
+				continue
+		
+			intersection = descriptorSet & set(files)
+			if intersection: 
+				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
+				# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
+				# as it proliferates to all strings in each test
+				if i18n_reencode is not None: descriptorfile = descriptorfile.encode(i18n_reencode) 
+
+				try:
+					parsed = self._parseTestDescriptor(project, descriptorfile, parentDirDefaults=parentconfig)
+					if parsed:
+						descriptors.append(parsed)
+				except UserError:
+					raise # no stack trace needed, will already include descriptorfile name
+				except Exception as e:
+					log.info('Failed to read descriptor: ', exc_info=True)
+					raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
+
+				# if this is a test dir, it never makes sense to look at sub directories
+				del dirs[:]
+				continue
+			
+			thisignoreset = ignoreSet # sub-directories to be ignored
+			
+			for ignorefile in ['.pysysignore', 'pysysignore']:
+				for d in dirs:
+					if pathexists(os.path.join(root, d, ignorefile)):
+						thisignoreset = set(thisignoreset) # copy on write (this is a rare operation)
+						thisignoreset.add(d)
+						log.debug('Skipping directory %s due to ignore file %s', root+os.sep+ignorefile)
+			
+			for ignore in (thisignoreset & set(dirs)): dirs.remove(ignore)
+			if not projectfound:
+				for p in DEFAULT_PROJECTFILE:
+					if p in files:
+						projectfound = True
+						sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
+				
+		return descriptors
+
+	def _handleSubDirectory(self, dir, subdirs, files, descriptors, parentDirDefaults, **kwargs):
+		"""Overrides the handling of each sub-directory found while walking 
+		the directory tree during L{loadDescriptors}. 
+		
+		Can be used to add test descriptors, and/or add custom logic for 
+		preventing PySys searching a particular part of the directory tree 
+		perhaps based on the presence of specific files or subdirectories 
+		within it. 
+
+		This method is called before directories containing pysysignore 
+		files are stripped out. 
+		
+		@param dir: The full path of the directory to be processed.
+		On Windows, this will be a long-path safe unicode string. 
+		@param subdirs: a list of the subdirectories under dir, which 
+		can be used to detect what kind of directory this is. 
+		@param files: a list of the files under dir, which 
+		can be used to detect what kind of directory this is. 
+		@param descriptors: A list of L{TestDescriptor} items which this method 
+		can add to if desired. 
+		@param parentDirDefaults: A L{TestDescriptor} containing defaults 
+		from the parent directory, or None if there are none. Test loaders may 
+		optionally merge some of this information with test-specific 
+		information when creating test descriptors. 
+		@param kwargs: Reserved for future use. Pass this to the base class 
+		implementation when calling it. 
+		@return: If True, this part of the directory tree has been fully 
+		handled and PySys will not search under it any more. False to allow 
+		normal PySys handling of the directory to proceed. 
+		"""
+		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
+		return False
+
+	def _parseTestDescriptor(self, project, descriptorfile, parentDirDefaults=None, **kwargs):
+		""" Parses a single XML descriptor file for a testcase and returns the result. 
+		
+		@param project: The L{Project} instance associated with these descriptors. 
+		@param descriptorfile: The absolute path of the descriptor file. 
+		@param parentDirDefaults: A L{TestDescriptor} instance containing 
+		defaults to inherit from the parent directory, or None if none was found. 
+		@return: The L{TestDescriptor} instance, or None if none should be 
+		added for this descriptor file. Note that subclasses may modify the 
+		contents of the returned instance. 
+		@raises UserError: If the descriptor is invalid and an error should be 
+		displayed to the user without any Python stacktrace. 
+		The exception message must contain the path of the descriptorfile.
+		"""
+		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
+		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults)
 
 if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 

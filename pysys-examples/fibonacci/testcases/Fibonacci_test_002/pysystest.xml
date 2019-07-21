@@ -17,7 +17,7 @@ perform multiple validations on the contents of the output file, to
   </description>
 
   <classification>
-    <groups>
+    <groups inherit="true">
       <group>examples</group>
     </groups>
   </classification>

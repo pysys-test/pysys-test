@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="auto">
+    
+  <description> 
+    <title>Test</title>    
+    <purpose><![CDATA[
+
+]]>
+    </purpose>
+  </description>
+
+  <execution-order hint="4"/>
+
+  <classification>
+    <groups>
+      <group>Group_4a</group>
+      <group>Group_4b</group>
+    </groups>
+    <modes>
+		<mode>Mode_4a</mode>
+		<mode>Mode_4b</mode>
+		<mode>Mode_4c</mode>
+	</modes>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+</pysystest>

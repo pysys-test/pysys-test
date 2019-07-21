@@ -17,25 +17,12 @@
 
 
 """
-Contains utilities used by test launchers when running, printing, cleaning or making new tests. 
-
-The module includes the L{pysys.launcher.createDescriptors} method which locates test 
-descriptors based upon a given starting location on the file system, the chosen range 
-of test ids, the test type, the specified requirements, and the include and exclude lists.
-
-Utilities defined in the module can be used by any launchers, either distributed
-with the framework, or created as an extension to it. Currently the framework 
-distributes the console launcher module only - see L{pysys.launcher.console}. This 
-module uses the current working directory in a command shell as the starting location 
-on the file system, and provides utilities for parsing command line arguments in order
-to launch operations against a set of tests etc.  
-
+@undocumented: createDescriptors, loadDescriptors
 """
 from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
-import locale
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -45,101 +32,26 @@ except NameError:
 	from sets import Set as set
 
 from pysys.constants import *
-from pysys.xml.descriptor import XMLDescriptorParser
-from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2
 from pysys.exceptions import UserError
 
 def loadDescriptors(dir=None):
-	"""Load descriptor objects representing a set of tests to run, returning the list.
+	"""Load descriptor objects representing a set of tests to run for 
+	the current project, returning the list.
+	
+	Deprecated, use L{pysys.xml.descriptor.DescriptorLoader} instead.
 	
 	@param dir: The parent directory to search for runnable tests
-	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
+	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects. 
+	Caller must sort this list to ensure deterministic behaviour. 
 	@rtype: list
 	@raises UserError: Raised if no testcases can be found.
 	
 	"""
-	descriptors = []
-	descriptorfiles = []
-	ignoreSet = set(OSWALK_IGNORES)
-	descriptorSet =set(DEFAULT_DESCRIPTOR)
-	
 	if dir is None: dir = os.getcwd()
-	projectfound = PROJECT.projectFile != None
-	log = logging.getLogger('pysys.launcher')
+	loader = PROJECT.descriptorLoaderClass(PROJECT)
+	return loader.loadDescriptors(dir)
 
-	# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
-	# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
-	i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
-	for root, dirs, files in os.walk(toLongPathSafe(dir)):
-		intersection =  descriptorSet & set(files)
-		if intersection: 
-			descriptorpath = fromLongPathSafe(os.path.join(root, intersection.pop()))
-			# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
-			# as it proliferates to all strings in each test
-			if i18n_reencode is not None: descriptorpath = descriptorpath.encode(i18n_reencode) 
-			descriptorfiles.append(descriptorpath)
-			# if this is a test dir, it never makes sense to look at sub directories
-			del dirs[:]
-			continue
-		
-		thisignoreset = ignoreSet # sub-directories to be ignored
-		
-		for ignorefile in ['.pysysignore', 'pysysignore']:
-			for d in dirs:
-				if pathexists(os.path.join(root, d, ignorefile)):
-					thisignoreset = set(thisignoreset) # copy on write (this is a rare operation)
-					thisignoreset.add(d)
-					log.debug('Skipping directory %s due to ignore file %s', root+os.sep+ignorefile)
-		
-		for ignore in (thisignoreset & set(dirs)): dirs.remove(ignore)
-		if not projectfound:
-			for p in DEFAULT_PROJECTFILE:
-				if p in files:
-					projectfound = True
-					sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
-
-	DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
-	if PROJECT.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(PROJECT.projectFile))):
-		# find directory config descriptors between the project root and the testcase 
-		# dirs. We deliberately use project dir not current working dir since 
-		# we don't want descriptors to be loaded differently depending on where the 
-		# tests are run from (i.e. should be independent of cwd). 
-		dirconfigs = {}
-		projectroot = os.path.dirname(PROJECT.projectFile).replace('\\','/').split('/')
-	else:
-		dirconfigs = None
-		log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
-	
-	def getParentDirConfig(descriptorfile):
-		if dirconfigs is None: return None
-		testdir = os.path.dirname(descriptorfile).replace('\\','/').split('/')
-		currentconfig = None
-		for i in range(len(projectroot), len(testdir)):
-			currentdir = '/'.join(testdir[:i])
-			if currentdir in dirconfigs:
-				currentconfig = dirconfigs[currentdir]
-			else:
-				if pathexists(currentdir+'/'+DIR_CONFIG_DESCRIPTOR):
-					currentconfig = XMLDescriptorParser.parse(currentdir+'/'+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
-					log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
-				dirconfigs[currentdir] = currentconfig
-		return currentconfig
-	
-	for descriptorfile in descriptorfiles:
-		parentconfig = getParentDirConfig(descriptorfile)
-		try:
-			descriptors.append(XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=getParentDirConfig(descriptorfile)))
-		except UserError:
-			raise # no stack trace needed, will already include descriptorfile name
-		except Exception as e:
-			log.info('Failed to read descriptor: ', exc_info=True)
-			raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
-			
-	descriptors = sorted(descriptors, key=lambda x: x.file)
-	return descriptors
-
-def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
+def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[], expandmodes=True):
 	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
 	
 	@param testIdSpecs: A list of strings specifying the set of testcase identifiers
@@ -148,16 +60,109 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	@param excludes: A list of test groups to exclude in the returned set
 	@param trace: A list of requirements to indicate tests to include in the returned set
 	@param dir: The parent directory to search for runnable tests
-	@return: List of L{pysys.xml.descriptor.XMLDescriptorContainer} objects
+	@param modeincludes: A list specifying the modes to be included; 
+	must contain at most one entry unless supportMultipleModesPerRun=True. 
+	@param modeexcludes: A list specifying the modes to be excluded; 
+	only supported if supportMultipleModesPerRun=True. 
+	@param expandmodes: Set to False to disable expanding a test with multiple
+	modes into separate descriptors for each one (used for pysys print) 
+	if supportMultipleModesPerRun=True. 
+	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects
 	@rtype: list
-	@raises UserError: Raised if not testcases can be found or are returned by the requested input parameters
+	@raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
 	
 	"""
-	descriptors = loadDescriptors(dir=dir)
+	project = PROJECT
 	
+	descriptors = loadDescriptors(dir=dir)
+	# must sort by id for range matching and dup detection to work deterministically
+	descriptors.sort(key=lambda d: [d.id, d.file])
+	
+	supportMultipleModesPerRun = getattr(project, 'supportMultipleModesPerRun', '').lower()=='true'
+	
+	# as a convenience support !mode syntax in the includes
+	modeexcludes = modeexcludes+[x[1:] for x in modeincludes if x.startswith('!')]
+	modeincludes = [x for x in modeincludes if not x.startswith('!')]
+	for x in modeexcludes: 
+		if x.startswith('!'): raise UserError('Cannot use ! in a mode exclusion: "%s"'%x)
+	
+	if not supportMultipleModesPerRun: 
+		if len(modeincludes)>1: raise UserError('Cannot specify multiple modes unless supportMultipleModesPerRun=True')
+		if modeexcludes: raise UserError('Cannot specify mode exclusions unless supportMultipleModesPerRun=True')
+	else: 
+		# populate modedescriptors data structure for supportMultipleModesPerRun=True
+		MODES_ALL = 'ALL'
+		MODES_PRIMARY = 'PRIMARY'
+		assert MODES_ALL not in modeexcludes, "Cannot exclude all modes, that doesn't make sense"
+		if not modeincludes: # pick a useful default
+			if modeexcludes:
+				modeincludes = [MODES_ALL]
+			else:
+				modeincludes = [MODES_PRIMARY]
+
+		modedescriptors = {} # populate this with testid:[descriptors list]
+		
+		allmodes = {} # populate this as we go; could have used a set, but instead use a dict so we can check or capitalization mismatches easily at the same time; 
+		#the key is a lowercase version of mode name, value is the canonical capitalized name
+		
+		modeincludesnone = ((MODES_ALL in modeincludes or MODES_PRIMARY in modeincludes or '' in modeincludes) and 
+					(MODES_PRIMARY not in modeexcludes and '' not in modeexcludes))
+		
+		for d in descriptors:
+			if not d.modes:
+				# for tests that have no modes, there is only one descriptor and it's treated as the primary mode; 
+				# user can also specify '' to indicate no mode
+				if modeincludesnone:
+					d.mode = None
+					modedescriptors[d.id] = [d]
+				else:
+					modedescriptors[d.id] = []
+			else:
+				thisdescriptorlist = []
+				modedescriptors[d.id] = thisdescriptorlist # even if it ends up being empty
+				
+				# create a copy of the descriptor for each selected mode
+				for m in d.modes: 
+					try:
+						canonicalmodecapitalization = allmodes[m.lower()]
+					except KeyError:
+						allmodes[m.lower()] = m
+					else:
+						if m != canonicalmodecapitalization:
+							# this is useful to detect early; it's almost certain to lead to buggy tests 
+							# since people would be comparing self.mode to a string that might have different capitalization
+							raise UserError('Cannot have multiple modes with same name but different capitalization: "%s" and "%s"'%(m, canonicalmodecapitalization))
+					
+					# apply modes filter
+					isprimary = m==d.primaryMode
+					
+					# excludes 
+					if isprimary and MODES_PRIMARY in modeexcludes: continue
+					if m in modeexcludes: continue
+					
+					# includes
+					if not (MODES_ALL in modeincludes or 
+						m in modeincludes or 
+						(isprimary and MODES_PRIMARY in modeincludes)
+						): 
+						continue
+					
+					thisdescriptorlist.append(d._createDescriptorForMode(m))
+
+		for m in [MODES_ALL, MODES_PRIMARY]:
+			if m.lower() in allmodes: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
+		
+		# don't permit the user to specify a non existent mode by mistake
+		for m in modeincludes+modeexcludes:
+			if (not m) or m.upper() in [MODES_ALL, MODES_PRIMARY]: continue
+			if allmodes.get(m.lower(),None) != m:
+				raise UserError('Unknown mode "%s": the available modes for descriptors in this directory are: %s'%(
+					m, ', '.join(sorted(allmodes.values() or ['<none>']))))
+		
 	# first check for duplicate ids
 	ids = {}
 	dups = []
+	d = None
 	for d in descriptors:
 		if d.id in ids:
 			dups.append('%s - in %s and %s'%(d.id, ids[d.id], d.file))
@@ -172,56 +177,89 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 	
 
 	# trim down the list for those tests in the test specifiers 
+	# unless user the testspec includes a mode suffix, this stage ignores modes, 
+	# and then we expand the modes out afterwards
 	tests = []
 	if testIdSpecs == []:
 		tests = descriptors
 	else:
 		testids = set([d.id for d in descriptors])
 		def idMatch(descriptorId, specId):
-			# permit specifying suffix at end of testcase only, which is 
-			# important to allow directory completion to be used if a prefix is 
-			# being added on artificially; but only if spec is non-numeric 
+			if specId==descriptorId: return True
+			
+			# permit specifying suffix at end of testcase, which is 
+			# important to allow shell directory completion to be used if an id-prefix is 
+			# being added onto the directory id; but only do this if spec is non-numeric 
 			# since we don't want to match test_104 against spec 04
-			return specId==descriptorId or (
-				descriptorId.endswith(specId) and not specId.isdigit() and specId not in testids) or (
-				specId.isdigit() and re.match('.+_0*%s$'%specId, descriptorId))
+			if specId.isdigit():
+				return re.match('.+_0*%s$'%re.escape(specId), descriptorId)
+			else:
+				return descriptorId.endswith(specId) and specId not in testids
 
 		for t in testIdSpecs:
 			try:
+				matches = None
 				index = index1 = index2 = -1
 				t = t.rstrip('/\\')
 
-				if re.search('^[\w_]*$', t):
-					for i in range(0,len(descriptors)):
-						if idMatch(descriptors[i].id, t): index = i
-					matches = descriptors[index:index+1]
+				if re.search('^[\w_.~]*$', t): # single test id (not a range or regex)
+					if '~' in t:
+						testspecid, testspecmode = t.split('~')
+						# first match the id, then the mode
+						for i in range(0,len(descriptors)):
+							if idMatch(descriptors[i].id, testspecid): 
+								index = i
+								break
+						if index >= 0:
+							if testspecmode not in descriptors[index].modes:
+								raise UserError('Unknown mode "%s": the available modes for this test are: %s'%(
+									testspecmode, ', '.join(sorted(descriptors[index].modes or ['<none>']))))
 
-				elif re.search('^:[\w_]*', t):
+							matches = [descriptors[index]._createDescriptorForMode(testspecmode)]
+							# note test id+mode combinations selected explicitly like this way are included regardless of what modes are enabled/disabled
+
+					else: # normal case where it's not a mode
+						for i in range(0,len(descriptors)):
+							if idMatch(descriptors[i].id, t): 
+								index = i
+								break
+						matches = descriptors[index:index+1]
+						if supportMultipleModesPerRun and not modedescriptors[matches[0].id]:
+							# if user explicitly specified an individual test and excluded all modes it can run in, 
+							# we shouldn't silently skip/exclude it as they clearly made a mistake
+							raise UserError('Test "%s" cannot be selected with the specified mode(s).'%matches[0].id)
+				elif '~' in t:
+					# The utility of this would be close to zero and lots more to implement/test, so not worth it
+					raise UserError('A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
+				elif re.search('^:[\w_.]*', t):
 					for i in range(0,len(descriptors)):
 						if idMatch(descriptors[i].id, t.split(':')[1]): index = i
 					matches = descriptors[:index+1]
 
-				elif re.search('^[\w_]*:$', t):
+				elif re.search('^[\w_.]*:$', t):
 					for i in range(0,len(descriptors)):
 					  	if idMatch(descriptors[i].id, t.split(':')[0]): index = i
 					matches = descriptors[index:]
 
-				elif re.search('^[\w_]*:[\w_]*$', t):
+				elif re.search('^[\w_.]*:[\w_.]*$', t):
 					for i in range(0,len(descriptors)):
 					  	if idMatch(descriptors[i].id, t.split(':')[0]): index1 = i
 					  	if idMatch(descriptors[i].id, t.split(':')[1]): index2 = i
 					matches = descriptors[index1:index2+1]
 
-				else:
+				else: 
+					# regex match
 					matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
 
 				# each specified test patten must match something, else probably user made a typo
 				if not matches: raise Exception("No matches for: '%s'", t)
 				tests.extend(matches)
 
+			except UserError:
+				raise
 			except Exception:
 				raise UserError("Unable to locate requested testcase(s): '%s'"%t)
-				
+
 	# trim down the list based on the type
 	if type:
 		index = 0
@@ -271,6 +309,39 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None):
 			else:
 				index = index + 1
 	
+	# expand based on modes (unless we're printing in which case expandmodes=False)
+	if supportMultipleModesPerRun and expandmodes: 
+		expandedtests = []
+		for t in tests:
+			if hasattr(t, 'mode'): 
+				# if mode if set it has no modes or has a test id~mode that was explicitly specified in a testspec, so does not need expanding
+				expandedtests.append(t)
+			else:
+				expandedtests.extend(modedescriptors[t.id])
+		tests = expandedtests
+	
+	# combine execution order hints from descriptors with global project configuration; 
+	# we only need to do this if there are any executionOrderHints defined (may be pure group hints not for modes) 
+	# or if there are any tests with multiple modes (since then the secondary hint mode delta applies)
+	if (supportMultipleModesPerRun and len(allmodes)>0) or project.executionOrderHints:
+		def calculateNewHint(d, mode):
+			hint = d.executionOrderHint
+			for hintdelta, hintmatcher in project.executionOrderHints:
+				if hintmatcher(d.groups, mode): hint += hintdelta
+			if mode: 
+				hint += project.executionOrderSecondaryModesHintDelta * (d.modes.index(mode))
+			return hint
+		
+		for d in tests:
+			hintspermode = []
+			if expandmodes: # used for pysys run; d.mode will have been set
+				d.executionOrderHint = calculateNewHint(d, d.mode)
+			else:
+				modes = [None] if len(d.modes)==0 else d.modes
+				# set this for the benefit of pysys print
+				d.executionOrderHintsByMode = [calculateNewHint(d, m) for m in modes]
+				d.executionOrderHint = d.executionOrderHintsByMode[0]
+		
 	if len(tests) == 0:
 		raise UserError("The supplied options did not result in the selection of any tests")
 	else:

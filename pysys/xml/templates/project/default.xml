@@ -14,6 +14,7 @@
 	<property name="defaultIgnoreExitStatus" value="false"/>
 	<property name="defaultEnvironsTempDir" value="self.output"/>
 	<property name="redirectPrintToLogger" value="false"/>
+	<property name="supportMultipleModesPerRun" value="true"/>
 
 	<!-- Custom test framework extensions, if needed -->
 	<!--
