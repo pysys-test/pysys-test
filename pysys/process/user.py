@@ -1298,7 +1298,7 @@ class ProcessUser(object):
 		@param file: The path of the file to write, either an absolute path or 
 		relative to the `self.output` directory. 
 		
-		@param text: The string to write to the file, with `\n` 
+		@param text: The string to write to the file, with `\\n` 
 		for newlines (do not use `os.linesep` as the file will be opened in 
 		text mode so platform line separators will be added automatically).
 		
