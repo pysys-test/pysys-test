@@ -67,8 +67,12 @@ New features:
   a convenient way to assert an arbitrary Python expression, with generation of 
   a clear outcome reason that is easy to understand and debug. 
 
+- Added `ProcessUser.write_text` method for writing characters to a text file 
+  in the output directory using a single line of Python. 
+  
 - Added `ProcessUser.startPython` method has similar options to `startProcess` 
-  and should be used for starting Python. 
+  and should be used for starting Python. Support functionality such as 
+  Python code coverage. 
 
 - Added `hostname`, `startTime` and `startDate` project properties which can be 
   used in any `pysysproject.xml` configuration file. The start time/date 
@@ -227,7 +231,8 @@ Upgrade guide and compatibility:
   directory) instead of just the relative path passed in. This make it easier 
   to use in-line while performing operations such as creating a file in the 
   new directory. Code that relied on the old behaviour of returning the 
-  path passed in may need to be updated. 
+  path passed in may need to be updated to avoid having the output directory 
+  specified twice. 
 
 - Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 
   from running, whereas previously they would just be logged. Since an invalid 

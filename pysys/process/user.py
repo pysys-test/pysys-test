@@ -89,7 +89,6 @@ class ProcessUser(object):
 		from access by background threads, as needed. 
 		"""
 
-
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
 		
@@ -1171,8 +1170,10 @@ class ProcessUser(object):
 		path = os.path.join(self.output, path)
 		mkdir(path)
 		return path
-		
-	def deletedir(self, path):
+
+	def deletedir(self, path, **kwargs): return self.deleteDir(path, **kwargs)
+
+	def deleteDir(self, path, **kwargs):
 		"""
 		Recursively delete the specified directory. 
 		
@@ -1180,8 +1181,11 @@ class ProcessUser(object):
 		
 		@param path: The path to be deleted. This can be an absolute path or 
 		relative to the testcase output directory.
+		
+		@param kwargs: Any additional arguments are passed to 
+		L{pysys.utils.fileutils.deletedir()}. 
 		"""
-		deletedir(os.path.join(self.output, path))
+		deletedir(os.path.join(self.output, path), **kwargs)
 		
 	def getDefaultFileEncoding(self, file, **xargs):
 		"""
@@ -1285,3 +1289,31 @@ class ProcessUser(object):
 		or 0 if they are semantically the same.
 		"""
 		return compareVersions(v1, v2)
+
+	def write_text(self, file, text, encoding=None):
+		"""
+		Writes the specified text to a file in the output directory. 
+		
+		@param file: The path of the file to write, either an absolute path or 
+		relative to the `self.output` directory. 
+		
+		@param text: The string to write to the file, with `\n` 
+		for newlines (do not use `os.linesep` as the file will be opened in 
+		text mode so platform line separators will be added automatically).
+		
+		On Python 3 this must be a character string. 
+
+		On Python 2 this can be a character or byte string containing ASCII 
+		characters. If non-ASCII characters are used, it must be a unicode 
+		string if there is an encoding specified for this file/type, or 
+		else a byte string. 
+		
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
+		"""
+		# This method provides similar functionality to the Python3 pathlib write_text method. 
+		
+		with openfile(os.path.join(self.output, file), 'w', encoding=encoding or self.getDefaultFileEncoding(file)) as f:
+			f.write(text)
+		
