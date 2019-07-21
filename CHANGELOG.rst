@@ -223,6 +223,12 @@ Improvements to the `pysys.py` command line tool:
 
 Upgrade guide and compatibility:
 
+- `ProcessUser.mkdir` now returns the absolutized path (including the output 
+  directory) instead of just the relative path passed in. This make it easier 
+  to use in-line while performing operations such as creating a file in the 
+  new directory. Code that relied on the old behaviour of returning the 
+  path passed in may need to be updated. 
+
 - Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 
   from running, whereas previously they would just be logged. Since an invalid 
   descriptor prevents the associated testcase from reporting a result, the 
@@ -261,11 +267,6 @@ Bug fixes:
 - Fixed CSV performance reporter runDetails which was including each item 
   twice. 
   
-- `ProcessUser.mkdir` now returns the absolutized path (including the output 
-  directory) instead of just the relative path passed in. This make it easier 
-  to use in-line while performing operations such as creating a file in the 
-  new directory, 
-
 ---------------
 Release History
 ---------------

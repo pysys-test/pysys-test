@@ -54,56 +54,56 @@ class PySysTest(BaseTest):
 			return r
 		
 		if self.supportsAsciiLANG:
-			runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=1')
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=utf8,color=true,threads=1'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'true', # this affects the stdout stream
 					'PYTHONIOENCODING':'utf-8', # sets stdout encoding
 					}, LANG='ascii')))
-			runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=2')
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=utf8,color=true,threads=2'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'true', # this affects the stdout stream
 					'PYTHONIOENCODING':'utf-8', # sets stdout encoding
 					}, LANG='ascii')))
-			runid=self.mkdir('default=ascii,stdout=ascii,color=false,threads=1')
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=ascii,color=false,threads=1'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'false', # this affects the stdout stream
 					'PYTHONIOENCODING':'ascii', # sets stdout encoding
 					}, LANG='ascii')))
-			runid=self.mkdir('default=ascii,stdout=none,color=true,threads=1') # also progress, why not!
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=none,color=true,threads=1')) # also progress, why not!
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '--progress'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'true', # this affects the stdout stream
 					'PYTHONIOENCODING':None if PY2 else 'ascii', # sets stdout encoding
 					}, LANG='ascii')))
-			runid=self.mkdir('default=ascii,stdout=none,color=false,threads=2')
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=none,color=false,threads=2'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'false', # this affects the stdout stream
 					'PYTHONIOENCODING': None if PY2 else 'ascii', # sets stdout encoding
 					}, LANG='ascii')))
 				
-		runid=self.mkdir('default=utf8,stdout=ascii,color=true,threads=2')
+		runid=os.path.basename(self.mkdir('default=utf8,stdout=ascii,color=true,threads=2'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':'ascii', # sets stdout encoding
 				}, LANG='en_US.utf-8')))
-		runid=self.mkdir('default=utf8,stdout=none,color=true,threads=2')
+		runid=os.path.basename(self.mkdir('default=utf8,stdout=none,color=true,threads=2'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':None if PY2 else 'utf-8', # sets stdout encoding
 				}, LANG='en_US.utf-8')))
-		runid=self.mkdir('default=utf8,stdout=utf8,color=false,threads=2')
+		runid=os.path.basename(self.mkdir('default=utf8,stdout=utf8,color=false,threads=2'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'false', # this affects the stdout stream
 				'PYTHONIOENCODING':'utf-8', # sets stdout encoding
 				}, LANG='en_US.utf-8')))
-		runid=self.mkdir('default=local,stdout=local,color=true,threads=2,debug=true')
+		runid=os.path.basename(self.mkdir('default=local,stdout=local,color=true,threads=2,debug=true'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '-v', 'debug'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
