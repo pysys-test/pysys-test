@@ -179,12 +179,18 @@ DEFAULT_TIMEOUT = 600
 @deprecated: Use a specific member of TIMEOUTS instead."""
 TIMEOUTS = {}
 """ Default timeouts used for various operations. 
-Each timeout is given as a floating point number of seconds. """
+
+Each timeout is given as a floating point number of seconds.
+
+These timeouts can be customized from runner.setup() if needed 
+(but never change them from within individual testcases). 
+ """
 TIMEOUTS['WaitForSocket'] = 60
 TIMEOUTS['WaitForFile'] = 30
 TIMEOUTS['WaitForSignal'] = 60
 TIMEOUTS['WaitForProcessStop'] = 30
 TIMEOUTS['WaitForProcess'] = 60*10
+TIMEOUTS['WaitForAvailableTCPPort'] = 60*20 # in case other tests are using up all ports
 TIMEOUTS['ManualTester'] = 1800
 
 # the supported distinct log categories

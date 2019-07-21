@@ -80,6 +80,18 @@ New features:
   directly using a `-X prop=value` argument, or with a property set in the 
   `pysysproject.xml` configuration file.
 
+- Added environment variable `PYSYS_PORTS_FILE` which if present will be read 
+  as a utf-8/ascii file with one port number on each line, and used to populate 
+  the pool of ports for `getNextAvailableTCPPort()`. This can be used to 
+  avoid port conflicts when invoking PySys from an environment where some ports 
+  are taken up by other processes. 
+
+- Added `TIMEOUTS['WaitForAvailableTCPPort']` which controls how long 
+  `getNextAvailableTCPPort()` will wait before throwing an exception. 
+  Previously `getNextAvailableTCPPort()` would have thrown an exception if 
+  other tests were using up all ports from the available pool; the new 
+  behaviour is to block and retry until this timeout is reached.
+  
 Improvements to the XML descriptors that provide information about tests:
 
 - Added support for disabling search for testcases in part of a directory tree 
