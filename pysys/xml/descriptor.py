@@ -138,9 +138,15 @@ class TestDescriptor(object):
 	low values. The default is 0.0. 
 	@ivar isDirConfig: True if this is a directory configuration, or False if 
 	it's a normal testcase. 
-
+	@ivar userData: A dictionary that can be used for storing user-defined data 
+	in the descriptor.
+	
 	@undocumented: _createDescriptorForMode
 	"""
+
+	__slots__ = 'isDirConfig', 'file', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
+		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', \
+		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData'
 
 	def __init__(self, file, id, 
 		type="auto", state="runnable", title=u'(no title)', purpose=u'', groups=[], modes=[], 
@@ -193,6 +199,8 @@ class TestDescriptor(object):
 		
 		# NB: self.mode is set after construction and 
 		# cloning for each supported mode when supportMultipleModesPerRun=true
+		
+		self.userData = {}
 	
 	def _createDescriptorForMode(self, mode):
 		"""
