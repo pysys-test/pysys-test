@@ -688,7 +688,7 @@ class DescriptorLoader(object):
 					currentdir = projectroot+os.sep+os.sep.join(searchdirsuffix[:i])
 				
 				if pathexists(currentdir+os.sep+DIR_CONFIG_DESCRIPTOR):
-					currentconfig = XMLDescriptorParser.parse(currentdir+os.sep+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
+					currentconfig = self._parseTestDescriptor(currentdir+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=currentconfig, isDirConfig=True)
 					log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
 			# this is the top-level directory that will be checked below
 			dirconfigs[os.path.dirname(dir)] = currentconfig
@@ -704,7 +704,7 @@ class DescriptorLoader(object):
 			if dirconfigs is not None:
 				parentconfig = dirconfigs[os.path.dirname(root)]
 				if next( (f for f in files if (f == DIR_CONFIG_DESCRIPTOR)), None):
-					parentconfig = XMLDescriptorParser.parse(root+os.sep+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=parentconfig)
+					parentconfig = self._parseTestDescriptor(root+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=parentconfig, isDirConfig=True)
 					log.debug('Loaded directory configuration descriptor from %s: \n%s', root, parentconfig)
 
 			# allow subclasses to modify descriptors list and/or avoid processing 
@@ -782,12 +782,14 @@ class DescriptorLoader(object):
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
 		return False
 
-	def _parseTestDescriptor(self, descriptorfile, parentDirDefaults=None, **kwargs):
-		""" Parses a single XML descriptor file for a testcase and returns the result. 
+	def _parseTestDescriptor(self, descriptorfile, parentDirDefaults=None, isDirConfig=False, **kwargs):
+		""" Parses a single descriptor file (typically an XML file) for a testcase or directory configuration 
+		and returns the resulting descriptor. 
 		
 		@param descriptorfile: The absolute path of the descriptor file. 
 		@param parentDirDefaults: A L{TestDescriptor} instance containing 
 		defaults to inherit from the parent directory, or None if none was found. 
+		@param isDirConfig: False for normal test descriptors, True for a directory configuration. 
 		@return: The L{TestDescriptor} instance, or None if none should be 
 		added for this descriptor file. Note that subclasses may modify the 
 		contents of the returned instance. 
@@ -796,7 +798,7 @@ class DescriptorLoader(object):
 		The exception message must contain the path of the descriptorfile.
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
-		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults)
+		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig)
 
 if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 
