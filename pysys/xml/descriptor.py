@@ -15,7 +15,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
+"""
+@undocumented: DTD, log, DESCRIPTOR_TEMPLATE, XMLDescriptorParser, XMLDescriptorCreator
+"""
 
 from __future__ import print_function
 import os.path, logging, xml.dom.minidom
@@ -283,7 +285,7 @@ class TestDescriptor(object):
 	def __repr__(self): return str(self)
 
 class XMLDescriptorCreator(object):
-	'''Helper class to create a test descriptor template.'''
+	'''Helper class to create a test descriptor template. DEPRECATED. '''
 		
 	def __init__(self, file, type="auto", group=DEFAULT_GROUP, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
 		'''Class constructor.'''
@@ -305,7 +307,9 @@ exists for compatibility reasons only.
 """
 
 class XMLDescriptorParser(object):
-	'''Helper class to parse an XML test descriptor - either for a testcase, 
+	'''DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. 
+	
+	Helper class to parse an XML test descriptor - either for a testcase, 
 	or for defaults for a (sub-)directory of testcases.
 
 	The class uses the minidom DOM (Document Object Model) non validating
