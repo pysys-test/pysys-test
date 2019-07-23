@@ -701,7 +701,7 @@ class TestContainer(object):
 					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
 					# don't need to add mode to this path as it's already in the id
 				else:
-					self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
+					self.outsubdir = os.path.join(self.descriptor.testDir, self.descriptor.output, self.runner.outsubdir)
 					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
 						self.outsubdir += '~'+self.descriptor.mode
 
@@ -750,7 +750,7 @@ class TestContainer(object):
 			with global_lock:
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 				try:
-					runpypath = self.descriptor.module+'.py'
+					runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module+'.py')
 					with open(runpypath, 'rb') as runpyfile:
 						runpycode = compile(runpyfile.read(), runpypath, 'exec')
 					runpy_namespace = {}

@@ -106,7 +106,9 @@ class TestDescriptor(object):
 	The L{DescriptorLoader} class is responsible for determining the available 
 	descriptor instances. 
 	
-	@ivar file: The full path of the testcase descriptor file. 
+	@ivar file: The absolute path of the testcase descriptor file. 
+	@ivar testDir: The absolute path of the test, which is used to convert 
+	any relative paths into absolute paths. 
 	@ivar id: The testcase identifier, or the id prefix if this is a 
 	directory config descriptor rather than a testcase descriptor. 
 	Includes a mode suffix if this is a multi-mode test and 
@@ -128,10 +130,10 @@ class TestDescriptor(object):
 	raw descriptors have been expanded into multiple mode-specific 
 	descriptors, and only if supportMultipleModesPerRun=True. 
 	@ivar classname: The Python classname to be executed for this testcase
-	@ivar module: The full path to the python module containing the testcase class
-	@ivar input: The full path to the input directory of the testcase
-	@ivar output: The full path to the output parent directory of the testcase
-	@ivar reference: The full path to the reference directory of the testcase
+	@ivar module: The path to the python module containing the testcase class. Relative to testDir, or an absoute path.
+	@ivar input: The path to the input directory of the testcase. Relative to testDir, or an absoute path.
+	@ivar output: The path to the output parent directory of the testcase. Relative to testDir, or an absoute path.
+	@ivar reference: The path to the reference directory of the testcase. Relative to testDir, or an absoute path.
 	@ivar traceability: A list of the requirements covered by the testcase
 	@ivar executionOrderHint: A float priority value used to determine the 
 	order in which testcases will be run; higher values are executed before 
@@ -144,8 +146,8 @@ class TestDescriptor(object):
 	@undocumented: _createDescriptorForMode
 	"""
 
-	__slots__ = 'isDirConfig', 'file', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
-		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', \
+	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
+		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', 'executionOrderHintsByMode', \
 		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData'
 
 	def __init__(self, file, id, 
@@ -153,6 +155,7 @@ class TestDescriptor(object):
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE, 
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, 
+		testDir=None, 
 		isDirConfig=False):
 		"""Create an instance of the class.
 		
@@ -163,6 +166,9 @@ class TestDescriptor(object):
 		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
 		self.isDirConfig = isDirConfig
 		self.file = file
+		if not isDirConfig:
+			assert file, [file, id]
+			self.testDir = testDir or os.path.dirname(file)
 		self.id = id
 		self.type = type
 		self.state = state
@@ -174,15 +180,9 @@ class TestDescriptor(object):
 		self.classname = classname
 		self.module = module
 		
-		# absolutize these paths if something relative was passed in
 		self.input = input
 		self.output = output
 		self.reference = reference
-		if file and not isDirConfig: 
-			dirname = os.path.dirname(file)
-			self.input = os.path.join(dirname, self.input)
-			self.output = os.path.join(dirname, self.output)
-			self.reference = os.path.join(dirname, self.reference)
 
 		self.traceability = traceability
 		self.executionOrderHint = executionOrderHint
@@ -219,6 +219,7 @@ class TestDescriptor(object):
 		"""Converts this descriptor to an (ordered) dict suitable for serialization."""
 		d = collections.OrderedDict()
 		d['id'] = self.id
+		d['testDir'] = self.testDir
 		d['xmlDescriptor'] = self.file
 		d['type'] = self.type
 		d['state'] = self.state
@@ -235,7 +236,6 @@ class TestDescriptor(object):
 		d['executionOrderHint'] = (self.executionOrderHintsByMode
 			if hasattr(self, 'executionOrderHintsByMode') else [self.executionOrderHint])
 
-		self.executionOrderHint
 		d['classname'] = self.classname
 		d['module'] = self.module
 		d['input'] = self.input
@@ -359,7 +359,7 @@ class XMLDescriptorParser(object):
 		title='', purpose='', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
-		traceability=[], executionOrderHint=0.0, skippedReason=None)
+		traceability=[], executionOrderHint=0.0, skippedReason=None, isDirConfig=True)
 	"""
 	A directory config descriptor instance of TestDescriptor holding 
 	the default values to be used if there is no directory config descriptor. 
@@ -378,14 +378,14 @@ class XMLDescriptorParser(object):
 										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
 										self.getGroups(), self.getModes(),
 										self.getClassDetails()[0],
-										# don't absolutize for dir config descriptors, since we don't yet know the test's dirname
-										os.path.join(self.dirname if self.istest else '', self.getClassDetails()[1]),
-										os.path.join(self.dirname if self.istest else '', self.getTestInput()),
-										os.path.join(self.dirname if self.istest else '', self.getTestOutput()),
-										os.path.join(self.dirname if self.istest else '', self.getTestReference()),
+										self.getClassDetails()[1],
+										self.getTestInput(),
+										self.getTestOutput(),
+										self.getTestReference(),
 										self.getRequirements(), 
 										self.getExecutionOrderHint(), 
 										skippedReason=self.getSkippedReason(), 
+										testDir=self.dirname,
 										isDirConfig=not self.istest)
 
 

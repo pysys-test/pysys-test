@@ -253,6 +253,13 @@ Upgrade guide and compatibility:
   colon to separate the test id and titles. This makes it easier to copy and 
   paste test ids from `pysys print` into the command line. 
 
+- Several fields in the `TestDescriptor` (aka `XMLDescriptorContainer`) class 
+  that used to contain absolute paths now contain paths relative to 
+  the newly introduced `testDir` member. These are: `module`, `output`, 
+  `input`, `reference`. The values of `BaseTest.output/input/reference` 
+  have not changed (these are still absolute paths), so this change is unlikely 
+  to affect many users. 
+
 Bug fixes:
 
 - PySys now uses `Test outcome reason:` rather than `Test failure reason:` 

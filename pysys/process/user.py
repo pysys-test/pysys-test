@@ -1034,7 +1034,7 @@ class ProcessUser(object):
 				if (self.__skipFrame(info.filename, ProcessUser) ): continue
 				if (self.__skipFrame(info.filename, BaseTest) ): continue
 				stack.append( '%s:%s' % (os.path.basename(info.filename).strip(), info.lineno) )
-				if (os.path.splitext(info.filename)[0] == os.path.splitext(self.descriptor.module)[0] and (info.function == 'execute' or info.function == 'validate')): return stack
+				if (os.path.splitext(info.filename)[0] == os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] and (info.function == 'execute' or info.function == 'validate')): return stack
 		return None
 
 

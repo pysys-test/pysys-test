@@ -114,9 +114,9 @@ class BaseTest(ProcessUser):
 		"""
 		ProcessUser.__init__(self)
 		self.descriptor = descriptor
-		self.input = descriptor.input
-		self.output = os.path.join(descriptor.output, outsubdir)
-		self.reference = descriptor.reference
+		self.input = os.path.join(descriptor.testDir, descriptor.input)
+		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir)
+		self.reference = os.path.join(descriptor.testDir, descriptor.reference)
 		self.runner = runner
 		if runner.supportMultipleModesPerRun:
 			self.mode = descriptor.mode
