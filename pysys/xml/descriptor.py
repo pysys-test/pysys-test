@@ -650,46 +650,61 @@ class DescriptorLoader(object):
 		log = logging.getLogger('pysys.launcher')
 
 		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
-		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path). 
+		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path), 
+		# so must use long-path-safe - but need to re-encode from unicode string back to bytestring in Python 2
 		i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
-		assert os.path.exists(toLongPathSafe(dir)), dir
+		
+		dir = toLongPathSafe(os.path.normpath(dir))
+		assert os.path.exists(dir), dir # sanity check
+		if project.projectFile:
+			projectroot = toLongPathSafe(os.path.normpath(os.path.dirname(project.projectFile)))
 
 		DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
-		if project.projectFile and os.path.normpath(dir).startswith(os.path.normpath(os.path.dirname(project.projectFile))):
+		if not project.projectFile or not dir.startswith(projectroot): 
+			dirconfigs = None
+			log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
+		else:
 			# find directory config descriptors between the project root and the testcase 
 			# dirs. We deliberately use project dir not current working dir since 
 			# we don't want descriptors to be loaded differently depending on where the 
 			# tests are run from (i.e. should be independent of cwd). 
 			dirconfigs = {}
-			projectroot = os.path.dirname(project.projectFile).replace('\\','/').split('/')
-		else:
-			dirconfigs = None
-			log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
 
-		def getParentDirConfig(testdir):
-			if dirconfigs is None: return None
-			testdir = testdir.replace('\\','/').split('/')
+			# load any descriptors between the project dir up to (but not including) the dir we'll be walking
+			searchdirsuffix = dir[len(projectroot)+1:].split(os.sep)
 			currentconfig = None
-			for i in range(len(projectroot), len(testdir)):
-				currentdir = '/'.join(testdir[:i])
-				if currentdir in dirconfigs:
-					currentconfig = dirconfigs[currentdir]
+			for i in range(len(searchdirsuffix)): # up to but not including dir
+				if i == 0:
+					currentdir = projectroot
 				else:
-					if pathexists(currentdir+'/'+DIR_CONFIG_DESCRIPTOR):
-						currentconfig = XMLDescriptorParser.parse(currentdir+'/'+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
-						log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
-					dirconfigs[currentdir] = currentconfig
-			return currentconfig
+					currentdir = projectroot+os.sep+os.sep.join(searchdirsuffix[:i])
+				
+				if pathexists(currentdir+os.sep+DIR_CONFIG_DESCRIPTOR):
+					currentconfig = XMLDescriptorParser.parse(currentdir+os.sep+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=currentconfig)
+					log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, currentconfig)
+			# this is the top-level directory that will be checked below
+			dirconfigs[os.path.dirname(dir)] = currentconfig
 
 		for root, dirs, files in os.walk(toLongPathSafe(dir)):
-			parentconfig = getParentDirConfig(fromLongPathSafe(root))
+			ignorematch = next( (f for f in files if (f == '.pysysignore' or f == 'pysysignore')), None)
+			if ignorematch:
+				log.debug('Skipping directory %s due to ignore file %s', root, ignorematch)
+				del dirs[:]
+				continue
+				
+			parentconfig = None
+			if dirconfigs is not None:
+				parentconfig = dirconfigs[os.path.dirname(root)]
+				if next( (f for f in files if (f == DIR_CONFIG_DESCRIPTOR)), None):
+					parentconfig = XMLDescriptorParser.parse(root+os.sep+DIR_CONFIG_DESCRIPTOR, istest=False, parentDirDefaults=parentconfig)
+					log.debug('Loaded directory configuration descriptor from %s: \n%s', root, parentconfig)
 
 			# allow subclasses to modify descriptors list and/or avoid processing 
 			# subdirectories
 			if self._handleSubDirectory(root, dirs, files, descriptors, parentDirDefaults=parentconfig):
 				del dirs[:]
 				continue
-		
+
 			intersection = descriptorSet & set(files)
 			if intersection: 
 				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
@@ -698,7 +713,7 @@ class DescriptorLoader(object):
 				if i18n_reencode is not None: descriptorfile = descriptorfile.encode(i18n_reencode) 
 
 				try:
-					parsed = self._parseTestDescriptor(project, descriptorfile, parentDirDefaults=parentconfig)
+					parsed = self._parseTestDescriptor(descriptorfile, parentDirDefaults=parentconfig)
 					if parsed:
 						descriptors.append(parsed)
 				except UserError:
@@ -711,24 +726,21 @@ class DescriptorLoader(object):
 				del dirs[:]
 				continue
 			
-			thisignoreset = ignoreSet # sub-directories to be ignored
-			
-			for ignorefile in ['.pysysignore', 'pysysignore']:
-				for d in dirs:
-					if pathexists(os.path.join(root, d, ignorefile)):
-						thisignoreset = set(thisignoreset) # copy on write (this is a rare operation)
-						thisignoreset.add(d)
-						log.debug('Skipping directory %s due to ignore file %s', root+os.sep+ignorefile)
-			
-			for ignore in (thisignoreset & set(dirs)): dirs.remove(ignore)
+			for ignore in (ignoreSet & set(dirs)): dirs.remove(ignore)
+
+			if dirconfigs is not None and len(dirs)>0:
+				# stash it for when we navigate down to subdirectories
+				# only add to dict if we're continuing to process children
+				dirconfigs[root] = parentconfig 
+
 			if not projectfound:
 				for p in DEFAULT_PROJECTFILE:
 					if p in files:
 						projectfound = True
 						sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
-				
+		
 		return descriptors
-
+		
 	def _handleSubDirectory(self, dir, subdirs, files, descriptors, parentDirDefaults, **kwargs):
 		"""Overrides the handling of each sub-directory found while walking 
 		the directory tree during L{loadDescriptors}. 
@@ -762,10 +774,9 @@ class DescriptorLoader(object):
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
 		return False
 
-	def _parseTestDescriptor(self, project, descriptorfile, parentDirDefaults=None, **kwargs):
+	def _parseTestDescriptor(self, descriptorfile, parentDirDefaults=None, **kwargs):
 		""" Parses a single XML descriptor file for a testcase and returns the result. 
 		
-		@param project: The L{Project} instance associated with these descriptors. 
 		@param descriptorfile: The absolute path of the descriptor file. 
 		@param parentDirDefaults: A L{TestDescriptor} instance containing 
 		defaults to inherit from the parent directory, or None if none was found. 
