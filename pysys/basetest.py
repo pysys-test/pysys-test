@@ -692,16 +692,22 @@ class BaseTest(ProcessUser):
 		
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		
-		@param expr: The regular expression to check for in the file (or a string literal if literal=True). 
-		If the match fails, the matching regex will be reported as the test outcome
+		@param expr: The regular expression to check for in the file (or a string literal if literal=True), 
+		for example " ERROR .*".
+		 
+		For contains=False matches, you should end the expr with `.*` if you wish to include just the 
+		matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
+		then the entire matching line will be included in the outcome failure reason. 
 		
-		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
+		For contains=True matches, the expr itself is used as the outcome failure reason. 
+		
+		@param contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
 		@param ignores: Optional list of regular expressions that will be 
 		ignored when reading the file. 
 		
 		@param literal: By default expr is treated as a regex, but set this to True to pass in 
-		a string literal instead
+		a string literal instead.
 		
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
@@ -750,10 +756,25 @@ class BaseTest(ProcessUser):
 			# including the expression it found that should not have been there
 			outcome = PASSED if (result!=None) == contains else FAILED
 			if outcome == PASSED: 
+				if contains: log.debug('Grep on input file %s successfully matched expression %s with line: %s', 
+					file, quotestring(expr), quotestring(result.string))
 				msg = assertMessage or ('Grep on input file %s' % file)
 			else:
-				msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', 
-					quotestring(result.group(0) if result else expr) ))
+			
+				if assertMessage:
+					msg = assertMessage
+				elif contains:
+					msg = 'Grep on %s contains %s'%(file, quotestring(expr))
+				else:
+					msg = 'Grep on %s does not contain %s failed with: %s'%(file, 
+						quotestring(expr),
+						# heuristic to give best possible message; expressions ending with .* are usually 
+						# complete and help to remove timestamps etc from the start so best to return match only; if user didn't do 
+						# that they probably haven't thought much about it and returning the entire match string 
+						# is more useful (though strip off trailing newlines and whitespace):
+						quotestring(
+							(result.group(0) if expr.endswith('*') else result.string.rstrip()) 
+							))
 			self.addOutcome(outcome, msg, abortOnError=abortOnError)
 		
 

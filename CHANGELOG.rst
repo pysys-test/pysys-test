@@ -282,6 +282,10 @@ Bug fixes:
 
 - The Ant JUnit writer now includes the test duration. 
 
+- Improved `assertGrep` outcome reason to include the entire matching string 
+  when a `contains=False` test fails since `ERROR - The bad thing happened` is 
+  a much more useful outcome reason than just `ERROR`. 
+
 - Fixed CSV performance reporter runDetails which was including each item 
   twice. 
   
