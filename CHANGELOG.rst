@@ -223,6 +223,15 @@ Improvements to the `pysys.py` command line tool:
   the number of threads to use with `--threads auto` is specified on a 
   per-machine or per-user basis. 
 
+- Added automatic conversion of strings specified on the command line with 
+  `-Xkey=value` to int, float or bool if there's a static variable of the 
+  same name and one of those types defined on the test class. This makes it 
+  easier to write tests that have their parameters overridden from the command 
+  line. For example, if a test class has a static variable `iterations=1000` 
+  to control how many iterations it performs, it can be run with 
+  `pysys run -Xiterations=10` during test development to override the number 
+  of iterations to a much lower number without any changes to `run.py`. 
+
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
   programs. 

@@ -81,24 +81,34 @@ override when running tests:
   customizations in your shell so that you don't need to keep specifying them 
   every time you invoke `pysys run`. 
 
-To use an attribute, set the default value as a Python string on your test 
-or basetest before `BaseTest.__init__()` is called. The easiest way to do this 
-in an individual testcase is usually to use a static variable, e.g.::
+To use a testcase attribute, set the default value as a Python string on your 
+test or basetest before `BaseTest.__init__()` is called. The easiest way to do 
+this in an individual testcase is usually to use a static attribute on the test 
+class, e.g.::
 
 	class PySysTest(BaseTest):
 
-		myIterationCount = str(100*1000) # can be overridden with -XmyIterationCount=
+		myIterationCount = 100*1000 # can be overridden with -XmyIterationCount=
 		
 		def execute(self):
-			self.log.info('Using iterations=%d', int(self.myIterationCount))
+			self.log.info('Using iterations=%d', self.myIterationCount)
 			...
-	
-If you have a custom BaseTest subclass then you need to set the defaults in 
-your `__init__ before calling the super implementation of `__init__`. 
 
-To override the value of an attribute use the `-X` option::
+If instead of setting a default for just one test you wish to set the default 
+for many tests from your custom BaseTest subclass, then you need to set the 
+defaults in your `__init__` before calling the super implementation of `__init__`. 
+
+Once the default value is defined with an attribute, you can override the value 
+when you run your test using the `-X` option::
 
 	pysys run -XmyIterationCount=10
+
+If the attribute was defined with a default value of int, float or bool then 
+the `-X` value will be automatically converted to that type; otherwise, it will 
+be a string. 
+
+The other mechanism that PySys supports for configurable test options is 
+project properties. 
 
 To use a project property that can be overridden with an environment variable, 
 add a `property` element to your `pysysproject.xml` file::
@@ -121,7 +131,7 @@ To use projects properties in your testcase, just access the attributes on
 	def execute(self):
 		self.log.info('Using username=%s and password %s' % self.project.myCredentials.split(':'))
 
-Remember that they will all be of string type. 
+Property properties will always be of string type. 
 
 Producing code coverage reports
 -------------------------------

@@ -147,11 +147,28 @@ class BaseTest(ProcessUser):
 		data attributes, which can be overriden on instantiation e.g. using the -X options to the 
 		runTest.py launch executable.
 		
+		If an existing attribute is present on this test class (typically a 
+		static class variable) and it has a type of bool, int or float, then 
+		any -X options will be automatically converted from string to that type. 
+		This facilitates providing default values for parameters such as 
+		iteration count or timeouts as static class variables with the 
+		possibility of overriding on the command line, for example `-Xiterations=123`. 
+		
 		@param xargs: A dictionary of the user defined extra arguments
 		
 		"""
 		for key in list(xargs.keys()):
-			setattr(self, key, xargs[key])
+			val = xargs[key]
+			basetestDefaultValue = getattr(self, key, None) # most of the time these will not be on the basetest
+			if basetestDefaultValue is not None and isstring(val):
+				# attempt type coersion to keep the type the same
+				if basetestDefaultValue == True or basetestDefaultValue == False:
+					val = val.lower()=='true'
+				elif isinstance(basetestDefaultValue, int):
+					val = int(val)
+				elif isinstance(basetestDefaultValue, float):
+					val = float(val)
+			setattr(self, key, val)
 
 			
 	# test methods for execution, validation and cleanup. The execute method is
