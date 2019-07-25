@@ -284,6 +284,10 @@ Upgrade guide and compatibility:
   have not changed (these are still absolute paths), so this change is unlikely 
   to affect many users. 
 
+- The `PROJECT` variable in the `constants` module is deprecated. Use 
+  `self.project` instead (which is defined on classes such as `BaseTest`, 
+  `BaseRunner` etc). 
+
 Bug fixes:
 
 - PySys now uses `Test outcome reason:` rather than `Test failure reason:` 

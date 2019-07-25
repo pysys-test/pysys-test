@@ -140,7 +140,7 @@ class BaseRunner(ProcessUser):
 		summarywriters = []
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
-		for classname, module, filename, properties in PROJECT.writers:
+		for classname, module, filename, properties in self.project.writers:
 			module = import_module(module, sys.path)
 			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
 			for key in list(properties.keys()): setattr(writer, key, properties[key])
@@ -350,16 +350,16 @@ class BaseRunner(ProcessUser):
 		results.
 
 		"""
-		if PROJECT.perfReporterConfig:
+		if self.project.perfReporterConfig:
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet
 			from pysys.utils.perfreporter import CSVPerformanceReporter
 			try:
-				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir, runner=self)]
+				self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir, runner=self)]
 			except Exception:
 				# support for passing kwargs was added in 1.4.0; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
 				CSVPerformanceReporter._runnerSingleton = self
-				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir)]
+				self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir)]
 				del CSVPerformanceReporter._runnerSingleton
 		
 		class PySysPrintRedirector(object):
@@ -374,7 +374,7 @@ class BaseRunner(ProcessUser):
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
-		if getattr(PROJECT, 'redirectPrintToLogger', False):
+		if getattr(self.project, 'redirectPrintToLogger', False):
 			sys.stdout = PySysPrintRedirector()
 		
 		# call the hook to setup prior to running tests
@@ -692,7 +692,7 @@ class TestContainer(object):
 				# here we use UnicodeSafeStreamWrapper to ensure we get a buffer of unicode characters (mixing chars+bytes leads to exceptions), 
 				# from any supported character (utf-8 being pretty much a superset of all encodings)
 				self.testFileHandlerStdout = logging.StreamHandler(_UnicodeSafeStreamWrapper(self.testFileHandlerStdoutBuffer, writebytes=False, encoding='utf-8'))
-				self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
+				self.testFileHandlerStdout.setFormatter(self.runner.project.formatters.stdout)
 				self.testFileHandlerStdout.setLevel(stdoutHandler.level)
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout])
 
@@ -724,7 +724,7 @@ class TestContainer(object):
 				self.testFileHandlerRunLog = logging.StreamHandler(_UnicodeSafeStreamWrapper(
 					io.open(toLongPathSafe(os.path.join(self.outsubdir, 'run.log')), 'a', encoding=runLogEncoding), 
 					writebytes=False, encoding=runLogEncoding))
-				self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
+				self.testFileHandlerRunLog.setFormatter(self.runner.project.formatters.runlog)
 				self.testFileHandlerRunLog.setLevel(logging.INFO)
 				if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout, self.testFileHandlerRunLog])

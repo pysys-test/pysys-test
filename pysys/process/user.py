@@ -30,6 +30,7 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter
+from pysys.xml.project import Project
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe
@@ -67,10 +68,10 @@ class ProcessUser(object):
 		self.log = log
 		"""The logger instance that should be used to log from this class. """
 		
-		assert PROJECT or 'doctest' in sys.argv[0], 'constants.PROJECT was not assigned yet, probably due to a change in module dependencies causing constants to be imported before the project was loaded' # allow it only during doctest-ing
-
-		self.project = PROJECT
+		self.project = Project.getInstance()
 		"""The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
+
+		assert self.project or 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing
 		
 		self.processList = []
 		self.processCount = {}
@@ -79,8 +80,8 @@ class ProcessUser(object):
 		self.outcome = []
 		self.__outcomeReason = ''
 		
-		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
-		self.defaultIgnoreExitStatus = PROJECT.defaultIgnoreExitStatus.lower()=='true' if hasattr(PROJECT, 'defaultIgnoreExitStatus') else True
+		self.defaultAbortOnError = self.project.defaultAbortOnError.lower()=='true' if hasattr(self.project, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
+		self.defaultIgnoreExitStatus = self.project.defaultIgnoreExitStatus.lower()=='true' if hasattr(self.project, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
 		self.__pythonCoverageFile = 0
 		
@@ -389,7 +390,7 @@ class ProcessUser(object):
 
 		# this feature is a workaround to maintain compatibility for a bug in PySys v1.1-1.3
 		# (see https://github.com/pysys-test/pysys-test/issues/9 for details)
-		if getattr(PROJECT, 'defaultEnvironsLegacyMode','').lower()=='true':
+		if getattr(self.project, 'defaultEnvironsLegacyMode','').lower()=='true':
 			if IS_WINDOWS: 
 				return dict(os.environ)
 			else:
@@ -398,8 +399,8 @@ class ProcessUser(object):
 		e = {}
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location
-		if getattr(PROJECT, 'defaultEnvironsTempDir',None)!=None:
-			tempDir = eval(PROJECT.defaultEnvironsTempDir)
+		if getattr(self.project, 'defaultEnvironsTempDir',None)!=None:
+			tempDir = eval(self.project.defaultEnvironsTempDir)
 			self.mkdir(tempDir)
 			if IS_WINDOWS: # pragma: no cover
 				e['TEMP'] = e['TMP'] = os.path.normpath(tempDir)
@@ -435,8 +436,8 @@ class ProcessUser(object):
 			e['DYLD_LIBRARY_PATH'] = DYLD_LIBRARY_PATH
 				
 		if not IS_WINDOWS:
-			if getattr(PROJECT, 'defaultEnvironsDefaultLang',''):
-				e['LANG'] = PROJECT.defaultEnvironsDefaultLang
+			if getattr(self.project, 'defaultEnvironsDefaultLang',''):
+				e['LANG'] = self.project.defaultEnvironsDefaultLang
 		
 		if command == sys.executable:
 			# Ensure it's possible to run another instance of this Python, by adding it to the start of the path env vars
@@ -806,7 +807,7 @@ class ProcessUser(object):
 			if pathexists(f):
 				matches = getmatches(f, expr, encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores)
 				if eval("%d %s" % (len(matches), condition)):
-					if PROJECT.verboseWaitForSignal.lower()=='true' if hasattr(PROJECT, 'verboseWaitForSignal') else False:
+					if self.project.verboseWaitForSignal.lower()=='true' if hasattr(self.project, 'verboseWaitForSignal') else False:
 						log.info("%s completed successfully", msg)
 					else:
 						log.info("Wait for signal in %s completed successfully", file)

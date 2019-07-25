@@ -34,7 +34,7 @@
 	as a substitution variable within the project file. Note that this is only for local expansion 
 	within the project file, where the project root location is required for full paths, e.g. 
 	stylesheets etc. Within a test class, the root location can be referenced using the 
-	PROJECT.root class variable. If not specified, defaults to "root".
+	self.project.root class variable. If not specified, defaults to "root".
 	-->
 	<property root="testRootDir"/>
 	
@@ -43,7 +43,7 @@
 	Set a property on the project class. The property can then be used as a substitution variable 
 	within the project file, and is also set as an attribute to the project class so it's value 
 	can be reference internally within the PySys framework, e.g. in the below example, user would 
-	be set on the project class referenced by pysys.constants.PROJECT, such that PROJECT.user is 
+	be set on the project class referenced by self.project, such that self.project.user is 
 	the USERNAME taken from the environment, or guest if the variable is not defined within the 
 	environment. The literal value can be set directly on the property, in which case the default 
 	attribute is not required, e.g. <property name="maxFails" value="100"/>	

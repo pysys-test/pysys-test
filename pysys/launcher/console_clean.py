@@ -26,6 +26,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import deletedir
+from pysys.xml.project import Project
 
 class ConsoleCleanTestHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -90,8 +91,7 @@ class ConsoleCleanTestHelper(object):
 
 	def clean(self):
 			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir, expandmodes=False)
-			from pysys.constants import PROJECT
-			supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
+			supportMultipleModesPerRun = getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true'
 
 			for descriptor in descriptors:
 				if self.all:

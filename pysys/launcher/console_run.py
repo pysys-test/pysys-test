@@ -27,6 +27,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
+from pysys.xml.project import Project
 
 class ConsoleLaunchHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -193,7 +194,7 @@ class ConsoleLaunchHelper(object):
 					sys.exit(1)
 
 			elif option in ("-b", "--abort"):
-				setattr(PROJECT, 'defaultAbortOnError', str(value.lower()=='true'))
+				setattr(Project.getInstance(), 'defaultAbortOnError', str(value.lower()=='true'))
 
 			elif option in ["-g", "--progress"]:
 				self.progress = True
@@ -248,8 +249,8 @@ def runTest(args):
 	try:
 		launcher = ConsoleLaunchHelper(os.getcwd(), "run")
 		args = launcher.parseArgs(args)
-		module = import_module(PROJECT.runnerModule, sys.path)
-		runner = getattr(module, PROJECT.runnerClassname)(*args)
+		module = import_module(Project.getInstance().runnerModule, sys.path)
+		runner = getattr(module, Project.getInstance().runnerClassname)(*args)
 		runner.start()
 	
 		for cycledict in runner.results.values():

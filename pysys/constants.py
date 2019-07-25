@@ -223,12 +223,14 @@ class PrintLogs(Enum):
 	"""Detailed run.log output is only printed to the stdout console for failed testcases. """
 
 PROJECT = None
-""" The L{pysys.xml.project.Project} instance containing settings for this PySys project.
+"""DEPRECATED. 
+Holds the L{pysys.xml.project.Project} instance containing settings for this PySys project.
 Instead of using this constant, we recommend using the 
 L{pysys.basetest.BaseTest.project} (or L{pysys.process.user.ProcessUser.project}) 
-field to access this. """
+field to access this. If this is not possible, use Project.getInstance(). """
 
 from pysys.xml.project import Project 
 def loadproject(start):
 	global PROJECT
-	PROJECT = Project.findAndLoadProject(start)
+	Project.findAndLoadProject(start)
+	PROJECT = Project.getInstance()

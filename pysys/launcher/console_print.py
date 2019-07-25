@@ -27,6 +27,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
+from pysys.xml.project import Project
 
 class ConsolePrintHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -211,7 +212,7 @@ class ConsolePrintHelper(object):
 				if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
 			maxsize = maxsize + 2
 			
-			supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
+			supportMultipleModesPerRun = getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true'
 
 			for descriptor in descriptors:
 				if self.modefilter and self.modefilter not in descriptor.modes: continue

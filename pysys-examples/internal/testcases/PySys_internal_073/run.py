@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		# use root pysys project so we can check all our own tests print ok
 		# it's safe to use project root because we are not enabling record mode
-		testsdir = os.path.normpath(PROJECT.testRootDir)
+		testsdir = os.path.normpath(self.project.testRootDir)
 		
 		assert testsdir.endswith('pysys-examples'), testsdir
 		self.log.info('printing tests from: %s', testsdir)

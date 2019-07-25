@@ -371,7 +371,6 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
-		assert kwargs['testoutdir'], kwargs # TODO remove
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		
@@ -411,7 +410,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 
 			# add the test host node
 			element = self.document.createElement("root")
-			element.appendChild(self.document.createTextNode(self.__pathToURL(PROJECT.root)))
+			element.appendChild(self.document.createTextNode(self.__pathToURL(kwargs['runner'].project.root)))
 			self.rootElement.appendChild(element)
 
 			# add the extra params nodes
@@ -540,7 +539,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
-		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
+		self.outputDir = os.path.join(kwargs['runner'].project.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
 		deletedir(self.outputDir)
 		mkdir(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
