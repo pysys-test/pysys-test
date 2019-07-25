@@ -34,7 +34,7 @@ class PySysTest(BaseTest):
 		# for an expression ending in *, print just the match
 		self.assertGrep(file='run.log', expr='Grep on file.txt does not contain "moon [^ ]*" failed with: "moon shines" ... failed', literal=True)
 		# for an expression not ending in *, print the whole line
-		self.assertGrep(file='run.log', expr='Grep on file.txt does not contain "moo. [^ ]" failed with: "And the moon shines bright as I rove at night," ... failed', literal=True)
+		self.assertGrep(file='run.log', expr='Grep on file.txt does not contain "moo. [^ ]" failed with: "And the moon shines bright as I rove at night, " ... failed', literal=True)
 		# here's a real-world example of why that's useful
 		self.assertGrep(file='run.log', expr='Grep on file.txt does not contain "ERROR" failed with: "2019-07-24 [Thread1] ERROR This is an error message!"', literal=True)
 		self.assertGrep(file='run.log', expr='Grep on file.txt does not contain " WARN .*" failed with: " WARN This is a warning message!"', literal=True)

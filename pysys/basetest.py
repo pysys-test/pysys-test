@@ -788,9 +788,9 @@ class BaseTest(ProcessUser):
 						# heuristic to give best possible message; expressions ending with .* are usually 
 						# complete and help to remove timestamps etc from the start so best to return match only; if user didn't do 
 						# that they probably haven't thought much about it and returning the entire match string 
-						# is more useful (though strip off trailing newlines and whitespace):
+						# is more useful (though strip off trailing newlines):
 						quotestring(
-							(result.group(0) if expr.endswith('*') else result.string.rstrip()) 
+							(result.group(0) if expr.endswith('*') else result.string).rstrip('\n\r')
 							))
 			self.addOutcome(outcome, msg, abortOnError=abortOnError)
 		
