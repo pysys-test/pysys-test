@@ -242,6 +242,21 @@ Improvements to the `pysys.py` command line tool:
 
 Upgrade guide and compatibility:
 
+- The behaviour of `ProcessUser.getDefaultEnvirons` has changed compared to 
+  PySys 1.4.0 when the command being launched is `sys.executable`, i.e. another 
+  instance of the current Python process (`getDefaultEnvirons` is used by 
+  `startProcess` when `environs=` is not explicitly provided). 
+  In 1.4.0 the returned environment always set the `PYTHONHOME` environment 
+  variable, and on Windows would add a copy of the `PATH` environment from the 
+  parent process. In PySys 1.5.0 this is no longer the case, as the 1.4.0 
+  behaviour was found to cause subtle problems when running from a virtualenv 
+  installation or when the child Python itself launches another Python process 
+  of a different version. The new behaviour is that `getDefaultEnvirons` adds 
+  the directory containing the Python executable to `PATH` (on all OSes), and 
+  copies the `LD_LIBRARY_PATH` from the parent process only on Unix (where it 
+  is necessary to reliably load the required libraries). `getDefaultEnvirons` 
+  no longer sets the `PYTHONHOME` environment variable. 
+  
 - `ProcessUser.mkdir` now returns the absolutized path (including the output 
   directory) instead of just the relative path passed in. This make it easier 
   to use in-line while performing operations such as creating a file in the 

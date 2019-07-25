@@ -183,7 +183,10 @@ class ProcessUser(object):
 		
 		"""
 		args = arguments
-		environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
+		if 'environs' in kwargs:
+			environs = kwargs['environs']
+		else:
+			environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
 		if self.getBool('pythonCoverage') and not disableCoverage:
 			if hasattr(self.project, 'pythonCoverageArgs'):
 				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
@@ -370,6 +373,12 @@ class ProcessUser(object):
 		this is always set). This allows default environment variables to be 
 		customized for different process types e.g. Java, Python, etc. 
 		
+		When using `command=sys.executable` to launch another copy of the 
+		current Python executable, extra items from this process's path 
+		environment variables are added to the returned dictionary so that it 
+		can start correctly. On Unix-based systems this includes copying all of 
+		the load library path environment variable from the parent process. 
+		
 		@param kwargs: Overrides of this method should pass any additional 
 		kwargs down to the super implementation, to allow for future extensions. 
 		
@@ -430,15 +439,21 @@ class ProcessUser(object):
 				e['LANG'] = PROJECT.defaultEnvironsDefaultLang
 		
 		if command == sys.executable:
-			# ensure it's possible to run another instance of this Python
-			# (but only if full path exactly matches)
-			# keep it as clean as possible by not passing sys.path/PYTHONPATH
+			# Ensure it's possible to run another instance of this Python, by adding it to the start of the path env vars
+			# (but only if full path to the Python executable exactly matches).
+			# Keep it as clean as possible by not passing sys.path/PYTHONPATH
+			# - but it seems we do need to copy the LD_LIBRARY_PATH from the parent process to ensure the required libraries are present.
+			# Do not set PYTHONHOME here, as doesn't work well in virtualenv, and messes up grandchildren 
+			# processes that need a different Python version
 			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
-			e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e[LIBRARY_PATH_ENV_VAR]
-			isvirtualenv = hasattr(sys, 'real_prefix') or (
-				hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix)
-			if not isvirtualenv:
-				e['PYTHONHOME'] = sys.prefix
+
+			if LIBRARY_PATH_ENV_VAR != 'PATH': # if it's an os with something like LD_LIBRARY_PATH
+				# it's a shame this is necessary, but there's no sane way to unpick which libraries are 
+				# actually required on Unix. 
+				e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e.get(LIBRARY_PATH_ENV_VAR,'')
+				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment, including %s=%s', LIBRARY_PATH_ENV_VAR, os.getenv(LIBRARY_PATH_ENV_VAR,''))
+			else:  
+				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment')
 		return e
 
 	def createEnvirons(self, overrides=None, addToLibPath=[], addToExePath=[], command=None, **kwargs):
