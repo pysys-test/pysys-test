@@ -23,13 +23,13 @@ class PySysTest(BaseTest):
 		self.assertTrue(self.proj.user_full == "Professor Simon Smith")
 
 		for p in ['projectbool', 'projectbooloverride', 'cmdlineoverride']:
-			self.log.info('getBool %s=%r', p, self.getBool(p))
+			self.log.info('getBoolProperty %s=%r', p, self.getBoolProperty(p))
 		
 		# no type coersion if not defined as a basetest property
 		self.assertEval('{cmdlineoverride} == "tRue"', cmdlineoverride=self.cmdlineoverride)
 
-		self.log.info('getBool %s=%r', 'booldeftrue', self.getBool('bool-not-defined', True))
-		self.log.info('getBool %s=%r', 'booldeffalse', self.getBool('bool-not-defined', False))		
+		self.log.info('getBoolProperty %s=%r', 'booldeftrue', self.getBoolProperty('bool-not-defined', True))
+		self.log.info('getBoolProperty %s=%r', 'booldeffalse', self.getBoolProperty('bool-not-defined', False))		
 
 		# check type coersion based on base test type
 		self.assertEval('{testBooleanProperty} == True', testBooleanProperty=self.testBooleanProperty)

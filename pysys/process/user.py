@@ -145,7 +145,7 @@ class ProcessUser(object):
 			os.path.join(self.output, processKey+suffix+'.err'), 
 			)	
 
-	def getBool(self, propertyName, default=False):
+	def getBoolProperty(self, propertyName, default=False):
 		"""
 		Get a True/False indicating whether the specified property is set 
 		on this object (typically as a result of specifying -X on the command 
@@ -187,7 +187,7 @@ class ProcessUser(object):
 			environs = kwargs['environs']
 		else:
 			environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
-		if self.getBool('pythonCoverage') and not disableCoverage:
+		if self.getBoolProperty('pythonCoverage') and not disableCoverage:
 			if hasattr(self.project, 'pythonCoverageArgs'):
 				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
 			args = ['-m', 'coverage', 'run']+args

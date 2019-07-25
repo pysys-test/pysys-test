@@ -85,7 +85,7 @@ New features:
   gives the UTC time when the test run began, using the yyyy-mm-dd HH.MM.SS 
   format which is suitable for inclusion in file/directory names. 
 
-- Added `ProcessUser.getBool()` helper method which provides a simple way to 
+- Added `ProcessUser.getBoolProperty()` helper method which provides a simple way to 
   get a True/False value indicating whether a setting is enabled, either 
   directly using a `-X prop=value` argument, or with a property set in the 
   `pysysproject.xml` configuration file.
