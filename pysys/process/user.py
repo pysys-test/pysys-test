@@ -158,6 +158,7 @@ class ProcessUser(object):
 		val = getattr(self, propertyName, None)
 		if val is None: val = getattr(self.project, propertyName, None)
 		if val is None: return default
+		if val==True or val==False: return val
 		return val.lower()=='true'
 
 	def startPython(self, arguments, disableCoverage=False, **kwargs):
