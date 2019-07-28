@@ -30,6 +30,9 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	
 	Currently, this is necessary only on Windows, where a unicode string 
 	starting with \\?\ must be used to get correct behaviour for long paths. 
+	On Windows this function also normalizes the capitalization of drive 
+	letters so they are always upper case regardless of OS version and current 
+	working directory. 
 	
 	@param path: A path. Must not be a relative path. Can be None/empty. Can 
 	contain ".." sequences. If possible, use a unicode character string. 
@@ -51,6 +54,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	
 	"""
 	if (not IS_WINDOWS) or (not path): return path
+	if path[0] != path[0].upper(): path = path[0].upper()+path[1:]
 	if onlyIfNeeded and len(path)<255: return path
 	if path.startswith('\\\\?\\'): return path
 	inputpath = path

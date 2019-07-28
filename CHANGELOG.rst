@@ -306,6 +306,12 @@ Upgrade guide and compatibility:
   as testcases, you can avoid errors by adding a `.pysysignore` file to prevent 
   PySys looking in that part of the directory tree. 
 
+- On Windows, paths within the testcase are now normalized so that the drive 
+  letter is always capitalized (e.g. `C:\` not `c:\`). Previously the 
+  capitalization of the drive letter would vary depending on how exactly PySys 
+  was launched, which could occasionally lead to inconsistent behaviour if 
+  testing an application that relies on the ASCII sort order of paths. 
+
 - The format of `pysys print` has changed to use a `|` character instead of a 
   colon to separate the test id and titles. This makes it easier to copy and 
   paste test ids from `pysys print` into the command line. 
