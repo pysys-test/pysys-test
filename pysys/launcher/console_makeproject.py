@@ -51,7 +51,7 @@ def makeProject(args):
 	optionList = ['dir=', 'help', 'template=']
 	
 	try:
-		optlist, arguments = getopt.getopt(args, optionString, optionList)
+		optlist, arguments = getopt.gnu_getopt(args, optionString, optionList)
 	except Exception:
 		log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 		sys.exit(1)

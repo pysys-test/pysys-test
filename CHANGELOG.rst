@@ -250,6 +250,12 @@ Improvements to the `pysys.py` command line tool:
   verbose and slow to generate; if required, it can be enabled using 
   `-vassertions=DEBUG`.
 
+- Argument parsing now permits mixing of `-OPTION` and non-option (e.g. test 
+  id) arguments, rather than requiring that the test ids be specified 
+  only at the end of the command line. For example::
+  
+    pysys run --threads auto MyTest_001 -vDEBUG
+
 - Added automatic conversion of strings specified on the command line with 
   `-Xkey=value` to int, float or bool if there's a static variable of the 
   same name and one of those types defined on the test class. This makes it 

@@ -95,7 +95,7 @@ class ConsolePrintHelper(object):
 
 	def parseArgs(self, args):
 		try:
-			optlist, self.arguments = getopt.getopt(args, self.optionString, self.optionList)
+			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
