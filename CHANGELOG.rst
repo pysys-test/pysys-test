@@ -295,9 +295,7 @@ Bug fixes:
   outcomes such as SKIPPED. 
 
 - Fixed `--purge` to delete files in nested subdirectories of the output 
-  directory not just direct children of the output directory. Also, non-empty 
-  directories are now deleted after test execution (regardless of whether 
-  `--purge` is set or not), just as zero-byte files are.  
+  directory not just direct children of the output directory. 
 
 - Previous versions of PySys did not complain if you created multiple tests 
   with the same id (in different parent directories under the same project). 
