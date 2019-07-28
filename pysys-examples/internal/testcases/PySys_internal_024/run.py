@@ -21,7 +21,7 @@ class PySysTest(BaseTest):
 			env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
 		else:
 			# On UNIX we may need the python shared libraries on the LD_LIBRARY_PATH
-			env[LIBRARY_PATH_ENV_VAR] = os.environ.get(LIBRARY_PATH_ENV_VAR,'')
+			env[LIBRARY_PATH_ENV_VAR] = (os.environ.get(LIBRARY_PATH_ENV_VAR,'')).strip(os.pathsep)
 		env['PATH'] = os.path.dirname(sys.executable)+os.pathsep+PATH
 		
 		# create the process

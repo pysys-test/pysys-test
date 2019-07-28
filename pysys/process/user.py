@@ -490,9 +490,12 @@ class ProcessUser(object):
 			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
 
 			if LIBRARY_PATH_ENV_VAR != 'PATH': # if it's an os with something like LD_LIBRARY_PATH
-				# it's a shame this is necessary, but there's no sane way to unpick which libraries are 
-				# actually required on Unix. 
-				e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e.get(LIBRARY_PATH_ENV_VAR,'')
+				# It's a shame it's necessary to copy parent environment, but there's no sane way to unpick which libraries are 
+				# actually required on Unix. Make sure we don't set this env var to an empty string just in case that 
+				# doesn't anything weird. 
+				newlibpath = (os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e.get(LIBRARY_PATH_ENV_VAR,'')).strip(os.pathsep)
+				if newlibpath:
+					e[LIBRARY_PATH_ENV_VAR] = newlibpath
 				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment, including %s=%s', LIBRARY_PATH_ENV_VAR, os.getenv(LIBRARY_PATH_ENV_VAR,''))
 			else:  
 				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment')
