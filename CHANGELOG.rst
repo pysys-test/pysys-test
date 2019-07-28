@@ -75,7 +75,13 @@ New features:
 
 - Added `ProcessUser.write_text` method for writing characters to a text file 
   in the output directory using a single line of Python. 
-  
+
+- Added `expectedExitStatus` parameter to `ProcessUser.startProcess()` method 
+  which can be used to assert that a command returns a non-zero exit code, 
+  for example `self.startProcess(..., expectedExitStatus='==5')`. 
+  This is simpler and more intuitive than setting `ignoreExitStatus=True` and 
+  then checking the exit status separately. 
+
 - Added `ProcessUser.startPython` method has similar options to `startProcess` 
   and should be used for starting Python. Support functionality such as 
   Python code coverage. 

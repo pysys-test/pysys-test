@@ -202,7 +202,7 @@ class ProcessUser(object):
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, ignoreExitStatus=None, stdouterr=None):
+			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, stdouterr=None):
 		"""Start a process running in the foreground or background, and return 
 		the L{ProcessWrapper} process object.
 		
@@ -256,9 +256,21 @@ class ProcessUser(object):
 		
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
 		project setting)
+
+		@param expectedExitStatus: The condition string used to determine whether the exit status/code 
+		returned by the process is correct. The default is '==0', as an exit code of zero usually indicates success, but if you 
+		are expecting a non-zero exit status (for example because you are testing correct handling of 
+		a failure condition) this could be set to '!=0' or a specific value such as '==5'. 
+	
+		@param ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
+		exit code that doesn't match expectedExitStatus (or if the command cannot be run at all). 
+		In cases where you do not care whether the command succeeds or fails, or wish to handle the 
+		exit status separately with more complicated logic this can be set to True. 
 		
-		@param ignoreExitStatus: If False, non-zero exit codes are reported as an error outcome. None means the value will 
-		be taken from defaultIgnoreExitStatus, which can be configured in the project XML, or is set to True if not specified there. 
+		The default value of ignoreExitStatus=None means the value will 
+		be taken from the project property defaultIgnoreExitStatus, which can be configured in the project XML 
+		(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
+		compatibility with older PySys releases if no project property is set. 
 		
 		@return: The process handle of the process (L{ProcessWrapper}).
 		@rtype: L{ProcessWrapper}
@@ -299,11 +311,16 @@ class ProcessUser(object):
 			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
 			process.start()
 			if state == FOREGROUND:
-				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, exit status %d%s", displayName, process.exitStatus,
+				correctExitStatus = eval('%d %s'%(process.exitStatus, expectedExitStatus))
+				(log.info if correctExitStatus else log.warn)("Executed %s, exit status %d%s", displayName, process.exitStatus,
 																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
 				
-				if not ignoreExitStatus and process.exitStatus != 0:
-					self.addOutcome(BLOCKED, '%s returned non-zero exit code %d'%(process, process.exitStatus), abortOnError=abortOnError)
+				if not ignoreExitStatus and not correctExitStatus:
+					self.addOutcome(BLOCKED, 
+						('%s returned non-zero exit code %d'%(process, process.exitStatus))
+						if expectedExitStatus=='==0' else
+						('%s returned exit code %d (expected %s)'%(process, process.exitStatus, expectedExitStatus)), 
+						abortOnError=abortOnError)
 
 			elif state == BACKGROUND:
 				log.info("Started %s with process id %d", displayName, process.pid)
