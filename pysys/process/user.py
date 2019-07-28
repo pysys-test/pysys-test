@@ -202,7 +202,6 @@ class ProcessUser(object):
 		else:
 			environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
 		if self.getBoolProperty('pythonCoverage') and not disableCoverage and not self.disableCoverage:
-			assert False
 			if hasattr(self.project, 'pythonCoverageArgs'):
 				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
 			args = ['-m', 'coverage', 'run']+args
