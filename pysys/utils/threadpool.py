@@ -85,7 +85,6 @@ class WorkerThread(threading.Thread):
 			if self._dismissed.isSet():
 				break
 			try:
-
 				request = self._requests_queue.get(True, self._poll_timeout)
 			except Queue.Empty:
 				continue
