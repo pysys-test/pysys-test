@@ -692,9 +692,7 @@ class ProcessUser(object):
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 
-		log.debug("Performing wait for socket creation:")
-		log.debug("  port:       %d" % port)
-		log.debug("  host:       %s" % host)
+		log.debug("Performing wait for socket creation %s:%s", host, port)
 
 		with process_lock:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -759,9 +757,7 @@ class ProcessUser(object):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
-		log.debug("Performing wait for file creation:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
+		log.debug("Performing wait for file creation: %s", f)
 		
 		startTime = time.time()
 		while True:
@@ -833,11 +829,7 @@ class ProcessUser(object):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
-		log.debug("Performing wait for signal in file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		log.debug("  expression: %s" % expr)
-		log.debug("  condition:  %s" % condition)
+		log.debug("Performing wait for signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
 		
 		if errorExpr: assert not isstring(errorExpr), 'errorExpr must be a list of strings not a string'
 		

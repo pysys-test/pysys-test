@@ -673,11 +673,7 @@ class BaseTest(ProcessUser):
 		f1 = os.path.join(filedir1, file1)
 		f2 = os.path.join(filedir2, file2)
 
-		log.debug("Performing file comparison:")
-		log.debug("  file1:       %s" % file1)
-		log.debug("  filedir1:    %s" % filedir1)
-		log.debug("  file2:       %s" % file2)
-		log.debug("  filedir2:    %s" % filedir2)
+		log.debug("Performing file comparison diff with file1=%s and file2=%s", f1, f2)
 		
 		msg = assertMessage or ('File comparison between %s and %s'%(file1, file2))
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
@@ -757,11 +753,7 @@ class BaseTest(ProcessUser):
 				return expr
 			expr = escapeRegex(expr)
 
-		log.debug("Performing grep on file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		log.debug("  expr:       %s" % expr)
-		log.debug("  contains:   %s" % LOOKUP[contains])
+		log.debug("Performing %s contains=%s grep on file: %s", 'regex' if not literal else 'literal/non-regex', contains, f)
 		try:
 			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f))
 		except Exception:
@@ -825,11 +817,7 @@ class BaseTest(ProcessUser):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
-		log.debug("Performing grep on file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		log.debug("  expr:       %s" % expr)
-		log.debug("  contains:   %s" % LOOKUP[contains])
+		log.debug("Performing contains=%s grep on last line of file: %s", contains, f)
 
 		msg = assertMessage or ('Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
 		try:
@@ -872,11 +860,7 @@ class BaseTest(ProcessUser):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 	
-		log.debug("Performing ordered grep on file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		for expr in exprList: log.debug("  exprList:   %s" % expr)
-		log.debug("  contains:   %s" % LOOKUP[contains])
+		log.debug("Performing contains=%s ordered grep on %s for %s", contains, f, exprList)
 		
 		msg = assertMessage or ('Ordered grep on input file %s' % file)
 		expr = None
@@ -930,7 +914,7 @@ class BaseTest(ProcessUser):
 
 		try:
 			numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f))
-			log.debug("Number of matching lines is %d"%numberLines)
+			log.debug("Number of matching lines in %s is %d", f, numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Line count on %s for %s%s '%(file, quotestring(expr), condition))
