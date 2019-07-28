@@ -398,7 +398,6 @@ class CSVPerformanceFile(object):
 				l.append(str(values.get(k,'')))
 			if values.get('resultDetails', None):
 				l.append(CSVPerformanceFile.RESULT_DETAILS)
-				l.append(values['resultDetails'])
 				for k in values['resultDetails']:
 					l.append('%s=%s'%(k, values['resultDetails'][k]))
 			return CSVPerformanceFile.toCSVLine(l)

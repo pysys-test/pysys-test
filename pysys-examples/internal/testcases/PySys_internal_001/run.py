@@ -16,7 +16,13 @@ class PySysTest(BaseTest):
 		try:
 			runPySys(self, 'pysys', ['run', '-o', 'myoutdir', 
 				'-X', 'projectbooloverride=fAlse', 
-				'-X', 'cmdlineoverride=tRue'], workingDir='test', environs={
+				'-X', 'cmdlineoverride=tRue',
+				'-XtestBooleanProperty=tRue',
+				'-XtestIntProperty=1234',
+				'-XtestFloatProperty=456.78',
+				'-XtestStringProperty=123456',
+				'-XtestNoneProperty=Hello',
+				], workingDir='test', environs={
 				'TEST_USER':"Felicity Kendal"
 			})
 		finally:

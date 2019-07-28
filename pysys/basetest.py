@@ -114,9 +114,9 @@ class BaseTest(ProcessUser):
 		"""
 		ProcessUser.__init__(self)
 		self.descriptor = descriptor
-		self.input = descriptor.input
-		self.output = os.path.join(descriptor.output, outsubdir)
-		self.reference = descriptor.reference
+		self.input = os.path.join(descriptor.testDir, descriptor.input)
+		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir)
+		self.reference = os.path.join(descriptor.testDir, descriptor.reference)
 		self.runner = runner
 		if runner.supportMultipleModesPerRun:
 			self.mode = descriptor.mode
@@ -147,11 +147,28 @@ class BaseTest(ProcessUser):
 		data attributes, which can be overriden on instantiation e.g. using the -X options to the 
 		runTest.py launch executable.
 		
+		If an existing attribute is present on this test class (typically a 
+		static class variable) and it has a type of bool, int or float, then 
+		any -X options will be automatically converted from string to that type. 
+		This facilitates providing default values for parameters such as 
+		iteration count or timeouts as static class variables with the 
+		possibility of overriding on the command line, for example `-Xiterations=123`. 
+		
 		@param xargs: A dictionary of the user defined extra arguments
 		
 		"""
 		for key in list(xargs.keys()):
-			setattr(self, key, xargs[key])
+			val = xargs[key]
+			basetestDefaultValue = getattr(self, key, None) # most of the time these will not be on the basetest
+			if basetestDefaultValue is not None and isstring(val):
+				# attempt type coersion to keep the type the same
+				if basetestDefaultValue == True or basetestDefaultValue == False:
+					val = val.lower()=='true'
+				elif isinstance(basetestDefaultValue, int):
+					val = int(val)
+				elif isinstance(basetestDefaultValue, float):
+					val = float(val)
+			setattr(self, key, val)
 
 			
 	# test methods for execution, validation and cleanup. The execute method is
@@ -458,9 +475,72 @@ class BaseTest(ProcessUser):
 		self.addOutcome(PASSED if pathexists(os.path.join(self.output, path))==exists else FAILED, 
 			'Assertion that path exists=%s for "%s"'%(exists, os.path.normpath(path)), 
 			abortOnError=abortOnError)
+
+	def assertEval(self, evalstring, abortOnError=False, **formatparams):
+		"""Perform a validation based on substituting values into 
+		a .format() string with named {} placeholders and then evaluating it with eval. 
 		
+		Example use::
+		
+			self.assertEval('os.path.size({filename}) > {origFileSize}', 	
+				filename=self.output+'/file.txt', origFileSize=1000)
+		
+		See also L{getExprFromFile} which is often used to extract a piece of 
+		data from a log file which can then be checked using this method. 
+		
+		@param evalstring: a string that will be formatted using .format(...) 
+		with the specified parameters, and result in failure outcome if not true. 
+		
+		Parameters should be specified using {name} syntax, and quoting is not 
+		required as string values are automatically escaped using repr. 
+		e.g. 'os.path.size({filename}) > {origFileSize}'. 
+		
+		Do not use an f-string instead of explicitly passing formatparams, as 
+		with an f-string this method will not know the names of the substituted 
+		parameters which makes the intention of the assertion harder to 
+		understand from looking at the test output. 
+
+		@param formatparams: Named parameters for the format string, which 
+		can be of any type. Use descriptive names for the parameters to produce 
+		an assertion message that makes it really clear what is being checked. 
+		
+		String parameters will be automatically passed through `repr()` before 
+		being formatted, so there is no need to perform additional 
+		quoting or escaping of strings. 
+		
+		@param abortOnError: Set to True to make the test immediately abort if the
+		assertion fails. Unless abortOnError=True this method only throws 
+		an exception if the format string is invalid; failure to execute the 
+		eval(...) results in a BLOCKED outcome but no exception. 
+		
+		"""
+		formatparams = {k: (repr(v) if isstring(v) else v) for (k,v) in formatparams.items()}
+		toeval = evalstring.format(**formatparams)
+		
+		display = 'with: %s'%', '.join(['%s=%s'%(k, 
+			# avoid excessively long messages by removing self.output (slightly complicated by the fact we called repr recently above)
+			str(formatparams[k]).replace(self.output.replace('\\','\\\\'), '<outputdir>') 
+			) for k in sorted(formatparams.keys())])
+		
+		try:
+			result = bool(eval(toeval))
+		except Exception as e:
+			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" due to %s - %s'%(toeval, e.__class__.__name__, e), abortOnError=abortOnError)
+			return False
+		
+		if result:
+			self.addOutcome(PASSED, 'Assertion %s passed %s'%(evalstring, display))
+			return True
+		else:
+			self.addOutcome(FAILED, 'Assertion %s failed %s'%(evalstring, display), abortOnError=abortOnError)
+			return False
+			
 	def assertThat(self, conditionstring, *args, **kwargs):
-		"""Perform a validation based on a python eval string.
+		"""[DEPRECATED] Perform a validation based on substituting values into 
+		an old-style % format string and then evaluating it with eval. 
+		
+		This method is deprecated in favour of L{assertEval} which produces 
+		more useful assertion failure messages and automatic quoting of strings. 
 
 		The eval string should be specified as a format string, with zero or more %s-style
 		arguments. This provides an easy way to check conditions that also produces clear
@@ -470,6 +550,8 @@ class BaseTest(ProcessUser):
 		repr() function to add appropriate quotes and escaping. 
 
 		e.g. self.assertThat('%d >= 5 or %s=="foobar"', myvalue, repr(mystringvalue))
+		
+		@deprecated: Use L{assertEval} instead. 
 		
 		@param conditionstring: A string will have any following args 
 		substituted into it and then be evaluated as a boolean python 
@@ -505,6 +587,9 @@ class BaseTest(ProcessUser):
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
+		Consider using L{assertEval} instead of this method, which produces 
+		clearer assertion failure messages. 
+		
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
 		
@@ -525,6 +610,9 @@ class BaseTest(ProcessUser):
 
 	def assertFalse(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to false.
+		
+		Consider using L{assertEval} instead of this method, which produces 
+		clearer assertion failure messages. 
 		
 		If the supplied expression evaluates to false a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to true, a C{FAILED} outcome is added.
@@ -554,6 +642,11 @@ class BaseTest(ProcessUser):
 		after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, otherwise
 		a C{FAILED} outcome is added.
 		
+		Although this method can perform transformation of the files directly, it is often easier to instead use 
+		L{copy} to perform the transformation (e.g. stripping out timestamps, finding lines of interest etc)
+		and then separately call assertDiff on the processed file. This makes it easier to generate a suitable 
+		reference file and to diagnose test failures. 
+		
 		@param file1: The basename of the first file used in the file comparison
 		@param file2: The basename of the second file used in the file comparison (often a reference file)
 		@param filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
@@ -580,11 +673,7 @@ class BaseTest(ProcessUser):
 		f1 = os.path.join(filedir1, file1)
 		f2 = os.path.join(filedir2, file2)
 
-		log.debug("Performing file comparison:")
-		log.debug("  file1:       %s" % file1)
-		log.debug("  filedir1:    %s" % filedir1)
-		log.debug("  file2:       %s" % file2)
-		log.debug("  filedir2:    %s" % filedir2)
+		log.debug("Performing file comparison diff with file1=%s and file2=%s", f1, f2)
 		
 		msg = assertMessage or ('File comparison between %s and %s'%(file1, file2))
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
@@ -616,16 +705,22 @@ class BaseTest(ProcessUser):
 		
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		
-		@param expr: The regular expression to check for in the file (or a string literal if literal=True). 
-		If the match fails, the matching regex will be reported as the test outcome
+		@param expr: The regular expression to check for in the file (or a string literal if literal=True), 
+		for example " ERROR .*".
+		 
+		For contains=False matches, you should end the expr with `.*` if you wish to include just the 
+		matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
+		then the entire matching line will be included in the outcome failure reason. 
 		
-		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
+		For contains=True matches, the expr itself is used as the outcome failure reason. 
+		
+		@param contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
 		@param ignores: Optional list of regular expressions that will be 
 		ignored when reading the file. 
 		
 		@param literal: By default expr is treated as a regex, but set this to True to pass in 
-		a string literal instead
+		a string literal instead.
 		
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
@@ -658,11 +753,7 @@ class BaseTest(ProcessUser):
 				return expr
 			expr = escapeRegex(expr)
 
-		log.debug("Performing grep on file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		log.debug("  expr:       %s" % expr)
-		log.debug("  contains:   %s" % LOOKUP[contains])
+		log.debug("Performing %s contains=%s grep on file: %s", 'regex' if not literal else 'literal/non-regex', contains, f)
 		try:
 			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f))
 		except Exception:
@@ -674,10 +765,25 @@ class BaseTest(ProcessUser):
 			# including the expression it found that should not have been there
 			outcome = PASSED if (result!=None) == contains else FAILED
 			if outcome == PASSED: 
+				if contains: log.debug('Grep on input file %s successfully matched expression %s with line: %s', 
+					file, quotestring(expr), quotestring(result.string))
 				msg = assertMessage or ('Grep on input file %s' % file)
 			else:
-				msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', 
-					quotestring(result.group(0) if result else expr) ))
+			
+				if assertMessage:
+					msg = assertMessage
+				elif contains:
+					msg = 'Grep on %s contains %s'%(file, quotestring(expr))
+				else:
+					msg = 'Grep on %s does not contain %s failed with: %s'%(file, 
+						quotestring(expr),
+						# heuristic to give best possible message; expressions ending with .* are usually 
+						# complete and help to remove timestamps etc from the start so best to return match only; if user didn't do 
+						# that they probably haven't thought much about it and returning the entire match string 
+						# is more useful (though strip off trailing newlines):
+						quotestring(
+							(result.group(0) if expr.endswith('*') else result.string).rstrip('\n\r')
+							))
 			self.addOutcome(outcome, msg, abortOnError=abortOnError)
 		
 
@@ -711,11 +817,7 @@ class BaseTest(ProcessUser):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
-		log.debug("Performing grep on file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		log.debug("  expr:       %s" % expr)
-		log.debug("  contains:   %s" % LOOKUP[contains])
+		log.debug("Performing contains=%s grep on last line of file: %s", contains, f)
 
 		msg = assertMessage or ('Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
 		try:
@@ -758,11 +860,7 @@ class BaseTest(ProcessUser):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 	
-		log.debug("Performing ordered grep on file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		for expr in exprList: log.debug("  exprList:   %s" % expr)
-		log.debug("  contains:   %s" % LOOKUP[contains])
+		log.debug("Performing contains=%s ordered grep on %s for %s", contains, f, exprList)
 		
 		msg = assertMessage or ('Ordered grep on input file %s' % file)
 		expr = None
@@ -816,7 +914,7 @@ class BaseTest(ProcessUser):
 
 		try:
 			numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f))
-			log.debug("Number of matching lines is %d"%numberLines)
+			log.debug("Number of matching lines in %s is %d", f, numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Line count on %s for %s%s '%(file, quotestring(expr), condition))

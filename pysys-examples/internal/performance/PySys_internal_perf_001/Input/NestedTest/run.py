@@ -54,7 +54,7 @@ Yes this is one purposeful test, oh yeah
 
 class PySysTest(BaseTest):
 	testDurationSecs = '1.0'
-	testsPerLoader = '10'
+	testsPerLoader = '200'
 
 	def execute(self):
 		loader = DescriptorLoader(project=self.project)

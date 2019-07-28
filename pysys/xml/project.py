@@ -18,7 +18,7 @@
 """ Contains the L{Project} class which holds configuration for the entire 
 test project. 
 
-@undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE
+@undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE, XMLProjectParser
 """
 
 __all__ = ['Project']
@@ -478,6 +478,8 @@ class Project(object):
 	
 	"""
 	
+	__INSTANCE = None
+		
 	def __init__(self, root, projectFile):
 		self.root = root
 		self.startTimestamp = time.time()
@@ -545,6 +547,21 @@ class Project(object):
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
 
 	@staticmethod
+	def getInstance():
+		"""
+		Provides access to the singleton instance of Project.
+		
+		Raises an exception if the project has not yet been loaded.  
+		
+		Use `self.project` to get access to the project instance where possible, 
+		for example from a `BaseTest` or `BaseRunner` class. This attribute is for 
+		use in internal classes that do not have a `self.project`.
+		"""
+		if Project.__INSTANCE: return Project.__INSTANCE
+		if 'doctest' in sys.argv[0]: return None # special-case for doctesting
+		raise Exception('Cannot call Project.getInstance() as the project has not been loaded yet')
+	
+	@staticmethod
 	def findAndLoadProject(startdir):
 		"""Find and load a project file, starting from the specified directory. 
 		
@@ -596,9 +613,10 @@ class Project(object):
 					sys.exit(1)
 
 		try:
-			PROJECT = Project(search, projectFile)
-			stdoutHandler.setFormatter(PROJECT.formatters.stdout)
-			return PROJECT
+			project = Project(search, projectFile)
+			stdoutHandler.setFormatter(project.formatters.stdout)
+			Project.__INSTANCE = project # set singleton
+			return project
 		except Exception as e:
 			sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
 			traceback.print_exc()

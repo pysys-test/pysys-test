@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Port allocation - blocking when all ports are in use, and PYSYS_PORTS_FILE</title>    
+    <purpose><![CDATA[
+
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+</pysystest>

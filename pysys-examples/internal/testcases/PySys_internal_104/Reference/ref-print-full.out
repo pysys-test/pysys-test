@@ -1,6 +1,7 @@
 [
    {
       "id": "rootprefix_dir3prefix_Test_SubdirMinimalDescriptor", 
+      "testDir": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor", 
       "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml", 
       "type": "manual", 
       "state": "skipped", 
@@ -8,35 +9,36 @@
       "title": "Nested testcase", 
       "purpose": "Nested purpose", 
       "groups": [
-         "root-group1",
-         "root-group2",
-         "dir2-group",
+         "root-group1", 
+         "root-group2", 
+         "dir2-group", 
          "dir3-group"
-      ],
+      ], 
       "modes": [
-         "root-mode1",
-         "root-mode2",
-         "dir2-mode",
+         "root-mode1", 
+         "root-mode2", 
+         "dir2-mode", 
          "dir3-mode"
-      ],
-      "primaryMode": "root-mode1",
+      ], 
+      "primaryMode": "root-mode1", 
       "requirements": [
-         "root-req1",
-         "root-req2",
-         "dir2-req",
+         "root-req1", 
+         "root-req2", 
+         "dir2-req", 
          "dir3-req"
-      ],
+      ], 
       "executionOrderHint": [
          -5.2
       ], 
-      "classname": "PySysTest-dir3",
-      "module": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\run_dir3",
-      "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Input-dir3",
-      "output": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Output-dir3",
-      "reference": "c:\\dev/xxxx/pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\Reference-dir3"
-   },
+      "classname": "PySysTest-dir3", 
+      "module": "run_dir3", 
+      "input": "Input-dir3", 
+      "output": "Output-dir3", 
+      "reference": "Reference-dir3"
+   }, 
    {
       "id": "rootprefix_testprefix.Test_RootFullDescriptor", 
+      "testDir": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor", 
       "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml", 
       "type": "manual", 
       "state": "deprecated", 
@@ -54,8 +56,8 @@
          "root-mode2", 
          "testcase-mode1", 
          "testcase-mode2"
-      ],
-      "primaryMode": "root-mode1",
+      ], 
+      "primaryMode": "root-mode1", 
       "requirements": [
          "root-req1", 
          "root-req2", 
@@ -66,13 +68,14 @@
          9.9
       ], 
       "classname": "PySysTest-testcase", 
-      "module": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\run_testcase", 
-      "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\Input-testcase", 
-      "output": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\Output-testcase", 
-      "reference": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\Reference-testcase"
+      "module": "run_testcase", 
+      "input": "Input-testcase", 
+      "output": "Output-testcase", 
+      "reference": "Reference-testcase"
    }, 
    {
       "id": "rootprefix_Test_RootMinimalDescriptor", 
+      "testDir": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor", 
       "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\pysystest.xml", 
       "type": "auto", 
       "state": "runnable", 
@@ -86,8 +89,8 @@
       "modes": [
          "root-mode1", 
          "root-mode2"
-      ],
-      "primaryMode": "root-mode1",
+      ], 
+      "primaryMode": "root-mode1", 
       "requirements": [
          "root-req1", 
          "root-req2"
@@ -96,14 +99,15 @@
          -4.1
       ], 
       "classname": "PySysTest-root", 
-      "module": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\run_root", 
-      "input": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Input-root", 
-      "output": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Output-root", 
-      "reference": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\Reference-root"
+      "module": "run_root", 
+      "input": "Input-root", 
+      "output": "Output-root", 
+      "reference": "Reference-root"
    }, 
    {
       "id": "rootprefix_Test_RootNoInheritDescriptor", 
-      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml", 
+      "testDir": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor", 
+      "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml", 
       "type": "auto", 
       "state": "runnable", 
       "skippedReason": null, 
@@ -124,9 +128,9 @@
          -4.1
       ], 
       "classname": "PySysTest-root", 
-      "module": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\run_root", 
-      "input": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\Input-root", 
-      "output": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\Output-root", 
-      "reference": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\Reference-root"
+      "module": "run_root", 
+      "input": "Input-root", 
+      "output": "Output-root", 
+      "reference": "Reference-root"
    }
 ]

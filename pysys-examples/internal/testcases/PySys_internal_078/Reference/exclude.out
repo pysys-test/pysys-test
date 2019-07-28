@@ -1,5 +1,5 @@
-Nested_test_01:  Nested testcase
-Nested_test_02:  Nested testcase
-Nested_test_06:  Nested testcase - manual
-Nested_test_07:  Nested testcase
-Nested_test_08:  Nested testcase
+Nested_test_01  | Nested testcase
+Nested_test_02  | Nested testcase
+Nested_test_06  | Nested testcase - manual
+Nested_test_07  | Nested testcase
+Nested_test_08  | Nested testcase

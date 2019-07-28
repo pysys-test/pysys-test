@@ -39,3 +39,8 @@ class PySysTest(BaseTest):
 			'  FAILED: NestedFail \\[CYCLE 02\\]',
 			'Test progress: completed 5/6'
 		])
+		self.assertOrderedGrep('pysys.out', exprList=[
+			'Summary of non passes: ',
+			'List of non passing test ids:',
+			'CRIT .* NestedFail NestedTimedout$'
+			])

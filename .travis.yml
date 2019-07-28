@@ -151,6 +151,8 @@ script:
   
   # check the documentation is good
   # must do this after testing to avoid polluting the installed packages while running the tests
+  # docutils 0.15 has a bug preventing it working with Python 2, so force to a lower version
+  - $PY -m pip install docutils==0.14
   - $PY -m pip install rstcheck
   - rstcheck *.rst
   

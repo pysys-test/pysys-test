@@ -10,7 +10,7 @@ class PySysTest(BaseTest):
 		for attr in dir(self.proj):
 			if attr in ['lib', 'library', 'version', 'user']:
 				self.log.info("%s = %s", attr, eval("self.proj.%s" % attr))
-		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
+		stdoutHandler.setFormatter(self.project.formatters.stdout)
 		
 		# good opportunity to check that default project props are set
 		self.assertThat('%s != ""', repr(self.proj.os)) # renamed from osfamily by config

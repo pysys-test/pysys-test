@@ -10,6 +10,10 @@ class PySysTest(BaseTest):
 		'''Override the BaseTest.execute method to perform the test execution.
 		
 		'''
+		# Be sure to disable code coverage in performance tests. In a real test suite 
+		# this line should be in a custom BaseTest class shared by all testcases. 
+		if 'performance' in self.descriptor.groups: self.disableCoverage = True
+		
 		if self.mode == 'FibonacciMode1':
 			pass # in a real application, the modes would have different implementations
 		elif self.mode == 'FibonacciMode2':

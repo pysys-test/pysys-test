@@ -113,7 +113,16 @@ class BaseRunner(ProcessUser):
 		
 		"""
 		ProcessUser.__init__(self)
-		
+
+
+		# Set a sensible default output dir for the runner. Many projects do not actually write 
+		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
+		# runner subclasses to do so if required. 
+		if os.path.isabs(outsubdir):
+			self.output = os.path.join(outsubdir, 'pysys-runner')
+		else:
+			self.output = os.path.join(self.project.root, 'pysys-runner-%s'%outsubdir)
+
 		self.record = record
 		self.purge = purge
 		self.cycle = cycle
@@ -133,14 +142,14 @@ class BaseRunner(ProcessUser):
 		self.setKeywordArgs(xargs)
 
 		if self.threads <= 0:
-			self.threads = N_CPUS
+			self.threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS)) 
 		if self.threads > 1: log.info('Running tests with %d threads', self.threads)
 	
 		self.writers = []
 		summarywriters = []
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
-		for classname, module, filename, properties in PROJECT.writers:
+		for classname, module, filename, properties in self.project.writers:
 			module = import_module(module, sys.path)
 			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
 			for key in list(properties.keys()): setattr(writer, key, properties[key])
@@ -284,8 +293,10 @@ class BaseRunner(ProcessUser):
 								time.sleep(0.1)
 								count = count + 1
 								
-				# always try to delete empty directories (just as we do for empty files)
-				if deleted == len(filenames):
+				# always try to delete empty directories (just as we do for empty files); 
+				# until we have some kind of internal option for disabling this for debugging 
+				# purpose only delete dirs when we've just deleted the contents ourselves 
+				if removeNonZero or (deleted > 0 and deleted == len(filenames)):
 					try:
 						os.rmdir(dirpath)
 					except Exception as ex:
@@ -348,16 +359,16 @@ class BaseRunner(ProcessUser):
 		results.
 
 		"""
-		if PROJECT.perfReporterConfig:
+		if self.project.perfReporterConfig:
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet
 			from pysys.utils.perfreporter import CSVPerformanceReporter
 			try:
-				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir, runner=self)]
+				self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir, runner=self)]
 			except Exception:
 				# support for passing kwargs was added in 1.4.0; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
 				CSVPerformanceReporter._runnerSingleton = self
-				self.performanceReporters = [PROJECT.perfReporterConfig[0](PROJECT, PROJECT.perfReporterConfig[1], self.outsubdir)]
+				self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir)]
 				del CSVPerformanceReporter._runnerSingleton
 		
 		class PySysPrintRedirector(object):
@@ -372,7 +383,7 @@ class BaseRunner(ProcessUser):
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
-		if getattr(PROJECT, 'redirectPrintToLogger', False):
+		if getattr(self.project, 'redirectPrintToLogger', False):
 			sys.stdout = PySysPrintRedirector()
 		
 		# call the hook to setup prior to running tests
@@ -461,6 +472,8 @@ class BaseRunner(ProcessUser):
 					log.info("test interrupt from keyboard - joining threads ... ")
 					threadPool.dismissWorkers(self.threads, True)
 					self.handleKbrdInt(prompt=False)
+				else:
+					threadPool.dismissWorkers(self.threads, True)
 
 			for collect in self.__collectTestOutput:
 				if pathexists(collect['outputDir']):
@@ -516,7 +529,7 @@ class BaseRunner(ProcessUser):
 		coverage data from other languages, e.g. Java. 		
 		"""
 		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
-		if self.getBool('pythonCoverage') and pythonCoverageDir is not None:
+		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir is not None:
 			pythonCoverageDir = os.path.join(self.project.root, pythonCoverageDir
 				.replace('@OUTDIR@', os.path.basename(self.outsubdir))) # matches collect-test-output logic
 			if not pathexists(pythonCoverageDir):
@@ -690,7 +703,7 @@ class TestContainer(object):
 				# here we use UnicodeSafeStreamWrapper to ensure we get a buffer of unicode characters (mixing chars+bytes leads to exceptions), 
 				# from any supported character (utf-8 being pretty much a superset of all encodings)
 				self.testFileHandlerStdout = logging.StreamHandler(_UnicodeSafeStreamWrapper(self.testFileHandlerStdoutBuffer, writebytes=False, encoding='utf-8'))
-				self.testFileHandlerStdout.setFormatter(PROJECT.formatters.stdout)
+				self.testFileHandlerStdout.setFormatter(self.runner.project.formatters.stdout)
 				self.testFileHandlerStdout.setLevel(stdoutHandler.level)
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout])
 
@@ -699,7 +712,7 @@ class TestContainer(object):
 					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
 					# don't need to add mode to this path as it's already in the id
 				else:
-					self.outsubdir = os.path.join(self.descriptor.output, self.runner.outsubdir)
+					self.outsubdir = os.path.join(self.descriptor.testDir, self.descriptor.output, self.runner.outsubdir)
 					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
 						self.outsubdir += '~'+self.descriptor.mode
 
@@ -722,7 +735,8 @@ class TestContainer(object):
 				self.testFileHandlerRunLog = logging.StreamHandler(_UnicodeSafeStreamWrapper(
 					io.open(toLongPathSafe(os.path.join(self.outsubdir, 'run.log')), 'a', encoding=runLogEncoding), 
 					writebytes=False, encoding=runLogEncoding))
-				self.testFileHandlerRunLog.setFormatter(PROJECT.formatters.runlog)
+				self.testFileHandlerRunLog.setFormatter(self.runner.project.formatters.runlog)
+				# unlike stdout, we force the run.log to be _at least_ INFO level
 				self.testFileHandlerRunLog.setLevel(logging.INFO)
 				if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout, self.testFileHandlerRunLog])
@@ -748,7 +762,7 @@ class TestContainer(object):
 			with global_lock:
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 				try:
-					runpypath = self.descriptor.module+'.py'
+					runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module+'.py')
 					with open(runpypath, 'rb') as runpyfile:
 						runpycode = compile(runpyfile.read(), runpypath, 'exec')
 					runpy_namespace = {}
@@ -833,7 +847,7 @@ class TestContainer(object):
 				log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
 				log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra=BaseLogFormatter.tag(LOOKUP[self.testObj.getOutcome()].lower(), 0))
 				if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
-					log.info("Test failure reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
+					log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
 				log.info("")
 				
 				pysysLogHandler.flush()

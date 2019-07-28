@@ -26,7 +26,7 @@ from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
-from pysys.xml.project import getProjectConfigTemplates, createProjectConfig
+from pysys.xml.project import getProjectConfigTemplates, createProjectConfig, Project
 from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
@@ -55,7 +55,7 @@ class ConsoleMakeTestHelper(object):
 
 	def parseArgs(self, args):
 		try:
-			optlist, arguments = getopt.getopt(args, 'ha:d:', ["help","type=","dir="] )
+			optlist, arguments = getopt.gnu_getopt(args, 'ha:d:', ["help","type=","dir="] )
 		except Exception:
 			print("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			self.printUsage()
@@ -126,8 +126,8 @@ class ConsoleMakeTestHelper(object):
 			log.info("Created test class module %s " % os.path.join(self.testdir, self.testId, "%s.py" % module))	
 
 def makeTest(args):
-	module = import_module(PROJECT.makerModule, sys.path)
-	maker = getattr(module, PROJECT.makerClassname)("make")
+	module = import_module(Project.getInstance().makerModule, sys.path)
+	maker = getattr(module, Project.getInstance().makerClassname)("make")
 	maker.parseArgs(args)
 	maker.makeTest()
 

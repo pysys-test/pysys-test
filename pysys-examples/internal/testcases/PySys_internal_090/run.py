@@ -34,7 +34,7 @@ class PySysTest(BaseTest):
 		controlchars = u'!\x00 !\x01 tab\x09tab !\x10 !\x11 !\x0B !\x0C !\x0E !\x19 space\x20space BMP: \uD7FF \uE000 \uFFFD !\uFFFE !\uFFFF SMP: \U00010000 \U00010001 \U0010FFFF'
 		self.assertGrep('myoutdir/NestedFail/run.log', expr=u'Log with control characters: %s end'%controlchars, encoding='utf-8')
 
-		self.assertGrep('myoutdir/NestedFail/run.log', expr=u'Test failure reason: .*Outcome with control characters: %s end'%
+		self.assertGrep('myoutdir/NestedFail/run.log', expr=u'Test outcome reason: .*Outcome with control characters: %s end'%
 			u'! ! tab tab ! ! ! ! ! ! space\x20space BMP: \uD7FF \uE000 \uFFFD !\uFFFE !\uFFFF SMP: \U00010000 \U00010001 \U0010FFFF',
 			encoding='utf-8')
 

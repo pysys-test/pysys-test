@@ -157,7 +157,7 @@ class BaseResultsWriter(object):
 		can extract data from this object but should not store a reference to it. 
 		The testObj.descriptor.id indicates the test that ran. 
 		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
-		@param testTime: Duration of the test in seconds. 
+		@param testTime: Duration of the test in seconds as a floating point number. 
 		@param testStart: The time when the test started. 
 		@param runLogOutput: The logging output written to run.log, as a unicode character string. 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
@@ -371,7 +371,6 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
-		assert kwargs['testoutdir'], kwargs # TODO remove
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 		
@@ -411,7 +410,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 
 			# add the test host node
 			element = self.document.createElement("root")
-			element.appendChild(self.document.createTextNode(self.__pathToURL(PROJECT.root)))
+			element.appendChild(self.document.createTextNode(self.__pathToURL(kwargs['runner'].project.root)))
 			self.rootElement.appendChild(element)
 
 			# add the extra params nodes
@@ -540,7 +539,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		@param kwargs: Variable argument list
 		
 		"""
-		self.outputDir = os.path.join(PROJECT.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
+		self.outputDir = os.path.join(kwargs['runner'].project.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
 		deletedir(self.outputDir)
 		mkdir(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
@@ -577,10 +576,13 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		attr3.value = '%d'%(int)(testObj.getOutcome() in FAILS)	
 		attr4 = document.createAttribute('skipped')	
 		attr4.value = '%d'%(int)(testObj.getOutcome() == SKIPPED)		
+		attr5 = document.createAttribute('time')	
+		attr5.value = '%s'%kwargs['testTime']
 		rootElement.setAttributeNode(attr1)
 		rootElement.setAttributeNode(attr2)
 		rootElement.setAttributeNode(attr3)
 		rootElement.setAttributeNode(attr4)
+		rootElement.setAttributeNode(attr5)
 		
 		# add the testcase information
 		testcase = document.createElement('testcase')
@@ -717,6 +719,7 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 	"""
 	def __init__(self, **kwargs):
 		self.showOutcomeReason = self.showOutputDir = False # option added in 1.3.0. May soon change the default to True. 
+		self.showTestIdList = True
 	
 	def setup(self, cycles=0, threads=0, **kwargs):
 		self.results = {}
@@ -746,7 +749,8 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 	def printNonPassesSummary(self, log):
 		showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
 		showOutputDir = str(self.showOutputDir).lower() == 'true'
-		
+		showNonPassingTestIds = str(self.showTestIdList).lower() == 'true'
+
 		log.critical("Summary of non passes: ")
 		fails = 0
 		for cycle in list(self.results.keys()):
@@ -755,17 +759,28 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 		if fails == 0:
 			log.critical("	THERE WERE NO NON PASSES", extra=ColorLogFormatter.tag(LOG_PASSES))
 		else:
+			failedids = set()
 			for cycle in list(self.results.keys()):
 				cyclestr = ''
 				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
 				for outcome in FAILS:
 					for (id, reason, outputdir) in self.results[cycle][outcome]: 
+						failedids.add(id)
 						log.critical("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra=ColorLogFormatter.tag(LOOKUP[outcome].lower()))
 						if showOutputDir:
 							log.critical("      %s", os.path.normpath(os.path.relpath(outputdir)))
 						if showOutcomeReason and reason:
 							log.critical("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
-
+		
+			if showNonPassingTestIds and len(failedids) > 1:
+				# display just the ids, in a way that's easy to copy and paste into a command line
+				failedids = list(failedids)
+				failedids.sort()
+				if len(failedids) > 20: # this feature is only useful for small test runs
+					failedids = failedids[:20]+['...']
+				log.critical('')
+				log.critical('List of non passing test ids:')
+				log.critical('%s', ' '.join(failedids))
 
 class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 	"""Default progress writer that logs a summary of progress so far to the console, after each test completes.

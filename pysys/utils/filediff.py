@@ -19,12 +19,14 @@
 
 from __future__ import print_function
 import os.path, copy, difflib
+import logging
 
-from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.pycompat import openfile
 from pysys.utils.fileutils import pathexists
+
+log = logging.getLogger('pysys.assertions')
 
 def trimContents(contents, expressions, exclude=True):
 	"""Reduce a list of strings based by including/excluding lines which match any of a set of regular expressions, returning the processed list.
@@ -86,6 +88,7 @@ def logContents(message, list):
 	
 	@param list: The list of strings to log
 	"""
+	if not log.isEnabledFor(logging.DEBUG): return
 	count = 0
 	log.debug(message)
 	for line in list:

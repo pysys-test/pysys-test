@@ -13,7 +13,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		runPySys(self, 'makeproject', ['makeproject'])
-		runPySys(self, 'makeproject-custom', ['makeproject', '--dir', self.output+'/mytestRootDir', 'default'])
+		runPySys(self, 'makeproject-custom', ['makeproject', '--dir', self.output+'/mytestRootDir', '--template=default'])
 		
 		# should not overwrite even though filename is different
 		open(self.mkdir(self.output+'/fakeprojroot')+'/.pysysproject','w').close()

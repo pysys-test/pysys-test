@@ -18,6 +18,9 @@
 
 
 import collections, random, subprocess, sys
+import io
+import logging
+import time
 from pysys import process_lock
 from pysys.constants import *
 
@@ -25,6 +28,8 @@ from pysys.constants import *
 # start TCP servers. Initialized to None since it might not actually be used.
 # Properly initialize only on demand.
 tcpServerPortPool = None
+
+_log = logging.getLogger('allocport')
 
 def getEphemeralTCPPortRange():
 	"""Returns the range of TCP ports the operating system uses to allocate
@@ -80,10 +85,20 @@ def initializePortPool():
 
 	global tcpServerPortPool
 
-	ephemeral_low, ephemeral_high = getEphemeralTCPPortRange()
+	portsfile = os.getenv('PYSYS_PORTS_FILE',None)
+	if portsfile:
+		with io.open(portsfile, 'r', encoding='utf-8') as f:
+			tcpServerPortPool = []
+			for l in f:
+				l = l.strip()
+				if l: tcpServerPortPool.append(int(l))
+		if not tcpServerPortPool:
+			raise Exception('No ports found in %s'%portsfile)
+	else: 
+		ephemeral_low, ephemeral_high = getEphemeralTCPPortRange()
 
-	# Allocate server ports from all non-privileged, non-ephemeral ports
-	tcpServerPortPool = list(range(1024, ephemeral_low)) + list(range(ephemeral_high,65536))
+		# Allocate server ports from all non-privileged, non-ephemeral ports
+		tcpServerPortPool = list(range(1024, ephemeral_low)) + list(range(ephemeral_high,65536))
 
 	# Randomize the port set to reduce the chance of clashes between
 	# simultaneous runs on the same machine
@@ -131,19 +146,30 @@ def portIsInUse(port):
 			return False
 		except Exception as e:
 			# Don't expect this but just in case
-			sys.stderr.write('Exception from port allocator: %s\n'%e)
+			_log.error('Exception from port allocator: %s - %s', e.__class__.__name__, e)
 			if s != None:
 				s.close()
 			return True
 
 def allocateTCPPort():
-	while True:
-		port = tcpServerPortPool.popleft()
+	t = time.time()
+	while time.time()-t < TIMEOUTS['WaitForAvailableTCPPort']:
+		
+		# in case we've allocated all the available ports, loop 
+		# until another test terminates and free up some ports
+		try:
+			port = tcpServerPortPool.popleft()
+		except Exception:
+			time.sleep(2)
+			continue
+		
 		if portIsInUse(port):
 			# Toss the port back at the end of the queue
 			tcpServerPortPool.append(port)
+			time.sleep(0.5) # avoid spinning
 		else:
 			return port
+	raise Exception('Could not allocate TCP server port; other tests are currently using all the available ports')
 
 class TCPPortOwner(object):
 	def __init__(self):

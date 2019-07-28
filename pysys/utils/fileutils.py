@@ -30,6 +30,9 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	
 	Currently, this is necessary only on Windows, where a unicode string 
 	starting with \\?\ must be used to get correct behaviour for long paths. 
+	On Windows this function also normalizes the capitalization of drive 
+	letters so they are always upper case regardless of OS version and current 
+	working directory. 
 	
 	@param path: A path. Must not be a relative path. Can be None/empty. Can 
 	contain ".." sequences. If possible, use a unicode character string. 
@@ -51,6 +54,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	
 	"""
 	if (not IS_WINDOWS) or (not path): return path
+	if path[0] != path[0].upper(): path = path[0].upper()+path[1:]
 	if onlyIfNeeded and len(path)<255: return path
 	if path.startswith('\\\\?\\'): return path
 	inputpath = path
@@ -120,16 +124,22 @@ def mkdir(path):
 			os.makedirs(path)
 	return origpath
 
-def deletedir(path):
+def deletedir(path, retries=1):
 	"""
 	Recursively delete the specified directory. 
 	
 	Does nothing if it does not exist. Raises an exception if the deletion fails. 
+	
+	@param retries: The number of retries to attempt. This can be useful to 
+	work around temporary failures causes by Windows file locking. 
 	"""
 	path = toLongPathSafe(path)
 	try:
 		shutil.rmtree(path)
-	except Exception:
+	except Exception: # pragma: no cover
 		if not os.path.exists(path): return # nothing to do
-		raise
+		if retries <= 0:
+			raise
+		time.sleep(0.5) # work around windows file-locking issues
+		deletedir(path, retries = retries-1)
 

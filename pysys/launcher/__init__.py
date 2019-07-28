@@ -33,6 +33,7 @@ except NameError:
 
 from pysys.constants import *
 from pysys.exceptions import UserError
+from pysys.xml.project import Project
 
 def loadDescriptors(dir=None):
 	"""Load descriptor objects representing a set of tests to run for 
@@ -48,7 +49,7 @@ def loadDescriptors(dir=None):
 	
 	"""
 	if dir is None: dir = os.getcwd()
-	loader = PROJECT.descriptorLoaderClass(PROJECT)
+	loader = Project.getInstance().descriptorLoaderClass(Project.getInstance())
 	return loader.loadDescriptors(dir)
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[], expandmodes=True):
@@ -72,7 +73,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	@raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
 	
 	"""
-	project = PROJECT
+	project = Project.getInstance()
 	
 	descriptors = loadDescriptors(dir=dir)
 	# must sort by id for range matching and dup detection to work deterministically

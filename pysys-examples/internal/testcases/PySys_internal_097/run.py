@@ -11,6 +11,9 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
+		self.log.info('Using python from     %s', sys.executable)
+		self.log.info('With python libs from %s', os.__file__)
+	
 		shutil.copytree(self.input, self.output+'/test')
 		
 		for subtest in ['none', 'lang', 'legacy', 'tempdir']:

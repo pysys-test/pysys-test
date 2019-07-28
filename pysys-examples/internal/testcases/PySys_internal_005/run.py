@@ -7,7 +7,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		self.proj = Project(self.input, 'pysysproject.xml')
-		stdoutHandler.setFormatter(PROJECT.formatters.stdout)
+		stdoutHandler.setFormatter(self.project.formatters.stdout)
 		
 	def validate(self):
 		self.assertTrue(self.proj.loc == self.input)
