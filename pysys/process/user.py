@@ -202,7 +202,7 @@ class ProcessUser(object):
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, stdouterr=None):
+			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None):
 		"""Start a process running in the foreground or background, and return 
 		the L{ProcessWrapper} process object.
 		
@@ -264,14 +264,21 @@ class ProcessUser(object):
 	
 		@param ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
 		exit code that doesn't match expectedExitStatus (or if the command cannot be run at all). 
-		In cases where you do not care whether the command succeeds or fails, or wish to handle the 
-		exit status separately with more complicated logic this can be set to True. 
+		This can be set to True in cases where you do not care whether the command succeeds or fails, or wish to handle the 
+		exit status separately with more complicated logic. 
 		
 		The default value of ignoreExitStatus=None means the value will 
 		be taken from the project property defaultIgnoreExitStatus, which can be configured in the project XML 
 		(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
 		compatibility with older PySys releases if no project property is set. 
-		
+
+		@param quiet: If True, this method will not do any INFO or WARN level logging 
+		(only DEBUG level), unless a failure outcome is appended. This parameter can be 
+		useful to avoid filling up the log where it is necessary to repeatedly execute a 
+		command check for completion of some operation until it succeeds; in such cases 
+		you should usually set ignoreExitStatus=True as well since both success and 
+		failure exit statuses are valid. 
+
 		@return: The process handle of the process (L{ProcessWrapper}).
 		@rtype: L{ProcessWrapper}
 
@@ -312,7 +319,10 @@ class ProcessUser(object):
 			process.start()
 			if state == FOREGROUND:
 				correctExitStatus = eval('%d %s'%(process.exitStatus, expectedExitStatus))
-				(log.info if correctExitStatus else log.warn)("Executed %s, exit status %d%s", displayName, process.exitStatus,
+				
+				logmethod = log.info if correctExitStatus else log.warn
+				if quiet: logmethod = log.debug
+				logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
 																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
 				
 				if not ignoreExitStatus and not correctExitStatus:
@@ -323,15 +333,15 @@ class ProcessUser(object):
 						abortOnError=abortOnError)
 
 			elif state == BACKGROUND:
-				log.info("Started %s with process id %d", displayName, process.pid)
+				(log.info if not quiet else log.debug)("Started %s with process id %d", displayName, process.pid)
 		except ProcessError as e:
 			if not ignoreExitStatus:
 				self.addOutcome(BLOCKED, 'Could not start %s process: %s'%(displayName, e), abortOnError=abortOnError)
-			else:
+			else: # this wouldn't happen during a polling-until-success use case so is always worth logging even in quiet mode
 				log.info("%s", sys.exc_info()[1], exc_info=0)
 		except ProcessTimeout:
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
-			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+			(log.warn if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			process.stop()
 		else:
 			with self.lock:

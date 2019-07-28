@@ -82,6 +82,11 @@ New features:
   This is simpler and more intuitive than setting `ignoreExitStatus=True` and 
   then checking the exit status separately. 
 
+- Added `quiet` parameter to `ProcessUser.startProcess()` method 
+  which disable INFO/WARN level logging (unless a failure outcome is appended), 
+  which is useful when calling a process repeatedly to poll for completion of 
+  some operation. 
+
 - Added `ProcessUser.startPython` method has similar options to `startProcess` 
   and should be used for starting Python. Support functionality such as 
   Python code coverage. 

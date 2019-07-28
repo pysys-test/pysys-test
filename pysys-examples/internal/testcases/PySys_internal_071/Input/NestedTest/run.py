@@ -9,6 +9,12 @@ class PySysTest(BaseTest):
 		p = self.startProcess(command=sys.executable,
 			arguments = [self.input+'/fail.py'],
 			environs = dict(os.environ), 
+			stdouterr = 'fail-quiet', displayName='python-failer-quiet', 
+			state=FOREGROUND, ignoreExitStatus=True, quiet=True)
+		
+		p = self.startProcess(command=sys.executable,
+			arguments = [self.input+'/fail.py'],
+			environs = dict(os.environ), 
 			stdouterr = 'fail1', displayName='python-failer-1', 
 			expectedExitStatus='==100',
 			state=FOREGROUND, abortOnError=True)

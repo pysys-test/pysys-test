@@ -2,10 +2,10 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Project Configuration - startProcess ignoreExitStatus default values; expectedExitStatus</title>    
+    <title>Process - defaultIgnoreExitStatus project option, expectedExitStatus=, quiet=</title>    
     <purpose><![CDATA[
 Ensure that defaultIgnoreExitStatus works correctly, including if configured in project, and if not configured. 
-Also checks that expectedExitStatus is respected. 
+Also checks that expectedExitStatus= and quiet= are respected. 
 ]]>
     </purpose>
   </description>

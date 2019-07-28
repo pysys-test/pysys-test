@@ -34,4 +34,7 @@ class PySysTest(BaseTest):
 		# check we can cope with nonzero expected status - should be INFO not WARN
 		self.assertGrep('pysys-exampleproject.out', expr='INFO .*Executed python-failer-1, exit status 100$')
 
+		# quiet mode shoudn't be logged at all
+		self.assertGrep('pysys-exampleproject.out', expr='python-failer-quiet', contains=False)
+
 		
