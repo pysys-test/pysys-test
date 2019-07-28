@@ -336,7 +336,7 @@ Upgrade guide and compatibility:
   PySys looking in that part of the directory tree. 
 
 - On Windows, paths within the testcase are now normalized so that the drive 
-  letter is always capitalized (e.g. `C:\` not `c:\`). Previously the 
+  letter is always capitalized (e.g. `C:` not `c:`). Previously the 
   capitalization of the drive letter would vary depending on how exactly PySys 
   was launched, which could occasionally lead to inconsistent behaviour if 
   testing an application that relies on the ASCII sort order of paths. 
