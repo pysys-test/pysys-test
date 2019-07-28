@@ -463,6 +463,8 @@ class BaseRunner(ProcessUser):
 					log.info("test interrupt from keyboard - joining threads ... ")
 					threadPool.dismissWorkers(self.threads, True)
 					self.handleKbrdInt(prompt=False)
+				else:
+					threadPool.dismissWorkers(self.threads, True)
 
 			for collect in self.__collectTestOutput:
 				if pathexists(collect['outputDir']):

@@ -85,6 +85,7 @@ class WorkerThread(threading.Thread):
 			if self._dismissed.isSet():
 				break
 			try:
+
 				request = self._requests_queue.get(True, self._poll_timeout)
 			except Queue.Empty:
 				continue
@@ -144,7 +145,7 @@ class ThreadPool(object):
 
 	"""
 
-	def __init__(self, num_workers, q_size=0, resq_size=0, poll_timeout=5, requests_queue=None):
+	def __init__(self, num_workers, q_size=0, resq_size=0, poll_timeout=0.7, requests_queue=None):
 		"""Class constructor.
 		
 		@param num_workers: The number of worker threads processing the queue
