@@ -46,8 +46,8 @@ testcases provides a single framework for all test organisation requirements.
 
 """
 
-__author__  = "Moray Grieve"
-"""The original author of PySys."""
+__author__  = "Moray Grieve, Ben Spiller"
+"""The current and previous lead maintainers of PySys."""
 
 __maintainer__  = "Ben Spiller"
 """The current lead maintainer of PySys."""
