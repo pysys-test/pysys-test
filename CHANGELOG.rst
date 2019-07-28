@@ -236,8 +236,8 @@ Improvements to the `pysys.py` command line tool:
   about the available tests in JSON format suitable for reading in from other 
   programs. 
 
-- Change `makeproject` so that templates must be specified with an explicit 
-  argument `--template=NAME`. 
+- Changed `makeproject` so that when a template is to be specified, it is now 
+  necessary to use an explicit `--template` argument, e.g `--template=NAME`. 
   
 
 Upgrade guide and compatibility:
