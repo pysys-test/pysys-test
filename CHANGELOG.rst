@@ -88,8 +88,15 @@ New features:
   some operation. 
 
 - Added `ProcessUser.startPython` method has similar options to `startProcess` 
-  and should be used for starting Python. Support functionality such as 
+  and should be used for starting Python. Supports functionality such as 
   Python code coverage. 
+
+- Added `ProcessUser.disableCoverage` attribute which can be used to globally 
+  disable all code coverage (in all languages) for a specific test. For example 
+  if you apply a group called 'performance' to all performance tests, you could 
+  disable coverage for those tests by adding this line to your BaseTest::
+  
+  	 if 'performance' in self.descriptor.groups: self.disableCoverage = True
 
 - Added `hostname`, `startTime` and `startDate` project properties which can be 
   used in any `pysysproject.xml` configuration file. The start time/date 

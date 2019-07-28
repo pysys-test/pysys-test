@@ -190,6 +190,12 @@ as Java), this is easy to achieve by following the same pattern:
   `runner.outsubdir` is not available when the project properties are 
   resolved). 
   
+- Add a custom BaseTest class from the `__init__` constructor set 
+  `self.disableCoverage=True` for test groups that should not use coverage, 
+  such as performance tests. For example::
+  
+  	 if 'performance' in self.descriptor.groups: self.disableCoverage = True
+  
 - If using a continuous integration system or centralized code coverage 
   database, you could optionally upload the coverage data there from the 
   directory PySys collected it into, so there is a permanent record of 

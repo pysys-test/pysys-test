@@ -58,7 +58,16 @@ class ProcessUser(object):
 	@type input: string
 	@ivar output: Location for output from any processes (defaults to current working directory)
 	@type output: string
-
+	
+	@ivar disableCoverage: Set to True to disable all code coverage collection for processes 
+	started from this instance. For example, to disable coverage in tests tagged with the 
+	'performance' group you could use a line like this in your BaseTest::
+	
+		if 'performance' in self.descriptor.groups: self.disableCoverage = True
+	
+	The built-in Python code coverage functionality in L{startPython} checks this 
+	flag. It is recommended that any other languages supporting code coverage 
+	also check the self.disableCoverage flag. 
 	"""
 	
 	def __init__(self):
@@ -84,6 +93,8 @@ class ProcessUser(object):
 		self.defaultIgnoreExitStatus = self.project.defaultIgnoreExitStatus.lower()=='true' if hasattr(self.project, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
 		self.__pythonCoverageFile = 0
+		
+		self.disableCoverage = False
 		
 		self.lock = threading.RLock()
 		"""
@@ -179,7 +190,8 @@ class ProcessUser(object):
 		to execute, or '-m' followed by a module name. 
 		@param kwargs: See L{startProcess} for detail on available arguments.
 		@param disableCoverage: Disables code coverage for this specific 
-		process. 
+		process. Coverage can also be disabled by setting 
+		`self.disableCoverage==True` on this test instance. 
 		@return: The process handle of the process (L{ProcessWrapper}).
 		@rtype: L{ProcessWrapper}
 		
@@ -189,7 +201,8 @@ class ProcessUser(object):
 			environs = kwargs['environs']
 		else:
 			environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
-		if self.getBoolProperty('pythonCoverage') and not disableCoverage:
+		if self.getBoolProperty('pythonCoverage') and not disableCoverage and not self.disableCoverage:
+			assert False
 			if hasattr(self.project, 'pythonCoverageArgs'):
 				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
 			args = ['-m', 'coverage', 'run']+args
