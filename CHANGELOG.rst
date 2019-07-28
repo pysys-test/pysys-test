@@ -12,7 +12,24 @@ See installation notes in README.rst for more details.
 What's new in this release
 --------------------------
 
-<highlights here>
+PySys 1.5.0 brings some significant new features for large PySys projects 
+including support for running a test in multiple modes, and 
+`pysysdirconfig.xml` files that allow you to specify defaults that apply to 
+all testcases under a particular directory - such as groups, modes, a prefix 
+to add to the start of each test id, and a numeric hint to help define the 
+execution order of your tests. 
+
+There is also new support for collecting files from each test output 
+directory (e.g. code coverage files), new features in the `pysys run` and 
+`pysys print` command lines, and a host of small additions to the API to make 
+test creation easier e.g. `assertEval`, `copy` (with filtering of each copied 
+line) and `write_text` (for easy programmatic creation of files in the output 
+directory). 
+
+This is a major release and therefore there are a few significant changes 
+that could required changes in existing projects; please review the 
+compatibility section of this document and perform an initial test run using 
+the new PySys version to check for issues before switching over. 
 
 New features:
 
@@ -87,9 +104,9 @@ New features:
   which is useful when calling a process repeatedly to poll for completion of 
   some operation. 
 
-- Added `ProcessUser.startPython` method has similar options to `startProcess` 
-  and should be used for starting Python. Supports functionality such as 
-  Python code coverage. 
+- Added `ProcessUser.startPython` method with similar options to `startProcess` 
+  that should be used for starting Python processes. Supports functionality 
+  such as Python code coverage. 
 
 - Added `ProcessUser.disableCoverage` attribute which can be used to globally 
   disable all code coverage (in all languages) for a specific test. For example 

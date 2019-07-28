@@ -1217,7 +1217,7 @@ class ProcessUser(object):
 		@param path: The path to be created. This can be an absolute path or 
 		relative to the testcase output directory.
 		
-		@return: the absolutized path of the new directory, to facilitate fluent-style method calling. 
+		@return: the absolute path of the new directory, to facilitate fluent-style method calling. 
 		"""
 		path = os.path.join(self.output, path)
 		mkdir(path)
