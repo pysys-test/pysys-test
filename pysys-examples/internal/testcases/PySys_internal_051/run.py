@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 		self.assertLastGrep('file1.txt', filedir=self.input, expr='Foo', contains=FALSE, assertMessage='Looking for Foo')
 		self.assertLastGrep('file1.txt', filedir=self.input, expr='Foo', contains=FALSE, assertMessage='Looking for Foo again')
 		
-		self.waitForSignal('run.log', expr='Looking for Foo again', condition='>=1', timeout=5)
+		self.waitForSignal('run.log', expr='Looking for Foo again', condition='>=1', timeout=5, ignores=[' DEBUG '])
 		
 		self.log.info('Copying run.log for later verification')
 		filecopy(os.path.join(self.output, 'run.log'), os.path.join(self.output, 'run.log.proc'))
