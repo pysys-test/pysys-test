@@ -275,6 +275,18 @@ Improvements to the `pysys.py` command line tool:
 
 Upgrade guide and compatibility:
 
+- The `self.output` variable in `BaseRunner` is no longer set to the current 
+  directory, but instead to a `pysys-runner-OUTDIR` subdirectory of the 
+  test root (or to `OUTDIR/pysys-runner` if `OUTDIR` is an absolute path). 
+  This ensures that any files created by the runner go into a known location 
+  that is isolated from other runs using different `OUTDIR`s. The runner 
+  `self.output` directory is often not actually used for anything since 
+  most logic that writes output files lives in `BaseTest` subclasses, so 
+  the runner output directory is not created (or cleaned) automatically. 
+  If you have a custom `BaseRunner` that writes files to its output directory 
+  then you should add a call to `self.mkdir` to create the output directory 
+  after cleaning output from the previous test run using `self.deleteDir`. 
+
 - The behaviour of `ProcessUser.getDefaultEnvirons` has changed compared to 
   PySys 1.4.0 when the command being launched is `sys.executable`, i.e. another 
   instance of the current Python process (`getDefaultEnvirons` is used by 
