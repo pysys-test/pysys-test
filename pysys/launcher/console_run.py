@@ -61,7 +61,8 @@ class ConsoleLaunchHelper(object):
 		print("     -h | --help                  print this message")
 		print("     -r | --record                record test results using all configured record writers")
 		print("     -p | --purge                 purge the output subdirectory on test pass")
-		print("     -v | --verbosity STRING      set the verbosity level (CRIT, WARN, INFO, DEBUG)")
+		print("     -v | --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)")
+		print("                      CAT=LEVEL   set the verbosity for a specific category e.g. assertions=, process=")
 		print("     -c | --cycle     INT         set the the number of cycles to run the tests")
 		print("     -o | --outdir    STRING      set the name of the directory to use for this run's test output")
 		print("     -n | --threads   INT|auto    set the number of worker threads to run the tests (defaults to 1). ")
@@ -131,6 +132,14 @@ class ConsoleLaunchHelper(object):
 		EXPR2 = re.compile("^[\w\.]*$")
 
 		printLogs = None
+		
+		logging.getLogger('pysys').setLevel(logging.INFO)
+
+		# as a special case, set a non-DEBUG log level for the implementation of assertions 
+		# so that it doesn't get enabled with -vDEBUG only -vassertions=DEBUG 
+		# as it is incredibly verbose and slow and not often useful
+		logging.getLogger('pysys.assertions').setLevel(logging.INFO)
+		
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage(printXOptions)	  
@@ -142,19 +151,38 @@ class ConsoleLaunchHelper(object):
 				self.purge = True		  
 
 			elif option in ("-v", "--verbosity"):
-				self.verbosity = value
-				if self.verbosity.upper() == "DEBUG":
-					stdoutHandler.setLevel(logging.DEBUG)
-				elif self.verbosity.upper() == "INFO":
-					stdoutHandler.setLevel(logging.INFO)
-				elif self.verbosity.upper() == "WARN":
-					stdoutHandler.setLevel(logging.WARN)
-				elif self.verbosity.upper() == "CRIT":					
-					stdoutHandler.setLevel(logging.CRITICAL)	
+				verbosity = value
+				if '=' in verbosity:
+					loggername, verbosity = value.split('=')
+					assert not loggername.startswith('pysys.'), 'The "pysys." prefix is assumed and should not be explicitly specified'
+					loggername = 'pysys.'+loggername
 				else:
-					log.warn('Invalid log level "%s"'%value)
+					loggername = None
+				
+				if verbosity.upper() == "DEBUG":
+					verbosity = logging.DEBUG
+				elif verbosity.upper() == "INFO":
+					verbosity = logging.INFO
+				elif verbosity.upper() == "WARN":
+					verbosity = logging.WARN
+				elif verbosity.upper() == "CRIT":					
+					verbosity = logging.CRITICAL
+				else:
+					log.warn('Invalid log level "%s"'%verbosity)
 					sys.exit(1)
-
+				
+				if loggername is None:
+					# when setting global log level to a higher level like WARN etc we want to affect stdout but 
+					# not necessarily downgrade the root level (would make run.log less useful and break 
+					# some PrintLogs behaviour)
+					stdoutHandler.setLevel(verbosity)
+					if verbosity == logging.DEBUG: logging.getLogger('pysys').setLevel(logging.DEBUG)
+				else:
+					# for specific level setting we need the opposite - only change stdoutHandler if we're 
+					# turning up the logging (since otherwise it wouldn't be seen) but also change the specified level
+					logging.getLogger(loggername).setLevel(verbosity)
+					if verbosity == logging.DEBUG: stdoutHandler.setLevel(logging.DEBUG)
+				
 			elif option in ("-a", "--type"):
 				self.type = value
 				if self.type not in ["auto", "manual"]:

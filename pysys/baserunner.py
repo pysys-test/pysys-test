@@ -727,6 +727,7 @@ class TestContainer(object):
 					io.open(toLongPathSafe(os.path.join(self.outsubdir, 'run.log')), 'a', encoding=runLogEncoding), 
 					writebytes=False, encoding=runLogEncoding))
 				self.testFileHandlerRunLog.setFormatter(self.runner.project.formatters.runlog)
+				# unlike stdout, we force the run.log to be _at least_ INFO level
 				self.testFileHandlerRunLog.setLevel(logging.INFO)
 				if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout, self.testFileHandlerRunLog])

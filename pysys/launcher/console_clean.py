@@ -68,16 +68,20 @@ class ConsoleCleanTestHelper(object):
 
 			elif option in ("-v", "--verbosity"):
 				if value.upper() == "DEBUG":
-					stdoutHandler.setLevel(logging.DEBUG)
+					verbosity = logging.DEBUG
 				elif value.upper() == "INFO":
-					stdoutHandler.setLevel(logging.INFO)
+					verbosity = logging.INFO
 				elif value.upper() == "WARN":
-					stdoutHandler.setLevel(logging.WARN)	
-				elif value.upper() == "CRIT":
-					stdoutHandler.setLevel(logging.CRITICAL)
+					verbosity = logging.WARN
+				elif value.upper() == "CRIT":					
+					verbosity = logging.CRITICAL
 				else:
 					log.warn('Invalid log level "%s"'%value)
 					sys.exit(1)
+
+				log.setLevel(verbosity)
+				if verbosity == logging.DEBUG: stdoutHandler.setLevel(verbosity)
+
 				# refresh handler levels
 				pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
 				

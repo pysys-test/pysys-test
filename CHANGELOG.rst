@@ -241,6 +241,15 @@ Improvements to the `pysys.py` command line tool:
   the number of threads to use with `--threads auto` is specified on a 
   per-machine or per-user basis. 
 
+- Added the ability to set logging verbosity for specific `pysys.*` categories 
+  individually using `-vCAT=LEVEL`. For example to enable just DEBUG logging 
+  related to process starting, use `-vprocess=DEBUG`. Detailed DEBUG logging 
+  related to assertions including the processed version of the input files uses 
+  the category "assertions" and is no longer included by default when the 
+  root log level is specified using `-vDEBUG` since it tends to be excessively 
+  verbose and slow to generate; if required, it can be enabled using 
+  `-vassertions=DEBUG`.
+
 - Added automatic conversion of strings specified on the command line with 
   `-Xkey=value` to int, float or bool if there's a static variable of the 
   same name and one of those types defined on the test class. This makes it 
