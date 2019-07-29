@@ -1,5 +1,5 @@
 =========================
-PySys 1.5.0 Release Notes
+PySys 1.5.1 Release Notes
 =========================
 
 PySys can be used with Python 3.7/3.6/3.5. PySys also retains compatibility 
@@ -11,6 +11,29 @@ See installation notes in README.rst for more details.
 --------------------------
 What's new in this release
 --------------------------
+
+Miscellaneous new features
+--------------------------
+- TODO
+
+Improvements to the `pysys.py` command line tool
+------------------------------------------------
+- TODO
+
+Bug fixes
+---------
+- TODO
+
+Upgrade guide and compatibility
+-------------------------------
+- TODO
+
+---------------
+Release History
+---------------
+
+1.4.0 to 1.5.0
+--------------
 
 PySys 1.5.0 brings some significant new features for large PySys projects 
 including support for running a test in multiple modes, and 
@@ -31,8 +54,7 @@ that could required changes in existing projects; please review the
 compatibility section of this document and perform an initial test run using 
 the new PySys version to check for issues before switching over. 
 
-Miscellaneous new features
---------------------------
+Miscellaneous new features:
 
 - Added support for running tests in multiple modes from within a single PySys 
   execution. To make use of this, add the following property to your 
@@ -138,8 +160,7 @@ Miscellaneous new features
   other tests were using up all ports from the available pool; the new 
   behaviour is to block and retry until this timeout is reached.
   
-Improvements to the XML descriptors that provide information about tests
-------------------------------------------------------------------------
+Improvements to the XML descriptors that provide information about tests:
 
 - Added support for disabling search for testcases in part of a directory tree 
   by adding a `.pysysignore` or `pysysignore` file. This is just an empty file 
@@ -230,8 +251,7 @@ Improvements to the XML descriptors that provide information about tests
   tests (by programmatically creating PySys TestDescriptor objects for them).
   See the `pysys.xml.descriptor.DescriptorLoader` class for more details. 
 
-Improvements to the `pysys.py` command line tool
-------------------------------------------------
+Improvements to the `pysys.py` command line tool:
 
 - Added support for running tests by specifying just a (non-numeric) suffix 
   without needing to include the entire id. Although support for specifying a 
@@ -292,8 +312,7 @@ Improvements to the `pysys.py` command line tool
 - Changed `makeproject` so that when a template is to be specified, it is now 
   necessary to use an explicit `--template` argument, e.g `--template=NAME`. 
 
-Bug fixes
----------
+Bug fixes:
 
 - PySys now uses `Test outcome reason:` rather than `Test failure reason:` 
   to display the outcome, since there is sometimes a reason for non-failure 
@@ -320,8 +339,8 @@ Bug fixes
 - Fixed CSV performance reporter runDetails which was including each item 
   twice. 
 
-Upgrade guide and compatibility
--------------------------------
+Upgrade guide and compatibility:
+
 Occasionally it is necessary for a new PySys release to include changes that 
 might change or break the behaviour of existing test suites. As 1.5.0 is a 
 major release it is possible that some users might need to make changes:
@@ -393,9 +412,6 @@ major release it is possible that some users might need to make changes:
   `self.project` instead (which is defined on classes such as `BaseTest`, 
   `BaseRunner` etc). 
 
----------------
-Release History
----------------
 
 1.3.0 to 1.4.0
 --------------
