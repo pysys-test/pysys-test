@@ -288,7 +288,33 @@ Improvements to the `pysys.py` command line tool:
 
 - Changed `makeproject` so that when a template is to be specified, it is now 
   necessary to use an explicit `--template` argument, e.g `--template=NAME`. 
-  
+
+Bug fixes:
+
+- PySys now uses `Test outcome reason:` rather than `Test failure reason:` 
+  to display the outcome, since there is sometimes a reason for non-failure 
+  outcomes such as SKIPPED. 
+
+- Fixed `--purge` to delete files in nested subdirectories of the output 
+  directory not just direct children of the output directory. 
+
+- Previous versions of PySys did not complain if you created multiple tests 
+  with the same id (in different parent directories under the same project). 
+  This was dangerous as the results would overwrite each other, so in this 
+  version PySys checks for this condition and will terminate with an error 
+  if it is detected. If you intentionally have multiple tests with the same 
+  name in different directories, add an `<id-prefix>` element to the 
+  `pysystest.xml` or (better) to a `pysysdirconfig.xml` file to provide 
+  separate namespaces for the tests in each directory and avoid colliding ids. 
+
+- The Ant JUnit writer now includes the test duration. 
+
+- Improved `assertGrep` outcome reason to include the entire matching string 
+  when a `contains=False` test fails since `ERROR - The bad thing happened` is 
+  a much more useful outcome reason than just `ERROR`. 
+
+- Fixed CSV performance reporter runDetails which was including each item 
+  twice. 
 
 Upgrade guide and compatibility:
 
@@ -356,33 +382,6 @@ Upgrade guide and compatibility:
   `self.project` instead (which is defined on classes such as `BaseTest`, 
   `BaseRunner` etc). 
 
-Bug fixes:
-
-- PySys now uses `Test outcome reason:` rather than `Test failure reason:` 
-  to display the outcome, since there is sometimes a reason for non-failure 
-  outcomes such as SKIPPED. 
-
-- Fixed `--purge` to delete files in nested subdirectories of the output 
-  directory not just direct children of the output directory. 
-
-- Previous versions of PySys did not complain if you created multiple tests 
-  with the same id (in different parent directories under the same project). 
-  This was dangerous as the results would overwrite each other, so in this 
-  version PySys checks for this condition and will terminate with an error 
-  if it is detected. If you intentionally have multiple tests with the same 
-  name in different directories, add an `<id-prefix>` element to the 
-  `pysystest.xml` or (better) to a `pysysdirconfig.xml` file to provide 
-  separate namespaces for the tests in each directory and avoid colliding ids. 
-
-- The Ant JUnit writer now includes the test duration. 
-
-- Improved `assertGrep` outcome reason to include the entire matching string 
-  when a `contains=False` test fails since `ERROR - The bad thing happened` is 
-  a much more useful outcome reason than just `ERROR`. 
-
-- Fixed CSV performance reporter runDetails which was including each item 
-  twice. 
-  
 ---------------
 Release History
 ---------------
