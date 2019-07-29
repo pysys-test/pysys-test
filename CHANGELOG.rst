@@ -80,7 +80,7 @@ New features:
   `<collect-test-output>` to gather the coverage files and providing a 
   custom implementation of `BaseRunner.processCoverageData`.  
 
-- Added `BaseTest.assertEval` method which supercedes `assertThat` and provides 
+- Added `BaseTest.assertEval` method which supersedes `assertThat` and provides 
   a convenient way to assert an arbitrary Python expression, with generation of 
   a clear outcome reason that is easy to understand and debug. 
 
@@ -126,7 +126,7 @@ New features:
   `pysysproject.xml` configuration file.
 
 - Added environment variable `PYSYS_PORTS_FILE` which if present will be read 
-  as a utf-8/ascii file with one port number on each line, and used to populate 
+  as a UTF-8/ASCII file with one port number on each line, and used to populate 
   the pool of ports for `getNextAvailableTCPPort()`. This can be used to 
   avoid port conflicts when invoking PySys from an environment where some ports 
   are taken up by other processes. 
@@ -296,7 +296,7 @@ Upgrade guide and compatibility:
   directory, but instead to a `pysys-runner-OUTDIR` subdirectory of the 
   test root (or to `OUTDIR/pysys-runner` if `OUTDIR` is an absolute path). 
   This ensures that any files created by the runner go into a known location 
-  that is isolated from other runs using different `OUTDIR`s. The runner 
+  that is isolated from other runs using a different `OUTDIR`. The runner 
   `self.output` directory is often not actually used for anything since 
   most logic that writes output files lives in `BaseTest` subclasses, so 
   the runner output directory is not created (or cleaned) automatically. 

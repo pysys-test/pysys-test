@@ -271,7 +271,7 @@ specified modes::
   pysys run --mode MyMode1,MyMode2
   pysys run --mode !MyMode3,!MyMode4
 
-After sucessfully getting all your tests passing in their primary mode, it could 
+After successfully getting all your tests passing in their primary mode, it could 
 be useful to run them in every mode other than the primary one::
 
   pysys run --mode !PRIMARY
