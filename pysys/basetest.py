@@ -489,29 +489,29 @@ class BaseTest(ProcessUser):
 		data from a log file which can then be checked using this method. 
 		
 		@param evalstring: a string that will be formatted using .format(...) 
-		with the specified parameters, and result in failure outcome if not true. 
+			with the specified parameters, and result in failure outcome if not true. 
+			
+			Parameters should be specified using {name} syntax, and quoting is not 
+			required as string values are automatically escaped using repr. 
+			e.g. 'os.path.size({filename}) > {origFileSize}'. 
+			
+			Do not use an f-string instead of explicitly passing formatparams, as 
+			with an f-string this method will not know the names of the substituted 
+			parameters which makes the intention of the assertion harder to 
+			understand from looking at the test output. 
 		
-		Parameters should be specified using {name} syntax, and quoting is not 
-		required as string values are automatically escaped using repr. 
-		e.g. 'os.path.size({filename}) > {origFileSize}'. 
-		
-		Do not use an f-string instead of explicitly passing formatparams, as 
-		with an f-string this method will not know the names of the substituted 
-		parameters which makes the intention of the assertion harder to 
-		understand from looking at the test output. 
-
 		@param formatparams: Named parameters for the format string, which 
-		can be of any type. Use descriptive names for the parameters to produce 
-		an assertion message that makes it really clear what is being checked. 
-		
-		String parameters will be automatically passed through `repr()` before 
-		being formatted, so there is no need to perform additional 
-		quoting or escaping of strings. 
+			can be of any type. Use descriptive names for the parameters to produce 
+			an assertion message that makes it really clear what is being checked. 
+			
+			String parameters will be automatically passed through `repr()` before 
+			being formatted, so there is no need to perform additional 
+			quoting or escaping of strings. 
 		
 		@param abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. Unless abortOnError=True this method only throws 
-		an exception if the format string is invalid; failure to execute the 
-		eval(...) results in a BLOCKED outcome but no exception. 
+			assertion fails. Unless abortOnError=True this method only throws 
+			an exception if the format string is invalid; failure to execute the 
+			eval(...) results in a BLOCKED outcome but no exception. 
 		
 		"""
 		formatparams = {k: (repr(v) if isstring(v) else v) for (k,v) in formatparams.items()}
@@ -706,31 +706,31 @@ class BaseTest(ProcessUser):
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		
 		@param expr: The regular expression to check for in the file (or a string literal if literal=True), 
-		for example " ERROR .*".
-		 
-		For contains=False matches, you should end the expr with `.*` if you wish to include just the 
-		matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
-		then the entire matching line will be included in the outcome failure reason. 
-		
-		For contains=True matches, the expr itself is used as the outcome failure reason. 
+			for example " ERROR .*".
+			
+			For contains=False matches, you should end the expr with `.*` if you wish to include just the 
+			matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
+			then the entire matching line will be included in the outcome failure reason. 
+			
+			For contains=True matches, the expr itself is used as the outcome failure reason. 
 		
 		@param contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
 		@param ignores: Optional list of regular expressions that will be 
-		ignored when reading the file. 
+			ignored when reading the file. 
 		
 		@param literal: By default expr is treated as a regex, but set this to True to pass in 
 		a string literal instead.
 		
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
 		
 		@param abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. 
+			assertion fails. 
 		
 		@param assertMessage: Overrides the string used to describe this 
-		assertion in log messages and the outcome reason. 
+			assertion in log messages and the outcome reason. 
 		
 		"""
 		assert expr, 'expr= argument must be specified'

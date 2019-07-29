@@ -60,14 +60,15 @@ class ProcessUser(object):
 	@type output: string
 	
 	@ivar disableCoverage: Set to True to disable all code coverage collection for processes 
-	started from this instance. For example, to disable coverage in tests tagged with the 
-	'performance' group you could use a line like this in your BaseTest::
+		started from this instance. For example, to disable coverage in tests tagged with the 
+		'performance' group you could use a line like this in your BaseTest::
+		
+			if 'performance' in self.descriptor.groups: self.disableCoverage = True
+		
+		The built-in Python code coverage functionality in L{startPython} checks this 
+		flag. It is recommended that any other languages supporting code coverage 
+		also check the self.disableCoverage flag. 
 	
-		if 'performance' in self.descriptor.groups: self.disableCoverage = True
-	
-	The built-in Python code coverage functionality in L{startPython} checks this 
-	flag. It is recommended that any other languages supporting code coverage 
-	also check the self.disableCoverage flag. 
 	"""
 	
 	def __init__(self):
@@ -240,9 +241,9 @@ class ProcessUser(object):
 		@param arguments: A list of arguments to pass to the command
 		
 		@param environs: A dictionary specifying the environment to run the process in. 
-		If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
-		produce a suitable clean default environment for this `command`, containing a minimal set of variables. 
-		If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
+			If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
+			produce a suitable clean default environment for this `command`, containing a minimal set of variables. 
+			If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
 		
 		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
 		
@@ -251,45 +252,45 @@ class ProcessUser(object):
 		@param timeout: The timeout period after which to terminate processes running in the C{FOREGROUND}. 
 		
 		@param stdouterr: The filename prefix to use for the stdout and stderr of the process 
-		(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
-		L{allocateUniqueStdOutErr}. 
-		The stdouterr prefix is also used to form a default display name for 
-		the process if none is explicitly provided. 
-		The files are created relative to the test output directory. 
-		The filenames can be accessed from the returned process object using 
-		L{pysys.process.helper.CommonProcessWrapper.stdout} and 
-		L{pysys.process.helper.CommonProcessWrapper.stderr}.
+			(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
+			L{allocateUniqueStdOutErr}. 
+			The stdouterr prefix is also used to form a default display name for 
+			the process if none is explicitly provided. 
+			The files are created relative to the test output directory. 
+			The filenames can be accessed from the returned process object using 
+			L{pysys.process.helper.CommonProcessWrapper.stdout} and 
+			L{pysys.process.helper.CommonProcessWrapper.stderr}.
 		
 		@param stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
 		@param stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
 		
 		@param displayName: Logical name of the process used for display 
-		(defaults to a string generated from the stdouterr and/or the command).
+			(defaults to a string generated from the stdouterr and/or the command).
 		
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-		project setting)
+			project setting)
 
 		@param expectedExitStatus: The condition string used to determine whether the exit status/code 
-		returned by the process is correct. The default is '==0', as an exit code of zero usually indicates success, but if you 
-		are expecting a non-zero exit status (for example because you are testing correct handling of 
-		a failure condition) this could be set to '!=0' or a specific value such as '==5'. 
+			returned by the process is correct. The default is '==0', as an exit code of zero usually indicates success, but if you 
+			are expecting a non-zero exit status (for example because you are testing correct handling of 
+			a failure condition) this could be set to '!=0' or a specific value such as '==5'. 
 	
 		@param ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
-		exit code that doesn't match expectedExitStatus (or if the command cannot be run at all). 
-		This can be set to True in cases where you do not care whether the command succeeds or fails, or wish to handle the 
-		exit status separately with more complicated logic. 
+			exit code that doesn't match expectedExitStatus (or if the command cannot be run at all). 
+			This can be set to True in cases where you do not care whether the command succeeds or fails, or wish to handle the 
+			exit status separately with more complicated logic. 
+			
+			The default value of ignoreExitStatus=None means the value will 
+			be taken from the project property defaultIgnoreExitStatus, which can be configured in the project XML 
+			(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
+			compatibility with older PySys releases if no project property is set. 
 		
-		The default value of ignoreExitStatus=None means the value will 
-		be taken from the project property defaultIgnoreExitStatus, which can be configured in the project XML 
-		(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
-		compatibility with older PySys releases if no project property is set. 
-
 		@param quiet: If True, this method will not do any INFO or WARN level logging 
-		(only DEBUG level), unless a failure outcome is appended. This parameter can be 
-		useful to avoid filling up the log where it is necessary to repeatedly execute a 
-		command check for completion of some operation until it succeeds; in such cases 
-		you should usually set ignoreExitStatus=True as well since both success and 
-		failure exit statuses are valid. 
+			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
+			useful to avoid filling up the log where it is necessary to repeatedly execute a 
+			command check for completion of some operation until it succeeds; in such cases 
+			you should usually set ignoreExitStatus=True as well since both success and 
+			failure exit statuses are valid. 
 
 		@return: The process handle of the process (L{ProcessWrapper}).
 		@rtype: L{ProcessWrapper}
@@ -410,18 +411,18 @@ class ProcessUser(object):
 		    variables using `createEnvirons()`. 
 
 		@param command: If known, the full path of the executable for which 
-		a default environment is being created (when called from `startProcess` 
-		this is always set). This allows default environment variables to be 
-		customized for different process types e.g. Java, Python, etc. 
-		
-		When using `command=sys.executable` to launch another copy of the 
-		current Python executable, extra items from this process's path 
-		environment variables are added to the returned dictionary so that it 
-		can start correctly. On Unix-based systems this includes copying all of 
-		the load library path environment variable from the parent process. 
+			a default environment is being created (when called from `startProcess` 
+			this is always set). This allows default environment variables to be 
+			customized for different process types e.g. Java, Python, etc. 
+			
+			When using `command=sys.executable` to launch another copy of the 
+			current Python executable, extra items from this process's path 
+			environment variables are added to the returned dictionary so that it 
+			can start correctly. On Unix-based systems this includes copying all of 
+			the load library path environment variable from the parent process. 
 		
 		@param kwargs: Overrides of this method should pass any additional 
-		kwargs down to the super implementation, to allow for future extensions. 
+			kwargs down to the super implementation, to allow for future extensions. 
 		
 		@return: A new dictionary containing the environment variables. 
 		"""
@@ -1347,22 +1348,22 @@ class ProcessUser(object):
 		Writes the specified text to a file in the output directory. 
 		
 		@param file: The path of the file to write, either an absolute path or 
-		relative to the `self.output` directory. 
+			relative to the `self.output` directory. 
 		
 		@param text: The string to write to the file, with `\\n` 
-		for newlines (do not use `os.linesep` as the file will be opened in 
-		text mode so platform line separators will be added automatically).
-		
-		On Python 3 this must be a character string. 
-
-		On Python 2 this can be a character or byte string containing ASCII 
-		characters. If non-ASCII characters are used, it must be a unicode 
-		string if there is an encoding specified for this file/type, or 
-		else a byte string. 
+			for newlines (do not use `os.linesep` as the file will be opened in 
+			text mode so platform line separators will be added automatically).
+			
+			On Python 3 this must be a character string. 
+			
+			On Python 2 this can be a character or byte string containing ASCII 
+			characters. If non-ASCII characters are used, it must be a unicode 
+			string if there is an encoding specified for this file/type, or 
+			else a byte string. 
 		
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
 		"""
 		# This method provides similar functionality to the Python3 pathlib write_text method. 
 		

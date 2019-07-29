@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-@undocumented: DTD, log, DESCRIPTOR_TEMPLATE, XMLDescriptorParser, XMLDescriptorCreator
+@undocumented: DTD, log, DESCRIPTOR_TEMPLATE, XMLDescriptorParser, XMLDescriptorCreator, TestDescriptor._createDescriptorForMode
 """
 
 from __future__ import print_function
@@ -144,8 +144,6 @@ class TestDescriptor(object):
 	it's a normal testcase. 
 	@ivar userData: A dictionary that can be used for storing user-defined data 
 	in the descriptor.
-	
-	@undocumented: _createDescriptorForMode
 	"""
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
@@ -630,18 +628,18 @@ class DescriptorLoader(object):
 		@param dir: The parent directory to search for runnable tests. 
 		
 		@return: List of L{pysys.xml.descriptor.TestDescriptor} objects 
-		which could be selected for execution. 
-		
-		If a test can be run in multiple modes there must be a single descriptor 
-		for it in the list returned from this method. Each multi-mode 
-		descriptor is later expanded out into separate mode-specific 
-		descriptors (at the same time as descriptor filtering based on 
-		command line arguments, and addition of project-level 
-		execution-order), before the final list is sorted and passed to 
-		L{pysys.baserunner.BaseRunner}. 
-		
-		The order of the returned list is random, so the caller is responsible 
-		for sorting this list to ensure deterministic behaviour. 
+			which could be selected for execution. 
+			
+			If a test can be run in multiple modes there must be a single descriptor 
+			for it in the list returned from this method. Each multi-mode 
+			descriptor is later expanded out into separate mode-specific 
+			descriptors (at the same time as descriptor filtering based on 
+			command line arguments, and addition of project-level 
+			execution-order), before the final list is sorted and passed to 
+			L{pysys.baserunner.BaseRunner}. 
+			
+			The order of the returned list is random, so the caller is responsible 
+			for sorting this list to ensure deterministic behaviour. 
 		
 		@rtype: list
 		@raises UserError: Raised if no testcases can be found.

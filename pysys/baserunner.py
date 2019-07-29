@@ -25,7 +25,7 @@ base runner as a list of object references, so that the base runner can then ite
 list to perform the test execution. For more information see the L{pysys.baserunner.BaseRunner} 
 API documentation. 
 
-@undocumented: global_lock, N_CPUS, TestContainer
+@undocumented: global_lock, N_CPUS, TestContainer, BaseRunner._testScheduler
 """
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
@@ -94,8 +94,6 @@ class BaseRunner(ProcessUser):
 	@type log: logging.Logger
 	@ivar project: Reference to the project details as set on the module load of the launching executable  
 	@type project: L{Project}
-	
-	@undocumented: _testScheduler
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
