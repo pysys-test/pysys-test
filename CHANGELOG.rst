@@ -31,7 +31,8 @@ that could required changes in existing projects; please review the
 compatibility section of this document and perform an initial test run using 
 the new PySys version to check for issues before switching over. 
 
-New features:
+Miscellaneous new features
+--------------------------
 
 - Added support for running tests in multiple modes from within a single PySys 
   execution. To make use of this, add the following property to your 
@@ -137,7 +138,8 @@ New features:
   other tests were using up all ports from the available pool; the new 
   behaviour is to block and retry until this timeout is reached.
   
-Improvements to the XML descriptors that provide information about tests:
+Improvements to the XML descriptors that provide information about tests
+------------------------------------------------------------------------
 
 - Added support for disabling search for testcases in part of a directory tree 
   by adding a `.pysysignore` or `pysysignore` file. This is just an empty file 
@@ -228,7 +230,8 @@ Improvements to the XML descriptors that provide information about tests:
   tests (by programmatically creating PySys TestDescriptor objects for them).
   See the `pysys.xml.descriptor.DescriptorLoader` class for more details. 
 
-Improvements to the `pysys.py` command line tool:
+Improvements to the `pysys.py` command line tool
+------------------------------------------------
 
 - Added support for running tests by specifying just a (non-numeric) suffix 
   without needing to include the entire id. Although support for specifying a 
@@ -289,7 +292,8 @@ Improvements to the `pysys.py` command line tool:
 - Changed `makeproject` so that when a template is to be specified, it is now 
   necessary to use an explicit `--template` argument, e.g `--template=NAME`. 
 
-Bug fixes:
+Bug fixes
+---------
 
 - PySys now uses `Test outcome reason:` rather than `Test failure reason:` 
   to display the outcome, since there is sometimes a reason for non-failure 
@@ -316,24 +320,47 @@ Bug fixes:
 - Fixed CSV performance reporter runDetails which was including each item 
   twice. 
 
-Upgrade guide and compatibility:
+Upgrade guide and compatibility
+-------------------------------
+Occasionally it is necessary for a new PySys release to include changes that 
+might change or break the behaviour of existing test suites. As 1.5.0 is a 
+major release it is possible that some users might need to make changes:
+
+- Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 
+  from running, whereas previously they would just be logged. Since an invalid 
+  descriptor prevents the associated testcase from reporting a result, the 
+  new behaviour ensures such mistakes will be spotted and fixed promptly. 
+  If you have any non-PySys files under your PySys project root directory 
+  with names such as `descriptor.xml` which PySys would normally recognise 
+  as testcases, you can avoid errors by adding a `.pysysignore` file to prevent 
+  PySys looking in that part of the directory tree. 
+  
+- `ProcessUser.mkdir` now returns the absolute path (including the output 
+  directory) instead of just the relative path passed in. This make it easier 
+  to use in-line while performing operations such as creating a file in the 
+  new directory. Code that relied on the old behaviour of returning the 
+  path passed in may need to be updated to avoid having the output directory 
+  specified twice. If you're using `os.path.join` then no change will be 
+  required. 
 
 - The `self.output` variable in `BaseRunner` is no longer set to the current 
   directory, but instead to a `pysys-runner-OUTDIR` subdirectory of the 
   test root (or to `OUTDIR/pysys-runner` if `OUTDIR` is an absolute path). 
   This ensures that any files created by the runner go into a known location 
-  that is isolated from other runs using a different `OUTDIR`. The runner 
+  that is isolated from other runs using a different `OUTDIR`. The runner's 
   `self.output` directory is often not actually used for anything since 
   most logic that writes output files lives in `BaseTest` subclasses, so 
-  the runner output directory is not created (or cleaned) automatically. 
+  most users won't be affected. For the same reason, the runner output 
+  directory is not created (or cleaned) automatically. 
   If you have a custom `BaseRunner` that writes files to its output directory 
-  then you should add a call to `self.mkdir` to create the output directory 
-  after cleaning output from the previous test run using `self.deleteDir`. 
+  then you should add a call to `self.deleteDir` and then `self.mkdir` to 
+  clean previous output and then create the new output directory.
 
 - The behaviour of `ProcessUser.getDefaultEnvirons` has changed compared to 
-  PySys 1.4.0 when the command being launched is `sys.executable`, i.e. another 
-  instance of the current Python process (`getDefaultEnvirons` is used by 
-  `startProcess` when `environs=` is not explicitly provided). 
+  PySys 1.4.0, but only when the command being launched is `sys.executable`, 
+  i.e. another instance of the current Python process (`getDefaultEnvirons` is 
+  used by `startProcess` when `environs=` is not explicitly provided). 
+  
   In 1.4.0 the returned environment always set the `PYTHONHOME` environment 
   variable, and on Windows would add a copy of the `PATH` environment from the 
   parent process. In PySys 1.5.0 this is no longer the case, as the 1.4.0 
@@ -344,22 +371,6 @@ Upgrade guide and compatibility:
   copies the `LD_LIBRARY_PATH` from the parent process only on Unix (where it 
   is necessary to reliably load the required libraries). `getDefaultEnvirons` 
   no longer sets the `PYTHONHOME` environment variable. 
-  
-- `ProcessUser.mkdir` now returns the absolutized path (including the output 
-  directory) instead of just the relative path passed in. This make it easier 
-  to use in-line while performing operations such as creating a file in the 
-  new directory. Code that relied on the old behaviour of returning the 
-  path passed in may need to be updated to avoid having the output directory 
-  specified twice. 
-
-- Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 
-  from running, whereas previously they would just be logged. Since an invalid 
-  descriptor prevents the associated testcase from reporting a result, the 
-  new behaviour ensures such mistakes will be spotted and fixed promptly. 
-  If you have any non-PySys files under your PySys project root directory 
-  with names such as `descriptor.xml` which PySys would normally recognise 
-  as testcases, you can avoid errors by adding a `.pysysignore` file to prevent 
-  PySys looking in that part of the directory tree. 
 
 - On Windows, paths within the testcase are now normalized so that the drive 
   letter is always capitalized (e.g. `C:` not `c:`). Previously the 
