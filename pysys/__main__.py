@@ -24,7 +24,7 @@ def main(args=None):
 	import pysys.constants
 	# if user selected an option that needs a project, must set 
 	# constants.PROJECT before any modules start importing * from constants
-	if len(sys.argv) >= 2 and sys.argv[1] in ['run', 'make', 'print', 'clean']:
+	if len(sys.argv) >= 2 and sys.argv[1] in ['run', 'make', 'print', 'clean'] and '--help' not in sys.argv and '-h' not in sys.argv:
 		pysys.constants.loadproject(os.getcwd())
 
 	import pysys.launcher.console
