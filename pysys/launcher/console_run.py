@@ -115,8 +115,8 @@ class ConsoleLaunchHelper(object):
 		print("     ^Test.*                   - All tests matching the specified regex")
 		print("")
 		print("   e.g. ")
-		print("       %s -vDEBUG --include MYTESTS 1:4 Test_007" % _PYSYS_SCRIPT_NAME)
-		print("       %s -c2 -Xhost=localhost Test_001:" % _PYSYS_SCRIPT_NAME)
+		print("       %s run -c2 --threads=auto Test_007 Test_001: 3:5" % _PYSYS_SCRIPT_NAME)
+		print("       %s run -vDEBUG --include MYTESTS -Xhost=localhost" % _PYSYS_SCRIPT_NAME)
 		print("")
 		sys.exit()
 
