@@ -636,28 +636,33 @@ class BaseTest(ProcessUser):
 			abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the comparison of two input text files.
 		
-		This method performs a file comparison on two input files. The files are pre-processed prior to the 
-		comparison to either ignore particular lines, sort their constituent lines, replace matches to regular 
+		This method performs a file comparison on two input files. 
+		
+		The files can be pre-processed prior to the comparison to either ignore particular lines, 
+		sort their constituent lines, replace matches to regular 
 		expressions in a line with an alternate value, or to only include particular lines. Should the files 
 		after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, otherwise
 		a C{FAILED} outcome is added.
 		
-		Although this method can perform transformation of the files directly, it is often easier to instead use 
-		L{copy} to perform the transformation (e.g. stripping out timestamps, finding lines of interest etc)
+		Note that although this method can perform transformation of the files directly, it is often easier to instead use 
+		L{copy} to perform the transformations (e.g. stripping out timestamps, finding lines of interest etc)
 		and then separately call assertDiff on the processed file. This makes it easier to generate a suitable 
 		reference file and to diagnose test failures. 
 		
-		@param file1: The basename of the first file used in the file comparison
-		@param file2: The basename of the second file used in the file comparison (often a reference file)
+		@param file1: The basename or full path of the actual output file to be used in the file comparison. 
+		If you need some complex transformations to get the file into a form suitable for diffing 
+		(e.g. stripping out timestamps etc), you may wish to use the L{copy} method to 
+		create a suitable pre-processed copy of the file, and use `self.assertDiff(file1=self.copy(...)`, file2='reference-file.txt'). 
+		@param file2: The basename or full path of the expected/reference file used in the file comparison.
 		@param filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
 		@param filedir2: The dirname of the second file (defaults to the testcase reference directory)
 		@param ignores: A list of regular expressions used to denote lines in the files which should be ignored
 		@param sort: Boolean flag to indicate if the lines in the files should be sorted prior to the comparison
 		@param replace: List of tuples of the form ('regexpr', 'replacement'). For each regular expression in the 
-			list, any occurences in the files is replaced with the replacement value prior to the comparison being 
+			list, any occurences in the files are replaced with the replacement value prior to the comparison being 
 			carried out. This is often useful to replace timestamps in logfiles etc.
 		@param includes: A list of regular expressions used to denote lines in the files which should be used in the 
-			comparison. Only lines which match an expression in the list are used for the comparison
+			comparison. Only lines which match an expression in the list are used for the comparison.
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 

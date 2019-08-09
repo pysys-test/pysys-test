@@ -1411,6 +1411,8 @@ class ProcessUser(object):
 		@param encoding: The encoding to use to open the file. 
 		The default value is None which indicates that the decision will be delegated 
 		to the L{getDefaultFileEncoding()} method. 
+		
+		@return: the absolute path of the destination file. 
 		"""
 		src = toLongPathSafe(os.path.join(self.output, src))
 		dest = toLongPathSafe(os.path.join(self.output, dest))
@@ -1430,4 +1432,5 @@ class ProcessUser(object):
 						if line is not None: destf.write(line)
 			
 		shutil.copymode(src, dest)
+		return dest
 		
