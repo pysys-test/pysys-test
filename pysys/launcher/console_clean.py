@@ -129,7 +129,13 @@ class ConsoleCleanTestHelper(object):
 						log.debug("Output directory does not exist: " + pathToDelete)
 
 def cleanTest(args):
-	cleaner = ConsoleCleanTestHelper(os.getcwd(), "clean")
-	cleaner.parseArgs(args)
-	cleaner.clean()
-
+	try:
+		cleaner = ConsoleCleanTestHelper(os.getcwd(), "clean")
+		cleaner.parseArgs(args)
+		cleaner.clean()
+	except Exception as e:
+		sys.stderr.write('\nERROR: %s\n' % e)
+		if not isinstance(e, UserError): traceback.print_exc()
+		sys.exit(10)
+		
+		
