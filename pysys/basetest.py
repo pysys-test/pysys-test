@@ -107,6 +107,14 @@ class BaseTest(ProcessUser):
 	def __init__ (self, descriptor, outsubdir, runner):
 		"""Create an instance of the BaseTest class.
 		
+		SUbclasses should not usually have any reason to override this constructor, 
+		and in particular must not put any code that allocates resources here 
+		(for example, starting threads, making connections etc), since if the 
+		constructor throws for some reason then no cleanup will be performed. 
+		
+		Instead, use the L{setup()} method for setting up your test prior to 
+		execution. 
+		
 		@param descriptor: The descriptor for the test giving all test details
 		@param outsubdir: The output subdirectory the test output will be written to
 		@param runner: Reference to the runner responsable for executing the testcase
@@ -175,6 +183,8 @@ class BaseTest(ProcessUser):
 	# abstract and must be implemented by a subclass. 
 	def setup(self):
 		"""Setup method which may optionally be overridden to perform custom setup operations prior to test execution.
+		
+		If this method throws an exception, L{cleanup} will be called.
 		
 		"""
 		pass		
