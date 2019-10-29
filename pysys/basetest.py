@@ -324,11 +324,11 @@ class BaseTest(ProcessUser):
 		function. 
 		
 		The target function will be invoked with the specified keyword 
-		arguments and also the special keyword argument `stopping` which is 
-		a Python C{threading.Event} instance that can be used to detect 
-		when the thread has been requested to terminate. It is recommended 
-		to use this event instead of C{time.sleep} to avoid waiting when 
-		the thread is meant to be finishing. 
+		arguments, preceded by the special keyword arguments `stopping` and `log`. 
+		The `stopping` argument is a Python C{threading.Event} instance that 
+		can be used to detect when the thread has been requested to terminate. 
+		It is recommended to use this event instead of C{time.sleep} to avoid 
+		waiting when the thread is meant to be finishing. 
 		
 		Example usage::
 			class PySysTest(BaseTest):
