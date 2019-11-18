@@ -136,7 +136,10 @@ Property properties will always be of string type.
 Producing code coverage reports
 -------------------------------
 PySys includes built-in support for producing coverage reports for programs 
-written in Python, using the `coverage.py` library. 
+written in Python, using the `coverage.py` library. To enable this, 
+set the pythonCoverageDir and collect-test-output project options (see below), 
+make sure you're using `startPython` to execute Python from within your tests, 
+and run PySys with `-XpythonCoverage=true`. 
 
 If you wish to produce coverage reports using any other tool or language (such 
 as Java), this is easy to achieve by following the same pattern:
