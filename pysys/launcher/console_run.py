@@ -59,71 +59,78 @@ class ConsoleLaunchHelper(object):
 		"""
 		# printXOptions is not documented so probably little-used
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
-		print("\nPySys System Test Framework (version %s): Console run test helper" % __version__) 
-		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
+		print("\nPySys System Test Framework (version %s)" % __version__) 
+		print("\nUsage: %s %s [TESTIDS | OPTIONS]*" % (_PYSYS_SCRIPT_NAME, self.name))
+		# chars                                                                |80                                      | 120
 		print("""
 Execution options
 -----------------
-     -h | --help                  print this message
-     -r | --record                record test results using all configured record writers
-     -p | --purge                 purge the output subdirectory on test pass
-     -v | --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
-                      CAT=LEVEL   set the verbosity for a specific category e.g. assertions=, process=
-     -c | --cycle     INT         set the the number of cycles to run the tests
-     -o | --outdir    STRING      set the name of the directory to use for this run's test output
-     -n | --threads   INT|auto    set the number of worker threads to run the tests (defaults to 1). 
-                                  A value of 'auto' sets to the number of available CPUs, or if set, 
-                                  the value of the PYSYS_DEFAULT_THREADS environment variable.
-     -g | --progress              print progress updates after completion of each test (or set
-                                  the PYSYS_PROGRESS=true environment variable)
-     -b | --abort     STRING      set the default abort on error property (true|false, overrides 
-                                  that specified in the project properties)
-          --printLogs STRING      indicates for which outcome types the run.log output 
-                                  will be printed to the stdout console; 
-                                  options are: all|none|failures, default is all.
-     -y | --validateOnly          test the validate() method without re-running execute()
-     -X               KEY=VALUE   set user defined options to be passed through to the testcase and 
-                                  runner instances. The left hand side string is the data attribute 
-                                  to set, the right hand side string the value (True if not specified)""")
+     -h, --help                  print this message
+     -r, --record                record test results using all configured record writers
+     -c, --cycle     INT         set the the number of cycles to run the tests
+     -o, --outdir    STRING      set the name of the directory to use for this run's test output
+     -n, --threads   INT|auto    set the number of worker threads to run the tests (defaults to 1). 
+                                 A value of 'auto' sets to the number of available CPUs, or if set, 
+                                 the value of the PYSYS_DEFAULT_THREADS environment variable.
+                                 options are: all|none|failures, default is all.
+     -p, --purge                 purge the output subdirectory on test pass
+     -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
+     -v, --verbosity CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
+     -y, --validateOnly          test the validate() method without re-running execute()
+
+     -X KEY=VALUE                set user defined options to be passed through to the testcase and 
+                                 runner instances. The left hand side string is the data attribute 
+                                 to set, the right hand side string the value (True if not specified)""")
 		if printXOptions: printXOptions()
 		print("""
-Selection and filtering
------------------------
-     -G | --grep      STRING      run only tests whose title or id contains the specified regex
-                                  (matched case insensitively)
-     -m | --mode | --modeinclude  ALL,PRIMARY,!PRIMARY,MyMode1,!MyMode2,...
-                                  run tests in the specifies mode(s):
+Advanced:
+     --printLogs STRING          indicates for which outcome types the run.log output 
+                                 will be printed to the stdout console; 
+     -g, --progress              print progress updates after completion of each test (or set
+                                 the PYSYS_PROGRESS=true environment variable)
+     -b, --abort     STRING      set the default abort on error property (true|false, overrides 
+                                 that specified in the project properties)
+
+Selection and filtering options
+-------------------------------
+     -i, --include   STRING      set the test groups to include (can be specified multiple times)
+     -e, --exclude   STRING      set the test groups to exclude (can be specified multiple times)
+     -G, --grep      STRING      run only tests whose title or id contains the specified regex
+                                 (matched case insensitively)
+     -m, --mode, --modeinclude ALL,PRIMARY,!PRIMARY,MyMode1,!MyMode2,...
+                                 run tests in the specifies mode(s):
                                    - use PRIMARY to select the test's
                                      first/main mode (this is the default)
                                    - use ALL to select all modes
                                    - use !MODE as an alias for modeexclude
-        | --modeexclude           MyMode1,MyMode2,...
-                                  run tests excluding specified mode(s)
-     -a | --type      STRING      set the test type to run (auto or manual, default is both)"
-     -t | --trace     STRING      set the requirement id for the test run
-     -i | --include   STRING      set the test groups to include (can be specified multiple times)
-     -e | --exclude   STRING      set the test groups to exclude (can be specified multiple times)
-   
-[tests] describes a set of tests to be run. Note that multiple tests can be specified, and if 
-none are given all available tests will be run. If an include group is given, only tests that 
-belong to that group will be run. If an exclude group is given, tests in the group will not be run. 
+     --modeexclude MyMode1,MyMode2,...
+                                 run tests excluding specified mode(s)
+     -a, --type      STRING      set the test type to run (auto or manual, default is both)"
+     -t, --trace     STRING      set the requirement id for the test run
+
+Test identifiers
+----------------
+By default, PySys executes all available tests under the current directory will be run. Alternatively to run just a 
+subset, one or more tests or sequences of tests can be specified on the command line. In both cases, tests are filtered 
+based on the selection options listed above (e.g. --include/--exclude). 
+
 Tests should contain only alphanumeric and the underscore characters. The following syntax is used 
-to select a test set:
+to select an individual test, or a sequence of numbered tests:
 
-     Test_001                  - a single testcase with id Test_001
-     _001                      - a single testcase ending with _001
-     1                         - a single testcase ending with number 1 (but not ending '11')
-                                 (if it has multiple modes, runs the primary one, or uses --mode)
-     Test_001~ModeA            - run testcase with id Test_001 in ModeA
-     :Test_002                 - up to testcase with id Test_002
-     Test_001:                 - from testcase with id Test_001 onwards
-     Test_001:Test_002         - all tests between tests with ids Test_001 and Test_002
-     2 Test_001                - Test_001 and Test_002
-     ^Test.*                   - All tests matching the specified regex
+     Test_001                   - a single testcase with id equal to or ending with Test_001
+     _001                       - a single testcase with id equal to or ending with _001
+     1                          - a single testcase ending with number 1 (but not ending '11')
+                                  (if it has multiple modes, runs the primary one, or uses --mode)
+     Test_001~ModeA             - run testcase with id Test_001 in ModeA
+     :Test_002                  - all tests up to and including the testcase with id Test_002
+     Test_001:                  - all tests from Test_001 onwards
+     Test_001:Test_002          - all tests between tests with ids Test_001 and Test_002 (inclusive)
+     2 Test_001                 - Test_001 and Test_002
+     ^Test.*                    - All tests matching the specified regex
 
-   e.g. 
-       {scriptname} run -c2 --threads=auto Test_007 Test_001: 3:5
-       {scriptname} run -vDEBUG --include MYTESTS -Xhost=localhost
+e.g. 
+     {scriptname} run -c2 --threads=auto Test_007 Test_001: 3:5
+     {scriptname} run -vDEBUG --include MYTESTS -Xhost=localhost
 """.format(scriptname=_PYSYS_SCRIPT_NAME))
 		sys.exit()
 
