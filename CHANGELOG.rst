@@ -14,7 +14,10 @@ What's new in this release
 
 Miscellaneous new features
 --------------------------
-- TODO
+- `basetest.BaseTest.assertDiff` usability was improved by including the relative path to each file 
+  in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
+  file without losing track of which is which. This also makes it easier to manually diff the output directory against 
+  the ``Reference`` directory using GUI diff tools when debugging test failures. 
 
 Improvements to the `pysys.py` command line tool
 ------------------------------------------------

@@ -160,10 +160,20 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 			for i in list1: l1.append("%s\n"%i)
 			for i in list2: l2.append("%s\n"%i)
 
+			file1display = file1
+			file2display = file2
+			try:
+				commonprefix = os.path.commonpath([file1display, file2display])
+			except ValueError: pass
+			else:
+				file1display = file1display[len(commonprefix)+1:]
+				file2display = file2display[len(commonprefix)+1:]
+			# heuristic to give a longer prefix than just basename (to distinguish reference+output files with same basename)
+
 			# nb: have to switch 1 and 2 around to get the right diff for a typical output,ref file pair
 			diff = ''.join(difflib.unified_diff(l2, l1, 
-				fromfile='%s (%d lines)'%(os.path.basename(file2), len(l2)),
-				tofile='%s (%d lines)'%(os.path.basename(file1), len(l1)),
+				fromfile='%s (%d lines)'%(file2display, len(l2)),
+				tofile='%s (%d lines)'%(file1display, len(l1)),
 				))
 			if unifiedDiffOutput:
 				with openfile(unifiedDiffOutput, 'w', encoding=encoding) as f:
