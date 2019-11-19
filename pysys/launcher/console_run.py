@@ -65,29 +65,29 @@ class ConsoleLaunchHelper(object):
 		print("""
 Execution options
 -----------------
-     -h, --help                  print this message
-     -r, --record                record test results using all configured record writers
-     -c, --cycle     INT         set the the number of cycles to run the tests
-     -o, --outdir    STRING      set the name of the directory to use for this run's test output
-     -n, --threads   INT|auto    set the number of worker threads to run the tests (defaults to 1). 
+     -c, --cycle     INT         run each test the specified number of times
+     -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path)
+     -n, --threads   INT | auto  set the number of worker threads to run the tests (defaults to 1). 
                                  A value of 'auto' sets to the number of available CPUs, or if set, 
                                  the value of the PYSYS_DEFAULT_THREADS environment variable.
-                                 options are: all|none|failures, default is all.
-     -p, --purge                 purge the output subdirectory on test pass
+     -p, --purge                 purge all files except run.log from the output directory (unless test fails)
+     -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
      -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
      -v, --verbosity CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
      -y, --validateOnly          test the validate() method without re-running execute()
+     -h, --help                  print this message
 
-     -X KEY=VALUE                set user defined options to be passed through to the testcase and 
-                                 runner instances. The left hand side string is the data attribute 
-                                 to set, the right hand side string the value (True if not specified)""")
+     -X KEY[=VALUE]              set user-defined overrides to be set on the testcase and runner instances. The VALUE 
+                                 will be available to Python as "self.KEY". Value is True if not explicitly provided. 
+""".rstrip())
 		if printXOptions: printXOptions()
 		print("""
 Advanced:
-     --printLogs STRING          indicates for which outcome types the run.log output 
-                                 will be printed to the stdout console; 
      -g, --progress              print progress updates after completion of each test (or set
                                  the PYSYS_PROGRESS=true environment variable)
+     --printLogs STRING          indicates for which outcome types the run.log output 
+                                 will be printed to the stdout console; 
+                                 options are: all|none|failures, default is all.
      -b, --abort     STRING      set the default abort on error property (true|false, overrides 
                                  that specified in the project properties)
 
@@ -129,7 +129,7 @@ to select an individual test, or a sequence of numbered tests:
      ^Test.*                    - All tests matching the specified regex
 
 e.g. 
-     {scriptname} run -c2 --threads=auto Test_007 Test_001: 3:5
+     {scriptname} run -c2 -w4 -u --threads=auto Test_007 Test_001: 3:5
      {scriptname} run -vDEBUG --include MYTESTS -Xhost=localhost
 """.format(scriptname=_PYSYS_SCRIPT_NAME))
 		sys.exit()
