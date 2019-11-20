@@ -169,13 +169,13 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 			file1display = file1
 			file2display = file2
 			try:
-				commonprefix = os.path.commonpath([file1display, file2display])
+				commonprefix = os.path.commonprefix([file1display, file2display])
 			except ValueError: pass
 			else:
 				if commonprefix:
 					# heuristic to give a longer prefix than just basename (to distinguish reference+output files with same basename)
-					file1display = file1display[len(commonprefix)+1:]
-					file2display = file2display[len(commonprefix)+1:]
+					file1display = file1display[len(commonprefix):]
+					file2display = file2display[len(commonprefix):]
 
 			# nb: have to switch 1 and 2 around to get the right diff for a typical output,ref file pair
 			diff = ''.join(difflib.unified_diff(l2, l1, 
