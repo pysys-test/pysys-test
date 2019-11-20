@@ -100,20 +100,20 @@ Execution options
                                A value of 'auto' sets to the number of available CPUs, or if set, 
                                the value of the PYSYS_DEFAULT_THREADS environment variable.
    -p, --purge                 purge all files except run.log from the output directory (unless test fails)
-   -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
    -v, --verbosity CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
    -y, --validateOnly          test the validate() method without re-running execute()
    -h, --help                  print this message
  
-   -X KEY[=VALUE]              set user-defined overrides to be set on the testcase and runner instances. The VALUE 
-                               will be available to Python as "self.KEY". Value is True if not explicitly provided. 
+   -Xkey[=value]               set user-defined override attributes to be set on the testcase and runner instances. The 
+                               value is available to Python as "self.key". Value is True if not explicitly provided. 
 """.rstrip())
 		if printXOptions: printXOptions()
 		print("""
 Advanced:
    -g, --progress              print progress updates after completion of each test (or set
                                the PYSYS_PROGRESS=true environment variable)
+   -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
    --printLogs STRING          indicates for which outcome types the run.log output 
                                will be printed to the stdout console; 
                                options are: all|none|failures, default is all.
