@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 		shutil.copytree(self.input, self.output+'/test')
 		
 		ports = [self.getNextAvailableTCPPort() for i in range(5)]
-		self.write_text('allocated-ports.txt', '\n'.join(str(p) for p in ports))
+		self.write_text('allocated-ports.txt', '\n'.join(str(p) for p in ports)+'\n')
 		
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/pysys-output'], workingDir='test', 
 			environs={'PYSYS_PORTS_FILE':self.output+'/allocated-ports.txt'})

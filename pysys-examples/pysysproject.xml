@@ -79,6 +79,12 @@
 	-->
 	<property name="defaultEnvironsTempDir" value="self.output"/>
 
+	<!-- Recommended behaviour is to not strip whitespace unless explicitly requested; this option exists to keep 
+		compatibility for old projects. 
+	-->
+	<property name="defaultAssertDiffStripWhitespace" value="False"/>
+
+
 	<!-- 
 	Controls whether print() and sys.stdout.write() statements will be 
 	converted into logger.info() calls. If redirection is enabled, output 

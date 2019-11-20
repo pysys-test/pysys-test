@@ -643,7 +643,7 @@ class BaseTest(ProcessUser):
 
 
 	def assertDiff(self, file1, file2=None, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], encoding=None, 
-			abortOnError=False, assertMessage=None):
+			abortOnError=False, assertMessage=None, stripWhitespace=None):
 		"""Perform a validation assert on the comparison of two input text files, for example comparing a file from the 
 		output directory against a reference file containing the expected output.
 		
@@ -671,6 +671,10 @@ class BaseTest(ProcessUser):
 		@param replace: List of tuples of the form ('regexpr', 'replacement'). For each regular expression in the 
 			list, any occurences in the files are replaced with the replacement value prior to the comparison being 
 			carried out. This is often useful to replace timestamps in logfiles etc.
+		@param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
+			which means indentation differences and whether the file ends with a blank line do not affect the outcome. 
+			If the value is ``None``, delegates to the value of the project property ``defaultAssertDiffStripWhitespace`` 
+			(which is True for old projects, but recommended to be False for new projects). 
 		@param includes: A list of regular expressions used to denote lines in the files which should be used in the 
 			comparison. Only lines which match an expression in the list are used for the comparison.
 		@param encoding: The encoding to use to open the file. 
@@ -697,13 +701,16 @@ class BaseTest(ProcessUser):
 
 		log.debug("Performing file comparison diff with file1=%s and file2=%s", f1, f2)
 		
+		if stripWhitespace is None: stripWhitespace = self.getBoolProperty('defaultAssertDiffStripWhitespace', default=True)
+		
 		msg = assertMessage or ('File comparison between %s and %s'%(
 			self.__stripTestDirPrefix(f1), self.__stripTestDirPrefix(f2)))
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
 		result = False
 		try:
 			result = filediff(f1, f2, 
-				ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
+				ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1), 
+				stripWhitespace=stripWhitespace)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)

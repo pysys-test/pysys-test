@@ -9,6 +9,13 @@ class PySysTest(BaseTest):
 		# straight diff
 		self.copy(self.input+'/file1.txt', 'file1.txt')
 		self.assertDiff(file1='file1.txt')
+
+		self.assertDiff(file1='file1.txt', file2='file1_with_whitespace.txt')
+		self.checkForFailedOutcome()
+		
+		# override project/test property; should now pass
+		self.defaultAssertDiffStripWhitespace = True
+		self.assertDiff(file1='file1.txt', file2='file1_with_whitespace.txt')
 		
 		# diff with an ignores
 		self.assertDiff(file1='file2.txt', filedir1=self.input, file2='ref_file.txt', ignores=['\(on my Vespa 300 GTS ...\)'])
@@ -41,7 +48,7 @@ class PySysTest(BaseTest):
 		self.log.info('(expected failed outcome)')
 		outcome = self.outcome.pop()
 		if outcome == FAILED: self.addOutcome(PASSED)
-		else: self.addOutcome(FAILED, 'did not get expected failure')
+		else: self.addOutcome(FAILED, 'did not get expected failure', abortOnError=True)
 		self.log.info('')
 		
 		

@@ -23,6 +23,10 @@ Miscellaneous new features
   for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
   ``Project Help`` heading is automatically added is no other heading is present, and PySys will intelligently add or 
   remove indentation from the specified content so that it aligns with the built-in options.
+- ``pysysproject.xml`` has a new property "defaultAssertDiffStripWhitespace" which controls whether 
+  `pysys.basetest.BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
+  value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
+  is True. 
 
 Improvements to the `pysys.py` command line tool
 ------------------------------------------------
@@ -34,7 +38,9 @@ Bug fixes
 
 Upgrade guide and compatibility
 -------------------------------
-- TODO
+- Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to set this to False in 
+  your ``pysysproject.xml`` file, but it is likely some test reference files may need fixing, so the default value is 
+  True which maintains pre-1.5.1 behaviour.
 
 ---------------
 Release History

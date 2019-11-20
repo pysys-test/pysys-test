@@ -97,7 +97,7 @@ def logContents(message, list):
 
 
 
-def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None, encoding=None):
+def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None, encoding=None, stripWhitespace=True):
 	"""Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.
 	
 	The method reads in the files and loads the contents of each as a list of strings. The two files are 
@@ -114,6 +114,8 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 	@param ignore: A list of regular expressions which remove entries in the input file contents before making the comparison
 	@param sort: Boolean to sort the input file contents before making the comparison
 	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison
+	@param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
+		which means indentation differences and whether the file ends with a blank line do not affect the outcome. 
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
 	@param unifiedDiffOutput: If specified, indicates the full path of a file to which unified diff output will be written, 
 		if the diff fails. 
@@ -132,10 +134,14 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 		list2 = []
 
 		with openfile(file1, 'r', encoding=encoding) as f:
-			for i in f: list1.append(i.strip())
+			for i in f: 
+				if stripWhitespace: i = i.strip()
+				list1.append(i)
 
 		with openfile(file2, 'r', encoding=encoding) as f:
-			for i in f: list2.append(i.strip())
+			for i in f: 
+				if stripWhitespace: i = i.strip()
+				list2.append(i)
 		
 		list1 = trimContents(list1, ignore, exclude=True)
 		list2 = trimContents(list2, ignore, exclude=True)
