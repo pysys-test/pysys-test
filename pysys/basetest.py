@@ -661,6 +661,17 @@ class BaseTest(ProcessUser):
 		Should the files after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, 
 		otherwise a C{FAILED} outcome is added.
 		
+		If you have a large set of test reference files which need to be updated after a behaviour or output formatting 
+		change, you can use a special command line option which makes ``assertDiff`` overwrite the reference files with 
+		a copy of the actual comparison file in cases where the diff would otherwise fail. 
+		Use this feature with caution, since it overwrites reference files with no backup. In 
+		particular, make sure you have committed all reference files to version control before running the command, and 
+		the afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
+		committing. To use 
+		this feature, run::
+		
+			pysys.py run -XautoUpdateAssertDiffReferences
+		
 		@param file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. 
 		@param file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.
 			The default is for file2 to be the same basename as file1. 
@@ -708,9 +719,17 @@ class BaseTest(ProcessUser):
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
 		result = False
 		try:
-			result = filediff(f1, f2, 
-				ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1), 
-				stripWhitespace=stripWhitespace)
+			for i in [0, 1]:
+				result = filediff(f1, f2, 
+					ignores, sort, replace, includes, unifiedDiffOutput=unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1), 
+					stripWhitespace=stripWhitespace)
+				
+				if (not result) and self.getBoolProperty('autoUpdateAssertDiffReferences'):
+					log.warn('... -XautoUpdateAssertDiffReferences option is enabled, so overwriting reference file %s and retrying ... '%f2)
+					self.copy(f1, f2)
+					continue
+
+				break
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)

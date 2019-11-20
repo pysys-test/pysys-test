@@ -18,11 +18,22 @@ Miscellaneous new features
   in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
   file without losing track of which is which. This also makes it easier to manually diff the output directory against 
   the ``Reference`` directory using GUI diff tools when debugging test failures. 
+
+- `basetest.BaseTest.assertDiff` has a new advanced feature, ``autoUpdateAssertDiffReferences``, to help when you 
+  have a large set of test reference files which need to be updated after a behaviour or output formatting change. 
+  If you run the tests with ``-XautoUpdateAssertDiffReferences`` any diff failures will result in PySys overwriting 
+  the reference file with the contents of the comparison file, providing an easy way to quickly update a large set 
+  of references. Use this feature with caution, since it overwrites reference files with no backup. In 
+  particular, make sure you have committed all reference files to version control before running the command, and 
+  the afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
+  committing. 
+
 - ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
   used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
   for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
   ``Project Help`` heading is automatically added is no other heading is present, and PySys will intelligently add or 
   remove indentation from the specified content so that it aligns with the built-in options.
+
 - ``pysysproject.xml`` has a new property "defaultAssertDiffStripWhitespace" which controls whether 
   `pysys.basetest.BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
   value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
