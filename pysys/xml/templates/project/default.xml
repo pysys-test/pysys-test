@@ -53,4 +53,6 @@
 			name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 	</formatters>
 	
+	<project-help>
+	</project-help>
 </pysysproject>

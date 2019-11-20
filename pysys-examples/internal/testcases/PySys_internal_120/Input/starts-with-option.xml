@@ -1,0 +1,13 @@
+<pysysproject>
+	<project-help>
+	 
+		<!-- starts with a comment -->
+		
+		<![CDATA[
+		-Xfoo=bar This is information about the 
+		          specified option
+		
+		Hopefully it will indent everything OK.    
+		]]>
+	</project-help>
+</pysysproject>

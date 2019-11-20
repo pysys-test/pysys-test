@@ -1,0 +1,14 @@
+<pysysproject>
+	<project-help>
+	 
+		<!-- starts with some tabs-->
+		
+		
+		 This is some information
+		 about the project with 
+		   an indented line and
+  a line without much indentation and
+
+		 a blank line.    
+	</project-help>
+</pysysproject>

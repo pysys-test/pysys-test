@@ -18,6 +18,11 @@ Miscellaneous new features
   in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
   file without losing track of which is which. This also makes it easier to manually diff the output directory against 
   the ``Reference`` directory using GUI diff tools when debugging test failures. 
+- ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
+  used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
+  for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
+  ``Project Help`` heading is automatically added is no other heading is present, and PySys will intelligently add or 
+  remove indentation from the specified content so that it aligns with the built-in options.
 
 Improvements to the `pysys.py` command line tool
 ------------------------------------------------

@@ -53,6 +53,35 @@ class ConsoleLaunchHelper(object):
 		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=']
 
 
+	def getProjectHelp(self):
+		help = Project.getInstance().projectHelp
+		if not help: return None
+
+		lines = help.rstrip().split('\n')
+		# delete blank lines at start
+		while lines and not lines[0].strip():
+			del lines[0]
+		if not lines: return None
+		
+		# strip initial indentation and convert tabs to spaces
+		for i in range(len(lines)):
+			l = lines[i].replace('\t', ' '*3) # this is the amount of indentation we use for the standard help message
+			if i == 0:
+				indenttostrip = len(l) - len(l.lstrip())
+				indenttoadd = ''
+				if l.strip().startswith('-'):
+					# align everything with existing content
+					indenttoadd = ' '*3
+				
+			if len(l)-len(l.lstrip()) >= indenttostrip:
+				l = indenttoadd+l[indenttostrip:]
+			lines[i] = l
+		
+		# if user hasn't provided their own heading, add ours
+		if '----' not in help:
+			lines = ['Project help', '-'*12]+lines
+		return '\n'.join(lines)
+
 	def printUsage(self, printXOptions):
 		"""
 		Print the pysys run usage.
@@ -65,48 +94,48 @@ class ConsoleLaunchHelper(object):
 		print("""
 Execution options
 -----------------
-     -c, --cycle     INT         run each test the specified number of times
-     -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path)
-     -n, --threads   INT | auto  set the number of worker threads to run the tests (defaults to 1). 
-                                 A value of 'auto' sets to the number of available CPUs, or if set, 
-                                 the value of the PYSYS_DEFAULT_THREADS environment variable.
-     -p, --purge                 purge all files except run.log from the output directory (unless test fails)
-     -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
-     -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
-     -v, --verbosity CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
-     -y, --validateOnly          test the validate() method without re-running execute()
-     -h, --help                  print this message
-
-     -X KEY[=VALUE]              set user-defined overrides to be set on the testcase and runner instances. The VALUE 
-                                 will be available to Python as "self.KEY". Value is True if not explicitly provided. 
+   -c, --cycle     INT         run each test the specified number of times
+   -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path)
+   -n, --threads   INT | auto  set the number of worker threads to run the tests (defaults to 1). 
+                               A value of 'auto' sets to the number of available CPUs, or if set, 
+                               the value of the PYSYS_DEFAULT_THREADS environment variable.
+   -p, --purge                 purge all files except run.log from the output directory (unless test fails)
+   -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
+   -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
+   -v, --verbosity CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
+   -y, --validateOnly          test the validate() method without re-running execute()
+   -h, --help                  print this message
+ 
+   -X KEY[=VALUE]              set user-defined overrides to be set on the testcase and runner instances. The VALUE 
+                               will be available to Python as "self.KEY". Value is True if not explicitly provided. 
 """.rstrip())
 		if printXOptions: printXOptions()
 		print("""
 Advanced:
-     -g, --progress              print progress updates after completion of each test (or set
-                                 the PYSYS_PROGRESS=true environment variable)
-     --printLogs STRING          indicates for which outcome types the run.log output 
-                                 will be printed to the stdout console; 
-                                 options are: all|none|failures, default is all.
-     -b, --abort     STRING      set the default abort on error property (true|false, overrides 
-                                 that specified in the project properties)
+   -g, --progress              print progress updates after completion of each test (or set
+                               the PYSYS_PROGRESS=true environment variable)
+   --printLogs STRING          indicates for which outcome types the run.log output 
+                               will be printed to the stdout console; 
+                               options are: all|none|failures, default is all.
+   -b, --abort     STRING      set the default abort on error property (true|false, overrides 
+                               that specified in the project properties)
 
 Selection and filtering options
 -------------------------------
-     -i, --include   STRING      set the test groups to include (can be specified multiple times)
-     -e, --exclude   STRING      set the test groups to exclude (can be specified multiple times)
-     -G, --grep      STRING      run only tests whose title or id contains the specified regex
-                                 (matched case insensitively)
-     -m, --mode, --modeinclude ALL,PRIMARY,!PRIMARY,MyMode1,!MyMode2,...
-                                 run tests in the specifies mode(s):
-                                   - use PRIMARY to select the test's
-                                     first/main mode (this is the default)
-                                   - use ALL to select all modes
-                                   - use !MODE as an alias for modeexclude
-     --modeexclude MyMode1,MyMode2,...
-                                 run tests excluding specified mode(s)
-     -a, --type      STRING      set the test type to run (auto or manual, default is both)"
-     -t, --trace     STRING      set the requirement id for the test run
+   -i, --include   STRING      set the test groups to include (can be specified multiple times)
+   -e, --exclude   STRING      set the test groups to exclude (can be specified multiple times)
+   -G, --grep      STRING      run only tests whose title or id contains the specified regex
+                               (matched case insensitively)
+   -m, --mode, --modeinclude ALL,PRIMARY,!PRIMARY,MyMode1,!MyMode2,...
+                               run tests in the specifies mode(s):
+                                 - use PRIMARY to select the test's
+                                   first/main mode (this is the default)
+                                 - use ALL to select all modes
+                                 - use !MODE as an alias for modeexclude
+   --modeexclude MyMode1,MyMode2,...
+                               run tests excluding specified mode(s)
+   -a, --type      STRING      set the test type to run (auto or manual, default is both)"
+   -t, --trace     STRING      set the requirement id for the test run
 
 Test identifiers
 ----------------
@@ -117,21 +146,26 @@ based on the selection options listed above (e.g. --include/--exclude).
 Tests should contain only alphanumeric and the underscore characters. The following syntax is used 
 to select an individual test, or a sequence of numbered tests:
 
-     Test_001                   - a single testcase with id equal to or ending with Test_001
-     _001                       - a single testcase with id equal to or ending with _001
-     1                          - a single testcase ending with number 1 (but not ending '11')
-                                  (if it has multiple modes, runs the primary one, or uses --mode)
-     Test_001~ModeA             - run testcase with id Test_001 in ModeA
-     :Test_002                  - all tests up to and including the testcase with id Test_002
-     Test_001:                  - all tests from Test_001 onwards
-     Test_001:Test_002          - all tests between tests with ids Test_001 and Test_002 (inclusive)
-     2 Test_001                 - Test_001 and Test_002
-     ^Test.*                    - All tests matching the specified regex
+   Test_001                   - a single testcase with id equal to or ending with Test_001
+   _001                       - a single testcase with id equal to or ending with _001
+   1                          - a single testcase ending with number 1 (but not ending '11')
+                                (if it has multiple modes, runs the primary one, or uses --mode)
+   Test_001~ModeA             - run testcase with id Test_001 in ModeA
+   :Test_002                  - all tests up to and including the testcase with id Test_002
+   Test_001:                  - all tests from Test_001 onwards
+   Test_001:Test_002          - all tests between tests with ids Test_001 and Test_002 (inclusive)
+   2 Test_001                 - Test_001 and Test_002
+   ^Test.*                    - All tests matching the specified regex
 
 e.g. 
-     {scriptname} run -c2 -w4 -u --threads=auto Test_007 Test_001: 3:5
-     {scriptname} run -vDEBUG --include MYTESTS -Xhost=localhost
+   {scriptname} run -c2 -w4 -u --threads=auto Test_007 Test_001: 3:5
+   {scriptname} run -vDEBUG --include MYTESTS -Xhost=localhost
 """.format(scriptname=_PYSYS_SCRIPT_NAME))
+		
+		# show project help at the end so it's more prominent
+		help = self.getProjectHelp()
+		if help: print(help)
+		
 		sys.exit()
 
 	def parseArgs(self, args, printXOptions=None):

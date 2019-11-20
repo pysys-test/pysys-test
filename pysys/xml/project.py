@@ -37,7 +37,7 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?), collect-test-output* >
+<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?), collect-test-output*, project-help >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requires-python (#PCDATA)>
@@ -48,6 +48,7 @@ DTD='''
 <!ELEMENT default-file-encodings (default-file-encoding+) >
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (property*) >
+<!ELEMENT project-help (#PCDATA)>
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
 <!ATTLIST property root CDATA #IMPLIED>
@@ -251,6 +252,14 @@ class XMLProjectParser(object):
 		if optionsDict: raise Exception('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
 		
 		return cls, summaryfile
+
+	def getProjectHelp(self):
+		help = ''
+		for e in self.root.getElementsByTagName('project-help'):
+			for n in e.childNodes:
+				if (n.nodeType in {e.TEXT_NODE,e.CDATA_SECTION_NODE}) and n.data:
+					help += n.data
+		return help
 
 	def getDescriptorLoaderClass(self):
 		nodeList = self.root.getElementsByTagName('descriptor-loader')
@@ -489,6 +498,7 @@ class Project(object):
 		self.perfReporterConfig = None
 		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
 		self.collectTestOutput = []
+		self.projectHelp = None
 
 		stdoutformatter, runlogformatter = None, None
 
@@ -537,6 +547,8 @@ class Project(object):
 				self.executionOrderHints, self.executionOrderSecondaryModesHintDelta = parser.getExecutionOrderHints()
 				
 				self.collectTestOutput = parser.getCollectTestOutputDetails()
+				
+				self.projectHelp = parser.getProjectHelp()
 				
 				# set the data attributes
 				parser.unlink()
