@@ -116,6 +116,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison
 	@param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
 		which means indentation differences and whether the file ends with a blank line do not affect the outcome. 
+		If False, only newline characters are stripped. 
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
 	@param unifiedDiffOutput: If specified, indicates the full path of a file to which unified diff output will be written, 
 		if the diff fails. 
@@ -130,18 +131,13 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 		if not pathexists(file):
 			raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
-		list1 = []
-		list2 = []
+		stripchars = None if stripWhitespace else '\r\n' # None means all whitespace
 
 		with openfile(file1, 'r', encoding=encoding) as f:
-			for i in f: 
-				if stripWhitespace: i = i.strip()
-				list1.append(i)
+			list1 = [i.strip(stripchars) for i in f]
 
 		with openfile(file2, 'r', encoding=encoding) as f:
-			for i in f: 
-				if stripWhitespace: i = i.strip()
-				list2.append(i)
+			list2 = [i.strip(stripchars) for i in f]
 		
 		list1 = trimContents(list1, ignore, exclude=True)
 		list2 = trimContents(list2, ignore, exclude=True)
