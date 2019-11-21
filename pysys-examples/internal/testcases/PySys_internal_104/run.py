@@ -27,6 +27,7 @@ class PySysTest(BaseTest):
 			('"[^"]+PySys_internal_104', '"<path-to-test>/PySys_internal_104'), # snip out absolute paths
 			(r'[\\]','/'),
 			('//','/'),
+			(', *$', ','), # python 2 vs 3 have slightly different pretty JSON formatting
 			])
 			
 		with open(self.output+'/print-full.out', 'rb') as f:
