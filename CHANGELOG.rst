@@ -28,6 +28,11 @@ Miscellaneous new features
   the afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
   committing. 
 
+- All ``assertXXX`` methods in `basetest.BaseTest` now return a value to indicate the result of the assertion. In most 
+  cases this is a boolean ``True``/``False``, though some methods such as ``assertGrep`` return the matching string 
+  (or ``None``). This creates an opportunity to gather or log additional diagnostic information (e.g. using 
+  `basetest.BaseTest.logFileContents`) after an assertion fails. 
+
 - ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
   used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
   for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 

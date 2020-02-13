@@ -481,10 +481,13 @@ class BaseTest(ProcessUser):
 		@param abortOnError: Set to True to make the test immediately abort if the
 		assertion fails. 
 		
+		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
-		self.addOutcome(PASSED if pathexists(os.path.join(self.output, path))==exists else FAILED, 
+		result = PASSED if pathexists(os.path.join(self.output, path))==exists else FAILED
+		self.addOutcome(result, 
 			'Assertion that path exists=%s for "%s"'%(exists, os.path.normpath(path)), 
 			abortOnError=abortOnError)
+		return result
 
 	def assertEval(self, evalstring, abortOnError=False, **formatparams):
 		"""Perform a validation based on substituting values into 
@@ -522,7 +525,9 @@ class BaseTest(ProcessUser):
 			assertion fails. Unless abortOnError=True this method only throws 
 			an exception if the format string is invalid; failure to execute the 
 			eval(...) results in a BLOCKED outcome but no exception. 
-		
+
+		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+
 		"""
 		formatparams = {k: (repr(v) if isstring(v) else v) for (k,v) in formatparams.items()}
 		toeval = evalstring.format(**formatparams)
@@ -575,6 +580,8 @@ class BaseTest(ProcessUser):
 
 		@keyword assertMessage: Overrides the string used to describe this 
 		assertion in log messages and the outcome reason. 
+		
+		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		abortOnError = kwargs.pop('abortOnError',False)
 		assertMessage = kwargs.pop('assertMessage',None)
@@ -591,8 +598,10 @@ class BaseTest(ProcessUser):
 		
 		if result:
 			self.addOutcome(PASSED, assertMessage or ('Assertion on %s'%expr))
+			return True
 		else:
 			self.addOutcome(FAILED, assertMessage or ('Assertion on %s'%expr), abortOnError=abortOnError)
+			return False
 
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.
@@ -610,12 +619,15 @@ class BaseTest(ProcessUser):
 		
 		@param assertMessage: Overrides the string used to describe this 
 		assertion in log messages and the outcome reason. 
+
+		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		msg = assertMessage or 'Assertion on boolean expression equal to true'
 		if expr == True:
 			self.addOutcome(PASSED, msg)
 		else:
 			self.addOutcome(FAILED, msg, abortOnError=abortOnError)
+		return expr==True
 	
 
 	def assertFalse(self, expr, abortOnError=False, assertMessage=None):
@@ -634,13 +646,15 @@ class BaseTest(ProcessUser):
 		
 		@param assertMessage: Overrides the string used to describe this 
 		assertion in log messages and the outcome reason. 
+
+		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		msg = assertMessage or 'Assertion on boolean expression equal to false'
 		if expr == False:
 			self.addOutcome(PASSED, msg)
 		else:
 			self.addOutcome(FAILED, msg, abortOnError=abortOnError)
-
+		return expr==False
 
 	def assertDiff(self, file1, file2=None, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], encoding=None, 
 			abortOnError=False, assertMessage=None, stripWhitespace=None):
@@ -700,6 +714,8 @@ class BaseTest(ProcessUser):
 		
 		@param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
+			
+		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		if filedir1 is None: filedir1 = self.output
 		if filedir2 is None: filedir2 = self.reference
@@ -736,12 +752,15 @@ class BaseTest(ProcessUser):
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
+			return False
 		else:
+			result = PASSED if result else FAILED
 			try:
-				self.addOutcome(PASSED if result else FAILED, msg, abortOnError=abortOnError)
+				self.addOutcome(result, msg, abortOnError=abortOnError)
 			finally:
 				if not result:
 					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
+			return result
 
 	def __stripTestDirPrefix(self, path):
 		"""Normalize the specified path then strip off any self.output (or failing that prefix. 
@@ -781,7 +800,7 @@ class BaseTest(ProcessUser):
 			ignored when reading the file. 
 		
 		@param literal: By default expr is treated as a regex, but set this to True to pass in 
-		a string literal instead.
+			a string literal instead.
 		
 		@param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
@@ -792,6 +811,9 @@ class BaseTest(ProcessUser):
 		
 		@param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
+
+		@return: None if there was no match, or the string that was matched (note the return value is not affected by 
+			the contains=True/False parameter).
 		
 		"""
 		assert expr, 'expr= argument must be specified'
@@ -821,6 +843,7 @@ class BaseTest(ProcessUser):
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
+			result = None
 		else:
 			# short message if it succeeded, more verbose one if it failed to help you understand why, 
 			# including the expression it found that should not have been there
@@ -846,7 +869,7 @@ class BaseTest(ProcessUser):
 							(result.group(0) if expr.endswith('*') else result.string).rstrip('\n\r')
 							))
 			self.addOutcome(outcome, msg, abortOnError=abortOnError)
-		
+		return result
 
 	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], encoding=None, 
 			abortOnError=False, assertMessage=None):
@@ -872,6 +895,9 @@ class BaseTest(ProcessUser):
 
 		@param assertMessage: Overrides the string used to describe this 
 		assertion in log messages and the outcome reason. 				
+		
+		@return: None if there was no match, or the string that was matched (note the return value is not affected by 
+			the contains=True/False parameter).
 		"""
 		assert expr, 'expr= argument must be specified'
 		
@@ -886,9 +912,11 @@ class BaseTest(ProcessUser):
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
+			result = None
 		else:
 			if result: msg = assertMessage or ('Grep on input file %s' % file)
 			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=abortOnError)
+		return result
 
 
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, encoding=None, 
@@ -914,7 +942,9 @@ class BaseTest(ProcessUser):
 
 		@param assertMessage: Overrides the string used to describe this 
 		assertion in log messages and the outcome reason. 
-		
+
+		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+
 		"""
 		assert exprList, 'expr= argument must be specified'
 		
@@ -943,6 +973,8 @@ class BaseTest(ProcessUser):
 			if result == FAILED and expr: 
 				msg += ' failed on expression \"%s\"'% expr
 			self.addOutcome(result, msg, abortOnError=abortOnError)
+			return result==PASSED
+		return False
 
 	
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, encoding=None, 
@@ -967,6 +999,8 @@ class BaseTest(ProcessUser):
 		
 		@param assertMessage: Overrides the string used to describe this 
 		assertion in log messages and the outcome reason. 
+
+		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""	
 		assert expr, 'expr= argument must be specified'
 		
@@ -984,9 +1018,11 @@ class BaseTest(ProcessUser):
 			if (eval("%d %s" % (numberLines, condition))):
 				msg = assertMessage or ('Line count on input file %s' % file)
 				self.addOutcome(PASSED, msg)
+				return True
 			else:
 				msg = assertMessage or ('Line count on %s for %s%s (actual =%d) '%(file, quotestring(expr), condition, numberLines))
 				self.addOutcome(FAILED, msg, abortOnError=abortOnError)
+		return False
 
 	def reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		""" Reports a new performance result, with an associated unique key that identifies it for  comparison purposes.
