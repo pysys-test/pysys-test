@@ -684,7 +684,18 @@ class TestContainer(object):
 		self.kbrdInt = False
 
 	def __str__(self): return self.descriptor.id+('' if self.runner.cycle <= 1 else '.cycle%03d'%(self.cycle+1))
-		
+	
+	@staticmethod
+	def __onDeleteOutputDirError(function, path, excinfo):
+		if function==os.rmdir:
+			# Useful to tolerate this since people foten keep a cmd window/shell/tool open on test output directories, 
+			# and while we wouldn't want to leave files around, empty directories don't usually cause problems. 
+			# In rare cases where someone cares they could explicitly verify the directory doesn't exist at the start of 
+			# their run() method. 
+			log.debug('Ignoring failure to delete test output directory before running test: %s', path)
+		else:
+			raise excinfo[1] # re-raise the original error
+	
 	def __call__(self, *args, **kwargs):
 		"""Over-ridden call builtin to allow the class instance to be called directly.
 		
@@ -714,19 +725,23 @@ class TestContainer(object):
 					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
 						self.outsubdir += '~'+self.descriptor.mode
 
-				if not self.runner.validateOnly: 
-					if self.runner.cycle <= 1: 
-						deletedir(self.outsubdir)
-					else:
-						# must use lock to avoid deleting the parent dir after we've started creating outdirs for some cycles
-						with global_lock:
-							if self.outsubdir not in TestContainer.__purgedOutputDirs:
-								deletedir(self.outsubdir)
-								TestContainer.__purgedOutputDirs.add(self.outsubdir)
+				try:
+					if not self.runner.validateOnly: 
+						if self.runner.cycle <= 1: 
+							deletedir(self.outsubdir, onerror=TestContainer.__onDeleteOutputDirError)
+						else:
+							# must use lock to avoid deleting the parent dir after we've started creating outdirs for some cycles
+							with global_lock:
+								if self.outsubdir not in TestContainer.__purgedOutputDirs:
+									deletedir(self.outsubdir, onerror=TestContainer.__onDeleteOutputDirError)
+									TestContainer.__purgedOutputDirs.add(self.outsubdir)
+				except Exception as ex:
+					raise Exception('Failed to clean test output directory before starting test: %s'%ex)
 				
 				if self.runner.cycle > 1: 
 					self.outsubdir = os.path.join(self.outsubdir, 'cycle%d' % (self.cycle+1))
 				mkdir(self.outsubdir)
+				initialOutputFiles = os.listdir(toLongPathSafe(self.outsubdir))
 
 				# run.log handler
 				runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or locale.getpreferredencoding()
@@ -750,6 +765,10 @@ class TestContainer(object):
 					log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 				log.debug('Execution order hint: %s', self.descriptor.executionOrderHint)
 				log.info(62*"=")
+				
+				# this often doesn't matter, but it's worth alerting the user as in rare cases it could cause a test failure
+				if initialOutputFiles:
+					log.warning('Some directories from a previous run could not be deleted from the output directory before starting this test: %s', ', '.join(initialOutputFiles))
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 			

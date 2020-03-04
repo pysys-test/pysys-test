@@ -50,7 +50,11 @@ Improvements to the `pysys.py` command line tool
 
 Bug fixes
 ---------
-- TODO
+- Handling of errors deleting previous test output has been improved. In 1.5.0, there was a usability regression in 
+  which a test would fail to run if any part of its output directory could not be deleted due 
+  to a shell or tool (e.g. tail) keeping it locked. Now, although error deleting files will still cause the test to 
+  fail (since this has a high chance of affecting correctness), directory deletion errors are logged at WARN in the 
+  test output but do not cause an error. 
 
 Upgrade guide and compatibility
 -------------------------------

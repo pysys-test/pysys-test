@@ -124,22 +124,36 @@ def mkdir(path):
 			os.makedirs(path)
 	return origpath
 
-def deletedir(path, retries=1):
+def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 	"""
-	Recursively delete the specified directory. 
+	Recursively delete the specified directory, with optional retries. 
 	
-	Does nothing if it does not exist. Raises an exception if the deletion fails. 
+	Does nothing if it does not exist. Raises an exception if the deletion fails (unless ``onerror=`` is specified), 
+	but deletes as many files as possible before doing so. 
 	
 	@param retries: The number of retries to attempt. This can be useful to 
-	work around temporary failures causes by Windows file locking. 
+		work around temporary failures causes by Windows file locking. 
+	
+	@param ignore_errors: If True, an exception is raised if the path exists but cannot be deleted. 
+	
+	@param onerror: A callable that with arguments (function, path, excinfo), called when an error occurs while 
+		deleting. See the documentation for ``shutil.rmtree`` for more information. 
 	"""
+	if ignore_errors: assert onerror==None, 'cannot set onerror and also ignore_errors'
+	
 	path = toLongPathSafe(path)
 	try:
-		shutil.rmtree(path)
+		# delete as many files as we can first, so if there's an error deleting some files (e.g. due to windows file 
+		# locking) we don't use any more disk space than we need to
+		shutil.rmtree(path, ignore_errors=True)
+		
+		# then try again, being more careful
+		if os.path.exists(path) and not ignore_errors:
+			shutil.rmtree(path, onerror=onerror)
 	except Exception: # pragma: no cover
 		if not os.path.exists(path): return # nothing to do
 		if retries <= 0:
 			raise
 		time.sleep(0.5) # work around windows file-locking issues
-		deletedir(path, retries = retries-1)
+		deletedir(path, retries = retries-1, onerror=onerror)
 
