@@ -43,6 +43,11 @@ Miscellaneous new features
   `pysys.basetest.BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
   value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
   is True. 
+  
+- The `basetest.BaseTest.assertEval` method now allows ``evalstring`` to make use of some additional standard Python 
+  modules such as ``math`` and ``re``. It is also possible to use ``import_module`` to dynamically import additional 
+  modules from within an ``evalstring``. 
+
 
 Improvements to the `pysys.py` command line tool
 ------------------------------------------------
@@ -62,6 +67,11 @@ Upgrade guide and compatibility
 - Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to set this to False in 
   your ``pysysproject.xml`` file, but it is likely some test reference files may need fixing, so the default value is 
   True which maintains pre-1.5.1 behaviour.
+  
+- The global namespace available for use from `basetest.BaseTest.assertEval` has been cut down to remove some 
+  functions and modules such as ``filegrep`` that are anyone is likely to be using from ``assertEval``. If you find you 
+  need anything that is no longer available, just use ``import_module`` in your eval string to add it, but it is highly 
+  unlikely this will affect anyone. 
 
 ---------------
 Release History

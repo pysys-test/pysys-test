@@ -41,6 +41,7 @@ from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 from pysys.utils.pycompat import *
 from pysys.utils.fileutils import pathexists
+import pysys.internal.safe_eval
 
 TEST_TEMPLATE = '''%s
 %s
@@ -513,6 +514,14 @@ class BaseTest(ProcessUser):
 			parameters which makes the intention of the assertion harder to 
 			understand from looking at the test output. 
 		
+			The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, and ``locale`` 
+			standard Python modules, as well as the ``pysys`` module and the contents of the `pysys.constants` module, 
+			e.g. ``IS_WINDOWS``, and also the BaseTest's ``self`` variable. 
+	
+			If necessary, symbols for additional modules can be imported dynamically using ``import_module``, for example::
+			
+				self.assertEval("len(import_module('difflib').get_close_matches({word}, ['apple', 'orange', 'applic'])) == 2", word='app')
+		
 		@param formatparams: Named parameters for the format string, which 
 			can be of any type. Use descriptive names for the parameters to produce 
 			an assertion message that makes it really clear what is being checked. 
@@ -536,9 +545,8 @@ class BaseTest(ProcessUser):
 			# avoid excessively long messages by removing self.output (slightly complicated by the fact we called repr recently above)
 			str(formatparams[k]).replace(self.output.replace('\\','\\\\'), '<outputdir>') 
 			) for k in sorted(formatparams.keys())])
-		
 		try:
-			result = bool(eval(toeval))
+			result = bool(pysys.internal.safe_eval.safe_eval(toeval, extraNamespace={'self':self}))
 		except Exception as e:
 			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" due to %s - %s'%(toeval, e.__class__.__name__, e), abortOnError=abortOnError)
 			return False
@@ -1138,4 +1146,3 @@ class BaseTest(ProcessUser):
 				for line in failure:
 					log.warning('  %s'%line.rstrip())
 				log.info('')
-		
