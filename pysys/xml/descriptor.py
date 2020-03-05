@@ -252,6 +252,9 @@ class TestDescriptor(object):
 		"""
 		
 		str=    "Test id:           %s\n" % self.id
+		reltestdir = self.testDir # relative to current dir is most useful
+		if reltestdir.lower().replace('\\','/').startswith(os.getcwd().lower().replace('\\','/')): reltestdir = reltestdir[len(os.getcwd())+1:]
+		str=str+"Test directory:    %s\n" % reltestdir # use OS slashes to facilitate copy+paste
 		str=str+"Test type:         %s\n" % self.type
 		str=str+"Test state:        %s\n" % self.state
 		if self.skippedReason: str=str+"Test skip reason:  %s\n" % self.skippedReason

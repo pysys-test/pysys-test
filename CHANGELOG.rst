@@ -36,7 +36,7 @@ Miscellaneous new features
 - ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
   used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
   for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
-  ``Project Help`` heading is automatically added is no other heading is present, and PySys will intelligently add or 
+  ``Project Help`` heading is automatically added if no other heading is present, and PySys will intelligently add or 
   remove indentation from the specified content so that it aligns with the built-in options.
 
 - ``pysysproject.xml`` has a new property "defaultAssertDiffStripWhitespace" which controls whether 
@@ -46,7 +46,8 @@ Miscellaneous new features
 
 Improvements to the `pysys.py` command line tool
 ------------------------------------------------
-- TODO
+- Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
+  PySys was run from. 
 
 Bug fixes
 ---------
