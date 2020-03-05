@@ -62,6 +62,8 @@ Bug fixes
   fail (since this has a high chance of affecting correctness), directory deletion errors are logged at WARN in the 
   test output but do not cause an error. 
 
+- Fixed bug in which ``assertDiff`` was not logging the diff to the console after a failure. 
+
 Upgrade guide and compatibility
 -------------------------------
 - Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to set this to False in 

@@ -766,7 +766,7 @@ class BaseTest(ProcessUser):
 			try:
 				self.addOutcome(result, msg, abortOnError=abortOnError)
 			finally:
-				if not result:
+				if result != PASSED:
 					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
 			return result
 
