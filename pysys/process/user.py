@@ -249,7 +249,10 @@ class ProcessUser(object):
 		
 		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
 		
-		@param timeout: The timeout period after which to terminate processes running in the C{FOREGROUND}. 
+		@param timeout: The number of seconds after which to terminate processes running in the C{FOREGROUND}. For processes 
+			that complete in a few seconds or less, it is best to avoid overriding this and stick with the default. 
+			However for long-running foreground processes it will be necessary to set a larger number, for example 
+			if running a soak test where the process needs to run for up to 2 hours you could set ``timeout=2*60*60``. 
 		
 		@param stdouterr: The filename prefix to use for the stdout and stderr of the process 
 			(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
