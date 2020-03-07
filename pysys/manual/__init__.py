@@ -35,8 +35,7 @@ makes it easy at a future date to remove the manual steps when automation is pos
 scriptable record and playback test tools for user interface testing etc.   
 
 """
-__all__ = [ "ui",
-			"xmlhandler" ]
+__all__ = [ "ui"]
 
 
 

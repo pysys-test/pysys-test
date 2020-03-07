@@ -25,7 +25,7 @@ Miscellaneous new features
   the reference file with the contents of the comparison file, providing an easy way to quickly update a large set 
   of references. Use this feature with caution, since it overwrites reference files with no backup. In 
   particular, make sure you have committed all reference files to version control before running the command, and 
-  the afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
+  then afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
   committing. 
 
 - All ``assertXXX`` methods in `basetest.BaseTest` now return a value to indicate the result of the assertion. In most 
