@@ -45,7 +45,7 @@ class %s(%s):
 		pass
 ''' # not public API, do not use
 
-
+	
 class BaseTest(ProcessUser):
 	"""BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your 
 	test logic and then to validate the results against the expected behaviour. 
@@ -106,14 +106,14 @@ class BaseTest(ProcessUser):
 	:ivar int testCycle: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
 		The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
 
-	:ivar pysys.xml.descriptor.TestDescriptor descriptor: The `pysys.xml.descriptor.TestDescriptor` containing 
+	:ivar pysys.xml.descriptor.TestDescriptor ~.descriptor: The `pysys.xml.descriptor.TestDescriptor` containing 
 		information about this testcase such as the test id, typically stored in a ``pysystest.xml`` file. 
 
 	:ivar pysys.baserunner.BaseRunner runner: A reference to the global `pysys.baserunner.BaseRunner` object 
 		responsible for orchestrating all the tests. The runner is where any cross-test state can be held, for example 
 		if you want to have multiple tests share use of a single server, VM, or other resource. 
 
-	:ivar pysys.xml.project.Project project: The `pysys.xml.project.Project` object containing the configuration of 
+	:ivar pysys.xml.project.Project ~.project: The `pysys.xml.project.Project` object containing the configuration of 
 		this PySys test project as defined by ``pysysproject.xml``. 
 		The project can be used to access information such as the project properties shared 
 		across all tests (e.g. for hosts and credentials). 

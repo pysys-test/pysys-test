@@ -68,11 +68,10 @@ class BaseRunner(ProcessUser):
 	This class provides the default implementation, and can be subclassed 
 	if customizations are needed. 
 	
-	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
-	with a list of L{pysys.xml.descriptor.TestDescriptor} objects detailing the set of testcases to be run. 
+	The runner is instantiated with a list of L{pysys.xml.descriptor.TestDescriptor} objects detailing the set of testcases to be run. 
 	The runner iterates through the descriptor list and for each entry imports the L{pysys.basetest.BaseTest}
 	subclass for the testcase, creates an instance of the test class and then calls the setup, execute, validate 
-	and cleanup methods of the test class instance. The runner is responsible for ensuring the output 
+	and cleanup methods of the test class instance. The runner is ensures the output 
 	subdirectory of each testcase is purged prior to test execution to remove stale output from a previous run, 
 	detects any core files produced during execution of a testcase from processes started via the L{pysys.process} 
 	module, and performs audit trail logging of the test results on completion of running a set of testcases.
@@ -80,36 +79,39 @@ class BaseRunner(ProcessUser):
 	The base runner contains the hook functions L{setup}, L{testComplete}, and L{cleanup} to 
 	allow a subclass to perform custom operations prior to the execution of a set of testcases, between the 
 	execution of each testcase in a set, and on completion 
-	of all testcases respectively. Subclasses are typically used should some global conditions need to be setup 
+	of all testcases respectively. Subclasses are typically used if some global conditions need to be setup 
 	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
-	etc), and subsequently cleaned up after test execution. 
+	etc), and subsequently cleaned up after test execution. It is not necessary to override the ``__init__`` 
+	constructor when creating a new runner; instead, add any initialization logic to your `setup()` method. 
 
+	:ivar str outsubdir: The directory name for the the output of each testcase. Typically a relative path,
+		but can also be an absolute path. 
+	
+	:ivar logging.Logger log: Reference to the logger instance for this class.
+	
+	:ivar pysys.xml.project.Project ~.project: Reference to the PySys project.
+
+	:ivar bool record: Indicates if the test results should be recorded by the record writer(s), due to 
+		the ``--record`` command line argument being specified.
+	
+	:ivar bool purge: Indicates that all files other than ``run.log`` should be deleted from the output directory 
+		unless the test fails; this corresponds to the ``--purge`` command line argument. 
+
+	:ivar int cycle: The number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
 
 	:ivar str mode: Legacy parameter used only if ``supportMultipleModesPerRun=False``; specifies the single mode 
 		tests will be run with. 
+
+	:ivar int threads: The number of worker threads to execute the requested testcases.
+
+	:ivar list[pysys.xml.descriptor] descriptors: A list of all the ``pysys.xml.descriptor.TestDescriptor`` test descriptors that are selected for execution. 
+
+	:ivar dict xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments to be set as data attributes 
+		on the class.
 	
-	:ivar str outsubdir: The directory name for the output subdirectory. Typically a relative path,
-		but can also be an absolute path. 
-	
-	:ivar logging.Logger log: Reference to the logger instance of this class.
-	
-	:ivar pysys.xml.project.Project project: Reference to the PySys project.
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
-		"""Create an instance of the BaseRunner class.
-		
-		@param record: Indicates if the test results should be recorded 
-		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
-		@param cycle: The number of times to execute the set of requested testcases
-		@param mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
-			tests will be run with. 
-		@param threads: The number of worker threads to execute the requested testcases
-		@param outsubdir: The name of the output subdirectory
-		@param descriptors: List of L{pysys.xml.descriptor.TestDescriptor} descriptors specifying the set of testcases to be run
-		@param xargs: The dictionary of additional "-X" user-defined arguments to be set as data attributes on the class
-		
-		"""
 		ProcessUser.__init__(self)
 
 
