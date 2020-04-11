@@ -88,10 +88,10 @@ class CSVPerformanceReporter(object):
 		@param summaryfile: The filename pattern used for the summary file(s)
 		
 		@param testoutdir: The output directory used for this test run 
-		(equal to `runner.outsubdir`), an identifying string which often contains 
-		the platform, or when there are multiple test runs on the same machine 
-		may be used to distinguish between them. This is usually a relative path 
-		but may be an absolute path. 
+			(equal to `runner.outsubdir`), an identifying string which often contains 
+			the platform, or when there are multiple test runs on the same machine 
+			may be used to distinguish between them. This is usually a relative path 
+			but may be an absolute path. 
 
 		"""
 		self.runner = kwargs.pop('runner', None) or self._runnerSingleton
@@ -298,19 +298,16 @@ class CSVPerformanceFile(object):
 	If this file contains aggregated results the number of "samples" may be greater than 1 and the "value"
 	will specify the mean result.
 
-	@ivar runDetails: A dictionary containing (string key, string value) information about the whole test run
-	@type runDetails: dictionary
-	@ivar results: A list where each item is a dictionary containing information about a given result, 
-	containing values for each of the keys in L{COLUMNS}, for example 'resultKey', 'value', etc. 
-	@type results: list
-
-	@ivar RUN_DETAILS: The constant prefix identifying information about the whole test run
-	@type RUN_DETAILS: string
-	@ivar RESULT_DETAILS: The constant prefix identifying detailed information about a given result
-	@type RESULT_DETAILS: string
-	@ivar COLUMNS: Constant list of the columns in the performance output
-	@type COLUMNS: list
-
+	:ivar dict runDetails: A dictionary containing (string key, string value) information about the whole test run.
+	
+	:ivar list results: A list where each item is a dictionary containing information about a given result, 
+		containing values for each of the keys in L{COLUMNS}, for example 'resultKey', 'value', etc. 
+		
+	:ivar str RUN_DETAILS: The constant prefix identifying information about the whole test run
+	
+	:ivar str RESULT_DETAILS: The constant prefix identifying detailed information about a given result
+	
+	:ivar list COLUMNS: Constant list of the columns in the performance output
 	"""
 	COLUMNS = ['resultKey','testId','value','unit','biggerIsBetter','toleranceStdDevs','samples','stdDev']
 	RUN_DETAILS = '#runDetails:#'

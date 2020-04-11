@@ -35,22 +35,22 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	working directory. 
 	
 	@param path: A path. Must not be a relative path. Can be None/empty. Can 
-	contain ".." sequences. If possible, use a unicode character string. 
-	On Python 2, byte strings are permitted and converted using 
-	`locale.getpreferredencoding()`.
+		contain ".." sequences. If possible, use a unicode character string. 
+		On Python 2, byte strings are permitted and converted using 
+		``locale.getpreferredencoding()``.
 	
 	@param onlyIfNeeded: Set to True to only adds the long path support if this 
-	path exceeds the maximum length on this OS (e.g. 256 chars). You must keep 
-	this at False if you will be adding extra characters on to the end of the 
-	returned string. 
+		path exceeds the maximum length on this OS (e.g. 256 chars). You must keep 
+		this at False if you will be adding extra characters on to the end of the 
+		returned string. 
 	
-	@return: The passed-in path, possibly with a "\\?\" prefix added, 
-	forward slashes converted to backslashes on Windows, and converted to 
-	a unicode string. Trailing slashes may be removed. 
-	Note that the conversion to unicode requires a lot of care on Python 2 
-	where byte strings are more common, since it is not possible to combine 
-	unicode and byte strings (if tjhey have non-ascii characters), for example 
-	for a log statement. 
+	@return: The passed-in path, possibly with a ``\\?\`` prefix added, 
+		forward slashes converted to backslashes on Windows, and converted to 
+		a unicode string. Trailing slashes may be removed. 
+		Note that the conversion to unicode requires a lot of care on Python 2 
+		where byte strings are more common, since it is not possible to combine 
+		unicode and byte strings (if they have non-ascii characters), for example 
+		for a log statement. 
 	
 	"""
 	if (not IS_WINDOWS) or (not path): return path
@@ -79,7 +79,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 
 def fromLongPathSafe(path):
 	"""
-	Strip off \\?\ prefixes added by L{toLongPathSafe}. 
+	Strip off ``\\?\`` prefixes added by L{toLongPathSafe}. 
 	
 	Note that this function does not convert unicode strings back to byte 
 	strings, so if you want a complete reversal of toLongPathSafe you will 
@@ -101,7 +101,7 @@ def pathexists(path):
 	character limit. 
 	
 	@param path: If None or empty, returns True. Only Python 2, can be a 
-	unicode or byte string. 
+		unicode or byte string. 
 	"""
 	return path and os.path.exists(toLongPathSafe(path))
 

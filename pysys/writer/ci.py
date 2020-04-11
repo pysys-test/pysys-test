@@ -19,7 +19,7 @@
 """
 Contains writers for recording test results to Continuous Integration providers.
 
-These writers only generate output in --record mode, and only if the 
+These writers only generate output in ``--record`` mode, and only if the 
 environment variables associated with their CI system are set. 
 """
 
@@ -37,7 +37,7 @@ log = logging.getLogger('pysys.writer')
 class TravisCIWriter(BaseRecordResultsWriter):
 	"""
 	Writer for Travis CI. Only enabled when running under Travis (specifically, 
-	if the TRAVIS=true environment variable is set).
+	if the ``TRAVIS=true`` environment variable is set).
 	
 	"""
 		

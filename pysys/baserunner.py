@@ -83,17 +83,17 @@ class BaseRunner(ProcessUser):
 	of all testcases respectively. Subclasses are typically used should some global conditions need to be setup 
 	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
 	etc), and subsequently cleaned up after test execution. 
-	      
-	@ivar mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
-	tests will be run with. 
-	@type mode: string
-	@ivar outsubdir: The directory name for the output subdirectory. Typically a relative path,
-	but can also be an absolute path. 
-	@type outsubdir: string
-	@ivar log: Reference to the logger instance of this class
-	@type log: logging.Logger
-	@ivar project: Reference to the project details as set on the module load of the launching executable  
-	@type project: L{Project}
+
+
+	:ivar str mode: Legacy parameter used only if ``supportMultipleModesPerRun=False``; specifies the single mode 
+		tests will be run with. 
+	
+	:ivar str outsubdir: The directory name for the output subdirectory. Typically a relative path,
+		but can also be an absolute path. 
+	
+	:ivar logging.Logger log: Reference to the logger instance of this class.
+	
+	:ivar pysys.xml.project.Project project: Reference to the PySys project.
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
@@ -103,7 +103,7 @@ class BaseRunner(ProcessUser):
 		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
 		@param cycle: The number of times to execute the set of requested testcases
 		@param mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
-		tests will be run with. 
+			tests will be run with. 
 		@param threads: The number of worker threads to execute the requested testcases
 		@param outsubdir: The name of the output subdirectory
 		@param descriptors: List of L{pysys.xml.descriptor.TestDescriptor} descriptors specifying the set of testcases to be run
@@ -331,9 +331,9 @@ class BaseRunner(ProcessUser):
 		execution across multiple cycles. 
 		
 		@deprecated: Overriding this method is discouraged as it disables 
-		concurrent test execution across cycles. Instead, cleanup should be 
-		performed using either BaseTest.cleanup() or BaseRunner.testComplete() 
-		instead. 
+			concurrent test execution across cycles. Instead, cleanup should be 
+			performed using either BaseTest.cleanup() or BaseRunner.testComplete() 
+			instead. 
 		"""
 		pass
 
@@ -349,12 +349,12 @@ class BaseRunner(ProcessUser):
 		output from each iteration.
 		
 		@param printSummary: Ignored, exists only for compatibility reasons. To provide a custom summary printing 
-		implementation, specify a BaseSummaryResultsWriter subclass in the <writers> section of your project XML file. 
+			implementation, specify a BaseSummaryResultsWriter subclass in the <writers> section of your project XML file. 
 
 		@return: Use of this value is deprecated as of 1.3.0. This method returns a dictionary of testcase outcomes, and
-		for compatibility reasons this will continue in the short term, but will be removed in a future release. Please
-		ignore the return value of start() and use a custom BaseSummaryResultsWriter if you need to customize summarization of
-		results.
+			for compatibility reasons this will continue in the short term, but will be removed in a future release. Please
+			ignore the return value of start() and use a custom BaseSummaryResultsWriter if you need to customize summarization of
+			results.
 
 		"""
 		if self.project.perfReporterConfig:

@@ -73,8 +73,8 @@ class CommonProcessWrapper(object):
 		@param command:  The full path to the command to execute
 		@param arguments:  A list of arguments to the command
 		@param environs:  A dictionary of environment variables (key, value) for the process context execution. 
-		Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
-		automatically to unicode using utf-8. 
+			Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
+			automatically to unicode using utf-8. 
 		@param workingDir:  The working directory for the process
 		@param state:  The state of the process (L{pysys.constants.FOREGROUND} or L{pysys.constants.BACKGROUND}
 		@param timeout:  The timeout in seconds to be applied to the process
@@ -135,12 +135,12 @@ class CommonProcessWrapper(object):
 		addNewLine to false.
 		
 		@param data: The data to write to the process stdin. 
-		As only binary data can be written to a process stdin, 
-		if a character string rather than a byte object is passed as the data,
-		it will be automatically converted to a bytes object using the encoding 
-		given by locale.getpreferredencoding. 
+			As only binary data can be written to a process stdin, 
+			if a character string rather than a byte object is passed as the data,
+			it will be automatically converted to a bytes object using the encoding 
+			given by ``locale.getpreferredencoding()``. 
 		@param addNewLine: True if a new line character is to be added to the end of 
-		                   the data string
+			the data string
 		
 		"""
 		if not self.running(): raise Exception('Cannot write to process stdin when it is not running')

@@ -31,8 +31,8 @@ def unzipall(path, binary=False):
 	
 	@param path: The full path to the directory containing the archive files.
 	@param binary: Boolean flag to indicate if the unzipped files should be written as binary. 
-	The default value of False indicates that on some platforms newline characters will be 
-	converted to the operating system default. 
+		The default value of False indicates that on some platforms newline characters will be 
+		converted to the operating system default. 
 	
 	@raises FileNotFoundException: Raised if the directory path does not exist.
 	
@@ -57,8 +57,8 @@ def unzip(zfilename, replace=False, binary=False):
 	@param zfilename: The full path to the archive file.
 	@param replace: Boolean flag to indicate if the archive file should be removed after unpacking.
 	@param binary: Boolean flag to indicate if the unzipped file should be written as binary.
-	The default value of False indicates that on some platforms newline characters will be 
-	converted to the operating system default. 
+		The default value of False indicates that on some platforms newline characters will be 
+		converted to the operating system default. 
 	
 	@raises FileNotFoundException: Raised if the archive file does not exist.
 	@raises IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension.

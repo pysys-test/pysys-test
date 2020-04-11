@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -15,15 +15,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
-"""
-Contains the L{BaseTest} class that is subclassed by each individual testcase, 
-provides most of the assertion methods, and itself subclasses L{pysys.process.user.ProcessUser}. 
-
-For more information see the L{pysys.basetest.BaseTest} API documentation. 
-
-@undocumented: TEST_TEMPLATE
-"""
 import os.path, time, threading, logging
 
 from pysys import log
@@ -52,75 +43,183 @@ class %s(%s):
 
 	def validate(self):
 		pass
-'''
+''' # not public API, do not use
 
 
 class BaseTest(ProcessUser):
-	"""The base class for all PySys testcases.
-
-	BaseTest is the parent class of all PySys system testcases. The class provides utility functions for 
-	cross-platform process management and manipulation, test timing, and test validation. Any PySys testcase 
-	should inherit from the base test and provide an implementation of the abstract L{execute} method 
-	defined in this class. Child classes can also overide the L{setup}, L{cleanup} and L{validate} 
-	methods of the class to provide custom setup and cleanup actions for a particual test, and to perform 
-	all validation steps in a single method should this prove logically more simple.
+	"""BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your 
+	test logic and then to validate the results against the expected behaviour. 
 	
-	Execution of a PySys testcase is performed through an instance of the L{pysys.baserunner.BaseRunner}
-	class, or a subclass thereof. The base runner instantiates an instance of the testcase, and then calls 
-	the C{setup}, C{execute}, C{validate} and C{cleanup} methods of the instance. All processes started during 
-	the test execution are reference counted within the base test, and terminated within the C{cleanup} method.
+	All the functionality required to write PySys testcases is available from this class, apart from 
+	the constants defined in the `pysys.constants` module (e.g. `pysys.constants.IS_WINDOWS` etc). 
 	
-	Validation of the testcase is through the C{assert*} methods. Execution of many methods appends an outcome 
-	to the outcome data structure maintained by the ProcessUser base class, thus building up a record of the 
-	individual validation outcomes. Several potential outcomes are supported by the PySys framework 
-	(C{SKIPPED}, C{BLOCKED}, C{DUMPEDCORE}, C{TIMEDOUT}, C{FAILED}, C{NOTVERIFIED}, and C{PASSED}) and the 
-	overall outcome of the testcase is determined using aprecedence order of the individual outcomes. 
+	.. rubric:: Test lifecycle
+	
+	The basic ingredients of every PySys test class are an `execute` method containing the main body of the test, and 
+	a `validate` method containing the assertions that check for the expected result. 
+	
+	If it is necessary to do some extra setup before beginning the test's execution (for example, starting a server or 
+	provisioning a virtual machine), this can be achieved by overriding the `setup` method. Typically this would be 
+	used only if you're implementing a custom `BaseTest` subclass to make the functionality available to multiple 
+	individual test classes. Taken together, the PySys ``setup() -> execute() -> validate()`` methods correspond to the common 
+	'Arrange, Act, Assert' testing paradigm. At the end of each test, PySys automatically terminates all processes it 
+	started, in the `cleanup` method. If any additional custom cleanup is required, this can be achieved by calling 
+	`addCleanupFunction`.
+	
+	NB: Do not ever override the ``__init__`` constructor of a test class; instead use `setup`, which ensures orderly 
+	cleanup if an exception occurs during the setup process. 
+	
+	.. autosummary::
+		setup
+		execute
+		validate
+		addCleanupFunction
+		cleanup
 
-	@ivar mode: The user defined mode the test is running within. Subclasses can use this in conditional checks
-	           to modify the test execution based upon the mode.
-	@type mode: string
-	@ivar input: Full path to the input directory of the testcase. This is used both by the class and its 
-	            subclasses to locate the default directory containing all input data to the testcase, as defined
-	            in the testcase descriptor.  
-	@type input: string
-	@ivar output: Full path to the output sub-directory of the testcase. This is used both by the class and its 
-				subclasses to locate the default directory for output produced by the testcase. Note that this 
-				is the actual directory where all output is written, as modified from that defined in the testcase 
-				descriptor to accomodate for the sub-directory used within this location to sandbox concurrent 
-				execution of the test, and/or to denote the run number. 
-	@type output: string
-	@ivar reference: Full path to the reference directory of the testcase. This is used both by the class and its 
-	            subclasses to locate the default directory containing all reference data to the testcase, as defined
-	            in the testcase descriptor.  
-	@type reference: string
-	@ivar log: Reference to the logger instance of this class
-	@type log: logging.Logger
-	@ivar project: Reference to the project details as set on the module load of the launching executable  
-	@type project: L{Project}
-	@ivar descriptor: Information about this testcase, with fields such as id, title, etc
-	@type descriptor: L{pysys.xml.descriptor.TestDescriptor}
-	@ivar testCycle: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
-	The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
-	@type testCycle: int
+	.. rubric:: Test and project information
+
+	The input/output directories and other essential information about this test object and its parent project are 
+	can be accessed via instance attributes on ``self``:
+	
+	:ivar str input: Full path to the input directory of the testcase, which is where test-specific resources such as 
+		configuration files are stored. The directory is usually ``<testdir>/Input`` but the path can be customized in the testcase descriptor.  
+		An example ::
 		
+			self.copy(self.input+'/serverconfig.xml', self.output, mappers=[lambda line: line.replace('@PORT@', str(myport))])
+
+	:ivar str output: Full path to the output directory of the testcase, which is the only location to which the 
+		test should write output files, temporary files and logs. The output directory is automatically created and 
+		cleaned of existing content before the test runs to ensure separate runs do not influence each other. 
+		There are separate output directories when a test is run for multiple cycles or in multiple modes. 
+		The directory is usually ``<testdir>/Output/<outdir>`` but the path can be customized in the testcase descriptor.  
+		
+	:ivar str reference: Full path to the reference directory of the testcase, which is where reference comparison files 
+		are stored (typically for use with `assertDiff`)
+		The directory is usually ``<testdir>/Reference`` but the path can be customized in the testcase descriptor. 
+	
+	:ivar logging.Logger log: The Python ``Logger`` instance that should be used to record progress and status 
+		information. For example: ``self.log.info("Starting myserver on port %d", serverport)``.
+
+	:ivar str mode: The user-defined mode this test object is running. Tests can use this to modify how the test 
+		executed based upon the mode, for example to allow the test to run against either a mock or a real database.
+
+	:ivar int testCycle: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
+		The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
+
+	:ivar pysys.xml.descriptor.TestDescriptor descriptor: The `pysys.xml.descriptor.TestDescriptor` containing 
+		information about this testcase such as the test id, typically stored in a ``pysystest.xml`` file. 
+
+	:ivar pysys.baserunner.BaseRunner runner: A reference to the global `pysys.baserunner.BaseRunner` object 
+		responsible for orchestrating all the tests. The runner is where any cross-test state can be held, for example 
+		if you want to have multiple tests share use of a single server, VM, or other resource. 
+
+	:ivar pysys.xml.project.Project project: The `pysys.xml.project.Project` object containing the configuration of 
+		this PySys test project as defined by ``pysysproject.xml``. 
+		The project can be used to access information such as the project properties shared 
+		across all tests (e.g. for hosts and credentials). 
+
+	.. rubric:: Assertions and outcome handling
+	
+	PySys has a library of assertion methods that are great for typical system testing validation tasks such as 
+	checking log messages, diff'ing output files against a reference, and for more complex cases, evaluating arbitrary 
+	Python expressions. All these methods are designed to give a really clear outcome reason if the assertion fails. 
+	Note that by default assertion failures do not abort the test, so all the validation statements will be executed 
+	even if some early ones fail. 
+	
+	For example::
+	
+		def validate(self):
+			self.assertGrep('myserver.log', expr='Successfully authenticated user ".*"')
+			self.assertEval('actualNumberOfLogFiles == expected', actualNumberOfLogFiles=len(glob.glob(self.output+'/myserver*.log')), expected=3)
+	
+	The available outcomes for each assertion are contained in the `pysys.constants` module:
+	C{SKIPPED}, C{BLOCKED}, C{DUMPEDCORE}, C{TIMEDOUT}, C{FAILED}, C{NOTVERIFIED}, and C{PASSED}. 
+	
+	.. autosummary::
+		pysys.constants.SKIPPED
+		pysys.constants.BLOCKED
+	
+	.. autosummary::
+		assertGrep
+		assertLineCount
+		assertDiff
+		assertEval
+		assertLastGrep
+		assertOrderedGrep
+		assertPathExists
+		abort
+		skipTest
+		addOutcome
+		getOutcome
+		getOutcomeReason
+		reportPerformanceResult
+	
+	There are some deprecated methods which we do not recommend using: `assertThat`, `assertTrue`, `assertFalse`. 
+
+	.. rubric:: Process starting and management
+
+	The most important part of a test's `execute` method is starting the process(es) that you are testing. Always use 
+	the `startProcess` method for this (or a wrapper such as `startPython`) rather than ``os.system`` or ``subprocess``, 
+	to ensure that PySys can cleanup all test processes at the end of the test. 
+	
+	This class also provides methods to dynamically allocate a free TCP server port, 
+	and to monitor the memory/CPU usage of the processes it starts. 
+
+	.. autosummary::
+		startProcess
+		startPython
+		getNextAvailableTCPPort
+		allocateUniqueStdOutErr
+		createEnvirons
+		getDefaultEnvirons
+		signalProcess
+		stopProcess
+		writeProcess
+		startProcessMonitor
+		stopProcessMonitor
+
+	.. rubric:: Waiting for completion
+	
+	PySys provides a number of methods that can be used in your `execute` method to wait for operations to complete, 
+	of which the most commonly used is `waitForSignal`. 
+
+	.. autosummary::
+		waitForSignal
+		waitForFile
+		waitProcess
+		waitForSocket
+		wait
+
+	Do not use `wait` unless there is no alternative, since it makes tests both slower and more fragile than they ought to be. 
+
+	.. rubric:: File reading/writing/management
+	
+	The helper methods for common file I/O operations are:
+
+	.. autosummary::
+		copy
+		mkdir
+		deleteDir
+		getExprFromFile
+		logFileContents
+		write_text
+		getDefaultFileEncoding
+
+	.. rubric:: Utility methods
+	.. autosummary::
+		compareVersions
+		getBoolProperty
+		startBackgroundThread
+		pythonDocTest
+		startManualTester
+		stopManualTester
+		waitManualTester
+
+	.. rubric:: Method details
+
 	"""
 	
 	def __init__ (self, descriptor, outsubdir, runner):
-		"""Create an instance of the BaseTest class.
-		
-		SUbclasses should not usually have any reason to override this constructor, 
-		and in particular must not put any code that allocates resources here 
-		(for example, starting threads, making connections etc), since if the 
-		constructor throws for some reason then no cleanup will be performed. 
-		
-		Instead, use the L{setup()} method for setting up your test prior to 
-		execution. 
-		
-		@param descriptor: The descriptor for the test giving all test details
-		@param outsubdir: The output subdirectory the test output will be written to
-		@param runner: Reference to the runner responsable for executing the testcase
-		
-		"""
 		ProcessUser.__init__(self)
 		self.descriptor = descriptor
 		self.input = os.path.join(descriptor.testDir, descriptor.input)
@@ -148,7 +247,9 @@ class BaseTest(ProcessUser):
 		return ('%s.cycle%03d'%(self.descriptor.id, self.testCycle)) if self. testCycle else self.descriptor.id
 
 	def setKeywordArgs(self, xargs):
-		"""Set the xargs as data attributes of the test class.
+		"""Set the xargs as data attributes of the test class. For internal use only. 
+	
+		:meta private:
 				
 		Values in the xargs dictionary are set as data attributes using the builtin C{setattr} method. 
 		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
@@ -183,37 +284,49 @@ class BaseTest(ProcessUser):
 	# test methods for execution, validation and cleanup. The execute method is
 	# abstract and must be implemented by a subclass. 
 	def setup(self):
-		"""Setup method which may optionally be overridden to perform custom setup operations prior to test execution.
+		"""
+		Contains setup actions to be executed before the test is executed. 
 		
-		If this method throws an exception, L{cleanup} will be called.
+		The ``setup`` method may be overridden by individual test classes, or (more commonly) in a custom `BaseTest` 
+		subclass that provides common functionality for multiple individual tests. If you override this method, be 
+		sure to call ``super(BASETEST_CLASS_HERE, self).setup()`` to allow the setup commands from the base test to run. 
+		
+		If ``setup`` throws an exception, the `cleanup` method will still be called, to allow for clean up resources 
+		that were already allocated.
 		
 		"""
 		pass		
 
 
 	def execute(self):
-		"""Execute method which must be overridden to perform the test execution steps.
+		"""The method tests implement to perform the test execution steps. 
 		
-		@raises NotImplementedError:  Raised exeception should the method not be overridden
+		@raises NotImplementedError: If this method was not implemented yet. 
 		"""
 		raise NotImplementedError("The execute method of the BaseTest class must be implemented in a subclass")
 
 
 	def validate(self):
-		"""Validate method which may optionally be overridden to group all validation steps.
+		"""The method tests implement to perform assertions that check for the expected behaviour. 
+		
+		In some cases all of the required assertions (e.g. checking that a process ran without error etc) will have 
+		been performed in the `execute` method and so `validate` will be empty. However, where possible it is 
+		recommended to put assertions into the ``validate`` method for clarity, and so that the 
+		``pysys run --validateOnly`` option can be used during test development. 
 		
 		"""
 		pass
 
 
 	def cleanup(self):
-		"""Cleanup method which performs cleanup actions after execution and validation of the test.
+		"""
+		Contains cleanup actions to be executed after the test's `execute` and `validate` methods have completed. 
 		
-		The cleanup method performs actions to stop all processes started in the background and not 
-		explicitly killed during the test execution. It also stops all process monitors running in 
+		The cleanup method automatically stops all processes that are still still running (assuming they were started 
+		with `startProcess`). It also stops all process monitors running in 
 		separate threads, and any instances of the manual tester user interface.
 		
-		Should a custom cleanup for a subclass be required, use L{addCleanupFunction} instead of overriding
+		If any custom cleanup is required, use `addCleanupFunction` instead of overriding
 		this method.
 				
 		"""
@@ -242,7 +355,7 @@ class BaseTest(ProcessUser):
 		"""Add a resource which is owned by the test and is therefore
 		cleaned up (deleted) when the test is cleaned up. 
 		
-		Deprecated - please use addCleanupFunction instead of this function. 
+		:deprecated: Please use `addCleanupFunction` instead of this function. 
 		"""
 		self.resources.append(resource)
 
@@ -257,38 +370,39 @@ class BaseTest(ProcessUser):
 		and noise in the last few samples of the data. 
 		
 		You can specify a `file` and/or a list of `handlers`. If you use 
-		`file`, a default L{pysys.process.monitor.ProcessMonitorTextFileHandler} 
+		`file`, a default `pysys.process.monitor.ProcessMonitorTextFileHandler`
 		instance is created to produce tab-delimited lines with default columns 
 		specified by 
-		L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS}. 
+		`pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS`. 
 		If you wish to customize this for an individual test create your own 
-		C{ProcessMonitorTextFileHandler} instance and pass it to handlers instead. 
+		``ProcessMonitorTextFileHandler`` instance and pass it to handlers instead. 
 		Additional default columns may be added in future releases. 
 		
 		@param process: The process handle returned from the L{startProcess} method.
 		
 		@param interval: The polling interval in seconds between collection of 
-		monitoring statistics. 
+			monitoring statistics. 
 		
 		@param file: The name of a tab separated values (.tsv) file to write to, 
-		for example 'monitor-myprocess.tsv'. 
-		A default L{pysys.process.monitor.ProcessMonitorTextFileHandler} instance is 
-		created if this parameter is specified, with default columns from 
-		L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS} . 
+			for example 'monitor-myprocess.tsv'. 
+			
+			A default L{pysys.process.monitor.ProcessMonitorTextFileHandler} instance is 
+			created if this parameter is specified, with default columns from 
+			L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS}. 
 		
 		@param handlers: A list of L{pysys.process.monitor.BaseProcessMonitorHandler} 
-		instances (such as L{pysys.process.monitor.ProcessMonitorTextFileHandler}), 
-		which will process monitoring data every polling interval. This can be 
-		used for recording results (for example in a file) or for dynamically 
-		analysing them and reporting problems. 
+			instances (such as L{pysys.process.monitor.ProcessMonitorTextFileHandler}), 
+			which will process monitoring data every polling interval. This can be 
+			used for recording results (for example in a file) or for dynamically 
+			analysing them and reporting problems. 
 		
 		@param pmargs: Keyword arguments to allow advanced parameterization 
-		of the process monitor class, which will be passed to its 
-		constructor. It is an error to specify any parameters 
-		not supported by the process monitor class on each platform. 
+			of the process monitor class, which will be passed to its 
+			constructor. It is an error to specify any parameters 
+			not supported by the process monitor class on each platform. 
 				
 		@return: An object representing the process monitor 
-		(L{pysys.process.monitor.BaseProcessMonitor}).
+			(L{pysys.process.monitor.BaseProcessMonitor}).
 		@rtype: pysys.process.monitor.BaseProcessMonitor
 		
 		"""
@@ -332,6 +446,7 @@ class BaseTest(ProcessUser):
 		waiting when the thread is meant to be finishing. 
 		
 		Example usage::
+		
 			class PySysTest(BaseTest):
 				def dosomething(self, stopping, log, param1, pollingInterval):
 					log.debug('Message from my thread')
@@ -351,7 +466,7 @@ class BaseTest(ProcessUser):
 					t.join()
 		
 		Note that C{BaseTest} is not thread-safe (apart from C{addOutcome}, 
-		C{startProcess} and the reading of fields like self.output that don't 
+		C{startProcess} and the reading of fields like ``self.output`` that don't 
 		change) so if you need to use its fields or methods from 
 		background threads, be sure to add your own locking to the foreground 
 		and background threads in your test, including any custom cleanup 
@@ -360,24 +475,24 @@ class BaseTest(ProcessUser):
 		The BaseTest will stop and join all running background threads at the 
 		beginning of cleanup. If a thread doesn't stop within the expected 
 		timeout period a L{constants.TIMEDOUT} outcome will be appended. 
-		If a thread's `target` function raises an Exception then a 
+		If a thread's ``target`` function raises an Exception then a 
 		L{constants.BLOCKED} outcome will be appended during cleanup or 
 		when it is joined. 
 		
 		@param name: A name for this thread that concisely describes its purpose. 
-		Should be unique within this test/owner instance. 
-		A prefix indicating the test/owner will be added to the provided name. 
+			Should be unique within this test/owner instance. 
+			A prefix indicating the test/owner will be added to the provided name. 
 		
 		@param target: The function or instance method that will be executed 
-		on the background thread. The function must accept a keyword argument 
-		named `stopping` in addition to whichever keyword arguments are 
-		specified in `kwargsForTarget`. 
+			on the background thread. The function must accept a keyword argument 
+			named `stopping` in addition to whichever keyword arguments are 
+			specified in `kwargsForTarget`. 
 		
 		@param kwargsForTarget: A dictionary of keyword arguments that will be 
-		passed to the target function. 
+			passed to the target function. 
 		
 		@return: A L{pysys.utils.threadutils.BackgroundThread} instance 
-		wrapping the newly started thread. 
+			wrapping the newly started thread. 
 		@rtype: L{pysys.utils.threadutils.BackgroundThread}
 		
 		"""
@@ -389,7 +504,7 @@ class BaseTest(ProcessUser):
 
 	# methods to control the manual tester user interface
 	def startManualTester(self, file, filedir=None, state=FOREGROUND, timeout=TIMEOUTS['ManualTester']): # pragma: no cover
-		"""Start the manual tester.
+		"""Start the manual tester, which provides a UI to guide a human through the tests needed to implement this testcase.
 		
 		The manual tester user interface (UI) is used to describe a series of manual steps to be performed 
 		to execute and validate a test. Only a single instance of the UI can be running at any given time, and 
@@ -458,9 +573,13 @@ class BaseTest(ProcessUser):
 	# on various conditions i.e. a socket becoming available for connections,
 	# a file to exist etc
 	def wait(self, interval):
-		"""Wait for a specified period of time.
+		"""Wait for a specified period of time, and log a message to indicate this is happening.
 		
-		@param interval: The time interval in seconds to wait
+		Tests that rely on waiting for arbitrary times usually take longer to execute than necessary, and are fragile 
+		if the timings or machine load changes, so wherever possible use a method like `waitForSignal` to 
+		wait for something specific instead. 
+		
+		@param interval: The time interval in seconds to wait. 
 		
 		"""
 		log.info('Waiting for %0.1f seconds'%interval)
@@ -474,13 +593,13 @@ class BaseTest(ProcessUser):
 		(or does not exist). 
 		
 		@param path: The path to be checked. This can be an absolute path or 
-		relative to the testcase output directory.
+			relative to the testcase output directory.
 
 		@param exists: True if the path is asserted to exist, False if it 
-		should not. 
+			should not. 
 		
 		@param abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. 
+			assertion fails. 
 		
 		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
@@ -491,8 +610,8 @@ class BaseTest(ProcessUser):
 		return result
 
 	def assertEval(self, evalstring, abortOnError=False, **formatparams):
-		"""Perform a validation based on substituting values into 
-		a .format() string with named {} placeholders and then evaluating it with eval. 
+		"""Perform a validation by substituting named ``{}`` placeholder values into a Python expression such as 
+		``{expected}=={actual}`` or ``4 <= {actual} <= 10``. 
 		
 		Example use::
 		
@@ -502,12 +621,12 @@ class BaseTest(ProcessUser):
 		See also L{getExprFromFile} which is often used to extract a piece of 
 		data from a log file which can then be checked using this method. 
 		
-		@param evalstring: a string that will be formatted using .format(...) 
+		@param evalstring: a string that will be formatted using ``.format(...)``
 			with the specified parameters, and result in failure outcome if not true. 
 			
 			Parameters should be specified using {name} syntax, and quoting is not 
 			required as string values are automatically escaped using repr. 
-			e.g. 'os.path.size({filename}) > {origFileSize}'. 
+			e.g. '`os.path.size({filename}) > {origFileSize}'`. 
 			
 			Do not use an f-string instead of explicitly passing formatparams, as 
 			with an f-string this method will not know the names of the substituted 
@@ -559,11 +678,11 @@ class BaseTest(ProcessUser):
 			return False
 			
 	def assertThat(self, conditionstring, *args, **kwargs):
-		"""[DEPRECATED] Perform a validation based on substituting values into 
-		an old-style % format string and then evaluating it with eval. 
+		"""Perform a validation based on substituting values into 
+		an old-style ``%`` format string and then evaluating it with eval. 
 		
-		This method is deprecated in favour of L{assertEval} which produces 
-		more useful assertion failure messages and automatic quoting of strings. 
+		:deprecated: This method is deprecated in favour of L{assertEval} which produces 
+			more useful assertion failure messages and automatic quoting of strings. 
 
 		The eval string should be specified as a format string, with zero or more %s-style
 		arguments. This provides an easy way to check conditions that also produces clear
@@ -572,22 +691,24 @@ class BaseTest(ProcessUser):
 		The safest way to pass arbitrary arguments of type string is to use the 
 		repr() function to add appropriate quotes and escaping. 
 
-		e.g. self.assertThat('%d >= 5 or %s=="foobar"', myvalue, repr(mystringvalue))
+		e.g.::
+		
+			self.assertThat('%d >= 5 or %s=="foobar"', myvalue, repr(mystringvalue))
 		
 		@deprecated: Use L{assertEval} instead. 
 		
 		@param conditionstring: A string will have any following args 
-		substituted into it and then be evaluated as a boolean python 
-		expression. 
+			substituted into it and then be evaluated as a boolean python 
+			expression. 
 		
 		@param args: Zero or more arguments to be substituted into the format 
-		string
+			string.
 		
 		@keyword abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. 
+			assertion fails. 
 
 		@keyword assertMessage: Overrides the string used to describe this 
-		assertion in log messages and the outcome reason. 
+			assertion in log messages and the outcome reason. 
 		
 		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
@@ -614,8 +735,8 @@ class BaseTest(ProcessUser):
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
-		Consider using L{assertEval} instead of this method, which produces 
-		clearer assertion failure messages. 
+		:deprecated: Use L{assertEval} instead of this method, which produces 
+			clearer messages if the assertion fails. 
 		
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
@@ -623,10 +744,10 @@ class BaseTest(ProcessUser):
 		@param expr: The expression, as a boolean, to check for the True | False value
 		
 		@param abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. 
+			assertion fails. 
 		
 		@param assertMessage: Overrides the string used to describe this 
-		assertion in log messages and the outcome reason. 
+			assertion in log messages and the outcome reason. 
 
 		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
@@ -641,8 +762,8 @@ class BaseTest(ProcessUser):
 	def assertFalse(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to false.
 		
-		Consider using L{assertEval} instead of this method, which produces 
-		clearer assertion failure messages. 
+		:deprecated: Use L{assertEval} instead of this method, which produces 
+			clearer messages if the assertion fails. 
 		
 		If the supplied expression evaluates to false a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to true, a C{FAILED} outcome is added.
@@ -650,10 +771,10 @@ class BaseTest(ProcessUser):
 		@param expr: The expression to check for the true | false value
 		
 		@param abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. 	
+			assertion fails. 	
 		
 		@param assertMessage: Overrides the string used to describe this 
-		assertion in log messages and the outcome reason. 
+			assertion in log messages and the outcome reason. 
 
 		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
@@ -666,17 +787,16 @@ class BaseTest(ProcessUser):
 
 	def assertDiff(self, file1, file2=None, filedir1=None, filedir2=None, ignores=[], sort=False, replace=[], includes=[], encoding=None, 
 			abortOnError=False, assertMessage=None, stripWhitespace=None):
-		"""Perform a validation assert on the comparison of two input text files, for example comparing a file from the 
-		output directory against a reference file containing the expected output.
+		"""Perform a validation by comparing the contents of two text files, typically a file from the 
+		output directory against a file in the ``<testdir>/Reference/`` directory containing the expected output.
+
+		Differences in line ending are always ignored, and depending on the value of ``stripWhitespace`` leading 
+		and trailing whitespace may also be ignored. 
 		
 		The files can be pre-processed prior to the comparison to either ignore particular lines, 
 		sort their constituent lines, replace matches to regular 
 		expressions in a line with an alternate value, or to only include particular lines. 
-		
-		Differences in line ending are always ignored, and depending on the value of ``stripWhitespace`` leading 
-		and trailing whitespace may also be ignored. 
-		
-		However although this method can perform transformation of the files directly, it is often easier to instead use 
+		However, it is often easier to instead use 
 		L{copy} to perform the transformations (e.g. stripping out timestamps, finding lines of interest etc)
 		and then separately call assertDiff on the file generated by copy. This makes it easier to generate a suitable 
 		reference file and to diagnose test failures. For example::
@@ -782,7 +902,12 @@ class BaseTest(ProcessUser):
 
 	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, encoding=None, 
 			abortOnError=False, assertMessage=None):
-		"""Perform a validation assert on a regular expression occurring in a text file.
+		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
+		
+		For example::
+		
+			self.assertGrep('myserver.log', ' ERROR .*', contains=False)
+			self.assertGrep('myserver.log', f'Successfully authenticated user "{username}" in .* seconds')
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
 		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
@@ -895,14 +1020,14 @@ class BaseTest(ProcessUser):
 		@param ignores: A list of regular expressions used to denote lines in the file which should be ignored
 		@param includes: A list of regular expressions used to denote lines in the file which should be used in the assertion.#
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
 
 		@param abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. 
+			assertion fails. 
 
 		@param assertMessage: Overrides the string used to describe this 
-		assertion in log messages and the outcome reason. 				
+			assertion in log messages and the outcome reason. 				
 		
 		@return: None if there was no match, or the string that was matched (note the return value is not affected by 
 			the contains=True/False parameter).
@@ -942,14 +1067,14 @@ class BaseTest(ProcessUser):
 		@param exprList: A list of regular expressions which should occur in the file in the order they appear in the list
 		@param contains: Boolean flag to denote if the expressions should or should not be seen in the file in the order specified
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
 
 		@param abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. 
+			assertion fails. 
 
 		@param assertMessage: Overrides the string used to describe this 
-		assertion in log messages and the outcome reason. 
+			assertion in log messages and the outcome reason. 
 
 		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 
@@ -987,11 +1112,11 @@ class BaseTest(ProcessUser):
 	
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, encoding=None, 
 			abortOnError=False, assertMessage=None):
-		"""Perform a validation assert on the number of lines in a text file matching a specific regular expression.
+		"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
 		input file matching the specified regular expression evaluate to true when evaluated against 
-		the supplied condition.
+		the supplied ``condition``.
 		
 		@param file: The basename of the file used in the line count
 		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
@@ -999,14 +1124,14 @@ class BaseTest(ProcessUser):
 		@param condition: The condition to be met for the number of lines matching the regular expression
 		@param ignores: A list of regular expressions that will cause lines to be excluded from the count
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
 
 		@param abortOnError: Set to True to make the test immediately abort if the
-		assertion fails. 
+			assertion fails. 
 		
 		@param assertMessage: Overrides the string used to describe this 
-		assertion in log messages and the outcome reason. 
+			assertion in log messages and the outcome reason. 
 
 		@return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""	
@@ -1033,38 +1158,39 @@ class BaseTest(ProcessUser):
 		return False
 
 	def reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
-		""" Reports a new performance result, with an associated unique key that identifies it for  comparison purposes.
+		""" Reports a new performance result to the performance ``csv`` file, with an associated unique string key 
+		that identifies it for comparison purposes.
 		
 		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
 		rather than the total time taken, since this allows the number of iterations to be increased .
 		
 		@param value: The value to be reported. Usually this is a float or integer, but string is 
-		also permitted. 
+			also permitted. 
 
 		@param resultKey: A unique string that fully identifies what was measured, which will be
-		used to compare results from different test runs. For example "HTTP transport message sending throughput
-		using with 3 connections in SSL mode". The resultKey must be unique across all test cases and modes. It should be fully
-		self-describing (without the need to look up extra information such as the associated testId). Do not include
-		the test id or units in the resultKey string. It must be stable across different runs, so cannot contain
-		process identifiers, date/times or other numbers that will vary. If possible resultKeys should be written
-		so that related results will be together when all performance results are sorted by resultKey, which usually
-		means putting general information near the start of the string and specifics (throughput/latency, sending/receiving)
-		towards the end of the string. It should be as concise as possible (given the above).
+			used to compare results from different test runs. For example "HTTP transport message sending throughput
+			using with 3 connections in SSL mode". The resultKey must be unique across all test cases and modes. It should be fully
+			self-describing (without the need to look up extra information such as the associated testId). Do not include
+			the test id or units in the resultKey string. It must be stable across different runs, so cannot contain
+			process identifiers, date/times or other numbers that will vary. If possible resultKeys should be written
+			so that related results will be together when all performance results are sorted by resultKey, which usually
+			means putting general information near the start of the string and specifics (throughput/latency, sending/receiving)
+			towards the end of the string. It should be as concise as possible (given the above).
 
 		@param unit: Identifies the unit the the value is measured in, including whether bigger numbers are better or
-		worse (used to determine improvement or regression). Must be an instance of L{pysys.utils.perfreporter.PerformanceUnit}.
-		In most cases, use L{pysys.utils.perfreporter.PerformanceUnit.SECONDS} (e.g. for latency) or
-		L{pysys.utils.perfreporter.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be
-		used as a shorthand for those PerformanceUnit instances.
+			worse (used to determine improvement or regression). Must be an instance of L{pysys.utils.perfreporter.PerformanceUnit}.
+			In most cases, use L{pysys.utils.perfreporter.PerformanceUnit.SECONDS} (e.g. for latency) or
+			L{pysys.utils.perfreporter.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be
+			used as a shorthand for those PerformanceUnit instances.
 		
 		@param toleranceStdDevs: (optional) A float that indicates how many standard deviations away from the mean a
-		result needs to be to be considered a regression.
+			result needs to be to be considered a regression.
 		
 		@param resultDetails: (optional) A dictionary of detailed information about this specific result 
-		and/or test that should be recorded together with the result, for example detailed information about what mode 
-		or versions the test is measuring. Note this is separate from the global run details shared across 
-		all tests in this PySys execution, which can be customized by overriding 
-		L{pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails}.
+			and/or test that should be recorded together with the result, for example detailed information about what mode 
+			or versions the test is measuring. Note this is separate from the global run details shared across 
+			all tests in this PySys execution, which can be customized by overriding 
+			L{pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails}.
 
 		"""
 		for p in self.runner.performanceReporters:
@@ -1074,7 +1200,7 @@ class BaseTest(ProcessUser):
 		"""
 		Specifies what encoding should be used to read or write the specified 
 		text file. The default implementation for BaseTest delegates to the 
-		runner, which in turn gets its defaults from the pysyproject.xml 
+		runner, which in turn gets its defaults from the ``pysyproject.xml`` 
 		configuration. 
 		
 		See L{pysys.process.user.ProcessUser.getDefaultFileEncoding} for more details.
@@ -1089,7 +1215,7 @@ class BaseTest(ProcessUser):
 		@param pythonFile: the absolute path to a python file name. 
 		@param pythonPath: a list of directories to be added to the PYTHONPATH.
 		@param output: the output file; if not specified, '%s-doctest.txt' is used with 
-		the basename of the python file. 
+			the basename of the python file. 
 		
 		@param kwargs: extra arguments are passed to startProcess/startPython. 
 		"""

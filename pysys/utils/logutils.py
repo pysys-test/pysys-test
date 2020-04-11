@@ -43,7 +43,7 @@ class BaseLogFormatter(logging.Formatter):
 
 		@param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
 		@param arg_index: The index of argument in the string expansion to color. This can be either a single
-		integer value representing the index, or a list of integers representing a set of indexes
+			integer value representing the index, or a list of integers representing a set of indexes
 		@return: A dictionary that can then be used in calls to the logger
 		"""
 		if type(arg_index) is int: return {cls.CATEGORY:category, cls.ARG_INDEX:[arg_index]}
@@ -80,12 +80,13 @@ class ColorLogFormatter(BaseLogFormatter):
 	console output, with the color coding enabled either by the color option on the formatter
 	set to true. 
 	
-	The PYSYS_COLOR environment variable can be set to true or false, overriding any 
+	The ``PYSYS_COLOR`` environment variable can be set to true or false, overriding any 
 	setting specified in the project configuration.
 	
 	The colors used for each category defined by this class can be overridden 
-	by specifying "color:XXX" options, e.g.
-	<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
+	by specifying "color:XXX" options, e.g.::
+
+		<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
 
 	@ivar COLOR_CATEGORIES: the color map for the defined logging categories
 	@type COLOR_CATEGORIES: dictionary
@@ -134,9 +135,9 @@ class ColorLogFormatter(BaseLogFormatter):
 		later 
 		
 		@param bright: set to False to force only the basic (30-39) codes 
-		or True to use the better-looking 90-99 bright codes which are not 
-		supported by all terminals. Default is bright=False, but can be 
-		overridden by PYSYS_COLOR_BASIC env var. 
+			or True to use the better-looking 90-99 bright codes which are not 
+			supported by all terminals. Default is bright=False, but can be 
+			overridden by the ``PYSYS_COLOR_BASIC`` environment var. 
 		"""
 		if bright is None: bright = os.getenv('PYSYS_COLOR_BRIGHT','true')=='true'
 		# by default we use standard ANSI escape sequences, supported by most unix terminals

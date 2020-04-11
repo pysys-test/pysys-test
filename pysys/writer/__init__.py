@@ -22,10 +22,10 @@ Contains API and sample implementations of L{BaseResultsWriter} and
 its subclasses, which are used to output test results during runtime execution.
 
 Output writers are responsible for summarising test results on completion of a test, or on completion
-of a set of tests. There are currently three distinct types of writers, namely `Record`, `Progress`, and
-`Summary`, each of which performs output at different stages of a run:
+of a set of tests. There are currently three distinct types of writers, namely 'Record', 'Progress', and
+'Summary', each of which performs output at different stages of a run:
 
-   - `Record` writers output the outcome of a specific test after completion of that test, to allow
+   - *Record* writers output the outcome of a specific test after completion of that test, to allow
      runtime auditing of the test output, e.g. into a relational database. Several record
      writers are distributed with the PySys framework, such as the L{writer.JUnitXMLResultsWriter}.
      Best practice is to subclass L{writer.BaseRecordResultsWriter} when writing new record writers. 
@@ -33,7 +33,7 @@ of a set of tests. There are currently three distinct types of writers, namely `
      though some writers may enable/disable themselves under different conditions, by overriding the 
      L{pysys.writer.BaseRecordResultsWriter.isEnabled} method.
 
-   - `Progress` writers output a summary of the test progress after completion of each test, to give
+   - *Progress* writers output a summary of the test progress after completion of each test, to give
      an indication of how far and how well the run is progressing. A single implementation of a progress
      writer is distributed with the PySys framework, namely the L{writer.ConsoleProgressResultsWriter},
      which details the percentage of tests selected to be run and that have executed, and a summary
@@ -41,14 +41,14 @@ of a set of tests. There are currently three distinct types of writers, namely `
      are enabled when the --progress flag is given to the PySys launcher, or when PYSYS_PROGRESS=true is
      set in the local environment.
 
-   - `Summary` writers output an overall summary of the status at the end of a test run. A single implementation
+   - *Summary* writers output an overall summary of the status at the end of a test run. A single implementation
      of a progress writer is distributed with the PySys framework, namely the L{writer.ConsoleSummaryResultsWriter},
      which details the overall test run outcome and lists any tests that did not pass. A summary writer is always
      enabled regardless of the flags given to the pysys launcher.
 
-Project configuration of the writers is through the PySys project XML file using the <writer> tag. Multiple
-writers may be configured and their individual properties set through the nested <property> tag. Writer
-properties are set as attributes to the class through the setattr() function. Custom (site specific) modules
+Project configuration of the writers is through the PySys project XML file using the ``<writer>`` tag. Multiple
+writers may be configured and their individual properties set through the nested ``<property>`` tag. Writer
+properties are set as attributes to the class through the ``setattr()`` function. Custom (site specific) modules
 can be created and configured by users of the PySys framework (e.g. to output test results into a relational
 database etc), though they must adhere to the interface demonstrated by the implementations demonstrated here.
 If no progress writers are explicitly configured in the PySys project XML file, an instance of
@@ -57,7 +57,7 @@ XML file, an instance of L{writer.ConsoleSummaryResultsWriter} is used.
 
 The writers are instantiated and invoked by the L{pysys.baserunner.BaseRunner} class instance. This calls the class
 constructors of all configured test writers, and then the setup (prior to executing the set of tests), processResult
-(process a test result), and cleanup (upon completion of the execution of all tests). The **kwargs method parameter
+(process a test result), and cleanup (upon completion of the execution of all tests). The ``**kwargs`` method parameter
 is used for variable argument passing in the interface methods to allow modification of the PySys framework without
 breaking writer implementations already in existence.
 
@@ -87,7 +87,7 @@ class BaseResultsWriter(object):
 		""" Create an instance of the BaseResultsWriter class.
 
 		@param logfile: Optional configuration property specifying a file to store output in. 
-		Does not apply to all writers, can be ignored if not needed. 
+			Does not apply to all writers, can be ignored if not needed. 
 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
 
@@ -101,14 +101,14 @@ class BaseResultsWriter(object):
 		(including L{setup})) will be called. 
 		
 		@param record: True if the user ran PySys with the `--record` flag, 
-		indicating that test results should be recorded. 
+			indicating that test results should be recorded. 
 		 
 		@returns: For record writers, the default to enable only if record==True, 
-		but individual writers can use different criteria if desired, e.g. 
-		writers for logging output to a CI system may enable themselves 
-		based on environment variables indicating that system is present, 
-		even if record is not specified explicitly. 
-		
+			but individual writers can use different criteria if desired, e.g. 
+			writers for logging output to a CI system may enable themselves 
+			based on environment variables indicating that system is present, 
+			even if record is not specified explicitly. 
+			
 		"""
 		return record == True
 
@@ -125,10 +125,10 @@ class BaseResultsWriter(object):
 		@param threads: The number of threads used for running tests. 
 		
 		@param testoutdir: The output directory used for this test run 
-		(equal to `runner.outsubdir`), an identifying string which often contains 
-		the platform, or when there are multiple test runs on the same machine 
-		may be used to distinguish between them. This is usually a relative path 
-		but may be an absolute path. 
+			(equal to `runner.outsubdir`), an identifying string which often contains 
+			the platform, or when there are multiple test runs on the same machine 
+			may be used to distinguish between them. This is usually a relative path 
+			but may be an absolute path. 
 		
 		@param runner: The runner instance that owns this writer. 
 		
@@ -154,8 +154,8 @@ class BaseResultsWriter(object):
 		when multiple tests are running in parallel. 
 
 		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
-		can extract data from this object but should not store a reference to it. 
-		The testObj.descriptor.id indicates the test that ran. 
+			can extract data from this object but should not store a reference to it. 
+			The testObj.descriptor.id indicates the test that ran. 
 		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
 		@param testTime: Duration of the test in seconds as a floating point number. 
 		@param testStart: The time when the test started. 
@@ -173,8 +173,8 @@ class BaseResultsWriter(object):
 		synchronized if performing non-atomic operations.
 		
 		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
-		can extract data from this object but should not store a reference to it. The testObj.descriptor.id
-		indicates the test that ran.
+			can extract data from this object but should not store a reference to it. The testObj.descriptor.id
+			indicates the test that ran.
 		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
 		@param kwargs: Additional keyword arguments may be added in a future release. 
 
@@ -329,9 +329,9 @@ def replaceIllegalXMLCharacters(unicodeString, replaceWith=u'?'):
 	See https://bugs.python.org/issue5166
 	
 	@param unicodeString: a unicode character string (not a byte string). 
-	Since most XML documents are encoded in utf-8, typical usage would be to 
-	decode the UTF-8 bytes into characters before calling this function and then 
-	re-encode as UTF-8 again afterwards.
+		Since most XML documents are encoded in utf-8, typical usage would be to 
+		decode the UTF-8 bytes into characters before calling this function and then 
+		re-encode as UTF-8 again afterwards.
 	
 	@param replaceWith: the unicode character string to replace each illegal character with. 
 	"""

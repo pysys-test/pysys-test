@@ -165,7 +165,7 @@ class ProcessUser(object):
 		line), or else from the project configuration. 
 		
 		@param propertyName: The name of a property set on the command line 
-		or project configuration.
+			or project configuration.
 		"""
 		val = getattr(self, propertyName, None)
 		if val is None: val = getattr(self.project, propertyName, None)
@@ -187,12 +187,12 @@ class ProcessUser(object):
 		coverage tool. 
 		
 		@param arguments: The arguments to pass to the Python executable. 
-		Typically the first one be either the name of a Python script 
-		to execute, or '-m' followed by a module name. 
+			Typically the first one be either the name of a Python script 
+			to execute, or '-m' followed by a module name. 
 		@param kwargs: See L{startProcess} for detail on available arguments.
 		@param disableCoverage: Disables code coverage for this specific 
-		process. Coverage can also be disabled by setting 
-		`self.disableCoverage==True` on this test instance. 
+			process. Coverage can also be disabled by setting 
+			`self.disableCoverage==True` on this test instance. 
 		@return: The process handle of the process (L{ProcessWrapper}).
 		@rtype: L{ProcessWrapper}
 		
@@ -517,32 +517,32 @@ class ProcessUser(object):
 		entire parent environment instead of using this method. 
 		
 		@param overrides: A dictionary of environment variables whose 
-		values will be used instead of any existing values. 
-		You can use `os.getenv('VARNAME','')` if you need to pass selected 
-		variables from the current process as part of the overrides list. 
-		If the value is set to None then any variable of this name will be 
-		deleted. Use unicode strings if possible (byte strings will be 
-		converted depending on the platform). 
-		A list of dictionaries can be specified, in which case the latest 
-		will override the earlier if there are any conflicts.
+			values will be used instead of any existing values. 
+			You can use `os.getenv('VARNAME','')` if you need to pass selected 
+			variables from the current process as part of the overrides list. 
+			If the value is set to None then any variable of this name will be 
+			deleted. Use unicode strings if possible (byte strings will be 
+			converted depending on the platform). 
+			A list of dictionaries can be specified, in which case the latest 
+			will override the earlier if there are any conflicts.
 		
 		@param addToLibPath: A path or list of paths to be prepended to the 
-		default value for the environment variable used to load libraries 
-		(or the value specified in overrides, if any), 
-		i.e. `[DY]LD_LIBRARY_PATH` on Unix or `PATH` on Windows. This is usually 
-		more convenient than adding it directly to `overrides`. 
+			default value for the environment variable used to load libraries 
+			(or the value specified in overrides, if any), 
+			i.e. `[DY]LD_LIBRARY_PATH` on Unix or `PATH` on Windows. This is usually 
+			more convenient than adding it directly to `overrides`. 
 
 		@param addToExePath: A path or list of paths to be prepended to the 
-		default value for the environment variable used to locate executables 
-		(or the value specified in overrides, if any), 
-		i.e. `PATH` on both Unix and Windows. This is usually 
-		more convenient than adding it directly to `overrides`. 
+			default value for the environment variable used to locate executables 
+			(or the value specified in overrides, if any), 
+			i.e. `PATH` on both Unix and Windows. This is usually 
+			more convenient than adding it directly to `overrides`. 
 		
 		@param command: If known, the full path of the executable for which 
-		a default environment is being created (passed to L{getDefaultEnvirons}). 
+			a default environment is being created (passed to L{getDefaultEnvirons}). 
 		
 		@param kwargs: Overrides of this method should pass any additional 
-		kwargs down to the super implementation, to allow for future extensions. 
+			kwargs down to the super implementation, to allow for future extensions. 
 		
 		@return: A new dictionary containing the environment variables. 
 		"""
@@ -636,7 +636,7 @@ class ProcessUser(object):
 		@param process: The process handle returned from the L{startProcess} method
 		@param timeout: The timeout value in seconds to wait before returning
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-		project setting)
+			project setting)
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -663,10 +663,10 @@ class ProcessUser(object):
 
 		@param process: The process handle returned from the L{startProcess()} method
 		@param data: The data to write to the process stdin. 
-		As only binary data can be written to a process stdin, 
-		if a character string rather than a byte object is passed as the data,
-		it will be automatically converted to a bytes object using the encoding 
-		given by locale.getpreferredencoding(). 
+			As only binary data can be written to a process stdin, 
+			if a character string rather than a byte object is passed as the data,
+			it will be automatically converted to a bytes object using the encoding 
+			given by locale.getpreferredencoding(). 
 		@param addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""
@@ -692,9 +692,9 @@ class ProcessUser(object):
 		@param host: The host value in the socket host:port pair
 		@param timeout: The timeout in seconds to wait for connection to the socket
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-		project setting)
+			project setting)
 		@param process: If a handle to a process is specified, the wait will abort if 
-		the process dies before the socket becomes available.
+			the process dies before the socket becomes available.
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 
@@ -812,22 +812,22 @@ class ProcessUser(object):
 		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		
 		@param ignores: A list of regular expressions used to denote lines in the files which should be ignored 
-		when matching both `expr` and `errorExpr`. 
+			when matching both `expr` and `errorExpr`. 
 		
 		@param process: If a handle to the process object producing output is specified, the wait will abort if 
-		the process dies before the expected signal appears.
+			the process dies before the expected signal appears.
 		
 		@param errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
-		for the main expression to be aborted with an error outcome. This is useful to avoid waiting a long time for 
-		the expected expression when an ERROR is logged that means it will never happen, and also provides 
-		much clearer test failure messages in this case. 
+			for the main expression to be aborted with an error outcome. This is useful to avoid waiting a long time for 
+			the expected expression when an ERROR is logged that means it will never happen, and also provides 
+			much clearer test failure messages in this case. 
 		
 		@param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
-		project setting)
+			project setting)
 		
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
 		"""
 		assert expr, 'expr= argument must be specified when calling waitForSignal'
 		
@@ -957,20 +957,20 @@ class ProcessUser(object):
 		@param outcome: The outcome to add
 		
 		@param outcomeReason: A string summarizing the reason for the outcome, 
-		for example "Grep on x.log contains 'ERROR: server failed'". 
+			for example "Grep on x.log contains 'ERROR: server failed'". 
 		
 		@param printReason: If True the specified outcomeReason will be printed
 		
 		@param abortOnError: If true abort the test on any error outcome. This should usually be set to 
-		False for assertions, or the configured `self.defaultAbortOnError` setting (typically True) for 
-		operations that involve waiting. 
+			False for assertions, or the configured `self.defaultAbortOnError` setting (typically True) for 
+			operations that involve waiting. 
 		
 		@param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
-		to the log output for better test triage.
+			to the log output for better test triage.
 		
 		@param override: Remove any existing test outcomes when adding this one, ensuring 
-		that this outcome is the one and only one reported even if an existing outcome 
-		has higher precedence. 
+			that this outcome is the one and only one reported even if an existing outcome 
+			has higher precedence. 
 		"""
 		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
 		with self.lock:
@@ -1031,7 +1031,7 @@ class ProcessUser(object):
 		This is useful when a test should not be executed in the current mode or platform. 
 
 		@param outcomeReason: A string summarizing the reason the test is being skipped, for example
-		"Feature X is not supported on Windows". 
+			"Feature X is not supported on Windows". 
 		"""
 		raise AbortExecution(SKIPPED, outcomeReason, callRecord)
 
@@ -1115,14 +1115,14 @@ class ProcessUser(object):
 		@param path: file to search (located in the output dir unless an absolute path is specified)
 		@param expr: the regular expression, optionally containing the regex group operator (...)
 		@param groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ['1'] meaning 
-		the first group. If more than one group is specified, the result will be a tuple of group values, otherwise the
-		result will be the value of the group at the specified index.
+			the first group. If more than one group is specified, the result will be a tuple of group values, otherwise the
+			result will be the value of the group at the specified index.
 		@param returnAll: returns all matching lines if True, the first matching line otherwise.
 		@param returnNoneIfMissing: set this to return None instead of throwing an exception
-		if the regex is not found in the file
+			if the regex is not found in the file
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
 		"""
 		with openfile(os.path.join(self.output, path), 'r', encoding=encoding or self.getDefaultFileEncoding(os.path.join(self.output, path))) as f:
 			matches = []
@@ -1158,9 +1158,9 @@ class ProcessUser(object):
 		@param maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
 		@param tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
-		
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
+			
 		@return: True if anything was logged, False if not
 		
 		"""
@@ -1219,7 +1219,7 @@ class ProcessUser(object):
 		This function is a no-op (does not throw) if the directory already exists. 
 		
 		@param path: The path to be created. This can be an absolute path or 
-		relative to the testcase output directory.
+			relative to the testcase output directory.
 		
 		@return: the absolute path of the new directory, to facilitate fluent-style method calling. 
 		"""
@@ -1236,10 +1236,10 @@ class ProcessUser(object):
 		Does nothing if it does not exist. Raises an exception if the deletion fails. 
 		
 		@param path: The path to be deleted. This can be an absolute path or 
-		relative to the testcase output directory.
+			relative to the testcase output directory.
 		
 		@param kwargs: Any additional arguments are passed to 
-		L{pysys.utils.fileutils.deletedir()}. 
+			L{pysys.utils.fileutils.deletedir()}. 
 		"""
 		deletedir(os.path.join(self.output, path), **kwargs)
 		
@@ -1265,17 +1265,17 @@ class ProcessUser(object):
 		
 		A return value of None indicates default behaviour, which on Python 3 is to 
 		use the default encoding, as specified by python's 
-		locale.getpreferredencoding(), and on Python 2 is to use binary "str" 
+		``locale.getpreferredencoding()``, and on Python 2 is to use binary ``str`` 
 		objects with no character encoding or decoding applied. 
 		
 		@param file: The filename to be read or written. This may be an 
-		absolute path or a relative path.
+			absolute path or a relative path.
 		 
-		@param xargs: Ensure that an **xargs argument is specified so that 
-		additional information can be passed to this method in future releases. 
+		@param xargs: Ensure that an ``**xargs`` argument is specified so that 
+			additional information can be passed to this method in future releases. 
 		
 		@return: The encoding to use for this file, or None if default behaviour is 
-		to be used.
+			to be used.
 		"""
 		file = file.replace('\\','/').lower() # normalize slashes and ignore case
 		for e in self.project.defaultFileEncodings:
@@ -1341,8 +1341,8 @@ class ProcessUser(object):
 		@param v2: A string containing a version number, with any number of components. 
 
 		@return: an integer > 0 if v1>v2, 
-		an integer < 0 if v1<v2, 
-		or 0 if they are semantically the same.
+			an integer < 0 if v1<v2, 
+			or 0 if they are semantically the same.
 		"""
 		return compareVersions(v1, v2)
 
@@ -1398,22 +1398,22 @@ class ProcessUser(object):
 				])
 		
 		@param src: The source filename, which can be an absolute path, or 
-		a path relative to the `self.output` directory. 
-		Use `src=self.input+'/myfile'` if you wish to copy a file from the test 
-		input directory. 
+			a path relative to the `self.output` directory. 
+			Use `src=self.input+'/myfile'` if you wish to copy a file from the test 
+			input directory. 
 		
 		@param dest: The source filename, which can be an absolute path, or 
-		a path relative to the `self.output` directory. If this is a directory 
-		name, the file is copied to this directory with the same basename as src. 
+			a path relative to the `self.output` directory. If this is a directory 
+			name, the file is copied to this directory with the same basename as src. 
 		
 		@param mappers: A list of filter functions that will be applied, 
-		in order, to each line read from the file. Each function accepts a string for 
-		the current line as input and returns either a string to write or 
-		None if the line is to be omitted. 
+			in order, to each line read from the file. Each function accepts a string for 
+			the current line as input and returns either a string to write or 
+			None if the line is to be omitted. 
 		
 		@param encoding: The encoding to use to open the file. 
-		The default value is None which indicates that the decision will be delegated 
-		to the L{getDefaultFileEncoding()} method. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
 		
 		@return: the absolute path of the destination file. 
 		"""

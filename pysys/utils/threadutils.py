@@ -37,17 +37,17 @@ class BackgroundThread(object):
 	@ivar name: The name specified for this thread when it was created. 
 	
 	@ivar joinTimeoutSecs: The default timeout that will be used for joining 
-	this thread. If not explicitly set this will be L{TIMEOUTS}C{['WaitForProcessStop']}.
+		this thread. If not explicitly set this will be L{TIMEOUTS}C{['WaitForProcessStop']}.
 	
 	@ivar exception: The exception object raised by the thread if it has 
-	terminated with an error, or None if not. 
+		terminated with an error, or None if not. 
 	"""
 	def __init__(self, owner, name, target, kwargsForTarget):
 		"""
 		For details see L{pysys.basetest.BaseTest.startBackgroundThread}.
 		
 		@param owner: The BaseTest that owns this background thread and is 
-		responsible for ensuring it is terminated during cleanup. 
+			responsible for ensuring it is terminated during cleanup. 
 		"""
 		assert name, 'Thread name must always be specified'
 
@@ -137,15 +137,15 @@ class BackgroundThread(object):
 		since failures during cleanup are usually to be expected. 
 		
 		@param timeout: The time in seconds to wait. Usually this should be 
-		left at the default value of None which uses a default timeout 
-		of L{constants.TIMEOUTS}C{['WaitForProcessStop']}. 
-		Note that unlike Python's `Thread.join` method, infinite timeouts 
-		are not supported. 
+			left at the default value of None which uses a default timeout 
+			of L{constants.TIMEOUTS}C{['WaitForProcessStop']}. 
+			Note that unlike Python's `Thread.join` method, infinite timeouts 
+			are not supported. 
 		
 		@param abortOnError: Set to True if you wish this method to 
-		immediately abort with an exception if the background thread times out 
-		or raises an Exception. The default is False, which adds the failure 
-		outcome but does not raise an exception. 
+			immediately abort with an exception if the background thread times out 
+			or raises an Exception. The default is False, which adds the failure 
+			outcome but does not raise an exception. 
 		"""
 		outcomereported = self.__outcomeReported
 		self.__outcomeReported = True # only do this once

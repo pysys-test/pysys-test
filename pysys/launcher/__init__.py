@@ -43,7 +43,7 @@ def loadDescriptors(dir=None):
 	
 	@param dir: The parent directory to search for runnable tests
 	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects. 
-	Caller must sort this list to ensure deterministic behaviour. 
+		Caller must sort this list to ensure deterministic behaviour. 
 	@rtype: list
 	@raises UserError: Raised if no testcases can be found.
 	
@@ -62,12 +62,12 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	@param trace: A list of requirements to indicate tests to include in the returned set
 	@param dir: The parent directory to search for runnable tests
 	@param modeincludes: A list specifying the modes to be included; 
-	must contain at most one entry unless supportMultipleModesPerRun=True. 
+		must contain at most one entry unless supportMultipleModesPerRun=True. 
 	@param modeexcludes: A list specifying the modes to be excluded; 
-	only supported if supportMultipleModesPerRun=True. 
+		only supported if supportMultipleModesPerRun=True. 
 	@param expandmodes: Set to False to disable expanding a test with multiple
-	modes into separate descriptors for each one (used for pysys print) 
-	if supportMultipleModesPerRun=True. 
+		modes into separate descriptors for each one (used for pysys print) 
+		if supportMultipleModesPerRun=True. 
 	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects
 	@rtype: list
 	@raises UserError: Raised if no testcases can be found or are returned by the requested input parameters

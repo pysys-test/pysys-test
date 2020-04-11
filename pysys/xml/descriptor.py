@@ -109,41 +109,62 @@ class TestDescriptor(object):
 	descriptor instances. 
 	
 	@ivar file: The absolute path of the testcase descriptor file. 
+	
 	@ivar testDir: The absolute path of the test, which is used to convert 
-	any relative paths into absolute paths. 
+		any relative paths into absolute paths. 
+	
 	@ivar id: The testcase identifier, or the id prefix if this is a 
-	directory config descriptor rather than a testcase descriptor. 
-	Includes a mode suffix if this is a multi-mode test and 
-	supportMultipleModesPerRun=True.
+		directory config descriptor rather than a testcase descriptor. 
+		Includes a mode suffix if this is a multi-mode test and 
+		supportMultipleModesPerRun=True.
+	
 	@ivar idWithoutMode: The raw testcase identifier with no mode suffix. 
+	
 	@ivar type: The type of the testcase (automated or manual)
+	
 	@ivar state: The state of the testcase (runnable, deprecated or skipped)
+	
 	@ivar skippedReason: If set to a non-empty string, indicates that this 
-	testcase is skipped and provides the reason. If this is set then the test 
-	is skipped regardless of the value of `state`. 
-	@ivar title: The one-line title summarizing this testcase
-	@ivar purpose: A detailed description of the purpose of the testcase
-	@ivar groups: A list of the user defined groups the testcase belongs to
-	@ivar modes: A list of the user defined modes the testcase can be run in
+		testcase is skipped and provides the reason. If this is set then the test 
+		is skipped regardless of the value of `state`. 
+		
+	@ivar title: The one-line title summarizing this testcase.
+	
+	@ivar purpose: A detailed description of the purpose of the testcase.
+	
+	@ivar groups: A list of the user defined groups the testcase belongs to.
+	
+	@ivar modes: A list of the user defined modes the testcase can be run in.
+	
 	@ivar primaryMode: Specifies the primary mode for this test id (which may be None 
-	if this test has no modes). Usually this is the first mode in the list. 
+		if this test has no modes). Usually this is the first mode in the list. 
+	
 	@ivar mode: Specifies which of the possible modes this descriptor represents or None if the 
-	the descriptor has no modes. This field is only present after the 
-	raw descriptors have been expanded into multiple mode-specific 
-	descriptors, and only if supportMultipleModesPerRun=True. 
-	@ivar classname: The Python classname to be executed for this testcase
+		the descriptor has no modes. This field is only present after the 
+		raw descriptors have been expanded into multiple mode-specific 
+		descriptors, and only if supportMultipleModesPerRun=True. 
+	
+	@ivar classname: The Python classname to be executed for this testcase.
+	
 	@ivar module: The path to the python module containing the testcase class. Relative to testDir, or an absoute path.
+	
 	@ivar input: The path to the input directory of the testcase. Relative to testDir, or an absoute path.
+	
 	@ivar output: The path to the output parent directory of the testcase. Relative to testDir, or an absoute path.
+	
 	@ivar reference: The path to the reference directory of the testcase. Relative to testDir, or an absoute path.
-	@ivar traceability: A list of the requirements covered by the testcase
+	
+	@ivar traceability: A list of the requirements covered by the testcase.
+	
 	@ivar executionOrderHint: A float priority value used to determine the 
-	order in which testcases will be run; higher values are executed before 
-	low values. The default is 0.0. 
+		order in which testcases will be run; higher values are executed before 
+		low values. The default is 0.0. 
+	
 	@ivar isDirConfig: True if this is a directory configuration, or False if 
-	it's a normal testcase. 
+		it's a normal testcase. 
+	
 	@ivar userData: A dictionary that can be used for storing user-defined data 
-	in the descriptor.
+		in the descriptor.
 	"""
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
@@ -348,10 +369,10 @@ class XMLDescriptorParser(object):
 		TestDescriptor object. 
 		
 		@param istest: True if this is a pysystest.xml file, false if it is 
-		a descritor giving defaults for a directory of testcases.  
-		@param parentDirDefaults: Optional TestDescriptor instance 
-		specifying default values to be filtered in from the parent 
-		directory.
+			a descritor giving defaults for a directory of testcases.  
+			@param parentDirDefaults: Optional TestDescriptor instance 
+			specifying default values to be filtered in from the parent 
+			directory.
 		"""
 		p = XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults)
 		try:
@@ -767,22 +788,22 @@ class DescriptorLoader(object):
 		files are stripped out. 
 		
 		@param dir: The full path of the directory to be processed.
-		On Windows, this will be a long-path safe unicode string. 
+			On Windows, this will be a long-path safe unicode string. 
 		@param subdirs: a list of the subdirectories under dir, which 
-		can be used to detect what kind of directory this is. 
+			can be used to detect what kind of directory this is. 
 		@param files: a list of the files under dir, which 
-		can be used to detect what kind of directory this is. 
+			can be used to detect what kind of directory this is. 
 		@param descriptors: A list of L{TestDescriptor} items which this method 
-		can add to if desired. 
+			can add to if desired. 
 		@param parentDirDefaults: A L{TestDescriptor} containing defaults 
-		from the parent directory, or None if there are none. Test loaders may 
-		optionally merge some of this information with test-specific 
-		information when creating test descriptors. 
+			from the parent directory, or None if there are none. Test loaders may 
+			optionally merge some of this information with test-specific 
+			information when creating test descriptors. 
 		@param kwargs: Reserved for future use. Pass this to the base class 
-		implementation when calling it. 
+			implementation when calling it. 
 		@return: If True, this part of the directory tree has been fully 
-		handled and PySys will not search under it any more. False to allow 
-		normal PySys handling of the directory to proceed. 
+			handled and PySys will not search under it any more. False to allow 
+			normal PySys handling of the directory to proceed. 
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
 		return False
@@ -793,14 +814,14 @@ class DescriptorLoader(object):
 		
 		@param descriptorfile: The absolute path of the descriptor file. 
 		@param parentDirDefaults: A L{TestDescriptor} instance containing 
-		defaults to inherit from the parent directory, or None if none was found. 
+			defaults to inherit from the parent directory, or None if none was found. 
 		@param isDirConfig: False for normal test descriptors, True for a directory configuration. 
 		@return: The L{TestDescriptor} instance, or None if none should be 
-		added for this descriptor file. Note that subclasses may modify the 
-		contents of the returned instance. 
+			added for this descriptor file. Note that subclasses may modify the 
+			contents of the returned instance. 
 		@raises UserError: If the descriptor is invalid and an error should be 
-		displayed to the user without any Python stacktrace. 
-		The exception message must contain the path of the descriptorfile.
+			displayed to the user without any Python stacktrace. 
+			The exception message must contain the path of the descriptorfile.
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
 		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig)
