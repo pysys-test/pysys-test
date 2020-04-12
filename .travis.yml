@@ -24,13 +24,13 @@ matrix:
 
   - name: Python 2.7 OSX
     os: osx
-    language: sh
+    language: shell
     env: TRAVIS_PYTHON_VERSION=2.7
 
   - name: Python 3.7 Windows
     os: windows
     # until Travis has language=python support on Windows, manually install using choco and sh(ell)
-    language: sh
+    language: shell
     before_install: 
       - unset GITHUB_API_KEY
       - choco install python --version 3.7
@@ -47,7 +47,7 @@ matrix:
 
   - name: Python 3.x OSX
     os: osx
-    language: sh
+    language: shell
     # since Travis doesn't have full osx python support yet we use whichever 
     # 3.x is installed by default; have to set env var manually
     env: TRAVIS_PYTHON_VERSION=3
@@ -55,7 +55,7 @@ matrix:
 
   - name: Python 2.7 Windows
     os: windows
-    language: sh
+    language: shell
     before_install: 
       - unset GITHUB_API_KEY
       - choco install python2 vcredist2008 -i vcpython27
@@ -182,7 +182,7 @@ deploy:
     file: 
       - dist/*
       - CHANGELOG.rst
-    skip_cleanup: true
+    cleanup: false
     overwrite: true
     on: 
        # by default we only create a draft release for commits to release
@@ -202,7 +202,7 @@ deploy:
     github-token: $GITHUB_API_KEY
     target-branch: gh-pages
     local-dir: docs/build_output/html/
-    skip_cleanup: true
+    cleanup: false
     keep-history: true
     project-name: "PySys $PYSYS_VERSION"
     
