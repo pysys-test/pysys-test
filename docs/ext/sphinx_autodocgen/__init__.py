@@ -59,15 +59,17 @@ class AutoDocGen:
 		
 		By default we skip names that begin with a single underscore. """
 
-		skip_on_docstring_regex: str='.. private::'
+
+		skip_on_docstring_regex: str=':meta private:'
 		""" If a member or module's docstring contains this regular expression then it will be skipped. 
 		
 		This regex works on attribute docstrings (which Sphinx supports, even though Python's ``__doc__`` does not 
 		work for attributes), so is more robust than checking ``__doc__`` from the ``autodoc-skip-member`` hook. 
 		
 		By default we skip if the docstring contains the special directive (defined by this extension) 
-		``.. private:: REASON HERE``. 
+		``:meta private: REASON HERE``. 
 		"""
+		# uses same syntax as the official autodoc feature; it might therefore not be necessary anymore
 
 		autodoc_options_decider = lambda app, what, fullname, obj, docstring, defaultOptions, extra: defaultOptions
 		"""
