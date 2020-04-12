@@ -164,6 +164,7 @@ script:
 
        pip install sphinx==2.2.0 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3
        
+       mkdir docs/build_output
        $PY -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
        
        todos *.rst *.txt
