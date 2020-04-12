@@ -156,14 +156,14 @@ script:
     if [[ -n $PYSYS_DOC_AND_DEPLOY ]]; then (
        set -e
        echo --- Building PySys documentation
-       # check the documentation is good
        # must do this after testing to avoid polluting the installed packages while running the tests
-       pip install docutils==0.14
+       # peg to specific versions to avoid our build breaking when there's an upgrade
+       pip install docutils==0.16 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3
+
        pip install rstcheck
+       # check the non-sphinx documentation is valid rst
        rstcheck *.rst
 
-       pip install sphinx==2.2.0 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3
-       
        mkdir docs/build_output
        $PY -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
        
@@ -175,7 +175,6 @@ script:
        cd ../../..
     ) 
     fi
-  - ls dist
 
 deploy:
   - provider: releases

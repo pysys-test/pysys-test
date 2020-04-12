@@ -84,6 +84,7 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 	return None
 
 autosummary_generate = True
+autosummary_generate_overwrite = False
 
 import pysys.basetest
 autodocgen_config = {
