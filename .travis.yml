@@ -204,7 +204,6 @@ deploy:
     target-branch: gh-pages
     local-dir: docs/build_output/html/
     cleanup: false
-    keep-history: true
     project-name: "PySys $PYSYS_VERSION"
     
     on: 
