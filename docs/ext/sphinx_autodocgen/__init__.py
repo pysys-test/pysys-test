@@ -229,14 +229,15 @@ class AutoDocGen:
 		self.documented_items.add(f'{module_fullname} (module)')
 
 		output = """
-{module_fullname}
-{module_fullname_underline}
+{module_fullname_escaped}
+{module_fullname_escaped_underline}
 
 .. automodule:: {module_fullname}
 
 .. currentmodule:: {module_fullname}
 
-""".format(module_fullname=rst.escape(module_fullname), module_fullname_underline=module_underline*len(rst.escape(module_fullname)))
+""".format(module_fullname=module_fullname, module_fullname_escaped=rst.escape(module_fullname), 
+		module_fullname_escaped_underline=module_underline*len(rst.escape(module_fullname)))
 
 		for memberType, members in membersByType.items():
 			if not members: continue # don't show empty sections
