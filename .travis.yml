@@ -15,20 +15,18 @@ matrix:
   
   # --- For most branches run on a limited combination of OS and Python 
   # versions to get reasonable coverage. Documentation and deployment 
-  # happen only on one of them - Python 2.7 (needed for epydoc) on Linux
+  # happen only on one of them - Python 3 on Linux
   
-  - name: Python 2.7 Linux + doc + deploy
+  - name: Python 3.7 Linux + doc + deploy
     os: linux
-    python: 2.7
+    python: 3.7
     env: PYSYS_DOC_AND_DEPLOY=true
-  
-  - name: Python 3.x OSX
+
+  - name: Python 2.7 OSX
     os: osx
     language: sh
-    # since Travis doesn't have full osx python support yet we use whichever 
-    # 3.x is installed by default; have to set env var manually
-    env: TRAVIS_PYTHON_VERSION=3
-  
+    env: TRAVIS_PYTHON_VERSION=2.7
+
   - name: Python 3.7 Windows
     os: windows
     # until Travis has language=python support on Windows, manually install using choco and sh(ell)
@@ -42,6 +40,19 @@ matrix:
 
   # --- Additional testing combinations only on the main branch
 
+  - name: Python 2.7 Linux
+    os: linux
+    python: 2.7
+    if: branch = master
+
+  - name: Python 3.x OSX
+    os: osx
+    language: sh
+    # since Travis doesn't have full osx python support yet we use whichever 
+    # 3.x is installed by default; have to set env var manually
+    env: TRAVIS_PYTHON_VERSION=3
+    if: branch = master
+
   - name: Python 2.7 Windows
     os: windows
     language: sh
@@ -50,17 +61,6 @@ matrix:
       - choco install python2 vcredist2008 -i vcpython27
       - export PATH=/c/Python27:/c/Python27/Scripts:$PATH
     filter_secrets: false
-    if: branch = master
-
-  - name: Python 2.7 OSX
-    os: osx
-    language: sh
-    env: TRAVIS_PYTHON_VERSION=2.7
-    if: branch = master
-
-  - name: Python 3.7 Linux
-    os: linux
-    python: 3.7
     if: branch = master
 
   - name: Python 3.5 Linux
@@ -149,30 +149,30 @@ script:
   - pysys.py run --threads auto --purge --record --include pysys-packaging --outdir against-src-develop-mode
 
   - cd ..
-  
-  # check the documentation is good
-  # must do this after testing to avoid polluting the installed packages while running the tests
-  # docutils 0.15 has a bug preventing it working with Python 2, so force to a lower version
-  - $PY -m pip install docutils==0.14
-  - $PY -m pip install rstcheck
-  - rstcheck *.rst
-  
-  # generate API docs (epydoc only works on Python 2.7 unfortunately), and a zip 
+    
+  # generate API docs, and a zip 
   # including these and the text files (with Windows line endings)
   - |
     if [[ -n $PYSYS_DOC_AND_DEPLOY ]]; then (
        set -e
        echo --- Building PySys documentation
-       pip install epydoc
-       mkdir dist/api-docs/
-       epydoc --debug -v --html --no-private --fail-on-docstring-warning --name "PySys $PYSYS_VERSION" "--url=https://pypi.org/project/PySys" -o dist/api-docs "--exclude=.*([.]internal|__main__).*" pysys
+       # check the documentation is good
+       # must do this after testing to avoid polluting the installed packages while running the tests
+       pip install docutils==0.14
+       pip install rstcheck
+       rstcheck *.rst
+
+       pip install sphinx==2.2.0 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3
+       mkdir dist/
+       
+       $PY -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
+       
        todos *.rst *.txt
-       cp README.rst USERGUIDE.rst CHANGELOG.rst LICENSE.txt dist/api-docs/
-       cd dist/api-docs
-       # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions; use C locale to avoid ignoring __'s
-       LC_ALL=C sort --unique -o api-objects.txt api-objects.txt
+       # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions
+       cp README.rst USERGUIDE.rst CHANGELOG.rst LICENSE.txt docs/build_output/autodocgen_documented_items.txt docs/build_output/html/
+       cd docs/build_output/html/
        zip -r --quiet ../../dist/PySys-$PYSYS_VERSION-docs.zip .
-       cd ../..
+       cd ../../..
     ) 
     fi
 
@@ -201,7 +201,7 @@ deploy:
   - provider: pages
     github-token: $GITHUB_API_KEY
     target-branch: gh-pages
-    local-dir: dist/api-docs/
+    local-dir: docs/build_output/html/
     skip_cleanup: true
     keep-history: true
     project-name: "PySys $PYSYS_VERSION"
@@ -209,5 +209,5 @@ deploy:
     on: 
        # only publish doc for released version
        branch: release
-       # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
+       # best to only publish from one platform to avoid possible race conditions
        condition: $PYSYS_DOC_AND_DEPLOY = true
