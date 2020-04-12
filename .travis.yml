@@ -175,6 +175,7 @@ script:
        cd ../../..
     ) 
     fi
+  - ls dist
 
 deploy:
   - provider: releases
@@ -184,6 +185,7 @@ deploy:
       - dist/*
       - CHANGELOG.rst
     cleanup: false
+    skip_cleanup: true
     overwrite: true
     on: 
        # by default we only create a draft release for commits to release
@@ -204,6 +206,7 @@ deploy:
     target-branch: gh-pages
     local-dir: docs/build_output/html/
     cleanup: false
+    skip_cleanup: true
     project-name: "PySys $PYSYS_VERSION"
     
     on: 
