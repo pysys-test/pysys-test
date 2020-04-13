@@ -21,7 +21,7 @@ sys.path.append(PYSYS_ROOT_DIR)
 
 # -- Project information -----------------------------------------------------
 
-copyright = 'Copyright (C) 2006-2020 M.B. Grieve and Ben Spiller'
+copyright = '2006-2020 M.B. Grieve and Ben Spiller' # TODO: put current date in here automatically
 author = 'M.B. Grieve and Ben Spiller'
 
 # The full version, including alpha/beta/rc tags
@@ -90,7 +90,7 @@ import pysys.basetest
 autodocgen_config = {
 	'modules':[pysys], 
 	'generated_source_dir': DOC_SOURCE_DIR+'/autodocgen/',
-	'skip_module_regex': '(pysys[.]internal.*|.*[.]__)', # if module matches this then it and any of its submodules will be skipped
+	'skip_module_regex': '(pysys[.]internal.*|.*[.]__|pysys.basetest)', # if module matches this then it and any of its submodules will be skipped
 	'write_documented_items_output_file': PYSYS_ROOT_DIR+'/docs/build_output/autodocgen_documented_items.txt',
 	'autodoc_options_decider': { # for usability, it's best to fold the inherited ProcessUser content into BaseTest/BaseRunner
 		'pysys.basetest.BaseTest':    { 'inherited-members':True },

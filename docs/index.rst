@@ -12,11 +12,7 @@ API documentation
 .. toctree::
    :maxdepth: 2
    
+   basetest.rst
    autodocgen/pysys
    changelog.rst
-   
-TODO: add api.rst
-
-License
--------
-TODO
+   license.rst
