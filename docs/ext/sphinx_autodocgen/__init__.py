@@ -259,8 +259,10 @@ class AutoDocGen:
 		"""
 		mod=module
 		modulename = mod.__name__
-		logger.info(f'{self} Visiting module: {modulename}')
-		if self.config['skip_module_regex'] and re.match(self.config['skip_module_regex'], modulename): return False
+		skipped = self.config['skip_module_regex'] and re.match(self.config['skip_module_regex'], modulename)
+		logger.info(f'{self} Visiting module: {modulename} {"(skipped)" if skipped else ""}')
+		if skipped: 
+			return False
 		# TODO: call skip here too
 		# TODO: skip undoc'd modules?
 		
