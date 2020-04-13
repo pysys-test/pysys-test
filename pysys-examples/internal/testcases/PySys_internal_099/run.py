@@ -10,7 +10,7 @@ class PySysTest(BaseTest):
 		
 		distinfo = glob.glob(pysysroot+'/PySys*dist-info*') # created when installing from whl
 		
-		rootdocs = ['README.rst', 'USERGUIDE.rst', 'LICENSE.txt', 'CHANGELOG.rst']
+		rootdocs = ['README.rst', 'LICENSE.txt', 'CHANGELOG.rst']
 		
 		self.log.info('PySys root directory is %s', pysysroot)
 		self.log.info('')
