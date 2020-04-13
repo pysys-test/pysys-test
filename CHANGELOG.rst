@@ -1,16 +1,10 @@
-=========================
-PySys 1.5.1 Release Notes
-=========================
+==========
+Change Log
+==========
 
-PySys can be used with Python 3.7/3.6/3.5. PySys also retains compatibility 
-with Python 2.7 though users are encouraged to move to Python 3 when possible 
-as 2.7 will soon be at the end of its support lifetime. 
-
-See installation notes in README.rst for more details.
-
---------------------------
-What's new in this release
---------------------------
+-------------------
+What's new in 1.5.1
+-------------------
 
 Miscellaneous new features
 --------------------------
