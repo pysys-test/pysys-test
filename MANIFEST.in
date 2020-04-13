@@ -3,6 +3,7 @@
 # Include the top level readme and license documentation
 include *.rst
 include LICENSE.txt
+include docs/*.rst
 
 include VERSION
 include MANIFEST.in

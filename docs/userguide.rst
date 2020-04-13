@@ -1,5 +1,5 @@
-PySys User Guide and FAQ
-========================
+User Guide
+==========
 
 Platform detection
 ------------------

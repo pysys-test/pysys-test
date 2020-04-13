@@ -1,11 +1,5 @@
 .. PySys documentation master file
 
-
-Download
---------
-
-Download the latest release from XXX
-
 API documentation
 -----------------
 
@@ -13,6 +7,7 @@ API documentation
    :maxdepth: 2
    
    basetest.rst
+   userguide.rst
    autodocgen/pysys
-   changelog.rst
    license.rst
+   changelog.rst
