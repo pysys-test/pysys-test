@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve, Ben Spiller
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -18,31 +18,14 @@
 
 
 """
-PySys System Test Framework.
+Welcome to the PySys System Test Framework.
 
-PySys is an easy-to-use cross-platform framework for writing and orchestrating 
-all your system/integration tests, combined seamlessly with your unit and 
-manual tests. 
+`pysys.basetest` contains (or provides links to) pretty much everything you need for the main business of creating 
+testcases using PySys.
 
-It provides a comprehensive package of utility methods to make all the common 
-system/integration testing operations a breeze, as well as the flexibility to 
-add whatever test execution and validation logic you need using the full power 
-of the Python language. 
-
-For more information see https://pypi.org/project/PySys/
-
-Testcases are instances of a base test class (L{pysys.basetest.BaseTest}) which provides core functionality for cross platform 
-process management, monitoring and manipulation; in this manner an application under test (AUT) can be started and interacted with 
-directly within a testcase. The base test class additionally provides a set of standard validation techniques based predominantly 
-on regular expression matching within text files (e.g. stdout, logfile of the AUT etc). Testcases are executed through a base 
-runner (L{pysys.baserunner.BaseRunner}) which provides the mechanism to control concurrent testcase flow and auditing. In both 
-cases the base test and runner classes have been designed to be extended for a particular AUT, e.g. to allow a higher level of 
-abstraction over the AUT, tear up and tear down prior to executing a set of testcases etc. 
-
-PySys allows automated regression testcases to be built rapidly. Where an AUT cannot be tested in an automated fashion, testcases 
-can be written to make use of a manual test user interface (L{pysys.manual.ui.ManualTester}) which allows the steps required to 
-execute the test to be presented to a tester in a concise and navigable manner. The tight integration of both manual and automated 
-testcases provides a single framework for all test organisation requirements. 
+However for more advanced users, it is possible to customize many aspects of PySys behaviour by providing custom 
+implementations of PySys classes described in this API reference (e.g. `pysys.baserunner.BaseRunner`). There are also 
+many utility functions which could be helpful when creating custom assertion methods. 
 
 """
 
