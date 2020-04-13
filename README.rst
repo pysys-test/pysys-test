@@ -1,5 +1,6 @@
-What is PySys?
-==============
+Welcome to PySys!
+=================
+
 PySys is an easy-to-use cross-platform framework for writing and orchestrating 
 all your system/integration tests, combined seamlessly with your unit and 
 manual tests. 
