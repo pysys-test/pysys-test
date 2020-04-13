@@ -9,6 +9,8 @@ Documentation contents
 .. toctree::
    :maxdepth: 2
    
+   installation.rst
+   getting-started.rst
    basetest.rst
    userguide.rst
    autodocgen/pysys

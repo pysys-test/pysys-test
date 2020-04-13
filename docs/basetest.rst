@@ -14,17 +14,18 @@ create your own tests.
 Implementing your test class
 ============================
 
+Each PySys test class must implement an `execute` method containing the main body of the test, and 
+(usually) a `validate` method containing the assertions that check for the expected result. 
+Sometimes you may also need to provide `setup` and/or `cleanup` functionality:
+
 .. autosummary::
 	setup
 	execute
 	validate
 	addCleanupFunction
 
-Each PySys test class must implement an `execute` method containing the main body of the test, and 
-(usually) a `validate` method containing the assertions that check for the expected result. 
-
-If it is necessary to do some extra setup before beginning the test's execution (for example, starting a server or 
-provisioning a virtual machine), this can be achieved by overriding the `setup` method. Typically this would be 
+You may wish to override the `setup` method if it is necessary to do some extra setup before beginning the test's 
+execution (for example, starting a server or provisioning a virtual machine). However, typically this would be 
 worth doing only if you're implementing a custom `BaseTest` subclass to make the functionality available to multiple 
 individual test classes. 
 

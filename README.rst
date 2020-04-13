@@ -66,6 +66,8 @@ Project Links
 PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. See 
 LICENSE.txt for details. 
 
+.. inclusion-marker-section-start-installation
+
 Installation
 ============
 
@@ -111,6 +113,7 @@ Those wishing to use the manual tester should ensure they have
 installed the tcl/tk libraries on the host machine and are using a Python 
 version that was compiled with tcl/tk support.
 
+.. inclusion-marker-section-start-getting-started
 
 Getting Started
 ===============
@@ -119,6 +122,7 @@ After installation, to see the available options to the pysys.py script use::
 	> pysys.py --help
  
 The script has four main commands: 
+
   - ``makeproject`` to create your top-level testing project configuration file, 
   - ``make`` to create individual testcases, 
   - ``run`` to execute them, and 
@@ -147,28 +151,13 @@ To run your testcases, simply execute::
 
 	> pysys.py run
 
+Now take a look at `pysys.basetest` to begin exploring all the functionality 
+PySys provides to help you implement your own ``run.py`` test classes. 
 
-Next Steps
-==========
-The methods you need for typical tasks like starting processes (`pysys.basetest.BaseTest.startProcess`), 
-waiting for messages in log files (`pysys.basetest.BaseTest.waitForSignal`) and of course validating 
-the results (various assert methods such as `pysys.basetest.BaseTest.assertGrep`) are 
-all defined on the `pysys.basetest.BaseTest` class, so look that up in the API reference 
-for full details of what is possible - see https://pysys-test.github.io/pysys-test. 
-
-You might also want to take a look at our sample testcases for some practical 
-examples. These can be downloaded as a ``.tar.gz`` containing files with Unix 
+You might also want to take a look at our sample testcases. 
+These can be downloaded as a ``.tar.gz`` containing files with Unix 
 line endings, or a ``.zip`` using Windows line endings from 
-https://github.com/pysys-test/pysys-test/releases.
+https://github.com/pysys-test/pysys-test/releases. The ``fibonacci`` 
+directory is a good place to start. 
 
-To unpack the tests on Unix systems, use::
-
-	> tar zxvpf PySys-VERSION-sample-testcases-unix.tar.gz
-	> cd pysys-examples
-
-To run the testcases, after changing directory to the testcases location 
-simply execute::
-
-	> pysys.py run  
-
-The ``fibonacci`` sample tests are a good place to start. 
+.. inclusion-marker-section-start-next-steps
