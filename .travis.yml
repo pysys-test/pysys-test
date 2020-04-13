@@ -169,7 +169,7 @@ script:
        
        todos *.rst *.txt
        # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions
-       cp README.rst USERGUIDE.rst CHANGELOG.rst LICENSE.txt docs/build_output/autodocgen_documented_items.txt docs/build_output/html/
+       cp README.rst CHANGELOG.rst LICENSE.txt docs/build_output/autodocgen_documented_items.txt docs/build_output/html/
        cd docs/build_output/html/
        zip -r --quiet ../../../dist/PySys-$PYSYS_VERSION-docs.zip .
        cd ../../..
