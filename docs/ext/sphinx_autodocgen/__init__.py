@@ -59,7 +59,6 @@ class AutoDocGen:
 		
 		By default we skip names that begin with a single underscore. """
 
-
 		skip_on_docstring_regex: str=':meta private:'
 		""" If a member or module's docstring contains this regular expression then it will be skipped. 
 		
@@ -70,6 +69,11 @@ class AutoDocGen:
 		``:meta private: REASON HERE``. 
 		"""
 		# uses same syntax as the official autodoc feature; it might therefore not be necessary anymore
+
+		module_title_decider = lambda modulename: modulename
+		"""
+		A callback function that allows the overall heading for each module's to be customized if needed. 
+		"""
 
 		autodoc_options_decider = lambda app, what, fullname, obj, docstring, defaultOptions, extra: defaultOptions
 		"""
@@ -89,7 +93,7 @@ class AutoDocGen:
 		test to a reference file, to ensure you don't add items to the documented public API without noticing. """
 
 		_config_keys = ['modules', 'generated_source_dir', 'skip_module_regex', 'skip_on_docstring_regex', 
-			'autodoc_options_decider', 'write_documented_items_output_file']
+			'autodoc_options_decider', 'write_documented_items_output_file', 'module_title_decider']
 
 	def __init__(self, app):
 		"""
@@ -230,16 +234,18 @@ class AutoDocGen:
 
 		self.documented_items.add(f'{module_fullname} (module)')
 
+		title = self.config['module_title_decider'](module_fullname)
+
 		output = """
-{module_fullname_escaped}
-{module_fullname_escaped_underline}
+{module_title}
+{module_title_underline}
 
 .. automodule:: {module_fullname}
 
 .. currentmodule:: {module_fullname}
 
-""".format(module_fullname=module_fullname, module_fullname_escaped=rst.escape(module_fullname), 
-		module_fullname_escaped_underline=module_underline*len(rst.escape(module_fullname)))
+""".format(module_fullname=module_fullname, module_title=rst.escape(title), 
+		module_title_underline=module_underline*len(rst.escape(title)))
 
 		for memberType, members in membersByType.items():
 			if not members: continue # don't show empty sections
