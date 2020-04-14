@@ -24,8 +24,18 @@ Welcome to the PySys System Test Framework.
 testcases using PySys.
 
 However for more advanced users, it is possible to customize many aspects of PySys behaviour by providing custom 
-implementations of PySys classes described in this API reference (e.g. `pysys.baserunner.BaseRunner`). There are also 
-many utility functions which could be helpful when creating custom assertion methods. 
+implementations of PySys classes described in this API reference:
+
+	- `pysys.baserunner.BaseRunner` to customize orchestration of all the tests in a test run. 
+	- `pysys.writer` classes to customize how test outcomes are recorded.
+	- `pysys.utils.perfreporter.CSVPerformanceReporter` to customize how numeric performance results are reported.
+	- `pysys.xml.descriptor.DescriptorLoader` to customize how PySys find and runs tests (e.g. to support running tests 
+	  from other frameworks within PySys). 
+	- `pysys.utils.logutils.BaseLogFormatter` for advanced customization of log message format.
+
+There are also many utility functions which could be helpful when creating custom assertion methods. However before 
+using any functions from `pysys.utils`, always check first if there is a more convenient method available to do the 
+job on `pysys.basetest.BaseTest`/`pysys.baserunner.BaseRunner`. 
 
 """
 

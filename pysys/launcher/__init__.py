@@ -17,7 +17,7 @@
 
 
 """
-@undocumented: createDescriptors, loadDescriptors
+Implements the pysys.py launcher script.
 """
 from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
@@ -39,7 +39,7 @@ def loadDescriptors(dir=None):
 	"""Load descriptor objects representing a set of tests to run for 
 	the current project, returning the list.
 	
-	Deprecated, use L{pysys.xml.descriptor.DescriptorLoader} instead.
+	:meta private: Deprecated and since 1.5.1 also hidden; use `pysys.xml.descriptor.DescriptorLoader` instead.
 	
 	@param dir: The parent directory to search for runnable tests
 	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects. 
@@ -54,6 +54,8 @@ def loadDescriptors(dir=None):
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[], expandmodes=True):
 	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
+	
+	:meta private: Not for use outside the framwork. 
 	
 	@param testIdSpecs: A list of strings specifying the set of testcase identifiers
 	@param type: The type of the tests to run (manual | auto)

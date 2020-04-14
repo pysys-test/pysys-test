@@ -17,7 +17,7 @@
 
 
 """
-Contains modules for the Manual Test User Interface. 
+The Manual Test User Interface. 
 
 The Manual Test UI is used to detail test steps to be performed via manual intervention, 
 i.e. when a series of test steps cannot be automated through the execution of an 

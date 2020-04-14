@@ -14,14 +14,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+"""
+:meta private: Should be no reason for this module to be used outside of the PySys framework itself. 
+"""
+
 import os.path, stat, getopt, logging, traceback, sys
 
 from pysys import __version__
 from pysys.constants import *
-
-"""
-@undocumented: main
-"""
 
 from pysys.launcher.console_clean import ConsoleCleanTestHelper, cleanTest
 from pysys.launcher.console_print import ConsolePrintHelper, printTest
