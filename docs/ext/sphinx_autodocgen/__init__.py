@@ -266,6 +266,11 @@ class AutoDocGen:
 		mod=module
 		modulename = mod.__name__
 		skipped = self.config['skip_module_regex'] and re.match(self.config['skip_module_regex'], modulename)
+
+		skip_on_docstring_regex = self.config['skip_on_docstring_regex']
+		if skip_on_docstring_regex:
+			if mod.__doc__ and re.search(skip_on_docstring_regex, mod.__doc__): skipped=True
+
 		logger.info(f'{self} Visiting module: {modulename} {"(skipped)" if skipped else ""}')
 		if skipped: 
 			return False
@@ -313,8 +318,6 @@ class AutoDocGen:
 		permittedmembers = set(memberinfo[0] for memberinfo in documenter.get_object_members(want_all=True)[1])
 		members = [(mname,m) for mname, m in mod.__dict__.items() if mname in permittedmembers]
 		
-		skip_on_docstring_regex = self.config['skip_on_docstring_regex']
-
 		# TODO: ordering c.f. autodoc_member_order
 		for (mname, m, isattr) in documenter.filter_members(members, want_all=True):
 			if not isattr and not self.app.config['autodoc_default_options'].get('imported-members',False) and getattr(m, '__module__', modulename) != modulename: 
