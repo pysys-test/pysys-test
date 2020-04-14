@@ -939,14 +939,15 @@ class ProcessUser(object):
 		The method provides the ability to add a validation outcome to the internal data structure 
 		storing the list of validation outcomes. Multiple validations may be performed, the current
 		supported validation outcomes of which are:
-				
-		  - L{pysys.constants.SKIPPED}
-		  - L{pysys.constants.DUMPEDCORE}
-		  - L{pysys.constants.TIMEDOUT}
-		  - L{pysys.constants.FAILED}
-		  - L{pysys.constants.NOTVERIFIED}
-		  - L{pysys.constants.INSPECT}
-		  - L{pysys.constants.PASSED}
+		
+		.. autosummary::
+		   pysys.constants.FAILED
+		   pysys.constants.TIMEDOUT
+		   pysys.constants.DUMPEDCORE
+		   pysys.constants.NOTVERIFIED
+		   pysys.constants.INSPECT
+		   pysys.constants.PASSED
+		   pysys.constants.SKIPPED
 		
 		The outcomes are considered to have a precedence order, as defined by the order of the outcomes listed
 		above. Thus a C{BLOCKED} outcome has a higher precedence than a C{PASSED} outcome. The outcomes are defined 
@@ -954,7 +955,10 @@ class ProcessUser(object):
 		
 		This method is thread-safe. 
 		
-		@param outcome: The outcome to add
+		Although this method exists on all subclasses of `ProcessUser`, in practice only `pysys.basetest.BaseTest` 
+		subclasses actually do anything with the resulting outcome. 
+		
+		@param outcome: The outcome to add, e.g. `pysys.constants.FAILED`.
 		
 		@param outcomeReason: A string summarizing the reason for the outcome, 
 			for example "Grep on x.log contains 'ERROR: server failed'". 
