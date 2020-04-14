@@ -2,9 +2,9 @@
 Change Log
 ==========
 
--------------------
-What's new in 1.5.1
--------------------
+--------------------------------------
+What's new in 1.5.1 (not yet released)
+--------------------------------------
 
 Miscellaneous new features
 --------------------------
@@ -13,7 +13,7 @@ Miscellaneous new features
   file without losing track of which is which. This also makes it easier to manually diff the output directory against 
   the ``Reference`` directory using GUI diff tools when debugging test failures. 
 
-- `basetest.BaseTest.assertDiff` has a new advanced feature, ``autoUpdateAssertDiffReferences``, to help when you 
+- `basetest.BaseTest.assertDiff` has a new advanced feature, **autoUpdateAssertDiffReferences**, to help when you 
   have a large set of test reference files which need to be updated after a behaviour or output formatting change. 
   If you run the tests with ``-XautoUpdateAssertDiffReferences`` any diff failures will result in PySys overwriting 
   the reference file with the contents of the comparison file, providing an easy way to quickly update a large set 
@@ -33,7 +33,7 @@ Miscellaneous new features
   ``Project Help`` heading is automatically added if no other heading is present, and PySys will intelligently add or 
   remove indentation from the specified content so that it aligns with the built-in options.
 
-- ``pysysproject.xml`` has a new property "defaultAssertDiffStripWhitespace" which controls whether 
+- ``pysysproject.xml`` has a new property ``defaultAssertDiffStripWhitespace`` which controls whether 
   `pysys.basetest.BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
   value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
   is True. 
@@ -60,12 +60,15 @@ Bug fixes
 
 Upgrade guide and compatibility
 -------------------------------
+This is a minor release so is not expected to break existing tests, however we always recommend reading the notes 
+below and running your tests with the new version before upgrading just in case.
+
 - Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to set this to False in 
   your ``pysysproject.xml`` file, but it is likely some test reference files may need fixing, so the default value is 
   True which maintains pre-1.5.1 behaviour.
   
 - The global namespace available for use from `basetest.BaseTest.assertEval` has been cut down to remove some 
-  functions and modules such as ``filegrep`` that are anyone is likely to be using from ``assertEval``. If you find you 
+  functions and modules such as ``filegrep`` that no-one is likely to be using. If you find you 
   need anything that is no longer available, just use ``import_module`` in your eval string to add it, but it is highly 
   unlikely this will affect anyone. 
 
