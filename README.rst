@@ -95,8 +95,8 @@ On Windows, pip will automatically install the
 `colorama <https://pypi.org/project/colorama/>`_ 
 libraries that PySys depends upon.
 
-The executable launcher script ``pysys.py`` is installed into the ``Scripts\\`` 
-directory of the Python installation, e.g. ``c:\\Python\\Scripts\\pysys.py``. 
+The executable launcher script ``pysys.py`` is installed into the ``Scripts\`` 
+directory of the Python installation, e.g. ``c:\Python\Scripts\pysys.py``. 
 To allow easy invocation of PySys from any test directory you may wish to add 
 the Scripts directory to your ``PATH`` or copy the script to a location that is 
 already on ``PATH``. Alternatively you can run PySys using ``python -m pysys``.
