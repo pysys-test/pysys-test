@@ -990,14 +990,13 @@ class BaseTest(ProcessUser):
 		return False
 
 	def reportPerformanceResult(self, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
-		""" Reports a new performance result to the performance ``csv`` file, with an associated unique string key 
+		""" Reports a new performance number to the performance ``csv`` file, with an associated unique string key 
 		that identifies it for comparison purposes.
 		
 		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
 		rather than the total time taken, since this allows the number of iterations to be increased .
 		
-		@param value: The value to be reported. Usually this is a float or integer, but string is 
-			also permitted. 
+		@param value: The numeric value to be reported. If a str is provided, it will be converted to a float.
 
 		@param resultKey: A unique string that fully identifies what was measured, which will be
 			used to compare results from different test runs. For example "HTTP transport message sending throughput
