@@ -17,7 +17,7 @@
 
 
 """
-The runner is responsible for orchestrating execution and outcome reporting of all the tests, and for managing 
+The runner is responsible for orchestrating concurrent execution of the tests, and for setup/cleanup of 
 any resources that are shared across multiple tests.
 
 """
@@ -56,7 +56,7 @@ except ImportError:
 
 class BaseRunner(ProcessUser):
 	"""A single instance of the runner class is responsible for orchestrating 
-	execution and outcome reporting of all testcases, and managing 
+	concurrent execution of tests, and managing setup and cleanup of 
 	any resources that are shared across multiple testcases.
 
 	Selection of the tests (and modes) to be run is performed through the ``pysys.py run`` launch script, which locates 

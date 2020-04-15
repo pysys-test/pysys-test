@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -18,33 +18,36 @@
 
 
 """
-Contains API and sample implementations of L{BaseResultsWriter} and 
-its subclasses, which are used to output test results during runtime execution.
+Writers are configurable plug-ins that record test outcomes (typically on disk, on the console, or to your CI tooling). 
 
-Output writers are responsible for summarising test results on completion of a test, or on completion
-of a set of tests. There are currently three distinct types of writers, namely 'Record', 'Progress', and
-'Summary', each of which performs output at different stages of a run:
+This module contains the `BaseResultsWriter` abstract class which defines the writer API, as well as several 
+sample implementations.
 
-   - *Record* writers output the outcome of a specific test after completion of that test, to allow
-     runtime auditing of the test output, e.g. into a relational database. Several record
-     writers are distributed with the PySys framework, such as the L{writer.JUnitXMLResultsWriter}.
-     Best practice is to subclass L{writer.BaseRecordResultsWriter} when writing new record writers. 
-     By default, record writers are enabled only when the --record flag is given to the PySys launcher, 
+Output writers are responsible for summarising test results as each test completes, or at the end when all 
+tests has completed. There are currently three distinct types of writers, namely 'Record', 'Progress', and
+'Summary', each of which generates output at different stages of a run:
+
+   - `BaseRecordResultsWriter`: **Record writers** output the outcome of a specific test after completion of that test, to allow
+     runtime auditing of the test output, e.g. into text file, a database, or to the console in a format that 
+     can be read by your Continuous Integration (CI) tooling. Several record
+     writers are distributed with the PySys framework, such as the `JUnitXMLResultsWriter` and `ci.TravisCIWriter`.
+     By default, record writers are enabled only when the ``--record`` flag is given to the PySys launcher, 
      though some writers may enable/disable themselves under different conditions, by overriding the 
-     L{pysys.writer.BaseRecordResultsWriter.isEnabled} method.
+     L{BaseResultsWriter.isEnabled} method.
 
-   - *Progress* writers output a summary of the test progress after completion of each test, to give
+   - `BaseProgressResultsWriter`: **Progress writers** output a summary of the test progress after completion of each test, to give
      an indication of how far and how well the run is progressing. A single implementation of a progress
-     writer is distributed with the PySys framework, namely the L{writer.ConsoleProgressResultsWriter},
+     writer is distributed with the PySys framework, namely the L{ConsoleProgressResultsWriter},
      which details the percentage of tests selected to be run and that have executed, and a summary
-     of the recent test failures. Progress writers should extend the L{writer.BaseProgressResultsWriter} and
-     are enabled when the --progress flag is given to the PySys launcher, or when PYSYS_PROGRESS=true is
+     of the recent test failures. 
+     Progress writers should extend the L{BaseProgressResultsWriter} and
+     are enabled when the ``--progress`` flag is given to the PySys launcher, or when ``PYSYS_PROGRESS=true`` is
      set in the local environment.
 
-   - *Summary* writers output an overall summary of the status at the end of a test run. A single implementation
-     of a progress writer is distributed with the PySys framework, namely the L{writer.ConsoleSummaryResultsWriter},
-     which details the overall test run outcome and lists any tests that did not pass. A summary writer is always
-     enabled regardless of the flags given to the pysys launcher.
+   - `BaseSummaryResultsWriter`: **Summary writers** output an overall summary of the status at the end of a test run. 
+     A single implementation of a summary writer is distributed with the PySys framework, namely the L{ConsoleSummaryResultsWriter},
+     which details the overall test run outcome and lists any tests that did not pass. 
+     Summary writers are always enabled regardless of the flags given to the PySys launcher.
 
 Project configuration of the writers is through the PySys project XML file using the ``<writer>`` tag. Multiple
 writers may be configured and their individual properties set through the nested ``<property>`` tag. Writer
@@ -52,8 +55,8 @@ properties are set as attributes to the class through the ``setattr()`` function
 can be created and configured by users of the PySys framework (e.g. to output test results into a relational
 database etc), though they must adhere to the interface demonstrated by the implementations demonstrated here.
 If no progress writers are explicitly configured in the PySys project XML file, an instance of
-L{writer.ConsoleProgressResultsWriter} is used. If no summary writer is explicitly configured in the PySys project
-XML file, an instance of L{writer.ConsoleSummaryResultsWriter} is used.
+L{ConsoleProgressResultsWriter} is used. If no summary writer is explicitly configured in the PySys project
+XML file, an instance of L{ConsoleSummaryResultsWriter} is used.
 
 The writers are instantiated and invoked by the L{pysys.baserunner.BaseRunner} class instance. This calls the class
 constructors of all configured test writers, and then the setup (prior to executing the set of tests), processResult
@@ -81,17 +84,15 @@ from xml.dom.minidom import getDOMImplementation
 log = logging.getLogger('pysys.writer')
 
 class BaseResultsWriter(object):
-	"""Base class for objects that get notified as and when test results are available. """
+	"""Base class for all writers that get notified as and when test results are available.
+
+	:param str logfile: Optional configuration property specifying a file to store output in. 
+		Does not apply to all writers, can be ignored if not needed. 
+
+	:param kwargs: Additional keyword arguments may be added in a future release. 
+	"""
 
 	def __init__(self, logfile=None, **kwargs):
-		""" Create an instance of the BaseResultsWriter class.
-
-		@param logfile: Optional configuration property specifying a file to store output in. 
-			Does not apply to all writers, can be ignored if not needed. 
-
-		@param kwargs: Additional keyword arguments may be added in a future release. 
-
-		"""
 		pass
 
 	def isEnabled(self, record=False, **kwargs): 
@@ -183,7 +184,7 @@ class BaseResultsWriter(object):
 
 
 class BaseRecordResultsWriter(BaseResultsWriter):
-	"""Base class for writers that record the results of tests, and are enabled only when the --record flag is specified.
+	"""Base class for writers that record the results of tests, and are enabled only when the ``--record`` flag is specified.
 	
 	For compatibility reasons writers that do not subclass BaseSummaryResultsWriter or BaseProgressResultsWriter are
 	treated as "record" writers even if they do not inherit from this class.
@@ -195,7 +196,7 @@ class BaseRecordResultsWriter(BaseResultsWriter):
 class BaseSummaryResultsWriter(BaseResultsWriter):
 	"""Base class for writers that display a summary of test results.
 	
-	Summary writers are always enabled (regardless of whether --progress or --record are specified). If
+	Summary writers are always enabled (regardless of whether ``--progress`` or ``--record`` are specified). If
 	no "summary" writers are configured, a default ConsoleSummaryResultsWriter instance will be added
 	automatically.
 
@@ -209,7 +210,7 @@ class BaseSummaryResultsWriter(BaseResultsWriter):
 class BaseProgressResultsWriter(BaseResultsWriter):
 	""" Base class for writers that display progress information while tests are running.
 
-	Progress writers are only enabled if the --progress flag is specified.
+	Progress writers are only enabled if the ``--progress`` flag is specified.
 
 	"""
 	def isEnabled(self, record=False, **kwargs): 
@@ -218,6 +219,7 @@ class BaseProgressResultsWriter(BaseResultsWriter):
 class flushfile(): 
 	"""Utility class to flush on each write operation - for internal use only.  
 	
+	:meta private:
 	"""
 	fp=None 
 	
