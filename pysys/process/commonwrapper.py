@@ -16,9 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Contains the L{CommonProcessWrapper} class that represents a running process. 
-
-@undocumented: _stringToUnicode, log
+Contains the `pysys.process.commonwrapper.CommonProcessWrapper` class that represents a process PySys has started. 
 """
 
 import os.path, time, threading, sys, locale
@@ -46,43 +44,32 @@ def _stringToUnicode(s):
 log = logging.getLogger('pysys.process')
 
 class CommonProcessWrapper(object):
-	"""Abstract base process wrapper class for process execution and management.
+	"""Represents a process that PySys has started (or can start).
 	
-	A base implementation of common process related operations, which is extended
-	by the OS specific wrapper classes.
-
-	@ivar pid: The process id for a running or complete process (as set by the OS)
-	@type pid: integer
+	Instances of this class are returned by `pysys.process.user.ProcessUser.startProcess` (it's usually not 
+	helpful to create instances directly).
 	
-	@ivar exitStatus: The process exit status for a completed process	
-	@type exitStatus: integer
-	
-	@ivar stdout: The full path to the filename to write the stdout of the process
-	@type stdout: string
+	:ivar str command:  The full path to the executable.
+	:ivar list[str] arguments:  A list of arguments to the command.
+	:ivar dict(str,str) environs:  A dictionary of environment variables (key, value) for the process context execution. 
+		Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
+		automatically to unicode using utf-8. 
+	:ivar str workingDir:  The working directory for the process
+	:ivar state: The state of the process.
+	:vartype state: `pysys.constants.FOREGROUND` or `pysys.constants.BACKGROUND`
+	:ivar int timeout:  The time in seconds for a foreground process to complete.
+	:ivar str stdout: The full path to the filename to write the stdout of the process, or None for no stderr stream.
+	:ivar str stderr: The full path to the filename to write the stderr of the process, or None for no stderr stream. 
+	:ivar str displayName: Display name for this process (defaults to the basename if not explicitly specified). The 
+		display name is returned by calling ``str()`` on this instance. The display name and pid are returned by 
+		``repr()``.
 
-	@ivar stderr: The full path to the filename to write the stderr of the process
-	@type stderr: string
-
-	@ivar displayName: Display name for this process
-	@type displayName: string
+	:ivar int pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.
+	:ivar int exitStatus: The process exit status for a completed process (for many processes 0 represents success), 
+		or None if it has not yet completed. 
 	"""
 
 	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None):
-		"""Create an instance of the process wrapper.
-		
-		@param command:  The full path to the command to execute
-		@param arguments:  A list of arguments to the command
-		@param environs:  A dictionary of environment variables (key, value) for the process context execution. 
-			Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
-			automatically to unicode using utf-8. 
-		@param workingDir:  The working directory for the process
-		@param state:  The state of the process (L{pysys.constants.FOREGROUND} or L{pysys.constants.BACKGROUND}
-		@param timeout:  The timeout in seconds to be applied to the process
-		@param stdout:  The full path to the filename to write the stdout of the process, or None for no output
-		@param stderr:  The full path to the filename to write the sdterr of the process, or None for no output
-		@param displayName: Display name for this process
-
-		"""
 		self.displayName = displayName if displayName else os.path.basename(command)
 		self.command = command
 		self.arguments = arguments
@@ -118,12 +105,32 @@ class CommonProcessWrapper(object):
 	def __str__(self): return self.displayName
 	def __repr__(self): return '%s (pid %s)'%(self.displayName, self.pid)
 
-	# these abstract methods must be implemented by subclasses
+	# these abstract methods must be implemented by subclasses; no need to publically document
 	def setExitStatus(self): raise Exception('Not implemented')
 	def startBackgroundProcess(self): raise Exception('Not implemented')
 	def writeStdin(self): raise Exception('Not implemented')
-	def stop(self): raise Exception('Not implemented')
-	def signal(self): raise Exception('Not implemented')
+	def stop(self): 
+		"""Stop a running process.
+		
+		Does nothing if the process is not running. 
+		
+		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to stop the process.		
+		"""
+		raise Exception('Not implemented')
+		
+	def signal(self, signal): 
+		"""Send a signal to a running process. 
+	
+		Typically this uses ``os.kill`` to send the signal. 
+	
+		:param int signal: The integer signal to send to the process, e.g. ``process.signal(signal.SIGTERM)``.
+		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to signal the process
+		"""
+		try:
+			os.kill(self.pid, signal)
+		except Exception:
+			raise ProcessError("Error sending signal %s to process %r"%(signal, self))
+
 
 	def write(self, data, addNewLine=True):
 		"""Write binary data to the stdin of the process.
@@ -159,10 +166,9 @@ class CommonProcessWrapper(object):
 		self._outQueue.put(data)
 		
 	def running(self):
-		"""Check to see if a process is running, returning true if running.
+		"""Check to see if a process is running.
 		
-		@return: The running status (True / False)
-		@rtype: integer
+		@return: True if the process is currently running, False if not. 
 		
 		"""
 		return self.setExitStatus() is None
@@ -177,7 +183,7 @@ class CommonProcessWrapper(object):
 		
 		@param timeout: The timeout to wait in seconds. Always provide a 
 			timeout, otherwise your test may block indefinitely!
-		@raise ProcessTimeout: Raised if the timeout is exceeded.
+		@raise pysys.exceptions.ProcessTimeout: Raised if the timeout is exceeded.
 		
 		"""
 		startTime = time.time()
@@ -193,8 +199,8 @@ class CommonProcessWrapper(object):
 	def start(self):
 		"""Start a process using the runtime parameters set at instantiation.
 		
-		@raise ProcessError: Raised if there is an error creating the process
-		@raise ProcessTimeout: Raised in the process timed out (foreground process only)
+		@raise pysys.exceptions.ProcessError: Raised if there is an error creating the process
+		@raise pysys.exceptions.ProcessTimeout: Raised in the process timed out (foreground process only)
 		
 		"""
 		self._outQueue = None # always reset

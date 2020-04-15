@@ -17,7 +17,7 @@
 
 """Contains the OS-specific process wrapper subclass. 
 
-@undocumented: EXPR
+:meta private: No reason to publically document this. 
 """
 
 import string, os.path, time, logging, sys, threading
@@ -209,17 +209,3 @@ class ProcessWrapper(CommonProcessWrapper):
 		except Exception:
 			raise ProcessError("Error stopping process")
 		
-
-	def signal(self, signal):
-		"""Send a signal to a running process. 
-	
-		Note that this method is not implemented for win32 processes, and calling this on a 
-		win32 OS will raise a NotImplementedError.
-	
-		@param signal:  The integer signal to send to the process
-		@raise ProcessError: Raised if an error occurred whilst trying to signal the process
-		
-		"""
-		raise NotImplementedError("Unable to send a signal to a windows process")
-
-

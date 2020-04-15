@@ -217,7 +217,7 @@ class ProcessUser(object):
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
 			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None):
 		"""Start a process running in the foreground or background, and return 
-		the L{ProcessWrapper} process object.
+		the `pysys.process.commonwrapper.CommonProcessWrapper` object.
 		
 		Typical use is::
 		
@@ -261,8 +261,8 @@ class ProcessUser(object):
 			the process if none is explicitly provided. 
 			The files are created relative to the test output directory. 
 			The filenames can be accessed from the returned process object using 
-			L{pysys.process.helper.CommonProcessWrapper.stdout} and 
-			L{pysys.process.helper.CommonProcessWrapper.stderr}.
+			L{pysys.process.commonwrapper.CommonProcessWrapper.stdout} and 
+			L{pysys.process.commonwrapper.CommonProcessWrapper.stderr}.
 		
 		@param stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
 		@param stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
@@ -295,8 +295,8 @@ class ProcessUser(object):
 			you should usually set ignoreExitStatus=True as well since both success and 
 			failure exit statuses are valid. 
 
-		@return: The process handle of the process (L{ProcessWrapper}).
-		@rtype: L{ProcessWrapper}
+		@return: The process wrapper object.
+		@rtype: pysys.process.commonwrapper.CommonProcessWrapper
 
 		"""
 		if ignoreExitStatus == None: ignoreExitStatus = self.defaultIgnoreExitStatus

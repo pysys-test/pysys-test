@@ -17,18 +17,7 @@
 
 
 """
-Contains cross platform classes and utilities for starting, stopping and monitoring processes. 
-
-The module contains the base class L{pysys.process.user} that can be extended by subclasses that 
-require the ability to start, stop, interact and monitor processes started by the PySys 
-framework. Subclasses within the framework are the L{pysys.basetest.BaseTest} and 
-L{pysys.baserunner.BaseRunner} classes, both of which may be required to start processes as part 
-of the execution of a set of testcases. The import path of the helper and monitor modules is set up
-at runtime so as to select either the Win32 modules (located in pysys.process.plat-win32), or the 
-unix modules (located in pysys.process.plat-unix); both modules are written to display common 
-functionality in order to provide a unified abstraction where the user is not required to select the 
-correct modules based on their current operation system.
-
+Process execution and monitoring implementations. 
 """
 
 from pysys.constants import *
@@ -39,9 +28,9 @@ __all__ = [ "helper",
 			"monitorimpl",
 			"user" ]
 
-# add to the __path__ to import the platform specific helper class
+# add to the __path__ to import the platform specific process.helper module
 dirname = __path__[0]
-if PLATFORM in [ "win32" ]:
+if IS_WINDOWS:
 	__path__.append(os.path.join(dirname, "plat-win32"))
 else:
 	__path__.append(os.path.join(dirname, "plat-unix"))
