@@ -16,7 +16,9 @@
 
 
 """
-Contains the test class used to run pyunit tests
+Contains the test class used to run PyUnit tests. 
+
+A suite of PyUnit tests becomes a single PySys test. 
 """
 
 from __future__ import print_function
