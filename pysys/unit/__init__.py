@@ -17,7 +17,7 @@
 
 
 """
-Unit test support, currently just PyUnit.
+Unit test support (currently just PyUnit).
 """
 __all__ = [
 	"pyunit"

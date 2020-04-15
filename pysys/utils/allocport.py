@@ -15,7 +15,12 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+"""
+Dynamic TCP port allocation. 
 
+This is used by the `pysys.process.user.ProcessUser` class (and its subclasses e.g. BaseTest) which should 
+usually be used to access this functionality. 
+"""
 
 import collections, random, subprocess, sys
 import io

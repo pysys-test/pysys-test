@@ -15,7 +15,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
+"""
+Log formatting classes that can be used or customized from the project configuration, including support for colored 
+output on the console. 
+"""
 
 import copy, logging
 

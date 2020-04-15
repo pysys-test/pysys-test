@@ -18,9 +18,7 @@
 
 
 """
-pycompat is a small PySys module containing a minimal set of utilities for 
-writing single-source Python that runs in multiple python versions, for 
-example both Python 2 and Python 3. 
+Compatibility utilities to allow PySys to support both Python 2 and 3. 
 
 """
 

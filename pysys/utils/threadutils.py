@@ -34,26 +34,22 @@ class BackgroundThread(object):
 	PySys wrapper for a background thread that can receive requests to 
 	stop, and can send log output to the same place as the test's logging. 
 
-	@ivar name: The name specified for this thread when it was created. 
+	To create a background thread in your test, use `pysys.basetest.BaseTest.startBackgroundThread`.
+
+	:ivar str name: The name specified for this thread when it was created. 
 	
-	@ivar joinTimeoutSecs: The default timeout that will be used for joining 
+	:ivar int joinTimeoutSecs: The default timeout that will be used for joining 
 		this thread. If not explicitly set this will be L{TIMEOUTS}C{['WaitForProcessStop']}.
 	
-	@ivar exception: The exception object raised by the thread if it has 
+	:ivar exception: The exception object raised by the thread if it has 
 		terminated with an error, or None if not. 
 	"""
 	def __init__(self, owner, name, target, kwargsForTarget):
-		"""
-		For details see L{pysys.basetest.BaseTest.startBackgroundThread}.
-		
-		@param owner: The BaseTest that owns this background thread and is 
-			responsible for ensuring it is terminated during cleanup. 
-		"""
 		assert name, 'Thread name must always be specified'
 
 		self.log = logging.getLogger('pysys.thread.%s'%name) # name without the owner prefix
 		self.name = name
-		self.owner = owner
+		self.owner = owner # a BaseTest
 		self.__parentLogHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
 		assert self.__parentLogHandlers, self.__parentLogHandlers
 		self.__target = target

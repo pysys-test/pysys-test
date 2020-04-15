@@ -69,6 +69,9 @@ below and running your tests with the new version before upgrading just in case.
 
 - ``pysys.utils.filecopy`` and its functions ``copyfileobj`` and ``filecopy`` are now deprecated (and hidden from the 
   documentation) as there are functions in Python's standard library module ``shutil`` that do the same thing. 
+  Similarly ``pysys.utils.threadpool`` is also deprecated from the public API as it was never really 
+  intended for general purpose use and Python 3 contains similar functionality. None of these modules are actually 
+  removed yet but we encourage users to check for and remove any references to be ready for future removal. 
 
 - The global namespace available for use from `basetest.BaseTest.assertEval` has been cut down to remove some 
   functions and modules such as ``filegrep`` that no-one is likely to be using. If you find you 

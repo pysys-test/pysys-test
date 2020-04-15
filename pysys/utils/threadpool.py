@@ -15,7 +15,12 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+"""
+Thread pool implementation used by BaseRunner. 
 
+:meta private: Deprecated (and hidden) as of 1.5.1; there is no need for PySys to provide a general-purpose thread pool 
+	especially as Python 3 now includes simliar functionality. 
+"""
  
 # Note that the threadpool implementation is based from that proposed
 # by Christopher Arndt (http://chrisarndt.de/en/software/python/threadpool/)
