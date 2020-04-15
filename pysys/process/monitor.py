@@ -16,7 +16,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Contains the process monitoring API - the L{BaseProcessMonitor} class, L{ProcessMonitorKey} constants for identifying 
+Contains the process monitoring API used by L{pysys.basetest.BaseTest.startProcessMonitor}.
+
+The main components are the L{pysys.process.monitor.BaseProcessMonitor} class, L{ProcessMonitorKey} constants for identifying 
 columns and the default L{ProcessMonitorTextFileHandler} class for writing monitoring information to a file. 
 """
 

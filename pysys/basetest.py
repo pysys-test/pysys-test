@@ -49,6 +49,10 @@ class %s(%s):
 class BaseTest(ProcessUser):
 	"""BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your 
 	test logic and then to validate the results against the expected behaviour. 
+	
+	Apart from the `addOutcome` method this class is not thread-safe, so if 
+	you need to access it from multiple threads be sure to add your own locking 
+	around use of its fields and methods, including any cleanup functions. 
 	"""
 	
 	def __init__ (self, descriptor, outsubdir, runner):
