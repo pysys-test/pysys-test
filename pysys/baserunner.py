@@ -37,7 +37,6 @@ from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, pathexists
-from pysys.utils.filecopy import filecopy
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
@@ -297,7 +296,7 @@ class BaseRunner(ProcessUser):
 							while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
 								i += 1
 							collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
-							filecopy(path, collectdest)
+							shutil.copyfile(toLongPathSafe(path), toLongPathSafe(collectdest))
 							
 					size = os.path.getsize(path)
 					

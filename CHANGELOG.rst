@@ -66,7 +66,10 @@ below and running your tests with the new version before upgrading just in case.
 - Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to set this to False in 
   your ``pysysproject.xml`` file, but it is likely some test reference files may need fixing, so the default value is 
   True which maintains pre-1.5.1 behaviour.
-  
+
+- ``pysys.utils.filecopy`` and its functions ``copyfileobj`` and ``filecopy`` are now deprecated (and hidden from the 
+  documentation) as there are functions in Python's standard library module ``shutil`` that do the same thing. 
+
 - The global namespace available for use from `basetest.BaseTest.assertEval` has been cut down to remove some 
   functions and modules such as ``filegrep`` that no-one is likely to be using. If you find you 
   need anything that is no longer available, just use ``import_module`` in your eval string to add it, but it is highly 
