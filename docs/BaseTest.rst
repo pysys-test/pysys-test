@@ -1,4 +1,4 @@
-The BaseTest class
+The BaseTest Class
 ~~~~~~~~~~~~~~~~~~
 
 .. automodule:: pysys.basetest

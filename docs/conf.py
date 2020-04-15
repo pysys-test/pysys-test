@@ -96,7 +96,7 @@ autodocgen_config = {
 		'pysys.basetest.BaseTest':    { 'inherited-members':True },
 		'pysys.baserunner.BaseRunner':{ 'inherited-members':True },
 	},
-	'module_title_decider': lambda modulename: 'API reference' if modulename=='pysys' else modulename,
+	'module_title_decider': lambda modulename: 'API Reference' if modulename=='pysys' else modulename,
 }
 
 def setup(app):
