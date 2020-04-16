@@ -13,6 +13,7 @@ Documentation contents
    GettingStarted.rst
    BaseTest.rst
    UserGuide.rst
+   ProjectConfig.rst
    autodocgen/pysys
    license.rst
    ChangeLog.rst
