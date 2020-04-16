@@ -5,7 +5,11 @@ Each PySys project has a configuration file called ``pysysproject.xml`` at the t
 ``property`` elements for any user-defined properties that will be used by your tests such as credentials, server 
 names. It also contains allows customization of how PySys executes tests and reports on the results. 
 
-Here is a comprehensive project file with examples of most of the available elements to show what is possible:
+When starting a new PySys test project you should create a minimal project file from scratch using 
+``pysys makeproject``, then add any additional elements you require. 
+
+To illustrate the range of available elements, here is a large project file that demonstrates all the main 
+functionality:
 
 .. literalinclude:: ../pysys-examples/pysysproject.xml
   :language: xml
