@@ -320,6 +320,7 @@ class AutoDocGen:
 		
 		# TODO: ordering c.f. autodoc_member_order
 		for (mname, m, isattr) in documenter.filter_members(members, want_all=True):
+			logger.info('   visiting member: %s'%mname)
 			if not isattr and not self.app.config['autodoc_default_options'].get('imported-members',False) and getattr(m, '__module__', modulename) != modulename: 
 				# need to immediately rule out the majority of items which aren't really defined in this module; 
 				# data attributes don't have module set on them so don't do the check for those else we'd miss stuff that 

@@ -21,9 +21,7 @@ user-defined project properties.
 
 """
 
-# @undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE, XMLProjectParser
-
-__all__ = ['Project']
+__all__ = ['Project'] # Project is the only member we expose/document from this module
 
 import os.path, logging, xml.dom.minidom, collections, codecs, time
 
@@ -447,7 +445,7 @@ def getProjectConfigTemplates():
 	"""Get a list of available templates that can be used for creating a new project configuration. 
 	
 	@return: A dict, where each value is an absolute path to an XML template file 
-	and each key is the display name for that template. 
+		and each key is the display name for that template. 
 	"""
 	templatedir = os.path.dirname(__file__)+'/templates/project'
 	templates = { t.replace('.xml',''): templatedir+'/'+t 
