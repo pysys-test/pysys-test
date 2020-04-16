@@ -91,10 +91,8 @@ class ColorLogFormatter(BaseLogFormatter):
 
 		<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
 
-	@ivar COLOR_CATEGORIES: the color map for the defined logging categories
-	@type COLOR_CATEGORIES: dictionary
-	@ivar COLOR_ESCAPE_CODES: the escape codes for each of the support colors
-	@type COLOR_ESCAPE_CODES: dictionary
+	:ivar dict(str,str) COLOR_CATEGORIES: the color map for the defined logging categories
+	:ivar dict(str,str) COLOR_ESCAPE_CODES: the escape codes for each of the support colors
 
 	"""
 	# use a lookup map from message "categories" to colors,
