@@ -41,6 +41,8 @@ def getEphemeralTCPPortRange():
 	ephemeral ports from i.e. the ports allocated for the client side of a
 	client-server connection. Returned as a tuple, 
 	(ephemeral_low, ephemeral_high) or raises exception on error. 
+	
+	:meta private: Not public API
 	"""
 	# Find the smallest and largest ephemeral port
 	if PLATFORM == 'linux':
@@ -86,6 +88,8 @@ def initializePortPool():
 	"""Initialize the pool of ports we can allocate TCP server ports from
 	i.e. ports to which processes can bind to without clashes with other
 	processes
+	
+	:meta private: Not public API
 	"""
 
 	global tcpServerPortPool
@@ -177,10 +181,18 @@ def allocateTCPPort():
 	raise Exception('Could not allocate TCP server port; other tests are currently using all the available ports')
 
 class TCPPortOwner(object):
+	"""
+	Class that allocates a free server port when constructed, 
+	and returns it to the pool of available ports when `cleanup` is called. 
+	
+	:ivar int port: The port allocated and owned by this instance. 
+	"""
 	def __init__(self):
 		self.port = allocateTCPPort()
 
 	def cleanup(self):
+		"""Must be called when this port is no longer needed to return it to PySys' pool of available ports. 
+		"""
 		tcpServerPortPool.append(self.port)
 
 # Initialize the TCP port pool
