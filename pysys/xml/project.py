@@ -15,11 +15,13 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-""" Contains the L{Project} class which holds configuration for the entire 
-test project. 
-
-@undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE, XMLProjectParser
 """
+The `Project <pysys.xml.project.Project>` class holds the ``pysysproject.xml`` project configuration, including all 
+user-defined project properties. 
+
+"""
+
+# @undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE, XMLProjectParser
 
 __all__ = ['Project']
 
@@ -87,6 +89,9 @@ PROPERTY_FILE = "(?P<name>^.*)=(?P<value>.*)$"
 
 
 class XMLProjectParser(object):
+	"""
+	:meta private: Not public API. 
+	"""
 	def __init__(self, dirname, file):
 		self.dirname = dirname
 		self.xmlfile = os.path.join(dirname, file)
@@ -465,25 +470,25 @@ def createProjectConfig(targetdir, templatepath=None):
 
 class Project(object):
 	"""Contains settings for the entire test project, as defined by the 
-	`pysysproject.xml` project configuration file.
+	``pysysproject.xml`` project configuration file.
 	
-	To get a reference to the current C{Project} instance, use the 
-	L{pysys.basetest.BaseTest.project} 
-	(or L{pysys.process.user.ProcessUser.project}) field. 
+	To get a reference to the current `Project` instance, use the 
+	`pysys.basetest.BaseTest.project` 
+	(or `pysys.process.user.ProcessUser.project`) field. 
 	
 	This class reads and parses the PySys project file if it exists and sets 
-	an instance field for every::
+	an instance attribute for every::
 	
-	   <property name="...">value</property>
+	   <property name="PROP_NAME">prop value</property>
 	
 	element in the file. 
 	
-	@ivar root: Full path to the project root directory, as specified by the first PySys project
-	file encountered when walking up the directory tree from the start directory. 
-	If no project file was found, this is just the start directory PySys was run from.
-	@type root: string
-	@ivar projectFile: Full path to the project file. May be None, though providing a file is recommended. 
-	@type projectFile: string
+	:ivar dict(str,str) properties: The resolved values of all project properties defined in the configuration file. 
+		In addition, each of these is set as an attribute onto the `Project` instance itself. 
+	:ivar str root: Full path to the project root directory, as specified by the first PySys project
+		file encountered when walking up the directory tree from the start directory. 
+		If no project file was found, this is just the start directory PySys was run from.
+	:ivar str projectFile: Full path to the project file.  
 	
 	"""
 	
@@ -499,7 +504,7 @@ class Project(object):
 		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
 		self.collectTestOutput = []
 		self.projectHelp = None
-
+		self.properties = {}
 		stdoutformatter, runlogformatter = None, None
 
 		self.projectFile = None
@@ -522,6 +527,7 @@ class Project(object):
 				keys = list(properties.keys())
 				keys.sort()
 				for key in keys: setattr(self, key, properties[key])
+				self.properties = dict(properties)
 				
 				# add to the python path
 				parser.addToPath()
@@ -565,9 +571,9 @@ class Project(object):
 		
 		Raises an exception if the project has not yet been loaded.  
 		
-		Use `self.project` to get access to the project instance where possible, 
+		Use ``self.project`` to get access to the project instance where possible, 
 		for example from a `BaseTest` or `BaseRunner` class. This attribute is for 
-		use in internal classes that do not have a `self.project`.
+		use in internal classes that do not have a ``self.project``.
 		"""
 		if Project.__INSTANCE: return Project.__INSTANCE
 		if 'doctest' in sys.argv[0]: return None # special-case for doctesting

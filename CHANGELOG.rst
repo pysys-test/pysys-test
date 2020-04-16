@@ -67,11 +67,17 @@ below and running your tests with the new version before upgrading just in case.
   your ``pysysproject.xml`` file, but it is likely some test reference files may need fixing, so the default value is 
   True which maintains pre-1.5.1 behaviour.
 
-- ``pysys.utils.filecopy`` and its functions ``copyfileobj`` and ``filecopy`` are now deprecated (and hidden from the 
-  documentation) as there are functions in Python's standard library module ``shutil`` that do the same thing. 
-  Similarly ``pysys.utils.threadpool`` is also deprecated from the public API as it was never really 
-  intended for general purpose use and Python 3 contains similar functionality. None of these modules are actually 
-  removed yet but we encourage users to check for and remove any references to be ready for future removal. 
+- There are some deprecations in this release, to remove some items that no-one is likely to be using from the API. 
+  We encourage users to check for and remove any references to the following to be ready for future removal:
+
+   - ``pysys.utils.filecopy`` and its functions ``copyfileobj`` and ``filecopy`` are now deprecated (and hidden from the 
+     documentation) as there are functions in Python's standard library module ``shutil`` that do the same thing. 
+   - ``pysys.utils.threadpool`` is also deprecated and hidden from the public API as it was never really 
+     intended for general purpose use and Python 3 contains similar functionality. 
+   - The ``DTD`` constants in `pysys.xml.project` and `pysys.xml.descriptor`.
+   - ``pysys.xml.descriptor.XMLDescriptorParser`` (replaced by `pysys.xml.descriptor.DescriptorLoader.parseTestDescriptor`)
+   - ``pysys.xml.descriptor.XMLDescriptorContainer`` (replaced by `pysys.xml.descriptor.TestDescriptor`)
+   - ``pysys.xml.descriptor.XMLDescriptorCreator`` and ``DESCRIPTOR_TEMPLATE`` (create descriptors manually if needed) 
 
 - The global namespace available for use from `basetest.BaseTest.assertEval` has been cut down to remove some 
   functions and modules such as ``filegrep`` that no-one is likely to be using. If you find you 

@@ -16,7 +16,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-@undocumented: DTD, log, DESCRIPTOR_TEMPLATE, XMLDescriptorParser, XMLDescriptorCreator, TestDescriptor._createDescriptorForMode
+The `TestDescriptor <pysys.xml.descriptor.TestDescriptor>` class holds metadata for each testcase 
+(``pysystest.xml``) or directory (``pysysdirconfig.xml``), and the `DescriptorLoader <pysys.xml.descriptor.DescriptorLoader>` 
+class allows customization of the test discovery process. 
 """
 
 from __future__ import print_function
@@ -100,70 +102,71 @@ DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
 
 
 class TestDescriptor(object):
-	"""Contains descriptor metadata about an individual testcase. 
+	"""Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory 
+	subtree (``pysysdirconfig.xml``). 
 	
-	Also used for descriptors specifying defaults for a directory subtree 
-	containing a related set of testcases. 
-	
-	The L{DescriptorLoader} class is responsible for determining the available 
+	The `DescriptorLoader` class is responsible for determining the available 
 	descriptor instances. 
 	
-	@ivar file: The absolute path of the testcase descriptor file. 
+	:ivar str file: The absolute path of the testcase descriptor file. 
 	
-	@ivar testDir: The absolute path of the test, which is used to convert 
+	:ivar str testDir: The absolute path of the test, which is used to convert 
 		any relative paths into absolute paths. 
 	
-	@ivar id: The testcase identifier, or the id prefix if this is a 
+	:ivar str id: The testcase identifier, or the id prefix if this is a 
 		directory config descriptor rather than a testcase descriptor. 
 		Includes a mode suffix if this is a multi-mode test and 
 		supportMultipleModesPerRun=True.
 	
-	@ivar idWithoutMode: The raw testcase identifier with no mode suffix. 
+	:ivar str idWithoutMode: The raw testcase identifier with no mode suffix. 
 	
-	@ivar type: The type of the testcase (automated or manual)
+	:ivar str type: The kind of test this is (``auto`` or ``manual``)
 	
-	@ivar state: The state of the testcase (runnable, deprecated or skipped)
-	
-	@ivar skippedReason: If set to a non-empty string, indicates that this 
+	:ivar str skippedReason: If set to a non-empty string, indicates that this 
 		testcase is skipped and provides the reason. If this is set then the test 
 		is skipped regardless of the value of `state`. 
+
+	:ivar str state: The state of the testcase (runnable, deprecated or skipped). This field is deprecated - we 
+		recommend using `skippedReason` instead, which provides a descriptive outcome to explain why. 
 		
-	@ivar title: The one-line title summarizing this testcase.
+	:ivar str title: The one-line title summarizing this testcase.
 	
-	@ivar purpose: A detailed description of the purpose of the testcase.
+	:ivar str purpose: A detailed description of the purpose of the testcase.
 	
-	@ivar groups: A list of the user defined groups the testcase belongs to.
+	:ivar list[str] groups: A list of the user defined groups the testcase belongs to.
 	
-	@ivar modes: A list of the user defined modes the testcase can be run in.
+	:ivar list[str] modes: A list of the user defined modes the testcase can be run in.
 	
-	@ivar primaryMode: Specifies the primary mode for this test id (which may be None 
+	:ivar str primaryMode: Specifies the primary mode for this test id (which may be None 
 		if this test has no modes). Usually this is the first mode in the list. 
 	
-	@ivar mode: Specifies which of the possible modes this descriptor represents or None if the 
+	:ivar str mode: Specifies which of the possible modes this descriptor represents or None if the 
 		the descriptor has no modes. This field is only present after the 
 		raw descriptors have been expanded into multiple mode-specific 
 		descriptors, and only if supportMultipleModesPerRun=True. 
+		Note that after a descriptor is created from the on-disk file, the `mode` attribute is not set until 
+		the later phase when multi-mode descripors are cloned and expanded based on the selected modes. 
 	
-	@ivar classname: The Python classname to be executed for this testcase.
+	:ivar str classname: The Python classname to be executed for this testcase.
 	
-	@ivar module: The path to the python module containing the testcase class. Relative to testDir, or an absoute path.
+	:ivar str module: The path to the python module containing the testcase class. Relative to testDir, or an absoute path.
 	
-	@ivar input: The path to the input directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str input: The path to the input directory of the testcase. Relative to testDir, or an absoute path.
 	
-	@ivar output: The path to the output parent directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str output: The path to the output parent directory of the testcase. Relative to testDir, or an absoute path.
 	
-	@ivar reference: The path to the reference directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str reference: The path to the reference directory of the testcase. Relative to testDir, or an absoute path.
 	
-	@ivar traceability: A list of the requirements covered by the testcase.
+	:ivar list traceability: A list of the requirements covered by the testcase.
 	
-	@ivar executionOrderHint: A float priority value used to determine the 
+	:ivar float executionOrderHint: A float priority value used to determine the 
 		order in which testcases will be run; higher values are executed before 
 		low values. The default is 0.0. 
 	
-	@ivar isDirConfig: True if this is a directory configuration, or False if 
+	:ivar bool isDirConfig: True if this is a directory configuration, or False if 
 		it's a normal testcase. 
 	
-	@ivar userData: A dictionary that can be used for storing user-defined data 
+	:ivar dict(str,obj) userData: A dictionary that can be used for storing user-defined data 
 		in the descriptor.
 	"""
 
@@ -178,11 +181,6 @@ class TestDescriptor(object):
 		traceability=[], executionOrderHint=0.0, skippedReason=None, 
 		testDir=None, 
 		isDirConfig=False):
-		"""Create an instance of the class.
-		
-		After construction the self.mode attribute is not set until 
-		later cloning and expansion of each container for the supported modes. 
-		"""
 		if skippedReason: state = 'skipped'
 		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
 		self.isDirConfig = isDirConfig
@@ -307,7 +305,11 @@ class TestDescriptor(object):
 	def __repr__(self): return str(self)
 
 class XMLDescriptorCreator(object):
-	'''Helper class to create a test descriptor template. DEPRECATED. '''
+	'''Helper class to create a test descriptor template. DEPRECATED. 
+	
+	:meta private: If we want an API for this, having a writeToFile method on TestDescriptor would be a better way 
+	  to go.
+	'''
 		
 	def __init__(self, file, type="auto", group=DEFAULT_GROUP, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
 		'''Class constructor.'''
@@ -326,10 +328,14 @@ class XMLDescriptorCreator(object):
 XMLDescriptorContainer = TestDescriptor
 """ XMLDescriptorContainer is an alias for the TestDescriptor class, which 
 exists for compatibility reasons only. 
+
+:meta private:
 """
 
 class XMLDescriptorParser(object):
 	'''DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. 
+	
+	:meta private:
 	
 	Helper class to parse an XML test descriptor - either for a testcase, 
 	or for defaults for a (sub-)directory of testcases.
@@ -616,12 +622,15 @@ class DescriptorLoader(object):
 	This class is responsible for locating and loading all available testcase 
 	descriptors. 
 	
-	A custom DescriptorLoader subclass can be provided to provide more dynamic 
-	behaviour, typically by overriding L{loadDescriptors} and modifying the 
-	returned list of descriptors. 
+	A custom DescriptorLoader subclass can be provided to customize the test 
+	discovery process, typically by overriding L{loadDescriptors} and modifying the 
+	returned list of descriptors and configuring your ``pysysproject.xml`` with::
+	
+		<descriptor-loader module="mypkg.custom" classname="CustomDescriptorLoader"/>
 	
 	You could use this approach to add additional descriptor instances 
-	to represent non-PySys testcases found under the search directory. 
+	to represent non-PySys testcases found under the search directory, for example 
+	based on discovery of unit test classes. 
 	
 	Another key use case would be dynamically adding or changing descriptor 
 	settings such as the list of modes for each testcase or the 
@@ -632,7 +641,8 @@ class DescriptorLoader(object):
 	files on disk, and allowing for different database modes on different 
 	platforms. 
 
-	@ivar project: The L{Project} instance. 
+	:ivar Project ~.project: The L{Project} instance. 
+	
 	"""
 	def __init__(self, project, **kwargs): 
 		assert project, 'project must be specified'

@@ -17,7 +17,7 @@
 
 
 """
-Implements the pysys.py launcher script.
+Implementation of the pysys.py command line launcher.
 """
 from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
