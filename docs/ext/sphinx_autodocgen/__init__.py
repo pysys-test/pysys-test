@@ -3,10 +3,10 @@ Sphinx extension that automatically and recursively generates .rst files contain
 directives for a hierarchy of Python modules. 
 """
 
-__copyright__ = "Copyright (C) 2019 Ben Spiller"
+__copyright__ = "Copyright (C) 2019-2020 Ben Spiller"
 __author__ = "Ben Spiller"
 __license__ = "Apache 2.0"
-__version__ = "1.0.dev"
+__version__ = "1.1.dev"
 
 __all__ = ['AutoDocGen', 'setup']
 
