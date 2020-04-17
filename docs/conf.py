@@ -71,15 +71,10 @@ logger = logging.getLogger('conf.py')
 def autodoc_skip_member(app, what, name, obj, skip, options):
 	# nb: 'what' means the kind of member e.g. 'class'
 
-	# implement private skipping
+	# in case we ever need to customize skipping behaviour; not currently used
 	if skip: 
 		logger.debug(f'conf.py: ALREADY Skipping member: {name}')
 		return None
-
-	# use this until we have this fix: https://github.com/sphinx-doc/sphinx/issues/6830
-	if obj.__doc__ and ':meta private:' in obj.__doc__: 
-		logger.info(f'conf.py: skipping private member: {obj}')
-		return True
 		
 	return None
 
@@ -90,7 +85,7 @@ import pysys.basetest
 autodocgen_config = {
 	'modules':[pysys], 
 	'generated_source_dir': DOC_SOURCE_DIR+'/autodocgen/',
-	'skip_module_regex': '(pysys[.]internal.*|.*[.]__|pysys.basetest)', # if module matches this then it and any of its submodules will be skipped
+	'skip_module_regex': '(.*[.]__|pysys.basetest)', # if module matches this then it and any of its submodules will be skipped
 	'write_documented_items_output_file': PYSYS_ROOT_DIR+'/docs/build_output/autodocgen_documented_items.txt',
 	'autodoc_options_decider': { # for usability, it's best to fold the inherited ProcessUser content into BaseTest/BaseRunner
 		'pysys.basetest.BaseTest':    { 'inherited-members':True },
