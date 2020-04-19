@@ -62,14 +62,14 @@ class ProcessUser(object):
 	you need to access it from multiple threads be sure to add your own locking 
 	around use of its fields and methods, including any cleanup functions. 
 	
-	:ivar str input: Full path to the directory containing input files (e.g. ``testdir/Input``)
-	:ivar str output: Full path to the directory that output files should be written to (e.g. ``testdir/Output/<platformname>``)
+	:ivar str ~.input: Full path to the directory containing input files (e.g. ``testdir/Input``)
+	:ivar str ~.output: Full path to the directory that output files should be written to (e.g. ``testdir/Output/<platformname>``)
 	:ivar logging.Logger ~.log: The Python ``Logger`` instance that should be used to record progress and status information. 
 	:ivar pysys.xml.project.Project ~.project: A reference to the singleton project instance containing the 
 		configuration of this PySys test project as defined by ``pysysproject.xml``. 
 		The project can be used to access information such as the project properties which are shared across all tests 
 		(e.g. for hosts and credentials). 
-	:ivar bool disableCoverage: Set to True to disable all code coverage collection for processes 
+	:ivar bool ~.disableCoverage: Set to True to disable all code coverage collection for processes 
 		started from this instance. For example, to disable coverage in tests tagged with the 
 		'performance' group you could use a line like this in your BaseTest::
 		

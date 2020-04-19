@@ -108,65 +108,65 @@ class TestDescriptor(object):
 	The `DescriptorLoader` class is responsible for determining the available 
 	descriptor instances. 
 	
-	:ivar str file: The absolute path of the testcase descriptor file. 
+	:ivar str ~.file: The absolute path of the testcase descriptor file. 
 	
-	:ivar str testDir: The absolute path of the test, which is used to convert 
+	:ivar str ~.testDir: The absolute path of the test, which is used to convert 
 		any relative paths into absolute paths. 
 	
-	:ivar str id: The testcase identifier, or the id prefix if this is a 
+	:ivar str ~.id: The testcase identifier, or the id prefix if this is a 
 		directory config descriptor rather than a testcase descriptor. 
 		Includes a mode suffix if this is a multi-mode test and 
 		supportMultipleModesPerRun=True.
 	
-	:ivar str idWithoutMode: The raw testcase identifier with no mode suffix. 
+	:ivar str ~.idWithoutMode: The raw testcase identifier with no mode suffix. 
 	
-	:ivar str type: The kind of test this is (``auto`` or ``manual``)
+	:ivar str ~.type: The kind of test this is (``auto`` or ``manual``)
 	
-	:ivar str skippedReason: If set to a non-empty string, indicates that this 
+	:ivar str ~.skippedReason: If set to a non-empty string, indicates that this 
 		testcase is skipped and provides the reason. If this is set then the test 
 		is skipped regardless of the value of `state`. 
 
-	:ivar str state: The state of the testcase (runnable, deprecated or skipped). This field is deprecated - we 
+	:ivar str ~.state: The state of the testcase (runnable, deprecated or skipped). This field is deprecated - we 
 		recommend using `skippedReason` instead, which provides a descriptive outcome to explain why. 
 		
-	:ivar str title: The one-line title summarizing this testcase.
+	:ivar str ~.title: The one-line title summarizing this testcase.
 	
-	:ivar str purpose: A detailed description of the purpose of the testcase.
+	:ivar str ~.purpose: A detailed description of the purpose of the testcase.
 	
-	:ivar list[str] groups: A list of the user defined groups the testcase belongs to.
+	:ivar list[str] ~.groups: A list of the user defined groups the testcase belongs to.
 	
-	:ivar list[str] modes: A list of the user defined modes the testcase can be run in.
+	:ivar list[str] ~.modes: A list of the user defined modes the testcase can be run in.
 	
-	:ivar str primaryMode: Specifies the primary mode for this test id (which may be None 
+	:ivar str ~.primaryMode: Specifies the primary mode for this test id (which may be None 
 		if this test has no modes). Usually this is the first mode in the list. 
 	
-	:ivar str mode: Specifies which of the possible modes this descriptor represents or None if the 
+	:ivar str ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
 		the descriptor has no modes. This field is only present after the 
 		raw descriptors have been expanded into multiple mode-specific 
 		descriptors, and only if supportMultipleModesPerRun=True. 
 		Note that after a descriptor is created from the on-disk file, the `mode` attribute is not set until 
 		the later phase when multi-mode descripors are cloned and expanded based on the selected modes. 
 	
-	:ivar str classname: The Python classname to be executed for this testcase.
+	:ivar str ~.classname: The Python classname to be executed for this testcase.
 	
-	:ivar str module: The path to the python module containing the testcase class. Relative to testDir, or an absoute path.
+	:ivar str ~.module: The path to the python module containing the testcase class. Relative to testDir, or an absoute path.
 	
-	:ivar str input: The path to the input directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.input: The path to the input directory of the testcase. Relative to testDir, or an absoute path.
 	
-	:ivar str output: The path to the output parent directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.output: The path to the output parent directory of the testcase. Relative to testDir, or an absoute path.
 	
-	:ivar str reference: The path to the reference directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.reference: The path to the reference directory of the testcase. Relative to testDir, or an absoute path.
 	
-	:ivar list traceability: A list of the requirements covered by the testcase.
+	:ivar list ~.traceability: A list of the requirements covered by the testcase.
 	
-	:ivar float executionOrderHint: A float priority value used to determine the 
+	:ivar float ~.executionOrderHint: A float priority value used to determine the 
 		order in which testcases will be run; higher values are executed before 
 		low values. The default is 0.0. 
 	
-	:ivar bool isDirConfig: True if this is a directory configuration, or False if 
+	:ivar bool ~.isDirConfig: True if this is a directory configuration, or False if 
 		it's a normal testcase. 
 	
-	:ivar dict(str,obj) userData: A dictionary that can be used for storing user-defined data 
+	:ivar dict(str,obj) ~.userData: A dictionary that can be used for storing user-defined data 
 		in the descriptor.
 	"""
 
@@ -641,7 +641,7 @@ class DescriptorLoader(object):
 	files on disk, and allowing for different database modes on different 
 	platforms. 
 
-	:ivar Project ~.project: The L{Project} instance. 
+	:ivar pysys.xml.project.Project ~.project: The L{Project} instance. 
 	
 	"""
 	def __init__(self, project, **kwargs): 

@@ -260,7 +260,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 	Writing of the test summary file defaults to the working directory. This can be be overridden in the PySys 
 	project file using the nested <property> tag on the <writer> tag.
 	 
-	:ivar str outputDir: Path to output directory to write the test summary files
+	:ivar str ~.outputDir: Path to output directory to write the test summary files
 	
 	"""
 	outputDir = None
@@ -345,9 +345,9 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	logfile using toprettyxml(). The outputDir, stylesheet, useFileURL attributes of the class can 
 	be over-ridden in the PySys project file using the nested <property> tag on the <writer> tag.
 	 
-	:ivar str outputDir: Path to output directory to write the test summary files
-	:ivar str stylesheet: Path to the XSL stylesheet
-	:ivar str useFileURL: Indicates if full file URLs are to be used for local resource references 
+	:ivar str ~.outputDir: Path to output directory to write the test summary files
+	:ivar str ~.stylesheet: Path to the XSL stylesheet
+	:ivar str ~.useFileURL: Indicates if full file URLs are to be used for local resource references 
 	
 	"""
 	outputDir = None
@@ -520,7 +520,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	"""Class to log test results in Apache Ant JUnit XML format (one output file per test per cycle). 
 	
-	:ivar str outputDir: Path to output directory to write the test summary files
+	:ivar str ~.outputDir: Path to output directory to write the test summary files
 	
 	"""
 	outputDir = None
@@ -649,7 +649,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 	id, title, cycle, startTime, duration, outcome
 
-	:ivar str outputDir: Path to output directory to write the test summary files
+	:ivar str ~.outputDir: Path to output directory to write the test summary files
 
 	"""
 	outputDir = None

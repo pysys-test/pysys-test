@@ -185,7 +185,7 @@ class TCPPortOwner(object):
 	Class that allocates a free server port when constructed, 
 	and returns it to the pool of available ports when `cleanup` is called. 
 	
-	:ivar int port: The port allocated and owned by this instance. 
+	:ivar int ~.port: The port allocated and owned by this instance. 
 	"""
 	def __init__(self):
 		self.port = allocateTCPPort()

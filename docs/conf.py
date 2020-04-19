@@ -21,7 +21,8 @@ sys.path.append(PYSYS_ROOT_DIR)
 
 # -- Project information -----------------------------------------------------
 
-copyright = '2006-2020 M.B. Grieve and Ben Spiller' # TODO: put current date in here automatically
+from datetime import date
+copyright = '2006-'+str(date.today().year)+' M.B. Grieve and Ben Spiller' # TODO: put current date in here automatically
 author = 'M.B. Grieve and Ben Spiller'
 
 # The full version, including alpha/beta/rc tags

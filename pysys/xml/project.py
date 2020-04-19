@@ -481,12 +481,12 @@ class Project(object):
 	
 	element in the file. 
 	
-	:ivar dict(str,str) properties: The resolved values of all project properties defined in the configuration file. 
+	:ivar dict(str,str) ~.properties: The resolved values of all project properties defined in the configuration file. 
 		In addition, each of these is set as an attribute onto the `Project` instance itself. 
-	:ivar str root: Full path to the project root directory, as specified by the first PySys project
+	:ivar str ~.root: Full path to the project root directory, as specified by the first PySys project
 		file encountered when walking up the directory tree from the start directory. 
 		If no project file was found, this is just the start directory PySys was run from.
-	:ivar str projectFile: Full path to the project file.  
+	:ivar str ~.projectFile: Full path to the project file.  
 	
 	"""
 	

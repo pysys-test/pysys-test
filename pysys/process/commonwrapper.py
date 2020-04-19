@@ -49,23 +49,23 @@ class CommonProcessWrapper(object):
 	Instances of this class are returned by `pysys.process.user.ProcessUser.startProcess` (it's usually not 
 	helpful to create instances directly).
 	
-	:ivar str command:  The full path to the executable.
-	:ivar list[str] arguments:  A list of arguments to the command.
-	:ivar dict(str,str) environs:  A dictionary of environment variables (key, value) for the process context execution. 
+	:ivar str ~.command:  The full path to the executable.
+	:ivar list[str] ~.arguments:  A list of arguments to the command.
+	:ivar dict(str,str) ~.environs:  A dictionary of environment variables (key, value) for the process context execution. 
 		Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
 		automatically to unicode using utf-8. 
-	:ivar str workingDir:  The working directory for the process
-	:ivar state: The state of the process.
+	:ivar str ~.workingDir:  The working directory for the process
+	:ivar ~.state: The state of the process.
 	:vartype state: `pysys.constants.FOREGROUND` or `pysys.constants.BACKGROUND`
-	:ivar int timeout:  The time in seconds for a foreground process to complete.
-	:ivar str stdout: The full path to the filename to write the stdout of the process, or None for no stderr stream.
-	:ivar str stderr: The full path to the filename to write the stderr of the process, or None for no stderr stream. 
-	:ivar str displayName: Display name for this process (defaults to the basename if not explicitly specified). The 
+	:ivar int ~.timeout:  The time in seconds for a foreground process to complete.
+	:ivar str ~.stdout: The full path to the filename to write the stdout of the process, or None for no stderr stream.
+	:ivar str ~.stderr: The full path to the filename to write the stderr of the process, or None for no stderr stream. 
+	:ivar str ~.displayName: Display name for this process (defaults to the basename if not explicitly specified). The 
 		display name is returned by calling ``str()`` on this instance. The display name and pid are returned by 
 		``repr()``.
 
-	:ivar int pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.
-	:ivar int exitStatus: The process exit status for a completed process (for many processes 0 represents success), 
+	:ivar int ~.pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.
+	:ivar int ~.exitStatus: The process exit status for a completed process (for many processes 0 represents success), 
 		or None if it has not yet completed. 
 	"""
 

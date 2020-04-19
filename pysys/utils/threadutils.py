@@ -36,12 +36,12 @@ class BackgroundThread(object):
 
 	To create a background thread in your test, use `pysys.basetest.BaseTest.startBackgroundThread`.
 
-	:ivar str name: The name specified for this thread when it was created. 
+	:ivar str ~.name: The name specified for this thread when it was created. 
 	
-	:ivar int joinTimeoutSecs: The default timeout that will be used for joining 
+	:ivar int ~.joinTimeoutSecs: The default timeout that will be used for joining 
 		this thread. If not explicitly set this will be L{TIMEOUTS}C{['WaitForProcessStop']}.
 	
-	:ivar exception: The exception object raised by the thread if it has 
+	:ivar Exception ~.exception: The exception object raised by the thread if it has 
 		terminated with an error, or None if not. 
 	"""
 	def __init__(self, owner, name, target, kwargsForTarget):

@@ -302,16 +302,16 @@ class CSVPerformanceFile(object):
 	If this file contains aggregated results the number of "samples" may be greater than 1 and the "value"
 	will specify the mean result.
 
-	:ivar dict runDetails: A dictionary containing (string key, string value) information about the whole test run.
+	:ivar dict ~.runDetails: A dictionary containing (string key, string value) information about the whole test run.
 	
-	:ivar list results: A list where each item is a dictionary containing information about a given result, 
+	:ivar list ~.results: A list where each item is a dictionary containing information about a given result, 
 		containing values for each of the keys in L{COLUMNS}, for example 'resultKey', 'value', etc. 
 		
-	:ivar str RUN_DETAILS: The constant prefix identifying information about the whole test run
+	:ivar str ~.RUN_DETAILS: The constant prefix identifying information about the whole test run
 	
-	:ivar str RESULT_DETAILS: The constant prefix identifying detailed information about a given result
+	:ivar str ~.RESULT_DETAILS: The constant prefix identifying detailed information about a given result
 	
-	:ivar list COLUMNS: Constant list of the columns in the performance output
+	:ivar list ~.COLUMNS: Constant list of the columns in the performance output
 	"""
 	COLUMNS = ['resultKey','testId','value','unit','biggerIsBetter','toleranceStdDevs','samples','stdDev']
 	RUN_DETAILS = '#runDetails:#'

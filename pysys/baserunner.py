@@ -86,14 +86,14 @@ class BaseRunner(ProcessUser):
 	Do not override the ``__init__`` constructor when creating a runner subclass; instead, add any initialization logic 
 	to your `setup()` method. 
 	
-	:ivar str outsubdir: The directory name for the the output of each testcase. Typically a relative path,
+	:ivar str ~.outsubdir: The directory name for the the output of each testcase. Typically a relative path,
 		but can also be an absolute path. 
 
-	:ivar str output: The full path of the output directory that this runner can use for storing any persistent state, 
+	:ivar str ~.output: The full path of the output directory that this runner can use for storing any persistent state, 
 		e.g. logs for any servers started in the runner `setup` method. The runner output directory is formed based 
 		on the ``outsubdir``. 
 	
-	:ivar logging.Logger log: The Python ``Logger`` instance that should be used to record progress and status 
+	:ivar logging.Logger ~.log: The Python ``Logger`` instance that should be used to record progress and status 
 		information. 
 	
 	:ivar pysys.xml.project.Project ~.project: A reference to the singleton project instance containing the 
@@ -101,29 +101,29 @@ class BaseRunner(ProcessUser):
 		The project can be used to access information such as the project properties which are shared across all tests 
 		(e.g. for hosts and credentials). 
 
-	:ivar bool record: Indicates if the test results should be recorded by the record writer(s), due to 
+	:ivar bool ~.record: Indicates if the test results should be recorded by the record writer(s), due to 
 		the ``--record`` command line argument being specified.
 	
-	:ivar bool purge: Indicates that all files other than ``run.log`` should be deleted from the output directory 
+	:ivar bool ~.purge: Indicates that all files other than ``run.log`` should be deleted from the output directory 
 		unless the test fails; this corresponds to the ``--purge`` command line argument. 
 
-	:ivar int cycle: The number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
+	:ivar int ~.cycle: The number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
 
-	:ivar str mode: Legacy parameter used only if ``supportMultipleModesPerRun=False``; specifies the single mode 
+	:ivar str ~.mode: Legacy parameter used only if ``supportMultipleModesPerRun=False``; specifies the single mode 
 		tests will be run with. Ignored unless you have a legacy project. 
 
-	:ivar int threads: The number of worker threads to execute the requested testcases.
+	:ivar int ~.threads: The number of worker threads to execute the requested testcases.
 
-	:ivar list[pysys.xml.descriptor.TestDescriptor] descriptors: A list of all the `pysys.xml.descriptor.TestDescriptor` test 
+	:ivar list[pysys.xml.descriptor.TestDescriptor] ~.descriptors: A list of all the `pysys.xml.descriptor.TestDescriptor` test 
 		descriptors that are selected for execution by the runner. 
 
-	:ivar dict(str,str) xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
+	:ivar dict(str,str) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
 		set as data attributes on the class.
 
-	:ivar bool validateOnly: True if the user has requested that instead of cleaning output directories and running 
+	:ivar bool ~.validateOnly: True if the user has requested that instead of cleaning output directories and running 
 		each test, the validation for each test should be re-run on the previous output. 
 
-	:ivar float startTime: The time when the test run started (in seconds since the epoch).
+	:ivar float ~.startTime: The time when the test run started (in seconds since the epoch).
 	
 	"""
 	
