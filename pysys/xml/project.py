@@ -414,9 +414,9 @@ class XMLProjectParser(object):
 		module will be extracted from the first part of classname); any other attributes will be returned in
 		the optionsDict, as will <option name=""></option> child elements.
 
-		@param node: The node, may be None
-		@param defaultClass: a string specifying the default fully-qualified class
-		@return: a tuple of (pythonclassconstructor, propertiesdict)
+		:param node: The node, may be None
+		:param defaultClass: a string specifying the default fully-qualified class
+		:return: a tuple of (pythonclassconstructor, propertiesdict)
 		"""
 		optionsDict = {}
 		if node:
@@ -444,7 +444,7 @@ class XMLProjectParser(object):
 def getProjectConfigTemplates():
 	"""Get a list of available templates that can be used for creating a new project configuration. 
 	
-	@return: A dict, where each value is an absolute path to an XML template file 
+	:return: A dict, where each value is an absolute path to an XML template file 
 		and each key is the display name for that template. 
 	"""
 	templatedir = os.path.dirname(__file__)+'/templates/project'
@@ -594,7 +594,7 @@ class Project(object):
 		file, and then make a call to it prior to importing all names within the
 		constants module.
 
-		@param startdir: The initial path to start from when trying to locate the project file
+		:param startdir: The initial path to start from when trying to locate the project file
 
 		"""
 		projectFile = os.getenv('PYSYS_PROJECTFILE', None)

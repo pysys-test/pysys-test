@@ -100,7 +100,7 @@ class BaseTest(ProcessUser):
 		iteration count or timeouts as static class variables with the 
 		possibility of overriding on the command line, for example `-Xiterations=123`. 
 		
-		@param xargs: A dictionary of the user defined extra arguments
+		:param xargs: A dictionary of the user defined extra arguments
 		
 		"""
 		for key in list(xargs.keys()):
@@ -137,7 +137,7 @@ class BaseTest(ProcessUser):
 	def execute(self):
 		"""The method tests implement to perform the test execution steps. 
 		
-		@raises NotImplementedError: If this method was not implemented yet. 
+		:raises NotImplementedError: If this method was not implemented yet. 
 		"""
 		raise NotImplementedError("The execute method of the BaseTest class must be implemented in a subclass")
 
@@ -214,32 +214,32 @@ class BaseTest(ProcessUser):
 		``ProcessMonitorTextFileHandler`` instance and pass it to handlers instead. 
 		Additional default columns may be added in future releases. 
 		
-		@param process: The process handle returned from the L{startProcess} method.
+		:param process: The process handle returned from the L{startProcess} method.
 		
-		@param interval: The polling interval in seconds between collection of 
+		:param interval: The polling interval in seconds between collection of 
 			monitoring statistics. 
 		
-		@param file: The name of a tab separated values (.tsv) file to write to, 
+		:param file: The name of a tab separated values (.tsv) file to write to, 
 			for example 'monitor-myprocess.tsv'. 
 			
 			A default L{pysys.process.monitor.ProcessMonitorTextFileHandler} instance is 
 			created if this parameter is specified, with default columns from 
 			L{pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS}. 
 		
-		@param handlers: A list of L{pysys.process.monitor.BaseProcessMonitorHandler} 
+		:param handlers: A list of L{pysys.process.monitor.BaseProcessMonitorHandler} 
 			instances (such as L{pysys.process.monitor.ProcessMonitorTextFileHandler}), 
 			which will process monitoring data every polling interval. This can be 
 			used for recording results (for example in a file) or for dynamically 
 			analysing them and reporting problems. 
 		
-		@param pmargs: Keyword arguments to allow advanced parameterization 
+		:param pmargs: Keyword arguments to allow advanced parameterization 
 			of the process monitor class, which will be passed to its 
 			constructor. It is an error to specify any parameters 
 			not supported by the process monitor class on each platform. 
 				
-		@return: An object representing the process monitor 
+		:return: An object representing the process monitor 
 			(L{pysys.process.monitor.BaseProcessMonitor}).
-		@rtype: pysys.process.monitor.BaseProcessMonitor
+		:rtype: pysys.process.monitor.BaseProcessMonitor
 		
 		"""
 		if isstring(file): file = os.path.join(self.output, file)
@@ -264,7 +264,7 @@ class BaseTest(ProcessUser):
 		before you begin shutting down processes at the end of a test to avoid 
 		unwanted spikes and noise in the last few samples of the data. 
 		
-		@param monitor: The process monitor handle returned from the L{startProcessMonitor} method
+		:param monitor: The process monitor handle returned from the L{startProcessMonitor} method
 		
 		"""
 		monitor.stop()
@@ -315,21 +315,21 @@ class BaseTest(ProcessUser):
 		L{constants.BLOCKED} outcome will be appended during cleanup or 
 		when it is joined. 
 		
-		@param name: A name for this thread that concisely describes its purpose. 
+		:param name: A name for this thread that concisely describes its purpose. 
 			Should be unique within this test/owner instance. 
 			A prefix indicating the test/owner will be added to the provided name. 
 		
-		@param target: The function or instance method that will be executed 
+		:param target: The function or instance method that will be executed 
 			on the background thread. The function must accept a keyword argument 
 			named `stopping` in addition to whichever keyword arguments are 
 			specified in `kwargsForTarget`. 
 		
-		@param kwargsForTarget: A dictionary of keyword arguments that will be 
+		:param kwargsForTarget: A dictionary of keyword arguments that will be 
 			passed to the target function. 
 		
-		@return: A L{pysys.utils.threadutils.BackgroundThread} instance 
+		:return: A L{pysys.utils.threadutils.BackgroundThread} instance 
 			wrapping the newly started thread. 
-		@rtype: L{pysys.utils.threadutils.BackgroundThread}
+		:rtype: L{pysys.utils.threadutils.BackgroundThread}
 		
 		"""
 		t = BackgroundThread(self, name=name, target=target, kwargsForTarget=kwargsForTarget)
@@ -351,10 +351,10 @@ class BaseTest(ProcessUser):
 		UI not explicitly stopped within a test will automatically be stopped via the L{cleanup} method of the 
 		BaseTest.
 		
-		@param file: The name of the manual test xml input file (see L{pysys.xml.manual} for details on the DTD)
-		@param filedir: The directory containing the manual test xml input file (defaults to the output subdirectory)
-		@param state: Start the manual tester either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
-		@param timeout: The timeout period after which to termintate a manual tester running in the C{FOREGROUND}
+		:param file: The name of the manual test xml input file (see L{pysys.xml.manual} for details on the DTD)
+		:param filedir: The directory containing the manual test xml input file (defaults to the output subdirectory)
+		:param state: Start the manual tester either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
+		:param timeout: The timeout period after which to termintate a manual tester running in the C{FOREGROUND}
 		
 		"""
 		if filedir is None: filedir = self.input
@@ -415,7 +415,7 @@ class BaseTest(ProcessUser):
 		if the timings or machine load changes, so wherever possible use a method like `waitForSignal` to 
 		wait for something specific instead. 
 		
-		@param interval: The time interval in seconds to wait. 
+		:param interval: The time interval in seconds to wait. 
 		
 		"""
 		log.info('Waiting for %0.1f seconds'%interval)
@@ -428,16 +428,16 @@ class BaseTest(ProcessUser):
 		"""Perform a validation that the specified file or directory path exists 
 		(or does not exist). 
 		
-		@param path: The path to be checked. This can be an absolute path or 
+		:param path: The path to be checked. This can be an absolute path or 
 			relative to the testcase output directory.
 
-		@param exists: True if the path is asserted to exist, False if it 
+		:param exists: True if the path is asserted to exist, False if it 
 			should not. 
 		
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		result = PASSED if pathexists(os.path.join(self.output, path))==exists else FAILED
 		self.addOutcome(result, 
@@ -457,7 +457,7 @@ class BaseTest(ProcessUser):
 		See also L{getExprFromFile} which is often used to extract a piece of 
 		data from a log file which can then be checked using this method. 
 		
-		@param evalstring: a string that will be formatted using ``.format(...)``
+		:param evalstring: a string that will be formatted using ``.format(...)``
 			with the specified parameters, and result in failure outcome if not true. 
 			
 			Parameters should be specified using {name} syntax, and quoting is not 
@@ -477,7 +477,7 @@ class BaseTest(ProcessUser):
 			
 				self.assertEval("len(import_module('difflib').get_close_matches({word}, ['apple', 'orange', 'applic'])) == 2", word='app')
 		
-		@param formatparams: Named parameters for the format string, which 
+		:param formatparams: Named parameters for the format string, which 
 			can be of any type. Use descriptive names for the parameters to produce 
 			an assertion message that makes it really clear what is being checked. 
 			
@@ -485,12 +485,12 @@ class BaseTest(ProcessUser):
 			being formatted, so there is no need to perform additional 
 			quoting or escaping of strings. 
 		
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. Unless abortOnError=True this method only throws 
 			an exception if the format string is invalid; failure to execute the 
 			eval(...) results in a BLOCKED outcome but no exception. 
 
-		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 
 		"""
 		formatparams = {k: (repr(v) if isstring(v) else v) for (k,v) in formatparams.items()}
@@ -533,11 +533,11 @@ class BaseTest(ProcessUser):
 		
 		@deprecated: Use L{assertEval} instead. 
 		
-		@param conditionstring: A string will have any following args 
+		:param conditionstring: A string will have any following args 
 			substituted into it and then be evaluated as a boolean python 
 			expression. 
 		
-		@param args: Zero or more arguments to be substituted into the format 
+		:param args: Zero or more arguments to be substituted into the format 
 			string.
 		
 		@keyword abortOnError: Set to True to make the test immediately abort if the
@@ -546,7 +546,7 @@ class BaseTest(ProcessUser):
 		@keyword assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 		
-		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		abortOnError = kwargs.pop('abortOnError',False)
 		assertMessage = kwargs.pop('assertMessage',None)
@@ -577,15 +577,15 @@ class BaseTest(ProcessUser):
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to false, a C{FAILED} outcome is added.
 		
-		@param expr: The expression, as a boolean, to check for the True | False value
+		:param expr: The expression, as a boolean, to check for the True | False value
 		
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		@param assertMessage: Overrides the string used to describe this 
+		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 
-		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		msg = assertMessage or 'Assertion on boolean expression equal to true'
 		if expr == True:
@@ -604,15 +604,15 @@ class BaseTest(ProcessUser):
 		If the supplied expression evaluates to false a C{PASSED} outcome is added to the 
 		outcome list. Should the expression evaluate to true, a C{FAILED} outcome is added.
 		
-		@param expr: The expression to check for the true | false value
+		:param expr: The expression to check for the true | false value
 		
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 	
 		
-		@param assertMessage: Overrides the string used to describe this 
+		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 
-		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		msg = assertMessage or 'Assertion on boolean expression equal to false'
 		if expr == False:
@@ -653,33 +653,33 @@ class BaseTest(ProcessUser):
 		
 			pysys.py run -XautoUpdateAssertDiffReferences
 		
-		@param file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. 
-		@param file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.
+		:param file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. 
+		:param file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.
 			The default is for file2 to be the same basename as file1. 
-		@param filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
-		@param filedir2: The dirname of the second file (defaults to the testcase reference directory)
-		@param ignores: A list of regular expressions used to denote lines in the files which should be ignored
-		@param sort: Boolean flag to indicate if the lines in the files should be sorted prior to the comparison
-		@param replace: List of tuples of the form ('regexpr', 'replacement'). For each regular expression in the 
+		:param filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
+		:param filedir2: The dirname of the second file (defaults to the testcase reference directory)
+		:param ignores: A list of regular expressions used to denote lines in the files which should be ignored
+		:param sort: Boolean flag to indicate if the lines in the files should be sorted prior to the comparison
+		:param replace: List of tuples of the form ('regexpr', 'replacement'). For each regular expression in the 
 			list, any occurences in the files are replaced with the replacement value prior to the comparison being 
 			carried out. This is often useful to replace timestamps in logfiles etc.
-		@param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
+		:param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
 			which means indentation differences and whether the file ends with a blank line do not affect the outcome. 
 			If the value is ``None``, delegates to the value of the project property ``defaultAssertDiffStripWhitespace`` 
 			(which is True for old projects, but recommended to be False for new projects). 
-		@param includes: A list of regular expressions used to denote lines in the files which should be used in the 
+		:param includes: A list of regular expressions used to denote lines in the files which should be used in the 
 			comparison. Only lines which match an expression in the list are used for the comparison.
-		@param encoding: The encoding to use to open the file. 
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		@param assertMessage: Overrides the string used to describe this 
+		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 			
-		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""
 		if filedir1 is None: filedir1 = self.output
 		if filedir2 is None: filedir2 = self.reference
@@ -750,11 +750,11 @@ class BaseTest(ProcessUser):
 		C{FAILED} outcome is added. Should C{contains} be set to false, a C{PASSED} outcome will only 
 		be added should the regular expression not be seen in the file.
 		
-		@param file: The basename of the file used in the grep
+		:param file: The basename of the file used in the grep
 		
-		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		
-		@param expr: The regular expression to check for in the file (or a string literal if literal=True), 
+		:param expr: The regular expression to check for in the file (or a string literal if literal=True), 
 			for example " ERROR .*".
 			
 			For contains=False matches, you should end the expr with `.*` if you wish to include just the 
@@ -763,25 +763,25 @@ class BaseTest(ProcessUser):
 			
 			For contains=True matches, the expr itself is used as the outcome failure reason. 
 		
-		@param contains: Boolean flag to specify if the expression should or should not be seen in the file.
+		:param contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
-		@param ignores: Optional list of regular expressions that will be 
+		:param ignores: Optional list of regular expressions that will be 
 			ignored when reading the file. 
 		
-		@param literal: By default expr is treated as a regex, but set this to True to pass in 
+		:param literal: By default expr is treated as a regex, but set this to True to pass in 
 			a string literal instead.
 		
-		@param encoding: The encoding to use to open the file. 
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		@param assertMessage: Overrides the string used to describe this 
+		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 
-		@return: None if there was no match, or the string that was matched (note the return value is not affected by 
+		:return: None if there was no match, or the string that was matched (note the return value is not affected by 
 			the contains=True/False parameter).
 		
 		"""
@@ -849,23 +849,23 @@ class BaseTest(ProcessUser):
 		C{FAILED} outcome is added. Should C{contains} be set to false, a C{PASSED} outcome will only 
 		be added should the regular expression not be seen in the file.
 		
-		@param file: The basename of the file used in the grep
-		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param expr: The regular expression to check for in the last line of the file
-		@param contains: Boolean flag to denote if the expression should or should not be seen in the file
-		@param ignores: A list of regular expressions used to denote lines in the file which should be ignored
-		@param includes: A list of regular expressions used to denote lines in the file which should be used in the assertion.#
-		@param encoding: The encoding to use to open the file. 
+		:param file: The basename of the file used in the grep
+		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		:param expr: The regular expression to check for in the last line of the file
+		:param contains: Boolean flag to denote if the expression should or should not be seen in the file
+		:param ignores: A list of regular expressions used to denote lines in the file which should be ignored
+		:param includes: A list of regular expressions used to denote lines in the file which should be used in the assertion.#
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 
-		@param assertMessage: Overrides the string used to describe this 
+		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 				
 		
-		@return: None if there was no match, or the string that was matched (note the return value is not affected by 
+		:return: None if there was no match, or the string that was matched (note the return value is not affected by 
 			the contains=True/False parameter).
 		"""
 		assert expr, 'expr= argument must be specified'
@@ -898,21 +898,21 @@ class BaseTest(ProcessUser):
 		to false, a C{PASSED} outcome will only be added should the regular expressions not be seen in the file in 
 		the order they appear in the list.
 		
-		@param file: The basename of the file used in the ordered grep
-		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param exprList: A list of regular expressions which should occur in the file in the order they appear in the list
-		@param contains: Boolean flag to denote if the expressions should or should not be seen in the file in the order specified
-		@param encoding: The encoding to use to open the file. 
+		:param file: The basename of the file used in the ordered grep
+		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		:param exprList: A list of regular expressions which should occur in the file in the order they appear in the list
+		:param contains: Boolean flag to denote if the expressions should or should not be seen in the file in the order specified
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 
-		@param assertMessage: Overrides the string used to describe this 
+		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 
-		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 
 		"""
 		assert exprList, 'expr= argument must be specified'
@@ -954,22 +954,22 @@ class BaseTest(ProcessUser):
 		input file matching the specified regular expression evaluate to true when evaluated against 
 		the supplied ``condition``.
 		
-		@param file: The basename of the file used in the line count
-		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param expr: The regular expression string used to match a line of the input file
-		@param condition: The condition to be met for the number of lines matching the regular expression
-		@param ignores: A list of regular expressions that will cause lines to be excluded from the count
-		@param encoding: The encoding to use to open the file. 
+		:param file: The basename of the file used in the line count
+		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		:param expr: The regular expression string used to match a line of the input file
+		:param condition: The condition to be met for the number of lines matching the regular expression
+		:param ignores: A list of regular expressions that will cause lines to be excluded from the count
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 
-		@param abortOnError: Set to True to make the test immediately abort if the
+		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		@param assertMessage: Overrides the string used to describe this 
+		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 
-		@return: True if the assertion succeeds, False if a failure outcome was appended. 
+		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""	
 		assert expr, 'expr= argument must be specified'
 		
@@ -1000,9 +1000,9 @@ class BaseTest(ProcessUser):
 		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
 		rather than the total time taken, since this allows the number of iterations to be increased .
 		
-		@param value: The numeric value to be reported. If a str is provided, it will be converted to a float.
+		:param value: The numeric value to be reported. If a str is provided, it will be converted to a float.
 
-		@param resultKey: A unique string that fully identifies what was measured, which will be
+		:param resultKey: A unique string that fully identifies what was measured, which will be
 			used to compare results from different test runs. For example "HTTP transport message sending throughput
 			using with 3 connections in SSL mode". The resultKey must be unique across all test cases and modes. It should be fully
 			self-describing (without the need to look up extra information such as the associated testId). Do not include
@@ -1012,16 +1012,16 @@ class BaseTest(ProcessUser):
 			means putting general information near the start of the string and specifics (throughput/latency, sending/receiving)
 			towards the end of the string. It should be as concise as possible (given the above).
 
-		@param unit: Identifies the unit the the value is measured in, including whether bigger numbers are better or
+		:param unit: Identifies the unit the the value is measured in, including whether bigger numbers are better or
 			worse (used to determine improvement or regression). Must be an instance of L{pysys.utils.perfreporter.PerformanceUnit}.
 			In most cases, use L{pysys.utils.perfreporter.PerformanceUnit.SECONDS} (e.g. for latency) or
 			L{pysys.utils.perfreporter.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be
 			used as a shorthand for those PerformanceUnit instances.
 		
-		@param toleranceStdDevs: (optional) A float that indicates how many standard deviations away from the mean a
+		:param toleranceStdDevs: (optional) A float that indicates how many standard deviations away from the mean a
 			result needs to be to be considered a regression.
 		
-		@param resultDetails: (optional) A dictionary of detailed information about this specific result 
+		:param resultDetails: (optional) A dictionary of detailed information about this specific result 
 			and/or test that should be recorded together with the result, for example detailed information about what mode 
 			or versions the test is measuring. Note this is separate from the global run details shared across 
 			all tests in this PySys execution, which can be customized by overriding 
@@ -1047,12 +1047,12 @@ class BaseTest(ProcessUser):
 		Execute the Python doctests that exist in the specified python file; 
 		adds a FAILED outcome if any do not pass. 
 		
-		@param pythonFile: the absolute path to a python file name. 
-		@param pythonPath: a list of directories to be added to the PYTHONPATH.
-		@param output: the output file; if not specified, '%s-doctest.txt' is used with 
+		:param pythonFile: the absolute path to a python file name. 
+		:param pythonPath: a list of directories to be added to the PYTHONPATH.
+		:param output: the output file; if not specified, '%s-doctest.txt' is used with 
 			the basename of the python file. 
 		
-		@param kwargs: extra arguments are passed to startProcess/startPython. 
+		:param kwargs: extra arguments are passed to startProcess/startPython. 
 		"""
 		assert os.path.exists(os.path.abspath(pythonFile)), os.path.abspath(pythonFile)
 		

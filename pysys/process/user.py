@@ -131,9 +131,9 @@ class ProcessUser(object):
 		`('myprocess.1.out', 'myprocess.1.err')`, then 
 		`('myprocess.2.out', 'myprocess.2.err')` etc. 
 		
-		@param processKey: A user-defined identifier that will form the prefix onto which [.n].out is appended
-		@return: A STDOUTERR_TUPLE named tuple of (stdout, stderr)
-		@rtype: STDOUTERR_TUPLE
+		:param processKey: A user-defined identifier that will form the prefix onto which [.n].out is appended
+		:return: A STDOUTERR_TUPLE named tuple of (stdout, stderr)
+		:rtype: STDOUTERR_TUPLE
 
 		"""
 		newval = self.__uniqueProcessKeys.get(processKey, -1)+1
@@ -156,9 +156,9 @@ class ProcessUser(object):
 		processes started with the supplied logical name, or 0 if no processes have been started. 
 
 		@deprecated: The recommended way to allocate unique names is now L{allocateUniqueStdOutErr}
-		@param displayName: The process display name
-		@return: The number of processes started matching the command basename
-		@rtype:  integer
+		:param displayName: The process display name
+		:return: The number of processes started matching the command basename
+		:rtype:  integer
 		
 		"""
 		if displayName in self.processCount:
@@ -173,7 +173,7 @@ class ProcessUser(object):
 		on this object (typically as a result of specifying -X on the command 
 		line), or else from the project configuration. 
 		
-		@param propertyName: The name of a property set on the command line 
+		:param propertyName: The name of a property set on the command line 
 			or project configuration.
 		"""
 		val = getattr(self, propertyName, None)
@@ -195,15 +195,15 @@ class ProcessUser(object):
 		then its value will be added as (space-delimited) arguments to the 
 		coverage tool. 
 		
-		@param arguments: The arguments to pass to the Python executable. 
+		:param arguments: The arguments to pass to the Python executable. 
 			Typically the first one be either the name of a Python script 
 			to execute, or ``-m`` followed by a module name. 
-		@param kwargs: See L{startProcess} for detail on available arguments.
-		@param disableCoverage: Disables code coverage for this specific 
+		:param kwargs: See L{startProcess} for detail on available arguments.
+		:param disableCoverage: Disables code coverage for this specific 
 			process. Coverage can also be disabled by setting 
 			``self.disableCoverage==True`` on this test instance. 
-		@return: The process handle of the process.
-		@rtype: pysys.process.commonprocesswrapper.CommonProcessWrapper
+		:return: The process handle of the process.
+		:rtype: pysys.process.commonprocesswrapper.CommonProcessWrapper
 		
 		"""
 		args = arguments
@@ -246,24 +246,24 @@ class ProcessUser(object):
 		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process 
 		object are automatically killed on completion of the test via the L{cleanup()} destructor.
 
-		@param command: The path to the executable to be launched (should include the full path)
-		@param arguments: A list of arguments to pass to the command
+		:param command: The path to the executable to be launched (should include the full path)
+		:param arguments: A list of arguments to pass to the command
 		
-		@param environs: A dictionary specifying the environment to run the process in. 
+		:param environs: A dictionary specifying the environment to run the process in. 
 			If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
 			produce a suitable clean default environment for this `command`, containing a minimal set of variables. 
 			If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
 		
-		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
+		:param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
 		
-		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
+		:param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
 		
-		@param timeout: The number of seconds after which to terminate processes running in the C{FOREGROUND}. For processes 
+		:param timeout: The number of seconds after which to terminate processes running in the C{FOREGROUND}. For processes 
 			that complete in a few seconds or less, it is best to avoid overriding this and stick with the default. 
 			However for long-running foreground processes it will be necessary to set a larger number, for example 
 			if running a soak test where the process needs to run for up to 2 hours you could set ``timeout=2*60*60``. 
 		
-		@param stdouterr: The filename prefix to use for the stdout and stderr of the process 
+		:param stdouterr: The filename prefix to use for the stdout and stderr of the process 
 			(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
 			L{allocateUniqueStdOutErr}. 
 			The stdouterr prefix is also used to form a default display name for 
@@ -273,21 +273,21 @@ class ProcessUser(object):
 			L{pysys.process.commonwrapper.CommonProcessWrapper.stdout} and 
 			L{pysys.process.commonwrapper.CommonProcessWrapper.stderr}.
 		
-		@param stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
-		@param stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
+		:param stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
+		:param stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
 		
-		@param displayName: Logical name of the process used for display 
+		:param displayName: Logical name of the process used for display 
 			(defaults to a string generated from the stdouterr and/or the command).
 		
-		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+		:param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
 			project setting)
 
-		@param expectedExitStatus: The condition string used to determine whether the exit status/code 
+		:param expectedExitStatus: The condition string used to determine whether the exit status/code 
 			returned by the process is correct. The default is '==0', as an exit code of zero usually indicates success, but if you 
 			are expecting a non-zero exit status (for example because you are testing correct handling of 
 			a failure condition) this could be set to '!=0' or a specific value such as '==5'. 
 	
-		@param ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
+		:param ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
 			exit code that doesn't match expectedExitStatus (or if the command cannot be run at all). 
 			This can be set to True in cases where you do not care whether the command succeeds or fails, or wish to handle the 
 			exit status separately with more complicated logic. 
@@ -297,15 +297,15 @@ class ProcessUser(object):
 			(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
 			compatibility with older PySys releases if no project property is set. 
 		
-		@param quiet: If True, this method will not do any INFO or WARN level logging 
+		:param quiet: If True, this method will not do any INFO or WARN level logging 
 			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
 			useful to avoid filling up the log where it is necessary to repeatedly execute a 
 			command check for completion of some operation until it succeeds; in such cases 
 			you should usually set ignoreExitStatus=True as well since both success and 
 			failure exit statuses are valid. 
 
-		@return: The process wrapper object.
-		@rtype: pysys.process.commonwrapper.CommonProcessWrapper
+		:return: The process wrapper object.
+		:rtype: pysys.process.commonwrapper.CommonProcessWrapper
 
 		"""
 		if ignoreExitStatus == None: ignoreExitStatus = self.defaultIgnoreExitStatus
@@ -422,7 +422,7 @@ class ProcessUser(object):
 		    easily be changed to only set minimal required environment 
 		    variables using `createEnvirons()`. 
 
-		@param command: If known, the full path of the executable for which 
+		:param command: If known, the full path of the executable for which 
 			a default environment is being created (when called from `startProcess` 
 			this is always set). This allows default environment variables to be 
 			customized for different process types e.g. Java, Python, etc. 
@@ -433,10 +433,10 @@ class ProcessUser(object):
 			can start correctly. On Unix-based systems this includes copying all of 
 			the load library path environment variable from the parent process. 
 		
-		@param kwargs: Overrides of this method should pass any additional 
+		:param kwargs: Overrides of this method should pass any additional 
 			kwargs down to the super implementation, to allow for future extensions. 
 		
-		@return: A new dictionary containing the environment variables. 
+		:return: A new dictionary containing the environment variables. 
 		"""
 		
 		assert not kwargs, 'Unknown keyword arguments: %s'%kwargs.keys()
@@ -525,7 +525,7 @@ class ProcessUser(object):
 		just use C{environs=os.environ} to allow child processes to inherit the 
 		entire parent environment instead of using this method. 
 		
-		@param overrides: A dictionary of environment variables whose 
+		:param overrides: A dictionary of environment variables whose 
 			values will be used instead of any existing values. 
 			You can use `os.getenv('VARNAME','')` if you need to pass selected 
 			variables from the current process as part of the overrides list. 
@@ -535,25 +535,25 @@ class ProcessUser(object):
 			A list of dictionaries can be specified, in which case the latest 
 			will override the earlier if there are any conflicts.
 		
-		@param addToLibPath: A path or list of paths to be prepended to the 
+		:param addToLibPath: A path or list of paths to be prepended to the 
 			default value for the environment variable used to load libraries 
 			(or the value specified in overrides, if any), 
 			i.e. `[DY]LD_LIBRARY_PATH` on Unix or `PATH` on Windows. This is usually 
 			more convenient than adding it directly to `overrides`. 
 
-		@param addToExePath: A path or list of paths to be prepended to the 
+		:param addToExePath: A path or list of paths to be prepended to the 
 			default value for the environment variable used to locate executables 
 			(or the value specified in overrides, if any), 
 			i.e. `PATH` on both Unix and Windows. This is usually 
 			more convenient than adding it directly to `overrides`. 
 		
-		@param command: If known, the full path of the executable for which 
+		:param command: If known, the full path of the executable for which 
 			a default environment is being created (passed to L{getDefaultEnvirons}). 
 		
-		@param kwargs: Overrides of this method should pass any additional 
+		:param kwargs: Overrides of this method should pass any additional 
 			kwargs down to the super implementation, to allow for future extensions. 
 		
-		@return: A new dictionary containing the environment variables. 
+		:return: A new dictionary containing the environment variables. 
 		"""
 		
 		assert not kwargs, 'Unknown keyword arguments: %s'%kwargs.keys()
@@ -593,8 +593,8 @@ class ProcessUser(object):
 		This is equivalent to calling `pysys.process.commonwrapper.CommonProcessWrapper.stop()`, except it also 
 		logs an info message when the process is stopped.
 
-		@param process: The process handle returned from the L{startProcess} method
-		@param abortOnError: If True abort the test on any error outcome (defaults to the defaultAbortOnError
+		:param process: The process handle returned from the L{startProcess} method
+		:param abortOnError: If True abort the test on any error outcome (defaults to the defaultAbortOnError
 			project setting), if False a failure to stop the process will just be logged as a warning. 
 
 		"""
@@ -619,9 +619,9 @@ class ProcessUser(object):
 		Should the request to send the signal to the running process fail, a C{BLOCKED} outcome will be added to the
 		outcome list.
 
-		@param process: The process handle returned from the L{startProcess} method
-		@param signal: The integer value of the signal to send
-		@param abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
+		:param process: The process handle returned from the L{startProcess} method
+		:param signal: The integer value of the signal to send
+		:param abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
 			(defaults to the defaultAbortOnError project setting)
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -644,11 +644,11 @@ class ProcessUser(object):
 		This method does not check the exit code for success, but you can manually 
 		check the return value (which is the same as ``process.exitStatus``) if you wish to check it succeeded. 
 
-		@param process: The process handle returned from the L{startProcess} method
-		@param timeout: The timeout value in seconds to wait before returning
-		@param abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
+		:param process: The process handle returned from the L{startProcess} method
+		:param timeout: The timeout value in seconds to wait before returning
+		:param abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
 			(defaults to the defaultAbortOnError project setting)
-		@return: The process's ``exitStatus``. This will be None if the process timed out and abortOnError is disabled. 
+		:return: The process's ``exitStatus``. This will be None if the process timed out and abortOnError is disabled. 
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -673,13 +673,13 @@ class ProcessUser(object):
 		wrapper around the write method of the process helper only adds checking of the process running status prior
 		to the write being performed, and logging to the testcase run log to detail the write.
 
-		@param process: The process handle returned from the L{startProcess()} method
-		@param data: The data to write to the process stdin. 
+		:param process: The process handle returned from the L{startProcess()} method
+		:param data: The data to write to the process stdin. 
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
 			given by locale.getpreferredencoding(). 
-		@param addNewLine: True if a new line character is to be added to the end of the data string
+		:param addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""
 		if process.running():
@@ -700,12 +700,12 @@ class ProcessUser(object):
 		create connections to it. If a connection cannot be made within the specified timeout interval, the method
 		returns to the caller, or aborts the test if abortOnError=True. 
 		
-		@param port: The port value in the socket host:port pair
-		@param host: The host value in the socket host:port pair
-		@param timeout: The timeout in seconds to wait for connection to the socket
-		@param abortOnError: If true abort the test on any failure (defaults to the defaultAbortOnError
+		:param port: The port value in the socket host:port pair
+		:param host: The host value in the socket host:port pair
+		:param timeout: The timeout in seconds to wait for connection to the socket
+		:param abortOnError: If true abort the test on any failure (defaults to the defaultAbortOnError
 			project setting)
-		@param process: If a handle to a process is specified, the wait will abort if 
+		:param process: If a handle to a process is specified, the wait will abort if 
 			the process dies before the socket becomes available. It is recommended to set this wherever possible. 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -764,10 +764,10 @@ class ProcessUser(object):
 		initialisation actions and is ready for the test execution steps. If a file is not created 
 		on disk within the specified timeout interval, the method returns to the caller.
 
-		@param file: The basename of the file used to wait to be created
-		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		@param timeout: The timeout in seconds to wait for the file to be created
-		@param abortOnError: If true abort the test on any failure (defaults to the defaultAbortOnError
+		:param file: The basename of the file used to wait to be created
+		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		:param timeout: The timeout in seconds to wait for the file to be created
+		:param abortOnError: If true abort the test on any failure (defaults to the defaultAbortOnError
 			project setting)
 
 		"""
@@ -811,33 +811,33 @@ class ProcessUser(object):
 			self.waitForSignal('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
 				errorExpr=[' ERROR ', ' FATAL '], encoding='utf-8')
 
-		@param file: The absolute or relative name of the file used to wait for the signal
+		:param file: The absolute or relative name of the file used to wait for the signal
 		
-		@param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		
-		@param expr: The regular expression to search for in the text file
+		:param expr: The regular expression to search for in the text file
 		
-		@param condition: The condition to be met for the number of lines matching the regular expression
+		:param condition: The condition to be met for the number of lines matching the regular expression
 		
-		@param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
+		:param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
 		
-		@param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
+		:param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
 		
-		@param ignores: A list of regular expressions used to denote lines in the files which should be ignored 
+		:param ignores: A list of regular expressions used to denote lines in the files which should be ignored 
 			when matching both `expr` and `errorExpr`. 
 		
-		@param process: If a handle to the process object producing output is specified, the wait will abort if 
+		:param process: If a handle to the process object producing output is specified, the wait will abort if 
 			the process dies before the expected signal appears.
 		
-		@param errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
+		:param errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
 			for the main expression to be aborted with an error outcome. This is useful to avoid waiting a long time for 
 			the expected expression when an ERROR is logged that means it will never happen, and also provides 
 			much clearer test failure messages in this case. 
 		
-		@param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
+		:param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
 			project setting)
 		
-		@param encoding: The encoding to use to open the file. 
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		"""
@@ -971,21 +971,21 @@ class ProcessUser(object):
 		Although this method exists on all subclasses of `pysys.process.user.ProcessUser`, in practice only 
 		`pysys.basetest.BaseTest` subclasses actually do anything with the resulting outcome. 
 		
-		@param outcome: The outcome to add, e.g. `pysys.constants.FAILED`.
+		:param outcome: The outcome to add, e.g. `pysys.constants.FAILED`.
 		
-		@param outcomeReason: A string summarizing the reason for the outcome, 
+		:param outcomeReason: A string summarizing the reason for the outcome, 
 			for example "Grep on x.log contains 'ERROR: server failed'". 
 		
-		@param printReason: If True the specified outcomeReason will be printed
+		:param printReason: If True the specified outcomeReason will be printed
 		
-		@param abortOnError: If true abort the test on any error outcome. This should usually be set to 
+		:param abortOnError: If true abort the test on any error outcome. This should usually be set to 
 			False for assertions, or the configured `self.defaultAbortOnError` setting (typically True) for 
 			operations that involve waiting. 
 		
-		@param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
+		:param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
 			to the log output for better test triage.
 		
-		@param override: Remove any existing test outcomes when adding this one, ensuring 
+		:param override: Remove any existing test outcomes when adding this one, ensuring 
 			that this outcome is the one and only one reported even if an existing outcome 
 			has higher precedence. 
 		"""
@@ -1034,8 +1034,8 @@ class ProcessUser(object):
 		
 		See also L{skipTest}. 
 
-		@param outcome: The outcome, which will override any existing outcomes previously recorded.
-		@param outcomeReason: A string summarizing the reason for the outcome.
+		:param outcome: The outcome, which will override any existing outcomes previously recorded.
+		:param outcomeReason: A string summarizing the reason for the outcome.
 		
 		"""
 		raise AbortExecution(outcome, outcomeReason, callRecord)
@@ -1047,7 +1047,7 @@ class ProcessUser(object):
 		
 		This is useful when a test should not be executed in the current mode or platform. 
 
-		@param outcomeReason: A string summarizing the reason the test is being skipped, for example
+		:param outcomeReason: A string summarizing the reason the test is being skipped, for example
 			"Feature X is not supported on Windows". 
 		"""
 		raise AbortExecution(SKIPPED, outcomeReason, callRecord)
@@ -1063,8 +1063,8 @@ class ProcessUser(object):
 		The method returns the integer value of the outcome as defined in L{pysys.constants}. To convert this 
 		to a string representation use the L{pysys.constants.LOOKUP} dictionary i.e. C{LOOKUP[test.getOutcome()]}.
 		
-		@return: The overall outcome
-		@rtype:  integer
+		:return: The overall outcome
+		:rtype:  integer
 
 		"""	
 		with self.lock:
@@ -1075,8 +1075,8 @@ class ProcessUser(object):
 	def getOutcomeReason(self):
 		"""Get the reason string for the current overall outcome (if specified).
 				
-		@return: The overall test outcome reason or '' if not specified
-		@rtype:  string
+		:return: The overall test outcome reason or '' if not specified
+		:rtype:  string
 
 		"""	
 		with self.lock:
@@ -1117,8 +1117,8 @@ class ProcessUser(object):
 	def __skipFrame(self, file, clazz):
 		"""Private method to check if a file is that for a particular class.
 
-		@param file: The filepatch to check
-		@param clazz: The class to check against
+		:param file: The filepatch to check
+		:param clazz: The class to check against
 
 		"""
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
@@ -1133,15 +1133,15 @@ class ProcessUser(object):
 		self.getExprFromFile('test.txt', 'myKey="(.*)"') on a file containing 'myKey="foobar"' would return "foobar"
 		self.getExprFromFile('test.txt', 'foo') on a file containing 'myKey=foobar' would return "foo"
 		
-		@param path: file to search (located in the output dir unless an absolute path is specified)
-		@param expr: the regular expression, optionally containing the regex group operator (...)
-		@param groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ['1'] meaning 
+		:param path: file to search (located in the output dir unless an absolute path is specified)
+		:param expr: the regular expression, optionally containing the regex group operator (...)
+		:param groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ['1'] meaning 
 			the first group. If more than one group is specified, the result will be a tuple of group values, otherwise the
 			result will be the value of the group at the specified index.
-		@param returnAll: returns all matching lines if True, the first matching line otherwise.
-		@param returnNoneIfMissing: set this to return None instead of throwing an exception
+		:param returnAll: returns all matching lines if True, the first matching line otherwise.
+		:param returnNoneIfMissing: set this to return None instead of throwing an exception
 			if the regex is not found in the file
-		@param encoding: The encoding to use to open the file. 
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		"""
@@ -1173,16 +1173,16 @@ class ProcessUser(object):
 		diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
 		to make test failures easier to triage quickly. 
 		
-		@param path: May be an absolute, or relative to the test output directory
-		@param includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
-		@param excludes: Optional list of regex strings. If specified, no line containing these will be logged
-		@param maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
-		@param tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
-		@param encoding: The encoding to use to open the file. 
+		:param path: May be an absolute, or relative to the test output directory
+		:param includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
+		:param excludes: Optional list of regex strings. If specified, no line containing these will be logged
+		:param maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
+		:param tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 			
-		@return: True if anything was logged, False if not.
+		:return: True if anything was logged, False if not.
 		
 		"""
 		if not path: return False
@@ -1239,10 +1239,10 @@ class ProcessUser(object):
 		
 		This function does nothing (does not raise an except) if the directory already exists. 
 		
-		@param path: The path to be created. This can be an absolute path or 
+		:param path: The path to be created. This can be an absolute path or 
 			relative to the testcase output directory.
 		
-		@return: the absolute path of the new directory, to facilitate fluent-style method calling. 
+		:return: the absolute path of the new directory, to facilitate fluent-style method calling. 
 		"""
 		path = os.path.join(self.output, path)
 		mkdir(path)
@@ -1256,10 +1256,10 @@ class ProcessUser(object):
 		
 		Does nothing if it does not exist. Raises an exception if the deletion fails. 
 		
-		@param path: The path to be deleted. This can be an absolute path or 
+		:param path: The path to be deleted. This can be an absolute path or 
 			relative to the testcase output directory.
 		
-		@param kwargs: Any additional arguments are passed to 
+		:param kwargs: Any additional arguments are passed to 
 			L{pysys.utils.fileutils.deletedir()}. 
 		"""
 		deletedir(os.path.join(self.output, path), **kwargs)
@@ -1289,13 +1289,13 @@ class ProcessUser(object):
 		``locale.getpreferredencoding()``, and on Python 2 is to use binary ``str`` 
 		objects with no character encoding or decoding applied. 
 		
-		@param file: The filename to be read or written. This may be an 
+		:param file: The filename to be read or written. This may be an 
 			absolute path or a relative path.
 		 
-		@param xargs: Ensure that an ``**xargs`` argument is specified so that 
+		:param xargs: Ensure that an ``**xargs`` argument is specified so that 
 			additional information can be passed to this method in future releases. 
 		
-		@return: The encoding to use for this file, or None if default behaviour is 
+		:return: The encoding to use for this file, or None if default behaviour is 
 			to be used.
 		"""
 		file = file.replace('\\','/').lower() # normalize slashes and ignore case
@@ -1358,10 +1358,10 @@ class ProcessUser(object):
 		>>> ProcessUser.compareVersions('1', '')
 		1
 
-		@param v1: A string containing a version number, with any number of components. 
-		@param v2: A string containing a version number, with any number of components. 
+		:param v1: A string containing a version number, with any number of components. 
+		:param v2: A string containing a version number, with any number of components. 
 
-		@return: an integer > 0 if v1>v2, 
+		:return: an integer > 0 if v1>v2, 
 			an integer < 0 if v1<v2, 
 			or 0 if they are semantically the same.
 		"""
@@ -1371,10 +1371,10 @@ class ProcessUser(object):
 		"""
 		Writes the specified characters to a file in the output directory. 
 		
-		@param file: The path of the file to write, either an absolute path or 
+		:param file: The path of the file to write, either an absolute path or 
 			relative to the `self.output` directory. 
 		
-		@param text: The string to write to the file, with `\\n` 
+		:param text: The string to write to the file, with `\\n` 
 			for newlines (do not use `os.linesep` as the file will be opened in 
 			text mode so platform line separators will be added automatically).
 			
@@ -1385,7 +1385,7 @@ class ProcessUser(object):
 			string if there is an encoding specified for this file/type, or 
 			else a byte string. 
 		
-		@param encoding: The encoding to use to open the file. 
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		"""
@@ -1418,25 +1418,25 @@ class ProcessUser(object):
 					lambda line: line.replace('foo', 'bar'), 
 				])
 		
-		@param src: The source filename, which can be an absolute path, or 
+		:param src: The source filename, which can be an absolute path, or 
 			a path relative to the `self.output` directory. 
 			Use `src=self.input+'/myfile'` if you wish to copy a file from the test 
 			input directory. 
 		
-		@param dest: The source filename, which can be an absolute path, or 
+		:param dest: The source filename, which can be an absolute path, or 
 			a path relative to the `self.output` directory. If this is a directory 
 			name, the file is copied to this directory with the same basename as src. 
 		
-		@param mappers: A list of filter functions that will be applied, 
+		:param mappers: A list of filter functions that will be applied, 
 			in order, to each line read from the file. Each function accepts a string for 
 			the current line as input and returns either a string to write or 
 			None if the line is to be omitted. 
 		
-		@param encoding: The encoding to use to open the file. 
+		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
-		@return: the absolute path of the destination file. 
+		:return: the absolute path of the destination file. 
 		"""
 		src = toLongPathSafe(os.path.join(self.output, src))
 		dest = toLongPathSafe(os.path.join(self.output, dest))

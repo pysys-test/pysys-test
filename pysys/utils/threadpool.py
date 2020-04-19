@@ -69,10 +69,10 @@ class WorkerThread(threading.Thread):
 	def __init__(self, requests_queue, results_queue, poll_timeout=5, **kwds):
 		"""Class constructor.
 		
-		@param requests_queue: Reference to the threadpool's request queue
-		@param results_queue: Reference to the threadpool's results queue
-		@param poll_timeout: The timeout when trying to obtain a request from the request queue
-		@param kwds: Variable arguments to be passed to the threading.Thread constructor
+		:param requests_queue: Reference to the threadpool's request queue
+		:param results_queue: Reference to the threadpool's results queue
+		:param poll_timeout: The timeout when trying to obtain a request from the request queue
+		:param kwds: Variable arguments to be passed to the threading.Thread constructor
 		
 		"""
 		threading.Thread.__init__(self, **kwds)
@@ -120,12 +120,12 @@ class WorkRequest(object):
 			callback=None, exc_callback=_handle_thread_exception):
 		"""Class constructor.
 		
-		@param callable_: The callable object or function
-		@param args: The argument list to the callable object or function
-		@param kwds: The keyword arguments to the callable object or function
-		@param requestID: An ID for the request
-		@param callback: A callback on completion of the request
-		@param exc_callback: A callback when the request throws an excetion
+		:param callable_: The callable object or function
+		:param args: The argument list to the callable object or function
+		:param kwds: The keyword arguments to the callable object or function
+		:param requestID: An ID for the request
+		:param callback: A callback on completion of the request
+		:param exc_callback: A callback when the request throws an excetion
 	
 		"""
 		if requestID is None:
@@ -152,13 +152,13 @@ class ThreadPool(object):
 	def __init__(self, num_workers, q_size=0, resq_size=0, poll_timeout=0.7, requests_queue=None):
 		"""Class constructor.
 		
-		@param num_workers: The number of worker threads processing the queue
-		@param q_size: The request queue size; ignored if a custom requests_queue is specified
-		@param resq_size: The response queue size
-		@param requests_queue: a custom queue instance which can be used to implement any desired logic 
+		:param num_workers: The number of worker threads processing the queue
+		:param q_size: The request queue size; ignored if a custom requests_queue is specified
+		:param resq_size: The response queue size
+		:param requests_queue: a custom queue instance which can be used to implement any desired logic 
 			for deciding which job to execute next. Must implement the get() and put() methods 
 			from the queue.Queue class.
-		@param poll_timeout: The polling timeout of worker threads when getting requests from the queue
+		:param poll_timeout: The polling timeout of worker threads when getting requests from the queue
 		"""
 		self._requests_queue = Queue.Queue(q_size) if requests_queue is None else requests_queue
 		self._results_queue = Queue.Queue(resq_size)
@@ -171,8 +171,8 @@ class ThreadPool(object):
 	def createWorkers(self, num_workers, poll_timeout=5):
 		"""Create additional threads on the workers stack.
 
-		@param num_workers: The number of workers to add to the stack
-		@param poll_timeout: The timeout of the threads when waiting for a request on the queue
+		:param num_workers: The number of workers to add to the stack
+		:param poll_timeout: The timeout of the threads when waiting for a request on the queue
 		
 		"""
 		for i in range(num_workers):
@@ -186,8 +186,8 @@ class ThreadPool(object):
 		Stops a set number of workers in the workers list by popping the workers of the 
 		list stack. 
 		
-		@param num_workers: The number of workers to dismiss
-		@param do_join: If True wait for all threads to terminate before returning from the call
+		:param num_workers: The number of workers to dismiss
+		:param do_join: If True wait for all threads to terminate before returning from the call
 		
 		"""
 		dismiss_list = []
@@ -218,9 +218,9 @@ class ThreadPool(object):
 	def putRequest(self, request, block=True, timeout=0):
 		"""Place a WorkRequest on the request queue. 
 		
-		@param request: The WorkRequest to place on the request queue
-		@param block: If set to True, block queue operations until complete, otherwise use timeout
-		@param timeout: The timeout to use for queue operations when block is set to False
+		:param request: The WorkRequest to place on the request queue
+		:param block: If set to True, block queue operations until complete, otherwise use timeout
+		:param timeout: The timeout to use for queue operations when block is set to False
 		
 		"""
 		assert isinstance(request, WorkRequest)

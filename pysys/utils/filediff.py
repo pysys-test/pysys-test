@@ -36,11 +36,11 @@ def trimContents(contents, expressions, exclude=True):
 	The method reduces an input list of strings based on whether each string matches or does not match a 
 	list of regular expressions.
 	
-	@param contents: The input list of strings to trim based on matches to regular expressions
-	@param expressions: The input list of regular expressions
-	@param exclude: If true any matches to the regular expressions exclude the line, if false any matches include the line
-	@return: The processed list
-	@rtype: list
+	:param contents: The input list of strings to trim based on matches to regular expressions
+	:param expressions: The input list of regular expressions
+	:param exclude: If true any matches to the regular expressions exclude the line, if false any matches include the line
+	:return: The processed list
+	:rtype: list
 	"""
 	if len(expressions) == 0:
 		return contents
@@ -70,10 +70,10 @@ def replace(list, replacementList):
 	The replacementList parameter should contain a list of tuples to use in the replacement, e.g. 
 	[('foo', 'bar'), ('swim', 'swam')].
 	
-	@param list: The input list of strings to performed the replacement on
-	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value
-	@return: The processed list
-	@rtype: list
+	:param list: The input list of strings to performed the replacement on
+	:param replacementList: A list of tuples (key, value) where matches to key are replaced with value
+	:return: The processed list
+	:rtype: list
 	
 	"""
 	for pair in replacementList:
@@ -88,7 +88,7 @@ def replace(list, replacementList):
 def logContents(message, list):
 	"""Log a list of strings, prepending the line number to each line in the log output.
 	
-	@param list: The list of strings to log
+	:param list: The list of strings to log
 	"""
 	if not log.isEnabledFor(logging.DEBUG): return
 	count = 0
@@ -111,22 +111,22 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 	determinism may not exist). Verbose logging of the method occurs at DEBUG level showing the contents of the 
 	processed lists prior to the comparison being performed.  
 	
-	@param file1: The full path to the first file to use in the comparison
-	@param file2: The full path to the second file to use in the comparison, typically a reference file
-	@param ignore: A list of regular expressions which remove entries in the input file contents before making the comparison
-	@param sort: Boolean to sort the input file contents before making the comparison
-	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison
-	@param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
+	:param file1: The full path to the first file to use in the comparison
+	:param file2: The full path to the second file to use in the comparison, typically a reference file
+	:param ignore: A list of regular expressions which remove entries in the input file contents before making the comparison
+	:param sort: Boolean to sort the input file contents before making the comparison
+	:param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison
+	:param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
 		which means indentation differences and whether the file ends with a blank line do not affect the outcome. 
 		If False, only newline characters are stripped. 
-	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
-	@param unifiedDiffOutput: If specified, indicates the full path of a file to which unified diff output will be written, 
+	:param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
+	:param unifiedDiffOutput: If specified, indicates the full path of a file to which unified diff output will be written, 
 		if the diff fails. 
-	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	
-	@return: success (True / False)
-	@rtype: boolean
-	@raises FileNotFoundException: Raised if either of the files do not exist
+	:return: success (True / False)
+	:rtype: boolean
+	:raises FileNotFoundException: Raised if either of the files do not exist
 
 	"""
 	for file in file1, file2:

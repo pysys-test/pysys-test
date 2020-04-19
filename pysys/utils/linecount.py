@@ -32,13 +32,13 @@ def linecount(file, regexpr=None, ignores=None, encoding=None):
 	number of lines in the input file. The regular expression should be passed in as 
 	a string, i.e. C{"[a-z]_foo.*"} etc.
 	
-	@param file: The full path to the input file
-	@param regexpr: The regular expression used for counting matches
-	@param ignores: A list of regular expressions that will cause lines to be excluded from the count
-	@return: The number of matching lines in the input file 
-	@rtype: integer
-	@param encoding: Specifies a non-default encoding to be used for opening the file. 
-	@raises FileNotFoundException: Raised if the input file does not exist
+	:param file: The full path to the input file
+	:param regexpr: The regular expression used for counting matches
+	:param ignores: A list of regular expressions that will cause lines to be excluded from the count
+	:return: The number of matching lines in the input file 
+	:rtype: integer
+	:param encoding: Specifies a non-default encoding to be used for opening the file. 
+	:raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
 	matches = getmatches(file, regexpr, ignores=ignores, encoding=encoding)

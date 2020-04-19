@@ -202,7 +202,7 @@ class AutoDocGen:
 	def generate_member_type_rst(self, module, memberType: str, members: List[Tuple[str,object,str]]):
 		"""Generate RST for members of a specified type. 
 		
-		@returns: A string, or None if there is to be no dedicated section for this member type (e.g. if you want 
+		:return: A string, or None if there is to be no dedicated section for this member type (e.g. if you want 
 		the members to be listed in source order) rather than grouped by type. (TODO: make that possible)
 		
 		"""
@@ -226,7 +226,7 @@ class AutoDocGen:
 		"""
 		Generates the RST for a Python module. 
 		
-		@param membersByType: The filtered set of members to be documented, keyed by member type. 
+		:param membersByType: The filtered set of members to be documented, keyed by member type. 
 		"""
 		if not membersByType: return None
 

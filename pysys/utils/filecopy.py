@@ -30,9 +30,9 @@ from pysys.utils.fileutils import toLongPathSafe, pathexists
 def copyfileobj(fsrc, fdst, length=16*1024):
 	"""Internal method to read bytes from a source file descriptor, and write to a destination file descriptor.
 	
-	@param fsrc: The source file descriptor
-	@param fdst: The destination file descriptor
-	@param length: The buffer length to read from the src and write to the destination
+	:param fsrc: The source file descriptor
+	:param fdst: The destination file descriptor
+	:param length: The buffer length to read from the src and write to the destination
 	
 	"""
 	while 1:
@@ -45,9 +45,9 @@ def copyfileobj(fsrc, fdst, length=16*1024):
 def filecopy(src, dst):
 	"""Copy source file to a destination file.
 	
-	@param src: Full path to the source filename
-	@param dst: Full path the destination filename
- 	@raises FileNotFoundException: Raised if the source file does not exist
+	:param src: Full path to the source filename
+	:param dst: Full path the destination filename
+ 	:raises FileNotFoundException: Raised if the source file does not exist
  
 	"""
 	if not pathexists(src):

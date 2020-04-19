@@ -233,7 +233,7 @@ class BaseRunner(ProcessUser):
 		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
 		form C{self.foo} with C{value bar}. 
 		
-		@param xargs: A dictionary of the user defined extra arguments
+		:param xargs: A dictionary of the user defined extra arguments
 		
 		"""
 		for key in list(xargs.keys()):
@@ -267,8 +267,8 @@ class BaseRunner(ProcessUser):
 		
 		This method is always invoked from a single thread, even in multi-threaded mode. 
 		
-		@param testObj: Reference to the `pysys.basetest.BaseTest` instance of the test just completed.
-		@param dir: The test output directory to perform the purge on.
+		:param testObj: Reference to the `pysys.basetest.BaseTest` instance of the test just completed.
+		:param dir: The test output directory to perform the purge on.
 				
 		"""
 		if self.purge:
@@ -337,7 +337,7 @@ class BaseRunner(ProcessUser):
 		even when the test has passed, by returning False from this method. For example this
 		could be used to avoid deleting code coverage files. By default this will return True.
 		
-		@param path: The absolute path of the file to be purged
+		:param path: The absolute path of the file to be purged
 
 		"""
 		return True
@@ -371,10 +371,10 @@ class BaseRunner(ProcessUser):
 		set to more than 1, the output subdirectory is further split into cycle[n] directories to sandbox the 
 		output from each iteration.
 		
-		@param printSummary: Ignored, exists only for compatibility reasons. To provide a custom summary printing 
+		:param printSummary: Ignored, exists only for compatibility reasons. To provide a custom summary printing 
 			implementation, specify a BaseSummaryResultsWriter subclass in the <writers> section of your project XML file. 
 
-		@return: Use of this value is deprecated as of 1.3.0. This method returns a dictionary of testcase outcomes, and
+		:return: Use of this value is deprecated as of 1.3.0. This method returns a dictionary of testcase outcomes, and
 			for compatibility reasons this will continue in the short term, but will be removed in a future release. Please
 			ignore the return value of start() and use a custom BaseSummaryResultsWriter if you need to customize summarization of
 			results.
@@ -581,8 +581,8 @@ class BaseRunner(ProcessUser):
 		The method is responsible for calling of the testComplete() method of the runner, recording 
 		of the test result to the result writers, and for deletion of the test container object. 
 
-		@param thread: A reference to the calling thread (ignored in 1.3.0 onwards)
-		@param container: A reference to the container object that ran the test
+		:param thread: A reference to the calling thread (ignored in 1.3.0 onwards)
+		:param container: A reference to the container object that ran the test
 
 		"""
 		self.__remainingTests -= 1
@@ -640,7 +640,7 @@ class BaseRunner(ProcessUser):
 		
 		:meta private: This method would need a better signature before being made public. 
 		
-		@param exc_info: The tuple of values as created from sys.exc_info()
+		:param exc_info: The tuple of values as created from sys.exc_info()
 		 
 		"""
 		log.warn("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
@@ -693,9 +693,9 @@ class TestContainer(object):
 	def __init__ (self, descriptor, cycle, runner):
 		"""Create an instance of the TestContainer class.
 		
-		@param descriptor: A reference to the testcase descriptor
-		@param cycle: The cycle number of the test
-		@param runner: A reference to the runner that created this class
+		:param descriptor: A reference to the testcase descriptor
+		:param cycle: The cycle number of the test
+		:param runner: A reference to the runner that created this class
 
 		"""
 		self.descriptor = descriptor
@@ -910,8 +910,8 @@ class TestContainer(object):
 	def purgeDirectory(self, dir, delTop=False): # pragma: no cover (deprecated, no longer used)
 		"""Recursively purge a directory removing all files and sub-directories.
 		
-		@param dir: The top level directory to be purged
-		@param delTop: Indicates if the top level directory should also be deleted
+		:param dir: The top level directory to be purged
+		:param delTop: Indicates if the top level directory should also be deleted
 
 		@deprecated: Use L{pysys.utils.fileutils.deletedir} instead. 
 		"""
@@ -940,9 +940,9 @@ class TestContainer(object):
 	def detectCore(self, dir):
 		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
 		
-		@param dir: The directory to search for core files
-		@return: C{True} if a core detected, None if no core detected
-		@rtype: integer 
+		:param dir: The directory to search for core files
+		:return: C{True} if a core detected, None if no core detected
+		:rtype: integer 
 		"""
 		try:
 			for file in os.listdir(toLongPathSafe(dir)):

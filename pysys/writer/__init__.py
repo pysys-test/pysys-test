@@ -101,10 +101,10 @@ class BaseResultsWriter(object):
 		If set to False then after construction none of the other methods 
 		(including L{setup})) will be called. 
 		
-		@param record: True if the user ran PySys with the `--record` flag, 
+		:param record: True if the user ran PySys with the `--record` flag, 
 			indicating that test results should be recorded. 
 		 
-		@returns: For record writers, the default to enable only if record==True, 
+		:return: For record writers, the default to enable only if record==True, 
 			but individual writers can use different criteria if desired, e.g. 
 			writers for logging output to a CI system may enable themselves 
 			based on environment variables indicating that system is present, 
@@ -120,20 +120,20 @@ class BaseResultsWriter(object):
 		writer in the project configuration file, the configured value will be 
 		assigned to `self.PROP`. 
 
-		@param numTests: The total number of tests (cycles*testids) to be executed
-		@param cycles: The number of cycles. 
-		@param xargs: The runner's xargs
-		@param threads: The number of threads used for running tests. 
+		:param numTests: The total number of tests (cycles*testids) to be executed
+		:param cycles: The number of cycles. 
+		:param xargs: The runner's xargs
+		:param threads: The number of threads used for running tests. 
 		
-		@param testoutdir: The output directory used for this test run 
+		:param testoutdir: The output directory used for this test run 
 			(equal to `runner.outsubdir`), an identifying string which often contains 
 			the platform, or when there are multiple test runs on the same machine 
 			may be used to distinguish between them. This is usually a relative path 
 			but may be an absolute path. 
 		
-		@param runner: The runner instance that owns this writer. 
+		:param runner: The runner instance that owns this writer. 
 		
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+		:param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
 		pass
@@ -143,7 +143,7 @@ class BaseResultsWriter(object):
 		
 		This is where file headers can be written, and open handles should be closed. 
 
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+		:param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
 		pass
@@ -154,14 +154,14 @@ class BaseResultsWriter(object):
 		This method is always invoked from the same thread as setup() and cleanup(), even 
 		when multiple tests are running in parallel. 
 
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
 			can extract data from this object but should not store a reference to it. 
 			The testObj.descriptor.id indicates the test that ran. 
-		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
-		@param testTime: Duration of the test in seconds as a floating point number. 
-		@param testStart: The time when the test started. 
-		@param runLogOutput: The logging output written to run.log, as a unicode character string. 
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+		:param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
+		:param testTime: Duration of the test in seconds as a floating point number. 
+		:param testStart: The time when the test started. 
+		:param runLogOutput: The logging output written to run.log, as a unicode character string. 
+		:param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
 		pass
@@ -173,11 +173,11 @@ class BaseResultsWriter(object):
 		worker thread, so any data structures accessed in this method and others on this class must be
 		synchronized if performing non-atomic operations.
 		
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
 			can extract data from this object but should not store a reference to it. The testObj.descriptor.id
 			indicates the test that ran.
-		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+		:param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
+		:param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
 		pass
@@ -226,7 +226,7 @@ class flushfile():
 	def __init__(self, fp): 
 		"""Create an instance of the class. 
 		
-		@param fp: The file object
+		:param fp: The file object
 		
 		"""
 		self.fp = fp
@@ -234,7 +234,7 @@ class flushfile():
 	def write(self, msg):
 		"""Perform a write to the file object.
 		
-		@param msg: The string message to write. 
+		:param msg: The string message to write. 
 		
 		"""
 		if self.fp is not None:
@@ -277,7 +277,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		Creates the file handle to the logfile and logs initial details of the date, 
 		platform and test host. 
 				
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 		
 		"""		
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
@@ -292,7 +292,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		
 		Flushes and closes the file handle to the logfile.  
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 				
 		"""
 		if self.fp: 
@@ -305,8 +305,8 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		
 		Writes the test id and outcome to the logfile. 
 		
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
-		@param kwargs: Variable argument list
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		:param kwargs: Variable argument list
 		
 		"""
 		if "cycle" in kwargs: 
@@ -329,12 +329,12 @@ def replaceIllegalXMLCharacters(unicodeString, replaceWith=u'?'):
 	
 	See https://bugs.python.org/issue5166
 	
-	@param unicodeString: a unicode character string (not a byte string). 
+	:param unicodeString: a unicode character string (not a byte string). 
 		Since most XML documents are encoded in utf-8, typical usage would be to 
 		decode the UTF-8 bytes into characters before calling this function and then 
 		re-encode as UTF-8 again afterwards.
 	
-	@param replaceWith: the unicode character string to replace each illegal character with. 
+	:param replaceWith: the unicode character string to replace each illegal character with. 
 	"""
 	return re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]', replaceWith, unicodeString)
 
@@ -366,7 +366,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 
 		Creates the DOM for the test output summary and writes to logfile. 
 						
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 		
 		"""
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
@@ -436,7 +436,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		
 		Updates the test run status in the DOM, and re-writes to logfile.
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 				
 		"""
 		if self.fp: 
@@ -450,8 +450,8 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		
 		Adds the results node to the DOM and re-writes to logfile.
 		
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
-		@param kwargs: Variable argument list
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		:param kwargs: Variable argument list
 		
 		"""	
 		if "cycle" in kwargs: 
@@ -533,7 +533,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 		Creates the output directory for the writing of the test summary files.  
 						
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 		
 		"""
 		self.outputDir = os.path.join(kwargs['runner'].project.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
@@ -544,7 +544,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def cleanup(self, **kwargs):
 		"""Implementation of the cleanup method. 
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 				
 		"""
 		pass
@@ -554,8 +554,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		
 		Creates a test summary file in the Apache Ant JUnit XML format. 
 		
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
-		@param kwargs: Variable argument list
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		:param kwargs: Variable argument list
 		
 		"""	
 		if "cycle" in kwargs: 
@@ -665,7 +665,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		Creates the file handle to the logfile and logs initial details of the date,
 		platform and test host.
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 
 		"""
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
@@ -678,7 +678,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 		Flushes and closes the file handle to the logfile.
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 
 		"""
 		if self.fp:
@@ -691,8 +691,8 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 		Writes the test id and outcome to the logfile.
 
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
-		@param kwargs: Variable argument list
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		:param kwargs: Variable argument list
 
 		"""
 		testStart = kwargs["testStart"] if "testStart" in kwargs else time.time()

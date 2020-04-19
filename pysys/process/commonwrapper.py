@@ -141,12 +141,12 @@ class CommonProcessWrapper(object):
 		require to add data without the method appending a new line charater set 
 		addNewLine to false.
 		
-		@param data: The data to write to the process stdin. 
+		:param data: The data to write to the process stdin. 
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
 			given by ``locale.getpreferredencoding()``. 
-		@param addNewLine: True if a new line character is to be added to the end of 
+		:param addNewLine: True if a new line character is to be added to the end of 
 			the data string
 		
 		"""
@@ -168,7 +168,7 @@ class CommonProcessWrapper(object):
 	def running(self):
 		"""Check to see if a process is running.
 		
-		@return: True if the process is currently running, False if not. 
+		:return: True if the process is currently running, False if not. 
 		
 		"""
 		return self.setExitStatus() is None
@@ -181,7 +181,7 @@ class CommonProcessWrapper(object):
 		is exceeded. Note that the method will not terminate the process if the timeout is 
 		exceeded. 
 		
-		@param timeout: The timeout to wait in seconds. Always provide a 
+		:param timeout: The timeout to wait in seconds. Always provide a 
 			timeout, otherwise your test may block indefinitely!
 		@raise pysys.exceptions.ProcessTimeout: Raised if the timeout is exceeded.
 		

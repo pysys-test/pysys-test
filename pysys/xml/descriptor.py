@@ -266,8 +266,8 @@ class TestDescriptor(object):
 	def __str__(self):
 		"""Return an informal string representation of the xml descriptor container object
 		
-		@return: The string represention
-		@rtype: string
+		:return: The string represention
+		:rtype: string
 		"""
 		
 		str=    "Test id:           %s\n" % self.id
@@ -374,9 +374,9 @@ class XMLDescriptorParser(object):
 		Parses the test/dir descriptor in the specified path and returns the 
 		TestDescriptor object. 
 		
-		@param istest: True if this is a pysystest.xml file, false if it is 
+		:param istest: True if this is a pysystest.xml file, false if it is 
 			a descritor giving defaults for a directory of testcases.  
-			@param parentDirDefaults: Optional TestDescriptor instance 
+			:param parentDirDefaults: Optional TestDescriptor instance 
 			specifying default values to be filtered in from the parent 
 			directory.
 		"""
@@ -659,9 +659,9 @@ class DescriptorLoader(object):
 		  ...
 		  return descriptors
 		
-		@param dir: The parent directory to search for runnable tests. 
+		:param dir: The parent directory to search for runnable tests. 
 		
-		@return: List of L{pysys.xml.descriptor.TestDescriptor} objects 
+		:return: List of L{pysys.xml.descriptor.TestDescriptor} objects 
 			which could be selected for execution. 
 			
 			If a test can be run in multiple modes there must be a single descriptor 
@@ -675,8 +675,8 @@ class DescriptorLoader(object):
 			The order of the returned list is random, so the caller is responsible 
 			for sorting this list to ensure deterministic behaviour. 
 		
-		@rtype: list
-		@raises UserError: Raised if no testcases can be found.
+		:rtype: list
+		:raises UserError: Raised if no testcases can be found.
 		
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
@@ -797,21 +797,21 @@ class DescriptorLoader(object):
 		This method is called before directories containing pysysignore 
 		files are stripped out. 
 		
-		@param dir: The full path of the directory to be processed.
+		:param dir: The full path of the directory to be processed.
 			On Windows, this will be a long-path safe unicode string. 
-		@param subdirs: a list of the subdirectories under dir, which 
+		:param subdirs: a list of the subdirectories under dir, which 
 			can be used to detect what kind of directory this is. 
-		@param files: a list of the files under dir, which 
+		:param files: a list of the files under dir, which 
 			can be used to detect what kind of directory this is. 
-		@param descriptors: A list of L{TestDescriptor} items which this method 
+		:param descriptors: A list of L{TestDescriptor} items which this method 
 			can add to if desired. 
-		@param parentDirDefaults: A L{TestDescriptor} containing defaults 
+		:param parentDirDefaults: A L{TestDescriptor} containing defaults 
 			from the parent directory, or None if there are none. Test loaders may 
 			optionally merge some of this information with test-specific 
 			information when creating test descriptors. 
-		@param kwargs: Reserved for future use. Pass this to the base class 
+		:param kwargs: Reserved for future use. Pass this to the base class 
 			implementation when calling it. 
-		@return: If True, this part of the directory tree has been fully 
+		:return: If True, this part of the directory tree has been fully 
 			handled and PySys will not search under it any more. False to allow 
 			normal PySys handling of the directory to proceed. 
 		"""
@@ -822,14 +822,14 @@ class DescriptorLoader(object):
 		""" Parses a single descriptor file (typically an XML file) for a testcase or directory configuration 
 		and returns the resulting descriptor. 
 		
-		@param descriptorfile: The absolute path of the descriptor file. 
-		@param parentDirDefaults: A L{TestDescriptor} instance containing 
+		:param descriptorfile: The absolute path of the descriptor file. 
+		:param parentDirDefaults: A L{TestDescriptor} instance containing 
 			defaults to inherit from the parent directory, or None if none was found. 
-		@param isDirConfig: False for normal test descriptors, True for a directory configuration. 
-		@return: The L{TestDescriptor} instance, or None if none should be 
+		:param isDirConfig: False for normal test descriptors, True for a directory configuration. 
+		:return: The L{TestDescriptor} instance, or None if none should be 
 			added for this descriptor file. Note that subclasses may modify the 
 			contents of the returned instance. 
-		@raises UserError: If the descriptor is invalid and an error should be 
+		:raises UserError: If the descriptor is invalid and an error should be 
 			displayed to the user without any Python stacktrace. 
 			The exception message must contain the path of the descriptorfile.
 		"""

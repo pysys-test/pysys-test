@@ -75,8 +75,8 @@ class BackgroundThread(object):
 	
 	def isAlive(self):
 		"""
-		@return: True if this thread is still running. 
-		@rtype: bool
+		:return: True if this thread is still running. 
+		:rtype: bool
 		"""
 		return self.thread.isAlive()
 	
@@ -109,8 +109,8 @@ class BackgroundThread(object):
 		thread to terminate, call L{join} afterwards. Calling this repeatedly 
 		has no effect. 
 		
-		@return: This instance, in case you wish to do fluent method chaining.  
-		@rtype: L{BackgroundThread}
+		:return: This instance, in case you wish to do fluent method chaining.  
+		:rtype: L{BackgroundThread}
 		"""
 		self.log.debug('Stop() requested for background thread %s', self)
 		self.stopping.set()
@@ -132,13 +132,13 @@ class BackgroundThread(object):
 		stop this is logged but does not result in a failure outcome, 
 		since failures during cleanup are usually to be expected. 
 		
-		@param timeout: The time in seconds to wait. Usually this should be 
+		:param timeout: The time in seconds to wait. Usually this should be 
 			left at the default value of None which uses a default timeout 
 			of L{constants.TIMEOUTS}C{['WaitForProcessStop']}. 
 			Note that unlike Python's `Thread.join` method, infinite timeouts 
 			are not supported. 
 		
-		@param abortOnError: Set to True if you wish this method to 
+		:param abortOnError: Set to True if you wish this method to 
 			immediately abort with an exception if the background thread times out 
 			or raises an Exception. The default is False, which adds the failure 
 			outcome but does not raise an exception. 

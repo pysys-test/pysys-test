@@ -38,9 +38,9 @@ class _UnicodeSafeStreamWrapper(object):
 	"""
 	def __init__(self, underlying, writebytes, encoding=None):
 		"""
-		@param underlying: the underlying stream. May optionally have an "encoding" field. 
-		@param writebytes: if True, bytes are written, if False unicode characters are written. 
-		@param encoding: encoding which all written bytes/chars are guaranteed to be present in; 
+		:param underlying: the underlying stream. May optionally have an "encoding" field. 
+		:param writebytes: if True, bytes are written, if False unicode characters are written. 
+		:param encoding: encoding which all written bytes/chars are guaranteed to be present in; 
 		if None, will be taken from underlying encoding or getpreferredencoding(). 
 		"""
 		self.__writebytes = writebytes
@@ -107,7 +107,7 @@ class ThreadedStreamHandler(logging.StreamHandler): # pragma: no cover
 	"""
 	def __init__(self, strm):
 		"""Overrides logging.StreamHandler.__init__.
-		@param strm: the stream
+		:param strm: the stream
 		"""
 		self.threadId = threading.current_thread().ident
 		logging.StreamHandler.__init__(self, strm)

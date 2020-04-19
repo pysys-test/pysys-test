@@ -68,25 +68,25 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	character strings only if an encoding was explicitly specified; 
 	otherwise it returns a file stream yielding "str" bytes objects. 
 	
-	@param path: The path to open; must be an absolute path. 
+	:param path: The path to open; must be an absolute path. 
 		Even on Windows this path can be long (e.g. more than the usual 256 
 		character Windows limit). 
 	
-	@param mode: The file mode, e.g. 'r' for reading, 'wb' for binary writing. 
+	:param mode: The file mode, e.g. 'r' for reading, 'wb' for binary writing. 
 	
-	@param encoding: The encoding to use to translate between the bytes of the 
+	:param encoding: The encoding to use to translate between the bytes of the 
 		file and the characters used in the returned stream. If an encoding 
 		is specified then the returned stream is always a unicode character stream. 
 		This must be None if the mode specifies binary. 
 	
-	@param errors: Optional string that specifies how encoding/decoding errors 
+	:param errors: Optional string that specifies how encoding/decoding errors 
 		are handled, such as 'strict', 'ignore', 'replace'; see documentation of 
 		io module for more details. The value of this attribute is ignored 
 		if using the python 2 open() built-in with bytes mode that does not support it. 
 	
-	@param kwargs: Any additional args to be passed to open() or io.open(). 
+	:param kwargs: Any additional args to be passed to open() or io.open(). 
 	
-	@return: A file stream, either using unicode characters or binary bytes. 
+	:return: A file stream, either using unicode characters or binary bytes. 
 		This stream should be closed when no longer required.
 	
 	"""

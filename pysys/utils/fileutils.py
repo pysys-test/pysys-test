@@ -37,17 +37,17 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	letters so they are always upper case regardless of OS version and current 
 	working directory. 
 	
-	@param path: A path. Must not be a relative path. Can be None/empty. Can 
+	:param path: A path. Must not be a relative path. Can be None/empty. Can 
 		contain ".." sequences. If possible, use a unicode character string. 
 		On Python 2, byte strings are permitted and converted using 
 		``locale.getpreferredencoding()``.
 	
-	@param onlyIfNeeded: Set to True to only adds the long path support if this 
+	:param onlyIfNeeded: Set to True to only adds the long path support if this 
 		path exceeds the maximum length on this OS (e.g. 256 chars). You must keep 
 		this at False if you will be adding extra characters on to the end of the 
 		returned string. 
 	
-	@return: The passed-in path, possibly with a ``\\?\`` prefix added, 
+	:return: The passed-in path, possibly with a ``\\?\`` prefix added, 
 		forward slashes converted to backslashes on Windows, and converted to 
 		a unicode string. Trailing slashes may be removed. 
 		Note that the conversion to unicode requires a lot of care on Python 2 
@@ -103,7 +103,7 @@ def pathexists(path):
 	This method is safe to call on paths that may be over the Windows 256 
 	character limit. 
 	
-	@param path: If None or empty, returns True. Only Python 2, can be a 
+	:param path: If None or empty, returns True. Only Python 2, can be a 
 		unicode or byte string. 
 	"""
 	return path and os.path.exists(toLongPathSafe(path))
@@ -114,7 +114,7 @@ def mkdir(path):
 	
 	This function is a no-op (does not throw) if the directory already exists. 
 
-	@return: Returns the path passed in. 
+	:return: Returns the path passed in. 
 	"""
 	origpath = path
 	path = toLongPathSafe(path, onlyIfNeeded=True)
@@ -134,12 +134,12 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 	Does nothing if it does not exist. Raises an exception if the deletion fails (unless ``onerror=`` is specified), 
 	but deletes as many files as possible before doing so. 
 	
-	@param retries: The number of retries to attempt. This can be useful to 
+	:param retries: The number of retries to attempt. This can be useful to 
 		work around temporary failures causes by Windows file locking. 
 	
-	@param ignore_errors: If True, an exception is raised if the path exists but cannot be deleted. 
+	:param ignore_errors: If True, an exception is raised if the path exists but cannot be deleted. 
 	
-	@param onerror: A callable that with arguments (function, path, excinfo), called when an error occurs while 
+	:param onerror: A callable that with arguments (function, path, excinfo), called when an error occurs while 
 		deleting. See the documentation for ``shutil.rmtree`` for more information. 
 	"""
 	if ignore_errors: assert onerror==None, 'cannot set onerror and also ignore_errors'

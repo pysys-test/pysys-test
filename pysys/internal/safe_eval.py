@@ -49,9 +49,9 @@ def safe_eval(expr, extraNamespace={}):
 	If necessary, symbols for additional modules can be imported dynamically using ``import_module``, e.g. 
 	``safe_eval("import_module('difflib').get_close_matches('app', ['apple', 'orange', 'applic']")``.
 	
-	@param expr: The string to be evaluated.
+	:param expr: The string to be evaluated.
 	
-	@param extraNamespace: A dict of string names and Python object values to be included in the globals dict 
+	:param extraNamespace: A dict of string names and Python object values to be included in the globals dict 
 		used to evaluate this string. 
 	"""
 	env = globals()
