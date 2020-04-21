@@ -354,13 +354,14 @@ Improvements to the `pysys.py` command line tool:
 
 - Added automatic conversion of strings specified on the command line with 
   `-Xkey=value` to int, float or bool if there's a static variable of the 
-  same name and one of those types defined on the test class. This makes it 
+  same name and one of those types defined on the test BaseTest class. This makes it 
   easier to write tests that have their parameters overridden from the command 
   line. For example, if a test class has a static variable `iterations=1000` 
   to control how many iterations it performs, it can be run with 
   `pysys run -Xiterations=10` during test development to override the number 
   of iterations to a much lower number without any changes to `run.py`. 
-
+  Note that this doesn't apply to BaseRunner, only BaseTest.
+  
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
   programs. 
@@ -394,6 +395,12 @@ Bug fixes:
 
 - Fixed CSV performance reporter runDetails which was including each item 
   twice. 
+
+- On Windows, paths within the testcase are now normalized so that the drive 
+  letter is always capitalized (e.g. `C:` not `c:`). Previously the 
+  capitalization of the drive letter would vary depending on how exactly PySys 
+  was launched, which could occasionally lead to inconsistent behaviour if 
+  testing an application that relies on the ASCII sort order of paths. 
 
 Upgrade guide and compatibility:
 
@@ -446,12 +453,6 @@ major release it is possible that some users might need to make changes:
   copies the `LD_LIBRARY_PATH` from the parent process only on Unix (where it 
   is necessary to reliably load the required libraries). `getDefaultEnvirons` 
   no longer sets the `PYTHONHOME` environment variable. 
-
-- On Windows, paths within the testcase are now normalized so that the drive 
-  letter is always capitalized (e.g. `C:` not `c:`). Previously the 
-  capitalization of the drive letter would vary depending on how exactly PySys 
-  was launched, which could occasionally lead to inconsistent behaviour if 
-  testing an application that relies on the ASCII sort order of paths. 
 
 - The format of `pysys print` has changed to use a `|` character instead of a 
   colon to separate the test id and titles. This makes it easier to copy and 
