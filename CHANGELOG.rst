@@ -343,6 +343,16 @@ Improvements to the `pysys.py` command line tool:
   
     pysys run --threads auto MyTest_001 -vDEBUG
 
+- Added automatic conversion of strings specified on the command line with 
+  `-Xkey=value` to int, float or bool if there's a static variable of the 
+  same name and one of those types defined on the test BaseTest class. This makes it 
+  easier to write tests that have their parameters overridden from the command 
+  line. For example, if a test class has a static variable `iterations=1000` 
+  to control how many iterations it performs, it can be run with 
+  `pysys run -Xiterations=10` during test development to override the number 
+  of iterations to a much lower number without any changes to `run.py`. 
+  Note that this doesn't apply to BaseRunner, only BaseTest.
+  
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
   programs. 
@@ -434,19 +444,6 @@ major release it is possible that some users might need to make changes:
   copies the `LD_LIBRARY_PATH` from the parent process only on Unix (where it 
   is necessary to reliably load the required libraries). `getDefaultEnvirons` 
   no longer sets the `PYTHONHOME` environment variable. 
-
-- Added automatic conversion of strings specified on the command line with 
-  `-Xkey=value` to int, float or bool if there's a static variable of the 
-  same name and one of those types defined on the test class. This makes it 
-  easier to write tests that have their parameters overridden from the command 
-  line. For example, if a test class has a static variable `iterations=1000` 
-  to control how many iterations it performs, it can be run with 
-  `pysys run -Xiterations=10` during test development to override the number 
-  of iterations to a much lower number without any changes to `run.py`. 
-  If you have code in your test or a custom runner that uses project properties 
-  whose type is int/float/bool you need to change it to expect those types 
-  instead of str. For example change `if self.project.myBool=='true'`` to 
-  `if self.project.myBool``. 
 
 - The format of `pysys print` has changed to use a `|` character instead of a 
   colon to separate the test id and titles. This makes it easier to copy and 
