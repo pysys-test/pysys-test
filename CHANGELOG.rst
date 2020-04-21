@@ -1,10 +1,10 @@
 =========================
-PySys 1.4.1 Release Notes
+PySys 1.5.1 Release Notes
 =========================
 
 PySys can be used with Python 3.7/3.6/3.5. PySys also retains compatibility 
 with Python 2.7 though users are encouraged to move to Python 3 when possible 
-as 2.7 will soon be at the end of it support lifetime. 
+as 2.7 will soon be at the end of its support lifetime. 
 
 See installation notes in README.rst for more details.
 
@@ -12,9 +12,96 @@ See installation notes in README.rst for more details.
 What's new in this release
 --------------------------
 
-<highlights here>
+Miscellaneous new features
+--------------------------
+- `basetest.BaseTest.assertDiff` usability was improved by including the relative path to each file 
+  in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
+  file without losing track of which is which. This also makes it easier to manually diff the output directory against 
+  the ``Reference`` directory using GUI diff tools when debugging test failures. 
 
-New features:
+- `basetest.BaseTest.assertDiff` has a new advanced feature, ``autoUpdateAssertDiffReferences``, to help when you 
+  have a large set of test reference files which need to be updated after a behaviour or output formatting change. 
+  If you run the tests with ``-XautoUpdateAssertDiffReferences`` any diff failures will result in PySys overwriting 
+  the reference file with the contents of the comparison file, providing an easy way to quickly update a large set 
+  of references. Use this feature with caution, since it overwrites reference files with no backup. In 
+  particular, make sure you have committed all reference files to version control before running the command, and 
+  the afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
+  committing. 
+
+- All ``assertXXX`` methods in `basetest.BaseTest` now return a value to indicate the result of the assertion. In most 
+  cases this is a boolean ``True``/``False``, though some methods such as ``assertGrep`` return the matching string 
+  (or ``None``). This creates an opportunity to gather or log additional diagnostic information (e.g. using 
+  `basetest.BaseTest.logFileContents`) after an assertion fails. 
+
+- ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
+  used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
+  for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
+  ``Project Help`` heading is automatically added if no other heading is present, and PySys will intelligently add or 
+  remove indentation from the specified content so that it aligns with the built-in options.
+
+- ``pysysproject.xml`` has a new property "defaultAssertDiffStripWhitespace" which controls whether 
+  `pysys.basetest.BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
+  value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
+  is True. 
+  
+- The `basetest.BaseTest.assertEval` method now allows ``evalstring`` to make use of some additional standard Python 
+  modules such as ``math`` and ``re``. It is also possible to use ``import_module`` to dynamically import additional 
+  modules from within an ``evalstring``. 
+
+
+Improvements to the `pysys.py` command line tool
+------------------------------------------------
+- Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
+  PySys was run from. 
+
+Bug fixes
+---------
+- Handling of errors deleting previous test output has been improved. In 1.5.0, there was a usability regression in 
+  which a test would fail to run if any part of its output directory could not be deleted due 
+  to a shell or tool (e.g. tail) keeping it locked. Now, although error deleting files will still cause the test to 
+  fail (since this has a high chance of affecting correctness), directory deletion errors are logged at WARN in the 
+  test output but do not cause an error. 
+
+- Fixed bug in which ``assertDiff`` was not logging the diff to the console after a failure. 
+
+Upgrade guide and compatibility
+-------------------------------
+- Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to set this to False in 
+  your ``pysysproject.xml`` file, but it is likely some test reference files may need fixing, so the default value is 
+  True which maintains pre-1.5.1 behaviour.
+  
+- The global namespace available for use from `basetest.BaseTest.assertEval` has been cut down to remove some 
+  functions and modules such as ``filegrep`` that are anyone is likely to be using from ``assertEval``. If you find you 
+  need anything that is no longer available, just use ``import_module`` in your eval string to add it, but it is highly 
+  unlikely this will affect anyone. 
+
+---------------
+Release History
+---------------
+
+1.4.0 to 1.5.0
+--------------
+
+PySys 1.5.0 brings some significant new features for large PySys projects 
+including support for running a test in multiple modes, and 
+`pysysdirconfig.xml` files that allow you to specify defaults that apply to 
+all testcases under a particular directory - such as groups, modes, a prefix 
+to add to the start of each test id, and a numeric hint to help define the 
+execution order of your tests. 
+
+There is also new support for collecting files from each test output 
+directory (e.g. code coverage files), new features in the `pysys run` and 
+`pysys print` command lines, and a host of small additions to the API to make 
+test creation easier e.g. `assertEval`, `copy` (with filtering of each copied 
+line) and `write_text` (for easy programmatic creation of files in the output 
+directory). 
+
+This is a major release and therefore there are a few significant changes 
+that could required changes in existing projects; please review the 
+compatibility section of this document and perform an initial test run using 
+the new PySys version to check for issues before switching over. 
+
+Miscellaneous new features:
 
 - Added support for running tests in multiple modes from within a single PySys 
   execution. To make use of this, add the following property to your 
@@ -63,19 +150,63 @@ New features:
   `<collect-test-output>` to gather the coverage files and providing a 
   custom implementation of `BaseRunner.processCoverageData`.  
 
-- Added `ProcessUser.startPython` method has similar options to `startProcess` 
-  and should be used for starting Python. 
+- Added `BaseTest.assertEval` method which supersedes `assertThat` and provides 
+  a convenient way to assert an arbitrary Python expression, with generation of 
+  a clear outcome reason that is easy to understand and debug. 
+
+- Added `ProcessUser.copy` method for copying a binary or text file, with 
+  optional transformation of the contents by a series of mapping functions. 
+  This can be used to extract information of interest from a log file before 
+  diff-ing with a reference copy, for example by stripping out timestamps 
+  and irrelevant information. 
+
+- Added `ProcessUser.write_text` method for writing characters to a text file 
+  in the output directory using a single line of Python. 
+
+- Added `expectedExitStatus` parameter to `ProcessUser.startProcess()` method 
+  which can be used to assert that a command returns a non-zero exit code, 
+  for example `self.startProcess(..., expectedExitStatus='==5')`. 
+  This is simpler and more intuitive than setting `ignoreExitStatus=True` and 
+  then checking the exit status separately. 
+
+- Added `quiet` parameter to `ProcessUser.startProcess()` method 
+  which disable INFO/WARN level logging (unless a failure outcome is appended), 
+  which is useful when calling a process repeatedly to poll for completion of 
+  some operation. 
+
+- Added `ProcessUser.startPython` method with similar options to `startProcess` 
+  that should be used for starting Python processes. Supports functionality 
+  such as Python code coverage. 
+
+- Added `ProcessUser.disableCoverage` attribute which can be used to globally 
+  disable all code coverage (in all languages) for a specific test. For example 
+  if you apply a group called 'performance' to all performance tests, you could 
+  disable coverage for those tests by adding this line to your BaseTest::
+  
+  	 if 'performance' in self.descriptor.groups: self.disableCoverage = True
 
 - Added `hostname`, `startTime` and `startDate` project properties which can be 
   used in any `pysysproject.xml` configuration file. The start time/date 
   gives the UTC time when the test run began, using the yyyy-mm-dd HH.MM.SS 
   format which is suitable for inclusion in file/directory names. 
 
-- Added `ProcessUser.getBool()` helper method which provides a simple way to 
+- Added `ProcessUser.getBoolProperty()` helper method which provides a simple way to 
   get a True/False value indicating whether a setting is enabled, either 
   directly using a `-X prop=value` argument, or with a property set in the 
   `pysysproject.xml` configuration file.
 
+- Added environment variable `PYSYS_PORTS_FILE` which if present will be read 
+  as a UTF-8/ASCII file with one port number on each line, and used to populate 
+  the pool of ports for `getNextAvailableTCPPort()`. This can be used to 
+  avoid port conflicts when invoking PySys from an environment where some ports 
+  are taken up by other processes. 
+
+- Added `TIMEOUTS['WaitForAvailableTCPPort']` which controls how long 
+  `getNextAvailableTCPPort()` will wait before throwing an exception. 
+  Previously `getNextAvailableTCPPort()` would have thrown an exception if 
+  other tests were using up all ports from the available pool; the new 
+  behaviour is to block and retry until this timeout is reached.
+  
 Improvements to the XML descriptors that provide information about tests:
 
 - Added support for disabling search for testcases in part of a directory tree 
@@ -188,28 +319,54 @@ Improvements to the `pysys.py` command line tool:
   case insensitively) in their `id` or `title`. This can be a convenient way 
   to quickly run a set of tests related to a particular feature area.  
 
+- Added a concise summary of the test ids for any non-passes in a format that's 
+  easy to copy and paste into a new command, such as for re-running the failed 
+  tests. This can be disabled using the `ConsoleSummaryResultsWriter` property 
+  `showTestIdList` if desired. 
+
+- Added an environment variable PYSYS_DEFAULT_THREADS which can be used to set 
+  the number of threads to use with `--threads auto` is specified on a 
+  per-machine or per-user basis. 
+
+- Added the ability to set logging verbosity for specific `pysys.*` categories 
+  individually using `-vCAT=LEVEL`. For example to enable just DEBUG logging 
+  related to process starting, use `-vprocess=DEBUG`. Detailed DEBUG logging 
+  related to assertions including the processed version of the input files uses 
+  the category "assertions" and is no longer included by default when the 
+  root log level is specified using `-vDEBUG` since it tends to be excessively 
+  verbose and slow to generate; if required, it can be enabled using 
+  `-vassertions=DEBUG`.
+
+- Argument parsing now permits mixing of `-OPTION` and non-option (e.g. test 
+  id) arguments, rather than requiring that the test ids be specified 
+  only at the end of the command line. For example::
+  
+    pysys run --threads auto MyTest_001 -vDEBUG
+
+- Added automatic conversion of strings specified on the command line with 
+  `-Xkey=value` to int, float or bool if there's a static variable of the 
+  same name and one of those types defined on the test class. This makes it 
+  easier to write tests that have their parameters overridden from the command 
+  line. For example, if a test class has a static variable `iterations=1000` 
+  to control how many iterations it performs, it can be run with 
+  `pysys run -Xiterations=10` during test development to override the number 
+  of iterations to a much lower number without any changes to `run.py`. 
+
 - Added `--json` output mode to `pysys.py print` which dumps full information 
   about the available tests in JSON format suitable for reading in from other 
   programs. 
-  
 
-Upgrade guide and compatibility:
-
-- Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 
-  from running, whereas previously they would just be logged. Since an invalid 
-  descriptor prevents the associated testcase from reporting a result, the 
-  new behaviour ensures such mistakes will be spotted and fixed promptly. 
-  If you have any non-PySys files under your PySys project root directory 
-  with names such as `descriptor.xml` which PySys would normally recognise 
-  as testcases, you can avoid errors by adding a `.pysysignore` file to prevent 
-  PySys looking in that part of the directory tree. 
+- Changed `makeproject` so that when a template is to be specified, it is now 
+  necessary to use an explicit `--template` argument, e.g `--template=NAME`. 
 
 Bug fixes:
 
+- PySys now uses `Test outcome reason:` rather than `Test failure reason:` 
+  to display the outcome, since there is sometimes a reason for non-failure 
+  outcomes such as SKIPPED. 
+
 - Fixed `--purge` to delete files in nested subdirectories of the output 
-  directory not just direct children of the output directory. Also, non-empty 
-  directories are now deleted after test execution (regardless of whether 
-  `--purge` is set or not), just as zero-byte files are.  
+  directory not just direct children of the output directory. 
 
 - Previous versions of PySys did not complain if you created multiple tests 
   with the same id (in different parent directories under the same project). 
@@ -220,9 +377,88 @@ Bug fixes:
   `pysystest.xml` or (better) to a `pysysdirconfig.xml` file to provide 
   separate namespaces for the tests in each directory and avoid colliding ids. 
 
----------------
-Release History
----------------
+- The Ant JUnit writer now includes the test duration. 
+
+- Improved `assertGrep` outcome reason to include the entire matching string 
+  when a `contains=False` test fails since `ERROR - The bad thing happened` is 
+  a much more useful outcome reason than just `ERROR`. 
+
+- Fixed CSV performance reporter runDetails which was including each item 
+  twice. 
+
+Upgrade guide and compatibility:
+
+Occasionally it is necessary for a new PySys release to include changes that 
+might change or break the behaviour of existing test suites. As 1.5.0 is a 
+major release it is possible that some users might need to make changes:
+
+- Errors and typos in `pysystest.xml` XML descriptors will now prevent any tests 
+  from running, whereas previously they would just be logged. Since an invalid 
+  descriptor prevents the associated testcase from reporting a result, the 
+  new behaviour ensures such mistakes will be spotted and fixed promptly. 
+  If you have any non-PySys files under your PySys project root directory 
+  with names such as `descriptor.xml` which PySys would normally recognise 
+  as testcases, you can avoid errors by adding a `.pysysignore` file to prevent 
+  PySys looking in that part of the directory tree. 
+  
+- `ProcessUser.mkdir` now returns the absolute path (including the output 
+  directory) instead of just the relative path passed in. This make it easier 
+  to use in-line while performing operations such as creating a file in the 
+  new directory. Code that relied on the old behaviour of returning the 
+  path passed in may need to be updated to avoid having the output directory 
+  specified twice. If you're using `os.path.join` then no change will be 
+  required. 
+
+- The `self.output` variable in `BaseRunner` is no longer set to the current 
+  directory, but instead to a `pysys-runner-OUTDIR` subdirectory of the 
+  test root (or to `OUTDIR/pysys-runner` if `OUTDIR` is an absolute path). 
+  This ensures that any files created by the runner go into a known location 
+  that is isolated from other runs using a different `OUTDIR`. The runner's 
+  `self.output` directory is often not actually used for anything since 
+  most logic that writes output files lives in `BaseTest` subclasses, so 
+  most users won't be affected. For the same reason, the runner output 
+  directory is not created (or cleaned) automatically. 
+  If you have a custom `BaseRunner` that writes files to its output directory 
+  then you should add a call to `self.deleteDir` and then `self.mkdir` to 
+  clean previous output and then create the new output directory.
+
+- The behaviour of `ProcessUser.getDefaultEnvirons` has changed compared to 
+  PySys 1.4.0, but only when the command being launched is `sys.executable`, 
+  i.e. another instance of the current Python process (`getDefaultEnvirons` is 
+  used by `startProcess` when `environs=` is not explicitly provided). 
+  
+  In 1.4.0 the returned environment always set the `PYTHONHOME` environment 
+  variable, and on Windows would add a copy of the `PATH` environment from the 
+  parent process. In PySys 1.5.0 this is no longer the case, as the 1.4.0 
+  behaviour was found to cause subtle problems when running from a virtualenv 
+  installation or when the child Python itself launches another Python process 
+  of a different version. The new behaviour is that `getDefaultEnvirons` adds 
+  the directory containing the Python executable to `PATH` (on all OSes), and 
+  copies the `LD_LIBRARY_PATH` from the parent process only on Unix (where it 
+  is necessary to reliably load the required libraries). `getDefaultEnvirons` 
+  no longer sets the `PYTHONHOME` environment variable. 
+
+- On Windows, paths within the testcase are now normalized so that the drive 
+  letter is always capitalized (e.g. `C:` not `c:`). Previously the 
+  capitalization of the drive letter would vary depending on how exactly PySys 
+  was launched, which could occasionally lead to inconsistent behaviour if 
+  testing an application that relies on the ASCII sort order of paths. 
+
+- The format of `pysys print` has changed to use a `|` character instead of a 
+  colon to separate the test id and titles. This makes it easier to copy and 
+  paste test ids from `pysys print` into the command line. 
+
+- Several fields in the `TestDescriptor` (aka `XMLDescriptorContainer`) class 
+  that used to contain absolute paths now contain paths relative to 
+  the newly introduced `testDir` member. These are: `module`, `output`, 
+  `input`, `reference`. The values of `BaseTest.output/input/reference` 
+  have not changed (these are still absolute paths), so this change is unlikely 
+  to affect many users. 
+
+- The `PROJECT` variable in the `constants` module is deprecated. Use 
+  `self.project` instead (which is defined on classes such as `BaseTest`, 
+  `BaseRunner` etc). 
+
 
 1.3.0 to 1.4.0
 --------------

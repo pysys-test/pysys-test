@@ -33,6 +33,8 @@
 		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
 			<property name="showOutcomeReason" value="true"/>
 			<property name="showOutputDir" value="true"/>
+			<property name="showTestIdList" value="false"/>
+			
 		</writer>
 		
 	</writers>		

@@ -18,10 +18,11 @@
 """
 Contains the L{CommonProcessWrapper} class that represents a running process. 
 
-@undocumented: _stringToUnicode
+@undocumented: _stringToUnicode, log
 """
 
 import os.path, time, threading, sys, locale
+import logging
 if sys.version_info[0] == 2:
 	import Queue
 else:
@@ -41,6 +42,8 @@ def _stringToUnicode(s):
 		return s
 	else:
 		return unicode(s, "utf8")
+
+log = logging.getLogger('pysys.process')
 
 class CommonProcessWrapper(object):
 	"""Abstract base process wrapper class for process execution and management.

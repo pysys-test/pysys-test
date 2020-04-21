@@ -27,6 +27,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
+from pysys.xml.project import Project
 
 class ConsolePrintHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -94,7 +95,7 @@ class ConsolePrintHelper(object):
 
 	def parseArgs(self, args):
 		try:
-			optlist, self.arguments = getopt.getopt(args, self.optionString, self.optionList)
+			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
@@ -211,13 +212,13 @@ class ConsolePrintHelper(object):
 				if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
 			maxsize = maxsize + 2
 			
-			supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
+			supportMultipleModesPerRun = getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true'
 
 			for descriptor in descriptors:
 				if self.modefilter and self.modefilter not in descriptor.modes: continue
 				padding = " " * (maxsize - len(descriptor.id))
 				if not self.full:
-					print("%s:%s%s" % (descriptor.id, padding, descriptor.title))
+					print("%s%s| %s" % (descriptor.id, padding, descriptor.title))
 				else:
 					print("==========================================")
 					print("		" + descriptor.id)

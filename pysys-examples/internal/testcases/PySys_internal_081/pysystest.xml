@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Port allocation - check bind on returned available ports</title>    
+    <title>Port allocation - with waitForSocket</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>

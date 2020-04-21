@@ -27,6 +27,8 @@ from pysys.utils.filediff import trimContents
 from pysys.utils.pycompat import openfile
 from pysys.utils.fileutils import pathexists
 
+log = logging.getLogger('pysys.assertions')
+
 def getmatches(file, regexpr, ignores=None, encoding=None):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches.
 	
@@ -72,7 +74,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None):
 	@param ignores: Optional list of regular expression strings to ignore when searching file. 
 	@param returnMatch: return the regex match object instead of a simple boolean
 	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
-	
+
 	@returns: success (True / False), unless returnMatch=True in which case it returns the regex match 
 		object (or None if not matched)
 	@rtype: integer
@@ -186,6 +188,7 @@ def logContents(message, list):
 	
 	@param list: The list of strings to log
 	"""
+	if not log.isEnabledFor(logging.DEBUG): return
 	count = 0
 	log.debug(message)
 	for line in list:

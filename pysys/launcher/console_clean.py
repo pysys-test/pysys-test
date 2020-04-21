@@ -26,6 +26,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import deletedir
+from pysys.xml.project import Project
 
 class ConsoleCleanTestHelper(object):
 	def __init__(self, workingDir, name=""):
@@ -52,7 +53,7 @@ class ConsoleCleanTestHelper(object):
 
 	def parseArgs(self, args, printXOptions=None):
 		try:
-			optlist, self.arguments = getopt.getopt(args, self.optionString, self.optionList)
+			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
@@ -67,16 +68,20 @@ class ConsoleCleanTestHelper(object):
 
 			elif option in ("-v", "--verbosity"):
 				if value.upper() == "DEBUG":
-					stdoutHandler.setLevel(logging.DEBUG)
+					verbosity = logging.DEBUG
 				elif value.upper() == "INFO":
-					stdoutHandler.setLevel(logging.INFO)
+					verbosity = logging.INFO
 				elif value.upper() == "WARN":
-					stdoutHandler.setLevel(logging.WARN)	
-				elif value.upper() == "CRIT":
-					stdoutHandler.setLevel(logging.CRITICAL)
+					verbosity = logging.WARN
+				elif value.upper() == "CRIT":					
+					verbosity = logging.CRITICAL
 				else:
 					log.warn('Invalid log level "%s"'%value)
 					sys.exit(1)
+
+				log.setLevel(verbosity)
+				if verbosity == logging.DEBUG: stdoutHandler.setLevel(verbosity)
+
 				# refresh handler levels
 				pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
 				
@@ -90,18 +95,18 @@ class ConsoleCleanTestHelper(object):
 
 	def clean(self):
 			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir, expandmodes=False)
-			from pysys.constants import PROJECT
-			supportMultipleModesPerRun = getattr(PROJECT, 'supportMultipleModesPerRun', '').lower()=='true'
+			supportMultipleModesPerRun = getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true'
 
 			for descriptor in descriptors:
 				if self.all:
-					cache=os.path.join(os.path.dirname(descriptor.module),"__pycache__")
+					modulepath = os.path.join(descriptor.testDir, descriptor.module)
+					cache=os.path.join(os.path.dirname(modulepath),"__pycache__")
 					if os.path.isdir(cache):
 						log.info("Deleting pycache: " + cache)
 						deletedir(cache)
 					else:
 						log.debug('__pycache__ does not exist: %s', cache)
-					path = descriptor.module + ".pyc"
+					path = modulepath + ".pyc"
 					if os.path.exists(path):
 						log.info("Deleting compiled Python module: " + path)
 						os.remove(path)
@@ -109,7 +114,7 @@ class ConsoleCleanTestHelper(object):
 						log.debug('.pyc does not exist: %s', path)
 
 				for mode in (descriptor.modes or [None]):
-					pathToDelete = os.path.join(descriptor.output, self.outsubdir)
+					pathToDelete = os.path.join(descriptor.testDir, descriptor.output, self.outsubdir)
 
 					if os.path.isabs(self.outsubdir): # must delete only the selected testcase
 						pathToDelete += "/"+descriptor.id
@@ -124,7 +129,13 @@ class ConsoleCleanTestHelper(object):
 						log.debug("Output directory does not exist: " + pathToDelete)
 
 def cleanTest(args):
-	cleaner = ConsoleCleanTestHelper(os.getcwd(), "clean")
-	cleaner.parseArgs(args)
-	cleaner.clean()
-
+	try:
+		cleaner = ConsoleCleanTestHelper(os.getcwd(), "clean")
+		cleaner.parseArgs(args)
+		cleaner.clean()
+	except Exception as e:
+		sys.stderr.write('\nERROR: %s\n' % e)
+		if not isinstance(e, UserError): traceback.print_exc()
+		sys.exit(10)
+		
+		

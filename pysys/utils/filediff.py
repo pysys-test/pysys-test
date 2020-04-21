@@ -19,12 +19,14 @@
 
 from __future__ import print_function
 import os.path, copy, difflib
+import logging
 
-from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.pycompat import openfile
 from pysys.utils.fileutils import pathexists
+
+log = logging.getLogger('pysys.assertions')
 
 def trimContents(contents, expressions, exclude=True):
 	"""Reduce a list of strings based by including/excluding lines which match any of a set of regular expressions, returning the processed list.
@@ -86,6 +88,7 @@ def logContents(message, list):
 	
 	@param list: The list of strings to log
 	"""
+	if not log.isEnabledFor(logging.DEBUG): return
 	count = 0
 	log.debug(message)
 	for line in list:
@@ -94,7 +97,7 @@ def logContents(message, list):
 
 
 
-def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None, encoding=None):
+def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None, encoding=None, stripWhitespace=True):
 	"""Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.
 	
 	The method reads in the files and loads the contents of each as a list of strings. The two files are 
@@ -111,6 +114,9 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 	@param ignore: A list of regular expressions which remove entries in the input file contents before making the comparison
 	@param sort: Boolean to sort the input file contents before making the comparison
 	@param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison
+	@param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
+		which means indentation differences and whether the file ends with a blank line do not affect the outcome. 
+		If False, only newline characters are stripped. 
 	@param include: A list of regular expressions used to select lines from the input file contents to use in the comparison 
 	@param unifiedDiffOutput: If specified, indicates the full path of a file to which unified diff output will be written, 
 		if the diff fails. 
@@ -125,14 +131,13 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 		if not pathexists(file):
 			raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
-		list1 = []
-		list2 = []
+		stripchars = None if stripWhitespace else '\r\n' # None means all whitespace
 
 		with openfile(file1, 'r', encoding=encoding) as f:
-			for i in f: list1.append(i.strip())
+			list1 = [i.strip(stripchars) for i in f]
 
 		with openfile(file2, 'r', encoding=encoding) as f:
-			for i in f: list2.append(i.strip())
+			list2 = [i.strip(stripchars) for i in f]
 		
 		list1 = trimContents(list1, ignore, exclude=True)
 		list2 = trimContents(list2, ignore, exclude=True)
@@ -157,10 +162,21 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 			for i in list1: l1.append("%s\n"%i)
 			for i in list2: l2.append("%s\n"%i)
 
+			file1display = file1
+			file2display = file2
+			try:
+				commonprefix = os.path.commonprefix([file1display, file2display])
+			except ValueError: pass
+			else:
+				if commonprefix:
+					# heuristic to give a longer prefix than just basename (to distinguish reference+output files with same basename)
+					file1display = file1display[len(commonprefix):]
+					file2display = file2display[len(commonprefix):]
+
 			# nb: have to switch 1 and 2 around to get the right diff for a typical output,ref file pair
 			diff = ''.join(difflib.unified_diff(l2, l1, 
-				fromfile='%s (%d lines)'%(os.path.basename(file2), len(l2)),
-				tofile='%s (%d lines)'%(os.path.basename(file1), len(l1)),
+				fromfile='%s (%d lines)'%(file2display, len(l2)),
+				tofile='%s (%d lines)'%(file1display, len(l1)),
 				))
 			if unifiedDiffOutput:
 				with openfile(unifiedDiffOutput, 'w', encoding=encoding) as f:

@@ -18,7 +18,7 @@
 """ Contains the L{Project} class which holds configuration for the entire 
 test project. 
 
-@undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE
+@undocumented: DTD, log, PROPERTY_EXPAND_ENV, PROPERTY_EXPAND, PROPERTY_FILE, XMLProjectParser
 """
 
 __all__ = ['Project']
@@ -37,7 +37,7 @@ log = logging.getLogger('pysys.xml.project')
 
 DTD='''
 <!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?), collect-test-output* >
+<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?), collect-test-output*, project-help >
 <!ELEMENT property (#PCDATA)>
 <!ELEMENT path (#PCDATA)>
 <!ELEMENT requires-python (#PCDATA)>
@@ -48,6 +48,7 @@ DTD='''
 <!ELEMENT default-file-encodings (default-file-encoding+) >
 <!ELEMENT formatters (formatter+) >
 <!ELEMENT formatter (property*) >
+<!ELEMENT project-help (#PCDATA)>
 <!ELEMENT writers (writer+) >
 <!ELEMENT writer (property*) >
 <!ATTLIST property root CDATA #IMPLIED>
@@ -251,6 +252,14 @@ class XMLProjectParser(object):
 		if optionsDict: raise Exception('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
 		
 		return cls, summaryfile
+
+	def getProjectHelp(self):
+		help = ''
+		for e in self.root.getElementsByTagName('project-help'):
+			for n in e.childNodes:
+				if (n.nodeType in {e.TEXT_NODE,e.CDATA_SECTION_NODE}) and n.data:
+					help += n.data
+		return help
 
 	def getDescriptorLoaderClass(self):
 		nodeList = self.root.getElementsByTagName('descriptor-loader')
@@ -478,6 +487,8 @@ class Project(object):
 	
 	"""
 	
+	__INSTANCE = None
+		
 	def __init__(self, root, projectFile):
 		self.root = root
 		self.startTimestamp = time.time()
@@ -487,6 +498,7 @@ class Project(object):
 		self.perfReporterConfig = None
 		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
 		self.collectTestOutput = []
+		self.projectHelp = None
 
 		stdoutformatter, runlogformatter = None, None
 
@@ -536,6 +548,8 @@ class Project(object):
 				
 				self.collectTestOutput = parser.getCollectTestOutputDetails()
 				
+				self.projectHelp = parser.getProjectHelp()
+				
 				# set the data attributes
 				parser.unlink()
 
@@ -544,6 +558,21 @@ class Project(object):
 		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
 
+	@staticmethod
+	def getInstance():
+		"""
+		Provides access to the singleton instance of Project.
+		
+		Raises an exception if the project has not yet been loaded.  
+		
+		Use `self.project` to get access to the project instance where possible, 
+		for example from a `BaseTest` or `BaseRunner` class. This attribute is for 
+		use in internal classes that do not have a `self.project`.
+		"""
+		if Project.__INSTANCE: return Project.__INSTANCE
+		if 'doctest' in sys.argv[0]: return None # special-case for doctesting
+		raise Exception('Cannot call Project.getInstance() as the project has not been loaded yet')
+	
 	@staticmethod
 	def findAndLoadProject(startdir):
 		"""Find and load a project file, starting from the specified directory. 
@@ -596,9 +625,10 @@ class Project(object):
 					sys.exit(1)
 
 		try:
-			PROJECT = Project(search, projectFile)
-			stdoutHandler.setFormatter(PROJECT.formatters.stdout)
-			return PROJECT
+			project = Project(search, projectFile)
+			stdoutHandler.setFormatter(project.formatters.stdout)
+			Project.__INSTANCE = project # set singleton
+			return project
 		except Exception as e:
 			sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
 			traceback.print_exc()

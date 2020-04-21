@@ -13,6 +13,7 @@
 	<property name="defaultAbortOnError" value="true"/>	
 	<property name="defaultIgnoreExitStatus" value="false"/>
 	<property name="defaultEnvironsTempDir" value="self.output"/>
+	<property name="defaultAssertDiffStripWhitespace" value="False"/>
 	<property name="redirectPrintToLogger" value="false"/>
 	<property name="supportMultipleModesPerRun" value="true"/>
 
@@ -53,4 +54,6 @@
 			name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 	</formatters>
 	
+	<project-help>
+	</project-help>
 </pysysproject>

@@ -1,0 +1,4 @@
+expected success: PASSED / Assertion len({myString}) == {expectedLength} passed with: expectedLength=7, myString='a "\n\\ b', somethingrandom=True
+expected failure: FAILED / Assertion len({myString}) == {expectedLength} failed with: expectedLength=1000, myString='a "\n\\ b'
+expected failure: BLOCKED / Failed to evaluate "invalid SYNTAX 123:" due to SyntaxError - invalid syntax (<string>, line 1)
+expected success: PASSED / Assertion len({myPath}) > 4 passed with: myPath='<outputdir>/foo'

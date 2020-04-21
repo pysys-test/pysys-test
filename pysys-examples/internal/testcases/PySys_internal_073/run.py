@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		# use root pysys project so we can check all our own tests print ok
 		# it's safe to use project root because we are not enabling record mode
-		testsdir = os.path.normpath(PROJECT.testRootDir)
+		testsdir = os.path.normpath(self.project.testRootDir)
 		
 		assert testsdir.endswith('pysys-examples'), testsdir
 		self.log.info('printing tests from: %s', testsdir)
@@ -33,8 +33,10 @@ class PySysTest(BaseTest):
 		for t in ['basic', 'thistest', 'full', 'groups', 'modes']:
 			self.assertGrep(t+'.err', expr='.*', contains=False) # no errors
 
-		self.assertGrep('basic.out', expr='Fibonacci_test_001 *: *[^ ]+')
+		self.assertGrep('basic.out', expr='Fibonacci_test_001 *[|] *[^ ]+')
 		self.assertGrep('full.out', expr='Test id *: *Fibonacci_test_001') # just pick one example
+		self.assertGrep('full.out', expr=r'Test directory *: *fibonacci[/\\]testcases[/\\]Fibonacci_test_001')
+		
 		self.assertGrep('modes.out', expr='FibonacciMode1') # just pick one example
 		self.assertLineCount('thistest.out', expr='.', condition='==1')
 		

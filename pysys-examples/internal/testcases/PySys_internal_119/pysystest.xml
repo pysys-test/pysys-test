@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="auto">
+  
+  <description> 
+    <title>Test Loading - Windows drive letter capitalization</title>    
+    <purpose><![CDATA[
+Windows has a weird habit of picking a random capitalization for its drive letters, 
+which can sometimes have an impact on test behaviour (e.g. by changing the ASCII sort 
+order of a set of paths). This test checks we normalize so that regardless of the 
+current working directory drive letters always start with an uppercase letter. 
+]]>
+    </purpose>
+  </description>
+  
+  <classification>
+    <groups inherit="true">
+      <group></group>
+    </groups>
+    <modes inherit="true">
+    </modes>
+  </classification>
+
+  <!-- <skipped reason=""/> -->
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

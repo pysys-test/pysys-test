@@ -54,56 +54,56 @@ class PySysTest(BaseTest):
 			return r
 		
 		if self.supportsAsciiLANG:
-			runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=1')
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=utf8,color=true,threads=1'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'true', # this affects the stdout stream
 					'PYTHONIOENCODING':'utf-8', # sets stdout encoding
 					}, LANG='ascii')))
-			runid=self.mkdir('default=ascii,stdout=utf8,color=true,threads=2')
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=utf8,color=true,threads=2'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'true', # this affects the stdout stream
 					'PYTHONIOENCODING':'utf-8', # sets stdout encoding
 					}, LANG='ascii')))
-			runid=self.mkdir('default=ascii,stdout=ascii,color=false,threads=1')
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=ascii,color=false,threads=1'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'false', # this affects the stdout stream
 					'PYTHONIOENCODING':'ascii', # sets stdout encoding
 					}, LANG='ascii')))
-			runid=self.mkdir('default=ascii,stdout=none,color=true,threads=1') # also progress, why not!
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=none,color=true,threads=1')) # also progress, why not!
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '--progress'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'true', # this affects the stdout stream
 					'PYTHONIOENCODING':None if PY2 else 'ascii', # sets stdout encoding
 					}, LANG='ascii')))
-			runid=self.mkdir('default=ascii,stdout=none,color=false,threads=2')
+			runid=os.path.basename(self.mkdir('default=ascii,stdout=none,color=false,threads=2'))
 			processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 					'TEST_RUNID':runid,
 					'PYSYS_COLOR':'false', # this affects the stdout stream
 					'PYTHONIOENCODING': None if PY2 else 'ascii', # sets stdout encoding
 					}, LANG='ascii')))
 				
-		runid=self.mkdir('default=utf8,stdout=ascii,color=true,threads=2')
+		runid=os.path.basename(self.mkdir('default=utf8,stdout=ascii,color=true,threads=2'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':'ascii', # sets stdout encoding
 				}, LANG='en_US.utf-8')))
-		runid=self.mkdir('default=utf8,stdout=none,color=true,threads=2')
+		runid=os.path.basename(self.mkdir('default=utf8,stdout=none,color=true,threads=2'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
 				'PYTHONIOENCODING':None if PY2 else 'utf-8', # sets stdout encoding
 				}, LANG='en_US.utf-8')))
-		runid=self.mkdir('default=utf8,stdout=utf8,color=false,threads=2')
+		runid=os.path.basename(self.mkdir('default=utf8,stdout=utf8,color=false,threads=2'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '2'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'false', # this affects the stdout stream
 				'PYTHONIOENCODING':'utf-8', # sets stdout encoding
 				}, LANG='en_US.utf-8')))
-		runid=self.mkdir('default=local,stdout=local,color=true,threads=2,debug=true')
+		runid=os.path.basename(self.mkdir('default=local,stdout=local,color=true,threads=2,debug=true'))
 		processes.append(runPySys(self, runid+'/pysys', ['run', '-o', self.output+'/'+runid+'/testoutput', '--record', '-c', '2', '--threads', '1', '-v', 'debug'], workingDir='test', ignoreExitStatus=True, state=BACKGROUND, environs=createenv({
 				'TEST_RUNID':runid,
 				'PYSYS_COLOR':'true', # this affects the stdout stream
@@ -196,12 +196,12 @@ class PySysTest(BaseTest):
 				if not PY2: # in python2 this would give an exception in the run.py so we don't even attempt it
 					self.assertGrep(outfile, expr='Log bytes message including i18n string .+ end', encoding=enc)
 				self.assertGrep(outfile, expr='Other log message', encoding=enc)
-				self.assertGrep(outfile, expr='Test failure reason: %soutcome reason.*end'%('.*' if outfile.endswith('.out') else ''), encoding=enc)
+				self.assertGrep(outfile, expr='Test outcome reason: %soutcome reason.*end'%('.*' if outfile.endswith('.out') else ''), encoding=enc)
 
 				if enc == 'utf-8':
-					self.assertGrep(outfile, expr=u'Test failure reason: .*outcome reason %s end'%self.utf8teststring, encoding=enc)
+					self.assertGrep(outfile, expr=u'Test outcome reason: .*outcome reason %s end'%self.utf8teststring, encoding=enc)
 				elif enc == 'ascii': # ensure we have some suitable replacement chars
-					self.assertGrep(outfile, expr='Test failure reason: .*outcome reason utf8_European[?][?].*_Katakana[?].*_Hiragana[?].* end', encoding=enc)
+					self.assertGrep(outfile, expr='Test outcome reason: .*outcome reason utf8_European[?][?].*_Katakana[?].*_Hiragana[?].* end', encoding=enc)
 	
 				# logFileContents:
 				if enc == 'utf-8':

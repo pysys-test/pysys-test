@@ -224,8 +224,8 @@ setLogHandlersForCurrentThread has been called on the current thread.
 # customize the default logging names for display
 logging.addLevelName(50, 'CRIT')
 logging.addLevelName(30, 'WARN')
-stdoutHandler.setLevel(logging.INFO)
-rootLogger.setLevel(logging.DEBUG) # The root logger log level (set to DEBUG as all filtering is done by the handlers).
+stdoutHandler.setLevel(logging.INFO) 
+rootLogger.setLevel(logging.INFO) # The default root logger log level 
 rootLogger.addHandler(pysysLogHandler)
 pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler]) # main thread is by default the only one that writes to stdout
 

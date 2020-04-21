@@ -29,7 +29,7 @@ class PySysTest(BaseTest):
 
 		self.assertGrep('pysys-withmodes.out', expr='Running test Test_WithModes with mode "mode1"')
 		self.assertGrep('pysys-withmodes.out', expr='Test final outcome: *PASSED')
-		self.assertGrep('pysys-withmodes.out', expr='Test failure reason: *Unable to run test in mode1 mode') # for nomodes test
+		self.assertGrep('pysys-withmodes.out', expr='Test outcome reason: *Unable to run test in mode1 mode') # for nomodes test
 		self.assertGrep('pysys-withmodes.out', expr='Test final outcome: *SKIPPED') # for nomodes test
 
 		self.assertGrep('pysys-withemptymode.out', expr='Running test Test_WithModes with mode ""')

@@ -25,6 +25,8 @@ example both Python 2 and Python 3.
 """
 
 import sys, os, io, locale
+import logging
+__log = logging.getLogger('pysys.pycompat')
 
 PY2 = sys.version_info[0] == 2
 
@@ -93,6 +95,9 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	assert path
 	# sanity check to avoid accidentally creating files in cwd rather than test output directory
 	assert os.path.isabs(path), path
+	
+	if encoding:
+		__log.debug('Opening file using encoding=%s: %s', encoding, path)
 	
 	from pysys.utils.fileutils import toLongPathSafe # import here to avoid circular dependency
 	path = toLongPathSafe(path, onlyIfNeeded=True)

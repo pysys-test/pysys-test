@@ -178,12 +178,19 @@ DEFAULT_TIMEOUT = 600
 """Deprecated. 
 @deprecated: Use a specific member of TIMEOUTS instead."""
 TIMEOUTS = {}
-""" Default timeouts used for various operations. """
+""" Default timeouts used for various operations. 
+
+Each timeout is given as a floating point number of seconds.
+
+These timeouts can be customized from runner.setup() if needed 
+(but never change them from within individual testcases). 
+ """
 TIMEOUTS['WaitForSocket'] = 60
 TIMEOUTS['WaitForFile'] = 30
 TIMEOUTS['WaitForSignal'] = 60
 TIMEOUTS['WaitForProcessStop'] = 30
 TIMEOUTS['WaitForProcess'] = 60*10
+TIMEOUTS['WaitForAvailableTCPPort'] = 60*20 # in case other tests are using up all ports
 TIMEOUTS['ManualTester'] = 1800
 
 # the supported distinct log categories
@@ -210,18 +217,20 @@ class PrintLogs(Enum):
 	"""
 	NONE = 'PrintLogs.NONE'
 	"""Detailed run.log output is not printed to the stdout console. """
-	ALL = 'PrintLog.ALL'
+	ALL = 'PrintLogs.ALL'
 	"""Detailed run.log output is always printed to the stdout console, for both passed and failed testcases. """
-	FAILURES = 'PrintLog.FAILURES'
+	FAILURES = 'PrintLogs.FAILURES'
 	"""Detailed run.log output is only printed to the stdout console for failed testcases. """
 
 PROJECT = None
-""" The L{pysys.xml.project.Project} instance containing settings for this PySys project.
+"""DEPRECATED. 
+Holds the L{pysys.xml.project.Project} instance containing settings for this PySys project.
 Instead of using this constant, we recommend using the 
 L{pysys.basetest.BaseTest.project} (or L{pysys.process.user.ProcessUser.project}) 
-field to access this. """
+field to access this. If this is not possible, use Project.getInstance(). """
 
 from pysys.xml.project import Project 
 def loadproject(start):
 	global PROJECT
-	PROJECT = Project.findAndLoadProject(start)
+	Project.findAndLoadProject(start)
+	PROJECT = Project.getInstance()

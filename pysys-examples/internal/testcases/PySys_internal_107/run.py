@@ -16,6 +16,6 @@ class PySysTest(BaseTest):
 		self.assertGrep('print-full.out', expr='Test skip reason: *Skipped by pysystest.xml')
 		self.assertGrep('print-full.out', expr='Test skip reason: *Skipped by dirconfig')
 		
-		self.assertGrep('pysys-run.out', expr='Test failure reason: *Skipped by pysystest.xml')
-		self.assertGrep('pysys-run.out', expr='Test failure reason: *Skipped by dirconfig')
+		self.assertGrep('pysys-run.out', expr='Test outcome reason: *Skipped by pysystest.xml')
+		self.assertGrep('pysys-run.out', expr='Test outcome reason: *Skipped by dirconfig')
 		

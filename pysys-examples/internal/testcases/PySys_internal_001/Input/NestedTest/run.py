@@ -4,6 +4,12 @@ from pysys.exceptions import *
 from pysys.utils.pycompat import PY2
 
 class PySysTest(BaseTest):
+	testBooleanProperty = False
+	testIntProperty = 123
+	testFloatProperty = 456.7
+	testStringProperty = '12345'
+	testNoneProperty = None
+
 	def execute(self):
 		self.proj = self.project
 		self.assertTrue(self.proj.env_user == "Felicity Kendal")
@@ -17,10 +23,20 @@ class PySysTest(BaseTest):
 		self.assertTrue(self.proj.user_full == "Professor Simon Smith")
 
 		for p in ['projectbool', 'projectbooloverride', 'cmdlineoverride']:
-			self.log.info('getBool %s=%r', p, self.getBool(p))
+			self.log.info('getBoolProperty %s=%r', p, self.getBoolProperty(p))
+		
+		# no type coersion if not defined as a basetest property
+		self.assertEval('{cmdlineoverride} == "tRue"', cmdlineoverride=self.cmdlineoverride)
 
-		self.log.info('getBool %s=%r', 'booldeftrue', self.getBool('bool-not-defined', True))
-		self.log.info('getBool %s=%r', 'booldeffalse', self.getBool('bool-not-defined', False))		
+		self.log.info('getBoolProperty %s=%r', 'booldeftrue', self.getBoolProperty('bool-not-defined', True))
+		self.log.info('getBoolProperty %s=%r', 'booldeffalse', self.getBoolProperty('bool-not-defined', False))		
+
+		# check type coersion based on base test type
+		self.assertEval('{testBooleanProperty} == True', testBooleanProperty=self.testBooleanProperty)
+		self.assertEval('{testIntProperty} == 1234', testIntProperty=self.testIntProperty)
+		self.assertEval('{testFloatProperty} == 456.78', testFloatProperty=self.testFloatProperty)
+		self.assertEval('{testStringProperty} == "123456"', testStringProperty=self.testStringProperty)
+		self.assertEval('{testNoneProperty} == "Hello"', testNoneProperty=self.testNoneProperty)
 
 	def validate(self):
 		pass 

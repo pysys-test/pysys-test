@@ -121,7 +121,8 @@ script:
   # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
   - $PY -m pip install ../dist/PySys*.whl
   - pysys.py --version
-  - $PY -m pip install coverage codecov
+  # force coverage version to 4.5.4 since the next version requires an sqlite module that doesn't work on all our supported pythons
+  - $PY -m pip install coverage==4.5.4 codecov
 
   # main test run
   - $PY -m coverage run --rcfile ./internal/utilities/python_coveragerc ../scripts/pysys.py run -X pythonCoverage=true --threads auto --purge --record --type auto --outdir main --mode ALL
@@ -151,6 +152,8 @@ script:
   
   # check the documentation is good
   # must do this after testing to avoid polluting the installed packages while running the tests
+  # docutils 0.15 has a bug preventing it working with Python 2, so force to a lower version
+  - $PY -m pip install docutils==0.14
   - $PY -m pip install rstcheck
   - rstcheck *.rst
   

@@ -30,6 +30,9 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	
 	Currently, this is necessary only on Windows, where a unicode string 
 	starting with \\?\ must be used to get correct behaviour for long paths. 
+	On Windows this function also normalizes the capitalization of drive 
+	letters so they are always upper case regardless of OS version and current 
+	working directory. 
 	
 	@param path: A path. Must not be a relative path. Can be None/empty. Can 
 	contain ".." sequences. If possible, use a unicode character string. 
@@ -51,6 +54,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	
 	"""
 	if (not IS_WINDOWS) or (not path): return path
+	if path[0] != path[0].upper(): path = path[0].upper()+path[1:]
 	if onlyIfNeeded and len(path)<255: return path
 	if path.startswith('\\\\?\\'): return path
 	inputpath = path
@@ -120,16 +124,36 @@ def mkdir(path):
 			os.makedirs(path)
 	return origpath
 
-def deletedir(path):
+def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 	"""
-	Recursively delete the specified directory. 
+	Recursively delete the specified directory, with optional retries. 
 	
-	Does nothing if it does not exist. Raises an exception if the deletion fails. 
+	Does nothing if it does not exist. Raises an exception if the deletion fails (unless ``onerror=`` is specified), 
+	but deletes as many files as possible before doing so. 
+	
+	@param retries: The number of retries to attempt. This can be useful to 
+		work around temporary failures causes by Windows file locking. 
+	
+	@param ignore_errors: If True, an exception is raised if the path exists but cannot be deleted. 
+	
+	@param onerror: A callable that with arguments (function, path, excinfo), called when an error occurs while 
+		deleting. See the documentation for ``shutil.rmtree`` for more information. 
 	"""
+	if ignore_errors: assert onerror==None, 'cannot set onerror and also ignore_errors'
+	
 	path = toLongPathSafe(path)
 	try:
-		shutil.rmtree(path)
-	except Exception:
+		# delete as many files as we can first, so if there's an error deleting some files (e.g. due to windows file 
+		# locking) we don't use any more disk space than we need to
+		shutil.rmtree(path, ignore_errors=True)
+		
+		# then try again, being more careful
+		if os.path.exists(path) and not ignore_errors:
+			shutil.rmtree(path, onerror=onerror)
+	except Exception: # pragma: no cover
 		if not os.path.exists(path): return # nothing to do
-		raise
+		if retries <= 0:
+			raise
+		time.sleep(0.5) # work around windows file-locking issues
+		deletedir(path, retries = retries-1, onerror=onerror)
 

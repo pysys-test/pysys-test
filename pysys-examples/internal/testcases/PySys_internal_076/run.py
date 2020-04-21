@@ -21,5 +21,16 @@ class PySysTest(BaseTest):
 		self.assertPathExists('output/PySys_NestedTestcase/run.log')
 		self.assertPathExists('output/PySys_NestedTestcase/nonempty.txt', exists=False)
 		self.assertPathExists('output/PySys_NestedTestcase/empty.txt', exists=False)
-		self.assertPathExists('output/PySys_NestedTestcase/dir1', exists=False)
-		self.assertPathExists('output/PySys_NestedTestcase/dir2', exists=False)
+		
+		self.assertPathExists('output/PySys_NestedTestcase/dir1/dir1a/', exists=False) 
+		self.assertPathExists('output/PySys_NestedTestcase/dir2/dir2a', exists=False) 
+		self.assertPathExists('output/PySys_NestedTestcase/dir2/', exists=False)
+
+
+		self.assertPathExists('output/PySys_NestedTestcaseInspect/run.log')
+		self.assertPathExists('output/PySys_NestedTestcaseInspect/nonempty.txt', exists=True)
+		self.assertPathExists('output/PySys_NestedTestcaseInspect/empty.txt', exists=False)
+		
+		self.assertPathExists('output/PySys_NestedTestcaseInspect/dir1/dir1a/', exists=True) # empty but not emptied by PySys
+		self.assertPathExists('output/PySys_NestedTesPySys_NestedTestcaseInspecttcase/dir2/dir2a', exists=False) # emptied by PySys deleting empty file
+		self.assertPathExists('output/PySys_NestedTestcaseInspect/dir2/', exists=True)

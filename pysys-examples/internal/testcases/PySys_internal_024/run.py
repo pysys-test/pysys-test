@@ -5,6 +5,9 @@ from pysys.basetest import BaseTest
 class PySysTest(BaseTest):
 
 	def execute(self):
+		self.log.info('Using python from     %s', sys.executable)
+		self.log.info('With python libs from %s', os.__file__)
+
 		script = "%s/environment.py" % self.input
 		env = {}
 		env["PYSYS-USER"] = "Simon Batty"
@@ -12,13 +15,14 @@ class PySysTest(BaseTest):
 		env["EMPTY-ENV"] = ""
 		env["INT-ENV"] = "1"
 
-		env['PYTHONHOME'] = sys.prefix
+		# this mirrors the logic we use in createEnvirons for sys.executable
 		if PLATFORM=='win32':
 			# on win32, minimal environment must have SYSTEMROOT set
 			env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
 		else:
 			# On UNIX we may need the python shared libraries on the LD_LIBRARY_PATH
-			env[LIBRARY_PATH_ENV_VAR] = os.environ.get(LIBRARY_PATH_ENV_VAR,'')
+			env[LIBRARY_PATH_ENV_VAR] = (os.environ.get(LIBRARY_PATH_ENV_VAR,'')).strip(os.pathsep)
+		env['PATH'] = os.path.dirname(sys.executable)+os.pathsep+PATH
 		
 		# create the process
 		self.startProcess(command=sys.executable,
@@ -48,7 +52,7 @@ class PySysTest(BaseTest):
 	def validate(self):
 		# validate against the reference file
 
-		ignores=['SYSTEMROOT',LIBRARY_PATH_ENV_VAR, 'PYTHONHOME']
+		ignores=['SYSTEMROOT','PYTHONHOME', LIBRARY_PATH_ENV_VAR, 'PATH']
 		
 		if PLATFORM=='darwin':
 			ignores.append('VERSIONER_PYTHON')
@@ -58,6 +62,7 @@ class PySysTest(BaseTest):
 		ignores.append('LC_CTYPE')
 
 		self.assertDiff("environment-specified.out", "ref_environment.out", ignores=ignores)
+		self.assertGrep("environment-specified.out", expr='PATH=.+')
 
 		# check we haven't copied any env vars from the parent environment other than the expected small minimal set
 		envvarignores = []

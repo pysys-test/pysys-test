@@ -23,15 +23,17 @@ to provide process-related capabilities including cleanup.
 
 import time, collections, inspect, locale, fnmatch, sys
 import threading
+import shutil
 
 from pysys import log, process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter
+from pysys.xml.project import Project
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
-from pysys.utils.fileutils import mkdir, deletedir, pathexists
+from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe
 from pysys.utils.pycompat import *
 from pysys.utils.stringutils import compareVersions
 
@@ -56,7 +58,17 @@ class ProcessUser(object):
 	@type input: string
 	@ivar output: Location for output from any processes (defaults to current working directory)
 	@type output: string
-
+	
+	@ivar disableCoverage: Set to True to disable all code coverage collection for processes 
+		started from this instance. For example, to disable coverage in tests tagged with the 
+		'performance' group you could use a line like this in your BaseTest::
+		
+			if 'performance' in self.descriptor.groups: self.disableCoverage = True
+		
+		The built-in Python code coverage functionality in L{startPython} checks this 
+		flag. It is recommended that any other languages supporting code coverage 
+		also check the self.disableCoverage flag. 
+	
 	"""
 	
 	def __init__(self):
@@ -66,10 +78,10 @@ class ProcessUser(object):
 		self.log = log
 		"""The logger instance that should be used to log from this class. """
 		
-		assert PROJECT or 'doctest' in sys.argv[0], 'constants.PROJECT was not assigned yet, probably due to a change in module dependencies causing constants to be imported before the project was loaded' # allow it only during doctest-ing
-
-		self.project = PROJECT
+		self.project = Project.getInstance()
 		"""The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
+
+		assert self.project or 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing
 		
 		self.processList = []
 		self.processCount = {}
@@ -78,17 +90,18 @@ class ProcessUser(object):
 		self.outcome = []
 		self.__outcomeReason = ''
 		
-		self.defaultAbortOnError = PROJECT.defaultAbortOnError.lower()=='true' if hasattr(PROJECT, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
-		self.defaultIgnoreExitStatus = PROJECT.defaultIgnoreExitStatus.lower()=='true' if hasattr(PROJECT, 'defaultIgnoreExitStatus') else True
+		self.defaultAbortOnError = self.project.defaultAbortOnError.lower()=='true' if hasattr(self.project, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
+		self.defaultIgnoreExitStatus = self.project.defaultIgnoreExitStatus.lower()=='true' if hasattr(self.project, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
 		self.__pythonCoverageFile = 0
+		
+		self.disableCoverage = False
 		
 		self.lock = threading.RLock()
 		"""
 		A recursive lock that can be used for protecting the fields of this instance 
 		from access by background threads, as needed. 
 		"""
-
 
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
@@ -145,7 +158,7 @@ class ProcessUser(object):
 			os.path.join(self.output, processKey+suffix+'.err'), 
 			)	
 
-	def getBool(self, propertyName, default=False):
+	def getBoolProperty(self, propertyName, default=False):
 		"""
 		Get a True/False indicating whether the specified property is set 
 		on this object (typically as a result of specifying -X on the command 
@@ -157,6 +170,7 @@ class ProcessUser(object):
 		val = getattr(self, propertyName, None)
 		if val is None: val = getattr(self.project, propertyName, None)
 		if val is None: return default
+		if val==True or val==False: return val
 		return val.lower()=='true'
 
 	def startPython(self, arguments, disableCoverage=False, **kwargs):
@@ -177,14 +191,18 @@ class ProcessUser(object):
 		to execute, or '-m' followed by a module name. 
 		@param kwargs: See L{startProcess} for detail on available arguments.
 		@param disableCoverage: Disables code coverage for this specific 
-		process. 
+		process. Coverage can also be disabled by setting 
+		`self.disableCoverage==True` on this test instance. 
 		@return: The process handle of the process (L{ProcessWrapper}).
 		@rtype: L{ProcessWrapper}
 		
 		"""
 		args = arguments
-		environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
-		if self.getBool('pythonCoverage') and not disableCoverage:
+		if 'environs' in kwargs:
+			environs = kwargs['environs']
+		else:
+			environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
+		if self.getBoolProperty('pythonCoverage') and not disableCoverage and not self.disableCoverage:
 			if hasattr(self.project, 'pythonCoverageArgs'):
 				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
 			args = ['-m', 'coverage', 'run']+args
@@ -197,7 +215,7 @@ class ProcessUser(object):
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, ignoreExitStatus=None, stdouterr=None):
+			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None):
 		"""Start a process running in the foreground or background, and return 
 		the L{ProcessWrapper} process object.
 		
@@ -223,38 +241,60 @@ class ProcessUser(object):
 		@param arguments: A list of arguments to pass to the command
 		
 		@param environs: A dictionary specifying the environment to run the process in. 
-		If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
-		produce a suitable clean default environment for this `command`, containing a minimal set of variables. 
-		If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
+			If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
+			produce a suitable clean default environment for this `command`, containing a minimal set of variables. 
+			If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
 		
 		@param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
 		
 		@param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
 		
-		@param timeout: The timeout period after which to terminate processes running in the C{FOREGROUND}. 
+		@param timeout: The number of seconds after which to terminate processes running in the C{FOREGROUND}. For processes 
+			that complete in a few seconds or less, it is best to avoid overriding this and stick with the default. 
+			However for long-running foreground processes it will be necessary to set a larger number, for example 
+			if running a soak test where the process needs to run for up to 2 hours you could set ``timeout=2*60*60``. 
 		
 		@param stdouterr: The filename prefix to use for the stdout and stderr of the process 
-		(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
-		L{allocateUniqueStdOutErr}. 
-		The stdouterr prefix is also used to form a default display name for 
-		the process if none is explicitly provided. 
-		The files are created relative to the test output directory. 
-		The filenames can be accessed from the returned process object using 
-		L{pysys.process.helper.CommonProcessWrapper.stdout} and 
-		L{pysys.process.helper.CommonProcessWrapper.stderr}.
+			(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
+			L{allocateUniqueStdOutErr}. 
+			The stdouterr prefix is also used to form a default display name for 
+			the process if none is explicitly provided. 
+			The files are created relative to the test output directory. 
+			The filenames can be accessed from the returned process object using 
+			L{pysys.process.helper.CommonProcessWrapper.stdout} and 
+			L{pysys.process.helper.CommonProcessWrapper.stderr}.
 		
 		@param stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
 		@param stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
 		
 		@param displayName: Logical name of the process used for display 
-		(defaults to a string generated from the stdouterr and/or the command).
+			(defaults to a string generated from the stdouterr and/or the command).
 		
 		@param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
-		project setting)
+			project setting)
+
+		@param expectedExitStatus: The condition string used to determine whether the exit status/code 
+			returned by the process is correct. The default is '==0', as an exit code of zero usually indicates success, but if you 
+			are expecting a non-zero exit status (for example because you are testing correct handling of 
+			a failure condition) this could be set to '!=0' or a specific value such as '==5'. 
+	
+		@param ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
+			exit code that doesn't match expectedExitStatus (or if the command cannot be run at all). 
+			This can be set to True in cases where you do not care whether the command succeeds or fails, or wish to handle the 
+			exit status separately with more complicated logic. 
+			
+			The default value of ignoreExitStatus=None means the value will 
+			be taken from the project property defaultIgnoreExitStatus, which can be configured in the project XML 
+			(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
+			compatibility with older PySys releases if no project property is set. 
 		
-		@param ignoreExitStatus: If False, non-zero exit codes are reported as an error outcome. None means the value will 
-		be taken from defaultIgnoreExitStatus, which can be configured in the project XML, or is set to True if not specified there. 
-		
+		@param quiet: If True, this method will not do any INFO or WARN level logging 
+			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
+			useful to avoid filling up the log where it is necessary to repeatedly execute a 
+			command check for completion of some operation until it succeeds; in such cases 
+			you should usually set ignoreExitStatus=True as well since both success and 
+			failure exit statuses are valid. 
+
 		@return: The process handle of the process (L{ProcessWrapper}).
 		@rtype: L{ProcessWrapper}
 
@@ -294,22 +334,30 @@ class ProcessUser(object):
 			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
 			process.start()
 			if state == FOREGROUND:
-				(log.info if process.exitStatus == 0 else log.warn)("Executed %s, exit status %d%s", displayName, process.exitStatus,
+				correctExitStatus = eval('%d %s'%(process.exitStatus, expectedExitStatus))
+				
+				logmethod = log.info if correctExitStatus else log.warn
+				if quiet: logmethod = log.debug
+				logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
 																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
 				
-				if not ignoreExitStatus and process.exitStatus != 0:
-					self.addOutcome(BLOCKED, '%s returned non-zero exit code %d'%(process, process.exitStatus), abortOnError=abortOnError)
+				if not ignoreExitStatus and not correctExitStatus:
+					self.addOutcome(BLOCKED, 
+						('%s returned non-zero exit code %d'%(process, process.exitStatus))
+						if expectedExitStatus=='==0' else
+						('%s returned exit code %d (expected %s)'%(process, process.exitStatus, expectedExitStatus)), 
+						abortOnError=abortOnError)
 
 			elif state == BACKGROUND:
-				log.info("Started %s with process id %d", displayName, process.pid)
+				(log.info if not quiet else log.debug)("Started %s with process id %d", displayName, process.pid)
 		except ProcessError as e:
 			if not ignoreExitStatus:
 				self.addOutcome(BLOCKED, 'Could not start %s process: %s'%(displayName, e), abortOnError=abortOnError)
-			else:
+			else: # this wouldn't happen during a polling-until-success use case so is always worth logging even in quiet mode
 				log.info("%s", sys.exc_info()[1], exc_info=0)
 		except ProcessTimeout:
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
-			log.warn("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+			(log.warn if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			process.stop()
 		else:
 			with self.lock:
@@ -366,12 +414,18 @@ class ProcessUser(object):
 		    variables using `createEnvirons()`. 
 
 		@param command: If known, the full path of the executable for which 
-		a default environment is being created (when called from `startProcess` 
-		this is always set). This allows default environment variables to be 
-		customized for different process types e.g. Java, Python, etc. 
+			a default environment is being created (when called from `startProcess` 
+			this is always set). This allows default environment variables to be 
+			customized for different process types e.g. Java, Python, etc. 
+			
+			When using `command=sys.executable` to launch another copy of the 
+			current Python executable, extra items from this process's path 
+			environment variables are added to the returned dictionary so that it 
+			can start correctly. On Unix-based systems this includes copying all of 
+			the load library path environment variable from the parent process. 
 		
 		@param kwargs: Overrides of this method should pass any additional 
-		kwargs down to the super implementation, to allow for future extensions. 
+			kwargs down to the super implementation, to allow for future extensions. 
 		
 		@return: A new dictionary containing the environment variables. 
 		"""
@@ -380,7 +434,7 @@ class ProcessUser(object):
 
 		# this feature is a workaround to maintain compatibility for a bug in PySys v1.1-1.3
 		# (see https://github.com/pysys-test/pysys-test/issues/9 for details)
-		if getattr(PROJECT, 'defaultEnvironsLegacyMode','').lower()=='true':
+		if getattr(self.project, 'defaultEnvironsLegacyMode','').lower()=='true':
 			if IS_WINDOWS: 
 				return dict(os.environ)
 			else:
@@ -389,8 +443,8 @@ class ProcessUser(object):
 		e = {}
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location
-		if getattr(PROJECT, 'defaultEnvironsTempDir',None)!=None:
-			tempDir = eval(PROJECT.defaultEnvironsTempDir)
+		if getattr(self.project, 'defaultEnvironsTempDir',None)!=None:
+			tempDir = eval(self.project.defaultEnvironsTempDir)
 			self.mkdir(tempDir)
 			if IS_WINDOWS: # pragma: no cover
 				e['TEMP'] = e['TMP'] = os.path.normpath(tempDir)
@@ -426,19 +480,28 @@ class ProcessUser(object):
 			e['DYLD_LIBRARY_PATH'] = DYLD_LIBRARY_PATH
 				
 		if not IS_WINDOWS:
-			if getattr(PROJECT, 'defaultEnvironsDefaultLang',''):
-				e['LANG'] = PROJECT.defaultEnvironsDefaultLang
+			if getattr(self.project, 'defaultEnvironsDefaultLang',''):
+				e['LANG'] = self.project.defaultEnvironsDefaultLang
 		
 		if command == sys.executable:
-			# ensure it's possible to run another instance of this Python
-			# (but only if full path exactly matches)
-			# keep it as clean as possible by not passing sys.path/PYTHONPATH
+			# Ensure it's possible to run another instance of this Python, by adding it to the start of the path env vars
+			# (but only if full path to the Python executable exactly matches).
+			# Keep it as clean as possible by not passing sys.path/PYTHONPATH
+			# - but it seems we do need to copy the LD_LIBRARY_PATH from the parent process to ensure the required libraries are present.
+			# Do not set PYTHONHOME here, as doesn't work well in virtualenv, and messes up grandchildren 
+			# processes that need a different Python version
 			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
-			e[LIBRARY_PATH_ENV_VAR] = os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e[LIBRARY_PATH_ENV_VAR]
-			isvirtualenv = hasattr(sys, 'real_prefix') or (
-				hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix)
-			if not isvirtualenv:
-				e['PYTHONHOME'] = sys.prefix
+
+			if LIBRARY_PATH_ENV_VAR != 'PATH': # if it's an os with something like LD_LIBRARY_PATH
+				# It's a shame it's necessary to copy parent environment, but there's no sane way to unpick which libraries are 
+				# actually required on Unix. Make sure we don't set this env var to an empty string just in case that 
+				# doesn't anything weird. 
+				newlibpath = (os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e.get(LIBRARY_PATH_ENV_VAR,'')).strip(os.pathsep)
+				if newlibpath:
+					e[LIBRARY_PATH_ENV_VAR] = newlibpath
+				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment, including %s=%s', LIBRARY_PATH_ENV_VAR, os.getenv(LIBRARY_PATH_ENV_VAR,''))
+			else:  
+				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment')
 		return e
 
 	def createEnvirons(self, overrides=None, addToLibPath=[], addToExePath=[], command=None, **kwargs):
@@ -635,9 +698,7 @@ class ProcessUser(object):
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 
-		log.debug("Performing wait for socket creation:")
-		log.debug("  port:       %d" % port)
-		log.debug("  host:       %s" % host)
+		log.debug("Performing wait for socket creation %s:%s", host, port)
 
 		with process_lock:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -702,9 +763,7 @@ class ProcessUser(object):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
-		log.debug("Performing wait for file creation:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
+		log.debug("Performing wait for file creation: %s", f)
 		
 		startTime = time.time()
 		while True:
@@ -776,11 +835,7 @@ class ProcessUser(object):
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
-		log.debug("Performing wait for signal in file:")
-		log.debug("  file:       %s" % file)
-		log.debug("  filedir:    %s" % filedir)
-		log.debug("  expression: %s" % expr)
-		log.debug("  condition:  %s" % condition)
+		log.debug("Performing wait for signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
 		
 		if errorExpr: assert not isstring(errorExpr), 'errorExpr must be a list of strings not a string'
 		
@@ -791,7 +846,7 @@ class ProcessUser(object):
 			if pathexists(f):
 				matches = getmatches(f, expr, encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores)
 				if eval("%d %s" % (len(matches), condition)):
-					if PROJECT.verboseWaitForSignal.lower()=='true' if hasattr(PROJECT, 'verboseWaitForSignal') else False:
+					if self.project.verboseWaitForSignal.lower()=='true' if hasattr(self.project, 'verboseWaitForSignal') else False:
 						log.info("%s completed successfully", msg)
 					else:
 						log.info("Wait for signal in %s completed successfully", file)
@@ -935,6 +990,7 @@ class ProcessUser(object):
 			if override: 
 				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', [LOOKUP[o] for o in self.outcome], self.__outcomeReason)
 				del self.outcome[:]
+				self.__outcomeReason = None
 			old = self.getOutcome()
 			if (old == NOTVERIFIED and not self.__outcomeReason): old = None
 			self.outcome.append(outcome)
@@ -1033,7 +1089,7 @@ class ProcessUser(object):
 				if (self.__skipFrame(info.filename, ProcessUser) ): continue
 				if (self.__skipFrame(info.filename, BaseTest) ): continue
 				stack.append( '%s:%s' % (os.path.basename(info.filename).strip(), info.lineno) )
-				if (os.path.splitext(info.filename)[0] == os.path.splitext(self.descriptor.module)[0] and (info.function == 'execute' or info.function == 'validate')): return stack
+				if (os.path.splitext(info.filename)[0] == os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] and (info.function == 'execute' or info.function == 'validate')): return stack
 		return None
 
 
@@ -1165,12 +1221,15 @@ class ProcessUser(object):
 		@param path: The path to be created. This can be an absolute path or 
 		relative to the testcase output directory.
 		
-		@return: the same path passed, to facilitate fluent-style method calling. 
+		@return: the absolute path of the new directory, to facilitate fluent-style method calling. 
 		"""
-		mkdir(os.path.join(self.output, path))
+		path = os.path.join(self.output, path)
+		mkdir(path)
 		return path
-		
-	def deletedir(self, path):
+
+	def deletedir(self, path, **kwargs): return self.deleteDir(path, **kwargs)
+
+	def deleteDir(self, path, **kwargs):
 		"""
 		Recursively delete the specified directory. 
 		
@@ -1178,8 +1237,11 @@ class ProcessUser(object):
 		
 		@param path: The path to be deleted. This can be an absolute path or 
 		relative to the testcase output directory.
+		
+		@param kwargs: Any additional arguments are passed to 
+		L{pysys.utils.fileutils.deletedir()}. 
 		"""
-		deletedir(os.path.join(self.output, path))
+		deletedir(os.path.join(self.output, path), **kwargs)
 		
 	def getDefaultFileEncoding(self, file, **xargs):
 		"""
@@ -1283,3 +1345,95 @@ class ProcessUser(object):
 		or 0 if they are semantically the same.
 		"""
 		return compareVersions(v1, v2)
+
+	def write_text(self, file, text, encoding=None):
+		"""
+		Writes the specified text to a file in the output directory. 
+		
+		@param file: The path of the file to write, either an absolute path or 
+			relative to the `self.output` directory. 
+		
+		@param text: The string to write to the file, with `\\n` 
+			for newlines (do not use `os.linesep` as the file will be opened in 
+			text mode so platform line separators will be added automatically).
+			
+			On Python 3 this must be a character string. 
+			
+			On Python 2 this can be a character or byte string containing ASCII 
+			characters. If non-ASCII characters are used, it must be a unicode 
+			string if there is an encoding specified for this file/type, or 
+			else a byte string. 
+		
+		@param encoding: The encoding to use to open the file. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
+		"""
+		# This method provides similar functionality to the Python3 pathlib write_text method. 
+		
+		with openfile(os.path.join(self.output, file), 'w', encoding=encoding or self.getDefaultFileEncoding(file)) as f:
+			f.write(text)
+	
+	def copy(self, src, dest, mappers=[], encoding=None):
+		"""Copy a single text or binary file, optionally tranforming the 
+		contents by filtering each line through a list of mapping functions. 
+		
+		If any mappers are provided, the file is copied in text mode and 
+		each mapper is given the chance to modify or omit each line. 
+		If no mappers are provided, the file is copied in binary mode. 
+		
+		In addition to the file contents the mode is also copied, for example 
+		the executable permission will be retained. 
+		
+		This function is useful both for creating a modified version of an 
+		output file that's more suitable for later validation steps such as 
+		diff-ing, and also for copying required files from the input to the 
+		output directory. 
+		
+		For example::
+		
+			self.copy('output-raw.txt', 'output-processed.txt', encoding='utf-8', 
+				mappers=[
+					lambda line: None if ('Timestamp: ' in line) else line, 
+					lambda line: line.replace('foo', 'bar'), 
+				])
+		
+		@param src: The source filename, which can be an absolute path, or 
+		a path relative to the `self.output` directory. 
+		Use `src=self.input+'/myfile'` if you wish to copy a file from the test 
+		input directory. 
+		
+		@param dest: The source filename, which can be an absolute path, or 
+		a path relative to the `self.output` directory. If this is a directory 
+		name, the file is copied to this directory with the same basename as src. 
+		
+		@param mappers: A list of filter functions that will be applied, 
+		in order, to each line read from the file. Each function accepts a string for 
+		the current line as input and returns either a string to write or 
+		None if the line is to be omitted. 
+		
+		@param encoding: The encoding to use to open the file. 
+		The default value is None which indicates that the decision will be delegated 
+		to the L{getDefaultFileEncoding()} method. 
+		
+		@return: the absolute path of the destination file. 
+		"""
+		src = toLongPathSafe(os.path.join(self.output, src))
+		dest = toLongPathSafe(os.path.join(self.output, dest))
+		if os.path.isdir(dest): dest = toLongPathSafe(dest+'/'+os.path.basename(src))
+		assert src != dest, 'Source and destination file cannot be the same'
+		
+		if not mappers:
+			# simple binary copy
+			shutil.copyfile(src, dest)
+		else:
+			with openfile(src, 'r', encoding=encoding or self.getDefaultFileEncoding(src)) as srcf:
+				with openfile(dest, 'w', encoding=encoding or self.getDefaultFileEncoding(dest)) as destf:
+					for line in srcf:
+						for mapper in mappers:
+							line = mapper(line)
+							if line is None: break
+						if line is not None: destf.write(line)
+			
+		shutil.copymode(src, dest)
+		return dest
+		

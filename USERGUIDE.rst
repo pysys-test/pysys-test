@@ -56,10 +56,90 @@ the `.validate()` method of each test. That approach allows you to later
 customize the logic by changing just one single place, and also to omit it for 
 specific tests where it is not wanted. 
 
+Configuring and overriding test options
+---------------------------------------
+PySys provides two mechanisms for specifying options such as credentials, 
+hostnames, or test duration/iteration that you might want to change or 
+override when running tests:
+
+- *Testcase attributes*, which are just variables on the Python testcase 
+  instance (or a BaseTest subclass shared by many tests). 
+  Attributes can be overridden on the command line when executing `pysys run`. 
+  
+  Attributes are useful for settings specific to an individual testcase such as 
+  the number of iterations or time duration to use for a performance test. 
+  A user running the test locally you might want to temporarily set to a lower 
+  iteration count while getting the test right, or perhaps try 
+  a higher value to get a more stable performance result. 
+  
+- *Project properties*. The default value is specified in the `pysysproject.xml` 
+  file or in a `.properties` file. 
+  
+  Properties can be overridden using an environment variable. 
+  Project properties are useful for things like credentials and hostnames that 
+  are shared across many testcases, and where you might want to set up 
+  customizations in your shell so that you don't need to keep specifying them 
+  every time you invoke `pysys run`. 
+
+To use a testcase attribute, set the default value as a Python string on your 
+test or basetest before `BaseTest.__init__()` is called. The easiest way to do 
+this in an individual testcase is usually to use a static attribute on the test 
+class, e.g.::
+
+	class PySysTest(BaseTest):
+
+		myIterationCount = 100*1000 # can be overridden with -XmyIterationCount=
+		
+		def execute(self):
+			self.log.info('Using iterations=%d', self.myIterationCount)
+			...
+
+If instead of setting a default for just one test you wish to set the default 
+for many tests from your custom BaseTest subclass, then you need to set the 
+defaults in your `__init__` before calling the super implementation of `__init__`. 
+
+Once the default value is defined with an attribute, you can override the value 
+when you run your test using the `-X` option::
+
+	pysys run -XmyIterationCount=10
+
+If the attribute was defined with a default value of int, float or bool then 
+the `-X` value will be automatically converted to that type; otherwise, it will 
+be a string. 
+
+The other mechanism that PySys supports for configurable test options is 
+project properties. 
+
+To use a project property that can be overridden with an environment variable, 
+add a `property` element to your `pysysproject.xml` file::
+
+	<property name="myCredentials" value="${env.MYCOMPANY_CREDENTIALS}" default="testuser:testpassword"/>
+
+This property can will take the value of the specified environment variable, 
+or else the default if not set. 
+
+Another way to specify default project property values is to put them into a 
+Java-style `.properties` file. You can use properties to specify which file is 
+loaded, so it would be possible to customize using environment variables::
+
+	<property name="myProjectPropertiesFile" value="${env.MYCOMPANY_CUSTOM_PROJECT_PROPERTIES}" default="${testRootDir}/default-config.properties"/>
+	<property file="${myProjectPropertiesFile}"/>
+
+To use projects properties in your testcase, just access the attributes on 
+`self.project` from either a test instance or a runner::
+
+	def execute(self):
+		self.log.info('Using username=%s and password %s' % self.project.myCredentials.split(':'))
+
+Property properties will always be of string type. 
+
 Producing code coverage reports
 -------------------------------
 PySys includes built-in support for producing coverage reports for programs 
-written in Python, using the `coverage.py` library. 
+written in Python, using the `coverage.py` library. To enable this, 
+set the pythonCoverageDir and collect-test-output project options (see below), 
+make sure you're using `startPython` to execute Python from within your tests, 
+and run PySys with `-XpythonCoverage=true`. 
 
 If you wish to produce coverage reports using any other tool or language (such 
 as Java), this is easy to achieve by following the same pattern:
@@ -112,6 +192,12 @@ as Java), this is easy to achieve by following the same pattern:
   such as `@OUTDIR@` must be replaced manually (since the value of 
   `runner.outsubdir` is not available when the project properties are 
   resolved). 
+  
+- Add a custom BaseTest class from the `__init__` constructor set 
+  `self.disableCoverage=True` for test groups that should not use coverage, 
+  such as performance tests. For example::
+  
+  	 if 'performance' in self.descriptor.groups: self.disableCoverage = True
   
 - If using a continuous integration system or centralized code coverage 
   database, you could optionally upload the coverage data there from the 
@@ -188,7 +274,7 @@ specified modes::
   pysys run --mode MyMode1,MyMode2
   pysys run --mode !MyMode3,!MyMode4
 
-After sucessfully getting all your tests passing in their primary mode, it could 
+After successfully getting all your tests passing in their primary mode, it could 
 be useful to run them in every mode other than the primary one::
 
   pysys run --mode !PRIMARY

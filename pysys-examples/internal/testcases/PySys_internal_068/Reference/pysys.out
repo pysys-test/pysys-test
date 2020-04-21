@@ -22,7 +22,7 @@ DEBUG <BLUE>ProcessUser cleanup function done.<END>
 INFO  
 INFO  Test duration: <BLUE>0.05 secs<END>
 INFO  Test final outcome:  <RED>FAILED<END>
-INFO  Test failure reason: <CYAN>abort reason message<END>
+INFO  Test outcome reason: <CYAN>abort reason message<END>
 INFO  
 CRIT  
 CRIT  Completed test run at:  Monday 2018-04-02 18:13:28 GMT Daylight Time

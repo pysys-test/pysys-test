@@ -1,6 +1,6 @@
 import os, sys
 import pysys
-from pysys.constants import IS_WINDOWS, PROJECT, FAILED
+from pysys.constants import IS_WINDOWS, FAILED
 from pysys.utils.filecopy import filecopy
 from pysys.xml.project import createProjectConfig
 
