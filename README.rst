@@ -59,7 +59,7 @@ Project Links
 
 - Documentation: https://pysys-test.github.io/pysys-test
 - Download releases, including sample testcases: https://github.com/pysys-test/pysys-test/releases
-- Stackoverflow tag for questions: https://stackoverflow.com/tags/pysys
+- Stackoverflow tag for questions: https://stackoverflow.com/questions/ask?tags=pysys
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
 - Source repository: https://github.com/pysys-test/pysys-test
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -75,9 +75,9 @@ setup(
 		'Documentation':     'https://pysys-test.github.io/pysys-test',
 		'Repository':        'https://github.com/pysys-test/pysys-test',
 		'Tracker':           'https://github.com/pysys-test/pysys-test/issues',
-		'Change Log':        'https://github.com/pysys-test/pysys-test/blob/release/CHANGELOG.rst',
+		'Change Log':        'https://pysys-test.github.io/pysys-test/ChangeLog.html',
 		'Download Samples':  'https://github.com/pysys-test/pysys-test/releases',
-		'Stackoverflow Tag': 'https://stackoverflow.com/tags/pysys', 
+		'Ask a Question':    'https://stackoverflow.com/questions/ask?tags=pysys', 
 	},
 
 	version=pysys.__version__,
