@@ -35,6 +35,7 @@ Key features include:
   testing your application.
 - A performance monitoring framework for recording and aggregating latency, 
   throughput and other performance metrics.
+
 - A pluggable "writers" framework for recording test outcomes in any format, 
   including a standard JUnit-compatible XML results writer in the box, and 
   support for running tests under Travis CI.
@@ -59,12 +60,9 @@ Project Links
 
 - Documentation: https://pysys-test.github.io/pysys-test
 - Download releases, including sample testcases: https://github.com/pysys-test/pysys-test/releases
-- Stackoverflow tag for questions: https://stackoverflow.com/questions/ask?tags=pysys
+- Stack Overflow tag for questions: https://stackoverflow.com/questions/ask?tags=pysys
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
 - Source repository: https://github.com/pysys-test/pysys-test
-
-PySys is licensed under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1. See 
-LICENSE.txt for details. 
 
 .. inclusion-marker-section-start-installation
 
@@ -160,4 +158,21 @@ line endings, or a ``.zip`` using Windows line endings from
 https://github.com/pysys-test/pysys-test/releases. The ``fibonacci`` 
 directory is a good place to start. 
 
-.. inclusion-marker-section-start-next-steps
+.. inclusion-marker-section-start-license
+
+License
+=======
+
+PySys System Test Framework
+
+Copyright (C) 2006-2020 M.B. Grieve
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
