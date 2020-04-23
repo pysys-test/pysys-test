@@ -2,6 +2,8 @@
 Change Log
 ==========
 
+.. py:currentmodule:: pysys
+
 --------------------------------------
 What's new in 1.5.1 (not yet released)
 --------------------------------------
@@ -13,7 +15,7 @@ Miscellaneous new features
   file without losing track of which is which. This also makes it easier to manually diff the output directory against 
   the ``Reference`` directory using GUI diff tools when debugging test failures. 
 
-- `basetest.BaseTest.assertDiff` has a new advanced feature, **autoUpdateAssertDiffReferences**, to help when you 
+- `basetest.BaseTest.assertDiff` has a new advanced feature, *autoUpdateAssertDiffReferences*, to help when you 
   have a large set of test reference files which need to be updated after a behaviour or output formatting change. 
   If you run the tests with ``-XautoUpdateAssertDiffReferences`` any diff failures will result in PySys overwriting 
   the reference file with the contents of the comparison file, providing an easy way to quickly update a large set 
