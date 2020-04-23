@@ -454,6 +454,10 @@ class BaseTest(ProcessUser):
 			self.assertEval('os.path.size({filename}) > {origFileSize}', 	
 				filename=self.output+'/file.txt', origFileSize=1000)
 		
+		If necessary, symbols for additional modules can be imported dynamically using ``import_module``, for example::
+		
+			self.assertEval("len(import_module('difflib').get_close_matches({word}, ['apple', 'orange', 'applic'])) == 2", word='app')
+		
 		See also L{getExprFromFile} which is often used to extract a piece of 
 		data from a log file which can then be checked using this method. 
 		
@@ -473,10 +477,6 @@ class BaseTest(ProcessUser):
 			standard Python modules, as well as the ``pysys`` module and the contents of the `pysys.constants` module, 
 			e.g. ``IS_WINDOWS``, and also the BaseTest's ``self`` variable. 
 	
-			If necessary, symbols for additional modules can be imported dynamically using ``import_module``, for example::
-			
-				self.assertEval("len(import_module('difflib').get_close_matches({word}, ['apple', 'orange', 'applic'])) == 2", word='app')
-		
 		:param formatparams: Named parameters for the format string, which 
 			can be of any type. Use descriptive names for the parameters to produce 
 			an assertion message that makes it really clear what is being checked. 
