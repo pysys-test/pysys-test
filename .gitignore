@@ -1,5 +1,5 @@
 # Just for this project
-docs/*.tmpl
+docs/ProjectConfig.rst
 docs/autodocgen
 docs/build_output*
 
