@@ -1,7 +1,10 @@
 .. include:: ../README.rst
    :end-before: Project Links
 
-The source code and issue tracker for PySys is hosted on `GitHub <https://github.com/pysys-test/pysys-test>`_. If you have a question, please ask it on Stackoverflow using the `pysys <https://stackoverflow.com/tags/pysys>`_ tag. 
+.. note::
+  Use the `issue tracker <https://github.com/pysys-test/pysys-test/issues>`_ if you want to report a bug or feature 
+  request in the PySys test framework. For how-tos and advice, 
+  `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
 Documentation contents
 ----------------------
