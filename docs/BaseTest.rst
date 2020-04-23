@@ -86,6 +86,8 @@ can be accessed via instance attributes on ``self``:
   The project can be used to access information such as the project properties which are shared across all tests 
   (e.g. for hosts and credentials). 
 
+.. _assertions-and-outcomes:
+
 Assertions and outcomes
 =======================
 

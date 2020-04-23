@@ -951,20 +951,11 @@ class ProcessUser(object):
 		
 		The method provides the ability to add a validation outcome to the internal data structure 
 		storing the list of validation outcomes. Multiple validations may be performed, the current
-		supported validation outcomes of which are:
-		
-		.. autosummary::
-		   pysys.constants.FAILED
-		   pysys.constants.TIMEDOUT
-		   pysys.constants.DUMPEDCORE
-		   pysys.constants.NOTVERIFIED
-		   pysys.constants.INSPECT
-		   pysys.constants.PASSED
-		   pysys.constants.SKIPPED
+		supported validation outcomes of which are described in :ref:`assertions-and-outcomes`.
 		
 		The outcomes are considered to have a precedence order, as defined by the order of the outcomes listed
-		above. Thus a C{BLOCKED} outcome has a higher precedence than a C{PASSED} outcome. The outcomes are defined 
-		in L{pysys.constants}. 
+		above. Thus a C{pysys.constants.BLOCKED} outcome has a higher precedence than a C{pysys.constants.PASSED} 
+		outcome. The outcomes are defined in L{pysys.constants}. 
 		
 		This method is thread-safe. 
 		
