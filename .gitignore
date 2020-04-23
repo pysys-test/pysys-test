@@ -1,3 +1,8 @@
+# Just for this project
+docs/*.tmpl
+docs/autodocgen
+docs/build_output*
+
 # PySys Output directories
 Output/
 pysys-junit-report/

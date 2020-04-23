@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import shutil
 from typing import List, Dict, Tuple
 
 DOC_SOURCE_DIR = os.path.dirname(__file__)
@@ -34,6 +35,8 @@ project = f'PySys v{release}'
 # -- General configuration ---------------------------------------------------
 
 sys.path.append(DOC_SOURCE_DIR+'/ext') # temporary measure to get sphinx_autodocgen
+
+assert os.path.exists(DOC_SOURCE_DIR+'/ProjectConfig.rst'), 'must run setup.py first, to generate docs/ProjectConfig.rst'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
