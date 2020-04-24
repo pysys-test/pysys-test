@@ -15,7 +15,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
+"""
+Log formatting classes that can be used or customized from the project configuration, including support for colored 
+output on the console. 
+"""
 
 import copy, logging
 
@@ -41,10 +44,10 @@ class BaseLogFormatter(logging.Formatter):
 	def tag(cls, category, arg_index=None):
 		"""Return  dictionary to tag a string to format with color encodings.
 
-		@param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
-		@param arg_index: The index of argument in the string expansion to color. This can be either a single
-		integer value representing the index, or a list of integers representing a set of indexes
-		@return: A dictionary that can then be used in calls to the logger
+		:param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
+		:param arg_index: The index of argument in the string expansion to color. This can be either a single
+			integer value representing the index, or a list of integers representing a set of indexes
+		:return: A dictionary that can then be used in calls to the logger
 		"""
 		if type(arg_index) is int: return {cls.CATEGORY:category, cls.ARG_INDEX:[arg_index]}
 		if type(arg_index) is list and all(isinstance(i, int) for i in arg_index): return {cls.CATEGORY:category, cls.ARG_INDEX:arg_index}
@@ -60,7 +63,7 @@ class BaseLogFormatter(logging.Formatter):
 		when passing the properties to the super class, which will throw an exception if any unexpected
 		options are present
 		
-		@param propertiesDict: dictionary of formatter-specific options
+		:param propertiesDict: dictionary of formatter-specific options
 
 		"""
 		self.name = propertiesDict.pop('name', None)
@@ -80,17 +83,16 @@ class ColorLogFormatter(BaseLogFormatter):
 	console output, with the color coding enabled either by the color option on the formatter
 	set to true. 
 	
-	The PYSYS_COLOR environment variable can be set to true or false, overriding any 
+	The ``PYSYS_COLOR`` environment variable can be set to true or false, overriding any 
 	setting specified in the project configuration.
 	
 	The colors used for each category defined by this class can be overridden 
-	by specifying "color:XXX" options, e.g.
-	<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
+	by specifying "color:XXX" options, e.g.::
 
-	@ivar COLOR_CATEGORIES: the color map for the defined logging categories
-	@type COLOR_CATEGORIES: dictionary
-	@ivar COLOR_ESCAPE_CODES: the escape codes for each of the support colors
-	@type COLOR_ESCAPE_CODES: dictionary
+		<formatter><property name="color:dumped core" value="YELLOW"/></formatter>
+
+	:ivar dict(str,str) COLOR_CATEGORIES: the color map for the defined logging categories
+	:ivar dict(str,str) COLOR_ESCAPE_CODES: the escape codes for each of the support colors
 
 	"""
 	# use a lookup map from message "categories" to colors,
@@ -133,10 +135,10 @@ class ColorLogFormatter(BaseLogFormatter):
 		Called during startup, but can also be programatically invoked 
 		later 
 		
-		@param bright: set to False to force only the basic (30-39) codes 
-		or True to use the better-looking 90-99 bright codes which are not 
-		supported by all terminals. Default is bright=False, but can be 
-		overridden by PYSYS_COLOR_BASIC env var. 
+		:param bright: set to False to force only the basic (30-39) codes 
+			or True to use the better-looking 90-99 bright codes which are not 
+			supported by all terminals. Default is bright=False, but can be 
+			overridden by the ``PYSYS_COLOR_BASIC`` environment var. 
 		"""
 		if bright is None: bright = os.getenv('PYSYS_COLOR_BRIGHT','true')=='true'
 		# by default we use standard ANSI escape sequences, supported by most unix terminals
@@ -211,8 +213,8 @@ class ColorLogFormatter(BaseLogFormatter):
 	def formatException(self, exc_info):
 		"""Format an exception for logging, returning the new value.
 
-		@param exc_info: The exception info
-		@return: The formatted message ready for logging
+		:param exc_info: The exception info
+		:return: The formatted message ready for logging
 
 		"""
 		msg = super(ColorLogFormatter, self).formatException(exc_info)
@@ -226,8 +228,8 @@ class ColorLogFormatter(BaseLogFormatter):
 	def format(self, record):
 		"""Format a log record for logging, returning the new value.
 
-		@param record: The message to be formatted
-		@return: The formatted message ready for logging
+		:param record: The message to be formatted
+		:return: The formatted message ready for logging
 
 		"""
 		if self.color:
@@ -257,8 +259,8 @@ class ColorLogFormatter(BaseLogFormatter):
 	def formatArg(self, category, arg):
 		"""Format a single argument within a record, based on its category.
 
-		@param category: The logging category
-		@param arg: The argument within the record.
+		:param category: The logging category
+		:param arg: The argument within the record.
 
 		"""
 		if isstring(arg): return self.colorCategoryToEscapeSequence(category)+arg+self.colorCategoryToEscapeSequence(LOG_END)
@@ -268,8 +270,8 @@ class ColorLogFormatter(BaseLogFormatter):
 	def colorCategoryToEscapeSequence(self, category):
 		""" Return the escape sequence to be used for the specified category of logging output. 
 		
-		@param category: The category of the log message
-		@return: The escape sequence
+		:param category: The category of the log message
+		:return: The escape sequence
 
 		"""
 		color = self.COLOR_CATEGORIES.get(category, '<%s>'%category)
@@ -305,7 +307,7 @@ def stdoutPrint(s):
 	function is provided as a way to write to stdout for cases where it is truly 
 	needed, such as unconditionally writing status messages to a CI system. 
 	
-	@param s: a unicode or bytes string. A newline will be added automatically. 
+	:param s: a unicode or bytes string. A newline will be added automatically. 
 	"""
 	if isinstance(s, binary_type):
 		s += b'\n'

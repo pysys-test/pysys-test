@@ -17,7 +17,7 @@
 
 
 """
-@undocumented: createDescriptors, loadDescriptors
+Implementation of the pysys.py command line launcher.
 """
 from __future__ import print_function
 __all__ = [ "createDescriptors","console" ]
@@ -39,13 +39,13 @@ def loadDescriptors(dir=None):
 	"""Load descriptor objects representing a set of tests to run for 
 	the current project, returning the list.
 	
-	Deprecated, use L{pysys.xml.descriptor.DescriptorLoader} instead.
+	:meta private: Deprecated and since 1.5.1 also hidden; use `pysys.xml.descriptor.DescriptorLoader` instead.
 	
-	@param dir: The parent directory to search for runnable tests
-	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects. 
-	Caller must sort this list to ensure deterministic behaviour. 
-	@rtype: list
-	@raises UserError: Raised if no testcases can be found.
+	:param dir: The parent directory to search for runnable tests
+	:return: List of L{pysys.xml.descriptor.TestDescriptor} objects. 
+		Caller must sort this list to ensure deterministic behaviour. 
+	:rtype: list
+	:raises UserError: Raised if no testcases can be found.
 	
 	"""
 	if dir is None: dir = os.getcwd()
@@ -55,22 +55,24 @@ def loadDescriptors(dir=None):
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[], expandmodes=True):
 	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
 	
-	@param testIdSpecs: A list of strings specifying the set of testcase identifiers
-	@param type: The type of the tests to run (manual | auto)
-	@param includes: A list of test groups to include in the returned set
-	@param excludes: A list of test groups to exclude in the returned set
-	@param trace: A list of requirements to indicate tests to include in the returned set
-	@param dir: The parent directory to search for runnable tests
-	@param modeincludes: A list specifying the modes to be included; 
-	must contain at most one entry unless supportMultipleModesPerRun=True. 
-	@param modeexcludes: A list specifying the modes to be excluded; 
-	only supported if supportMultipleModesPerRun=True. 
-	@param expandmodes: Set to False to disable expanding a test with multiple
-	modes into separate descriptors for each one (used for pysys print) 
-	if supportMultipleModesPerRun=True. 
-	@return: List of L{pysys.xml.descriptor.TestDescriptor} objects
-	@rtype: list
-	@raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
+	:meta private: Not for use outside the framwork. 
+	
+	:param testIdSpecs: A list of strings specifying the set of testcase identifiers
+	:param type: The type of the tests to run (manual | auto)
+	:param includes: A list of test groups to include in the returned set
+	:param excludes: A list of test groups to exclude in the returned set
+	:param trace: A list of requirements to indicate tests to include in the returned set
+	:param dir: The parent directory to search for runnable tests
+	:param modeincludes: A list specifying the modes to be included; 
+		must contain at most one entry unless supportMultipleModesPerRun=True. 
+	:param modeexcludes: A list specifying the modes to be excluded; 
+		only supported if supportMultipleModesPerRun=True. 
+	:param expandmodes: Set to False to disable expanding a test with multiple
+		modes into separate descriptors for each one (used for pysys print) 
+		if supportMultipleModesPerRun=True. 
+	:return: List of L{pysys.xml.descriptor.TestDescriptor} objects
+	:rtype: list
+	:raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
 	
 	"""
 	project = Project.getInstance()

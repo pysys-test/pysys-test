@@ -16,7 +16,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Contains the process monitoring API - the L{BaseProcessMonitor} class, L{ProcessMonitorKey} constants for identifying 
+Contains the process monitoring API used by L{pysys.basetest.BaseTest.startProcessMonitor}.
+
+The main components are the L{pysys.process.monitor.BaseProcessMonitor} class, L{ProcessMonitorKey} constants for identifying 
 columns and the default L{ProcessMonitorTextFileHandler} class for writing monitoring information to a file. 
 """
 
@@ -97,6 +99,7 @@ class ProcessMonitorKey(object):
 	a format compatible with v1.3.0 and earlier versions of PySys. 
 	
 	This is %d/%m/%y %H:%M:%S on Windows and %m/%d/%y %H:%M:%S on Unix. 
+	
 	@deprecated: Use L{DATE_TIME} if possible. 
 	"""
 	
@@ -118,11 +121,11 @@ class BaseProcessMonitorHandler(object):
 		Called on a background thread each time a new sample of monitoring 
 		data is available. 
 		
-		@param data: a dictionary whose keys are from L{ProcessMonitorKey} 
-		(or any new keys added by custom process monitor implementations). 
-		The dictionary values are of type C{int}, C{float} or C{string}. 
+		:param data: a dictionary whose keys are from L{ProcessMonitorKey} 
+			(or any new keys added by custom process monitor implementations). 
+			The dictionary values are of type C{int}, C{float} or C{string}. 
 		
-		@param kwargs: Reserved for future use. 
+		:param kwargs: Reserved for future use. 
 		"""
 		raise NotImplementedError('Not implemented yet')
 	
@@ -181,7 +184,7 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 	def setDefaults(columns, delimiter=None, writeHeaderLine=None):
 		"""Static helper method for setting the default columns or 
 		C{writeHeaderLine} setting for all tests that use the 
-		C{rocessMonitorTextFileHandler}. 
+		C{ProcessMonitorTextFileHandler}. 
 		
 		This method could be called from a custom runner's 
 		L{pysys.baserunner.BaseRunner.setup} method in order to take effect 
@@ -190,16 +193,16 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 		Do not call this from within an individual testcase since that 
 		could cause unwanted interference between different testcases. 
 		
-		@param columns: A list of the colums to be included, using values from
-		L{ProcessMonitorKey}. Since additional columns may be added to the end 
-		of L{DEFAULT_COLUMNS} in future releases, when calling this method you 
-		should specify all the columns you want explicitly including the 
-		current defaults rather than writing `DEFAULT_COLUMNS+[...]`. 
+		:param columns: A list of the colums to be included, using values from
+			L{ProcessMonitorKey}. Since additional columns may be added to the end 
+			of L{DEFAULT_COLUMNS} in future releases, when calling this method you 
+			should specify all the columns you want explicitly including the 
+			current defaults rather than writing `DEFAULT_COLUMNS+[...]`. 
 		
-		@param delimiter: The delimiter string used between each column. 
+		:param delimiter: The delimiter string used between each column. 
 				
-		@param writeHeaderLine: Specifies whether a header line beginning 
-		with `#` should be written at the start of the file. 
+		:param writeHeaderLine: Specifies whether a header line beginning 
+			with `#` should be written at the start of the file. 
 		"""
 		if columns: ProcessMonitorTextFileHandler.DEFAULT_COLUMNS = list(columns)
 		if writeHeaderLine is not None: ProcessMonitorTextFileHandler.DEFAULT_WRITE_HEADER_LINE = writeHeaderLine
@@ -212,20 +215,20 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 		Uses default values set on the instance unless keyword overrides 
 		are provided; see L{setDefaults}.
 
-		@param file: An absolute path string or open file handle to which 
-		process monitor data lines will be written. 
+		:param file: An absolute path string or open file handle to which 
+			process monitor data lines will be written. 
 		
-		@param columns: An ordered list of the columns from L{ProcessMonitorKey} that 
-		should be included in the file. If not specified, the columns specified 
-		by L{DEFAULT_COLUMNS} will be used. 
+		:param columns: An ordered list of the columns from L{ProcessMonitorKey} that 
+			should be included in the file. If not specified, the columns specified 
+			by L{DEFAULT_COLUMNS} will be used. 
 		
-		@param delimiter: The delimiter string used between each column. 
-		If not specified, the string specified by L{DEFAULT_DELIMITER} will be 
-		used. 
+		:param delimiter: The delimiter string used between each column. 
+			If not specified, the string specified by L{DEFAULT_DELIMITER} will be 
+			used. 
 		
-		@param writeHeaderLine: Determines whether a header line prefixed 
-		by `#` will be written at the start of the file. If not overridden, the 
-		default is taken from L{DEFAULT_WRITE_HEADER_LINE}.
+		:param writeHeaderLine: Determines whether a header line prefixed 
+			by `#` will be written at the start of the file. If not overridden, the 
+			default is taken from L{DEFAULT_WRITE_HEADER_LINE}.
 		"""
 		self.columns = columns or self.DEFAULT_COLUMNS
 		self.delimiter = delimiter or self.DEFAULT_DELIMITER
@@ -285,18 +288,18 @@ class BaseProcessMonitor(object):
 	def __init__(self, owner, process, interval, handlers, **pmargs):
 		"""Construct an instance of the process monitor.
 		
-		@param owner: The BaseTest owning this monitor. 
+		:param owner: The BaseTest owning this monitor. 
 		
-		@param process: The process wrapper object. A numeric pid can be specified 
-		instead but with reduced functionality, so use a process object if you 
-		have one. 
+		:param process: The process wrapper object. A numeric pid can be specified 
+			instead but with reduced functionality, so use a process object if you 
+			have one. 
 		
-		@param interval: The interval in seconds between polling for each data 
-		sample. 
+		:param interval: The interval in seconds between polling for each data 
+			sample. 
 		
-		@param pmargs: Keyword arguments to allow parameterization of the 
-		returned data. An exception will be raised for any arguments not 
-		expected by this class. 
+		:param pmargs: Keyword arguments to allow parameterization of the 
+			returned data. An exception will be raised for any arguments not 
+			expected by this class. 
 		"""
 		
 		# NB: this could be subclassed to support different platforms and/or add extra 
@@ -351,8 +354,8 @@ class BaseProcessMonitor(object):
 		Performs any required initialization of data structures then 
 		starts the background thread. 
 		
-		@returns: This instance. 
-		@rtype: L{BaseProcessMonitor}
+		:return: This instance. 
+		:rtype: L{BaseProcessMonitor}
 		"""
 		# executed on main thread - the best place to perform initial setup so we 
 		# get an immediate error if it fails
@@ -366,8 +369,8 @@ class BaseProcessMonitor(object):
 		each poll of the process, to allow OS-agnostic pre-processing and 
 		addition of derived data keys such as the date and time. 
 		
-		@param data: The dictionary of process monitoring data. This method 
-		may add or modify the contents of this dictionary. 
+		:param data: The dictionary of process monitoring data. This method 
+			may add or modify the contents of this dictionary. 
 		
 		"""
 		
@@ -415,8 +418,8 @@ class BaseProcessMonitor(object):
 	def running(self):
 		"""Return the running status of the process monitor.
 		
-		@return: True if the process monitor background thread is still running. 
-		@rtype: bool
+		:return: True if the process monitor background thread is still running. 
+		:rtype: bool
 		"""
 		return self.thread.is_alive()
 
@@ -436,12 +439,12 @@ class BaseProcessMonitor(object):
 		
 		Called on the background monitoring thread regularly.
 		
-		@param sample: An integer starting at 1 and incrementing each time 
-		this method is called. 
+		:param sample: An integer starting at 1 and incrementing each time 
+			this method is called. 
 		
-		@return: A dictionary of (typically numeric) values, keyed by 
-		L{ProcessMonitorKey}.
-		@rtype: dict
+		:return: A dictionary of (typically numeric) values, keyed by 
+			L{ProcessMonitorKey}.
+		:rtype: dict
 		"""
 		raise NotImplementedError('_getData must be implemented by subclass')
 

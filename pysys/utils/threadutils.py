@@ -34,26 +34,22 @@ class BackgroundThread(object):
 	PySys wrapper for a background thread that can receive requests to 
 	stop, and can send log output to the same place as the test's logging. 
 
-	@ivar name: The name specified for this thread when it was created. 
+	To create a background thread in your test, use `pysys.basetest.BaseTest.startBackgroundThread`.
+
+	:ivar str ~.name: The name specified for this thread when it was created. 
 	
-	@ivar joinTimeoutSecs: The default timeout that will be used for joining 
-	this thread. If not explicitly set this will be L{TIMEOUTS}C{['WaitForProcessStop']}.
+	:ivar int ~.joinTimeoutSecs: The default timeout that will be used for joining 
+		this thread. If not explicitly set this will be L{TIMEOUTS}C{['WaitForProcessStop']}.
 	
-	@ivar exception: The exception object raised by the thread if it has 
-	terminated with an error, or None if not. 
+	:ivar Exception ~.exception: The exception object raised by the thread if it has 
+		terminated with an error, or None if not. 
 	"""
 	def __init__(self, owner, name, target, kwargsForTarget):
-		"""
-		For details see L{pysys.basetest.BaseTest.startBackgroundThread}.
-		
-		@param owner: The BaseTest that owns this background thread and is 
-		responsible for ensuring it is terminated during cleanup. 
-		"""
 		assert name, 'Thread name must always be specified'
 
 		self.log = logging.getLogger('pysys.thread.%s'%name) # name without the owner prefix
 		self.name = name
-		self.owner = owner
+		self.owner = owner # a BaseTest
 		self.__parentLogHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
 		assert self.__parentLogHandlers, self.__parentLogHandlers
 		self.__target = target
@@ -79,8 +75,8 @@ class BackgroundThread(object):
 	
 	def isAlive(self):
 		"""
-		@return: True if this thread is still running. 
-		@rtype: bool
+		:return: True if this thread is still running. 
+		:rtype: bool
 		"""
 		return self.thread.isAlive()
 	
@@ -113,8 +109,8 @@ class BackgroundThread(object):
 		thread to terminate, call L{join} afterwards. Calling this repeatedly 
 		has no effect. 
 		
-		@return: This instance, in case you wish to do fluent method chaining.  
-		@rtype: L{BackgroundThread}
+		:return: This instance, in case you wish to do fluent method chaining.  
+		:rtype: L{BackgroundThread}
 		"""
 		self.log.debug('Stop() requested for background thread %s', self)
 		self.stopping.set()
@@ -136,16 +132,16 @@ class BackgroundThread(object):
 		stop this is logged but does not result in a failure outcome, 
 		since failures during cleanup are usually to be expected. 
 		
-		@param timeout: The time in seconds to wait. Usually this should be 
-		left at the default value of None which uses a default timeout 
-		of L{constants.TIMEOUTS}C{['WaitForProcessStop']}. 
-		Note that unlike Python's `Thread.join` method, infinite timeouts 
-		are not supported. 
+		:param timeout: The time in seconds to wait. Usually this should be 
+			left at the default value of None which uses a default timeout 
+			of L{constants.TIMEOUTS}C{['WaitForProcessStop']}. 
+			Note that unlike Python's `Thread.join` method, infinite timeouts 
+			are not supported. 
 		
-		@param abortOnError: Set to True if you wish this method to 
-		immediately abort with an exception if the background thread times out 
-		or raises an Exception. The default is False, which adds the failure 
-		outcome but does not raise an exception. 
+		:param abortOnError: Set to True if you wish this method to 
+			immediately abort with an exception if the background thread times out 
+			or raises an Exception. The default is False, which adds the failure 
+			outcome but does not raise an exception. 
 		"""
 		outcomereported = self.__outcomeReported
 		self.__outcomeReported = True # only do this once

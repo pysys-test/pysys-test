@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -18,46 +18,49 @@
 
 
 """
-Contains API and sample implementations of L{BaseResultsWriter} and 
-its subclasses, which are used to output test results during runtime execution.
+Writers are configurable plug-ins that record test outcomes (typically on disk, on the console, or to your CI tooling). 
 
-Output writers are responsible for summarising test results on completion of a test, or on completion
-of a set of tests. There are currently three distinct types of writers, namely `Record`, `Progress`, and
-`Summary`, each of which performs output at different stages of a run:
+This module contains the `BaseResultsWriter` abstract class which defines the writer API, as well as several 
+sample implementations.
 
-   - `Record` writers output the outcome of a specific test after completion of that test, to allow
-     runtime auditing of the test output, e.g. into a relational database. Several record
-     writers are distributed with the PySys framework, such as the L{writer.JUnitXMLResultsWriter}.
-     Best practice is to subclass L{writer.BaseRecordResultsWriter} when writing new record writers. 
-     By default, record writers are enabled only when the --record flag is given to the PySys launcher, 
+Output writers are responsible for summarising test results as each test completes, or at the end when all 
+tests has completed. There are currently three distinct types of writers, namely 'Record', 'Progress', and
+'Summary', each of which generates output at different stages of a run:
+
+   - `BaseRecordResultsWriter`: **Record writers** output the outcome of a specific test after completion of that test, to allow
+     runtime auditing of the test output, e.g. into text file, a database, or to the console in a format that 
+     can be read by your Continuous Integration (CI) tooling. Several record
+     writers are distributed with the PySys framework, such as the `JUnitXMLResultsWriter` and `ci.TravisCIWriter`.
+     By default, record writers are enabled only when the ``--record`` flag is given to the PySys launcher, 
      though some writers may enable/disable themselves under different conditions, by overriding the 
-     L{pysys.writer.BaseRecordResultsWriter.isEnabled} method.
+     L{BaseResultsWriter.isEnabled} method.
 
-   - `Progress` writers output a summary of the test progress after completion of each test, to give
+   - `BaseProgressResultsWriter`: **Progress writers** output a summary of the test progress after completion of each test, to give
      an indication of how far and how well the run is progressing. A single implementation of a progress
-     writer is distributed with the PySys framework, namely the L{writer.ConsoleProgressResultsWriter},
+     writer is distributed with the PySys framework, namely the L{ConsoleProgressResultsWriter},
      which details the percentage of tests selected to be run and that have executed, and a summary
-     of the recent test failures. Progress writers should extend the L{writer.BaseProgressResultsWriter} and
-     are enabled when the --progress flag is given to the PySys launcher, or when PYSYS_PROGRESS=true is
+     of the recent test failures. 
+     Progress writers should extend the L{BaseProgressResultsWriter} and
+     are enabled when the ``--progress`` flag is given to the PySys launcher, or when ``PYSYS_PROGRESS=true`` is
      set in the local environment.
 
-   - `Summary` writers output an overall summary of the status at the end of a test run. A single implementation
-     of a progress writer is distributed with the PySys framework, namely the L{writer.ConsoleSummaryResultsWriter},
-     which details the overall test run outcome and lists any tests that did not pass. A summary writer is always
-     enabled regardless of the flags given to the pysys launcher.
+   - `BaseSummaryResultsWriter`: **Summary writers** output an overall summary of the status at the end of a test run. 
+     A single implementation of a summary writer is distributed with the PySys framework, namely the L{ConsoleSummaryResultsWriter},
+     which details the overall test run outcome and lists any tests that did not pass. 
+     Summary writers are always enabled regardless of the flags given to the PySys launcher.
 
-Project configuration of the writers is through the PySys project XML file using the <writer> tag. Multiple
-writers may be configured and their individual properties set through the nested <property> tag. Writer
-properties are set as attributes to the class through the setattr() function. Custom (site specific) modules
+Project configuration of the writers is through the PySys project XML file using the ``<writer>`` tag. Multiple
+writers may be configured and their individual properties set through the nested ``<property>`` tag. Writer
+properties are set as attributes to the class through the ``setattr()`` function. Custom (site specific) modules
 can be created and configured by users of the PySys framework (e.g. to output test results into a relational
 database etc), though they must adhere to the interface demonstrated by the implementations demonstrated here.
 If no progress writers are explicitly configured in the PySys project XML file, an instance of
-L{writer.ConsoleProgressResultsWriter} is used. If no summary writer is explicitly configured in the PySys project
-XML file, an instance of L{writer.ConsoleSummaryResultsWriter} is used.
+L{ConsoleProgressResultsWriter} is used. If no summary writer is explicitly configured in the PySys project
+XML file, an instance of L{ConsoleSummaryResultsWriter} is used.
 
 The writers are instantiated and invoked by the L{pysys.baserunner.BaseRunner} class instance. This calls the class
 constructors of all configured test writers, and then the setup (prior to executing the set of tests), processResult
-(process a test result), and cleanup (upon completion of the execution of all tests). The **kwargs method parameter
+(process a test result), and cleanup (upon completion of the execution of all tests). The ``**kwargs`` method parameter
 is used for variable argument passing in the interface methods to allow modification of the PySys framework without
 breaking writer implementations already in existence.
 
@@ -81,17 +84,15 @@ from xml.dom.minidom import getDOMImplementation
 log = logging.getLogger('pysys.writer')
 
 class BaseResultsWriter(object):
-	"""Base class for objects that get notified as and when test results are available. """
+	"""Base class for all writers that get notified as and when test results are available.
 
-	def __init__(self, logfile=None, **kwargs):
-		""" Create an instance of the BaseResultsWriter class.
-
-		@param logfile: Optional configuration property specifying a file to store output in. 
+	:param str logfile: Optional configuration property specifying a file to store output in. 
 		Does not apply to all writers, can be ignored if not needed. 
 
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+	:param kwargs: Additional keyword arguments may be added in a future release. 
+	"""
 
-		"""
+	def __init__(self, logfile=None, **kwargs):
 		pass
 
 	def isEnabled(self, record=False, **kwargs): 
@@ -100,15 +101,15 @@ class BaseResultsWriter(object):
 		If set to False then after construction none of the other methods 
 		(including L{setup})) will be called. 
 		
-		@param record: True if the user ran PySys with the `--record` flag, 
-		indicating that test results should be recorded. 
+		:param record: True if the user ran PySys with the `--record` flag, 
+			indicating that test results should be recorded. 
 		 
-		@returns: For record writers, the default to enable only if record==True, 
-		but individual writers can use different criteria if desired, e.g. 
-		writers for logging output to a CI system may enable themselves 
-		based on environment variables indicating that system is present, 
-		even if record is not specified explicitly. 
-		
+		:return: For record writers, the default to enable only if record==True, 
+			but individual writers can use different criteria if desired, e.g. 
+			writers for logging output to a CI system may enable themselves 
+			based on environment variables indicating that system is present, 
+			even if record is not specified explicitly. 
+			
 		"""
 		return record == True
 
@@ -119,20 +120,20 @@ class BaseResultsWriter(object):
 		writer in the project configuration file, the configured value will be 
 		assigned to `self.PROP`. 
 
-		@param numTests: The total number of tests (cycles*testids) to be executed
-		@param cycles: The number of cycles. 
-		@param xargs: The runner's xargs
-		@param threads: The number of threads used for running tests. 
+		:param numTests: The total number of tests (cycles*testids) to be executed
+		:param cycles: The number of cycles. 
+		:param xargs: The runner's xargs
+		:param threads: The number of threads used for running tests. 
 		
-		@param testoutdir: The output directory used for this test run 
-		(equal to `runner.outsubdir`), an identifying string which often contains 
-		the platform, or when there are multiple test runs on the same machine 
-		may be used to distinguish between them. This is usually a relative path 
-		but may be an absolute path. 
+		:param testoutdir: The output directory used for this test run 
+			(equal to `runner.outsubdir`), an identifying string which often contains 
+			the platform, or when there are multiple test runs on the same machine 
+			may be used to distinguish between them. This is usually a relative path 
+			but may be an absolute path. 
 		
-		@param runner: The runner instance that owns this writer. 
+		:param runner: The runner instance that owns this writer. 
 		
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+		:param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
 		pass
@@ -142,7 +143,7 @@ class BaseResultsWriter(object):
 		
 		This is where file headers can be written, and open handles should be closed. 
 
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+		:param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
 		pass
@@ -153,14 +154,14 @@ class BaseResultsWriter(object):
 		This method is always invoked from the same thread as setup() and cleanup(), even 
 		when multiple tests are running in parallel. 
 
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
-		can extract data from this object but should not store a reference to it. 
-		The testObj.descriptor.id indicates the test that ran. 
-		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
-		@param testTime: Duration of the test in seconds as a floating point number. 
-		@param testStart: The time when the test started. 
-		@param runLogOutput: The logging output written to run.log, as a unicode character string. 
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
+			can extract data from this object but should not store a reference to it. 
+			The testObj.descriptor.id indicates the test that ran. 
+		:param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
+		:param testTime: Duration of the test in seconds as a floating point number. 
+		:param testStart: The time when the test started. 
+		:param runLogOutput: The logging output written to run.log, as a unicode character string. 
+		:param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
 		pass
@@ -172,18 +173,18 @@ class BaseResultsWriter(object):
 		worker thread, so any data structures accessed in this method and others on this class must be
 		synchronized if performing non-atomic operations.
 		
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
-		can extract data from this object but should not store a reference to it. The testObj.descriptor.id
-		indicates the test that ran.
-		@param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
-		@param kwargs: Additional keyword arguments may be added in a future release. 
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
+			can extract data from this object but should not store a reference to it. The testObj.descriptor.id
+			indicates the test that ran.
+		:param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
+		:param kwargs: Additional keyword arguments may be added in a future release. 
 
 		"""
 		pass
 
 
 class BaseRecordResultsWriter(BaseResultsWriter):
-	"""Base class for writers that record the results of tests, and are enabled only when the --record flag is specified.
+	"""Base class for writers that record the results of tests, and are enabled only when the ``--record`` flag is specified.
 	
 	For compatibility reasons writers that do not subclass BaseSummaryResultsWriter or BaseProgressResultsWriter are
 	treated as "record" writers even if they do not inherit from this class.
@@ -195,7 +196,7 @@ class BaseRecordResultsWriter(BaseResultsWriter):
 class BaseSummaryResultsWriter(BaseResultsWriter):
 	"""Base class for writers that display a summary of test results.
 	
-	Summary writers are always enabled (regardless of whether --progress or --record are specified). If
+	Summary writers are always enabled (regardless of whether ``--progress`` or ``--record`` are specified). If
 	no "summary" writers are configured, a default ConsoleSummaryResultsWriter instance will be added
 	automatically.
 
@@ -209,7 +210,7 @@ class BaseSummaryResultsWriter(BaseResultsWriter):
 class BaseProgressResultsWriter(BaseResultsWriter):
 	""" Base class for writers that display progress information while tests are running.
 
-	Progress writers are only enabled if the --progress flag is specified.
+	Progress writers are only enabled if the ``--progress`` flag is specified.
 
 	"""
 	def isEnabled(self, record=False, **kwargs): 
@@ -218,13 +219,14 @@ class BaseProgressResultsWriter(BaseResultsWriter):
 class flushfile(): 
 	"""Utility class to flush on each write operation - for internal use only.  
 	
+	:meta private:
 	"""
 	fp=None 
 	
 	def __init__(self, fp): 
 		"""Create an instance of the class. 
 		
-		@param fp: The file object
+		:param fp: The file object
 		
 		"""
 		self.fp = fp
@@ -232,7 +234,7 @@ class flushfile():
 	def write(self, msg):
 		"""Perform a write to the file object.
 		
-		@param msg: The string message to write. 
+		:param msg: The string message to write. 
 		
 		"""
 		if self.fp is not None:
@@ -258,8 +260,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 	Writing of the test summary file defaults to the working directory. This can be be overridden in the PySys 
 	project file using the nested <property> tag on the <writer> tag.
 	 
-	@ivar outputDir: Path to output directory to write the test summary files
-	@type outputDir: string
+	:ivar str ~.outputDir: Path to output directory to write the test summary files
 	
 	"""
 	outputDir = None
@@ -276,7 +277,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		Creates the file handle to the logfile and logs initial details of the date, 
 		platform and test host. 
 				
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 		
 		"""		
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
@@ -291,7 +292,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		
 		Flushes and closes the file handle to the logfile.  
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 				
 		"""
 		if self.fp: 
@@ -304,8 +305,8 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		
 		Writes the test id and outcome to the logfile. 
 		
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
-		@param kwargs: Variable argument list
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		:param kwargs: Variable argument list
 		
 		"""
 		if "cycle" in kwargs: 
@@ -328,12 +329,12 @@ def replaceIllegalXMLCharacters(unicodeString, replaceWith=u'?'):
 	
 	See https://bugs.python.org/issue5166
 	
-	@param unicodeString: a unicode character string (not a byte string). 
-	Since most XML documents are encoded in utf-8, typical usage would be to 
-	decode the UTF-8 bytes into characters before calling this function and then 
-	re-encode as UTF-8 again afterwards.
+	:param unicodeString: a unicode character string (not a byte string). 
+		Since most XML documents are encoded in utf-8, typical usage would be to 
+		decode the UTF-8 bytes into characters before calling this function and then 
+		re-encode as UTF-8 again afterwards.
 	
-	@param replaceWith: the unicode character string to replace each illegal character with. 
+	:param replaceWith: the unicode character string to replace each illegal character with. 
 	"""
 	return re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]', replaceWith, unicodeString)
 
@@ -344,12 +345,9 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	logfile using toprettyxml(). The outputDir, stylesheet, useFileURL attributes of the class can 
 	be over-ridden in the PySys project file using the nested <property> tag on the <writer> tag.
 	 
-	@ivar outputDir: Path to output directory to write the test summary files
-	@type outputDir: string
-	@ivar stylesheet: Path to the XSL stylesheet
-	@type stylesheet: string
-	@ivar useFileURL: Indicates if full file URLs are to be used for local resource references 
-	@type useFileURL: string (true | false)
+	:ivar str ~.outputDir: Path to output directory to write the test summary files
+	:ivar str ~.stylesheet: Path to the XSL stylesheet
+	:ivar str ~.useFileURL: Indicates if full file URLs are to be used for local resource references 
 	
 	"""
 	outputDir = None
@@ -368,7 +366,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 
 		Creates the DOM for the test output summary and writes to logfile. 
 						
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 		
 		"""
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
@@ -438,7 +436,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		
 		Updates the test run status in the DOM, and re-writes to logfile.
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 				
 		"""
 		if self.fp: 
@@ -452,8 +450,8 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		
 		Adds the results node to the DOM and re-writes to logfile.
 		
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
-		@param kwargs: Variable argument list
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		:param kwargs: Variable argument list
 		
 		"""	
 		if "cycle" in kwargs: 
@@ -512,7 +510,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 
 	def __pathToURL(self, path):
 		try: 
-			if self.useFileURL.lower() == "false": return path
+			if self.useFileURL==True or (self.useFileURL.lower() == "false"): return path
 		except Exception:
 			return path
 		else:
@@ -522,8 +520,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	"""Class to log test results in Apache Ant JUnit XML format (one output file per test per cycle). 
 	
-	@ivar outputDir: Path to output directory to write the test summary files
-	@type outputDir: string
+	:ivar str ~.outputDir: Path to output directory to write the test summary files
 	
 	"""
 	outputDir = None
@@ -536,7 +533,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 		Creates the output directory for the writing of the test summary files.  
 						
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 		
 		"""
 		self.outputDir = os.path.join(kwargs['runner'].project.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
@@ -547,7 +544,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def cleanup(self, **kwargs):
 		"""Implementation of the cleanup method. 
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 				
 		"""
 		pass
@@ -557,8 +554,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		
 		Creates a test summary file in the Apache Ant JUnit XML format. 
 		
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
-		@param kwargs: Variable argument list
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		:param kwargs: Variable argument list
 		
 		"""	
 		if "cycle" in kwargs: 
@@ -652,8 +649,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 	id, title, cycle, startTime, duration, outcome
 
-	@ivar outputDir: Path to output directory to write the test summary files
-	@type outputDir: string
+	:ivar str ~.outputDir: Path to output directory to write the test summary files
 
 	"""
 	outputDir = None
@@ -669,7 +665,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		Creates the file handle to the logfile and logs initial details of the date,
 		platform and test host.
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 
 		"""
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
@@ -682,7 +678,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 		Flushes and closes the file handle to the logfile.
 
-		@param kwargs: Variable argument list
+		:param kwargs: Variable argument list
 
 		"""
 		if self.fp:
@@ -695,8 +691,8 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 		Writes the test id and outcome to the logfile.
 
-		@param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
-		@param kwargs: Variable argument list
+		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class
+		:param kwargs: Variable argument list
 
 		"""
 		testStart = kwargs["testStart"] if "testStart" in kwargs else time.time()

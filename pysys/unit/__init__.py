@@ -17,8 +17,7 @@
 
 
 """
-Contains classes for running various unit test frameworks, with the underlying
-philosophy being that a suite of unit tests becomes a single pysys test
+Unit test support (currently just PyUnit).
 """
 __all__ = [
 	"pyunit"

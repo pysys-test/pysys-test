@@ -15,7 +15,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
+"""
+Regular expression grep matching in text files. 
+"""
 
 from __future__ import print_function
 import os.path, logging, copy
@@ -32,13 +34,13 @@ log = logging.getLogger('pysys.assertions')
 def getmatches(file, regexpr, ignores=None, encoding=None):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches.
 	
-	@param file: The full path to the input file
-	@param regexpr: The regular expression used to search for matches
-	@param ignores: A list of regexes which will cause matches to be discarded
-	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
-	@return: A list of the match objects 
-	@rtype: list
-	@raises FileNotFoundException: Raised if the input file does not exist
+	:param file: The full path to the input file
+	:param regexpr: The regular expression used to search for matches
+	:param ignores: A list of regexes which will cause matches to be discarded
+	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:return: A list of the match objects 
+	:rtype: list
+	:raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
 	matches = []
@@ -69,16 +71,16 @@ def getmatches(file, regexpr, ignores=None, encoding=None):
 def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None):
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
 	
-	@param file: The full path to the input file
-	@param expr: The regular expression (uncompiled) to search for in the input file
-	@param ignores: Optional list of regular expression strings to ignore when searching file. 
-	@param returnMatch: return the regex match object instead of a simple boolean
-	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:param file: The full path to the input file
+	:param expr: The regular expression (uncompiled) to search for in the input file
+	:param ignores: Optional list of regular expression strings to ignore when searching file. 
+	:param returnMatch: return the regex match object instead of a simple boolean
+	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 
-	@returns: success (True / False), unless returnMatch=True in which case it returns the regex match 
+	:return: success (True / False), unless returnMatch=True in which case it returns the regex match 
 		object (or None if not matched)
-	@rtype: integer
-	@raises FileNotFoundException: Raised if the input file does not exist
+	:rtype: integer
+	:raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
 	if not pathexists(file):
@@ -110,15 +112,15 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None):
 def lastgrep(file, expr, ignore=[], include=[], encoding=None):
 	"""Search for matches to a regular expression in the last line of an input file, returning true if a match occurs.
 	
-	@param file: The full path to the input file
-	@param expr: The regular expression (uncompiled) to search for in the last line of the input file
-	@returns: success (True / False)
-	@param ignore: A list of regular expressions which remove entries in the input file contents before making the grep
-	@param include: A list of regular expressions used to select lines from the input file contents to use in the grep 
-	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:param file: The full path to the input file
+	:param expr: The regular expression (uncompiled) to search for in the last line of the input file
+	:return: success (True / False)
+	:param ignore: A list of regular expressions which remove entries in the input file contents before making the grep
+	:param include: A list of regular expressions used to select lines from the input file contents to use in the grep 
+	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	
-	@rtype: integer
-	@raises FileNotFoundException: Raised if the input file does not exist
+	:rtype: integer
+	:raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
 	if not pathexists(file):
@@ -153,13 +155,13 @@ def orderedgrep(file, exprList, encoding=None):
 	an expression list of ["^A.*$", "^C.*$", "^D.*$"] will return true, whilst an expression list of 
 	["^A.*$", "^C.$", "^B.$"] will return false.
 	
-	@param file: The full path to the input file
-	@param exprList: A list of regular expressions (uncompiled) to search for in the input file
-	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:param file: The full path to the input file
+	:param exprList: A list of regular expressions (uncompiled) to search for in the input file
+	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	
-	@returns: None on success, or on failure the string expression that was not found. 
-	@rtype: string
-	@raises FileNotFoundException: Raised if the input file does not exist
+	:return: None on success, or on failure the string expression that was not found. 
+	:rtype: string
+	:raises FileNotFoundException: Raised if the input file does not exist
 		
 	"""
 	list = copy.deepcopy(exprList)
@@ -186,7 +188,7 @@ def orderedgrep(file, exprList, encoding=None):
 def logContents(message, list):
 	"""Log a list of strings, prepending the line number to each line in the log output.
 	
-	@param list: The list of strings to log
+	:param list: The list of strings to log
 	"""
 	if not log.isEnabledFor(logging.DEBUG): return
 	count = 0

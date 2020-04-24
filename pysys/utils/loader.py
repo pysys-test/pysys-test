@@ -15,7 +15,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
+"""
+:meta private: This is used by baserunner and project configuration but not really needed by PySys users. 
+"""
 
 import sys, imp
 
@@ -27,9 +29,9 @@ def import_module(name, path, reload=False):
 	module named X.Y.Z, should reload be set to True only the tail module, X.Y.Z, will be reloaded on import; 
 	the intervening modules, X and X.Y, will not be reloaded. 
 	
-	@param name: The module name
-	@param path: A list of paths to search for the module
-	@param reload: A boolean indicating if the module should be reloaded if already in sys.modules
+	:param name: The module name
+	:param path: A list of paths to search for the module
+	:param reload: A boolean indicating if the module should be reloaded if already in sys.modules
 	
 	"""
 	elements = name.split(".")
@@ -47,11 +49,11 @@ def import_module(name, path, reload=False):
 def __import_module(fqname, qname, parent, path, reload):
 	"""Method to load a module.
 
-	@param fqname: The fully qualified name of the module
-	@param qname: The qualified name relative to the parent module (if one exists)
-	@param parent: A reference to the loaded parent module
-	@param path: The path used to search for the module
-	@param reload: Boolean indicating if the module should be reloaded if already in sys.modules
+	:param fqname: The fully qualified name of the module
+	:param qname: The qualified name relative to the parent module (if one exists)
+	:param parent: A reference to the loaded parent module
+	:param path: The path used to search for the module
+	:param reload: Boolean indicating if the module should be reloaded if already in sys.modules
 	
 	"""
 	if not reload:

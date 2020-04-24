@@ -17,13 +17,14 @@
 
 
 """
-Defines global constants that are used throughout the PySys framework. 
+Standard constants that are used throughout the PySys framework. 
 
-The standard convention is to import all contents of the module so that the constants can 
+The convention is to import all contents of the module so that the constants can 
 be referenced directly. 
 
-@undocumented: ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT
 """
+# undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT
+
 import sys, re, os, os.path, socket, traceback
 
 # if set is not available (>python 2.6) fall back to the sets module
@@ -94,7 +95,7 @@ else:  # pragma: no cover
 
 ENVSEPERATOR = os.pathsep
 """ Deprecated. 
-@deprecated: use C{os.pathsep} instead. """
+:meta private: Use ``os.pathsep`` instead. """
 
 IS_WINDOWS = OSFAMILY=='windows'
 """ True if this is Windows, False for other operating systems such as Unix. """
@@ -102,10 +103,10 @@ IS_WINDOWS = OSFAMILY=='windows'
 # constants used in testing
 TRUE=True 
 """ Deprecated. 
-@deprecated: use True instead. """
+:meta private: use True instead. """
 FALSE=False
 """ Deprecated. 
-@deprecated: use False instead. """
+:meta private: use False instead. """
 BACKGROUND = 10
 """Constant indicating a process is to be started asynchronously in the background. """
 FOREGROUND = 11
@@ -128,7 +129,7 @@ BLOCKED = 26
 """ Failure test outcome indicating that something went wrong, for example an exception was raised by the testcase or a required file could not be found. """
 SKIPPED = 27
 """ Non-failure test outcome indicating that the test was ignored as it is not currently required to run on this platform/mode. 
-	See L{pysys.process.user.ProcessUser.skipTest}.
+	See `pysys.basetest.BaseTest.skipTest`.
 """
 
 LOOKUP = {}
@@ -172,17 +173,18 @@ DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_ABORT_ON_ERROR=False
 
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn', '__pycache__', '.git' ]
-""" A list of directory names to exclude when recursively walking a directory tree. """
+""" A list of directory names to exclude when recursively walking a directory tree. 
+
+:meta private: Hidden since 1.5.1, not something end-users need to be concerned with. """
 
 DEFAULT_TIMEOUT = 600
-"""Deprecated. 
-@deprecated: Use a specific member of TIMEOUTS instead."""
+"""Deprecated: Use a specific member of `TIMEOUTS` instead."""
 TIMEOUTS = {}
 """ Default timeouts used for various operations. 
 
 Each timeout is given as a floating point number of seconds.
 
-These timeouts can be customized from runner.setup() if needed 
+These timeouts can be customized from `pysys.baserunner.BaseRunner.setup()` if needed 
 (but never change them from within individual testcases). 
  """
 TIMEOUTS['WaitForSocket'] = 60
@@ -223,7 +225,8 @@ class PrintLogs(Enum):
 	"""Detailed run.log output is only printed to the stdout console for failed testcases. """
 
 PROJECT = None
-"""DEPRECATED. 
+""":meta private: Hide this since 1.5.1 since we don't want people to use it. 
+ 
 Holds the L{pysys.xml.project.Project} instance containing settings for this PySys project.
 Instead of using this constant, we recommend using the 
 L{pysys.basetest.BaseTest.project} (or L{pysys.process.user.ProcessUser.project}) 

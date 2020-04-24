@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019  M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020  M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -15,9 +15,18 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import codecs, os, glob, sys
+import codecs, os, glob, sys, shutil
 
 import pysys
+ROOTDIR = os.path.abspath(os.path.dirname(__file__))
+
+# Slightly gross, but in the absence of cross-platform symlink support in git and to avoid duplicating it, create this on the fly
+with codecs.open(ROOTDIR+'/pysys-examples/pysysproject.xml', 'r', 'ascii') as projfile:
+	with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst.tmpl', 'r', 'ascii') as rsttmpl:
+		with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst', 'w', 'ascii') as rstout:
+			rstout.write(rsttmpl.read())
+			rstout.write('\n  '+'\n  '.join(projfile.read().split('\n')))
+
 
 import setuptools
 print('using setuptools v%s'%setuptools.__version__)
@@ -27,7 +36,6 @@ from setuptools import setup, find_packages
 # (end-users should be using the wheel so won't be affected).
 assert int(setuptools.__version__.split(".", 1)[0]) >= 37, 'Please upgrade setuptools and wheel to latest versions (pip install --upgrade setuptools wheel); current setuptools=%s'%setuptools.__version__
 
-ROOTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # classifiers come from PyPi's official list https://pypi.org/classifiers/
 PLATFORMS_CLASSIFIERS = [
@@ -66,6 +74,7 @@ with codecs.open(ROOTDIR+'/VERSION', "rb", "ascii") as f:
 	versionFromFile = f.read()
 	assert versionFromFile == pysys.__version__, '"%s" != "%s"'%(versionFromFile, pysys.__version__) # ensure consistent version
 
+
 setup(
 	name='PySys',
 	description='Python System Test Framework',
@@ -75,9 +84,9 @@ setup(
 		'Documentation':     'https://pysys-test.github.io/pysys-test',
 		'Repository':        'https://github.com/pysys-test/pysys-test',
 		'Tracker':           'https://github.com/pysys-test/pysys-test/issues',
-		'Change Log':        'https://github.com/pysys-test/pysys-test/blob/release/CHANGELOG.rst',
+		'Change Log':        'https://pysys-test.github.io/pysys-test/ChangeLog.html',
 		'Download Samples':  'https://github.com/pysys-test/pysys-test/releases',
-		'Stackoverflow Tag': 'https://stackoverflow.com/tags/pysys', 
+		'Ask a Question':    'https://stackoverflow.com/questions/ask?tags=pysys', 
 	},
 
 	version=pysys.__version__,

@@ -14,7 +14,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
+"""
+Implements ``pysys.py make`` to create new testcases. 
+"""
 
 from __future__ import print_function
 import os.path, stat, getopt, logging, traceback, sys
@@ -26,12 +28,19 @@ from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
-from pysys.xml.project import getProjectConfigTemplates, createProjectConfig, Project
+from pysys.xml.project import Project
 from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
 
 class ConsoleMakeTestHelper(object):
+	"""
+	The default implementation of ``pysys.py make``.
+	
+	A custom subclass can be specified in the project if required. 
+	"""
+
+
 	def __init__(self, name=""):
 		self.name = name
 		self.testId = None
@@ -40,6 +49,7 @@ class ConsoleMakeTestHelper(object):
 
 
 	def printUsage(self):
+		""" Print help info and exit. """
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
 
 		print("\nPySys System Test Framework (version %s): Console make test helper" % __version__) 
@@ -54,6 +64,8 @@ class ConsoleMakeTestHelper(object):
 
 
 	def parseArgs(self, args):
+		""" Parse the command line arguments after ``pysys make``. 
+		"""
 		try:
 			optlist, arguments = getopt.gnu_getopt(args, 'ha:d:', ["help","type=","dir="] )
 		except Exception:
@@ -89,6 +101,9 @@ class ConsoleMakeTestHelper(object):
 
 	def makeTest(self, input=None, output=None, reference=None, descriptor=None, testclass=None, module=None,
 				 group="", constantsImport=None, basetestImport=None, basetest=None, teststring=None):
+		"""
+		Makes a new test on disk. 
+		"""
 		if input==None: input = DEFAULT_INPUT
 		if output==None: output = DEFAULT_OUTPUT
 		if reference==None: reference = DEFAULT_REFERENCE

@@ -17,7 +17,7 @@
 
 
 """
-Defines custom exceptions that can be thrown within the PySys framework. 
+Exceptions used and raised by PySys methods. 
 
 """
 

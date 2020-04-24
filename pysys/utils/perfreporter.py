@@ -15,7 +15,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+"""
+Performance number reporting classes, used by `pysys.basetest.BaseTest.reportPerformanceResult`. 
 
+The `CSVPerformanceReporter` can be used as-is or subclassed for alternative output formats. 
+"""
 
 import collections, threading, time, math, sys, os
 
@@ -84,14 +88,14 @@ class CSVPerformanceReporter(object):
 	def __init__(self, project, summaryfile, testoutdir, **kwargs):
 		"""Construct an instance of the performance reporter.
 
-		@param project: The project configuration instance.
-		@param summaryfile: The filename pattern used for the summary file(s)
+		:param project: The project configuration instance.
+		:param summaryfile: The filename pattern used for the summary file(s)
 		
-		@param testoutdir: The output directory used for this test run 
-		(equal to `runner.outsubdir`), an identifying string which often contains 
-		the platform, or when there are multiple test runs on the same machine 
-		may be used to distinguish between them. This is usually a relative path 
-		but may be an absolute path. 
+		:param testoutdir: The output directory used for this test run 
+			(equal to `runner.outsubdir`), an identifying string which often contains 
+			the platform, or when there are multiple test runs on the same machine 
+			may be used to distinguish between them. This is usually a relative path 
+			but may be an absolute path. 
 
 		"""
 		self.runner = kwargs.pop('runner', None) or self._runnerSingleton
@@ -134,7 +138,7 @@ class CSVPerformanceReporter(object):
 
 		The method additionally adds a "," grouping for large numbers.
 
-		@param value: the value to be displayed
+		:param value: the value to be displayed
 
 		"""
 		if value > 1000:
@@ -152,7 +156,7 @@ class CSVPerformanceReporter(object):
 		If the specified file does not exist it will be created; it is possible to use multiple summary files from the same
 		run. The path will be resolved relative to the pysys project root directory unless an absolute path is specified.
 
-		@param testobj: the test case instance registering the value
+		:param testobj: the test case instance registering the value
 
 		"""
 		summaryfile = self.summaryfile or 'performance_output/@OUTDIR@_@HOSTNAME@/perf_@DATE@_@TIME@.csv'
@@ -178,12 +182,12 @@ class CSVPerformanceReporter(object):
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		"""Report a performance result, with an associated unique key that identifies it.
 
-		@param testobj: the test case instance registering the value
-		@param value: the value to be reported. This may be an int, float, or a character (unicode) string. 
-		@param resultKey: a unique string that fully identifies what was measured
-		@param unit: identifies the unit the the value is measured in
-		@param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression
-		@param resultDetails:  A dictionary of detailed information that should be recorded together with the result
+		:param testobj: the test case instance registering the value
+		:param value: the value to be reported. This may be an int, float, or a character (unicode) string. 
+		:param resultKey: a unique string that fully identifies what was measured
+		:param unit: identifies the unit the the value is measured in
+		:param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression
+		:param resultDetails:  A dictionary of detailed information that should be recorded together with the result
 
 		"""
 		resultKey = resultKey.strip()
@@ -245,12 +249,12 @@ class CSVPerformanceReporter(object):
 	def formatResult(self, testobj, value, resultKey, unit, toleranceStdDevs, resultDetails):
 		"""Retrieve an object representing the specified arguments that will be passed to recordResult to be written to the performance file(s).
 
-		@param testobj: the test case instance registering the value
-		@param value: the value to be reported
-		@param resultKey: a unique string that fully identifies what was measured
-		@param unit: identifies the unit the the value is measured in
-		@param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression
-		@param resultDetails:  A dictionary of detailed information that should be recorded together with the result
+		:param testobj: the test case instance registering the value
+		:param value: the value to be reported
+		:param resultKey: a unique string that fully identifies what was measured
+		:param unit: identifies the unit the the value is measured in
+		:param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression
+		:param resultDetails:  A dictionary of detailed information that should be recorded together with the result
 
 		"""
 		data = {'resultKey':resultKey,
@@ -268,8 +272,8 @@ class CSVPerformanceReporter(object):
 	def recordResult(self, formatted, testobj):
 		"""Record results to the performance summary file.
 
-		@param formatted: the formatted string to write
-		@param testobj: object reference to the calling test
+		:param formatted: the formatted string to write
+		:param testobj: object reference to the calling test
 
 		"""
 		# generate a file in the test output directory for convenience/triaging, plus add to the global summary
@@ -298,19 +302,16 @@ class CSVPerformanceFile(object):
 	If this file contains aggregated results the number of "samples" may be greater than 1 and the "value"
 	will specify the mean result.
 
-	@ivar runDetails: A dictionary containing (string key, string value) information about the whole test run
-	@type runDetails: dictionary
-	@ivar results: A list where each item is a dictionary containing information about a given result, 
-	containing values for each of the keys in L{COLUMNS}, for example 'resultKey', 'value', etc. 
-	@type results: list
-
-	@ivar RUN_DETAILS: The constant prefix identifying information about the whole test run
-	@type RUN_DETAILS: string
-	@ivar RESULT_DETAILS: The constant prefix identifying detailed information about a given result
-	@type RESULT_DETAILS: string
-	@ivar COLUMNS: Constant list of the columns in the performance output
-	@type COLUMNS: list
-
+	:ivar dict ~.runDetails: A dictionary containing (string key, string value) information about the whole test run.
+	
+	:ivar list ~.results: A list where each item is a dictionary containing information about a given result, 
+		containing values for each of the keys in L{COLUMNS}, for example 'resultKey', 'value', etc. 
+		
+	:ivar str ~.RUN_DETAILS: The constant prefix identifying information about the whole test run
+	
+	:ivar str ~.RESULT_DETAILS: The constant prefix identifying detailed information about a given result
+	
+	:ivar list ~.COLUMNS: Constant list of the columns in the performance output
 	"""
 	COLUMNS = ['resultKey','testId','value','unit','biggerIsBetter','toleranceStdDevs','samples','stdDev']
 	RUN_DETAILS = '#runDetails:#'
@@ -324,7 +325,7 @@ class CSVPerformanceFile(object):
 		CSVPerformanceFile with a single row for each resultKey (with the "value" set to the
 		mean if there are multiple results with that key, and the stdDev also set appropriately).
 
-		@param files: the list of performance file objects to aggregate
+		:param files: the list of performance file objects to aggregate
 
 		"""
 		if isinstance(files, CSVPerformanceFile): files = [files]
@@ -378,7 +379,7 @@ class CSVPerformanceFile(object):
 		a list (any nested dictionaries are expanded into KEY=VALUE entries), or a dictionary (or OrderedDict)
 		whose keys will be added in the same order as COLUMNS.
 
-		@param values: the input list or dictionary
+		:param values: the input list or dictionary
 
 		"""
 		if isinstance(values, list):
@@ -408,7 +409,7 @@ class CSVPerformanceFile(object):
 	def __init__(self, contents):
 		"""Construct an instance of the CSV performance file class.
 
-		@param contents: a string containing the contents of the file (can be empty)
+		:param contents: a string containing the contents of the file (can be empty)
 
 		"""
 		header = None

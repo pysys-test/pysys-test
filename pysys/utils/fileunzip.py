@@ -15,7 +15,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
+"""
+Unpacking one or more compressed files. 
+"""
 
 from __future__ import print_function
 import os.path, glob, gzip, shutil, re
@@ -29,12 +31,12 @@ def unzipall(path, binary=False):
 	
 	Archive files are automatically deleted after unzipping. 
 	
-	@param path: The full path to the directory containing the archive files.
-	@param binary: Boolean flag to indicate if the unzipped files should be written as binary. 
-	The default value of False indicates that on some platforms newline characters will be 
-	converted to the operating system default. 
+	:param path: The full path to the directory containing the archive files.
+	:param binary: Boolean flag to indicate if the unzipped files should be written as binary. 
+		The default value of False indicates that on some platforms newline characters will be 
+		converted to the operating system default. 
 	
-	@raises FileNotFoundException: Raised if the directory path does not exist.
+	:raises FileNotFoundException: Raised if the directory path does not exist.
 	
 	"""
 	if not os.path.exists(path):
@@ -54,14 +56,14 @@ def unzip(zfilename, replace=False, binary=False):
 	By default the unpacked archive is treated as non-binary data, 
 	unless the binary input parameter is set to true.
 	
-	@param zfilename: The full path to the archive file.
-	@param replace: Boolean flag to indicate if the archive file should be removed after unpacking.
-	@param binary: Boolean flag to indicate if the unzipped file should be written as binary.
-	The default value of False indicates that on some platforms newline characters will be 
-	converted to the operating system default. 
+	:param zfilename: The full path to the archive file.
+	:param replace: Boolean flag to indicate if the archive file should be removed after unpacking.
+	:param binary: Boolean flag to indicate if the unzipped file should be written as binary.
+		The default value of False indicates that on some platforms newline characters will be 
+		converted to the operating system default. 
 	
-	@raises FileNotFoundException: Raised if the archive file does not exist.
-	@raises IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension.
+	:raises pysys.exceptions.FileNotFoundException: Raised if the archive file does not exist.
+	:raises pysys.exceptions.IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension.
 	
 	"""
 	if not os.path.exists(zfilename):

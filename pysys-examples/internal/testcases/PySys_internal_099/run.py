@@ -10,7 +10,7 @@ class PySysTest(BaseTest):
 		
 		distinfo = glob.glob(pysysroot+'/PySys*dist-info*') # created when installing from whl
 		
-		rootdocs = ['README.rst', 'USERGUIDE.rst', 'LICENSE.txt', 'CHANGELOG.rst']
+		rootdocs = ['README.rst', 'LICENSE.txt', 'CHANGELOG.rst', 'docs/BaseTest.rst', 'docs/UserGuide.rst']
 		
 		self.log.info('PySys root directory is %s', pysysroot)
 		self.log.info('')
@@ -20,16 +20,16 @@ class PySysTest(BaseTest):
 		self.log.info('   Binary distinfo exists=%s', distinfo)
 		isSourceDist = os.path.exists(pysysroot+'/'+rootdocs[0])
 		self.log.info('   Source dist     exists=%s', isSourceDist)
-		self.assertThat('(%s or %s)', bool(distinfo), isSourceDist)
+		self.assertEval('bool({binary_whl_distinfo}) or {isSourceDist}', binary_whl_distinfo=distinfo, isSourceDist=isSourceDist)
 		self.log.info('')
 		if distinfo:
 			#self.log.info('Binary dist info contains: %s', sorted(os.listdir(distinfo[0])))
 			for d in rootdocs:
-				self.assertThat('os.path.exists(%s)', repr(distinfo[0]+'/'+d))
+				self.assertPathExists(distinfo[0]+'/'+os.path.basename(d))
 		self.log.info('')
 		if isSourceDist:
 			for d in rootdocs:
-				self.assertThat('os.path.exists(%s)', repr(pysysroot+'/'+d))
+				self.assertPathExists(pysysroot+'/'+d)
 
 		# since our automated testing covers the fibonacci pysysdirconfig, use an 
 		# assert to check that the template included with the distribution itself 

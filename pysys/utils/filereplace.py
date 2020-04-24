@@ -15,7 +15,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-
+"""
+Replacing tokens in a text file. 
+"""
 
 import os.path
 
@@ -39,14 +41,14 @@ def replace(input, output, dict={}, marker='', encoding=None):
 	  The cat sat on the mat
 	  The dog sat on the hat
 
-	@param input: The full path to the input file
-	@param output: The full path to the output file with the keywords replaced
-	@param dict: A dictionary of key/value pairs to use in the replacement
-	@param marker: The character used to mark key words to be replaced (may be the empty string
+	:param input: The full path to the input file
+	:param output: The full path to the output file with the keywords replaced
+	:param dict: A dictionary of key/value pairs to use in the replacement
+	:param marker: The character used to mark key words to be replaced (may be the empty string
 	               if no characters are used)
-	@param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	
-	@raises FileNotFoundException: Raised if the input file does not exist
+	:raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
 	if not os.path.exists(input):

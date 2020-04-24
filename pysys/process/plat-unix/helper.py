@@ -15,7 +15,29 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-"""Contains the OS-specific process wrapper subclass. """
+"""Contains the OS-specific ProcessWrapper subclass. 
+
+:meta private: No reason to publically document this. 
+
+The import path of the `pysys.process.helper` module is set up
+at runtime so as to select either the Win32 modules (located in pysys.process.plat-win32), or the 
+unix modules (located in pysys.process.plat-unix)
+
+The module contains the `pysys.process.user.ProcessUser` which holds all the logic for process management and 
+other common capabilities that are used by subclasses `pysys.basetest.BaseTest` and `pysys.baserunner.BaseRunner`.
+
+ that can be extended by subclasses that 
+require the ability to start, stop, interact and monitor processes started by the PySys 
+framework. Subclasses within the framework are the L{pysys.basetest.BaseTest} and 
+L{pysys.baserunner.BaseRunner} classes, both of which may be required to start processes as part 
+of the execution of a set of testcases. The import path of the helper and monitor modules is set up
+at runtime so as to select either the Win32 modules (located in pysys.process.plat-win32), or the 
+unix modules (located in pysys.process.plat-unix); both modules are written to display common 
+functionality in order to provide a unified abstraction where the user is not required to select the 
+correct modules based on their current operation system.
+
+
+"""
 
 import signal, time, copy, errno, threading, sys
 if sys.version_info[0] == 2:
@@ -49,31 +71,31 @@ class ProcessWrapper(CommonProcessWrapper):
 	method. During process execution the C{self.pid} and C{seld.exitStatus} data attributes are set 
 	within the class instance, and these values can be accessed directly via it's object reference.  
 
-	@ivar pid: The process id for a running or complete process (as set by the OS)
-	@type pid: integer
-	@ivar exitStatus: The process exit status for a completed process	
-	@type exitStatus: integer
+	:ivar pid: The process id for a running or complete process (as set by the OS)
+	:type pid: integer
+	:ivar exitStatus: The process exit status for a completed process	
+	:type exitStatus: integer
 
-	@ivar stdout: The full path to the filename to write the stdout of the process
-	@type stdout: string
+	:ivar stdout: The full path to the filename to write the stdout of the process
+	:type stdout: string
 
-	@ivar stderr: The full path to the filename to write the stderr of the process
-	@type stderr: string
+	:ivar stderr: The full path to the filename to write the stderr of the process
+	:type stderr: string
 	
 	"""
 
 	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None, **kwargs):
 		"""Create an instance of the process wrapper.
 		
-		@param command:  The full path to the command to execute
-		@param arguments:  A list of arguments to the command
-		@param environs:  A dictionary of environment variables (key, value) for the process context execution
-		@param workingDir:  The working directory for the process
-		@param state:  The state of the process (L{pysys.constants.FOREGROUND} or L{pysys.constants.BACKGROUND}
-		@param timeout:  The timeout in seconds to be applied to the process
-		@param stdout:  The full path to the filename to write the stdout of the process
-		@param stderr:  The full path to the filename to write the sdterr of the process
-		@param displayName: Display name for this process
+		:param command:  The full path to the command to execute
+		:param arguments:  A list of arguments to the command
+		:param environs:  A dictionary of environment variables (key, value) for the process context execution
+		:param workingDir:  The working directory for the process
+		:param state:  The state of the process (L{pysys.constants.FOREGROUND} or L{pysys.constants.BACKGROUND}
+		:param timeout:  The timeout in seconds to be applied to the process
+		:param stdout:  The full path to the filename to write the stdout of the process
+		:param stderr:  The full path to the filename to write the sdterr of the process
+		:param displayName: Display name for this process
 
 		"""
 		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
@@ -202,19 +224,3 @@ class ProcessWrapper(CommonProcessWrapper):
 			self.wait(timeout=timeout)
 		except Exception:
 			raise ProcessError("Error stopping process")
-
-
-	def signal(self, signal):
-		"""Send a signal to a running process. 
-	
-		@param signal:  The integer signal to send to the process
-		@raise ProcessError: Raised if an error occurred whilst trying to signal the process
-		
-		"""
-		try:
-			os.kill(self.pid, signal)
-		except Exception:
-			raise ProcessError("Error signaling process")
-
-
-

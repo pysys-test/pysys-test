@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Contains implementations of the L{BaseProcessMonitor} interface. 
+Contains implementations of the L{pysys.process.monitor.BaseProcessMonitor} interface. 
 """
 
 __all__ = ['DEFAULT_PROCESS_MONITOR', 'WindowsProcessMonitor', 'UnixProcessMonitor']

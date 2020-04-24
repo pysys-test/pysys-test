@@ -17,8 +17,10 @@
 
 
 """
-Contains utility modules used by the PySys framework for test execution and validation. 
+Utility functions and classes.
 
-The utils package is designed to hold utility modules for test execution and validation, common 
-to the framework and all extension modules. 
+These functions are used by the rest of the PySys framework. In some cases you may wish to use these directly, 
+however always check if there is a wrapper method in `pysys.basetest.BaseTest` (or `pysys.baserunner.BaseRunner)` 
+that would do the job first, before resorting to these lower-level functions. 
+
 """

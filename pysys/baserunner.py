@@ -17,15 +17,9 @@
 
 
 """
-Contains the L{BaseRunner} class which orchestrates the running of all test cases. 
+The runner is responsible for orchestrating concurrent execution of the tests, and for setup/cleanup of 
+any resources that are shared across multiple tests.
 
-Test selection is by default performed through the pysys.py launch script, which locates and 
-creates a set of class instances representing the tests to be executed. These are passed to the 
-base runner as a list of object references, so that the base runner can then iterate through the 
-list to perform the test execution. For more information see the L{pysys.baserunner.BaseRunner} 
-API documentation. 
-
-@undocumented: global_lock, N_CPUS, TestContainer, BaseRunner._testScheduler
 """
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
@@ -43,7 +37,6 @@ from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, pathexists
-from pysys.utils.filecopy import filecopy
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
@@ -51,9 +44,9 @@ from pysys.utils.pycompat import *
 from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, pysysLogHandler
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
 
-global_lock = threading.Lock()
+global_lock = threading.Lock() # internal, do not use
 
-N_CPUS = 1
+N_CPUS = 1 # internal, do not use
 try:
 	# multiprocessing is a new module in 2.6 so we can't assume it
 	import multiprocessing
@@ -63,53 +56,78 @@ except ImportError:
 
 class BaseRunner(ProcessUser):
 	"""A single instance of the runner class is responsible for orchestrating 
-	execution and outcome reporting of all testcases. 
+	concurrent execution of tests, and managing setup and cleanup of 
+	any resources that are shared across multiple testcases.
+
+	Selection of the tests (and modes) to be run is performed through the ``pysys.py run`` launch script, which locates 
+	and creates a set of `pysys.xml.descriptor.TestDescriptor` objects based on the command line arguments supplied by 
+	the user, and passes it to the runner. 
+	After executing any custom `setup` logic the runner's `start` method is responsible for iterating through the 
+	descriptor list and for each entry importing and creating an instance of the `BaseTest <pysys.basetest.BaseTest>` subclass 
+	named in the descriptor. The runner deletes the contents of the test output directory 
+	(to remove any output from previous runs) then calls the test's ``setup``, ``execute``, ``validate`` and ``cleanup`` 
+	methods. After each test is complete it performs cleanup of the output directory (removing all files but ``run.log`` 
+	if ``purge`` is enabled, or else just files that are empty), detects any core files produced by the test, and 
+	invokes any applicable `writers <pysys.writer>` to record the results of each test.
+
+	This class is the default runner implementation, and it can be subclassed 
+	if customizations are needed, for example:
 	
-	This class provides the default implementation, and can be subclassed 
-	if customizations are needed. 
+		- override `setup` and `cleanup` if you need to provision and tear down resources 
+		  (e.g. virtual machines, servers, user accounts, populating a database, etc) that must be shared by many 
+		  testcases.
+		- override `setup` if you want to customize the order or contents of the ``self.descriptors`` list of tests to 
+		  be run.
+		- override `testComplete` to customize how test output directories are cleaned up at the end of a test's 
+		  execution.
+		- override `processCoverageData` to provide support for producing a code coverage report at the end of 
+		  executing all tests. 
+		
+	Do not override the ``__init__`` constructor when creating a runner subclass; instead, add any initialization logic 
+	to your `setup()` method. 
 	
-	BaseRunner is the parent class for running a set of PySys system testcases. The runner is instantiated 
-	with a list of L{pysys.xml.descriptor.TestDescriptor} objects detailing the set of testcases to be run. 
-	The runner iterates through the descriptor list and for each entry imports the L{pysys.basetest.BaseTest}
-	subclass for the testcase, creates an instance of the test class and then calls the setup, execute, validate 
-	and cleanup methods of the test class instance. The runner is responsible for ensuring the output 
-	subdirectory of each testcase is purged prior to test execution to remove stale output from a previous run, 
-	detects any core files produced during execution of a testcase from processes started via the L{pysys.process} 
-	module, and performs audit trail logging of the test results on completion of running a set of testcases.
+	:ivar str ~.outsubdir: The directory name for the the output of each testcase. Typically a relative path,
+		but can also be an absolute path. 
+
+	:ivar str ~.output: The full path of the output directory that this runner can use for storing any persistent state, 
+		e.g. logs for any servers started in the runner `setup` method. The runner output directory is formed based 
+		on the ``outsubdir``. 
 	
-	The base runner contains the hook functions L{setup}, L{testComplete}, and L{cleanup} to 
-	allow a subclass to perform custom operations prior to the execution of a set of testcases, between the 
-	execution of each testcase in a set, and on completion 
-	of all testcases respectively. Subclasses are typically used should some global conditions need to be setup 
-	prior to the set of testcasess being run (i.e. load data into a shared database, start an external process 
-	etc), and subsequently cleaned up after test execution. 
-	      
-	@ivar mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
-	tests will be run with. 
-	@type mode: string
-	@ivar outsubdir: The directory name for the output subdirectory. Typically a relative path,
-	but can also be an absolute path. 
-	@type outsubdir: string
-	@ivar log: Reference to the logger instance of this class
-	@type log: logging.Logger
-	@ivar project: Reference to the project details as set on the module load of the launching executable  
-	@type project: L{Project}
+	:ivar logging.Logger ~.log: The Python ``Logger`` instance that should be used to record progress and status 
+		information. 
+	
+	:ivar pysys.xml.project.Project ~.project: A reference to the singleton project instance containing the 
+		configuration of this PySys test project as defined by ``pysysproject.xml``. 
+		The project can be used to access information such as the project properties which are shared across all tests 
+		(e.g. for hosts and credentials). 
+
+	:ivar bool ~.record: Indicates if the test results should be recorded by the record writer(s), due to 
+		the ``--record`` command line argument being specified.
+	
+	:ivar bool ~.purge: Indicates that all files other than ``run.log`` should be deleted from the output directory 
+		unless the test fails; this corresponds to the ``--purge`` command line argument. 
+
+	:ivar int ~.cycle: The number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
+
+	:ivar str ~.mode: Legacy parameter used only if ``supportMultipleModesPerRun=False``; specifies the single mode 
+		tests will be run with. Ignored unless you have a legacy project. 
+
+	:ivar int ~.threads: The number of worker threads to execute the requested testcases.
+
+	:ivar list[pysys.xml.descriptor.TestDescriptor] ~.descriptors: A list of all the `pysys.xml.descriptor.TestDescriptor` test 
+		descriptors that are selected for execution by the runner. 
+
+	:ivar dict(str,str) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
+		set as data attributes on the class.
+
+	:ivar bool ~.validateOnly: True if the user has requested that instead of cleaning output directories and running 
+		each test, the validation for each test should be re-run on the previous output. 
+
+	:ivar float ~.startTime: The time when the test run started (in seconds since the epoch).
+	
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
-		"""Create an instance of the BaseRunner class.
-		
-		@param record: Indicates if the test results should be recorded 
-		@param purge: Indicates if the output subdirectory should be purged on C{PASSED} result
-		@param cycle: The number of times to execute the set of requested testcases
-		@param mode: Only used if supportMultipleModesPerRun=False; specifies the single mode 
-		tests will be run with. 
-		@param threads: The number of worker threads to execute the requested testcases
-		@param outsubdir: The name of the output subdirectory
-		@param descriptors: List of L{pysys.xml.descriptor.TestDescriptor} descriptors specifying the set of testcases to be run
-		@param xargs: The dictionary of additional "-X" user-defined arguments to be set as data attributes on the class
-		
-		"""
 		ProcessUser.__init__(self)
 
 
@@ -215,7 +233,7 @@ class BaseRunner(ProcessUser):
 		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
 		form C{self.foo} with C{value bar}. 
 		
-		@param xargs: A dictionary of the user defined extra arguments
+		:param xargs: A dictionary of the user defined extra arguments
 		
 		"""
 		for key in list(xargs.keys()):
@@ -232,22 +250,25 @@ class BaseRunner(ProcessUser):
 
 
 	def testComplete(self, testObj, dir):
-		"""Test complete method which performs completion actions after a testcase has finished executing and 
-		its final outcome has been determined.
+		"""Called after a testcase's completion (including finalization of the output and 
+		`pysys.basetest.BaseTest.cleanup`) to allow for post-completion tasks such as purging 
+		unwanted files from the output directory.
 		
-		The testComplete method performs purging of the output subdirectory of a testcase on completion 
-		of the test execution. Purging involves removing all files with a zero file length in order to 
-		only include files with content of interest. Should C{self.purge} be set, the purging will remove
-		all files (excluding the run.log) on a C{PASSED} outcome of the testcase in order to reduce the 
-		on-disk memory footprint when running a large number of tests. Should a custom testComplete for 
-		a subclass be required, the BaseRunner testComplete method should be called afterwards inside a 
-		try...finally block. Do not put logic which could change the test outcome in testComplete - 
-		use L{BaseTest.cleanup} instead. 
+		The default implementation removes all files with a zero file length in order to 
+		only include files with content of interest. Should ``self.purge`` be ``True``, the purging will remove
+		all files (excluding the run.log) on a ``PASSED`` outcome of the testcase in order to reduce the 
+		on-disk memory footprint when running a large number of tests. 
+
+		See also `isPurgableFile` which can be used to customize how this method performs purging. 
+		
+		If you override this method, be sure to call the BaseRunner's implementation afterwards inside a
+		``try...finally`` block. Do not put logic which could change the test outcome into this method; instead, 
+		use `pysys.basetest.BaseTest.cleanup` for anything which might affect the outcome. 
 		
 		This method is always invoked from a single thread, even in multi-threaded mode. 
 		
-		@param testObj: Reference to the L{pysys.basetest.BaseTest} instance of the test just completed
-		@param dir: The directory to perform the purge on
+		:param testObj: Reference to the `pysys.basetest.BaseTest` instance of the test just completed.
+		:param dir: The test output directory to perform the purge on.
 				
 		"""
 		if self.purge:
@@ -275,7 +296,7 @@ class BaseRunner(ProcessUser):
 							while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
 								i += 1
 							collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
-							filecopy(path, collectdest)
+							shutil.copyfile(toLongPathSafe(path), toLongPathSafe(collectdest))
 							
 					size = os.path.getsize(path)
 					
@@ -311,12 +332,12 @@ class BaseRunner(ProcessUser):
 	def isPurgableFile(self, path):
 		"""Determine if a file should be purged when empty at the end of a test run.
 
-		This method is called by testComplete to provide runners with the ability to veto
+		This method is called by `testComplete` to provide runners with the ability to veto
 		deletion of non-empty files that should always be left in a test's output directory
 		even when the test has passed, by returning False from this method. For example this
 		could be used to avoid deleting code coverage files. By default this will return True.
 		
-		@param path: The absolute path of the file to be purged
+		:param path: The absolute path of the file to be purged
 
 		"""
 		return True
@@ -330,17 +351,19 @@ class BaseRunner(ProcessUser):
 		an override for this method will result in disabling concurrent test 
 		execution across multiple cycles. 
 		
-		@deprecated: Overriding this method is discouraged as it disables 
-		concurrent test execution across cycles. Instead, cleanup should be 
-		performed using either BaseTest.cleanup() or BaseRunner.testComplete() 
-		instead. 
+		.. warning:: This method is deprecated and overriding it is strongly discouraged as that disables 
+			concurrent test execution across cycles. Instead, cleanup should be 
+			performed using either `pysys.basetest.BaseTest.cleanup` or `testComplete`.
 		"""
 		pass
 
 
 	# perform a test run
 	def start(self, printSummary=True):
-		"""Start the execution of a set of testcases.
+		"""Starts the execution of a set of testcases.
+		
+		Do not override this method - instead, override ``setup`` and/or ``cleanup`` to customize the behaviour 
+		of this runner. 
 		
 		The start method is the main method for executing the set of requested testcases. The set of testcases 
 		are executed a number of times determined by the C{self.cycle} attribute. When executing a testcase 
@@ -348,13 +371,13 @@ class BaseRunner(ProcessUser):
 		set to more than 1, the output subdirectory is further split into cycle[n] directories to sandbox the 
 		output from each iteration.
 		
-		@param printSummary: Ignored, exists only for compatibility reasons. To provide a custom summary printing 
-		implementation, specify a BaseSummaryResultsWriter subclass in the <writers> section of your project XML file. 
+		:param printSummary: Ignored, exists only for compatibility reasons. To provide a custom summary printing 
+			implementation, specify a BaseSummaryResultsWriter subclass in the <writers> section of your project XML file. 
 
-		@return: Use of this value is deprecated as of 1.3.0. This method returns a dictionary of testcase outcomes, and
-		for compatibility reasons this will continue in the short term, but will be removed in a future release. Please
-		ignore the return value of start() and use a custom BaseSummaryResultsWriter if you need to customize summarization of
-		results.
+		:return: Use of this value is deprecated as of 1.3.0. This method returns a dictionary of testcase outcomes, and
+			for compatibility reasons this will continue in the short term, but will be removed in a future release. Please
+			ignore the return value of start() and use a custom BaseSummaryResultsWriter if you need to customize summarization of
+			results.
 
 		"""
 		if self.project.perfReporterConfig:
@@ -549,6 +572,8 @@ class BaseRunner(ProcessUser):
 	def containerCallback(self, thread, container):
 		"""Callback method on completion of running a test.
 
+		:meta private: Internal method
+
 		Called on completion of running a testcase, either directly by the BaseRunner class (or 
 		a sub-class thereof), or from the ThreadPool.wait() when running with more than one worker thread. 
 		This method is always invoked from a single thread, even in multi-threaded mode. 
@@ -556,8 +581,8 @@ class BaseRunner(ProcessUser):
 		The method is responsible for calling of the testComplete() method of the runner, recording 
 		of the test result to the result writers, and for deletion of the test container object. 
 
-		@param thread: A reference to the calling thread (ignored in 1.3.0 onwards)
-		@param container: A reference to the container object that ran the test
+		:param thread: A reference to the calling thread (ignored in 1.3.0 onwards)
+		:param container: A reference to the container object that ran the test
 
 		"""
 		self.__remainingTests -= 1
@@ -613,14 +638,16 @@ class BaseRunner(ProcessUser):
 	def containerExceptionCallback(self, thread, exc_info):
 		"""Callback method for unhandled exceptions thrown when running a test.
 		
-		@param exc_info: The tuple of values as created from sys.exc_info()
+		:meta private: This method would need a better signature before being made public. 
+		
+		:param exc_info: The tuple of values as created from sys.exc_info()
 		 
 		"""
 		log.warn("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 
 
 	def handleKbrdInt(self, prompt=True): # pragma: no cover (can't auto-test keyboard interrupt handling)
-		"""Handle a keyboard exception caught during running of a set of testcases.
+		"""Handle a ``Ctrl+C`` keyboard exception caught during running of a set of testcases.
 		
 		"""
 		if self.__remainingTests <= 0 or os.getenv('PYSYS_DISABLE_KBRD_INTERRUPT_PROMPT', 'false').lower()=='true' or not os.isatty(0):
@@ -656,8 +683,9 @@ class BaseRunner(ProcessUser):
 
 
 class TestContainer(object):
-	"""Internal class used for co-ordinating the execution of a single test case.
+	"""Internal class added to the work queue and used for co-ordinating the execution of a single test case.
 	
+	:meta private:
 	"""
 
 	__purgedOutputDirs = set() # static field
@@ -665,9 +693,9 @@ class TestContainer(object):
 	def __init__ (self, descriptor, cycle, runner):
 		"""Create an instance of the TestContainer class.
 		
-		@param descriptor: A reference to the testcase descriptor
-		@param cycle: The cycle number of the test
-		@param runner: A reference to the runner that created this class
+		:param descriptor: A reference to the testcase descriptor
+		:param cycle: The cycle number of the test
+		:param runner: A reference to the runner that created this class
 
 		"""
 		self.descriptor = descriptor
@@ -882,8 +910,8 @@ class TestContainer(object):
 	def purgeDirectory(self, dir, delTop=False): # pragma: no cover (deprecated, no longer used)
 		"""Recursively purge a directory removing all files and sub-directories.
 		
-		@param dir: The top level directory to be purged
-		@param delTop: Indicates if the top level directory should also be deleted
+		:param dir: The top level directory to be purged
+		:param delTop: Indicates if the top level directory should also be deleted
 
 		@deprecated: Use L{pysys.utils.fileutils.deletedir} instead. 
 		"""
@@ -912,9 +940,9 @@ class TestContainer(object):
 	def detectCore(self, dir):
 		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
 		
-		@param dir: The directory to search for core files
-		@return: C{True} if a core detected, None if no core detected
-		@rtype: integer 
+		:param dir: The directory to search for core files
+		:return: C{True} if a core detected, None if no core detected
+		:rtype: integer 
 		"""
 		try:
 			for file in os.listdir(toLongPathSafe(dir)):

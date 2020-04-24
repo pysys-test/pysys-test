@@ -15,7 +15,11 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+"""
+Manual test loading.
 
+:meta private: Really just used by the manual tester UI so not public API for now. 
+"""
 
 from __future__ import print_function
 import os.path, logging, xml.dom.minidom

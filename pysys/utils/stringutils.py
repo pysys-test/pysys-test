@@ -15,13 +15,12 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+"""
+String manipulation utilities (currently just `pysys.utils.stringutils.compareVersions`). 
+"""
 
 from pysys.constants import *
 from pysys.utils.pycompat import *
-
-"""
-Utility methods involving string manipulation. 
-"""
 
 __all__ = [
 	'compareVersions',
