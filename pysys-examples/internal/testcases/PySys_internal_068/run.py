@@ -55,10 +55,20 @@ class PySysTest(BaseTest):
 			'<results cycle="2">',
 			], encoding='utf-8')
 
-		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"', encoding='utf-8')
+		# nb: the order of attributes can vary across python releases e.g. 3.7->3.8, so compare the parsed XML
+		import xml.etree.ElementTree as ET
+		self.assertEval("{xml_NestedPass1} == {expected}", 
+			xml_NestedPass1="name={name}, tests={tests}, failures={failures}, skipped={skipped}".format(**dict(ET.parse(self.output+'/target/pysys-reports/TEST-NestedPass.1.xml').getroot().attrib)),
+			expected='name=NestedPass, tests=1, failures=0, skipped=0')
 		self.assertGrep('target/pysys-reports/TEST-NestedPass.1.xml', expr='<testsuite .* time="[0-9.]+"', encoding='utf-8')
-		self.assertGrep('target/pysys-reports/TEST-NestedPass.2.xml', expr='failures="0" name="NestedPass" skipped="0" tests="1"', encoding='utf-8')
-		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='failures="1" name="NestedTimedout" skipped="0" tests="1"', encoding='utf-8')
+
+		self.assertEval("{xml_NestedPass1} == {expected}", 
+			xml_NestedPass1="name={name}, tests={tests}, failures={failures}, skipped={skipped}".format(**dict(ET.parse(self.output+'/target/pysys-reports/TEST-NestedPass.2.xml').getroot().attrib)),
+			expected='name=NestedPass, tests=1, failures=0, skipped=0')
+
+		self.assertEval("{xml_NestedTimedout1} == {expected}", 
+			xml_NestedTimedout1="name={name}, tests={tests}, failures={failures}, skipped={skipped}".format(**dict(ET.parse(self.output+'/target/pysys-reports/TEST-NestedTimedout.2.xml').getroot().attrib)),
+			expected='name=NestedTimedout, tests=1, failures=1, skipped=0')
 		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness - %s</failure>'%TEST_STR, encoding='utf-8')
 		
 		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
