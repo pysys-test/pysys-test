@@ -21,6 +21,7 @@ outcome
 lock
 deletedir
 cleanup
+pythonCoverage
 		""".strip().split('\n')
 
 		def filter_member(m):
