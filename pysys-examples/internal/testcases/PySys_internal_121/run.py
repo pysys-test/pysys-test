@@ -41,7 +41,10 @@ cleanup
 		# make this work against both source and binary distributions
 		pysysroot = os.path.dirname(os.path.dirname(pysys.__file__))
 		docdir = glob.glob(pysysroot+'/PySys*dist-info*') # created when installing from whl
-		if not docdir: docdir = pysysroot+'/docs'
+		if len(docdir)==1: 
+			docdir = dirdir[0]
+		else:
+			docdir = pysysroot+'/docs'
 		self.log.info('Checking completeness of %s/BaseTest.rst', docdir)
 		with codecs.open(docdir+'/BaseTest.rst', 'r', encoding='ascii') as f: # this also serves to check we don't have non-ascii chars creeping in
 			for l in f:
