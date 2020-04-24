@@ -73,10 +73,16 @@ from sphinx.util import logging
 logger = logging.getLogger('conf.py')
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
-	# nb: 'what' means the kind of member e.g. 'class'
+	# nb: 'what' means the parent that the "name" item is in e.g. 'class', 'module'
 
 	# in case we ever need to customize skipping behaviour; not currently used
 	if skip: 
+		# we don't want to hide protected class methods with a single underscore; but we do want to hide any 
+		# that include a double-underscore since _classname__membername is how Python mangles private members
+		if (name.startswith('_') and ('__' not in name) and what=='class' and callable(obj) 
+				and obj.__doc__ and ':meta private:' not in obj.__doc__):
+			logger.info(f'conf.py: UNSKIPPING protected class method: {name}')
+			return False
 		logger.debug(f'conf.py: ALREADY Skipping member: {name}')
 		return None
 		

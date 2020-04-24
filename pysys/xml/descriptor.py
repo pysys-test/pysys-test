@@ -224,7 +224,7 @@ class TestDescriptor(object):
 	def _createDescriptorForMode(self, mode):
 		"""
 		Internal API for creating a test descriptor for a specific mode of this test.
-		
+		:meta private:
 		"""
 		assert mode, 'Mode must be specified'
 		assert not hasattr(self, 'mode'), 'Cannot create a mode descriptor from a descriptor that already has its mode set'
