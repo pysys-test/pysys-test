@@ -51,7 +51,7 @@ Miscellaneous new features
 
 
 Improvements to the ``pysys.py`` command line tool
-------------------------------------------------
+--------------------------------------------------
 - Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
   PySys was run from. 
 
