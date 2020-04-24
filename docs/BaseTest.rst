@@ -86,6 +86,11 @@ can be accessed via instance attributes on ``self``:
   The project can be used to access information such as the project properties which are shared across all tests 
   (e.g. for hosts and credentials). 
 
+- ``self.disableCoverage`` *(bool)*: Set this to True to request that no code coverage is generated for this test 
+  (even when code coverage has been enabled for the PySys run), for example because this is a time-sensitive 
+  or performance-measuring test. Typically this would be set in an individual testcase, or in the `setup` method of 
+  a `BaseTest` subclass based on groups in the ``self.descriptor`` that indicate what kind of test this is.
+
 .. _assertions-and-outcomes:
 
 Assertions and outcomes

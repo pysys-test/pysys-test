@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="auto">
+  
+  <description> 
+    <title>API documentation completeness</title>    
+    <purpose><![CDATA[Check we haven't missed adding anything to the autosummary in the documentation for BaseTest. 
+]]>
+    </purpose>
+  </description>
+  
+  <classification>
+    <groups inherit="true">
+      <group></group>
+    </groups>
+    <modes inherit="true">
+    </modes>
+  </classification>
+
+  <!-- <skipped reason=""/> -->
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

@@ -149,13 +149,14 @@ class ProcessUser(object):
 	def getInstanceCount(self, displayName):
 		"""(Deprecated) Return the number of processes started within the testcase matching the supplied displayName.
 
+		:deprecated: The recommended way to allocate unique names is now L{allocateUniqueStdOutErr}
+
 		The ProcessUser class maintains a reference count of processes started within the class instance 
 		via the L{startProcess()} method. The reference count is maintained against a logical name for 
 		the process, which is the C{displayName} used in the method call to L{startProcess()}, or the 
 		basename of the command if no displayName was supplied. The method returns the number of 
 		processes started with the supplied logical name, or 0 if no processes have been started. 
 
-		@deprecated: The recommended way to allocate unique names is now L{allocateUniqueStdOutErr}
 		:param displayName: The process display name
 		:return: The number of processes started matching the command basename
 		:rtype:  integer

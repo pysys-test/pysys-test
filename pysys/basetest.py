@@ -531,8 +531,6 @@ class BaseTest(ProcessUser):
 		
 			self.assertThat('%d >= 5 or %s=="foobar"', myvalue, repr(mystringvalue))
 		
-		@deprecated: Use L{assertEval} instead. 
-		
 		:param conditionstring: A string will have any following args 
 			substituted into it and then be evaluated as a boolean python 
 			expression. 
@@ -540,10 +538,10 @@ class BaseTest(ProcessUser):
 		:param args: Zero or more arguments to be substituted into the format 
 			string.
 		
-		@keyword abortOnError: Set to True to make the test immediately abort if the
+		:keyword abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 
-		@keyword assertMessage: Overrides the string used to describe this 
+		:keyword assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 		
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
