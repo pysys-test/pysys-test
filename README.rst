@@ -69,16 +69,16 @@ Project Links
 Installation
 ============
 
-PySys can be installed into Python 3.7/3.6/3.5 (recommended) or Python 2.7 
+PySys can be installed into Python 3.8 (recommended), 3.7/3.6/3.5 or Python 2.7 
 (though note that Python 2.7 will soon be out of support from the Python team). 
 
 The best way to install PySys is using the standard ``pip`` installer which 
-downloads and install the binary package (``.whl``) for the current PySys 
+downloads and install the binary package for the current PySys 
 release, by executing::
 
 	> python -m pip install PySys
 
-Alternatively, you can download the binary .whl distribution from 
+Alternatively, you can download the binary ``.whl`` package from 
 https://github.com/pysys-test/pysys-test/releases and use 
 ``python -m pip install PySys-<VERSION>.whl`` instead. 
 

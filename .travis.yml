@@ -17,9 +17,9 @@ matrix:
   # versions to get reasonable coverage. Documentation and deployment 
   # happen only on one of them - Python 3 on Linux
   
-  - name: Python 3.7 Linux + doc + deploy
+  - name: Python 3.8 Linux + doc + deploy
     os: linux
-    python: 3.7
+    python: 3.8
     env: PYSYS_DOC_AND_DEPLOY=true
 
   - name: Python 2.7 OSX
@@ -72,6 +72,10 @@ matrix:
     os: linux
     python: 3.6
     if: branch = master
+
+  - name: Python 3.7 Linux
+    os: linux
+    python: 3.7
 
 # Default Linux build runs on Ubuntu; use the Xenial version to get Python 3.7 support
 language: python

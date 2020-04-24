@@ -55,7 +55,8 @@ CLASSIFIERS = [
 	"Programming Language :: Python :: 3",
 	"Programming Language :: Python :: 3.5",
 	"Programming Language :: Python :: 3.6", 
-	"Programming Language :: Python :: 3.7", # see also python_requires
+	"Programming Language :: Python :: 3.7", 
+	"Programming Language :: Python :: 3.8", # see also python_requires
 	"Programming Language :: Python :: Implementation :: CPython",
 	"Environment :: Console",
 	"Topic :: Software Development :: Quality Assurance",

@@ -15,6 +15,8 @@ What's new in 1.5.1 (not yet released)
 
 Miscellaneous new features
 --------------------------
+- PySys now support v3.8 of Python. 
+
 - `BaseTest.assertDiff` usability was improved by including the relative path to each file 
   in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
   file without losing track of which is which. This also makes it easier to manually diff the output directory against 
