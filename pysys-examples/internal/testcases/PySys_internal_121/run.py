@@ -42,7 +42,7 @@ cleanup
 		pysysroot = os.path.dirname(os.path.dirname(pysys.__file__))
 		docdir = glob.glob(pysysroot+'/PySys*dist-info*') # created when installing from whl
 		if len(docdir)==1: 
-			docdir = dirdir[0]
+			docdir = docdir[0]
 		else:
 			docdir = pysysroot+'/docs'
 		self.log.info('Checking completeness of %s/BaseTest.rst', docdir)
