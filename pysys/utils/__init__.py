@@ -21,6 +21,6 @@ Utility functions and classes.
 
 These functions are used by the rest of the PySys framework. In some cases you may wish to use these directly, 
 however always check if there is a wrapper method in `pysys.basetest.BaseTest` (or `pysys.baserunner.BaseRunner)` 
-that woudl do the job first, before resorting to these lower-level functions. 
+that would do the job first, before resorting to these lower-level functions. 
 
 """

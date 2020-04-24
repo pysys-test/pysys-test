@@ -123,15 +123,15 @@ class ProcessUser(object):
 			raise AttributeError("Unknown class attribute ", name)
 	
 	def allocateUniqueStdOutErr(self, processKey):
-		"""Allocate unique filenames of the form `processKey[.n].out/.err` 
-		which can be used for the L{startProcess} C{stdouterr} parameter. 
+		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
+		which can be used for the `startProcess` ``stdouterr`` parameter. 
 		
 		The first time this is called it will return names like 
-		`('myprocess.out', 'myprocess.err')`, the second time it will return 
-		`('myprocess.1.out', 'myprocess.1.err')`, then 
-		`('myprocess.2.out', 'myprocess.2.err')` etc. 
+		``('myprocess.out', 'myprocess.err')``, the second time it will return 
+		``('myprocess.1.out', 'myprocess.1.err')``, then 
+		``('myprocess.2.out', 'myprocess.2.err')`` etc. 
 		
-		:param processKey: A user-defined identifier that will form the prefix onto which [.n].out is appended
+		:param str processKey: A user-defined identifier that will form the prefix onto which ``[.n].out`` is appended
 		:return: A STDOUTERR_TUPLE named tuple of (stdout, stderr)
 		:rtype: STDOUTERR_TUPLE
 
@@ -159,7 +159,7 @@ class ProcessUser(object):
 
 		:param displayName: The process display name
 		:return: The number of processes started matching the command basename
-		:rtype:  integer
+		:rtype:  int
 		
 		"""
 		if displayName in self.processCount:
@@ -204,7 +204,7 @@ class ProcessUser(object):
 			process. Coverage can also be disabled by setting 
 			``self.disableCoverage==True`` on this test instance. 
 		:return: The process handle of the process.
-		:rtype: pysys.process.commonprocesswrapper.CommonProcessWrapper
+		:rtype: pysys.process.commonwrapper.CommonProcessWrapper
 		
 		"""
 		args = arguments
@@ -539,14 +539,14 @@ class ProcessUser(object):
 		:param addToLibPath: A path or list of paths to be prepended to the 
 			default value for the environment variable used to load libraries 
 			(or the value specified in overrides, if any), 
-			i.e. `[DY]LD_LIBRARY_PATH` on Unix or `PATH` on Windows. This is usually 
+			i.e. ``[DY]LD_LIBRARY_PATH`` on Unix or ``PATH`` on Windows. This is usually 
 			more convenient than adding it directly to `overrides`. 
 
 		:param addToExePath: A path or list of paths to be prepended to the 
 			default value for the environment variable used to locate executables 
 			(or the value specified in overrides, if any), 
-			i.e. `PATH` on both Unix and Windows. This is usually 
-			more convenient than adding it directly to `overrides`. 
+			i.e. ``PATH`` on both Unix and Windows. This is usually 
+			more convenient than adding it directly to ``overrides``. 
 		
 		:param command: If known, the full path of the executable for which 
 			a default environment is being created (passed to L{getDefaultEnvirons}). 
@@ -1049,14 +1049,13 @@ class ProcessUser(object):
 				
 		The method returns the overall outcome of the test based on the outcomes stored in the internal data
 		structure. The `pysys.constants.PRECEDENT` order of the possible outcomes is used to determined the overall outcome 
-		of the test, e.g. if C{PASSED}, C{BLOCKED} and C{FAILED} were recorded during the execution of the test, 
-		the overall outcome would be C{BLOCKED}. 
+		of the test, e.g. if `pysys.constants.PASSED`, `pysys.constants.BLOCKED` and `pysys.constants.FAILED` were 
+		recorded during the execution of the test, the overall outcome would be `pysys.constants.BLOCKED`. 
 		
-		The method returns the integer value of the outcome as defined in L{pysys.constants}. To convert this 
-		to a string representation use the L{pysys.constants.LOOKUP} dictionary i.e. C{LOOKUP[test.getOutcome()]}.
+		The method returns the integer value of the outcome as defined in `pysys.constants`. To convert this 
+		to a string representation use the `pysys.constants.LOOKUP` dictionary i.e. ``LOOKUP[test.getOutcome()]``.
 		
 		:return: The overall outcome
-		:rtype:  integer
 
 		"""	
 		with self.lock:
@@ -1307,7 +1306,7 @@ class ProcessUser(object):
 				... # thisversion is newer than 1.2.alpha-3 
 
 		The comparison algorithm ignores case, and normalizes separators ./-/_ 
-		so that `'1.alpha2'=='1Alpha2'`. Any string components are compared 
+		so that ``'1.alpha2'=='1Alpha2'``. Any string components are compared 
 		lexicographically with other strings, and compared to numbers 
 		strings are always considered greater. 
 
@@ -1411,8 +1410,8 @@ class ProcessUser(object):
 				])
 		
 		:param src: The source filename, which can be an absolute path, or 
-			a path relative to the `self.output` directory. 
-			Use `src=self.input+'/myfile'` if you wish to copy a file from the test 
+			a path relative to the ``self.output`` directory. 
+			Use ``src=self.input+'/myfile'`` if you wish to copy a file from the test 
 			input directory. 
 		
 		:param dest: The source filename, which can be an absolute path, or 

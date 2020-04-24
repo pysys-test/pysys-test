@@ -641,7 +641,7 @@ class DescriptorLoader(object):
 	files on disk, and allowing for different database modes on different 
 	platforms. 
 
-	:ivar pysys.xml.project.Project ~.project: The L{Project} instance. 
+	:ivar pysys.xml.project.Project ~.project: The `pysys.xml.project.Project` instance. 
 	
 	"""
 	def __init__(self, project, **kwargs): 

@@ -184,7 +184,7 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 	def setDefaults(columns, delimiter=None, writeHeaderLine=None):
 		"""Static helper method for setting the default columns or 
 		C{writeHeaderLine} setting for all tests that use the 
-		C{rocessMonitorTextFileHandler}. 
+		C{ProcessMonitorTextFileHandler}. 
 		
 		This method could be called from a custom runner's 
 		L{pysys.baserunner.BaseRunner.setup} method in order to take effect 

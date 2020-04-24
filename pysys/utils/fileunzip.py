@@ -62,8 +62,8 @@ def unzip(zfilename, replace=False, binary=False):
 		The default value of False indicates that on some platforms newline characters will be 
 		converted to the operating system default. 
 	
-	:raises FileNotFoundException: Raised if the archive file does not exist.
-	:raises IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension.
+	:raises pysys.exceptions.FileNotFoundException: Raised if the archive file does not exist.
+	:raises pysys.exceptions.IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension.
 	
 	"""
 	if not os.path.exists(zfilename):

@@ -50,7 +50,7 @@ Miscellaneous new features
   modules from within an ``evalstring``. 
 
 
-Improvements to the `pysys.py` command line tool
+Improvements to the ``pysys.py`` command line tool
 ------------------------------------------------
 - Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
   PySys was run from. 
@@ -82,7 +82,7 @@ below and running your tests with the new version before upgrading just in case.
    - ``pysys.utils.threadpool`` is also deprecated and hidden from the public API as it was never really 
      intended for general purpose use and Python 3 contains similar functionality. 
    - The ``DTD`` constants in `pysys.xml.project` and `pysys.xml.descriptor`.
-   - ``pysys.xml.descriptor.XMLDescriptorParser`` (replaced by `pysys.xml.descriptor.DescriptorLoader.parseTestDescriptor`)
+   - ``pysys.xml.descriptor.XMLDescriptorParser`` (replaced by `pysys.xml.descriptor.DescriptorLoader`)
    - ``pysys.xml.descriptor.XMLDescriptorContainer`` (replaced by `pysys.xml.descriptor.TestDescriptor`)
    - ``pysys.xml.descriptor.XMLDescriptorCreator`` and ``DESCRIPTOR_TEMPLATE`` (create descriptors manually if needed) 
 
@@ -100,7 +100,7 @@ Release History
 
 PySys 1.5.0 brings some significant new features for large PySys projects 
 including support for running a test in multiple modes, and 
-`pysysdirconfig.xml` files that allow you to specify defaults that apply to 
+``pysysdirconfig.xml`` files that allow you to specify defaults that apply to 
 all testcases under a particular directory - such as groups, modes, a prefix 
 to add to the start of each test id, and a numeric hint to help define the 
 execution order of your tests. 
@@ -194,7 +194,7 @@ Miscellaneous new features:
   that should be used for starting Python processes. Supports functionality 
   such as Python code coverage. 
 
-- Added `pysys.process.user.ProcessUser.disableCoverage` attribute which can be used to globally 
+- Added `BaseTest.disableCoverage` attribute which can be used to globally 
   disable all code coverage (in all languages) for a specific test. For example 
   if you apply a group called 'performance' to all performance tests, you could 
   disable coverage for those tests by adding this line to your BaseTest::
@@ -464,7 +464,7 @@ major release it is possible that some users might need to make changes:
   colon to separate the test id and titles. This makes it easier to copy and 
   paste test ids from ``pysys print`` into the command line. 
 
-- Several fields in the `pysys.xml.descripto.TestDescriptor` (aka ``XMLDescriptorContainer``) class 
+- Several fields in the `pysys.xml.descriptor.TestDescriptor` (aka ``XMLDescriptorContainer``) class 
   that used to contain absolute paths now contain paths relative to 
   the newly introduced `testDir` member. These are: `module`, `output`, 
   `input`, `reference`. The values of `BaseTest.output/input/reference` 
@@ -555,34 +555,34 @@ New project options:
   feature, see comments in `pysysproject.xml` and in 
   `ProcessUser.getDefaultFileEncoding()`.
 
-- Use of `print()` rather than self.log is a common mistake that results in 
+- Use of ``print()`` rather than ``self.log`` is a common mistake that results in 
   essential diagnostic information showing up on the console but not 
-  stored in `run.log`. A new project option `redirectPrintToLogger` 
+  stored in ``run.log``. A new project option `redirectPrintToLogger` 
   can optionally be enabled to instruct PySys to catch output written using 
-  `print()` statements or to `sys.stdout` and redirect it to the logging 
-  framework, so it will show up in `run.log`. Writers that genuinely need 
+  ``print()`` statements or to ``sys.stdout`` and redirect it to the logging 
+  framework, so it will show up in ``run.log``. Writers that genuinely need 
   the ability to write directly to stdout should be changed to use 
   `pysys.utils.logutils.stdoutPrint`. 
 
 - There are new settings for customizing the default environment used by 
-  `startProcess`::
+  `BaseTest.startProcess`::
 
 	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
 	<property name="defaultEnvironsTempDir" value="self.output'"/>  
 
-  See `ProcessUser.getDefaultEnvirons()` for more information on these. 
+  See `BaseTest.getDefaultEnvirons()` for more information on these. 
 
 Main API improvements:
 
-- Added `ProcessUser.skipTest()` method, which can be used to avoid running the 
-  rest of the `execute()` or `validate()` method, if it is not appropriate for 
+- Added `BaseTest.skipTest()` method, which can be used to avoid running the 
+  rest of the `BaseTest.execute()` or `BaseTest.validate()` method, if it is not appropriate for 
   the test to execute on this platform/mode. 
 
-- Added boolean `IS_WINDOWS` constant, since conditionalizing logic for Windows 
+- Added boolean `pysys.constants.IS_WINDOWS` constant, since conditionalizing logic for Windows 
   versus all other Operating Systems is very common; this avoids the need for 
   error-prone matching against string literals. 
 
-- Added `ProcessUser.startProcess()` argument `stdouterr` which allows 
+- Added `BaseTest.startProcess()` argument `stdouterr` which allows 
   specifying the base prefix to use for writing process standard output and 
   error using a single parameter, either as a string or from a tuple such 
   as that returned from `allocateUniqueStdOutErr()`. As as result there is no 
@@ -600,10 +600,10 @@ Main API improvements:
   the `stdouterr` prefix so it's easy to identify which process is being 
   started. 
 
-- Added `ProcessUser.getDefaultEnvirons()` method which is now used by 
-  `startProcess()` to provide a minimal but clean set of environment variables 
+- Added `BaseTest.getDefaultEnvirons()` method which is now used by 
+  `BaseTest.startProcess()` to provide a minimal but clean set of environment variables 
   for launching a given process, and can also be used as a basis for creating 
-  customized environments using the new `createEnvirons()` helper method. 
+  customized environments using the new `BaseTest.createEnvirons()` helper method. 
   There are some new project properties to control how this works, which 
   you may wish to consider using for new projects, but are not enabled by 
   default in existing projects to maintain compatibility::
@@ -611,7 +611,7 @@ Main API improvements:
 	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
 	<property name="defaultEnvironsTempDir" value="self.output'"/>  
 
-  See `ProcessUser.getDefaultEnvirons()` for more information on these. 
+  See `BaseTest.getDefaultEnvirons()` for more information on these. 
   If needed you can further customize the environment by overriding 
   `getDefaultEnvirons`. 
 
@@ -669,21 +669,21 @@ Minor API additions:
   delegates to the runner's implementation, allowing customizations to be 
   performed in just one place if neede for both `BaseTest` and runner class.
 
-- Added `ProcessUser.compareVersions()` static helper method for 
+- Added `BaseTest.compareVersions()` static helper method for 
   comparing two alphanumeric dotted version strings. 
 
-- Added `ProcessUser.deletedir` which is more convenient that the associated 
+- Added `BaseTest.deletedir` which is more convenient that the associated 
   `fileutils.deletedir` for paths under the `self.output` directory. 
 
-- Added `ProcessUser.addOutcome(override=...)` argument which can be used to 
+- Added `BaseTest.addOutcome(override=...)` argument which can be used to 
   specify a new test outcome that replaces any existing outcomes even if 
   they have a higher precedence. 
 
-- Added `ignores=` argument to `ProcessUser.waitForSignal()` method which 
+- Added `ignores=` argument to `BaseTest.waitForSignal()` method which 
   excludes lines matching the specified expression from matching both the 
   main `expr` match expression and any `errorExpr` expressions. 
 
-- Added `fileutils.toLongPathSafe/fromLongPathSafe` which on Windows performs 
+- Added `pysys.utils.fileutils.toLongPathSafe/fromLongPathSafe` which on Windows performs 
   the necessary magic to allow Python to access paths longer than 256 
   characters (and on other platforms are a no-op), and `pathexists` which 
   is a long path-safe version of `os.path.exists`. PySys will now handle long 
@@ -707,7 +707,7 @@ this release there are a few such changes:
   assert* methods would be silently ignored (potentially masking mistakes); 
   now it is an error to specify an invalid argument.  
 
-- The environment `startProcess` uses by default if no `environs=` 
+- The environment `BaseTest.startProcess` uses by default if no `environs=` 
   parameter was specified has changed. Although the documentation states that 
   a clean environment is used if no `environs` dictionary is specified, in 
   PySys v1.1, 1.2 and 1.3 the Windows behaviour changed to include a copy of 

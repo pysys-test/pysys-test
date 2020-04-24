@@ -570,8 +570,8 @@ class Project(object):
 		Raises an exception if the project has not yet been loaded.  
 		
 		Use ``self.project`` to get access to the project instance where possible, 
-		for example from a `BaseTest` or `BaseRunner` class. This attribute is for 
-		use in internal classes that do not have a ``self.project``.
+		for example from a `pysys.basetest.BaseTest` or `pysys.baserunner.BaseRunner` class. This attribute is for 
+		use in internal functions and classes that do not have a ``self.project``.
 		"""
 		if Project.__INSTANCE: return Project.__INSTANCE
 		if 'doctest' in sys.argv[0]: return None # special-case for doctesting
