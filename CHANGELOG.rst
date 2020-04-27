@@ -68,7 +68,7 @@ Bug fixes
 - Fixed bug in which ``BaseTest.assertDiff`` was not logging the diff to the console after a failure. 
 
 - Fixed bug in which a ``pysysdirconfig.xml`` in the same directory as a ``pysysproject.xml`` would be read twice, 
-  potentially resulting in duplicated ``id-prefix``es.
+  potentially resulting in duplicated a ``id-prefix``.
 
 - Fix some bugs in the selection of test ids on the command line. Now we always prefer an exact match over any 
   possible suffix matches, and give an error if there are multiple matching suffixes rather than just picking one.
