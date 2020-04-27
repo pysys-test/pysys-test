@@ -206,10 +206,9 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 			if len(matches) == 1: return matches[0]			
 			if len(matches) == 0: raise UserError('No tests found matching id: "%s"'%specId)
 			
-			# prior to 1.5.1 we permitted multiple matches, but in a dodgy way that just picked the first one
-			# while we could try to be clever and pick the shortest (suffix) match, or do something fancy with matching 
-			# minus the id-prefix from the pysysdirconfig.xml, the least error prone and simplest thing is just to make 
-			# users be precise
+			# as a special-case, see if there's an exact match with the dirname
+			dirnameMatches = [index for index, d in enumerate(descriptors) if os.path.basename(d.testDir)==specId]
+			if len(dirnameMatches)==1: return dirnameMatches[0]
 			
 			# nb: use space not comma as the delimiter so it's easy to copy paste it
 			raise UserError('Multiple tests found matching "%s"; please specify which one you want: %s'%(specId, 
