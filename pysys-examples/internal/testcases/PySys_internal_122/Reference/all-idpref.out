@@ -1,0 +1,7 @@
+ID_PREFIX.AlsoNumbered_001  | Nested testcase
+ID_PREFIX.Numbered_001      | Nested testcase
+ID_PREFIX.Numbered_0        | Nested testcase
+ID_PREFIX.Prefix            | Nested testcase
+ID_PREFIX.Prefix_Suffix     | Nested testcase
+ID_PREFIX.PrefixSuffix      | Nested testcase
+ID_PREFIX.Suffix            | Nested testcase

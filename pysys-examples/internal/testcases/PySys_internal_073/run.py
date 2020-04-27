@@ -25,7 +25,8 @@ class PySysTest(BaseTest):
 		runPySys(self, 'groups', ['print', '--groups'], workingDir=testsdir)
 		runPySys(self, 'modes', ['print', '--modes'], workingDir=testsdir)
 		runPySys(self, 'requirements', ['print', '--requirements'], workingDir=testsdir)
-		runPySys(self, 'nonexistent', ['print', 'non-existent'], workingDir=testsdir, ignoreExitStatus=True)
+		runPySys(self, 'nonexistent', ['print', 'non-existent'], workingDir=testsdir, expectedExitStatus='!=0')
+		runPySys(self, 'nonexistent-regex', ['print', 'non-existent.*'], workingDir=testsdir, expectedExitStatus='!=0')
 		runPySys(self, 'emptydir', ['print'], workingDir=self.mkdir('emptydir'), ignoreExitStatus=True, 
 			projectfile=PROJECT.testRootDir+'/pysysproject.xml')
 			
@@ -44,4 +45,5 @@ class PySysTest(BaseTest):
 		self.assertGrep('requirements.out', expr='AL1') # just pick one example
 
 		self.assertGrep('emptydir.err', expr='The supplied options did not result in the selection of any tests')
-		self.assertGrep('nonexistent.err', expr='Unable to locate requested testcase')
+		self.assertGrep('nonexistent.err', expr='No tests found matching id: \"non-existent\"')
+		self.assertGrep('nonexistent-regex.err', expr='No test ids found matching regular expression: "non-existent.*"')

@@ -70,6 +70,9 @@ Bug fixes
 - Fixed bug in which a ``pysysdirconfig.xml`` in the same directory as a ``pysysproject.xml`` would be read twice, 
   potentially resulting in duplicated ``id-prefix``es.
 
+- Fix some bugs in the selection of test ids on the command line. Now we always prefer an exact match over any 
+  possible suffix matches, and give an error if there are multiple matching suffixes rather than just picking one.
+
 Upgrade guide and compatibility
 -------------------------------
 This is a minor release so is not expected to break existing tests, however we always recommend reading the notes 
