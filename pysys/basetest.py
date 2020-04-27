@@ -706,6 +706,7 @@ class BaseTest(ProcessUser):
 					stripWhitespace=stripWhitespace)
 				
 				if (not result) and self.getBoolProperty('autoUpdateAssertDiffReferences'):
+					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
 					log.warn('... -XautoUpdateAssertDiffReferences option is enabled, so overwriting reference file %s and retrying ... '%f2)
 					self.copy(f1, f2)
 					continue
