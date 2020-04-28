@@ -38,19 +38,33 @@ _log = logging.getLogger('allocport')
 
 def getEphemeralTCPPortRange():
 	"""Returns the range of TCP ports the operating system uses to allocate
-	ephemeral ports from i.e. the ports allocated for the client side of a
-	client-server connection. Returned as a tuple, 
-	(ephemeral_low, ephemeral_high) or raises exception on error. 
+	ephemeral ports (the client side of the TCP connection). 
 	
-	:meta private: Not public API
+	This function is called by when `pysys.baserunner.BaseRunner` is constructed to configure the 
+	pool of available server ports for `pysys.basetest.BaseTest.getNextAvailableTCPPort()`. 
+	This ensures that no ports from the ephemeral (client-side) range are used for server ports 
+	(which can cause random port clashes). 
+	
+	If required, the behaviour can be customized with environment variables:
+	
+	  - ``PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max`` This prevents `getEphemeralTCPPortRange` trying to detect the ephemeral 
+	    port range and instead uses ``min`` as the bottom and ``max`` and the top end of the range.
+	  - ``PYSYS_PORTS_FILE=file_path.txt`` This prevents `getEphemeralTCPPortRange` from even being called, and 
+	    instead allows the available server ports to be enumerated in an ASCII text file, one per line. 
+	
+	:return: A tuple (ephemeral_min: int, ephemeral_max: int) giving the ephemeral port range for this platform. 
+	:raises Exception: If the ephemeral port range cannot be determined, which will prevent PySys from running any tests. 
 	"""
+	if os.getenv('PYSYS_EPHEMERAL_TCP_PORT_RANGE'):
+		envrange = os.environ['PYSYS_EPHEMERAL_TCP_PORT_RANGE'].split('-')
+		if len(envrange)!=2: raise Exception('PYSYS_EPHEMERAL_TCP_PORT_RANGE environment variable must be of the form "low-high"')
+		ephemeral_low, ephemeral_high = int(envrange[0].strip()), int(envrange[1].strip())
 	# Find the smallest and largest ephemeral port
-	if PLATFORM == 'linux':
-		f = open('/proc/sys/net/ipv4/ip_local_port_range')
-		s = f.readline().split()
-		ephemeral_low  = int(s[0])
-		ephemeral_high = int(s[1])
-		del f
+	elif PLATFORM == 'linux':
+		with open('/proc/sys/net/ipv4/ip_local_port_range') as f:
+			s = f.readline().split()
+			ephemeral_low  = int(s[0])
+			ephemeral_high = int(s[1])
 	elif PLATFORM == 'sunos':
 		def runNdd(driver, parameter):
 			p = subprocess.Popen(['/usr/sbin/ndd', driver, parameter], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -70,29 +84,32 @@ def getEphemeralTCPPortRange():
 			import _winreg as winreg
 		else:
 			import winreg
-		h = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters')
-		try:
-			ephemeral_high = winreg.QueryValueEx(h, 'MaxUserPort')[0]
-		except Exception:
-			# Accept the default if there isn't a value in the registry
-			pass
-		finally:
-			winreg.CloseKey(h)
-			del h
+		with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters') as h:
+			try:
+				ephemeral_high = winreg.QueryValueEx(h, 'MaxUserPort')[0]
+			except Exception:
+				# Accept the default if there isn't a value in the registry
+				pass
 	else:
-		raise SystemError("No way of determining ephemeral port range on platform %s" % sys.platform)
+		raise Exception("PySys cannot determine the ephemeral port range on platform %s (consider using the PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max or PYSYS_PORTS_FILE= environment variables)" % sys.platform)
+
+	assert ephemeral_low <= ephemeral_high, [ephemeral_low, ephemeral_high]
 
 	return (ephemeral_low, ephemeral_high)
 
 def initializePortPool():
 	"""Initialize the pool of ports we can allocate TCP server ports from
-	i.e. ports to which processes can bind to without clashes with other
-	processes
+	i.e. ports that processes can bind to without clashes with other
+	processes.
+	
+	Called from BaseRuner.__init__ (not when this module is imported) so that it's possible to monkey-patch 
+	getEphemeralTCPPortRange() in user code (e.g. when the custom runner is imported) if required e.g. for a new platform. 
 	
 	:meta private: Not public API
 	"""
 
 	global tcpServerPortPool
+	assert tcpServerPortPool is None, 'Cannot call initializePortPool() more than once per process'
 
 	portsfile = os.getenv('PYSYS_PORTS_FILE',None)
 	if portsfile:
@@ -194,6 +211,3 @@ class TCPPortOwner(object):
 		"""Must be called when this port is no longer needed to return it to PySys' pool of available ports. 
 		"""
 		tcpServerPortPool.append(self.port)
-
-# Initialize the TCP port pool
-initializePortPool()

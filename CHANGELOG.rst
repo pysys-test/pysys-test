@@ -51,6 +51,11 @@ Miscellaneous new features
   modules such as ``math`` and ``re``. It is also possible to use ``import_module`` to dynamically import additional 
   modules from within an ``evalstring``. 
 
+- A new environment variable ``PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max`` can be used to override the way PySys detects 
+  the range of ephemeral (client-side) TCP ports (which are excluded from the range of server ports that 
+  `BaseTest.getNextAvailableTCPPort()` can return). This could be useful if you want to use PySys on an operating 
+  system where it does not yet manage to detect this automatically. For more information see 
+  `pysys.utils.portalloc.getEphemeralTCPPortRange()`.
 
 Improvements to the ``pysys.py`` command line tool
 --------------------------------------------------

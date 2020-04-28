@@ -43,6 +43,7 @@ from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.pycompat import *
 from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, pysysLogHandler
 from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
+import pysys.utils.allocport
 
 global_lock = threading.Lock() # internal, do not use
 
@@ -128,8 +129,12 @@ class BaseRunner(ProcessUser):
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
-		ProcessUser.__init__(self)
+		# we call this here so it's before any user code that should need to allocate ports, but after the 
+		# user's custom runner has been imported, making it possible to monkey-patch getEphemeralTCPPortRange() 
+		# if needed, e.g. for a new platform. 
+		pysys.utils.allocport.initializePortPool()
 
+		ProcessUser.__init__(self)
 
 		# Set a sensible default output dir for the runner. Many projects do not actually write 
 		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
@@ -244,6 +249,8 @@ class BaseRunner(ProcessUser):
 	# a cycle of all tests, and after all cycles
 	def setup(self):
 		"""Setup method which may optionally be overridden to perform custom setup operations prior to execution of a set of testcases.
+		
+		Always ensure you call the super implementation of setup() before adding any custom logic. 
 		
 		"""
 		pass
