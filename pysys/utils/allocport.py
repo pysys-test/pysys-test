@@ -26,6 +26,7 @@ import collections, random, subprocess, sys
 import io
 import logging
 import time
+import platform
 from pysys import process_lock
 from pysys.constants import *
 
@@ -34,7 +35,7 @@ from pysys.constants import *
 # Properly initialize only on demand.
 tcpServerPortPool = None
 
-_log = logging.getLogger('allocport')
+_log = logging.getLogger('pysys.allocport')
 
 def getEphemeralTCPPortRange():
 	"""Returns the range of TCP ports the operating system uses to allocate
@@ -61,10 +62,18 @@ def getEphemeralTCPPortRange():
 		ephemeral_low, ephemeral_high = int(envrange[0].strip()), int(envrange[1].strip())
 	# Find the smallest and largest ephemeral port
 	elif PLATFORM == 'linux':
-		with open('/proc/sys/net/ipv4/ip_local_port_range') as f:
-			s = f.readline().split()
-			ephemeral_low  = int(s[0])
-			ephemeral_high = int(s[1])
+		port_file = '/proc/sys/net/ipv4/ip_local_port_range'
+		if not os.path.exists(port_file):
+			# There's no perfect default that works for all OSes (and the config may be customized by the OS anyway), 
+			# but it's useful to avoid an error to help on environments like Windows Subsystem for Linux v1. 
+			# We pick the IANA range as our default
+			ephemeral_low, ephemeral_high = 49152, 65535
+			_log.warning('PySys cannot determine the local/ephemeral port range on this OS (%s) as "%s" is missing; falling back to default IANA range %d-%d. Consider using the PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max environment variable to explicitly configure this.', platform.platform(), port_file, ephemeral_low, ephemeral_high)
+		else:
+			with open(port_file) as f:
+				s = f.readline().split()
+				ephemeral_low  = int(s[0])
+				ephemeral_high = int(s[1])
 	elif PLATFORM == 'sunos':
 		def runNdd(driver, parameter):
 			p = subprocess.Popen(['/usr/sbin/ndd', driver, parameter], stdout=subprocess.PIPE, stderr=subprocess.PIPE)

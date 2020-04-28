@@ -52,10 +52,13 @@ Miscellaneous new features
   modules from within an ``evalstring``. 
 
 - A new environment variable ``PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max`` can be used to override the way PySys detects 
-  the range of ephemeral (client-side) TCP ports (which are excluded from the range of server ports that 
+  the range of ephemeral (client-side) TCP ports (which are excluded from the range of server-side ports that 
   `BaseTest.getNextAvailableTCPPort()` can return). This could be useful if you want to use PySys on an operating 
   system where it does not yet manage to detect this automatically. For more information see 
-  `pysys.utils.portalloc.getEphemeralTCPPortRange()`.
+  `pysys.utils.portalloc.getEphemeralTCPPortRange()`. In addition, the default behaviour on linux has changed, so that 
+  if ``/proc/sys/net/ipv4/ip_local_port_range`` is missing, PySys will fall back to using the default IANA ephemeral 
+  port range (with a warning. This makes it possible to use PySys in non-standard environments such as 
+  Windows Subsystem for Linux (WSL) v1. 
 
 Improvements to the ``pysys.py`` command line tool
 --------------------------------------------------
