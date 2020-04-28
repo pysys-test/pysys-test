@@ -51,14 +51,13 @@ Miscellaneous new features
   modules such as ``math`` and ``re``. It is also possible to use ``import_module`` to dynamically import additional 
   modules from within an ``evalstring``. 
 
-- A new environment variable ``PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max`` can be used to override the way PySys detects 
-  the range of ephemeral (client-side) TCP ports (which are excluded from the range of server-side ports that 
-  `BaseTest.getNextAvailableTCPPort()` can return). This could be useful if you want to use PySys on an operating 
-  system where it does not yet manage to detect this automatically. For more information see 
-  `pysys.utils.portalloc.getEphemeralTCPPortRange()`. In addition, the default behaviour on linux has changed, so that 
+- A new environment variable ``PYSYS_PORTS=minport-maxport,port,...`` can be used to override the set of possible 
+  server ports allocated from `BaseTest.getNextAvailableTCPPort()`. This avoids the usual logic which uses 
+  `pysys.utils.portalloc.getEphemeralTCPPortRange()` to detect the local/client-side ports which should be avoided 
+  for server-side use. In addition, the default behaviour of getEphemeralTCPPortRange has changed on Linux, so that 
   if ``/proc/sys/net/ipv4/ip_local_port_range`` is missing, PySys will fall back to using the default IANA ephemeral 
-  port range (with a warning. This makes it possible to use PySys in non-standard environments such as 
-  Windows Subsystem for Linux (WSL) v1. 
+  port range (with a warning). This makes it possible to use PySys in environments such as 
+  Windows Subsystem for Linux (WSL) v1 which may not have the usual Linux network stack. 
 
 Improvements to the ``pysys.py`` command line tool
 --------------------------------------------------

@@ -38,30 +38,20 @@ tcpServerPortPool = None
 _log = logging.getLogger('pysys.allocport')
 
 def getEphemeralTCPPortRange():
-	"""Returns the range of TCP ports the operating system uses to allocate
+	"""Returns the minimum and maximum TCP ports this operating system uses to allocate
 	ephemeral ports (the client side of the TCP connection). 
 	
-	This function is called by when `pysys.baserunner.BaseRunner` is constructed to configure the 
-	pool of available server ports for `pysys.basetest.BaseTest.getNextAvailableTCPPort()`. 
-	This ensures that no ports from the ephemeral (client-side) range are used for server ports 
-	(which can cause random port clashes). 
+	This function is used by `getServerTCPPorts()` to ensure that no ephemeral/client-side ports are allocated for 
+	server-side purposes by PySys (this could cause random port clashes). 
 	
-	If required, the behaviour can be customized with environment variables:
-	
-	  - ``PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max`` This prevents `getEphemeralTCPPortRange` trying to detect the ephemeral 
-	    port range and instead uses ``min`` as the bottom and ``max`` and the top end of the range.
-	  - ``PYSYS_PORTS_FILE=file_path.txt`` This prevents `getEphemeralTCPPortRange` from even being called, and 
-	    instead allows the available server ports to be enumerated in an ASCII text file, one per line. 
+	If the available server ports are overridden using the ``PYSYS_PORTS`` or ``PYSYS_PORTS_FILE`` environment 
+	variables, this function is not called. 
 	
 	:return: A tuple (ephemeral_min: int, ephemeral_max: int) giving the ephemeral port range for this platform. 
 	:raises Exception: If the ephemeral port range cannot be determined, which will prevent PySys from running any tests. 
 	"""
-	if os.getenv('PYSYS_EPHEMERAL_TCP_PORT_RANGE'):
-		envrange = os.environ['PYSYS_EPHEMERAL_TCP_PORT_RANGE'].split('-')
-		if len(envrange)!=2: raise Exception('PYSYS_EPHEMERAL_TCP_PORT_RANGE environment variable must be of the form "low-high"')
-		ephemeral_low, ephemeral_high = int(envrange[0].strip()), int(envrange[1].strip())
 	# Find the smallest and largest ephemeral port
-	elif PLATFORM == 'linux':
+	if PLATFORM == 'linux':
 		port_file = '/proc/sys/net/ipv4/ip_local_port_range'
 		if not os.path.exists(port_file):
 			# There's no perfect default that works for all OSes (and the config may be customized by the OS anyway), 
@@ -106,6 +96,50 @@ def getEphemeralTCPPortRange():
 
 	return (ephemeral_low, ephemeral_high)
 
+def getServerTCPPorts():
+	"""Returns a list of the TCP ports that PySys tests can use when starting servers that listen on a port. 
+	
+	This function is usually called when `pysys.baserunner.BaseRunner` is constructed to help decide the 
+	pool of available ports that can be allocated by `pysys.basetest.BaseTest.getNextAvailableTCPPort()`. 
+
+	PySys treats all ports from 1024-65536 as server ports except for the client-side ephemeral port range 
+	as determined by `getEphemeralTCPPortRange()`. Alternatively, the set of server ports can be overridden by the 
+	following environment variables:
+	
+	  - ``PYSYS_PORTS=minport-maxport,port,...`` PySys will use the specified ports and/or port ranges (inclusive) 
+	    allocating server ports.  
+	  - ``PYSYS_PORTS_FILE=file_path.txt`` PySys will use ports from the specified ASCII text file, one port per line. 
+
+	If using these variables, be sure to avoid none of the ports reserved for ephemeral use is in the set of server 
+	ports you specify. 
+
+	:return: A list or set of all the server ports that can be used, e.g. [1024, 1025, ...]. 
+	:raises Exception: If the port range cannot be determined, which will prevent PySys from running any tests. 
+	"""
+	if os.getenv('PYSYS_PORTS', None):
+		specs = os.environ['PYSYS_PORTS'].split(',')
+	elif os.getenv('PYSYS_PORTS_FILE',None):
+		with io.open(os.environ['PYSYS_PORTS_FILE'], 'r', encoding='utf-8') as f:
+			specs = f.readlines()
+	else: 
+		ephemeral_low, ephemeral_high = getEphemeralTCPPortRange()
+		# The standard implementation: allocate server ports from all non-privileged, non-ephemeral ports
+		return list(range(1024, ephemeral_low)) + list(range(ephemeral_high,65536))
+
+	ports = set()
+	for x in specs:
+		x = x.strip()
+		if len(x)==0: continue
+		
+		if '-' in x:
+			envrange = x.split('-')
+			for p in range(int(envrange[0].strip()), int(envrange[1].strip())+1):
+				ports.add(p)
+		else:
+			ports.add(int(x.strip()))
+	return ports
+
+
 def initializePortPool():
 	"""Initialize the pool of ports we can allocate TCP server ports from
 	i.e. ports that processes can bind to without clashes with other
@@ -120,20 +154,7 @@ def initializePortPool():
 	global tcpServerPortPool
 	assert tcpServerPortPool is None, 'Cannot call initializePortPool() more than once per process'
 
-	portsfile = os.getenv('PYSYS_PORTS_FILE',None)
-	if portsfile:
-		with io.open(portsfile, 'r', encoding='utf-8') as f:
-			tcpServerPortPool = []
-			for l in f:
-				l = l.strip()
-				if l: tcpServerPortPool.append(int(l))
-		if not tcpServerPortPool:
-			raise Exception('No ports found in %s'%portsfile)
-	else: 
-		ephemeral_low, ephemeral_high = getEphemeralTCPPortRange()
-
-		# Allocate server ports from all non-privileged, non-ephemeral ports
-		tcpServerPortPool = list(range(1024, ephemeral_low)) + list(range(ephemeral_high,65536))
+	tcpServerPortPool = list(getServerTCPPorts())
 
 	# Randomize the port set to reduce the chance of clashes between
 	# simultaneous runs on the same machine
