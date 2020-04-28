@@ -862,6 +862,14 @@ class BaseTest(ProcessUser):
 		to false, a C{PASSED} outcome will only be added should the regular expressions not be seen in the file in 
 		the order they appear in the list.
 		
+		While this assertion method can be very convenient for checking the order of a small number of expressions, 
+		it becomes unwieldy when the number of expressions grows beyond a handful, and this is definitely not the 
+		best tool for the job if what you're doing is really about checking that a subset of data from an output file 
+		matches expectations. For that use case, it's better to do a filtered `copy()` of the file to remove 
+		prefixes (e.g. timestamps) and lines that are not important, and then use `assertDiff` to check the extracted 
+		text matches expectations. This approach makes it easier to write tests, and crucially makes it much easier 
+		to figure out what went wrong if they fail. 
+		
 		:param file: The basename of the file used in the ordered grep
 		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		:param exprList: A list of regular expressions which should occur in the file in the order they appear in the list
