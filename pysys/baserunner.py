@@ -802,7 +802,7 @@ class TestContainer(object):
 				log.info(62*"=")
 				
 				# this often doesn't matter, but it's worth alerting the user as in rare cases it could cause a test failure
-				if initialOutputFiles:
+				if initialOutputFiles and not self.runner.validateOnly:
 					log.warning('Some directories from a previous run could not be deleted from the output directory before starting this test: %s', ', '.join(initialOutputFiles))
 			except KeyboardInterrupt:
 				self.kbrdInt = True
