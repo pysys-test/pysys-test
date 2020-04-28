@@ -2,7 +2,7 @@
 <pysystest type="auto">
     
   <description> 
-    <title>Port allocation - ephemeral port detection and PYSYS_EPHEMERAL_TCP_PORT_RANGE override</title>    
+    <title>Port allocation - ephemeral port detection and PYSYS_PORTS override</title>    
     <purpose><![CDATA[]]>
     </purpose>
   </description>
