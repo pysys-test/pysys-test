@@ -168,7 +168,7 @@ class ProcessUser(object):
 			return 0
 		
 	def setKeywordArgs(self, xargs):
-		"""Set the xargs as data attributes of the test class. For internal use by BaseTest/BaseRunner only. 
+		"""Set the xargs as data attributes of the class. For internal use by BaseTest/BaseRunner only. 
 	
 		:meta private:
 				
@@ -193,7 +193,7 @@ class ProcessUser(object):
 			basetestDefaultValue = getattr(self, key, None) # most of the time these will not be on the basetest
 			if basetestDefaultValue is not None and isstring(val):
 				# attempt type coersion to keep the type the same
-				if basetestDefaultValue == True or basetestDefaultValue == False:
+				if basetestDefaultValue is True or basetestDefaultValue is False:
 					val = val.lower()=='true'
 				elif isinstance(basetestDefaultValue, int):
 					val = int(val)

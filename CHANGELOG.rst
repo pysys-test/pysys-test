@@ -77,8 +77,11 @@ Bug fixes
 - Fixed bug in which a ``pysysdirconfig.xml`` in the same directory as a ``pysysproject.xml`` would be read twice, 
   potentially resulting in duplicated a ``id-prefix``.
 
-- Fix some bugs in the selection of test ids on the command line. Now we always prefer an exact match over any 
+- Fixed some bugs in the selection of test ids on the command line. Now we always prefer an exact match over any 
   possible suffix matches, and give an error if there are multiple matching suffixes rather than just picking one.
+
+- Fixed 1.5.0 bug in which a ``-Xkey=value`` command line value of ``1`` or ``0`` would be converted to a boolean 
+  True or False value instead of an int, when the `BaseTest` object has a field named ``key`` of type int.
 
 Upgrade guide and compatibility
 -------------------------------
