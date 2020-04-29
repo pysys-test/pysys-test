@@ -103,7 +103,7 @@ class AutoDocGen:
 		test to a reference file, to ensure you don't add items to the documented public API without noticing. """
 
 		_config_keys = ['modules', 'generated_source_dir', 'skip_module_regex', 'skip_on_docstring_regex', 
-			'autodoc_options_decider', 'write_documented_items_output_file', 'module_title_decider']
+			'autodoc_options_decider', 'write_documented_items_output_file', 'module_title_decider', 'overwrite_generated_source_rsts']
 
 	def __init__(self, app):
 		"""
