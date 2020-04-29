@@ -51,14 +51,15 @@ Miscellaneous new features
   modules such as ``math`` and ``re``. It is also possible to use ``import_module`` to dynamically import additional 
   modules from within an ``evalstring``. 
 
-- `BaseTest.waitForGrep` (the new name for `BaseTest.waitForSignal`) now log more useful information if the 
+- `BaseTest.waitForGrep` (the new name for `BaseTest.waitForSignal`) now logs more useful information if the 
   ``verboseWaitForGrep`` (or its alias, ``verboseWaitForSignal``) is set to true in the ``pysysproject.xml`` 
   properties. This includes logging at the start of waiting rather than at the end of waiting (to make it easier to 
   debug hangs during test development or when triaging an automated test run). In addition, if a non-default timeout 
   was specified this is included in the log message, and for the (small proportion of) waits that take longer than 
   30 seconds an additional message is logged to indicate how long was actually spent, which makes it easier to debug 
   tests that sometimes timeout and sometimes complete just before they would have timed out. All of this new 
-  functionality only applies if you have ``verboseWaitForGrep=true``. 
+  functionality only applies if you have ``verboseWaitForGrep=true`` so will not affect existing projects, but this 
+  is now enabled for newly created projects.  
 
 - `BaseTest.waitForGrep` (the new name for `BaseTest.waitForSignal`) now has a ``detailMessage`` parameter that can 
   be used to provide some extra information to explain more about the wait condition. 

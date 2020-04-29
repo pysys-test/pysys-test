@@ -102,6 +102,9 @@
 	<!-- Set this to true unless you need pre-1.4.1 mode behaviour for compatibility reasons. -->
 	<property name="supportMultipleModesPerRun" value="true"/>
 
+	<!-- Produces more informative messages from waitForGrep/Signal. -->
+	<property name="verboseWaitForGrep" value="true"/>
+
 	<!-- 
 	Import properties from file (fails silently if the file does not exist). The imported 
 	file should be of the format name=value (one pair specified per line). Any imported names

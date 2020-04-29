@@ -9,7 +9,7 @@ class PySysTest(BaseTest):
 
 	def validate(self):
 		self.runAssert()
-		self.waitForGrep('run.log', expr='Assertion on', condition='==3', abortOnError=True, ignores=[' DEBUG '])
+		self.waitForGrep('run.log', expr='Assertion on', condition='==3', abortOnError=True, ignores=[' DEBUG ', 'Waiting for'])
 		filecopy(os.path.join(self.output, 'run.log'), os.path.join(self.output, 'run.log.proc'))
 		del self.outcome[:]
 		self.assertGrep('run.log.proc', expr='Assertion.*failed \[run.py:7\]')

@@ -16,6 +16,7 @@
 	<property name="defaultAssertDiffStripWhitespace" value="False"/>
 	<property name="redirectPrintToLogger" value="false"/>
 	<property name="supportMultipleModesPerRun" value="true"/>
+	<property name="verboseWaitForGrep" value="true"/>
 
 	<!-- Custom test framework extensions, if needed -->
 	<!--
