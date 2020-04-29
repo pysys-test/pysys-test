@@ -832,18 +832,18 @@ class ProcessUser(object):
 			
 	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
 			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None):
-		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
+		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output directory.
 		
-		This method blocks until a particular regular expression is seen in a text file on a set
-		number of lines. The number of lines which should match the regular expression is given by 
-		the C{condition} argument in textual form i.e. for a match on more than 2 lines use condition =\">2\".
-		If the regular expression is not seen in the file matching the supplied condition within the 
-		specified timeout interval, the method returns to the caller.
+		When possible, always use the parameters that give a nice fail-fast with a clear 
+		outcome reason - if success becomes impossible due to premature termination of the process that's generating 
+		the output terminating unexpectedly (``process=``), or an error message/expression (``errorExpr=``) being 
+		written to the file. This will generate much clearer outcome reasons, which makes test failures easy to triage, 
+		and also avoids wasting time waiting for something that will never happen.
 		
 		Example::
 		
 			self.waitForSignal('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
-				errorExpr=[' ERROR ', ' FATAL '], encoding='utf-8')
+				errorExpr=[' ERROR .*', ' FATAL .*', 'Failed to start: .*'], encoding='utf-8')
 
 		:param file: The absolute or relative name of the file used to wait for the signal
 		
