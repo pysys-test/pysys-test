@@ -377,7 +377,7 @@ class BaseTest(ProcessUser):
 		"""Wait for a specified period of time, and log a message to indicate this is happening.
 		
 		Tests that rely on waiting for arbitrary times usually take longer to execute than necessary, and are fragile 
-		if the timings or machine load changes, so wherever possible use a method like `waitForSignal` to 
+		if the timings or machine load changes, so wherever possible use a method like `waitForGrep` to 
 		wait for something specific instead. 
 		
 		:param interval: The time interval in seconds to wait. 

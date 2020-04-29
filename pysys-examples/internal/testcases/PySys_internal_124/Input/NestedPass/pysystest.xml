@@ -2,15 +2,16 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Assertions - waitForGrep/waitForSignal - check match objects on waitForGrep</title>    
+    <title>Nested testcase</title>    
     <purpose><![CDATA[
+
 ]]>
     </purpose>
   </description>
 
   <classification>
     <groups>
-      <group></group>
+      <group>outcomes</group>
     </groups>
   </classification>
 

@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Assertions - assertLineCount/waitForSignal with non-ASCII/I18N character, and byte and character strings</title>    
+    <title>Assertions - assertLineCount/waitForGrep/waitForSignal with non-ASCII/I18N character, and byte and character strings</title>    
     <purpose><![CDATA[
 Ensure that assertLineCount/waitForSignal work correctly with non-ASCII characters from the default encoding, 
 using both bytes objects and strings, and also smoke test the other functions with an explicitly specified encoding. 

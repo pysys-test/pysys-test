@@ -46,8 +46,8 @@ class PySysTest(BaseTest):
 
 		# wait for the strings to be writen to stdout (not sure why, should be instant); 
 		# also serves as a verification that they completed successfully
-		self.waitForSignal("environment-specified.out", expr="Written process environment", timeout=5, abortOnError=True)
-		self.waitForSignal("environment-default.out", expr="Written process environment", timeout=5, abortOnError=True)
+		self.waitForGrep("environment-specified.out", expr="Written process environment", timeout=5, abortOnError=True)
+		self.waitForGrep("environment-default.out", expr="Written process environment", timeout=5, abortOnError=True)
 
 	def validate(self):
 		# validate against the reference file

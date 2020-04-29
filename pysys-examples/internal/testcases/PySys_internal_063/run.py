@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 		result = self.logFileContents('f1.txt', includes=['.*2\d.*', '.*3\d.*'], excludes=['\d1'])
 		assert result
 		self.logFileContents(self.output+'/f2.txt', maxLines=2, tail=True, excludes=['\d5'])
-		self.waitForSignal('run.log', expr='Contents of .*f2.txt', abortOnError=True, ignores=[' DEBUG '])
+		self.waitForGrep('run.log', expr='Contents of .*f2.txt', abortOnError=True, ignores=[' DEBUG '])
 		
 	def validate(self):
 		self.assertGrep('run.log', expr='Contents of f1.txt')

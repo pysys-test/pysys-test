@@ -42,10 +42,10 @@ class PySysTest(BaseTest):
 		pidmonitor = self.startProcessMonitor(p.pid, interval=0.1, file=self.output+'/monitor-pid.tsv')
 
 		assert pm.running(), 'monitor is still running'
-		self.waitForSignal('monitor-default.tsv', expr='.', condition='>=5', ignores=['#.*'])
-		self.waitForSignal('monitor-numproc.tsv', expr='.', condition='>=5', ignores=['#.*'])
-		self.waitForSignal('monitor-pid.tsv', expr='.', condition='>=5', ignores=['#.*'])
-		self.waitForSignal('monitor-all.csv', expr='.', condition='>=5', ignores=['#.*'])
+		self.waitForGrep('monitor-default.tsv', expr='.', condition='>=5', ignores=['#.*'])
+		self.waitForGrep('monitor-numproc.tsv', expr='.', condition='>=5', ignores=['#.*'])
+		self.waitForGrep('monitor-pid.tsv', expr='.', condition='>=5', ignores=['#.*'])
+		self.waitForGrep('monitor-all.csv', expr='.', condition='>=5', ignores=['#.*'])
 		assert pm.running(), 'monitor is still running'
 		assert pidmonitor.running(), 'pid monitor is still running'
 		self.stopProcessMonitor(pidmonitor)

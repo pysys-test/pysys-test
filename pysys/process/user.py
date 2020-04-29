@@ -829,81 +829,136 @@ class ProcessUser(object):
 				log.debug("Wait for '%s' file creation completed successfully", file)
 				return
 
-			
-	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
-			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None):
-		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output directory.
+	def waitForSignal(self, file, filedir=None, expr="", **waitForGrepArgs):
+		"""Old alias for `waitForGrep`; please use `waitForGrep` in new tests.
 		
-		When possible, always use the parameters that give a nice fail-fast with a clear 
-		outcome reason - if success becomes impossible due to premature termination of the process that's generating 
-		the output terminating unexpectedly (``process=``), or an error message/expression (``errorExpr=``) being 
-		written to the file. This will generate much clearer outcome reasons, which makes test failures easy to triage, 
+		All parameters are the same, except that in waitForSignal the (rarely used) ``filedir`` argument can be 
+		specified as the 2nd positional argument (after ``file`` and before ``expr``) whereas in waitForGrep it can 
+		only be specified as a ``filedir=`` keyword argument. 
+		"""
+		return self.waitForGrep(file, expr=expr, filedir=filedir, **waitForGrepArgs)
+			
+	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
+			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None, detailMessage='', filedir=None):
+		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
+		directory (waitForGrep was formerly known as `waitForSignal`).
+		
+		This method provides some parameters that give helpful fail-fast behaviour with a descriptive outcome reason; 
+		use these whenever possible:
+		
+		  - ``process=`` to abort if success becomes impossible due to premature termination of the process that's 
+		    generating the output
+		  - ``errorExpr=`` to abort if an error message/expression is written to the file
+		
+		This will generate much clearer outcome reasons, which makes test failures easy to triage, 
 		and also avoids wasting time waiting for something that will never happen.
 		
 		Example::
 		
-			self.waitForSignal('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
-				errorExpr=[' ERROR .*', ' FATAL .*', 'Failed to start: .*'], encoding='utf-8')
+			self.waitForGrep('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
+				errorExpr=[' ERROR ', ' FATAL ', 'Failed to start'], encoding='utf-8')
+				
+		Note that waitForGrep fails the test if the expression is not found (unless abortOnError was set to False, 
+		which isn't recommended), so there is no need to add duplication with an 
+		`assertGrep <pysys.basetest.BaseTest.assertGrep>` to check for the same expression in your validation logic. 
 
-		:param file: The absolute or relative name of the file used to wait for the signal
+		The message(s) logged when there is a successful wait can be controlled with the project 
+		property ``verboseWaitForGrep=true/false`` (or equivalently, ``verboseWaitForSignal``); for best visibility 
+		into what is happening set this property to true in your ``pysysproject.xml``. 
+
+		.. versionadded:: 1.5.1
+
+		:param str file: The path of the file to be searched. Usually this is a name/path relative to the 
+			``self.output`` directory, but alternatively an absolute path can be specified. 
 		
-		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		:param str expr: The regular expression to search for in the text file.
 		
-		:param expr: The regular expression to search for in the text file
+		:param str condition: The condition to be met for the number of lines matching the regular expression; by default 
+			we wait until there is at least one occurrence. 
 		
-		:param condition: The condition to be met for the number of lines matching the regular expression
+		:param int timeout: The number of seconds to wait for the regular expression before giving up and aborting 
+			the test with `constants.TIMEDOUT` (unless abortOnError=False in which case execution will continue).
 		
-		:param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
+		:param pysys.process.commonwrapper.CommonProcessWrapper process: The process that is generating the specified 
+			file, to allow the wait to fail fast (instead of timing out) if the process dies before the expected signal 
+			appears. Can be None if the process is not known or is expected to terminate itself during this period. 
 		
-		:param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
-		
-		:param ignores: A list of regular expressions used to denote lines in the files which should be ignored 
+		:param list[str] errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
+			for the main expression to be aborted with a `constants.BLOCKED` outcome. This is useful to avoid waiting 
+			a long time for the expected expression when an ERROR is logged that means it will never happen, and 
+			also provides much clearer test failure messages in this case. 
+
+		:param list[str] ignores: A list of regular expressions used to identify lines in the files which should be ignored 
 			when matching both `expr` and `errorExpr`. 
+
+		:param float poll: The time in seconds between to poll the file looking for the regular expression and to check against the condition
+				
+		:param bool abortOnError: If True abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting, which for a modern project will be True).
 		
-		:param process: If a handle to the process object producing output is specified, the wait will abort if 
-			the process dies before the expected signal appears.
-		
-		:param errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
-			for the main expression to be aborted with an error outcome. This is useful to avoid waiting a long time for 
-			the expected expression when an ERROR is logged that means it will never happen, and also provides 
-			much clearer test failure messages in this case. 
-		
-		:param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
-			project setting)
-		
-		:param encoding: The encoding to use to open the file. 
+		:param str encoding: The encoding to use to open the file and convert from bytes to characters. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+
+		:param str detailMessage: An extra string to add to the message logged when waiting to provide extra 
+			information about the wait condition. e.g. ``logSuffix='(downstream message received)'``. 
+			..versionadded: 1.5.1
+			
+		:param str filedir: Can be used to provide a directory name to add to the beginning of the ``file`` parameter; 
+			however usually it is clearer just to specify that directory in the ``file``
+		
+		:return: A list of the ``expr`` regular expression match objects.
+		:rtype: list[re.Match]
 		"""
-		assert expr, 'expr= argument must be specified when calling waitForSignal'
+		assert expr, 'expr= argument must be specified'
+		assert '\n' not in expr, 'expr= cannot contain multiple lines'
 		
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
-		log.debug("Performing wait for signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
-		
 		if errorExpr: assert not isstring(errorExpr), 'errorExpr must be a list of strings not a string'
 		
 		matches = []
 		startTime = time.time()
-		msg = "Wait for signal \"%s\" %s in %s" % (expr, condition, os.path.basename(file))
+		msg = "Waiting for {expr} {condition}in {file}{detail}".format(
+			expr=repr(expr), # repr performs escaping of embedded quotes, newlines, etc
+			condition=condition.strip()+' ' if condition!='>=1' else '', # only include if non-default
+			file=os.path.basename(file),
+			detail=' '+detailMessage.strip(' ') if detailMessage else ''
+			)
+
+		log.debug("Performing wait for grep signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
+		
+		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', False) or self.getBoolProperty('verboseWaitForGrep', False)
+		if verboseWaitForSignal: 
+			# if verbose, log when starting (which is very helpful for debugging hangs); non-verbose users get the message only when it's done
+			log.info('%s%s', msg, '; timeout=%ss'%timeout if timeout!=TIMEOUTS['WaitForSignal'] else '')
+		
+		encoding = encoding or self.getDefaultFileEncoding(f)
+		
+		timetaken = time.time()
 		while 1:
 			if pathexists(f):
-				matches = getmatches(f, expr, encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores)
+				matches = getmatches(f, expr, encoding=encoding, ignores=ignores)
 				if eval("%d %s" % (len(matches), condition)):
-					if self.project.verboseWaitForSignal.lower()=='true' if hasattr(self.project, 'verboseWaitForSignal') else False:
-						log.info("%s completed successfully", msg)
+					timetaken = time.time()-timetaken
+					# Old-style/non-verbose behaviour is to log only after complete, 
+					# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time
+					# (this helps people debug tests that sometimes timeout and sometimes "nearly" timeout)
+					if verboseWaitForSignal:
+						(log.info if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
 					else:
-						log.info("Wait for signal in %s completed successfully", file)
+						# We use the phrase "grep signal" to make it clear whether people used waitForGrep or the older waitForSignal
+						log.info("Wait for grep signal in %s completed successfully", file)
 					break
 				
 				if errorExpr:
 					for err in errorExpr:
-						errmatches = getmatches(f, err+'.*', encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores) # add .* to capture entire err msg for a better outcome reason
+						errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores) # add .* to capture entire err msg for a better outcome reason
 						if errmatches:
 							err = errmatches[0].group(0).strip()
-							msg = '%s found during %s'%(quotestring(err), msg)
+							msg = '%s found while %s'%(quotestring(err), msg)
 							# always report outcome for this case; additionally abort if requested to
 							self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
 							return matches

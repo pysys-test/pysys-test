@@ -163,10 +163,10 @@ Waiting
 =======
 
 PySys provides a number of methods that can be used in your `execute` method to wait for operations to complete, 
-of which the most commonly used is `waitForSignal`. 
+of which the most commonly used is `waitForGrep`. 
 
 .. autosummary::
-	waitForSignal
+	waitForGrep
 	waitForFile
 	waitProcess
 	waitForSocket

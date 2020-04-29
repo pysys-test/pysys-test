@@ -6,7 +6,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		self.assertLineCount('file1.txt', filedir=self.input, expr='Foo', condition='==1')
 		self.assertLineCount('file1.txt', filedir=self.input, expr='Fi', condition='>=15')
-		self.waitForSignal('run.log', expr='Line count .*Fi.*>=15', timeout=30)
+		self.waitForGrep('run.log', expr='Line count .*Fi.*>=15', timeout=30)
 		
 		self.log.info('Copying run.log for later verification')
 		filecopy(os.path.join(self.output, 'run.log'), os.path.join(self.output, 'run.log.proc'))

@@ -51,6 +51,18 @@ Miscellaneous new features
   modules such as ``math`` and ``re``. It is also possible to use ``import_module`` to dynamically import additional 
   modules from within an ``evalstring``. 
 
+- `BaseTest.waitForGrep` (the new name for `BaseTest.waitForSignal`) now log more useful information if the 
+  ``verboseWaitForGrep`` (or its alias, ``verboseWaitForSignal``) is set to true in the ``pysysproject.xml`` 
+  properties. This includes logging at the start of waiting rather than at the end of waiting (to make it easier to 
+  debug hangs during test development or when triaging an automated test run). In addition, if a non-default timeout 
+  was specified this is included in the log message, and for the (small proportion of) waits that take longer than 
+  30 seconds an additional message is logged to indicate how long was actually spent, which makes it easier to debug 
+  tests that sometimes timeout and sometimes complete just before they would have timed out. All of this new 
+  functionality only applies if you have ``verboseWaitForGrep=true``. 
+
+- `BaseTest.waitForGrep` (the new name for `BaseTest.waitForSignal`) now has a ``detailMessage`` parameter that can 
+  be used to provide some extra information to explain more about the wait condition. 
+
 - A new environment variable ``PYSYS_PORTS=minport-maxport,port,...`` can be used to override the set of possible 
   server ports allocated from `BaseTest.getNextAvailableTCPPort()`. This avoids the usual logic which uses 
   `pysys.utils.portalloc.getEphemeralTCPPortRange()` to detect the local/client-side ports which should be avoided 
@@ -85,12 +97,40 @@ Bug fixes
 
 Upgrade guide and compatibility
 -------------------------------
-This is a minor release so is not expected to break existing tests, however we always recommend reading the notes 
-below and running your tests with the new version before upgrading just in case.
+This is a minor release so is not expected to break existing tests, however we recommend reading the notes 
+below and making any 'recommended' changes at a convenient time after upgrading (to avoid problems in future major 
+upgrades), and also running your tests with the new version before upgrading to confirm everything still works as 
+expected.
 
 - Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to set this to False in 
   your ``pysysproject.xml`` file, but it is likely some test reference files may need fixing, so the default value is 
   True which maintains pre-1.5.1 behaviour.
+
+- `BaseTest.waitForSignal()` is now just an alias for the newly added `BaseTest.waitForGrep()`, which is now the 
+  preferred method to use for waiting until a regular expression is found in a file. This is a bit of API cleanup that 
+  provides consistency with widely-used `BaseTest.assertGrep()`, and increases clarity for new users who could 
+  otherwise be confused by the meaning of the term "signal". 
+  
+  The two methods are identical except for a small usability improvement in the method signature to avoid a common 
+  mistake in which the (rarely used, and never needed) ``filedir`` was given a prominent position as the second 
+  positional argument and therefore sometimes incorrectly given the value intended for the ``expr`` expression to be 
+  searched, as can be seen from the two signatures::
+  
+    def waitForSignal( self, file, filedir, expr='', ... )
+    def waitForGrep(   self, file, expr='', ..., filedir=None )
+	
+  In the new waitForGrep method, ``filedir`` can only be specified as a ``filedir=`` keyword argument, permitting the 
+  more natural positional usage::
+  
+    self.waitForGrep('file', 'expr', ...)
+  
+  There is no plan to actually remove waitForSignal, however in the interests of consistency we'd recommend doing a 
+  find-replace ``self.waitForSignal -> self.waitForGrep`` on your tests at a convenient time, bearing in mind that it 
+  could result in test failures in the unlikely event you are setting ``filedir`` and doing so positionally rather 
+  than with ``filedir=``.
+  
+  If you use the ``verboseWaitForSignal`` project property, we recommend you transition to the new 
+  ``verboseWaitForGrep`` property, though both work on both methods for now. 
 
 - There are some deprecations in this release, to remove some items that no-one is likely to be using from the API. 
   We encourage users to check for and remove any references to the following to be ready for future removal:
