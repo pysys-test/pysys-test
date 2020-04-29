@@ -230,7 +230,22 @@ class BaseRunner(ProcessUser):
 		The format of this string may change without notice. 
 		"""
 		return self.__class__.__name__ # there's usually only one base runner so class name is sufficient
-	
+
+	def setKeywordArgs(self, xargs):
+		"""Set the xargs as data attributes of the class.
+				
+		Values in the xargs dictionary are set as data attributes using the builtin C{setattr()} method. 
+		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
+		form C{self.foo} with C{value bar}. 
+		
+		:param xargs: A dictionary of the user defined extra arguments
+		
+		"""
+		# in the next major release we'll delete this method and have baserunner inherit the same logic that 
+		# basetest uses
+		for key in list(xargs.keys()):
+			setattr(self, key, xargs[key])
+
 	# methods to allow customer actions to be performed before a test run, after a test, after 
 	# a cycle of all tests, and after all cycles
 	def setup(self):

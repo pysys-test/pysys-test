@@ -109,15 +109,6 @@ below and running your tests with the new version before upgrading just in case.
   need anything that is no longer available, just use ``import_module`` in your eval string to add it, but it is highly 
   unlikely this will affect anyone. 
 
-- Added automatic conversion of strings specified on the command line with 
-  ``-Xkey=value`` to int, float or bool if there's a static variable of the 
-  same name and one of those types defined on the test `pysys.baserunner.BaseRunner` class. 
-  This matches the behaviour we already have for `BaseTest` and makes it 
-  easier to write tests that have their parameters overridden from the command 
-  line. There is a small chance you may need to make a change if you have a custom BaseRunner class which 
-  uses ``self.XXX`` to access ``-X`` command line options, since the type may now be an int/float/bool where 
-  previously it was a string. 
-
 ---------------
 Release History
 ---------------
