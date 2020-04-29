@@ -877,14 +877,14 @@ class ProcessUser(object):
 			we wait until there is at least one occurrence. 
 		
 		:param int timeout: The number of seconds to wait for the regular expression before giving up and aborting 
-			the test with `constants.TIMEDOUT` (unless abortOnError=False in which case execution will continue).
+			the test with `pysys.constants.TIMEDOUT` (unless abortOnError=False in which case execution will continue).
 		
 		:param pysys.process.commonwrapper.CommonProcessWrapper process: The process that is generating the specified 
 			file, to allow the wait to fail fast (instead of timing out) if the process dies before the expected signal 
 			appears. Can be None if the process is not known or is expected to terminate itself during this period. 
 		
 		:param list[str] errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
-			for the main expression to be aborted with a `constants.BLOCKED` outcome. This is useful to avoid waiting 
+			for the main expression to be aborted with a `pysys.constants.BLOCKED` outcome. This is useful to avoid waiting 
 			a long time for the expected expression when an ERROR is logged that means it will never happen, and 
 			also provides much clearer test failure messages in this case. 
 
@@ -902,7 +902,7 @@ class ProcessUser(object):
 
 		:param str detailMessage: An extra string to add to the message logged when waiting to provide extra 
 			information about the wait condition. e.g. ``logSuffix='(downstream message received)'``. 
-			..versionadded: 1.5.1
+			Added in v1.5.1. 
 			
 		:param str filedir: Can be used to provide a directory name to add to the beginning of the ``file`` parameter; 
 			however usually it is clearer just to specify that directory in the ``file``
