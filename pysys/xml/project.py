@@ -174,19 +174,18 @@ class XMLProjectParser(object):
 
 
 	def getPropertiesFromFile(self, file):
-		if os.path.exists(file):
-			try:
-				fp = open(file, "r")
-			except Exception: 
-				pass
-			else:
-				for line in fp.readlines():
-					regex = re.compile(PROPERTY_FILE, re.M)
-					if regex.search(line) is not None:
-						name = re.match(regex, line).group('name')
-						value = re.match(regex, line).group('value')					
-						value = self.expandFromProperty(value, "")				
-						self.properties[name.strip()] = value.strip()
+		if not os.path.exists(file):
+			log.debug('Project properties file does not exist: %s', file)
+			return
+
+		with open(file, 'r') as fp:
+			for line in fp:
+				regex = re.compile(PROPERTY_FILE, re.M)
+				if regex.search(line) is not None:
+					name = re.match(regex, line).group('name')
+					value = re.match(regex, line).group('value')					
+					value = self.expandFromProperty(value, "")				
+					self.properties[name.strip()] = value.strip()
 
 
 	def expandFromEnvironent(self, value, default):
