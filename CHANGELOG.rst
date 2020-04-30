@@ -120,6 +120,8 @@ Bug fixes
 - Fixed 1.5.0 bug in which a ``-Xkey=value`` command line value of ``1`` or ``0`` would be converted to a boolean 
   True or False value instead of an int, when the `BaseTest` object has a field named ``key`` of type int.
 
+- Fixed reading .properties file values that contain an equals ``=`` symbol. 
+
 Upgrade guide and compatibility
 -------------------------------
 This is a minor release so is not expected to break existing tests, however we recommend reading the notes 

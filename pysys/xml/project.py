@@ -83,7 +83,6 @@ DTD='''
 
 PROPERTY_EXPAND_ENV = "(?P<replace>\${%s.(?P<key>.*?)})"
 PROPERTY_EXPAND = "(?P<replace>\${(?P<key>.*?)})"
-PROPERTY_FILE = "(?P<name>^.*)=(?P<value>.*)$"
 
 
 class XMLProjectParser(object):
@@ -180,10 +179,9 @@ class XMLProjectParser(object):
 
 		with open(file, 'r') as fp:
 			for line in fp:
-				regex = re.compile(PROPERTY_FILE, re.M)
-				if regex.search(line) is not None:
-					name = re.match(regex, line).group('name')
-					value = re.match(regex, line).group('value')					
+				line = line.split('=', 1)
+				if len(line) == 2:
+					name, value = line[0], line[1]
 					value = self.expandFromProperty(value, "")				
 					self.properties[name.strip()] = value.strip()
 

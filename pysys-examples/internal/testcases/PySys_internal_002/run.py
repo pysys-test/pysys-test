@@ -19,6 +19,13 @@ class PySysTest(BaseTest):
 		self.assertThat('re.match(r"\d\d\d\d-\d\d-\d\d$", %s)', repr(self.proj.startDate))
 		self.assertThat('re.match(r"\d\d\.\d\d\.\d\d$", %s)', repr(self.proj.startTime))
 		
+		for k,v in self.proj.properties.items():
+			self.log.info('%r = %r'%(k, v))
+		
+		self.assertThat('actual == expected', actual__eval="self.proj.properties['test-key']", expected="test value")
+		self.assertThat('actual == expected', actual__eval="self.proj.properties['test-key_3']", expected="value  3 test value")
+		self.assertThat('actual == expected', actual__eval="self.proj.properties['test-key_2']", expected="test value = awesome")
+		
 	def validate(self):
 		self.assertTrue(self.proj.lib == 'lib_%s_1.0.so'%OSFAMILY)
 		self.assertTrue(self.proj.library == 'jstore1.0.jar')
