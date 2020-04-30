@@ -53,7 +53,7 @@ class PySysTest(BaseTest):
 		self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
 		self.assertThat("(0 <= actualValue < max) and type(actualValue)!=float", actualValue=v, max=100)
 
-		self.assertThat("IS_WINDOWS or re.match(actual, expected)", actual="foo", expected="f.*")
+		self.assertThat("IS_WINDOWS or re.match(expected, actual)", actual="foo", expected="f.*")
 		self.assertThat("import_module('tarfile').is_tarfile(self.output+file) is False", file='/foo.zip')
 
 		self.assertThat('float(startupTime) < 60.0', 

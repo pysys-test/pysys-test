@@ -4,7 +4,7 @@ Assert that (reasonFailedEvalAssert.startswith(expected)) with reasonFailedEvalA
 Assert that (actualStartupMessage == expected) with actualStartupMessage='Started successfully', expected='Started successfully' ... passed
 Assert that (actualStartupMessage.endswith('successfully')) with actualStartupMessage='Started successfully' ... passed
 Assert that ((0 <= actualValue < max) and type(actualValue)!=float) with actualValue=20, max=100 ... passed
-Assert that (IS_WINDOWS or re.match(actual, expected)) with actual='foo', expected='f.*' ... passed
+Assert that (IS_WINDOWS or re.match(expected, actual)) with actual='foo', expected='f.*' ... passed
 Assert that (import_module('tarfile').is_tarfile(self.output+file) is False) with file='/foo.zip' ... passed
 Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')) ='51.9' ... passed
 Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')) ='20.3' ... passed

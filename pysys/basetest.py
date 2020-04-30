@@ -507,7 +507,7 @@ class BaseTest(ProcessUser):
 		the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``. If necessary, symbols for additional modules 
 		can be imported dynamically using ``import_module()``. For example::
 
-			self.assertThat("IS_WINDOWS or re.match(actual, expected)", actual="foo", expected="f.*")
+			self.assertThat("IS_WINDOWS or re.match(expected, actual)", actual="foo", expected="f.*")
 			self.assertThat("import_module('tarfile').is_tarfile(self.output+file) is False", file='/foo.zip')
 		
 		Sometimes the differences between assertThat expressions are hard to describe in the parameter names themselves, 
