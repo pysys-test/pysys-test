@@ -1,0 +1,20 @@
+Assert that (actual == expected) with actual ('prefix'+' foo bar '+'suffix') ='prefix foo bar suffix', expected='foobar' ... failed [run.py:8]
+Assert that (actual == expected) with actual='prefix foo bar suffix', expected='foobar' ... failed [run.py:12]
+Assert that (reasonFailedEvalAssert.startswith(expected)) with reasonFailedEvalAssert="Assert that (actual == expected) with actual ('prefix'+' foo bar '+'suffix') ='prefix foo bar suffix', expected='foobar'", expected='Assert that (actual == expected) with ' ... passed
+Assert that (actualStartupMessage == expected) with actualStartupMessage='Started successfully', expected='Started successfully' ... passed
+Assert that (actualStartupMessage.endswith('successfully')) with actualStartupMessage='Started successfully' ... passed
+Assert that ((0 <= actualValue < max) and type(actualValue)!=float) with actualValue=20, max=100 ... passed
+Assert that (IS_WINDOWS or re.match(actual, expected)) with actual='foo', expected='f.*' ... passed
+Assert that (import_module('tarfile').is_tarfile(self.output+file) is False) with file='/foo.zip' ... passed
+Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')) ='51.9' ... passed
+Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')) ='20.3' ... passed
+Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
+Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='baz' ... passed
+Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
+Assert that (len(actual) == 1) with actual (myDataStructure['item2']) =[MyClass(baz)] ... passed
+Assert that (actual == expected) with item (myDataStructure['item1']) =[MyClass(foobar)], actual (item[-1].getId()) ='foobar', expected='foobar', needsPython36=True ... passed
+Assert that (actualErrorMessage == "Foo\"\'\nbar") with actualErrorMessage='Foo"\'\nbar' ... passed
+Assert that (actualFileSize > 0) with actualFileSize (os.path.getsize(self.output+'/file1.dat')) =3 ... passed
+Assert that (actualFileSize > 0) with actualFileSize (os.path.getsize(self.output+'/file2.dat')) =3 ... passed
+Assert that (reMatch.group()) with reMatch (re.match('f.*', 'foo')) =<_sre.SRE_Match object; span=(0, 3), match='foo'> ... passed
+Assert that (5 == 5.0) ... passed

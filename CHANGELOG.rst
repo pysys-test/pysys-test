@@ -15,8 +15,32 @@ What's new in 1.5.1 (not yet released)
 
 Miscellaneous new features
 --------------------------
-- PySys now support v3.8 of Python. 
+- PySys now supports v3.8 of Python. 
 
+- `BaseTest.assertThat` has been radically overhauled with a powerful mechanism that uses named parameters (e.g. 
+  ``actual=`` and ``expected=``) to produce self-describing log messages and outcome reasons, and even the ability to 
+  evaluate arbitrary Python expressions in the parameters, for example::
+  
+     self.assertThat("actualStartupMessage == expected", actualStartupMessage=msg, expected='Started successfully')
+
+     self.assertThat('float(startupTime) < 60.0', 
+        startupTime__eval="self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')")
+     self.assertThat('float(startupTime) < 60.0', 
+        startupTime__eval="self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')")
+
+     self.assertThat('actual == expected', actual__eval="myDataStructure['item1'][-1].getId()", expected='foobar')
+     self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].getId()", expected='baz')
+     self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].id", expected='baz')
+  
+  This automatically produces informative log messages such as::
+  
+     Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
+     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='blimey!' ... failed
+     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
+  
+  As a result, the less powerful `BaseTest.assertEval` method is now deprecated and new tests should use assertThat 
+  instead. 
+   
 - `BaseTest.assertDiff` usability was improved by including the relative path to each file 
   in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
   file without losing track of which is which. This also makes it easier to manually diff the output directory against 
@@ -145,10 +169,12 @@ expected.
    - ``pysys.xml.descriptor.XMLDescriptorContainer`` (replaced by `pysys.xml.descriptor.TestDescriptor`)
    - ``pysys.xml.descriptor.XMLDescriptorCreator`` and ``DESCRIPTOR_TEMPLATE`` (create descriptors manually if needed) 
 
-- The global namespace available for use from `BaseTest.assertEval` has been cut down to remove some 
-  functions and modules such as ``filegrep`` that no-one is likely to be using. If you find you 
-  need anything that is no longer available, just use ``import_module`` in your eval string to add it, but it is highly 
-  unlikely this will affect anyone. 
+- The global namespace available for use from `BaseTest.assertThat` and `BaseTest.assertEval` has been cut down to 
+  remove some functions and modules such as ``filegrep`` that no-one is likely to be using. If you find you 
+  need anything that is no longer available, just use ``import_module('modulename').member`` in your eval string to 
+  add it, but it is highly unlikely this will affect anyone. `BaseTest.assertEval` is now deprecated in favour of 
+  `BaseTest.assertThat` which provides more powerful capabilities (note that `BaseTest.assertThat` was itself 
+  previously deprecated, but after recent changes is now the preferred way to perform general-purpose assertions). 
 
 ---------------
 Release History

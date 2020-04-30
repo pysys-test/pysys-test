@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import os.path, time, threading, logging
+import inspect
 
 from pysys import log
 from pysys.constants import *
@@ -414,17 +415,14 @@ class BaseTest(ProcessUser):
 		"""Perform a validation by substituting named ``{}`` placeholder values into a Python expression such as 
 		``{expected}=={actual}`` or ``4 <= {actual} <= 10``. 
 		
+		:deprecated::
+			Deprecated since 1.5.1 in favour of `assertThat` which is now significantly more powerful and should be 
+			used for new tests. 
+		
 		Example use::
 		
-			self.assertEval('os.path.size({filename}) > {origFileSize}', 	
+			self.assertEval('os.path.getsize({filename}) > {origFileSize}', 	
 				filename=self.output+'/file.txt', origFileSize=1000)
-		
-		If necessary, symbols for additional modules can be imported dynamically using ``import_module``, for example::
-		
-			self.assertEval("len(import_module('difflib').get_close_matches({word}, ['apple', 'orange', 'applic'])) == 2", word='app')
-		
-		See also L{getExprFromFile} which is often used to extract a piece of 
-		data from a log file which can then be checked using this method. 
 		
 		:param evalstring: a string that will be formatted using ``.format(...)``
 			with the specified parameters, and result in failure outcome if not true. 
@@ -479,62 +477,149 @@ class BaseTest(ProcessUser):
 			return False
 			
 	def assertThat(self, conditionstring, *args, **kwargs):
-		"""Perform a validation based on substituting values into 
-		an old-style ``%`` format string and then evaluating it with eval. 
+		"""Performs equality/range tests or any general-purpose validation by evaluating a Python ``eval()`` expression 
+		in the context of some named values.
 		
-		:deprecated: This method is deprecated in favour of L{assertEval} which produces 
-			more useful assertion failure messages and automatic quoting of strings. 
+		For example::
+		
+			# Equality comparison of an 'actual' vs 'expected' message from when our server started:
+			self.assertThat("actualStartupMessage == expected", actualStartupMessage=msg, expected='Started successfully')
+			
+			# Note the common pattern of having an "actual" and "expected" parameter and using an explicit name to 
+			# indicate what the actual value is for. This produces the following self-describing log message: 
+			#   Assert that (actualStartupMessage == expected) with actualStartupMessage='Started unsuccessfully', expected='Started successfully' ... failed
 
-		The eval string should be specified as a format string, with zero or more %s-style
-		arguments. This provides an easy way to check conditions that also produces clear
-		outcome messages.
+			# Any valid Python expression is permitted (not only equality testing):
+			self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
+			self.assertThat("(0 <= actualValue < max) and type(actualValue)!=float", actualValue=v, max=100)
+			
+		This method is powerful enough for almost any validation that the other assert methods don't 
+		handle, and by enforcing the discipline of naming values it generates self-describing log messages and 
+		outcome reasons to make it really obvious what is going on.
+		For best results, make sure that your keyword= parameters have clear and unique names so it's obvious 
+		how each assertThat() differs from the other ones, and ensure that all values you're going to want to see 
+		are included as one of the named parameter values (rather than buried deep inside the main conditionstring). 
 		
-		The safest way to pass arbitrary arguments of type string is to use the 
-		repr() function to add appropriate quotes and escaping. 
+		The condition string is just a Python expression, which will be passed to ``eval()`` and can use any 
+		of the ``keyword=`` argument values passed to this method (but not the caller's local variables).
+		The evaluation is performed in a namespace that also includes the current `BaseTest` instance (``self``), 
+		some standard Python modules (``os.path``, ``math``, ``sys``, ``re``, and ``locale``), the `pysys` module, and 
+		the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``. If necessary, symbols for additional modules 
+		can be imported dynamically using ``import_module()``. For example::
 
-		e.g.::
+			self.assertThat("IS_WINDOWS or re.match(actual, expected)", actual="foo", expected="f.*")
+			self.assertThat("import_module('tarfile').is_tarfile(self.output+file) is False", file='/foo.zip')
 		
-			self.assertThat('%d >= 5 or %s=="foobar"', myvalue, repr(mystringvalue))
+		Sometimes the differences between assertThat expressions are hard to describe in the parameter names themselves, 
+		and for these cases you can get self-describing behaviour with a parameter ending in the suffix 
+		``__eval`` whose value is itself a Python expression to be evaluated, using any local variable in the 
+		namespace of the calling code, for example::
 		
-		:param conditionstring: A string will have any following args 
-			substituted into it and then be evaluated as a boolean python 
-			expression. 
-		
-		:param args: Zero or more arguments to be substituted into the format 
-			string.
-		
-		:keyword abortOnError: Set to True to make the test immediately abort if the
-			assertion fails. 
+			myDataStructure = ...
+			self.assertThat("actual == expected", actual__eval="myDataStructure['item1'][-1].getId()", expected="foobar")
+			self.assertThat("actual == expected", actual__eval="myDataStructure['item2'][-1].getId()", expected="baz")
+			self.assertThat("actual == expected", actual__eval="myDataStructure['item2'][-1].id", expected="baz")
 
-		:keyword assertMessage: Overrides the string used to describe this 
-			assertion in log messages and the outcome reason. 
+			# Produces self-describing log messages like this:
+			#  Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
+			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='baz' ... passed
+			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
+			
+		This also allows a very useful pattern of invoking `BaseTest.getExprFromFile()` to extract a string from a file 
+		and then perform detailed checks on the result with assertThat, for example::
 		
-		:return: True if the assertion succeeds, False if a failure outcome was appended. 
+			self.assertThat('float(startupTime) < 60.0', 
+				startupTime__eval="self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')")
+			self.assertThat('float(startupTime) < 60.0', 
+				startupTime__eval="self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')")
+			...
+		
+		.. versionchanged:: 1.5.1
+			The ability to pass named keyword= parameters was added in 1.5.1 
+			(prior to that this method was deprecated).
+		
+		:param str conditionstring: A string containing Python code that will be evaluated usin ``eval()`` 
+			as a boolean expression. 
+			
+			Do not be tempted to use a Python f-string here, as that would deprive PySys of the 
+			opportunity to provide a self-describing message and outcome reason. 
+		
+		:param \**kwargs: All additional keyword arguments are treated as values which will be made available 
+			when evaluating the condition string. Any keyword ending in the special suffix ``__eval`` will be treated 
+			as a Python expression string (rather than a string literal) and will be be evaluated in a namespace 
+			containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.  
+
+		:param \*positional_arguments: (deprecated) Unnamed positional arguments will be 
+			substituted into the condition string using the old ``%`` format string mechanism, before it is evaluated. 
+			This feature is deprecated as it provides poor diagnostic information, requires string parameters to be 
+			explicitly escaped using ``repr()``, and only permits stringifiable 
+			data structures to be used by the conditionstring. Instead use named ``keyword=`` in all new tests. 
+		
+		:param abortOnError=False: Set to True to make the test immediately abort if the
+			assertion fails. By default this method produces a BLOCKED output 
+			but does not throw if the eval(...) cannot be executed. 
+
+		:param assertMessage='': Overrides the string used to describe this 
+			assertion in log messages and the outcome reason. We do not recommend using this as the automatically 
+			generated assertion message is usually clearer. 
+		
+		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). 
 		"""
 		abortOnError = kwargs.pop('abortOnError',False)
 		assertMessage = kwargs.pop('assertMessage',None)
-		assert not kwargs, 'Invalid keyword arguments: %s'%kwargs.keys()
+		namedvalues = {}
+		displayvalues = []
+		
+		EVAL_SUFFIX = '__eval'
+		for k,v in kwargs.items():
+			if k.endswith(EVAL_SUFFIX):
+				k = k[:-len(EVAL_SUFFIX)] # strip the suffix
+				displayvalues.append('%s (%s) '%(k, v))
+				try:
+					# evaluate in the namespace of the parent (which includes basetest)
+					namespace = dict(inspect.currentframe().f_back.f_locals)
+					if sys.version_info[0:2] >= (3, 6): # only do this if we have ordered kwargs, else it'd be non-deterministic
+						namespace.update(namedvalues) # also add in any named values we already have
+					v = pysys.internal.safe_eval.safe_eval(v, extraNamespace=namespace)
+				except Exception as ex:
+					self.addOutcome(BLOCKED, 'Failed to evaluate named parameter %s=(%s): %s'%(k+EVAL_SUFFIX, v, ex), abortOnError=abortOnError)
+					return False
+			else:
+				displayvalues.append(k)
+				
+			if '__' in k: raise Exception('Please do not use __ in any for keywords, this is reserved for future use')
+
+			# use repr if it's a string so we get escaping, other data structures are best using normal str()
+			displayvalues[-1]+='=%s'%(repr(v) if isstring(v) else str(v))
+			namedvalues[k] = v
+		
+		displayvalues = ' with '+', '.join(displayvalues) if displayvalues else ''
 		try:
-			expr = conditionstring
-			if args:
-				expr = expr % args
-			
-			result = bool(eval(expr))
+			conditionstring = conditionstring
+			if args: # yucky old-style mechanism
+				conditionstring = conditionstring % args
+
+			namespace = dict(namedvalues)
+			namespace['self'] = self
+			result = bool(pysys.internal.safe_eval.safe_eval(conditionstring, extraNamespace=namespace))
+
 		except Exception as e:
-			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" with args %r: %s'%(conditionstring, args, e), abortOnError=abortOnError)
-			return
+			self.addOutcome(BLOCKED, 'Failed to evaluate (%s)%s: %s'%(conditionstring, displayvalues, e), abortOnError=abortOnError)
+			return False
+		
+		assertMessage = assertMessage or ('Assert that (%s)%s'%(conditionstring, displayvalues))
 		
 		if result:
-			self.addOutcome(PASSED, assertMessage or ('Assertion on %s'%expr))
+			self.addOutcome(PASSED, assertMessage)
 			return True
 		else:
-			self.addOutcome(FAILED, assertMessage or ('Assertion on %s'%expr), abortOnError=abortOnError)
+			self.addOutcome(FAILED, assertMessage, abortOnError=abortOnError)
 			return False
 
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.
 		
-		:deprecated: Use L{assertEval} instead of this method, which produces 
+		:deprecated: Use `assertThat` instead of this method, which produces 
 			clearer messages if the assertion fails. 
 		
 		If the supplied expression evaluates to true a C{PASSED} outcome is added to the 
@@ -561,7 +646,7 @@ class BaseTest(ProcessUser):
 	def assertFalse(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to false.
 		
-		:deprecated: Use L{assertEval} instead of this method, which produces 
+		:deprecated: Use `assertThat` instead of this method, which produces 
 			clearer messages if the assertion fails. 
 		
 		If the supplied expression evaluates to false a C{PASSED} outcome is added to the 
@@ -713,6 +798,12 @@ class BaseTest(ProcessUser):
 		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
 		C{FAILED} outcome is added. Should C{contains} be set to false, a C{PASSED} outcome will only 
 		be added should the regular expression not be seen in the file.
+		
+		See also `assertThat` which can be used to perform more powerful validations on regular expressions extracted 
+		from text files, for example::
+		
+			self.assertThat('float(startupTime) < 60.0', 
+				startupTime__eval="self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')")
 		
 		:param file: The basename of the file used in the grep
 		
