@@ -16,5 +16,4 @@ Assert that (actual == expected) with item (myDataStructure['item1']) =[MyClass(
 Assert that (actualErrorMessage == "Foo\"\'\nbar") with actualErrorMessage='Foo"\'\nbar' ... passed
 Assert that (actualFileSize > 0) with actualFileSize (os.path.getsize(self.output+'/file1.dat')) =3 ... passed
 Assert that (actualFileSize > 0) with actualFileSize (os.path.getsize(self.output+'/file2.dat')) =3 ... passed
-Assert that (reMatch.group()) with reMatch (re.match('f.*', 'foo')) =<_sre.SRE_Match object; span=(0, 3), match='foo'> ... passed
 Assert that (5 == 5.0) ... passed

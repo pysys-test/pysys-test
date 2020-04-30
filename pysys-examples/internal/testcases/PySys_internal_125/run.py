@@ -84,9 +84,6 @@ class PySysTest(BaseTest):
 		self.assertThat('actualFileSize > 0', actualFileSize__eval="os.path.getsize(self.output+'/file1.dat')")
 		self.assertThat('actualFileSize > 0', actualFileSize__eval="os.path.getsize(self.output+'/file2.dat')")
 
-		# this checks we can access the re module and that we can pass complex non-stringifiable objects over
-		self.assertThat('reMatch.group()', reMatch__eval="re.match('f.*', 'foo')")
-
 		# check we print something sane if there are no named parameters
 		self.assertThat("5 == %s", '5.0')
 
