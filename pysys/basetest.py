@@ -582,7 +582,7 @@ class BaseTest(ProcessUser):
 						namespace.update(namedvalues) # also add in any named values we already have
 					v = pysys.internal.safe_eval.safe_eval(v, extraNamespace=namespace)
 				except Exception as ex:
-					self.addOutcome(BLOCKED, 'Failed to evaluate named parameter %s=(%s): %s'%(k+EVAL_SUFFIX, v, ex), abortOnError=abortOnError)
+					self.addOutcome(BLOCKED, 'Failed to evaluate named parameter %s=(%s): %r'%(k+EVAL_SUFFIX, v, ex), abortOnError=abortOnError)
 					return False
 			else:
 				displayvalues.append(k)
@@ -604,7 +604,7 @@ class BaseTest(ProcessUser):
 			result = bool(pysys.internal.safe_eval.safe_eval(conditionstring, extraNamespace=namespace))
 
 		except Exception as e:
-			self.addOutcome(BLOCKED, 'Failed to evaluate (%s)%s: %s'%(conditionstring, displayvalues, e), abortOnError=abortOnError)
+			self.addOutcome(BLOCKED, 'Failed to evaluate (%s)%s: %r'%(conditionstring, displayvalues, e), abortOnError=abortOnError)
 			return False
 		
 		assertMessage = assertMessage or ('Assert that (%s)%s'%(conditionstring, displayvalues))
