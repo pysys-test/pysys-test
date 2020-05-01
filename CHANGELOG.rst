@@ -36,6 +36,9 @@ Miscellaneous new features
   As a result, the less powerful `BaseTest.assertEval` method is now deprecated and new tests should use assertThat 
   instead. 
 
+  Both methods also now allow the condition/eval string to make use of some additional standard Python modules such as ``math`` 
+  and ``re``, and to use ``import_module('...').XXX`` to dynamically import additional modules. 
+
 - `BaseTest.assertGrep` (and `BaseTest.assertLastGrep`) now return the regular expression match object, or if any 
   ``(?P<groupName>...)`` named groups are present in the regular expression, a dictionary containing the matched values. 
   This allows matching values from within the regular expression in a way that produces nicely descriptive error 
@@ -76,10 +79,6 @@ Miscellaneous new features
   value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
   is True. 
   
-- The `BaseTest.assertEval` method now allows ``evalstring`` to make use of some additional standard Python 
-  modules such as ``math`` and ``re``. It is also possible to use ``import_module`` to dynamically import additional 
-  modules from within an ``evalstring``. 
-
 - `BaseTest.waitForGrep` (the new name for `BaseTest.waitForSignal`) now logs more useful information if the 
   ``verboseWaitForGrep`` (or its alias, ``verboseWaitForSignal``) is set to true in the ``pysysproject.xml`` 
   properties. This includes logging at the start of waiting rather than at the end of waiting (to make it easier to 
