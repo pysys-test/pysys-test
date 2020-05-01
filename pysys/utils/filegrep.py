@@ -109,7 +109,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None):
 			f.close()
 
 
-def lastgrep(file, expr, ignore=[], include=[], encoding=None):
+def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False):
 	"""Search for matches to a regular expression in the last line of an input file, returning true if a match occurs.
 	
 	:param file: The full path to the input file
@@ -135,8 +135,9 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None):
 		if len(contents) > 0:
 			line = contents[len(contents)-1]
 			regexpr = re.compile(expr)
-			if regexpr.search(line) is not None: return True
-		return False
+			result = regexpr.search(line)
+			if result is not None: return result if returnMatch else True
+		return None if returnMatch else False
 
 
 def orderedgrep(file, exprList, encoding=None):

@@ -36,10 +36,10 @@ Miscellaneous new features
   As a result, the less powerful `BaseTest.assertEval` method is now deprecated and new tests should use assertThat 
   instead. 
 
-- `BaseTest.assertGrep` now returns the regular expression match object, or if any ``(?P<groupName>...)`` named 
-  groups are present in the regular expression, a dictionary containing the matched values. This allows matching 
-  values from within the regular expression in a way that produces nicely descriptive error messages, and also enables 
-  more sophisticated checking (e.g. by casting numeric types to float). For example::
+- `BaseTest.assertGrep` (and `BaseTest.assertLastGrep`) now return the regular expression match object, or if any 
+  ``(?P<groupName>...)`` named groups are present in the regular expression, a dictionary containing the matched values. 
+  This allows matching values from within the regular expression in a way that produces nicely descriptive error 
+  messages, and also enables more sophisticated checking (e.g. by casting numeric types to float). For example::
 
     self.assertThat('username == expected', expected='myuser',
       **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))

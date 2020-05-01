@@ -947,8 +947,13 @@ class BaseTest(ProcessUser):
 		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 				
 		
-		:return: None if there was no match, or the string that was matched (note the return value is not affected by 
-			the contains=True/False parameter).
+		:return: The ``re.Match`` object, or None if there was no match (note the return value is not affected by 
+			the contains=True/False parameter). 
+			
+			However if the expr contains any ``(?P<groupName>...)`` named groups, then a dict is returned 
+			containing ``dict(groupName: str, matchValue: str or None)`` (or an empty ``{}`` dict if there is no match) 
+			which allows the result to be passed to `assertThat` for further checking (typically 
+			unpacked using the ``**`` operator; see `assertGrep` for a similar example). 
 		"""
 		assert expr, 'expr= argument must be specified'
 		
@@ -958,16 +963,26 @@ class BaseTest(ProcessUser):
 		log.debug("Performing contains=%s grep on last line of file: %s", contains, f)
 
 		msg = assertMessage or ('Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
+		namedGroupsMode = False
 		try:
-			result = lastgrep(f, expr, ignores, includes, encoding=encoding or self.getDefaultFileEncoding(f)) == contains
+			compiled = re.compile(expr)
+			namedGroupsMode = compiled.groupindex
+			match = lastgrep(f, expr, ignores, includes, encoding=encoding or self.getDefaultFileEncoding(f), returnMatch=True)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
-			result = None
+			match = None
 		else:
+			result = (match is not None) == contains
 			if result: msg = assertMessage or ('Grep on input file %s' % file)
-			self.addOutcome(PASSED if result else FAILED, msg, abortOnError=abortOnError)
-		return result
+			self.addOutcome(PASSED if result else (BLOCKED if namedGroupsMode else FAILED), msg, abortOnError=abortOnError)
+
+		# special-case if they're using named regex named groups to make it super-easy to use with assertThat - 
+		# so always return a dict instead of None for that case
+		if namedGroupsMode:
+			return {} if match is None else match.groupdict()
+			
+		return match
 
 
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, encoding=None, 
