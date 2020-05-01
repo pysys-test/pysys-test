@@ -51,6 +51,22 @@ class PySysTest(BaseTest):
 			grepResult=self.assertGrep(file='file.txt', filedir=self.input, expr='(Now eastlin|westlin winds)').groups(),
 		)
 		
+		self.write_text('myserver.log', u'Successfully authenticated user "myuser" in 0.6 seconds.')
+		MAX_AUTH_TIME = 60
+		
+		self.assertThat('username == expected', expected='myuser',
+			**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+
+		self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
+			**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*" in (?P<authSecs>[^ ]+) seconds\.'))
+
+		self.assertThat('result == {}', 
+			result=self.assertGrep('myserver.log', expr='NO MATCH "(?P<username>[^"]*)"', contains=False))
+
+		self.assertThat('result is None', 
+			result=self.assertGrep('myserver.log', expr='NO MATCH "([^"]*)"', contains=False))
+
+		
 	def checkForFailedOutcome(self):
 		outcome = self.outcome.pop()
 		if outcome == FAILED: self.addOutcome(PASSED)

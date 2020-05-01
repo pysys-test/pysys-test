@@ -23,11 +23,6 @@ Miscellaneous new features
   
      self.assertThat("actualStartupMessage == expected", actualStartupMessage=msg, expected='Started successfully')
 
-     self.assertThat('float(startupTime) < 60.0', 
-        startupTime__eval="self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')")
-     self.assertThat('float(startupTime) < 60.0', 
-        startupTime__eval="self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')")
-
      self.assertThat('actual == expected', actual__eval="myDataStructure['item1'][-1].getId()", expected='foobar')
      self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].getId()", expected='baz')
      self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].id", expected='baz')
@@ -40,7 +35,22 @@ Miscellaneous new features
   
   As a result, the less powerful `BaseTest.assertEval` method is now deprecated and new tests should use assertThat 
   instead. 
-   
+
+- `BaseTest.assertGrep` now returns the regular expression match object, or if any ``(?P<groupName>...)`` named 
+  groups are present in the regular expression, a dictionary containing the matched values. This allows matching 
+  values from within the regular expression in a way that produces nicely descriptive error messages, and also enables 
+  more sophisticated checking (e.g. by casting numeric types to float). For example::
+
+    self.assertThat('username == expected', expected='myuser',
+      **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+    
+    self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
+      **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+
+- All ``assertXXX`` methods in `BaseTest` now return a value to indicate the result of the assertion. In most 
+  cases this is a boolean ``True``/``False``. This creates an opportunity to gather or log additional diagnostic 
+  information (e.g. using `BaseTest.logFileContents`) after an assertion fails. 
+
 - `BaseTest.assertDiff` usability was improved by including the relative path to each file 
   in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
   file without losing track of which is which. This also makes it easier to manually diff the output directory against 
@@ -54,11 +64,6 @@ Miscellaneous new features
   particular, make sure you have committed all reference files to version control before running the command, and 
   then afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
   committing. 
-
-- All ``assertXXX`` methods in `BaseTest` now return a value to indicate the result of the assertion. In most 
-  cases this is a boolean ``True``/``False``, though some methods such as ``assertGrep`` return the matching string 
-  (or ``None``). This creates an opportunity to gather or log additional diagnostic information (e.g. using 
-  `BaseTest.logFileContents`) after an assertion fails. 
 
 - ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
   used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 

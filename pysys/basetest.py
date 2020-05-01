@@ -524,16 +524,7 @@ class BaseTest(ProcessUser):
 			#  Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
 			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='baz' ... passed
 			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
-			
-		This also allows a very useful pattern of invoking `BaseTest.getExprFromFile()` to extract a string from a file 
-		and then perform detailed checks on the result with assertThat, for example::
-		
-			self.assertThat('float(startupTime) < 60.0', 
-				startupTime__eval="self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')")
-			self.assertThat('float(startupTime) < 60.0', 
-				startupTime__eval="self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')")
-			...
-		
+					
 		.. versionchanged:: 1.5.1
 			The ability to pass named keyword= parameters was added in 1.5.1 
 			(prior to that this method was deprecated).
@@ -788,31 +779,49 @@ class BaseTest(ProcessUser):
 	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, encoding=None, 
 			abortOnError=False, assertMessage=None):
 		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
-		
+
+		This method searches through the specified text file until it finds a line matching the regular expression. 
+		When contains=True it adds a `PASSED <pysys.constants.PASSED>` outcome if found or a 
+		`FAILED <pysys.constants.FAILED>` outcome if not found (except when where are named groups in the expression 
+		in which case `BLOCKED <pysys.constants.BLOCKED>` is used to indicate that the return value is not valid).
+		When contains=False this is inverted so a `PASSED <pysys.constants.PASSED>` outcome is added if not found 
+		and `FAILED <pysys.constants.FAILED>` if found. 
+
 		For example::
 		
 			self.assertGrep('myserver.log', expr=' ERROR .*', contains=False)
+			
+			# in Python 3+, f-Strings can be used to substitute in parameters:
 			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{username}" in .* seconds\\.')
+			
+			# If you need to use ``\`` regular epression escapes use a raw string to avoid double-escaping
 			self.assertGrep('myserver.log', expr=r'c:\Foo\bar\.txt')
 		
-		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
-		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
-		C{FAILED} outcome is added. Should C{contains} be set to false, a C{PASSED} outcome will only 
-		be added if the regular expression is not present in the file.
+		You can get more descriptive failure messages, and also do more sophisticated checking of results, by 
+		using one or more ``(?P<groupName>...)`` named groups in the expression to extract information. A common 
+		pattern is to unpack the resulting dict using ``**kwargs`` syntax and pass to `BaseTest.assertThat`. For 
+		example, the grep shown above for checking that a log message contains the correct username could be rewritten 
+		as::
 		
-		See also `assertThat` which can be used to perform more powerful validations on regular expressions extracted 
-		from text files, for example::
+			self.assertThat('username == expected', expected='myuser',
+				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+
+			self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
+				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
 		
-			self.assertThat('float(startupTime) < 60.0', 
-				startupTime__eval="self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')")
-		
+		.. versionchanged:: 1.5.1
+			The return value was added in 1.5.1.
+
 		:param file: The name or relative/absolute path of the file to be searched.
 		
 		:param str expr: The regular expression to check for in the file (or a string literal if literal=True), 
-			for example " ERROR .*". 
+			for example ``" ERROR .*"``. 
 			
 			It's sometimes helpful to use a 'raw' Python string so that you don't need to double-escape 
-			slashes intended for the regular expression parser, e.g. ``self.assertGrep(..., expr=r'c:\Foo\bar\.txt')
+			slashes intended for the regular expression parser, e.g. ``self.assertGrep(..., expr=r'c:\Foo\bar\.txt')``.
+			
+			If you wish to do something with the text inside the match you can use the ``re`` named 
+			group syntax ``(?P<groupName>...)`` to specify a name for parts of the regular expression.
 			
 			For contains=False matches, you should end the expr with `.*` if you wish to include just the 
 			matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
@@ -840,7 +849,12 @@ class BaseTest(ProcessUser):
 			deprecated, as it's simpler to just include the .
 
 		:return: The ``re.Match`` object, or None if there was no match (note the return value is not affected by 
-			the contains=True/False parameter).
+			the contains=True/False parameter). 
+			
+			However if the expr contains any ``(?P<groupName>...)`` named groups, then a dict is returned 
+			containing ``dict(groupName: str, matchValue: str or None)`` (or an empty ``{}`` dict if there is no match) 
+			which allows the assertGrep result to be passed to `assertThat` for further checking (typically 
+			unpacked using the ``**`` operator; see example above). 
 		
 		"""
 		assert expr, 'expr= argument must be specified'
@@ -863,9 +877,13 @@ class BaseTest(ProcessUser):
 				return expr
 			expr = escapeRegex(expr)
 
+		namedGroupsMode = False
 		log.debug("Performing %s contains=%s grep on file: %s", 'regex' if not literal else 'literal/non-regex', contains, f)
 		try:
+			compiled = re.compile(expr)
+			namedGroupsMode = compiled.groupindex
 			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f))
+			if result is None and re.compile(expr).groupindex: noMatchButHasNamedGroups = True
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
@@ -874,7 +892,7 @@ class BaseTest(ProcessUser):
 		else:
 			# short message if it succeeded, more verbose one if it failed to help you understand why, 
 			# including the expression it found that should not have been there
-			outcome = PASSED if (result!=None) == contains else FAILED
+			outcome = PASSED if (result!=None) == contains else (BLOCKED if namedGroupsMode else FAILED)
 			if outcome == PASSED: 
 				if contains: log.debug('Grep on input file %s successfully matched expression %s with line: %s', 
 					file, quotestring(expr), quotestring(result.string))
@@ -896,6 +914,12 @@ class BaseTest(ProcessUser):
 							(result.group(0) if expr.endswith('*') else result.string).rstrip('\n\r')
 							))
 			self.addOutcome(outcome, msg, abortOnError=abortOnError)
+		
+		# special-case if they're using named regex named groups to make it super-easy to use with assertThat - 
+		# so always return a dict instead of None for that case
+		if namedGroupsMode:
+			return {} if result is None else result.groupdict()
+		
 		return result
 
 	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], encoding=None, 
