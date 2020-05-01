@@ -40,12 +40,16 @@ class PySysTest(BaseTest):
 		self.assertGrep(file='run.log', expr='Grep on file.txt does not contain " WARN .*" failed with: " WARN This is a warning message!"', literal=True)
 		
 		self.log.info('')
-		self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines right', contains=False)
+		self.assertThat('grepResult==None', grepResult=
+			self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines right', contains=False)
+		)
 		self.assertGrep(file='file.txt', filedir=self.input, expr='(?P<tag>moon) shines bright')
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon.*bright')
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon.*bright', ignores=['oon'], contains=False)
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon.*bright', ignores=['pysys is great', 'oh yes it is'])
-		self.assertGrep(file='file.txt', filedir=self.input, expr='Now eastlin|westlin winds')
+		self.assertThat('grepResult==expected', expected=('westlin winds',),
+			grepResult=self.assertGrep(file='file.txt', filedir=self.input, expr='(Now eastlin|westlin winds)').groups(),
+		)
 		
 	def checkForFailedOutcome(self):
 		outcome = self.outcome.pop()

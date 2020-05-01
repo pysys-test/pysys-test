@@ -839,7 +839,7 @@ class BaseTest(ProcessUser):
 		:param str filedir: The directory of the file (defaults to the testcase output subdirectory); this is 
 			deprecated, as it's simpler to just include the .
 
-		:return: The string that was matched, or None if there was no match (note the return value is not affected by 
+		:return: The ``re.Match`` object, or None if there was no match (note the return value is not affected by 
 			the contains=True/False parameter).
 		
 		"""
