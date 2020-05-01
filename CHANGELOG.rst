@@ -78,8 +78,11 @@ Miscellaneous new features
   `BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
   value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
   is True. 
-  
-- `BaseTest.waitForGrep` (the new name for `BaseTest.waitForSignal`) now logs more useful information if the 
+
+- `BaseTest.waitForGrep()` has been added as a new and clearer name for `BaseTest.waitForSignal()`, and we recommend 
+  using waitForGrep in new tests from now on (see upgrade section for more information about this change).
+
+- `BaseTest.waitForGrep` (and `BaseTest.waitForSignal`) now logs more useful information if the 
   ``verboseWaitForGrep`` (or its alias, ``verboseWaitForSignal``) is set to true in the ``pysysproject.xml`` 
   properties. This includes logging at the start of waiting rather than at the end of waiting (to make it easier to 
   debug hangs during test development or when triaging an automated test run). In addition, if a non-default timeout 
@@ -89,7 +92,7 @@ Miscellaneous new features
   functionality only applies if you have ``verboseWaitForGrep=true`` so will not affect existing projects, but this 
   is now enabled for newly created projects.  
 
-- `BaseTest.waitForGrep` (the new name for `BaseTest.waitForSignal`) now has a ``detailMessage`` parameter that can 
+- `BaseTest.waitForGrep` (and `BaseTest.waitForSignal`) now has a ``detailMessage`` parameter that can 
   be used to provide some extra information to explain more about the wait condition. 
 
 - A new environment variable ``PYSYS_PORTS=minport-maxport,port,...`` can be used to override the set of possible 
