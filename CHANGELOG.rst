@@ -68,17 +68,6 @@ Miscellaneous new features
   then afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
   committing. 
 
-- ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
-  used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
-  for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
-  ``Project Help`` heading is automatically added if no other heading is present, and PySys will intelligently add or 
-  remove indentation from the specified content so that it aligns with the built-in options.
-
-- ``pysysproject.xml`` has a new property ``defaultAssertDiffStripWhitespace`` which controls whether 
-  `BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
-  value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
-  is True. 
-
 - `BaseTest.waitForGrep()` has been added as a new and clearer name for `BaseTest.waitForSignal()`, and we recommend 
   using waitForGrep in new tests from now on (see upgrade section for more information about this change).
 
@@ -92,8 +81,23 @@ Miscellaneous new features
   functionality only applies if you have ``verboseWaitForGrep=true`` so will not affect existing projects, but this 
   is now enabled for newly created projects.  
 
+- ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
+  used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
+  for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
+  ``Project Help`` heading is automatically added if no other heading is present, and PySys will intelligently add or 
+  remove indentation from the specified content so that it aligns with the built-in options.
+
+- ``pysysproject.xml`` has a new property ``defaultAssertDiffStripWhitespace`` which controls whether 
+  `BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
+  value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
+  is True. 
+
 - `BaseTest.waitForGrep` (and `BaseTest.waitForSignal`) now has a ``detailMessage`` parameter that can 
   be used to provide some extra information to explain more about the wait condition. 
+
+- `BaseTest.getNextAvailableTCPPort` and `BaseTest.waitForSocket` now support IPv6, via the new 
+  ``socketAddressFamily`` argument (IPv4 remains the default). It is also possible now to control which host 
+  address/interface is used to check that an allocated port isn't in use using the new ``hosts`` argument. 
 
 - A new environment variable ``PYSYS_PORTS=minport-maxport,port,...`` can be used to override the set of possible 
   server ports allocated from `BaseTest.getNextAvailableTCPPort()`. This avoids the usual logic which uses 
@@ -128,6 +132,9 @@ Bug fixes
   True or False value instead of an int, when the `BaseTest` object has a field named ``key`` of type int.
 
 - Fixed reading .properties file values that contain an equals ``=`` symbol. 
+
+- Changed `BaseTest.getNextAvailableTCPPort` to check the allocated port isn't in use on ``localhost`` (previously 
+  we only checked ``INADDR_ANY`` which doesn't include the ``localhost`` interface). 
 
 Upgrade guide and compatibility
 -------------------------------

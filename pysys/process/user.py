@@ -724,15 +724,19 @@ class ProcessUser(object):
 			raise Exception("Write to process %r stdin not performed as process is not running", process)
 
 
-	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], abortOnError=None, process=None):
+	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], abortOnError=None, process=None, 
+			socketAddressFamily=socket.AF_INET):
 		"""Wait until it is possible to establish a socket connection to a 
-		server running on the specified port. 
+		server running on the specified local or remote port. 
 		
 		This method blocks until connection to a particular host:port pair can be established. This is useful for
 		test timing where a component under test creates a socket for client server interaction - calling of this
 		method ensures that on return of the method call the server process is running and a client is able to
 		create connections to it. If a connection cannot be made within the specified timeout interval, the method
 		returns to the caller, or aborts the test if abortOnError=True. 
+		
+		.. versionchanged:: 1.5.1
+			Added host and socketAddressFamily parameters.
 		
 		:param port: The port value in the socket host:port pair
 		:param host: The host value in the socket host:port pair
@@ -741,13 +745,15 @@ class ProcessUser(object):
 			project setting)
 		:param process: If a handle to a process is specified, the wait will abort if 
 			the process dies before the socket becomes available. It is recommended to set this wherever possible. 
+		:param socketAddressFamily: The socket address family e.g. IPv4 vs IPv6. See Python's ``socket`` module for 
+			details. 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 
 		log.debug("Performing wait for socket creation %s:%s", host, port)
 
 		with process_lock:
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s = socket.socket(socketAddressFamily, socket.SOCK_STREAM)
 			# the following lines are to prevent handles being inherited by 
 			# other processes started while this test is runing
 			if OSFAMILY =='windows':
@@ -758,7 +764,7 @@ class ProcessUser(object):
 			else:
 				import fcntl
 				fcntl.fcntl(s.fileno(), fcntl.F_SETFD, 1)
-			
+		# TODO: close socket
 		startTime = time.time()
 		while True:
 			try:
@@ -1164,13 +1170,33 @@ class ProcessUser(object):
 			return self.__outcomeReason
 
 
-	def getNextAvailableTCPPort(self):
-		"""Allocate a TCP port.
+	def getNextAvailableTCPPort(self, hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET):
+		"""Allocate a free TCP port which can be used for starting a server on this machine.
 		
 		The port is taken from the pool of available server (non-ephemeral) ports on this machine, and will not 
 		be available for use by any other code in the current PySys process until this object's `cleanup` method is 
 		called to return it to the pool of available ports. 
 
+		To allocate an IPv4 port for use only on this host::
+		
+			port = self.getNextAvailableTCPPort(hosts=['localhost'])
+
+		.. versionchanged:: 1.5.1
+			Added hosts and socketAddressFamily parameters.
+
+		:param list(Str) hosts: A list of the host names or IP addresses to check when establishing that a potential 
+			allocated port isn't already in use by a process outside the PySys framework. 
+			By default we check ``""`` (which corresponds to ``INADDR_ANY`` and depending on the OS means 
+			either one or all non-localhost IPv4 addresses) and also ``localhost``. 
+			
+			Many machines have multiple network cards each with its own host IP address, and typically you'll only be using 
+			one of them in your test, most commonly ``localhost``. If you do know which host/IP you'll actually be using, 
+			just specify that directly to save time, and avoid needlessly opening remote ports on hosts your're not using. 
+			A list of available host addresses can be found from 
+			``socket.getaddrinfo('', None)``.
+
+		:param socketAddressFamily: The socket address family e.g. IPv4 vs IPv6. See Python's ``socket`` module for 
+			details. 
 		"""
 		o = TCPPortOwner()
 		self.addCleanupFunction(lambda: o.cleanup())

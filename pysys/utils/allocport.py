@@ -163,30 +163,27 @@ def initializePortPool():
 	# Convert to an LRU queue of ports
 	tcpServerPortPool = collections.deque(tcpServerPortPool)
 
-def portIsInUse(port):
-	# Try to bind to it to see if anyone else is using it
+def portIsInUse(port, host='', socketAddressFamily=socket.AF_INET, type=socket.SOCK_STREAM, proto=0):
+	# Try to bind to the post on the specified address to see if anyone else is using it
 	with process_lock:
-		s = None
+		s = socket.socket(socketAddressFamily, type, proto=proto)
 		try:
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
 			# Set SO_LINGER since we don't want any accidentally
 			# connecting clients to cause the socket to hang
 			# around
-			if OSFAMILY == 'windows':
+			if IS_WINDOWS:
 				s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, 0)
 
 			# Set non-blocking since we want to fail fast rather
 			# than block
 			s.setblocking(0)
 
-			# Bind to empty host i.e wildcard interface
 			try:
-				s.bind(("", port))
-			except Exception:
+				s.bind( (host, port) )
+			except Exception as e:
 				# If we get any exception assume it is because
 				# the port is in use
-				s.close()
 				return True
 
 			# Listen may not be necessary, but on unix it seems to
@@ -198,16 +195,18 @@ def portIsInUse(port):
 				# Do nothing - on windows shutdown sometimes
 				# fails even after listen
 				pass
-			s.close()
-			return False
+			
 		except Exception as e:
 			# Don't expect this but just in case
-			_log.error('Exception from port allocator: %s - %s', e.__class__.__name__, e)
-			if s != None:
-				s.close()
+			_log.error('Exception from port allocator portIsInUse check for %s:%d - %s: %s', host or 'INADDR_ANY', port, e.__class__.__name__, e)
 			return True
+		finally:
+			s.close()
+	return False
 
-def allocateTCPPort():
+def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET, type=socket.SOCK_STREAM, proto=0):
+	# nb: expose socket type and protocol number here but not higher up the stack just in case someone needs them, but 
+	# not very likely
 	t = time.time()
 	while time.time()-t < TIMEOUTS['WaitForAvailableTCPPort']:
 		
@@ -219,7 +218,7 @@ def allocateTCPPort():
 			time.sleep(2)
 			continue
 		
-		if portIsInUse(port):
+		if any(portIsInUse(port, socketAddressFamily=socketAddressFamily, type=type, proto=proto, host=host) for host in hosts):
 			# Toss the port back at the end of the queue
 			tcpServerPortPool.append(port)
 			time.sleep(0.5) # avoid spinning
@@ -232,10 +231,23 @@ class TCPPortOwner(object):
 	Class that allocates a free server port when constructed, 
 	and returns it to the pool of available ports when `cleanup` is called. 
 	
+	:param list(Str) hosts: A list of the host names or IP addresses to check when establishing that a potential 
+		allocated port isn't already in use by a process outside the PySys framework. 
+		By default we check ``""`` (which corresponds to ``INADDR_ANY`` and depending on the OS means 
+		either one or all non-localhost IPv4 addresses) and also ``localhost``. 
+		Many machines have multiple network cards each with its own host IP address, and typically you'll only be using 
+		one of them in your test, most commonly ``localhost``. If you do know which host/IP you'll actually be using, 
+		just specify that directly to save time, and avoid needlessly opening remote ports on hosts your're not using. 
+		A list of available host addresses and corresponding family/type/proto can be found from 
+		``socket.getaddrinfo('', None)``.
+	
+	:param int socketAddressFamily: The address family to use when checking if the port is in use, e.g. to indicate 
+		IPv4 vs IPv6. See ``socket.socket`` in the Python standard library for more information. 
+
 	:ivar int ~.port: The port allocated and owned by this instance. 
 	"""
-	def __init__(self):
-		self.port = allocateTCPPort()
+	def __init__(self, hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET):
+		self.port = allocateTCPPort(hosts=hosts, socketAddressFamily=socketAddressFamily)
 
 	def cleanup(self):
 		"""Must be called when this port is no longer needed to return it to PySys' pool of available ports. 
