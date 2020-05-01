@@ -791,8 +791,8 @@ class BaseTest(ProcessUser):
 		
 		For example::
 		
-			self.assertGrep('myserver.log', ' ERROR .*', contains=False)
-			self.assertGrep('myserver.log', f'Successfully authenticated user "{username}" in .* seconds')
+			self.assertGrep('myserver.log', expr=' ERROR .*', contains=False)
+			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{username}" in .* seconds')
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
 		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
