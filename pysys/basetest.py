@@ -798,7 +798,7 @@ class BaseTest(ProcessUser):
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
 		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
 		C{FAILED} outcome is added. Should C{contains} be set to false, a C{PASSED} outcome will only 
-		be added should the regular expression not be seen in the file.
+		be added if the regular expression is not present in the file.
 		
 		See also `assertThat` which can be used to perform more powerful validations on regular expressions extracted 
 		from text files, for example::
