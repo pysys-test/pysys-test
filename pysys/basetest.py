@@ -792,7 +792,8 @@ class BaseTest(ProcessUser):
 		For example::
 		
 			self.assertGrep('myserver.log', expr=' ERROR .*', contains=False)
-			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{username}" in .* seconds')
+			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{username}" in .* seconds\\.')
+			self.assertGrep('myserver.log', expr=r'c:\Foo\bar\.txt')
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
 		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
@@ -805,38 +806,40 @@ class BaseTest(ProcessUser):
 			self.assertThat('float(startupTime) < 60.0', 
 				startupTime__eval="self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')")
 		
-		:param file: The basename of the file used in the grep
+		:param file: The name or relative/absolute path of the file to be searched.
 		
-		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
-		
-		:param expr: The regular expression to check for in the file (or a string literal if literal=True), 
-			for example " ERROR .*".
+		:param str expr: The regular expression to check for in the file (or a string literal if literal=True), 
+			for example " ERROR .*". 
+			
+			It's sometimes helpful to use a 'raw' Python string so that you don't need to double-escape 
+			slashes intended for the regular expression parser, e.g. ``self.assertGrep(..., expr=r'c:\Foo\bar\.txt')
 			
 			For contains=False matches, you should end the expr with `.*` if you wish to include just the 
 			matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
 			then the entire matching line will be included in the outcome failure reason. 
-			
-			For contains=True matches, the expr itself is used as the outcome failure reason. 
 		
-		:param contains: Boolean flag to specify if the expression should or should not be seen in the file.
+		:param bool contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
-		:param ignores: Optional list of regular expressions that will be 
+		:param list[str] ignores: Optional list of regular expressions that will be 
 			ignored when reading the file. 
 		
-		:param literal: By default expr is treated as a regex, but set this to True to pass in 
+		:param bool literal: By default expr is treated as a regex, but set this to True to pass in 
 			a string literal instead.
 		
-		:param encoding: The encoding to use to open the file. 
+		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
-		:param abortOnError: Set to True to make the test immediately abort if the
+		:param bool abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		:param assertMessage: Overrides the string used to describe this 
+		:param str assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 
-		:return: None if there was no match, or the string that was matched (note the return value is not affected by 
+		:param str filedir: The directory of the file (defaults to the testcase output subdirectory); this is 
+			deprecated, as it's simpler to just include the .
+
+		:return: The string that was matched, or None if there was no match (note the return value is not affected by 
 			the contains=True/False parameter).
 		
 		"""
