@@ -92,6 +92,13 @@ Miscellaneous new features
   value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
   is True. 
 
+- ``pysysproject.xml`` ``<property name=.../>`` and ``<property file=.../>`` elements have a new optional attribute 
+  called ``pathMustExist="true/false"`` that can be set to true to indicate that the project should not load (and no 
+  tests be run) if the .properties file does not exist, or in the case of ``<property name=.../>``, if the property 
+  value does not exist (either as an absolute path or as a path relative to the project root directory). We recommend 
+  setting using ``pathMustExist`` on all ``<property file=.../>`` elements to be explicit about whether the file is 
+  optional or mandatory. 
+  
 - `BaseTest.waitForGrep` (and `BaseTest.waitForSignal`) now has a ``detailMessage`` parameter that can 
   be used to provide some extra information to explain more about the wait condition. 
 

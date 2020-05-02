@@ -32,6 +32,7 @@ from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.stringutils import compareVersions
 from pysys.utils.fileutils import mkdir
 from pysys.utils.pycompat import openfile
+from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.project')
 
@@ -165,19 +166,29 @@ class XMLProjectParser(object):
 					
 			elif propertyNode.hasAttribute("file"): 
 				file = self.expandFromProperty(propertyNode.getAttribute("file"), propertyNode.getAttribute("default"))
-				self.getPropertiesFromFile(os.path.join(self.dirname, file))
+				self.getPropertiesFromFile(os.path.normpath(os.path.join(self.dirname, file)) if file else '', 
+					pathMustExist=(propertyNode.getAttribute("pathMustExist") or '').lower()=='true')
 			
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
 				value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
-				self.properties[name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
-				log.debug('Setting project property %s="%s"', name, self.properties[name])
+				self.properties[name] = value = self.expandFromProperty(value, propertyNode.getAttribute("default"))
+				log.debug('Setting project property %s="%s"', name, value)
+
+				if (propertyNode.getAttribute("pathMustExist") or '').lower()=='true':
+					if not (value and os.path.exists(os.path.join(self.dirname, value))):
+						raise UserError('Cannot find path referenced in project property "%s": "%s"'%(
+							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
 
 		return self.properties
 
 
-	def getPropertiesFromFile(self, file):
-		if not os.path.exists(file):
+	def getPropertiesFromFile(self, file, pathMustExist=False):
+		if not os.path.isfile(file):
+			if pathMustExist:
+				raise UserError('Cannot find properties file referenced in %s: "%s"'%(
+					self.xmlfile, file))
+
 			log.debug('Skipping project properties file which not exist: "%s"', file)
 			return
 
@@ -645,6 +656,9 @@ class Project(object):
 			stdoutHandler.setFormatter(project.formatters.stdout)
 			Project.__INSTANCE = project # set singleton
 			return project
+		except UserError as e: 
+			sys.stderr.write("ERROR: Failed to load project - %s"%e)
+			sys.exit(1)
 		except Exception as e:
 			sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
 			traceback.print_exc()

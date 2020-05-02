@@ -112,13 +112,18 @@
 	<property name="verboseWaitForGrep" value="true"/>
 
 	<!-- 
-	Import properties from file (fails silently if the file does not exist). The imported 
-	file should be of the format name=value (one pair specified per line). Any imported names
-	can again be used as a substitution variables within the project file, and are also set as 
-	attributes to the project class. The value in the imported file can be defined to use 
-	substitution through the ${variable} syntax (where variable must be defined before the import
+	Import project properties from a file. 
+	
+	If pathMustExist=true, the project will fail to load if the specified file does not 
+	exist. If pathMustExist=false the project will silently ignore a missing properties file, 
+	which can be useful when using this feature to provide optional user-specific overrides. 
+	
+	The properties file should be of the format name=value (one pair specified per line). 
+	Each imported property line is handled just the same as a standard "property" element, 
+	so for example other project properties can be referenced withint the values 
+	using ${...} syntax. 
 	 -->
-	<property file="${osfamily}.properties" />
+	<property file="${osfamily}.properties" pathMustExist="false"/>
 
 
 	<!-- 
