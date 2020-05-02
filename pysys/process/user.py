@@ -275,21 +275,25 @@ class ProcessUser(object):
 		The method allows spawning of new processes in a platform independent way. The command, arguments,
 		environment and working directory to run the process in can all be specified in the arguments to the
 		method, along with the filenames used for capturing the stdout and stderr of the process. Processes may
-		be started in the C{FOREGROUND}, in which case the method does not return until the process has completed
-		or a time out occurs, or in the C{BACKGROUND} in which case the method returns immediately to the caller
+		be started in the foreground, in which case the method does not return until the process has completed
+		or a time out occurs, or in the background in which case the method returns immediately to the caller
 		returning a handle to the process to allow manipulation at a later stage, typically with L{waitProcess}. 
-		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process 
+		
+		All processes started in the background and not explicitly killed using the returned process 
 		object are automatically killed on completion of the test via the L{cleanup()} destructor.
 
-		:param command: The path to the executable to be launched (should include the full path)
-		:param arguments: A list of arguments to pass to the command
+		When starting a process that will listen on a server socket, use `getNextAvailableTCPPort` 
+		to allocate a free port before calling this method. 
+
+		:param str command: The path to the executable to be launched (should include the full path)
+		:param list[str] arguments: A list of arguments to pass to the command
 		
-		:param environs: A dictionary specifying the environment to run the process in. 
+		:param dict(str,str) environs: A dictionary specifying the environment to run the process in. 
 			If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
 			produce a suitable clean default environment for this `command`, containing a minimal set of variables. 
 			If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
 		
-		:param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
+		:param str workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
 		
 		:param bool background: Set to True to start the process in the background. By default processes are started 
 			in the foreground, meaning execution of the test will continue only once the process has terminated. 
@@ -298,12 +302,12 @@ class ProcessUser(object):
 			state=BACKGROUND is equivalent to setting background=True; in new tests using background=True is the 
 			preferred way to do this. 
 		
-		:param timeout: The number of seconds after which to terminate processes running in the C{FOREGROUND}. For processes 
+		:param int timeout: The number of seconds after which to terminate processes running in the foreground. For processes 
 			that complete in a few seconds or less, it is best to avoid overriding this and stick with the default. 
 			However for long-running foreground processes it will be necessary to set a larger number, for example 
 			if running a soak test where the process needs to run for up to 2 hours you could set ``timeout=2*60*60``. 
 		
-		:param stdouterr: The filename prefix to use for the stdout and stderr of the process 
+		:param str stdouterr: The filename prefix to use for the stdout and stderr of the process 
 			(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
 			L{allocateUniqueStdOutErr}. 
 			The stdouterr prefix is also used to form a default display name for 
@@ -313,21 +317,22 @@ class ProcessUser(object):
 			L{pysys.process.commonwrapper.CommonProcessWrapper.stdout} and 
 			L{pysys.process.commonwrapper.CommonProcessWrapper.stderr}.
 		
-		:param stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
-		:param stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
+		:param str stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
+		:param str stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
 		
-		:param displayName: Logical name of the process used for display 
+		:param str displayName: Logical name of the process used for display in log messages, and the str(...) 
+			representation of the returned process object 
 			(defaults to a string generated from the stdouterr and/or the command).
 		
-		:param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+		:param bool abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
 			project setting)
 
-		:param expectedExitStatus: The condition string used to determine whether the exit status/code 
+		:param str expectedExitStatus: The condition string used to determine whether the exit status/code 
 			returned by the process is correct. The default is '==0', as an exit code of zero usually indicates success, but if you 
 			are expecting a non-zero exit status (for example because you are testing correct handling of 
 			a failure condition) this could be set to '!=0' or a specific value such as '==5'. 
 	
-		:param ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
+		:param bool ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
 			exit code that doesn't match expectedExitStatus (or if the command cannot be run at all). 
 			This can be set to True in cases where you do not care whether the command succeeds or fails, or wish to handle the 
 			exit status separately with more complicated logic. 
@@ -337,7 +342,7 @@ class ProcessUser(object):
 			(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
 			compatibility with older PySys releases if no project property is set. 
 		
-		:param quiet: If True, this method will not do any INFO or WARN level logging 
+		:param bool quiet: If True, this method will not do any INFO or WARN level logging 
 			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
 			useful to avoid filling up the log where it is necessary to repeatedly execute a 
 			command check for completion of some operation until it succeeds; in such cases 
@@ -685,7 +690,7 @@ class ProcessUser(object):
 		Timeouts will result in an exception unless the project property ``defaultAbortOnError==False``.
 		
 		This method does not check the exit code for success, but you can manually 
-		check the return value (which is the same as ``process.exitStatus``) if you wish to check it succeeded. 
+		check the return value (which is the same as ``process.exitStatus``) using `assertThat` if you wish to check it succeeded. 
 
 		:param process: The process handle returned from the L{startProcess} method
 		:param timeout: The timeout value in seconds to wait before returning
