@@ -1,0 +1,3 @@
+<pysysproject>
+	<property name="myprop" value="missing.txt" pathMustExist="true"/>
+</pysysproject>
