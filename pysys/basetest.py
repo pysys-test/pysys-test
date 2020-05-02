@@ -491,6 +491,7 @@ class BaseTest(ProcessUser):
 
 			# Any valid Python expression is permitted (not only equality testing):
 			self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
+			self.assertThat("re.match(expected, actualStartupMessage)", expected=".* successfully", actualStartupMessage=msg)
 			self.assertThat("(0 <= actualValue < max) and type(actualValue)!=float", actualValue=v, max=100)
 			
 		This method is powerful enough for almost any validation that the other assert methods don't 
