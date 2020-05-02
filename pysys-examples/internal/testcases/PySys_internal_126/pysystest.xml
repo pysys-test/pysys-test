@@ -8,6 +8,8 @@
     </purpose>
   </description>
 
+  <execution-order hint="-5"/> <!-- because this is a slower test, start it earlier-->
+
   <classification>
     <groups>
       <group></group>
