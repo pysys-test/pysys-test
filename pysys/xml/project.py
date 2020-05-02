@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -92,6 +92,7 @@ class XMLProjectParser(object):
 	def __init__(self, dirname, file):
 		self.dirname = dirname
 		self.xmlfile = os.path.join(dirname, file)
+		log.debug('Loading project file: %s', self.xmlfile)
 		self.rootdir = 'root'
 		self.environment = 'env'
 		self.osfamily = 'osfamily'
@@ -154,11 +155,13 @@ class XMLProjectParser(object):
 				self.properties.pop(self.rootdir, "")
 				self.rootdir = propertyNode.getAttribute("root")
 				self.properties[self.rootdir] = self.dirname
-			
+				log.debug('Setting project property %s="%s"', self.rootdir, self.dirname)
+
 			elif propertyNode.hasAttribute("osfamily"):
 				self.properties.pop(self.osfamily, "")
 				self.osfamily = propertyNode.getAttribute("osfamily")
 				self.properties[self.osfamily] = OSFAMILY
+				log.debug('Setting project property %s="%s"', self.osfamily, OSFAMILY)
 					
 			elif propertyNode.hasAttribute("file"): 
 				file = self.expandFromProperty(propertyNode.getAttribute("file"), propertyNode.getAttribute("default"))
@@ -168,13 +171,14 @@ class XMLProjectParser(object):
 				name = propertyNode.getAttribute("name") 
 				value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
 				self.properties[name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
-	
+				log.debug('Setting project property %s="%s"', name, self.properties[name])
+
 		return self.properties
 
 
 	def getPropertiesFromFile(self, file):
 		if not os.path.exists(file):
-			log.debug('Project properties file does not exist: %s', file)
+			log.debug('Skipping project properties file which not exist: "%s"', file)
 			return
 
 		with open(file, 'r') as fp:
@@ -182,8 +186,11 @@ class XMLProjectParser(object):
 				line = line.split('=', 1)
 				if len(line) == 2:
 					name, value = line[0], line[1]
-					value = self.expandFromProperty(value, "")				
-					self.properties[name.strip()] = value.strip()
+					value = self.expandFromProperty(value, "")	
+					name = name.strip()
+					value = value.strip()
+					self.properties[name] = value
+					log.debug('Setting project property %s="%s" (from %s)', name, self.properties[name], file)
 
 
 	def expandFromEnvironent(self, value, default):
@@ -194,11 +201,17 @@ class XMLProjectParser(object):
 				try:
 					insert = os.environ[m[1]]
 				except Exception:
+					# this means that if the default also contains something that can't be resolved we get a hard failure 
+					# (otherwise would stack overflow)
 					if default==value:
 						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
+					log.debug('Failed to expand property from environment variables; "%s" env var does not exist so using default "%s"', m[1], default)
+
 					value = default
 					break
 				value = value.replace(m[0], insert)
+				log.debug('Expanding project property from environment: %s->"%s"', m[0], insert)
+
 		return value		
 
 
@@ -210,9 +223,11 @@ class XMLProjectParser(object):
 				try:
 					insert = self.properties[m[1]]
 				except Exception as e:
-					log.debug('Failed to expand properties in "%s" - %s: %s', value, e.__class__.__name__, e)
+					# this means that if the default also contains something that can't be resolved we get a hard failure 
+					# (otherwise would stack overflow)
 					if default==value:
 						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
+					log.debug('Failed to expand property %s in "%s" (will use default "%s") - %s: %s', m[1], value, default, e.__class__.__name__, e)
 					value = default
 					break
 				value = value.replace(m[0], insert)

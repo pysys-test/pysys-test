@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -15,19 +15,27 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import os
+import sys
 import pysys
+import logging
 
 def main(args=None):
 	"""The entry-point for invoking PySys."""
-	import os, sys
+	
+	if args is None: args = sys.argv[1:]
 
+	# Until we can remove constants.PROJECT the only way to see debug messages from project loading is this
+	if any((arg.lower() in ['-vdebug', '--verbosity=debug']) for arg in args):
+		logging.getLogger('pysys').setLevel(logging.DEBUG)
+	
 	import pysys.constants
 	# if user selected an option that needs a project, must set 
 	# constants.PROJECT before any modules start importing * from constants
-	if len(sys.argv) >= 2 and sys.argv[1] in ['run', 'make', 'print', 'clean']:
+	if len(args) >= 1 and args[0] in ['run', 'make', 'print', 'clean']:
 		pysys.constants.loadproject(os.getcwd())
 
 	import pysys.launcher.console
-	return pysys.launcher.console.main(args or sys.argv[1:])
+	return pysys.launcher.console.main(args)
 if __name__ == "__main__": 
 	main()

@@ -234,7 +234,6 @@ e.g.
 					# for specific level setting we need the opposite - only change stdoutHandler if we're 
 					# turning up the logging (since otherwise it wouldn't be seen) but also change the specified level
 					logging.getLogger(loggername).setLevel(verbosity)
-					if verbosity == logging.DEBUG: stdoutHandler.setLevel(logging.DEBUG)
 				
 			elif option in ("-a", "--type"):
 				self.type = value
