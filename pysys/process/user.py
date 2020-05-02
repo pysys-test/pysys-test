@@ -256,9 +256,10 @@ class ProcessUser(object):
 				kwargs['environs']['COVERAGE_FILE'] = self.output+'/.coverage.python.%02d'%(self.__pythonCoverageFile)
 		return self.startProcess(sys.executable, arguments=args, **kwargs)
 
-	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
+	def startProcess(self, command, arguments, environs=None, workingDir=None, state=None, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None):
+			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None, 
+			background=False):
 		"""Start a process running in the foreground or background, and return 
 		the `pysys.process.commonwrapper.CommonProcessWrapper` object.
 		
@@ -268,7 +269,7 @@ class ProcessUser(object):
 				arguments=['myoperation', 'arg1','arg2'],
 				environs=self.createEnvirons(addToLibPath=['my_ld_lib_path']), # if a customized environment is needed
 				stdouterr=self.allocateUniqueStdOutErr('myoperation'), # for stdout/err files, pick a suitable logical name for what it's doing
-				state=BACKGROUND # or remove for default behaviour of executing in foreground
+				background=True # or remove for default behaviour of executing in foreground
 				)
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments,
@@ -290,7 +291,12 @@ class ProcessUser(object):
 		
 		:param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
 		
-		:param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
+		:param bool background: Set to True to start the process in the background. By default processes are started 
+			in the foreground, meaning execution of the test will continue only once the process has terminated. 
+		:param state: Alternative way to set ``background=True``. 
+			Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND}). Setting 
+			state=BACKGROUND is equivalent to setting background=True; in new tests using background=True is the 
+			preferred way to do this. 
 		
 		:param timeout: The number of seconds after which to terminate processes running in the C{FOREGROUND}. For processes 
 			that complete in a few seconds or less, it is best to avoid overriding this and stick with the default. 
@@ -342,6 +348,9 @@ class ProcessUser(object):
 		:rtype: pysys.process.commonwrapper.CommonProcessWrapper
 
 		"""
+		if state is None: state = FOREGROUND
+		if background: state = BACKGROUND
+		
 		if ignoreExitStatus == None: ignoreExitStatus = self.defaultIgnoreExitStatus
 		workingDir = os.path.join(self.output, workingDir or '')
 		if abortOnError == None: abortOnError = self.defaultAbortOnError

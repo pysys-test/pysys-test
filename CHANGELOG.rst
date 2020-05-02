@@ -81,6 +81,10 @@ Miscellaneous new features
   functionality only applies if you have ``verboseWaitForGrep=true`` so will not affect existing projects, but this 
   is now enabled for newly created projects.  
 
+- In `BaseTest.startProcess()`, ``background=True/False`` has been added as an alternative and simpler equivalent of 
+  ``state=BACKGROUND``. It is preferred to use ``background=True`` in new tests (although there is no plan to 
+  remove ``state`` so it is not mandatory to change existing tests). 
+
 - ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
   used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
   for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 

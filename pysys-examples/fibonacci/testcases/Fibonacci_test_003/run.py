@@ -7,7 +7,7 @@ class PySysTest(BaseTest):
 			command=sys.executable, # This program uses the python executable
 			arguments=[self.input+'/fibonacci.py'],
 			stdouterr=self.allocateUniqueStdOutErr('fibonacci'),
-			state=FOREGROUND)
+			background=False)
 		
 	def validate(self):
 		# first validation diffs the output with the reference
