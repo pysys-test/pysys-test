@@ -4,7 +4,7 @@ from pysys.basetest import BaseTest
 from pysys.utils.allocport import portIsInUse
 class PySysTest(BaseTest):
 	def execute(self):
-		for family, type, proto, can, addr in socket.getaddrinfo('', None, family=0)+socket.getaddrinfo('localhost', None):
+		for family, type, proto, can, addr in socket.getaddrinfo(socket.gethostname(), None)+socket.getaddrinfo('localhost', None):
 			self.log.info("")
 			self.log.info("--- Testing with %s address %s", family, addr)
 			port = self.getNextAvailableTCPPort(hosts=[addr], socketAddressFamily=family)
