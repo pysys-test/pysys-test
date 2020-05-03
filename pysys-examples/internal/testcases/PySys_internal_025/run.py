@@ -18,8 +18,8 @@ class PySysTest(BaseTest):
 						  state=FOREGROUND)
 
 		# wait for the strings to be writen to sdtout
-		self.waitForSignal("workingdir.err", expr="Current working directory is", timeout=5)
-		self.waitForSignal("workingdir.out", expr="Written contents of working directory", timeout=5)
+		self.waitForGrep("workingdir.err", expr="Current working directory is", timeout=5)
+		self.waitForGrep("workingdir.out", expr="Written contents of working directory", timeout=5)
 			
 		
 	def validate(self):

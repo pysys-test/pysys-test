@@ -4,8 +4,8 @@ from pysys.basetest import BaseTest
 from pysys.utils.pycompat import PY2
 import io, locale
 
-# contains a non-ascii £ character that is different in utf-8 vs latin-1
-TEST_STR = u'Hello £ world' 
+# contains a non-ascii ï¿½ character that is different in utf-8 vs latin-1
+TEST_STR = u'Hello ï¿½ world' 
 # use a different encoding to the default/local encoding
 TEST_ENCODING = 'latin-1' if locale.getpreferredencoding().lower() == 'utf-8' else 'utf-8'
 
@@ -31,7 +31,7 @@ class PySysTest(BaseTest):
 		if (not PY2) or TEST_ENCODING == 'utf-8':
 			self.assertLineCount('test-local.txt', expr=TEST_STR, condition='==2')
 			self.assertGrep('test-local.txt', expr=TEST_STR, contains=True)
-			self.waitForSignal('test-local.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True)
+			self.waitForGrep('test-local.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True)
 
 		if not exceptionReadingNonLocal:
 			self.assertLineCount('test-nonlocal.txt', expr=TEST_STR, condition='==0')
@@ -41,7 +41,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=True, encoding=TEST_ENCODING)
 		
 		# smoke test this one too
-		self.waitForSignal('test-nonlocal.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True, encoding=TEST_ENCODING)
+		self.waitForGrep('test-nonlocal.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True, encoding=TEST_ENCODING)
 
 		# test using a bytes object, currently works only for Python 2
 		if not PY2:
@@ -63,5 +63,5 @@ class PySysTest(BaseTest):
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), contains=True)
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), contains=False)
 
-		self.waitForSignal('test-local.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), condition='==2', timeout=2, abortOnError=True)
-		self.waitForSignal('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==2', timeout=2, abortOnError=True)
+		self.waitForGrep('test-local.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), condition='==2', timeout=2, abortOnError=True)
+		self.waitForGrep('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==2', timeout=2, abortOnError=True)

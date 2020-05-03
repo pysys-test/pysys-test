@@ -21,8 +21,8 @@ class PySysTest(BaseTest):
 		self.waitForFile('counter.err', timeout=4)
 						  
 		# do a couple of wait for signals in the files
-		self.waitForSignal('counter.out', expr='Count is 1', timeout=4)
-		self.waitForSignal('counter.err', expr='Process id of test executable', timeout=4)	
+		self.waitForGrep('counter.out', expr='Count is 1', timeout=4)
+		self.waitForGrep('counter.err', expr='Process id of test executable', timeout=4)	
 
 		
 	def validate(self):

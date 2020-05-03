@@ -1,4 +1,4 @@
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -159,14 +159,16 @@ class ConsolePrintHelper(object):
 				regex = re.compile(self.grep, flags=re.IGNORECASE)
 				descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
 			
+			# nb: do this case insensitively since if someone uses inconsistent capitaization they still probably 
+			# want related items to show up next to each other
 			if not self.sort:
-				descriptors.sort(key=lambda d: d._defaultSortKey)
+				descriptors.sort(key=lambda d: d._defaultSortKey.lower())
 			elif (self.sort.lower()=='id'):
-				descriptors.sort(key=lambda d: d.id)
+				descriptors.sort(key=lambda d: d.id.lower())
 			elif self.sort.lower().replace('-','') in ['executionorderhint', 'orderhint', 'order']:
-				descriptors.sort(key=lambda d: [d.executionOrderHint, d._defaultSortKey])
+				descriptors.sort(key=lambda d: [d.executionOrderHint, d._defaultSortKey.lower()])
 			elif self.sort.lower()=='title':
-				descriptors.sort(key=lambda d: [d.title, d._defaultSortKey])
+				descriptors.sort(key=lambda d: [d.title.lower(), d.title, d._defaultSortKey.lower()])
 			else:
 				raise UserError('Unknown sort key: %s'%self.sort)
 			

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@ import sys
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 
-def linecount(file, regexpr=None, ignores=None, encoding=None):
+def linecount(file, regexpr=None, ignores=None, encoding=None, flags=0):
 	"""Count the number of lines in an input file matching a regular expression, return the count.
 	
 	If the input regular expression is set to None, the method returns a count of the 
@@ -41,7 +41,7 @@ def linecount(file, regexpr=None, ignores=None, encoding=None):
 	:raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
-	matches = getmatches(file, regexpr, ignores=ignores, encoding=encoding)
+	matches = getmatches(file, regexpr, ignores=ignores, encoding=encoding, flags=flags)
 	return len(matches)
 
 

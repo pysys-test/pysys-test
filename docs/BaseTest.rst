@@ -100,7 +100,7 @@ Assertions and outcomes
 	assertGrep
 	assertLineCount
 	assertDiff
-	assertEval
+	assertThat
 	assertLastGrep
 	assertOrderedGrep
 	assertPathExists
@@ -121,7 +121,7 @@ For example::
 
 	def validate(self):
 		self.assertGrep('myserver.log', expr='Successfully authenticated user ".*"')
-		self.assertEval('actualNumberOfLogFiles == expected', actualNumberOfLogFiles=len(glob.glob(self.output+'/myserver*.log')), expected=3)
+		self.assertThat('actualNumberOfLogFiles == expected', actualNumberOfLogFiles=len(glob.glob(self.output+'/myserver*.log')), expected=3)
 
 The available outcomes for each assertion are contained in the `pysys.constants` module:
 
@@ -134,7 +134,8 @@ The available outcomes for each assertion are contained in the `pysys.constants`
 	pysys.constants.BLOCKED
 	pysys.constants.SKIPPED
 
-There are some deprecated methods which we do not recommend using: `assertThat`, `assertTrue`, `assertFalse`. 
+There are some deprecated methods which we do not recommend using: `assertEval`, `assertTrue`, `assertFalse` 
+(`assertThat` should be used instead of these). 
 
 Processes
 =========
@@ -163,10 +164,10 @@ Waiting
 =======
 
 PySys provides a number of methods that can be used in your `execute` method to wait for operations to complete, 
-of which the most commonly used is `waitForSignal`. 
+of which the most commonly used is `waitForGrep`. 
 
 .. autosummary::
-	waitForSignal
+	waitForGrep
 	waitForFile
 	waitProcess
 	waitForSocket

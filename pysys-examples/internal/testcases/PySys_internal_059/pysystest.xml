@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Check waitForSignal abort when process dies</title>    
+    <title>Assertions - waitForGrep/waitForSignal - aborts when process dies</title>    
     <purpose><![CDATA[
 Checks waitForSignal abort when the process dies
 ]]>

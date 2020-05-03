@@ -1,5 +1,5 @@
 #!/usr/bin/env pytho
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -271,7 +271,7 @@ class TestDescriptor(object):
 		"""
 		
 		str=    "Test id:           %s\n" % self.id
-		reltestdir = self.testDir # relative to current dir is most useful
+		reltestdir = self.testDir if not self.isDirConfig else '' # relative to current dir is most useful
 		if reltestdir.lower().replace('\\','/').startswith(os.getcwd().lower().replace('\\','/')): reltestdir = reltestdir[len(os.getcwd())+1:]
 		str=str+"Test directory:    %s\n" % reltestdir # use OS slashes to facilitate copy+paste
 		str=str+"Test type:         %s\n" % self.type
@@ -704,7 +704,7 @@ class DescriptorLoader(object):
 			projectroot = toLongPathSafe(os.path.normpath(os.path.dirname(project.projectFile)))
 
 		DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
-		if not project.projectFile or not dir.startswith(projectroot): 
+		if not project.projectFile or not dir.startswith(projectroot):
 			dirconfigs = None
 			log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
 		else:
@@ -715,7 +715,7 @@ class DescriptorLoader(object):
 			dirconfigs = {}
 
 			# load any descriptors between the project dir up to (but not including) the dir we'll be walking
-			searchdirsuffix = dir[len(projectroot)+1:].split(os.sep)
+			searchdirsuffix = dir[len(projectroot)+1:].split(os.sep) if len(dir)>len(projectroot) else []
 			currentconfig = None
 			for i in range(len(searchdirsuffix)): # up to but not including dir
 				if i == 0:

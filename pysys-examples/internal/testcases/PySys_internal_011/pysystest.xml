@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Utils Module - check match objects on waitForSignal</title>    
+    <title>Assertions - waitForGrep/waitForSignal - check match objects on waitForGrep</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>

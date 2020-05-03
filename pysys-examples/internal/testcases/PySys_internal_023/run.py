@@ -24,7 +24,7 @@ class PySysTest(BaseTest):
 		self.hprocess.write("and the motives that have led them there", addNewLine=TRUE)
 
 		# wait for the strings to be writen to sdtout
-		self.waitForSignal("reader.out", expr="Line \(2\)", timeout=5)
+		self.waitForGrep("reader.out", expr="Line \(2\)", timeout=5)
 			
 	def validate(self):
 		# validate against the reference file

@@ -151,17 +151,17 @@ class BaseResultsWriter(object):
 	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		""" Called when each test has completed. 
 		
-		This method is always invoked from the same thread as setup() and cleanup(), even 
-		when multiple tests are running in parallel. 
+		This method is always invoked under a lock that prevents multiple concurrent invocations so additional 
+		locking is not usually necessary.  
 
-		:param testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. The writer 
-			can extract data from this object but should not store a reference to it. 
-			The testObj.descriptor.id indicates the test that ran. 
-		:param cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
-		:param testTime: Duration of the test in seconds as a floating point number. 
-		:param testStart: The time when the test started. 
-		:param runLogOutput: The logging output written to run.log, as a unicode character string. 
-		:param kwargs: Additional keyword arguments may be added in a future release. 
+		:param pysys.basetest.BaseTest testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. 
+			The writer can extract data from this object but should not store a reference to it. 
+			The ``testObj.descriptor.id`` indicates the test that ran. 
+		:param int cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
+		:param float testTime: Duration of the test in seconds as a floating point number. 
+		:param float testStart: The time when the test started. 
+		:param str runLogOutput: The logging output written to run.log, as a unicode character string. 
+		:param kwargs: Additional keyword arguments may be added in future releases. 
 
 		"""
 		pass

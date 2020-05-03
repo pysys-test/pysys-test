@@ -4,8 +4,8 @@ from pysys.basetest import BaseTest
 from pysys.utils.pycompat import PY2
 import io, locale
 
-# contains a non-ascii £ character that is different in utf-8 vs latin-1
-TEST_STR = u'Hello £ world' 
+# contains a non-ascii ï¿½ character that is different in utf-8 vs latin-1
+TEST_STR = u'Hello ï¿½ world' 
 # use a different encoding to the default/local encoding
 TEST_ENCODING = 'latin-1' if locale.getpreferredencoding().lower() == 'utf-8' else 'utf-8'
 
@@ -24,7 +24,7 @@ class PySysTest(BaseTest):
 
 		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR, condition='==2', encoding=TEST_ENCODING)
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=True, encoding=TEST_ENCODING)
-		self.waitForSignal('test-nonlocal.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True, encoding=TEST_ENCODING)
+		self.waitForGrep('test-nonlocal.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True, encoding=TEST_ENCODING)
 		self.assertLastGrep('test-nonlocal.txt', expr=TEST_STR, contains=True, ignores=['^$', 'otherstring'], encoding=TEST_ENCODING)
 		self.assertOrderedGrep('test-nonlocal.txt', exprList=[TEST_STR, TEST_STR], encoding=TEST_ENCODING)
 		self.assertTrue(self.logFileContents('test-nonlocal.txt', encoding=TEST_ENCODING))
@@ -36,7 +36,7 @@ class PySysTest(BaseTest):
 		self.__myDefaultEncoding = TEST_ENCODING
 		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR, condition='==2')
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR, contains=True)
-		self.waitForSignal('test-nonlocal.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True)
+		self.waitForGrep('test-nonlocal.txt', expr=TEST_STR, condition='==2', timeout=2, abortOnError=True)
 		self.assertLastGrep('test-nonlocal.txt', expr=TEST_STR, contains=True, ignores=['^$', 'otherstring'])
 		self.assertOrderedGrep('test-nonlocal.txt', exprList=[TEST_STR, TEST_STR])
 		self.assertTrue(self.logFileContents('test-nonlocal.txt'))

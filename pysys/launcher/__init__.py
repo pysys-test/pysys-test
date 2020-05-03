@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -186,46 +186,54 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	if testIdSpecs == []:
 		tests = descriptors
 	else:
-		testids = set([d.id for d in descriptors])
-		def idMatch(descriptorId, specId):
-			if specId==descriptorId: return True
+		testids = {d.id: index for index, d in enumerate(descriptors)}
+		def findMatchingIndex(specId): # change this to return the match, rather than whether it matches
+			# optimize the case where we specify the full id; no need to iterate
+			index = testids.get(specId, None)
+			if index is not None: return index
 			
-			# permit specifying suffix at end of testcase, which is 
-			# important to allow shell directory completion to be used if an id-prefix is 
-			# being added onto the directory id; but only do this if spec is non-numeric 
-			# since we don't want to match test_104 against spec 04
 			if specId.isdigit():
-				return re.match('.+_0*%s$'%re.escape(specId), descriptorId)
+				regex = re.compile('.+_0*'+(specId.lstrip('0') if (len(specId)>0) else specId)+'$')
+				matches = [index for index, d in enumerate(descriptors) if regex.match(d.id)]
 			else:
-				return descriptorId.endswith(specId) and specId not in testids
+				# permit specifying suffix at end of testcase, which is 
+				# important to allow shell directory completion to be used if an id-prefix is 
+				# being added onto the directory id; but only do this if spec is non-numeric 
+				# since we don't want to match test_104 against spec 04
+			
+				matches = [index for index, d in enumerate(descriptors) if d.id.endswith(specId)]
+			
+			if len(matches) == 1: return matches[0]			
+			if len(matches) == 0: raise UserError('No tests found matching id: "%s"'%specId)
+			
+			# as a special-case, see if there's an exact match with the dirname
+			dirnameMatches = [index for index, d in enumerate(descriptors) if os.path.basename(d.testDir)==specId]
+			if len(dirnameMatches)==1: return dirnameMatches[0]
+			
+			# nb: use space not comma as the delimiter so it's easy to copy paste it
+			raise UserError('Multiple tests found matching "%s"; please specify which one you want: %s'%(specId, 
+				' '.join([descriptors[index].id for index in matches[:20] ])))
 
 		for t in testIdSpecs:
 			try:
 				matches = None
-				index = index1 = index2 = -1
+				index = index1 = index2 = None
 				t = t.rstrip('/\\')
 
-				if re.search('^[\w_.~]*$', t): # single test id (not a range or regex)
+				if re.search('^[\w_.~-]*$', t): # single test id (not a range or regex)
 					if '~' in t:
 						testspecid, testspecmode = t.split('~')
+						index = findMatchingIndex(testspecid)
 						# first match the id, then the mode
-						for i in range(0,len(descriptors)):
-							if idMatch(descriptors[i].id, testspecid): 
-								index = i
-								break
-						if index >= 0:
-							if testspecmode not in descriptors[index].modes:
-								raise UserError('Unknown mode "%s": the available modes for this test are: %s'%(
-									testspecmode, ', '.join(sorted(descriptors[index].modes or ['<none>']))))
+						if testspecmode not in descriptors[index].modes:
+							raise UserError('Unknown mode "%s": the available modes for this test are: %s'%(
+								testspecmode, ', '.join(sorted(descriptors[index].modes or ['<none>']))))
 
-							matches = [descriptors[index]._createDescriptorForMode(testspecmode)]
-							# note test id+mode combinations selected explicitly like this way are included regardless of what modes are enabled/disabled
+						matches = [descriptors[index]._createDescriptorForMode(testspecmode)]
+						# note test id+mode combinations selected explicitly like this way are included regardless of what modes are enabled/disabled
 
 					else: # normal case where it's not a mode
-						for i in range(0,len(descriptors)):
-							if idMatch(descriptors[i].id, t): 
-								index = i
-								break
+						index = findMatchingIndex(t)
 						matches = descriptors[index:index+1]
 						if supportMultipleModesPerRun and not modedescriptors[matches[0].id]:
 							# if user explicitly specified an individual test and excluded all modes it can run in, 
@@ -235,33 +243,32 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 					# The utility of this would be close to zero and lots more to implement/test, so not worth it
 					raise UserError('A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
 				elif re.search('^:[\w_.]*', t):
-					for i in range(0,len(descriptors)):
-						if idMatch(descriptors[i].id, t.split(':')[1]): index = i
+					index = findMatchingIndex(t.split(':')[1])
 					matches = descriptors[:index+1]
 
 				elif re.search('^[\w_.]*:$', t):
-					for i in range(0,len(descriptors)):
-					  	if idMatch(descriptors[i].id, t.split(':')[0]): index = i
+					index = findMatchingIndex(t.split(':')[0])
 					matches = descriptors[index:]
 
 				elif re.search('^[\w_.]*:[\w_.]*$', t):
-					for i in range(0,len(descriptors)):
-					  	if idMatch(descriptors[i].id, t.split(':')[0]): index1 = i
-					  	if idMatch(descriptors[i].id, t.split(':')[1]): index2 = i
+					index1 = findMatchingIndex(t.split(':')[0])
+					index2 = findMatchingIndex(t.split(':')[1])
+					if index1 > index2:
+						index1, index2 = index2, index1
 					matches = descriptors[index1:index2+1]
 
 				else: 
 					# regex match
 					matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
+					if not matches: raise UserError("No test ids found matching regular expression: \"%s\""%t)
 
-				# each specified test patten must match something, else probably user made a typo
-				if not matches: raise Exception("No matches for: '%s'", t)
+				if not matches: raise UserError("No test ids found matching: \"%s\""%st)
 				tests.extend(matches)
 
 			except UserError:
 				raise
 			except Exception:
-				raise UserError("Unable to locate requested testcase(s): '%s'"%t)
+				raise # this shouldn't be possible so no need to sugar coat the error message
 
 	# trim down the list based on the type
 	if type:

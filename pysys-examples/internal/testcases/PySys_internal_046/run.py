@@ -40,12 +40,47 @@ class PySysTest(BaseTest):
 		self.assertGrep(file='run.log', expr='Grep on file.txt does not contain " WARN .*" failed with: " WARN This is a warning message!"', literal=True)
 		
 		self.log.info('')
-		self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines right', contains=False)
+		self.assertThat('grepResult==None', grepResult=
+			self.assertGrep(file='file.txt', filedir=self.input, expr='moon shines right', contains=False)
+		)
 		self.assertGrep(file='file.txt', filedir=self.input, expr='(?P<tag>moon) shines bright')
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon.*bright')
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon.*bright', ignores=['oon'], contains=False)
 		self.assertGrep(file='file.txt', filedir=self.input, expr='moon.*bright', ignores=['pysys is great', 'oh yes it is'])
-		self.assertGrep(file='file.txt', filedir=self.input, expr='Now eastlin|westlin winds')
+		self.assertThat('grepResult==expected', expected=('westlin winds',),
+			grepResult=self.assertGrep(file='file.txt', filedir=self.input, expr='(Now eastlin|westlin winds)').groups(),
+		)
+		
+		self.write_text('myserver.log', u'Successfully authenticated user "myuser" in 0.6 seconds.')
+		MAX_AUTH_TIME = 60
+		
+		self.assertThat('username == expected', expected='myuser',
+			**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+			
+		# this is a convenient place to test that waitForGrep behaves the same way
+		self.assertThat('username == expected', expected='myuser',
+			**self.waitForGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+		self.assertThat('result == {}', 
+			result=self.waitForGrep('myserver.log', expr=r'NO MATCH authenticated user "(?P<username>[^"]*)"', timeout=0.01, abortOnError=False))
+
+		self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
+			**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*" in (?P<authSecs>[^ ]+) seconds\.'))
+
+		self.assertGrep('myserver.log', reFlags=re.VERBOSE | re.IGNORECASE, expr=r"""
+			in\   
+			\d +  # the integral part
+			\.    # the decimal point
+			\d *  # some fractional digits
+			\ seconds\. # in verbose regex mode we escape spaces with a slash
+			""")
+
+
+		self.assertThat('result == {}', 
+			result=self.assertGrep('myserver.log', expr='NO MATCH "(?P<username>[^"]*)"', contains=False))
+
+		self.assertThat('result is None', 
+			result=self.assertGrep('myserver.log', expr='NO MATCH "([^"]*)"', contains=False))
+
 		
 	def checkForFailedOutcome(self):
 		outcome = self.outcome.pop()

@@ -4,11 +4,12 @@ from pysys.constants import IS_WINDOWS, FAILED
 from pysys.utils.filecopy import filecopy
 from pysys.xml.project import createProjectConfig
 
-def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError=True, environs=None, projectfile=None, defaultproject=False, expectedExitStatus=0, **kwargs):
+def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError=True, environs=None, projectfile=None, defaultproject=False, expectedExitStatus='==0', **kwargs):
 	"""
 	Executes pysys from within pysys. Used only by internal pysys testcases. 
 	"""
-	if expectedExitStatus != 0: ignoreExitStatus=True
+	# for compatibility with some existing tests
+	if isinstance(expectedExitStatus, int): expectedExitStatus = '==%d'%expectedExitStatus
 	
 	if sys.argv[0].endswith('pysys.py'):
 		args = [os.path.abspath(sys.argv[0])]+args
@@ -44,6 +45,7 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		result = processowner.startPython(
 			arguments = args,
 			environs = environs,
+			expectedExitStatus=expectedExitStatus,
 			ignoreExitStatus=ignoreExitStatus, abortOnError=abortOnError, 
 			stdout=stdouterr+'.out', stderr=stdouterr+'.err', 
 			displayName='pysys %s'%stdouterr, 
@@ -53,6 +55,4 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		raise
 	finally: # in case there was any error printed to stderr
 		processowner.logFileContents(stdouterr+'.err')
-	# checking for zero exit status happens in startProcess so no need to replicate here
-	if expectedExitStatus!=0 and result.exitStatus!=expectedExitStatus: processowner.addOutcome(FAILED, 'Expected exit status %d but got %s for %s'%(expectedExitStatus, result.exitStatus, result), abortOnError=False)
 	return result

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
 
 
 """
-Contains L{pysys.process.user.ProcessUser} which supports using processes from PySys, and provides the 
-shared functionality of subclasses L{pysys.basetest.BaseTest} and L{pysys.baserunner.BaseRunner}. 
+Contains `pysys.process.user.ProcessUser` which supports using processes from PySys, and provides the 
+shared functionality of subclasses `pysys.basetest.BaseTest` and `pysys.baserunner.BaseRunner`. 
 """
 
 import time, collections, inspect, locale, fnmatch, sys
@@ -36,6 +36,7 @@ from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe
 from pysys.utils.pycompat import *
 from pysys.utils.stringutils import compareVersions
+import pysys.internal.safe_eval
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 """
@@ -167,7 +168,40 @@ class ProcessUser(object):
 		else:
 			return 0
 		
+	def setKeywordArgs(self, xargs):
+		"""Set the xargs as data attributes of the class. For internal use by BaseTest/BaseRunner only. 
+	
+		:meta private:
+				
+		Values in the xargs dictionary are set as data attributes using the builtin C{setattr} method. 
+		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
+		form C{self.foo} with C{value bar}. This is used so that subclasses can define default values of 
+		data attributes, which can be overriden on instantiation e.g. using the -X options to the 
+		runTest.py launch executable.
 		
+		If an existing attribute is present on this test class (typically a 
+		static class variable) and it has a type of bool, int or float, then 
+		any -X options will be automatically converted from string to that type. 
+		This facilitates providing default values for parameters such as 
+		iteration count or timeouts as static class variables with the 
+		possibility of overriding on the command line, for example `-Xiterations=123`. 
+		
+		:param xargs: A dictionary of the user defined extra arguments
+		
+		"""
+		for key in list(xargs.keys()):
+			val = xargs[key]
+			basetestDefaultValue = getattr(self, key, None) # most of the time these will not be on the basetest
+			if basetestDefaultValue is not None and isstring(val):
+				# attempt type coersion to keep the type the same
+				if basetestDefaultValue is True or basetestDefaultValue is False:
+					val = val.lower()=='true'
+				elif isinstance(basetestDefaultValue, int):
+					val = int(val)
+				elif isinstance(basetestDefaultValue, float):
+					val = float(val)
+			setattr(self, key, val)
+	
 	def getBoolProperty(self, propertyName, default=False):
 		"""
 		Get a True/False indicating whether the specified property is set 
@@ -223,9 +257,10 @@ class ProcessUser(object):
 				kwargs['environs']['COVERAGE_FILE'] = self.output+'/.coverage.python.%02d'%(self.__pythonCoverageFile)
 		return self.startProcess(sys.executable, arguments=args, **kwargs)
 
-	def startProcess(self, command, arguments, environs=None, workingDir=None, state=FOREGROUND, 
+	def startProcess(self, command, arguments, environs=None, workingDir=None, state=None, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None):
+			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None, 
+			background=False):
 		"""Start a process running in the foreground or background, and return 
 		the `pysys.process.commonwrapper.CommonProcessWrapper` object.
 		
@@ -235,36 +270,45 @@ class ProcessUser(object):
 				arguments=['myoperation', 'arg1','arg2'],
 				environs=self.createEnvirons(addToLibPath=['my_ld_lib_path']), # if a customized environment is needed
 				stdouterr=self.allocateUniqueStdOutErr('myoperation'), # for stdout/err files, pick a suitable logical name for what it's doing
-				state=BACKGROUND # or remove for default behaviour of executing in foreground
+				background=True # or remove for default behaviour of executing in foreground
 				)
 
 		The method allows spawning of new processes in a platform independent way. The command, arguments,
 		environment and working directory to run the process in can all be specified in the arguments to the
 		method, along with the filenames used for capturing the stdout and stderr of the process. Processes may
-		be started in the C{FOREGROUND}, in which case the method does not return until the process has completed
-		or a time out occurs, or in the C{BACKGROUND} in which case the method returns immediately to the caller
+		be started in the foreground, in which case the method does not return until the process has completed
+		or a time out occurs, or in the background in which case the method returns immediately to the caller
 		returning a handle to the process to allow manipulation at a later stage, typically with L{waitProcess}. 
-		All processes started in the C{BACKGROUND} and not explicitly killed using the returned process 
+		
+		All processes started in the background and not explicitly killed using the returned process 
 		object are automatically killed on completion of the test via the L{cleanup()} destructor.
 
-		:param command: The path to the executable to be launched (should include the full path)
-		:param arguments: A list of arguments to pass to the command
+		When starting a process that will listen on a server socket, use `getNextAvailableTCPPort` 
+		to allocate a free port before calling this method. 
+
+		:param str command: The path to the executable to be launched (should include the full path)
+		:param list[str] arguments: A list of arguments to pass to the command
 		
-		:param environs: A dictionary specifying the environment to run the process in. 
+		:param dict(str,str) environs: A dictionary specifying the environment to run the process in. 
 			If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
 			produce a suitable clean default environment for this `command`, containing a minimal set of variables. 
 			If you wish to specify a customized environment, L{createEnvirons()} is a great way to create it.
 		
-		:param workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
+		:param str workingDir: The working directory for the process to run in (defaults to the testcase output subdirectory)
 		
-		:param state: Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
+		:param bool background: Set to True to start the process in the background. By default processes are started 
+			in the foreground, meaning execution of the test will continue only once the process has terminated. 
+		:param state: Alternative way to set ``background=True``. 
+			Run the process either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND}). Setting 
+			state=BACKGROUND is equivalent to setting background=True; in new tests using background=True is the 
+			preferred way to do this. 
 		
-		:param timeout: The number of seconds after which to terminate processes running in the C{FOREGROUND}. For processes 
+		:param int timeout: The number of seconds after which to terminate processes running in the foreground. For processes 
 			that complete in a few seconds or less, it is best to avoid overriding this and stick with the default. 
 			However for long-running foreground processes it will be necessary to set a larger number, for example 
 			if running a soak test where the process needs to run for up to 2 hours you could set ``timeout=2*60*60``. 
 		
-		:param stdouterr: The filename prefix to use for the stdout and stderr of the process 
+		:param str stdouterr: The filename prefix to use for the stdout and stderr of the process 
 			(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
 			L{allocateUniqueStdOutErr}. 
 			The stdouterr prefix is also used to form a default display name for 
@@ -274,21 +318,22 @@ class ProcessUser(object):
 			L{pysys.process.commonwrapper.CommonProcessWrapper.stdout} and 
 			L{pysys.process.commonwrapper.CommonProcessWrapper.stderr}.
 		
-		:param stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
-		:param stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
+		:param str stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
+		:param str stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
 		
-		:param displayName: Logical name of the process used for display 
+		:param str displayName: Logical name of the process used for display in log messages, and the str(...) 
+			representation of the returned process object 
 			(defaults to a string generated from the stdouterr and/or the command).
 		
-		:param abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
+		:param bool abortOnError: If true abort the test on any error outcome (defaults to the defaultAbortOnError
 			project setting)
 
-		:param expectedExitStatus: The condition string used to determine whether the exit status/code 
+		:param str expectedExitStatus: The condition string used to determine whether the exit status/code 
 			returned by the process is correct. The default is '==0', as an exit code of zero usually indicates success, but if you 
 			are expecting a non-zero exit status (for example because you are testing correct handling of 
 			a failure condition) this could be set to '!=0' or a specific value such as '==5'. 
 	
-		:param ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
+		:param bool ignoreExitStatus: If False, a BLOCKED outcome is added if the process terminates with an 
 			exit code that doesn't match expectedExitStatus (or if the command cannot be run at all). 
 			This can be set to True in cases where you do not care whether the command succeeds or fails, or wish to handle the 
 			exit status separately with more complicated logic. 
@@ -298,7 +343,7 @@ class ProcessUser(object):
 			(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
 			compatibility with older PySys releases if no project property is set. 
 		
-		:param quiet: If True, this method will not do any INFO or WARN level logging 
+		:param bool quiet: If True, this method will not do any INFO or WARN level logging 
 			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
 			useful to avoid filling up the log where it is necessary to repeatedly execute a 
 			command check for completion of some operation until it succeeds; in such cases 
@@ -309,6 +354,9 @@ class ProcessUser(object):
 		:rtype: pysys.process.commonwrapper.CommonProcessWrapper
 
 		"""
+		if state is None: state = FOREGROUND
+		if background: state = BACKGROUND
+		
 		if ignoreExitStatus == None: ignoreExitStatus = self.defaultIgnoreExitStatus
 		workingDir = os.path.join(self.output, workingDir or '')
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
@@ -344,7 +392,7 @@ class ProcessUser(object):
 			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
 			process.start()
 			if state == FOREGROUND:
-				correctExitStatus = eval('%d %s'%(process.exitStatus, expectedExitStatus))
+				correctExitStatus = pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
 				
 				logmethod = log.info if correctExitStatus else log.warn
 				if quiet: logmethod = log.debug
@@ -454,7 +502,8 @@ class ProcessUser(object):
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location
 		if getattr(self.project, 'defaultEnvironsTempDir',None)!=None:
-			tempDir = eval(self.project.defaultEnvironsTempDir)
+			tempDir = pysys.internal.safe_eval.safe_eval(self.project.defaultEnvironsTempDir, extraNamespace={'self':self})
+			
 			self.mkdir(tempDir)
 			if IS_WINDOWS: # pragma: no cover
 				e['TEMP'] = e['TMP'] = os.path.normpath(tempDir)
@@ -643,7 +692,7 @@ class ProcessUser(object):
 		Timeouts will result in an exception unless the project property ``defaultAbortOnError==False``.
 		
 		This method does not check the exit code for success, but you can manually 
-		check the return value (which is the same as ``process.exitStatus``) if you wish to check it succeeded. 
+		check the return value (which is the same as ``process.exitStatus``) using `assertThat` if you wish to check it succeeded. 
 
 		:param process: The process handle returned from the L{startProcess} method
 		:param timeout: The timeout value in seconds to wait before returning
@@ -691,15 +740,19 @@ class ProcessUser(object):
 			raise Exception("Write to process %r stdin not performed as process is not running", process)
 
 
-	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], abortOnError=None, process=None):
+	def waitForSocket(self, port, host='localhost', timeout=TIMEOUTS['WaitForSocket'], abortOnError=None, process=None, 
+			socketAddressFamily=socket.AF_INET):
 		"""Wait until it is possible to establish a socket connection to a 
-		server running on the specified port. 
+		server running on the specified local or remote port. 
 		
 		This method blocks until connection to a particular host:port pair can be established. This is useful for
 		test timing where a component under test creates a socket for client server interaction - calling of this
 		method ensures that on return of the method call the server process is running and a client is able to
 		create connections to it. If a connection cannot be made within the specified timeout interval, the method
 		returns to the caller, or aborts the test if abortOnError=True. 
+		
+		.. versionchanged:: 1.5.1
+			Added host and socketAddressFamily parameters.
 		
 		:param port: The port value in the socket host:port pair
 		:param host: The host value in the socket host:port pair
@@ -708,13 +761,15 @@ class ProcessUser(object):
 			project setting)
 		:param process: If a handle to a process is specified, the wait will abort if 
 			the process dies before the socket becomes available. It is recommended to set this wherever possible. 
+		:param socketAddressFamily: The socket address family e.g. IPv4 vs IPv6. See Python's ``socket`` module for 
+			details. 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 
 		log.debug("Performing wait for socket creation %s:%s", host, port)
 
 		with process_lock:
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s = socket.socket(socketAddressFamily, socket.SOCK_STREAM)
 			# the following lines are to prevent handles being inherited by 
 			# other processes started while this test is runing
 			if OSFAMILY =='windows':
@@ -725,36 +780,38 @@ class ProcessUser(object):
 			else:
 				import fcntl
 				fcntl.fcntl(s.fileno(), fcntl.F_SETFD, 1)
-			
-		startTime = time.time()
-		while True:
-			try:
-				s.connect((host, port))
-				s.shutdown(socket.SHUT_RDWR)
-				
-				log.debug("Wait for socket creation completed successfully")
-				if time.time()-startTime>10:
-					log.info("Wait for socket creation completed after %d secs", time.time()-startTime)
-				return True
-			except socket.error:
-				if process and not process.running():
-					msg = "Waiting for socket connection aborted due to unexpected process %s termination"%(process)
-					if abortOnError:
-						self.abort(BLOCKED, msg, self.__callRecord())
-					else:
-						log.warn(msg)
-					return False
-
-				if timeout:
-					currentTime = time.time()
-					if currentTime > startTime + timeout:
-						msg = "Timed out waiting for creation of socket after %d secs"%(time.time()-startTime)
+		try:
+			startTime = time.time()
+			while True:
+				try:
+					s.connect((host, port))
+					s.shutdown(socket.SHUT_RDWR)
+					
+					log.debug("Wait for socket creation completed successfully")
+					if time.time()-startTime>10:
+						log.info("Wait for socket creation completed after %d secs", time.time()-startTime)
+					return True
+				except socket.error:
+					if process and not process.running():
+						msg = "Waiting for socket connection aborted due to unexpected process %s termination"%(process)
 						if abortOnError:
-							self.abort(TIMEDOUT, msg, self.__callRecord())
+							self.abort(BLOCKED, msg, self.__callRecord())
 						else:
 							log.warn(msg)
 						return False
-			time.sleep(0.01)
+
+					if timeout:
+						currentTime = time.time()
+						if currentTime > startTime + timeout:
+							msg = "Timed out waiting for creation of socket after %d secs"%(time.time()-startTime)
+							if abortOnError:
+								self.abort(TIMEDOUT, msg, self.__callRecord())
+							else:
+								log.warn(msg)
+							return False
+				time.sleep(0.01)
+		finally:
+			s.close()
 
 
 	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile'], abortOnError=None):
@@ -796,84 +853,166 @@ class ProcessUser(object):
 				log.debug("Wait for '%s' file creation completed successfully", file)
 				return
 
-			
-	def waitForSignal(self, file, filedir=None, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
-			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None):
-		"""Wait for a particular regular expression to be seen on a set number of lines in a text file.
+	def waitForSignal(self, file, filedir=None, expr="", **waitForGrepArgs):
+		"""Old alias for `waitForGrep`; please use `waitForGrep` in new tests.
 		
-		This method blocks until a particular regular expression is seen in a text file on a set
-		number of lines. The number of lines which should match the regular expression is given by 
-		the C{condition} argument in textual form i.e. for a match on more than 2 lines use condition =\">2\".
-		If the regular expression is not seen in the file matching the supplied condition within the 
-		specified timeout interval, the method returns to the caller.
+		All parameters are the same, except that in waitForSignal the (rarely used) ``filedir`` argument can be 
+		specified as the 2nd positional argument (after ``file`` and before ``expr``) whereas in waitForGrep it can 
+		only be specified as a ``filedir=`` keyword argument. 
+		"""
+		return self.waitForGrep(file, expr=expr, filedir=filedir, **waitForGrepArgs)
+			
+	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
+			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None, detailMessage='', filedir=None, 
+			reFlags=0):
+		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
+		directory (waitForGrep was formerly known as `waitForSignal`).
+		
+		This method provides some parameters that give helpful fail-fast behaviour with a descriptive outcome reason; 
+		use these whenever possible:
+		
+		  - ``process=`` to abort if success becomes impossible due to premature termination of the process that's 
+		    generating the output
+		  - ``errorExpr=`` to abort if an error message/expression is written to the file
+		
+		This will generate much clearer outcome reasons, which makes test failures easy to triage, 
+		and also avoids wasting time waiting for something that will never happen.
 		
 		Example::
 		
-			self.waitForSignal('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
-				errorExpr=[' ERROR ', ' FATAL '], encoding='utf-8')
+			self.waitForGrep('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
+				errorExpr=[' ERROR ', ' FATAL ', 'Failed to start'], encoding='utf-8')
+				
+		Note that waitForGrep fails the test if the expression is not found (unless abortOnError was set to False, 
+		which isn't recommended), so there is no need to add duplication with an 
+		`assertGrep <pysys.basetest.BaseTest.assertGrep>` to check for the same expression in your validation logic. 
 
-		:param file: The absolute or relative name of the file used to wait for the signal
+		The message(s) logged when there is a successful wait can be controlled with the project 
+		property ``verboseWaitForGrep=true/false`` (or equivalently, ``verboseWaitForSignal``); for best visibility 
+		into what is happening set this property to true in your ``pysysproject.xml``. 
 		
-		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
+		You can extract information from the matched expression, optionally perform assertions on it, by 
+		using one or more ``(?P<groupName>...)`` named groups in the expression. A common 
+		pattern is to unpack the resulting dict using ``**kwargs`` syntax and pass to `BaseTest.assertThat`. For 
+		example::
+
+			self.assertThat('username == expected', expected='myuser',
+				**self.waitForGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+
+		.. versionadded:: 1.5.1
+
+		:param str file: The path of the file to be searched. Usually this is a name/path relative to the 
+			``self.output`` directory, but alternatively an absolute path can be specified. 
 		
-		:param expr: The regular expression to search for in the text file
+		:param str expr: The regular expression to search for in the text file.
 		
-		:param condition: The condition to be met for the number of lines matching the regular expression
+		:param str condition: The condition to be met for the number of lines matching the regular expression; by default 
+			we wait until there is at least one occurrence. 
 		
-		:param timeout: The timeout in seconds to wait for the regular expression and to check against the condition
+		:param int timeout: The number of seconds to wait for the regular expression before giving up and aborting 
+			the test with `pysys.constants.TIMEDOUT` (unless abortOnError=False in which case execution will continue).
 		
-		:param poll: The time in seconds to poll the file looking for the regular expression and to check against the condition
+		:param pysys.process.commonwrapper.CommonProcessWrapper process: The process that is generating the specified 
+			file, to allow the wait to fail fast (instead of timing out) if the process dies before the expected signal 
+			appears. Can be None if the process is not known or is expected to terminate itself during this period. 
 		
-		:param ignores: A list of regular expressions used to denote lines in the files which should be ignored 
+		:param list[str] errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
+			for the main expression to be aborted with a `pysys.constants.BLOCKED` outcome. This is useful to avoid waiting 
+			a long time for the expected expression when an ERROR is logged that means it will never happen, and 
+			also provides much clearer test failure messages in this case. 
+
+		:param list[str] ignores: A list of regular expressions used to identify lines in the files which should be ignored 
 			when matching both `expr` and `errorExpr`. 
+
+		:param float poll: The time in seconds between to poll the file looking for the regular expression and to check against the condition
+				
+		:param bool abortOnError: If True abort the test on any error outcome (defaults to the defaultAbortOnError
+			project setting, which for a modern project will be True).
 		
-		:param process: If a handle to the process object producing output is specified, the wait will abort if 
-			the process dies before the expected signal appears.
-		
-		:param errorExpr: Optional list of regular expressions, which if found in the file will cause waiting 
-			for the main expression to be aborted with an error outcome. This is useful to avoid waiting a long time for 
-			the expected expression when an ERROR is logged that means it will never happen, and also provides 
-			much clearer test failure messages in this case. 
-		
-		:param abortOnError: If true abort the test on any error outcome (defaults to the  defaultAbortOnError
-			project setting)
-		
-		:param encoding: The encoding to use to open the file. 
+		:param str encoding: The encoding to use to open the file and convert from bytes to characters. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+
+		:param str detailMessage: An extra string to add to the message logged when waiting to provide extra 
+			information about the wait condition. e.g. ``logSuffix='(downstream message received)'``. 
+			Added in v1.5.1. 
+
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+			
+		:param str filedir: Can be used to provide a directory name to add to the beginning of the ``file`` parameter; 
+			however usually it is clearer just to specify that directory in the ``file``.
+
+		:return list[re.Match]: Usually this returns a list of ``re.Match`` objects found for the ``expr``, or an 
+			empty list if there was no match.
+		
+			If the expr contains any ``(?P<groupName>...)`` named groups, and assuming the condition still the 
+			default of ">=1" (i.e. not trying to find multiple matches), then a dict is returned 
+			containing ``dict(groupName: str, matchValue: str or None)`` (or an empty ``{}`` dict if there is no match) 
+			which allows the result to be passed to `assertThat` for further checking of the matched groups (typically 
+			unpacked using the ``**`` operator; see example above). 
 		"""
-		assert expr, 'expr= argument must be specified when calling waitForSignal'
+		assert expr, 'expr= argument must be specified'
+		assert '\n' not in expr, 'expr= cannot contain multiple lines'
 		
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 		
-		log.debug("Performing wait for signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
-		
 		if errorExpr: assert not isstring(errorExpr), 'errorExpr must be a list of strings not a string'
 		
 		matches = []
 		startTime = time.time()
-		msg = "Wait for signal \"%s\" %s in %s" % (expr, condition, os.path.basename(file))
+		msg = "Waiting for {expr} {condition}in {file}{detail}".format(
+			expr=repr(expr), # repr performs escaping of embedded quotes, newlines, etc
+			condition=condition.strip()+' ' if condition!='>=1' else '', # only include if non-default
+			file=os.path.basename(file),
+			detail=' '+detailMessage.strip(' ') if detailMessage else ''
+			)
+
+		log.debug("Performing wait for grep signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
+		
+		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', False) or self.getBoolProperty('verboseWaitForGrep', False)
+		if verboseWaitForSignal: 
+			# if verbose, log when starting (which is very helpful for debugging hangs); non-verbose users get the message only when it's done
+			log.info('%s%s', msg, '; timeout=%ss'%timeout if timeout!=TIMEOUTS['WaitForSignal'] else '')
+		
+		encoding = encoding or self.getDefaultFileEncoding(f)
+		
+		# If condition was customized (typically to be more than 1) named groups mode isn't so useful since there would 
+		# be multiple matches, so restrict it to 1 which is the common case anyway. 
+		compiled = re.compile(expr, flags=reFlags)
+		namedGroupsMode = compiled.groupindex and condition.replace(' ','')=='>=1'
+
+		timetaken = time.time()
 		while 1:
 			if pathexists(f):
-				matches = getmatches(f, expr, encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores)
-				if eval("%d %s" % (len(matches), condition)):
-					if self.project.verboseWaitForSignal.lower()=='true' if hasattr(self.project, 'verboseWaitForSignal') else False:
-						log.info("%s completed successfully", msg)
+				matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags)
+
+				if pysys.internal.safe_eval.safe_eval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
+					timetaken = time.time()-timetaken
+					# Old-style/non-verbose behaviour is to log only after complete, 
+					# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time
+					# (this helps people debug tests that sometimes timeout and sometimes "nearly" timeout)
+					if verboseWaitForSignal:
+						(log.info if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
 					else:
-						log.info("Wait for signal in %s completed successfully", file)
+						# We use the phrase "grep signal" to avoid misleading anyone, whether people used waitForGrep or the older waitForSignal
+						log.info("Wait for grep signal in %s completed successfully", file)
 					break
 				
 				if errorExpr:
 					for err in errorExpr:
-						errmatches = getmatches(f, err+'.*', encoding=encoding or self.getDefaultFileEncoding(f), ignores=ignores) # add .* to capture entire err msg for a better outcome reason
+						errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags) # add .* to capture entire err msg for a better outcome reason
 						if errmatches:
 							err = errmatches[0].group(0).strip()
-							msg = '%s found during %s'%(quotestring(err), msg)
+							msg = '%s found while %s'%(quotestring(err), msg)
 							# always report outcome for this case; additionally abort if requested to
 							self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
-							return matches
+							return {} if namedGroupsMode else matches
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
@@ -895,11 +1034,13 @@ class ProcessUser(object):
 				break
 
 			time.sleep(poll)
+		if namedGroupsMode:
+			return {} if not matches else matches[0].groupdict()
 		return matches
 
 
 	def addCleanupFunction(self, fn):
-		""" Registers a function that will be called as part of the cleanup of this object.
+		""" Registers a function that will be called as part of the `cleanup` of this object.
 		
 		Cleanup functions should have no arguments, and are invoked in reverse order with the most recently added first (LIFO), and
 		before the automatic termination of any remaining processes associated with this object.
@@ -913,11 +1054,11 @@ class ProcessUser(object):
 
 
 	def cleanup(self):
-		""" Cleanup function that frees resources managed by this object. 
+		""" Tear down function that frees resources managed by this object. 
 
-		Should be called exactly once by the owner of teh ProcessUser when this object is no longer needed. 
+		Should be called exactly once by the owner of this object when is no longer needed. 
 		
-		Do not override this method, instead use L{addCleanupFunction}.
+		Do not override this method, instead use `addCleanupFunction`.
 		
 		"""
 		try:
@@ -1076,13 +1217,33 @@ class ProcessUser(object):
 			return self.__outcomeReason
 
 
-	def getNextAvailableTCPPort(self):
-		"""Allocate a TCP port.
+	def getNextAvailableTCPPort(self, hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET):
+		"""Allocate a free TCP port which can be used for starting a server on this machine.
 		
 		The port is taken from the pool of available server (non-ephemeral) ports on this machine, and will not 
 		be available for use by any other code in the current PySys process until this object's `cleanup` method is 
 		called to return it to the pool of available ports. 
 
+		To allocate an IPv4 port for use only on this host::
+		
+			port = self.getNextAvailableTCPPort(hosts=['localhost'])
+
+		.. versionchanged:: 1.5.1
+			Added hosts and socketAddressFamily parameters.
+
+		:param list(Str) hosts: A list of the host names or IP addresses to check when establishing that a potential 
+			allocated port isn't already in use by a process outside the PySys framework. 
+			By default we check ``""`` (which corresponds to ``INADDR_ANY`` and depending on the OS means 
+			either one or all non-localhost IPv4 addresses) and also ``localhost``. 
+			
+			Many machines have multiple network cards each with its own host IP address, and typically you'll only be using 
+			one of them in your test, most commonly ``localhost``. If you do know which host/IP you'll actually be using, 
+			just specify that directly to save time, and avoid needlessly opening remote ports on hosts your're not using. 
+			A list of available host addresses can be found from 
+			``socket.getaddrinfo('', None)``.
+
+		:param socketAddressFamily: The socket address family e.g. IPv4 vs IPv6. See Python's ``socket`` module for 
+			details. 
 		"""
 		o = TCPPortOwner()
 		self.addCleanupFunction(lambda: o.cleanup())
@@ -1115,31 +1276,44 @@ class ProcessUser(object):
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
 
 
-	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None):
+	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0):
 		""" Searches for a regular expression in the specified file, and returns it. 
 
-		If the regex contains groups, the specified group is returned. If the expression is not found, an exception is raised,
-		unless getAll=True or returnNoneIfMissing=True. For example;
+		If the regex contains unnamed groups, the specified group is returned. If the expression is not found, an exception is raised,
+		unless returnAll=True or returnNoneIfMissing=True. For example::
 
-		self.getExprFromFile('test.txt', 'myKey="(.*)"') on a file containing 'myKey="foobar"' would return "foobar"
-		self.getExprFromFile('test.txt', 'foo') on a file containing 'myKey=foobar' would return "foo"
+			self.getExprFromFile('test.txt', 'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
+			self.getExprFromFile('test.txt', 'foo') # on a file containing 'myKey=foobar' would return "foo"
 		
-		:param path: file to search (located in the output dir unless an absolute path is specified)
-		:param expr: the regular expression, optionally containing the regex group operator (...)
-		:param groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ['1'] meaning 
-			the first group. If more than one group is specified, the result will be a tuple of group values, otherwise the
-			result will be the value of the group at the specified index.
-		:param returnAll: returns all matching lines if True, the first matching line otherwise.
-		:param returnNoneIfMissing: set this to return None instead of throwing an exception
+		See also `pysys.basetest.BaseTest.assertGrep` which should be used when instead of just finding out what's 
+		in the file you want to assert that a specific expression is matched. assertGrep also provides some additional 
+		functionality such as returning named groups which this method does not currently support. 
+		
+		:param str path: file to search (located in the output dir unless an absolute path is specified)
+		:param str expr: the regular expression, optionally containing the regex group operator ``(...)``
+		:param List[int] groups: which regex group numbers (as indicated by brackets in the regex) should be returned; 
+			default is ``[1]`` meaning the first group. 
+			If more than one group is specified, the result will be a tuple of group values, otherwise the
+			result will be the value of the group at the specified index as a str.
+		:param bool returnAll: returns a list containing all matching lines if True, the first matching line otherwise.
+		:param bool returnNoneIfMissing: set this to return None instead of throwing an exception
 			if the regex is not found in the file
-		:param encoding: The encoding to use to open the file. 
+		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
+		:return: A List[List[str]] if returnAll=True and groups contains multiple groups, a List[str] if only one of 
+			those conditions is true, or else a simple str containing just the first match found. 
 		"""
 		with openfile(os.path.join(self.output, path), 'r', encoding=encoding or self.getDefaultFileEncoding(os.path.join(self.output, path))) as f:
 			matches = []
 			for l in f:
-				match = re.search(expr, l)
+				match = re.search(expr, l, flags=reFlags)
 				if not match: continue
 				if match.groups():
 					if returnAll: 
@@ -1157,22 +1331,34 @@ class ProcessUser(object):
 			raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
 
 
-	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None):
+	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, logFunction=None, reFlags=0):
 		""" Logs some or all of the lines in the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
 		diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
 		to make test failures easier to triage quickly. 
-		
-		:param path: May be an absolute, or relative to the test output directory
-		:param includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
-		:param excludes: Optional list of regex strings. If specified, no line containing these will be logged
-		:param maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
-		:param tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
-		:param encoding: The encoding to use to open the file. 
+
+		.. versionchanged:: 1.5.1
+			Added logFunction parameter. 
+
+		:param str path: May be an absolute, or relative to the test output directory
+		:param list[str] includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
+		:param list[str] excludes: Optional list of regex strings. If specified, no line containing these will be logged
+		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
+		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
+		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+		:param Callable[[line],None] logFunction: The function that will be used to log individual lines from the file. 
+			Usually this is ``self.log.info(u'  %s', line, extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS))``	
+			but a custom implementation can be provided, for example to provide a different color using 
+			`pysys.utils.logutils.BaseLogFormatter.tag`.
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
 			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
 		:return: True if anything was logged, False if not.
 		
 		"""
@@ -1189,7 +1375,7 @@ class ProcessUser(object):
 			def matchesany(s, regexes):
 				assert not isstring(regexes), 'must be a list of strings not a string'
 				for x in regexes:
-					m = re.search(x, s)
+					m = re.search(x, s, flags=reFlags)
 					if m: return m.group(0)
 				return None
 			
@@ -1215,11 +1401,15 @@ class ProcessUser(object):
 			
 		if not tolog:
 			return False
-			
+		
 		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
+		if logFunction is None: 
+			def logFunction(line):
+				self.log.info(u'  %s', l, extra=logextra)
+
 		self.log.info(u'Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
-			self.log.info(u'  %s'%(l), extra=logextra)
+			logFunction(l)
 		self.log.info('  -----', extra=logextra)
 		self.log.info('', extra=logextra)
 		return True

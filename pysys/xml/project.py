@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,7 @@ from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.stringutils import compareVersions
 from pysys.utils.fileutils import mkdir
 from pysys.utils.pycompat import openfile
+from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.project')
 
@@ -83,7 +84,6 @@ DTD='''
 
 PROPERTY_EXPAND_ENV = "(?P<replace>\${%s.(?P<key>.*?)})"
 PROPERTY_EXPAND = "(?P<replace>\${(?P<key>.*?)})"
-PROPERTY_FILE = "(?P<name>^.*)=(?P<value>.*)$"
 
 
 class XMLProjectParser(object):
@@ -93,6 +93,7 @@ class XMLProjectParser(object):
 	def __init__(self, dirname, file):
 		self.dirname = dirname
 		self.xmlfile = os.path.join(dirname, file)
+		log.debug('Loading project file: %s', self.xmlfile)
 		self.rootdir = 'root'
 		self.environment = 'env'
 		self.osfamily = 'osfamily'
@@ -155,38 +156,52 @@ class XMLProjectParser(object):
 				self.properties.pop(self.rootdir, "")
 				self.rootdir = propertyNode.getAttribute("root")
 				self.properties[self.rootdir] = self.dirname
-			
+				log.debug('Setting project property %s="%s"', self.rootdir, self.dirname)
+
 			elif propertyNode.hasAttribute("osfamily"):
 				self.properties.pop(self.osfamily, "")
 				self.osfamily = propertyNode.getAttribute("osfamily")
 				self.properties[self.osfamily] = OSFAMILY
+				log.debug('Setting project property %s="%s"', self.osfamily, OSFAMILY)
 					
 			elif propertyNode.hasAttribute("file"): 
 				file = self.expandFromProperty(propertyNode.getAttribute("file"), propertyNode.getAttribute("default"))
-				self.getPropertiesFromFile(os.path.join(self.dirname, file))
+				self.getPropertiesFromFile(os.path.normpath(os.path.join(self.dirname, file)) if file else '', 
+					pathMustExist=(propertyNode.getAttribute("pathMustExist") or '').lower()=='true')
 			
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
 				value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
-				self.properties[name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
-	
+				self.properties[name] = value = self.expandFromProperty(value, propertyNode.getAttribute("default"))
+				log.debug('Setting project property %s="%s"', name, value)
+
+				if (propertyNode.getAttribute("pathMustExist") or '').lower()=='true':
+					if not (value and os.path.exists(os.path.join(self.dirname, value))):
+						raise UserError('Cannot find path referenced in project property "%s": "%s"'%(
+							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
+
 		return self.properties
 
 
-	def getPropertiesFromFile(self, file):
-		if os.path.exists(file):
-			try:
-				fp = open(file, "r")
-			except Exception: 
-				pass
-			else:
-				for line in fp.readlines():
-					regex = re.compile(PROPERTY_FILE, re.M)
-					if regex.search(line) is not None:
-						name = re.match(regex, line).group('name')
-						value = re.match(regex, line).group('value')					
-						value = self.expandFromProperty(value, "")				
-						self.properties[name.strip()] = value.strip()
+	def getPropertiesFromFile(self, file, pathMustExist=False):
+		if not os.path.isfile(file):
+			if pathMustExist:
+				raise UserError('Cannot find properties file referenced in %s: "%s"'%(
+					self.xmlfile, file))
+
+			log.debug('Skipping project properties file which not exist: "%s"', file)
+			return
+
+		with open(file, 'r') as fp:
+			for line in fp:
+				line = line.split('=', 1)
+				if len(line) == 2:
+					name, value = line[0], line[1]
+					value = self.expandFromProperty(value, "")	
+					name = name.strip()
+					value = value.strip()
+					self.properties[name] = value
+					log.debug('Setting project property %s="%s" (from %s)', name, self.properties[name], file)
 
 
 	def expandFromEnvironent(self, value, default):
@@ -197,11 +212,17 @@ class XMLProjectParser(object):
 				try:
 					insert = os.environ[m[1]]
 				except Exception:
+					# this means that if the default also contains something that can't be resolved we get a hard failure 
+					# (otherwise would stack overflow)
 					if default==value:
 						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
+					log.debug('Failed to expand property from environment variables; "%s" env var does not exist so using default "%s"', m[1], default)
+
 					value = default
 					break
 				value = value.replace(m[0], insert)
+				log.debug('Expanding project property from environment: %s->"%s"', m[0], insert)
+
 		return value		
 
 
@@ -213,9 +234,11 @@ class XMLProjectParser(object):
 				try:
 					insert = self.properties[m[1]]
 				except Exception as e:
-					log.debug('Failed to expand properties in "%s" - %s: %s', value, e.__class__.__name__, e)
+					# this means that if the default also contains something that can't be resolved we get a hard failure 
+					# (otherwise would stack overflow)
 					if default==value:
 						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
+					log.debug('Failed to expand property %s in "%s" (will use default "%s") - %s: %s', m[1], value, default, e.__class__.__name__, e)
 					value = default
 					break
 				value = value.replace(m[0], insert)
@@ -382,23 +405,24 @@ class XMLProjectParser(object):
 		
 
 	def addToPath(self):		
-		pathNodeList = self.root.getElementsByTagName('path')
+		for elementname in ['path', 'pythonpath']:
+			pathNodeList = self.root.getElementsByTagName(elementname)
 
-		for pathNode in pathNodeList:
-				raw = self.expandFromEnvironent(pathNode.getAttribute("value"), "")
-				value = self.expandFromProperty(raw, "")
-				relative = pathNode.getAttribute("relative")
-				if not value: 
-					log.warn('Cannot add directory to the python <path>: "%s"', raw)
-					continue
+			for pathNode in pathNodeList:
+					raw = self.expandFromEnvironent(pathNode.getAttribute("value"), "")
+					value = self.expandFromProperty(raw, "")
+					relative = pathNode.getAttribute("relative")
+					if not value: 
+						log.warn('Cannot add directory to the python <path>: "%s"', raw)
+						continue
 
-				if relative == "true": value = os.path.join(self.dirname, value)
-				value = os.path.normpath(value)
-				if not os.path.isdir(value): 
-					log.warn('Cannot add non-existent directory to the python <path>: "%s"', value)
-				else:
-					log.debug('Adding value to path ')
-					sys.path.append(value)
+					if relative == "true": value = os.path.join(self.dirname, value)
+					value = os.path.normpath(value)
+					if not os.path.isdir(value): 
+						log.warn('Cannot add non-existent directory to the python <path>: "%s"', value)
+					else:
+						log.debug('Adding value to path ')
+						sys.path.append(value)
 
 
 	def writeXml(self):
@@ -633,6 +657,9 @@ class Project(object):
 			stdoutHandler.setFormatter(project.formatters.stdout)
 			Project.__INSTANCE = project # set singleton
 			return project
+		except UserError as e: 
+			sys.stderr.write("ERROR: Failed to load project - %s"%e)
+			sys.exit(1)
 		except Exception as e:
 			sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
 			traceback.print_exc()

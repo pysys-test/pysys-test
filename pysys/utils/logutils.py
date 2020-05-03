@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -110,6 +110,7 @@ class ColorLogFormatter(BaseLogFormatter):
 		LOG_FAILURES: 'RED',
 		LOG_PASSES: 'GREEN',
 		LOG_SKIPS: 'YELLOW',
+		LOG_DIFF_ADDED: 'CYAN', LOG_DIFF_REMOVED: 'MAGENTA', # can't use red/green here without confusion with fail/pass
 		LOG_END:'END',
 	}
 	

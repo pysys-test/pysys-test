@@ -1,4 +1,4 @@
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -234,7 +234,6 @@ e.g.
 					# for specific level setting we need the opposite - only change stdoutHandler if we're 
 					# turning up the logging (since otherwise it wouldn't be seen) but also change the specified level
 					logging.getLogger(loggername).setLevel(verbosity)
-					if verbosity == logging.DEBUG: stdoutHandler.setLevel(logging.DEBUG)
 				
 			elif option in ("-a", "--type"):
 				self.type = value

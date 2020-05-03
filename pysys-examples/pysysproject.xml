@@ -40,14 +40,20 @@
 	
 	
 	<!-- 
-	Set a property on the project class. The property can then be used as a substitution variable 
-	within the project file, and is also set as an attribute to the project class so it's value 
-	can be reference internally within the PySys framework, e.g. in the below example, user would 
-	be set on the project class referenced by self.project, such that self.project.user is 
-	the USERNAME taken from the environment, or guest if the variable is not defined within the 
-	environment. The literal value can be set directly on the property, in which case the default 
-	attribute is not required, e.g. <property name="maxFails" value="100"/>	
-	 -->
+	Example of setting a project property. 
+	
+	Project properties can be used as substitution variables within the project file, and 
+	are set as attributes on the Project class for use by tests. In the example below, "user" 
+	would be available to tests as "self.project.user".
+	
+	Property values can make use of other project properties using ${XXX} syntax, or environment 
+	variables using ${env.XXX} syntax. 
+
+	If a property value contains any properties or environment variables that do not exist, 
+	the "default" is used instead (or "" if a default is not explicitly specified). If the default 
+	also contains undefined properties the project will fail to load. 
+	
+	-->
 	<property name="user" value="${env.USERNAME}" default="guest"/>	
 
 
@@ -102,14 +108,22 @@
 	<!-- Set this to true unless you need pre-1.4.1 mode behaviour for compatibility reasons. -->
 	<property name="supportMultipleModesPerRun" value="true"/>
 
+	<!-- Produces more informative messages from waitForGrep/Signal. -->
+	<property name="verboseWaitForGrep" value="true"/>
+
 	<!-- 
-	Import properties from file (fails silently if the file does not exist). The imported 
-	file should be of the format name=value (one pair specified per line). Any imported names
-	can again be used as a substitution variables within the project file, and are also set as 
-	attributes to the project class. The value in the imported file can be defined to use 
-	substitution through the ${variable} syntax (where variable must be defined before the import
+	Import project properties from a file. 
+	
+	If pathMustExist=true, the project will fail to load if the specified file does not 
+	exist. If pathMustExist=false the project will silently ignore a missing properties file, 
+	which can be useful when using this feature to provide optional user-specific overrides. 
+	
+	The properties file should be of the format name=value (one pair specified per line). 
+	Each imported property line is handled just the same as a standard "property" element, 
+	so for example other project properties can be referenced withint the values 
+	using ${...} syntax. 
 	 -->
-	<property file="${osfamily}.properties" />
+	<property file="${osfamily}.properties" pathMustExist="false"/>
 
 
 	<!-- 
@@ -119,7 +133,7 @@
 	the path is treated as absolute, e.g. to add the src directory to the python path at runtime 
 	use;
 	
-	<path value="./src" relative="true" />
+	<pythonpath value="./src" relative="true" />
 	-->
 
 
@@ -154,8 +168,8 @@
 	code for the distributed writers). If no writer is specified in the project file, the 
 	XMLResultsWriter is used. 
 	
-	The writer tag details the classname (which should be added to the pythonpath using the 
-	path tag) and the module of the writer class. Where single file output is produced by the 
+	The writer tag details the classname (which should be added to the pythonpath)
+	and the module of the writer class. Where single file output is produced by the 
 	writer, the optional filename attribute is used to denote the filename template for the output 
 	logging. The filename template is processed through time.strftime so that time information can 
 	be set into the filename, e.g. a filename template of 'testsummary-%Y%m%d%H%M%S.xml' will result 

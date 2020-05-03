@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Port allocation - check IPv4 and IPv6 on all interfaces</title>    
+    <purpose><![CDATA[
+]]>
+    </purpose>
+  </description>
+
+  <execution-order hint="-5"/> <!-- because this is a slower test, start it earlier-->
+
+  <classification>
+    <groups>
+      <group></group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

@@ -9,13 +9,98 @@ Change Log
   request in the PySys test framework. For how-tos and advice, 
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
---------------------------------------
-What's new in 1.5.1 (not yet released)
---------------------------------------
+-------------------
+What's new in 1.5.1
+-------------------
 
-Miscellaneous new features
+Documentation improvements
 --------------------------
-- PySys now support v3.8 of Python. 
+PySys now uses Sphinx to build its documentation (instead of epydoc), and new content has also been written resulting 
+in a significantly larger set of HTML documentation that is also easier to navigate, and brings together 
+the detailed API reference with information on usage and how to get started with PySys. The main ``.rst`` 
+documentation source files are shipped inside the binary distribution of PySys so that users can view and 
+potentially even re-package the documentation combined with their own extensions. 
+
+Assertion and waitForGrep improvements
+--------------------------------------
+- `BaseTest.assertThat` has been radically overhauled with a powerful mechanism that uses named parameters (e.g. 
+  ``actual=`` and ``expected=``) to produce self-describing log messages and outcome reasons, and even the ability to 
+  evaluate arbitrary Python expressions in the parameters, for example::
+  
+     self.assertThat("actualStartupMessage == expected", actualStartupMessage=msg, expected='Started successfully')
+
+     self.assertThat('actual == expected', actual__eval="myDataStructure['item1'][-1].getId()", expected='foobar')
+     self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].getId()", expected='baz')
+     self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].id", expected='baz')
+  
+  This automatically produces informative log messages such as::
+  
+     Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
+     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='blimey!' ... failed
+     
+     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='biz' ... failed
+       expected: 'biz'
+         actual: 'baz'
+                   ^     
+     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
+  
+  Note that when two named parameters are provided and the condition string is a simple equality 
+  comparison (``==`` or ``is``), additional lines are logged when the assertion fails to show at what point the 
+  two arguments differ. For best results make sure you have colours turned on. 
+
+  As a result of these changes to assertThat, the less powerful `BaseTest.assertEval` method is now deprecated and 
+  new tests should use assertThat instead. 
+
+  Both methods also now allow the condition/eval string to make use of some additional standard Python modules such as 
+  ``math`` and ``re``, and to use ``import_module('...').XXX`` to dynamically import additional modules. 
+
+- `BaseTest.assertGrep` (and `BaseTest.assertLastGrep`) now return the regular expression match object, or if any 
+  ``(?P<groupName>...)`` named groups are present in the regular expression, a dictionary containing the matched values. 
+  This allows matching values from within the regular expression in a way that produces nicely descriptive error 
+  messages, and also enables more sophisticated checking (e.g. by casting numeric types to float). For example::
+
+    self.assertThat('username == expected', expected='myuser',
+      **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+    
+    self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
+      **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+ 
+  `BaseTest.waitForGrep` now provides the same dictionary return value when given a regular expression with named 
+  groups, so the above trick can also be used during execution of the test when convenient. 
+
+- `BaseTest.waitForGrep()` has been added as a new and clearer name for `BaseTest.waitForSignal()`, and we recommend 
+  using waitForGrep in new tests from now on (see upgrade section for more information about this change).
+
+- `BaseTest.waitForGrep` (and `BaseTest.waitForSignal`) now logs more useful information if the 
+  ``verboseWaitForGrep`` (or its alias, ``verboseWaitForSignal``) is set to true in the ``pysysproject.xml`` 
+  properties. This includes logging at the start of waiting rather than at the end of waiting (to make it easier to 
+  debug hangs during test development or when triaging an automated test run). In addition, if a non-default timeout 
+  was specified this is included in the log message, and for the (small proportion of) waits that take longer than 
+  30 seconds an additional message is logged to indicate how long was actually spent, which makes it easier to debug 
+  tests that sometimes timeout and sometimes complete just before they would have timed out. All of this new 
+  functionality only applies if you have ``verboseWaitForGrep=true`` so will not affect existing projects, but this 
+  is now enabled for newly created projects.  
+
+- `BaseTest.waitForGrep` (and `BaseTest.waitForSignal`) now has a ``detailMessage`` parameter that can 
+  be used to provide some extra information to explain more about the wait condition. 
+
+- All ``assertXXX`` methods in `BaseTest` now return a value to indicate the result of the assertion. In most 
+  cases this is a boolean ``True``/``False``. This creates an opportunity to gather or log additional diagnostic 
+  information (e.g. using `BaseTest.logFileContents`) after an assertion fails. 
+
+- Regular expression behaviour can now be customized by a ``reFlags=`` parameter on methods such as 
+  `BaseTest.assertGrep`, `BaseTest.waitForGrep`, etc. This allows for ignoring case, and use of verbose regular 
+  expression syntax, for example::
+  
+    self.assertGrep('myserver.log', reFlags=re.VERBOSE | re.IGNORECASE, expr=r\"""
+      in\   
+      \d +  # the integral part
+      \.    # the decimal point
+      \d *  # some fractional digits
+      \ seconds\. # in verbose regex mode we escape spaces with a slash
+      \""")
+
+- `BaseTest.assertDiff` now has colour-coding of the added/removed lines when logging a diff to the console on failure. 
 
 - `BaseTest.assertDiff` usability was improved by including the relative path to each file 
   in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
@@ -31,12 +116,16 @@ Miscellaneous new features
   then afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
   committing. 
 
-- All ``assertXXX`` methods in `BaseTest` now return a value to indicate the result of the assertion. In most 
-  cases this is a boolean ``True``/``False``, though some methods such as ``assertGrep`` return the matching string 
-  (or ``None``). This creates an opportunity to gather or log additional diagnostic information (e.g. using 
-  `BaseTest.logFileContents`) after an assertion fails. 
+Improvements to the ``pysys.py`` tool
+-------------------------------------
+- PySys now supports v3.8 of Python. 
 
-- ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
+- Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
+  PySys was run from. 
+
+New project options
+-------------------
+- The ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
   used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
   for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
   ``Project Help`` heading is automatically added if no other heading is present, and PySys will intelligently add or 
@@ -46,16 +135,31 @@ Miscellaneous new features
   `BaseTest.assertDiff` ignores whitespace (and blank lines at the end of a file). The recommended 
   value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
   is True. 
-  
-- The `BaseTest.assertEval` method now allows ``evalstring`` to make use of some additional standard Python 
-  modules such as ``math`` and ``re``. It is also possible to use ``import_module`` to dynamically import additional 
-  modules from within an ``evalstring``. 
 
+- The ``<property name=.../>`` and ``<property file=.../>`` elements have a new optional attribute 
+  called ``pathMustExist="true/false"`` that can be set to true to indicate that the project should not load (and no 
+  tests be run) if the .properties file does not exist, or in the case of ``<property name=.../>``, if the property 
+  value does not exist (either as an absolute path or as a path relative to the project root directory). We recommend 
+  setting using ``pathMustExist`` on all ``<property file=.../>`` elements to be explicit about whether the file is 
+  optional or mandatory. 
 
-Improvements to the ``pysys.py`` command line tool
---------------------------------------------------
-- Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
-  PySys was run from. 
+- ``<pythonpath>`` can now be used (and is recommended) instead of ``<path>`` to add items to the PYTHONPATH. There is 
+  no plan to remove support for ``<path>`` but this should increase clarity for new users. 
+
+Port allocation improvements
+----------------------------
+
+- `BaseTest.getNextAvailableTCPPort` and `BaseTest.waitForSocket` now support IPv6, via the new 
+  ``socketAddressFamily`` argument (IPv4 remains the default). It is also possible now to control which host 
+  address/interface is used to check that an allocated port isn't in use using the new ``hosts`` argument. 
+
+- A new environment variable ``PYSYS_PORTS=minport-maxport,port,...`` can be used to override the set of possible 
+  server ports allocated from `BaseTest.getNextAvailableTCPPort()`. This avoids the usual logic which uses 
+  `pysys.utils.portalloc.getEphemeralTCPPortRange()` to detect the local/client-side ports which should be avoided 
+  for server-side use. In addition, the default behaviour of getEphemeralTCPPortRange has changed on Linux, so that 
+  if ``/proc/sys/net/ipv4/ip_local_port_range`` is missing, PySys will fall back to using the default IANA ephemeral 
+  port range (with a warning). This makes it possible to use PySys in environments such as 
+  Windows Subsystem for Linux (WSL) v1 which may not have the usual Linux network stack. 
 
 Bug fixes
 ---------
@@ -67,14 +171,68 @@ Bug fixes
 
 - Fixed bug in which ``BaseTest.assertDiff`` was not logging the diff to the console after a failure. 
 
+- Fixed bug in which a ``pysysdirconfig.xml`` in the same directory as a ``pysysproject.xml`` would be read twice, 
+  potentially resulting in duplicated a ``id-prefix``.
+
+- Fixed some bugs in the selection of test ids on the command line. Now we always prefer an exact match over any 
+  possible suffix matches, and give an error if there are multiple matching suffixes rather than just picking one.
+
+- Fixed 1.5.0 bug in which a ``-Xkey=value`` command line value of ``1`` or ``0`` would be converted to a boolean 
+  True or False value instead of an int, when the `BaseTest` object has a field named ``key`` of type int.
+
+- Fixed reading .properties file values that contain an equals ``=`` symbol. 
+
+- Changed `BaseTest.getNextAvailableTCPPort` to check the allocated port isn't in use on ``localhost`` (previously 
+  we only checked ``INADDR_ANY`` which doesn't include the ``localhost`` interface). 
+
 Upgrade guide and compatibility
 -------------------------------
-This is a minor release so is not expected to break existing tests, however we always recommend reading the notes 
-below and running your tests with the new version before upgrading just in case.
+This is a minor release so is not expected to break existing tests, however we recommend reading the notes 
+below and making any 'recommended' changes at a convenient time after upgrading (to avoid problems in future major 
+upgrades), and also running your tests with the new version before upgrading to confirm everything still works as 
+expected.
 
-- Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to set this to False in 
-  your ``pysysproject.xml`` file, but it is likely some test reference files may need fixing, so the default value is 
-  True which maintains pre-1.5.1 behaviour.
+- Default project property ``defaultAssertDiffStripWhitespace`` was added. It is recommended to add this to 
+  your ``pysysproject.xml`` file set to false, but it is likely some test reference files may need fixing, so the 
+  default value is True which maintains pre-1.5.1 behaviour.
+
+- `BaseTest.waitForSignal()` is now just an alias for the newly added `BaseTest.waitForGrep()`, which is the 
+  preferred method to use for waiting until a regular expression is found in a file. This is a bit of API cleanup that 
+  provides consistency with widely-used `BaseTest.assertGrep()`, and increases clarity for new users who could 
+  otherwise be unsure of the meaning of the term "signal". 
+  
+  The two methods are identical except for a small usability improvement in the method signature to avoid a common 
+  mistake in which the (rarely used, and never needed) ``filedir`` was given a prominent position as the second 
+  positional argument and therefore sometimes incorrectly given the value intended for the ``expr`` expression to be 
+  searched, as can be seen from the two signatures::
+  
+    def waitForSignal( self, file, filedir, expr='', ... )
+    def waitForGrep(   self, file, expr='', ..., filedir=None )
+	
+  In the new waitForGrep method, ``filedir`` can only be specified as a ``filedir=`` keyword argument, permitting the 
+  more natural positional usage::
+  
+    self.waitForGrep('file', 'expr', ...)
+  
+  There is no plan to actually remove waitForSignal, however in the interests of consistency we'd recommend doing a 
+  find-replace ``self.waitForSignal -> self.waitForGrep`` on your tests at a convenient time, bearing in mind that it 
+  could result in test failures in the unlikely event you are setting ``filedir`` and doing so positionally rather 
+  than with ``filedir=``.
+  
+  If you use the ``verboseWaitForSignal`` project property, we recommend you transition to the new 
+  ``verboseWaitForGrep`` property, though both work on both methods for now. 
+
+- In `BaseTest.startProcess()`, ``background=True/False`` has been added as an alternative and simpler equivalent of 
+  ``state=BACKGROUND``. It is preferred to use ``background=True`` in new tests (although there is no plan to 
+  remove ``state`` so it is not mandatory to change existing tests). 
+
+- The global namespace available for use in eval() methods such as `BaseTest.assertThat`, `BaseTest.assertEval`, 
+  `BaseTest.assertLineCount` and `BaseTest.waitForGrep` has been cut down to remove some functions and modules 
+  (e.g. ``filegrep``) that no-one is likely to be using. If you find you need anything that is no longer available, 
+  just use ``import_module('modulename').member`` in your eval string to add it, but it is highly unlikely this will 
+  affect anyone as none of the removed symbols were documented. Also `BaseTest.assertEval` is deprecated in 
+  favour of `BaseTest.assertThat` which provides more powerful capabilities (note that `BaseTest.assertThat` was itself 
+  previously deprecated, but after recent changes is now the preferred way to perform general-purpose assertions). 
 
 - There are some deprecations in this release, to remove some items that no-one is likely to be using from the API. 
   We encourage users to check for and remove any references to the following to be ready for future removal:
@@ -87,11 +245,6 @@ below and running your tests with the new version before upgrading just in case.
    - ``pysys.xml.descriptor.XMLDescriptorParser`` (replaced by `pysys.xml.descriptor.DescriptorLoader`)
    - ``pysys.xml.descriptor.XMLDescriptorContainer`` (replaced by `pysys.xml.descriptor.TestDescriptor`)
    - ``pysys.xml.descriptor.XMLDescriptorCreator`` and ``DESCRIPTOR_TEMPLATE`` (create descriptors manually if needed) 
-
-- The global namespace available for use from `BaseTest.assertEval` has been cut down to remove some 
-  functions and modules such as ``filegrep`` that no-one is likely to be using. If you find you 
-  need anything that is no longer available, just use ``import_module`` in your eval string to add it, but it is highly 
-  unlikely this will affect anyone. 
 
 ---------------
 Release History

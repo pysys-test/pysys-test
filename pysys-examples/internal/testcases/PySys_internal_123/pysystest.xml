@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto">
+    
+  <description> 
+    <title>Port allocation - ephemeral port detection and PYSYS_PORTS override</title>    
+    <purpose><![CDATA[]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

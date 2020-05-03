@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -209,6 +209,8 @@ LOG_TIMEOUTS = 'timed out'
 LOG_FAILURES = 'failed'
 LOG_PASSES = 'passed'
 LOG_SKIPS = 'skipped'
+LOG_DIFF_ADDED = 'diff+'
+LOG_DIFF_REMOVED = 'diff-'
 LOG_END = 'end'
 
 class PrintLogs(Enum):
