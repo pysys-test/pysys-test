@@ -251,7 +251,8 @@ class BaseRunner(ProcessUser):
 	def setup(self):
 		"""Setup method which may optionally be overridden to perform custom setup operations prior to execution of a set of testcases.
 		
-		Always ensure you call the super implementation of setup() before adding any custom logic. 
+		Always ensure you call the super implementation of setup() before adding any custom logic, using
+		``super(MY_RUNNER_CLASS_HERE, self).setup()``. 
 		
 		"""
 		pass

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2019 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
 
 
 """
-Contains L{pysys.process.user.ProcessUser} which supports using processes from PySys, and provides the 
-shared functionality of subclasses L{pysys.basetest.BaseTest} and L{pysys.baserunner.BaseRunner}. 
+Contains `pysys.process.user.ProcessUser` which supports using processes from PySys, and provides the 
+shared functionality of subclasses `pysys.basetest.BaseTest` and `pysys.baserunner.BaseRunner`. 
 """
 
 import time, collections, inspect, locale, fnmatch, sys
@@ -1007,7 +1007,7 @@ class ProcessUser(object):
 
 
 	def addCleanupFunction(self, fn):
-		""" Registers a function that will be called as part of the cleanup of this object.
+		""" Registers a function that will be called as part of the `cleanup` of this object.
 		
 		Cleanup functions should have no arguments, and are invoked in reverse order with the most recently added first (LIFO), and
 		before the automatic termination of any remaining processes associated with this object.
@@ -1021,11 +1021,11 @@ class ProcessUser(object):
 
 
 	def cleanup(self):
-		""" Cleanup function that frees resources managed by this object. 
+		""" Tear down function that frees resources managed by this object. 
 
-		Should be called exactly once by the owner of teh ProcessUser when this object is no longer needed. 
+		Should be called exactly once by the owner of this object when is no longer needed. 
 		
-		Do not override this method, instead use L{addCleanupFunction}.
+		Do not override this method, instead use `addCleanupFunction`.
 		
 		"""
 		try:
