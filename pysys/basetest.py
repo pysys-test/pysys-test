@@ -585,19 +585,22 @@ class BaseTest(ProcessUser):
 			# use repr if it's a string so we get escaping, other data structures are best using normal str()
 			displayvalues[-1]+='=%s'%(repr(v) if isstring(v) else str(v))
 			namedvalues[k] = v
+
+		if args: # yucky old-style mechanism
+			try:
+				conditionstring = conditionstring % args
+			except Exception as e:
+				self.addOutcome(BLOCKED, 'Failed to substitute unnamed/positional arguments into %r using %% operator; this feature is deprecated, please use named arguments instead, e.g. assertThat("...", expected=..., actual=...)'%conditionstring, abortOnError=abortOnError)
+				return False
 		
 		displayvalues = ' with '+', '.join(displayvalues) if displayvalues else ''
 		try:
-			conditionstring = conditionstring
-			if args: # yucky old-style mechanism
-				conditionstring = conditionstring % args
-
 			namespace = dict(namedvalues)
 			namespace['self'] = self
 			result = bool(pysys.internal.safe_eval.safe_eval(conditionstring, extraNamespace=namespace))
 
 		except Exception as e:
-			self.addOutcome(BLOCKED, 'Failed to evaluate (%s)%s: %r'%(conditionstring, displayvalues, e), abortOnError=abortOnError)
+			self.addOutcome(BLOCKED, 'Failed to evaluate (%s)%s - %s: %s'%(conditionstring, displayvalues, e.__class__.__name__, e), abortOnError=abortOnError)
 			return False
 		
 		assertMessage = assertMessage or ('Assert that (%s)%s'%(conditionstring, displayvalues))
