@@ -88,7 +88,7 @@ Assertion and waitForGrep improvements
   cases this is a boolean ``True``/``False``. This creates an opportunity to gather or log additional diagnostic 
   information (e.g. using `BaseTest.logFileContents`) after an assertion fails. 
 
-- Regular expression behaviour can now be customed by a ``reFlags=`` parameter on methods such as 
+- Regular expression behaviour can now be customized by a ``reFlags=`` parameter on methods such as 
   `BaseTest.assertGrep`, `BaseTest.waitForGrep`, etc. This allows for ignoring case, and use of verbose regular 
   expression syntax, for example::
   
