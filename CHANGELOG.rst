@@ -182,6 +182,8 @@ Bug fixes
 
 - Fixed reading .properties file values that contain an equals ``=`` symbol. 
 
+- Replace new line characters in test outcome reasons to avoid confusing tools. 
+
 - Changed `BaseTest.getNextAvailableTCPPort` to check the allocated port isn't in use on ``localhost`` (previously 
   we only checked ``INADDR_ANY`` which doesn't include the ``localhost`` interface). 
 

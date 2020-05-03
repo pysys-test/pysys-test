@@ -1135,7 +1135,7 @@ class ProcessUser(object):
 					# messages and test outcome reasons don't get swallowed, add a 
 					# workaround for this here. Not a problem in python 3. 
 					outcomeReason = outcomeReason.decode('ascii', errors='replace')
-				outcomeReason = outcomeReason.strip().replace(u'\t', u' ')
+				outcomeReason = outcomeReason.strip().replace(u'\t', u' ').replace('\r','').replace('\n', ' ; ')
 			
 			if override: 
 				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', [LOOKUP[o] for o in self.outcome], self.__outcomeReason)
