@@ -17,6 +17,12 @@ Miscellaneous new features
 --------------------------
 - PySys now supports v3.8 of Python. 
 
+- PySys now uses Sphinx to build its documentation (instead of epydoc), and new content has also been written resulting 
+  in a significantly larger set of HTML documentation that is also easier to navigate, and brings together 
+  the detailed API reference with information on usage and how to get started with PySys. The main ``.rst`` 
+  documentation source files are shipped inside the binary distribution of PySys so that users can view and 
+  potentially even re-package the documentation combined with their own extensions. 
+
 - `BaseTest.assertThat` has been radically overhauled with a powerful mechanism that uses named parameters (e.g. 
   ``actual=`` and ``expected=``) to produce self-describing log messages and outcome reasons, and even the ability to 
   evaluate arbitrary Python expressions in the parameters, for example::
