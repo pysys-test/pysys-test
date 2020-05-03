@@ -887,6 +887,14 @@ class ProcessUser(object):
 		The message(s) logged when there is a successful wait can be controlled with the project 
 		property ``verboseWaitForGrep=true/false`` (or equivalently, ``verboseWaitForSignal``); for best visibility 
 		into what is happening set this property to true in your ``pysysproject.xml``. 
+		
+		You can extract information from the matched expression, optionally perform assertions on it, by 
+		using one or more ``(?P<groupName>...)`` named groups in the expression. A common 
+		pattern is to unpack the resulting dict using ``**kwargs`` syntax and pass to `BaseTest.assertThat`. For 
+		example::
+
+			self.assertThat('username == expected', expected='myuser',
+				**self.waitForGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
 
 		.. versionadded:: 1.5.1
 
@@ -927,10 +935,16 @@ class ProcessUser(object):
 			Added in v1.5.1. 
 			
 		:param str filedir: Can be used to provide a directory name to add to the beginning of the ``file`` parameter; 
-			however usually it is clearer just to specify that directory in the ``file``
+			however usually it is clearer just to specify that directory in the ``file``.
 		
-		:return: A list of the ``expr`` regular expression match objects.
-		:rtype: list[re.Match]
+		:return list[re.Match]: Usually this returns a list of ``re.Match`` objects found for the ``expr``, or an 
+			empty list if there was no match.
+		
+			If the expr contains any ``(?P<groupName>...)`` named groups, and assuming the condition still the 
+			default of ">=1" (i.e. not trying to find multiple matches), then a dict is returned 
+			containing ``dict(groupName: str, matchValue: str or None)`` (or an empty ``{}`` dict if there is no match) 
+			which allows the result to be passed to `assertThat` for further checking of the matched groups (typically 
+			unpacked using the ``**`` operator; see example above). 
 		"""
 		assert expr, 'expr= argument must be specified'
 		assert '\n' not in expr, 'expr= cannot contain multiple lines'
@@ -959,6 +973,11 @@ class ProcessUser(object):
 		
 		encoding = encoding or self.getDefaultFileEncoding(f)
 		
+		# If condition was customized (typically to be more than 1) named groups mode isn't so useful since there would 
+		# be multiple matches, so restrict it to 1 which is the common case anyway. 
+		compiled = re.compile(expr)
+		namedGroupsMode = compiled.groupindex and condition.replace(' ','')=='>=1'
+
 		timetaken = time.time()
 		while 1:
 			if pathexists(f):
@@ -971,7 +990,7 @@ class ProcessUser(object):
 					if verboseWaitForSignal:
 						(log.info if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
 					else:
-						# We use the phrase "grep signal" to make it clear whether people used waitForGrep or the older waitForSignal
+						# We use the phrase "grep signal" to avoid misleading anyone, whether people used waitForGrep or the older waitForSignal
 						log.info("Wait for grep signal in %s completed successfully", file)
 					break
 				
@@ -983,7 +1002,7 @@ class ProcessUser(object):
 							msg = '%s found while %s'%(quotestring(err), msg)
 							# always report outcome for this case; additionally abort if requested to
 							self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
-							return matches
+							return {} if namedGroupsMode else matches
 				
 			currentTime = time.time()
 			if currentTime > startTime + timeout:
@@ -1005,6 +1024,8 @@ class ProcessUser(object):
 				break
 
 			time.sleep(poll)
+		if namedGroupsMode:
+			return {} if not matches else matches[0].groupdict()
 		return matches
 
 

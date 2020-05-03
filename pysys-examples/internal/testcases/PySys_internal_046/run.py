@@ -56,6 +56,12 @@ class PySysTest(BaseTest):
 		
 		self.assertThat('username == expected', expected='myuser',
 			**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+			
+		# this is a convenient place to test that waitForGrep behaves the same way
+		self.assertThat('username == expected', expected='myuser',
+			**self.waitForGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
+		self.assertThat('result == {}', 
+			result=self.waitForGrep('myserver.log', expr=r'NO MATCH authenticated user "(?P<username>[^"]*)"', timeout=0.01, abortOnError=False))
 
 		self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
 			**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*" in (?P<authSecs>[^ ]+) seconds\.'))

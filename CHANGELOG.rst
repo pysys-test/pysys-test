@@ -64,6 +64,9 @@ Miscellaneous new features
     
     self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
       **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+ 
+  `BaseTest.waitForGrep` has the same dictionary return value when given a regular expression with named groups, so 
+  the above trick can also be used during execution of the test when convenient. 
 
 - All ``assertXXX`` methods in `BaseTest` now return a value to indicate the result of the assertion. In most 
   cases this is a boolean ``True``/``False``. This creates an opportunity to gather or log additional diagnostic 
