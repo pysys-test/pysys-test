@@ -319,6 +319,10 @@
 	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 	
 	<project-help>
-		<!-- Add project-specific text to be appended to the "pysys run -h". -->
+		<!-- Add project-specific text to be appended to the "pysys run -h". 
+		
+		You can use ${...} project properties, or ${$} to escape the $ character. 
+		
+		-->
 	</project-help>
 </pysysproject>

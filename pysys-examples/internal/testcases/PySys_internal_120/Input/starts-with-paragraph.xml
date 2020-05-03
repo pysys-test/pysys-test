@@ -1,11 +1,14 @@
 <pysysproject>
+
+	<property name="myProp" value="My property value"/>
+
 	<project-help>
 	 
 		<!-- starts with some tabs-->
 		
 		
 		 This is some information
-		 about the project with 
+		 about the project with ${$}{myProp}=${myProp}, 
 		   an indented line and
   a line without much indentation and
 

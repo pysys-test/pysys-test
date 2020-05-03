@@ -577,6 +577,11 @@ class Project(object):
 				self.collectTestOutput = parser.getCollectTestOutputDetails()
 				
 				self.projectHelp = parser.getProjectHelp()
+				def expandProperty(m):
+					m = m.group(1)
+					if m == '$': return '$'
+					return properties[m] # expand ${...} property in project help
+				self.projectHelp = re.sub(r'[$][{]([^}]+)[}]', expandProperty, self.projectHelp)
 				
 				# set the data attributes
 				parser.unlink()
