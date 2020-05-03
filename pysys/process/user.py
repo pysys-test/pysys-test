@@ -36,6 +36,7 @@ from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe
 from pysys.utils.pycompat import *
 from pysys.utils.stringutils import compareVersions
+import pysys.internal.safe_eval
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 """
@@ -391,7 +392,7 @@ class ProcessUser(object):
 			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
 			process.start()
 			if state == FOREGROUND:
-				correctExitStatus = eval('%d %s'%(process.exitStatus, expectedExitStatus))
+				correctExitStatus = pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
 				
 				logmethod = log.info if correctExitStatus else log.warn
 				if quiet: logmethod = log.debug
@@ -501,7 +502,8 @@ class ProcessUser(object):
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location
 		if getattr(self.project, 'defaultEnvironsTempDir',None)!=None:
-			tempDir = eval(self.project.defaultEnvironsTempDir)
+			tempDir = pysys.internal.safe_eval.safe_eval(self.project.defaultEnvironsTempDir, extraNamespace={'self':self})
+			
 			self.mkdir(tempDir)
 			if IS_WINDOWS: # pragma: no cover
 				e['TEMP'] = e['TMP'] = os.path.normpath(tempDir)
@@ -989,7 +991,8 @@ class ProcessUser(object):
 		while 1:
 			if pathexists(f):
 				matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags)
-				if eval("%d %s" % (len(matches), condition)):
+
+				if pysys.internal.safe_eval.safe_eval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
 					timetaken = time.time()-timetaken
 					# Old-style/non-verbose behaviour is to log only after complete, 
 					# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time

@@ -1169,7 +1169,7 @@ class BaseTest(ProcessUser):
 			msg = assertMessage or ('Line count on %s for %s%s '%(file, quotestring(expr), condition))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
-			if (eval("%d %s" % (numberLines, condition))):
+			if (pysys.internal.safe_eval.safe_eval("%d %s" % (numberLines, condition), extraNamespace={'self':self})):
 				msg = assertMessage or ('Line count on input file %s' % file)
 				self.addOutcome(PASSED, msg)
 				return True
