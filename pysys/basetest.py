@@ -928,7 +928,6 @@ class BaseTest(ProcessUser):
 			compiled = re.compile(expr)
 			namedGroupsMode = compiled.groupindex
 			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f))
-			if result is None and re.compile(expr).groupindex: noMatchButHasNamedGroups = True
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
