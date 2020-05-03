@@ -778,36 +778,38 @@ class ProcessUser(object):
 			else:
 				import fcntl
 				fcntl.fcntl(s.fileno(), fcntl.F_SETFD, 1)
-		# TODO: close socket
-		startTime = time.time()
-		while True:
-			try:
-				s.connect((host, port))
-				s.shutdown(socket.SHUT_RDWR)
-				
-				log.debug("Wait for socket creation completed successfully")
-				if time.time()-startTime>10:
-					log.info("Wait for socket creation completed after %d secs", time.time()-startTime)
-				return True
-			except socket.error:
-				if process and not process.running():
-					msg = "Waiting for socket connection aborted due to unexpected process %s termination"%(process)
-					if abortOnError:
-						self.abort(BLOCKED, msg, self.__callRecord())
-					else:
-						log.warn(msg)
-					return False
-
-				if timeout:
-					currentTime = time.time()
-					if currentTime > startTime + timeout:
-						msg = "Timed out waiting for creation of socket after %d secs"%(time.time()-startTime)
+		try:
+			startTime = time.time()
+			while True:
+				try:
+					s.connect((host, port))
+					s.shutdown(socket.SHUT_RDWR)
+					
+					log.debug("Wait for socket creation completed successfully")
+					if time.time()-startTime>10:
+						log.info("Wait for socket creation completed after %d secs", time.time()-startTime)
+					return True
+				except socket.error:
+					if process and not process.running():
+						msg = "Waiting for socket connection aborted due to unexpected process %s termination"%(process)
 						if abortOnError:
-							self.abort(TIMEDOUT, msg, self.__callRecord())
+							self.abort(BLOCKED, msg, self.__callRecord())
 						else:
 							log.warn(msg)
 						return False
-			time.sleep(0.01)
+
+					if timeout:
+						currentTime = time.time()
+						if currentTime > startTime + timeout:
+							msg = "Timed out waiting for creation of socket after %d secs"%(time.time()-startTime)
+							if abortOnError:
+								self.abort(TIMEDOUT, msg, self.__callRecord())
+							else:
+								log.warn(msg)
+							return False
+				time.sleep(0.01)
+		finally:
+			s.close()
 
 
 	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile'], abortOnError=None):
