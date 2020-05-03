@@ -133,7 +133,7 @@
 	the path is treated as absolute, e.g. to add the src directory to the python path at runtime 
 	use;
 	
-	<path value="./src" relative="true" />
+	<pythonpath value="./src" relative="true" />
 	-->
 
 
@@ -168,8 +168,8 @@
 	code for the distributed writers). If no writer is specified in the project file, the 
 	XMLResultsWriter is used. 
 	
-	The writer tag details the classname (which should be added to the pythonpath using the 
-	path tag) and the module of the writer class. Where single file output is produced by the 
+	The writer tag details the classname (which should be added to the pythonpath)
+	and the module of the writer class. Where single file output is produced by the 
 	writer, the optional filename attribute is used to denote the filename template for the output 
 	logging. The filename template is processed through time.strftime so that time information can 
 	be set into the filename, e.g. a filename template of 'testsummary-%Y%m%d%H%M%S.xml' will result 

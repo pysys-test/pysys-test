@@ -125,7 +125,7 @@ Improvements to the ``pysys.py`` tool
 
 New project options
 -------------------
-- ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
+- The ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
   used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
   for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
   ``Project Help`` heading is automatically added if no other heading is present, and PySys will intelligently add or 
@@ -136,12 +136,15 @@ New project options
   value is False, but to maintain compatibility with existing projects the default if not specified in the project file 
   is True. 
 
-- ``pysysproject.xml`` ``<property name=.../>`` and ``<property file=.../>`` elements have a new optional attribute 
+- The ``<property name=.../>`` and ``<property file=.../>`` elements have a new optional attribute 
   called ``pathMustExist="true/false"`` that can be set to true to indicate that the project should not load (and no 
   tests be run) if the .properties file does not exist, or in the case of ``<property name=.../>``, if the property 
   value does not exist (either as an absolute path or as a path relative to the project root directory). We recommend 
   setting using ``pathMustExist`` on all ``<property file=.../>`` elements to be explicit about whether the file is 
   optional or mandatory. 
+
+- ``<pythonpath>`` can now be used (and is recommended) instead of ``<path>`` to add items to the PYTHONPATH. There is 
+  no plan to remove support for ``<path>`` but this should increase clarity for new users. 
 
 Port allocation improvements
 ----------------------------

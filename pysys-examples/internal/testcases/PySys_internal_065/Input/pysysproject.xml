@@ -9,7 +9,7 @@
 
 	<property name="perfparent" value="perfsummary"/>
 
-	<path value="${root}/extrapath"/>
+	<pythonpath value="${root}/extrapath"/>
 	<performance-reporter classname="CustomPerfReporter" module="mypkg.customperf" summaryfile="${perfparent}/@OUTDIR@_@TESTID@_perf_@HOSTNAME@_@DATE@_${startTime}.csv"/>
 	
 </pysysproject>

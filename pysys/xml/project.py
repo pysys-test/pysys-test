@@ -405,23 +405,24 @@ class XMLProjectParser(object):
 		
 
 	def addToPath(self):		
-		pathNodeList = self.root.getElementsByTagName('path')
+		for elementname in ['path', 'pythonpath']:
+			pathNodeList = self.root.getElementsByTagName(elementname)
 
-		for pathNode in pathNodeList:
-				raw = self.expandFromEnvironent(pathNode.getAttribute("value"), "")
-				value = self.expandFromProperty(raw, "")
-				relative = pathNode.getAttribute("relative")
-				if not value: 
-					log.warn('Cannot add directory to the python <path>: "%s"', raw)
-					continue
+			for pathNode in pathNodeList:
+					raw = self.expandFromEnvironent(pathNode.getAttribute("value"), "")
+					value = self.expandFromProperty(raw, "")
+					relative = pathNode.getAttribute("relative")
+					if not value: 
+						log.warn('Cannot add directory to the python <path>: "%s"', raw)
+						continue
 
-				if relative == "true": value = os.path.join(self.dirname, value)
-				value = os.path.normpath(value)
-				if not os.path.isdir(value): 
-					log.warn('Cannot add non-existent directory to the python <path>: "%s"', value)
-				else:
-					log.debug('Adding value to path ')
-					sys.path.append(value)
+					if relative == "true": value = os.path.join(self.dirname, value)
+					value = os.path.normpath(value)
+					if not os.path.isdir(value): 
+						log.warn('Cannot add non-existent directory to the python <path>: "%s"', value)
+					else:
+						log.debug('Adding value to path ')
+						sys.path.append(value)
 
 
 	def writeXml(self):

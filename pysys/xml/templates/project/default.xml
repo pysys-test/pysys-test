@@ -20,7 +20,7 @@
 
 	<!-- Custom test framework extensions, if needed -->
 	<!--
-	<path value="../framework" relative="true" />
+	<pythonpath value="../framework" relative="true" />
 	<runner classname="MyRunner" module="my.organization"/>
 	<maker classname="MyTestMaker" module="my.organization"/>
 	-->
