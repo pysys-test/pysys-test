@@ -72,6 +72,18 @@ Miscellaneous new features
   cases this is a boolean ``True``/``False``. This creates an opportunity to gather or log additional diagnostic 
   information (e.g. using `BaseTest.logFileContents`) after an assertion fails. 
 
+- Regular expression behaviour can now be customed by a ``reFlags=`` parameter on methods such as 
+  `BaseTest.assertGrep`, `BaseTest.waitForGrep`, etc. This allows for ignoring case, and use of verbose regular 
+  expression syntax, for example::
+  
+    self.assertGrep('myserver.log', reFlags=re.VERBOSE | re.IGNORECASE, expr=r\"""
+      in\   
+      \d +  # the integral part
+      \.    # the decimal point
+      \d *  # some fractional digits
+      \ seconds\. # in verbose regex mode we escape spaces with a slash
+      \""")
+
 - `BaseTest.assertDiff` usability was improved by including the relative path to each file 
   in the assertion messages, so you can now use the same basename for the file to be compared and the reference 
   file without losing track of which is which. This also makes it easier to manually diff the output directory against 

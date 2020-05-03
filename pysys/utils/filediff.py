@@ -30,7 +30,7 @@ from pysys.utils.fileutils import pathexists
 
 log = logging.getLogger('pysys.assertions')
 
-def trimContents(contents, expressions, exclude=True):
+def trimContents(contents, expressions, exclude=True, flags=0):
 	"""Reduce a list of strings based by including/excluding lines which match any of a set of regular expressions, returning the processed list.
 	
 	The method reduces an input list of strings based on whether each string matches or does not match a 
@@ -47,7 +47,7 @@ def trimContents(contents, expressions, exclude=True):
 	
 	regexp = []
 	for i in range(0, len(expressions)):
-		regexp.append(re.compile(expressions[i]))
+		regexp.append(re.compile(expressions[i], flags=flags))
 	
 	list = copy.deepcopy(contents)
 	for i in range(0, len(contents)):
@@ -64,7 +64,7 @@ def trimContents(contents, expressions, exclude=True):
 
 
 
-def replace(list, replacementList):
+def replace(list, replacementList, flags=0):
 	"""Replace all occurrences of keyword values in a list of strings with a set value, returning the processed list.
 	
 	The replacementList parameter should contain a list of tuples to use in the replacement, e.g. 
@@ -77,7 +77,7 @@ def replace(list, replacementList):
 	
 	"""
 	for pair in replacementList:
-		regexp = re.compile(pair[0])
+		regexp = re.compile(pair[0], flags=flags)
 		for j in range(0, len(list)):
 			list[j] = re.sub(regexp, pair[1], list[j])
 
@@ -99,7 +99,7 @@ def logContents(message, list):
 
 
 
-def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None, encoding=None, stripWhitespace=True):
+def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[], unifiedDiffOutput=None, encoding=None, stripWhitespace=True, flags=0):
 	"""Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.
 	
 	The method reads in the files and loads the contents of each as a list of strings. The two files are 
@@ -141,12 +141,12 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 		with openfile(file2, 'r', encoding=encoding) as f:
 			list2 = [i.strip(stripchars) for i in f]
 		
-		list1 = trimContents(list1, ignore, exclude=True)
-		list2 = trimContents(list2, ignore, exclude=True)
-		list1 = trimContents(list1, include, exclude=False)
-		list2 = trimContents(list2, include, exclude=False)
-		list1 = replace(list1, replacementList)
-		list2 = replace(list2, replacementList)
+		list1 = trimContents(list1, ignore, exclude=True, flags=flags)
+		list2 = trimContents(list2, ignore, exclude=True, flags=flags)
+		list1 = trimContents(list1, include, exclude=False, flags=flags)
+		list2 = trimContents(list2, include, exclude=False, flags=flags)
+		list1 = replace(list1, replacementList, flags=flags)
+		list2 = replace(list2, replacementList, flags=flags)
 		if sort:
 			list1.sort()
 			list2.sort()

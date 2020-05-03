@@ -861,7 +861,8 @@ class ProcessUser(object):
 		return self.waitForGrep(file, expr=expr, filedir=filedir, **waitForGrepArgs)
 			
 	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
-			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None, detailMessage='', filedir=None):
+			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None, detailMessage='', filedir=None, 
+			reFlags=0):
 		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
 		directory (waitForGrep was formerly known as `waitForSignal`).
 		
@@ -933,10 +934,16 @@ class ProcessUser(object):
 		:param str detailMessage: An extra string to add to the message logged when waiting to provide extra 
 			information about the wait condition. e.g. ``logSuffix='(downstream message received)'``. 
 			Added in v1.5.1. 
+
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
 			
 		:param str filedir: Can be used to provide a directory name to add to the beginning of the ``file`` parameter; 
 			however usually it is clearer just to specify that directory in the ``file``.
-		
+
 		:return list[re.Match]: Usually this returns a list of ``re.Match`` objects found for the ``expr``, or an 
 			empty list if there was no match.
 		
@@ -975,13 +982,13 @@ class ProcessUser(object):
 		
 		# If condition was customized (typically to be more than 1) named groups mode isn't so useful since there would 
 		# be multiple matches, so restrict it to 1 which is the common case anyway. 
-		compiled = re.compile(expr)
+		compiled = re.compile(expr, flags=reFlags)
 		namedGroupsMode = compiled.groupindex and condition.replace(' ','')=='>=1'
 
 		timetaken = time.time()
 		while 1:
 			if pathexists(f):
-				matches = getmatches(f, expr, encoding=encoding, ignores=ignores)
+				matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags)
 				if eval("%d %s" % (len(matches), condition)):
 					timetaken = time.time()-timetaken
 					# Old-style/non-verbose behaviour is to log only after complete, 
@@ -996,7 +1003,7 @@ class ProcessUser(object):
 				
 				if errorExpr:
 					for err in errorExpr:
-						errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores) # add .* to capture entire err msg for a better outcome reason
+						errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags) # add .* to capture entire err msg for a better outcome reason
 						if errmatches:
 							err = errmatches[0].group(0).strip()
 							msg = '%s found while %s'%(quotestring(err), msg)
@@ -1266,31 +1273,39 @@ class ProcessUser(object):
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
 
 
-	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None):
+	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0):
 		""" Searches for a regular expression in the specified file, and returns it. 
 
 		If the regex contains groups, the specified group is returned. If the expression is not found, an exception is raised,
-		unless getAll=True or returnNoneIfMissing=True. For example;
+		unless returnAll=True or returnNoneIfMissing=True. For example::
 
-		self.getExprFromFile('test.txt', 'myKey="(.*)"') on a file containing 'myKey="foobar"' would return "foobar"
-		self.getExprFromFile('test.txt', 'foo') on a file containing 'myKey=foobar' would return "foo"
+			self.getExprFromFile('test.txt', 'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
+			self.getExprFromFile('test.txt', 'foo') # on a file containing 'myKey=foobar' would return "foo"
 		
-		:param path: file to search (located in the output dir unless an absolute path is specified)
-		:param expr: the regular expression, optionally containing the regex group operator (...)
-		:param groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ['1'] meaning 
+		:param str path: file to search (located in the output dir unless an absolute path is specified)
+		:param str expr: the regular expression, optionally containing the regex group operator ``(...)``
+		:param List[int] groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ``[1]`` meaning 
 			the first group. If more than one group is specified, the result will be a tuple of group values, otherwise the
 			result will be the value of the group at the specified index.
-		:param returnAll: returns all matching lines if True, the first matching line otherwise.
-		:param returnNoneIfMissing: set this to return None instead of throwing an exception
+		:param bool returnAll: returns a list containing all matching lines if True, the first matching line otherwise.
+		:param bool returnNoneIfMissing: set this to return None instead of throwing an exception
 			if the regex is not found in the file
-		:param encoding: The encoding to use to open the file. 
+		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
+		:return: A List[List[str]] if returnAll=True and groups contains multiple groups, a List[str] if only one of 
+			those conditions is true, or else a simple str containing just the first match found. 
 		"""
 		with openfile(os.path.join(self.output, path), 'r', encoding=encoding or self.getDefaultFileEncoding(os.path.join(self.output, path))) as f:
 			matches = []
 			for l in f:
-				match = re.search(expr, l)
+				match = re.search(expr, l, flags=reFlags)
 				if not match: continue
 				if match.groups():
 					if returnAll: 
@@ -1308,7 +1323,7 @@ class ProcessUser(object):
 			raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
 
 
-	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, logFunction=None):
+	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, logFunction=None, reFlags=0):
 		""" Logs some or all of the lines in the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
@@ -1330,6 +1345,11 @@ class ProcessUser(object):
 			Usually this is ``self.log.info(u'  %s', line, extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS))``	
 			but a custom implementation can be provided, for example to provide a different color using 
 			`pysys.utils.logutils.BaseLogFormatter.tag`.
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
 
 		:return: True if anything was logged, False if not.
 		
@@ -1347,7 +1367,7 @@ class ProcessUser(object):
 			def matchesany(s, regexes):
 				assert not isstring(regexes), 'must be a list of strings not a string'
 				for x in regexes:
-					m = re.search(x, s)
+					m = re.search(x, s, flags=reFlags)
 					if m: return m.group(0)
 				return None
 			

@@ -822,7 +822,7 @@ class BaseTest(ProcessUser):
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
 	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, encoding=None, 
-			abortOnError=False, assertMessage=None):
+			abortOnError=False, assertMessage=None, reFlags=0):
 		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
 		This method searches through the specified text file until it finds a line matching the regular expression. 
@@ -837,7 +837,7 @@ class BaseTest(ProcessUser):
 			self.assertGrep('myserver.log', expr=' ERROR .*', contains=False)
 			
 			# in Python 3+, f-Strings can be used to substitute in parameters:
-			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{username}" in .* seconds\\.')
+			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{re.escape(username)}" in .* seconds\\.')
 			
 			# If you need to use ``\`` regular epression escapes use a raw string to avoid double-escaping
 			self.assertGrep('myserver.log', expr=r'c:\Foo\bar\.txt')
@@ -854,8 +854,20 @@ class BaseTest(ProcessUser):
 			self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
 				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
 		
+		The behaviour of the regular expression can be controlled using ``reFlags=``. For example, to perform 
+		case-insensitive matching and to use Python's verbose regular expression syntax which permits whitespace 
+		and comments::
+			
+			self.assertGrep('myserver.log', reFlags=re.VERBOSE | re.IGNORECASE, expr=r\"""
+				in\   
+				\d +  # the integral part
+				\.    # the decimal point
+				\d *  # some fractional digits
+				\ seconds\. # in verbose regex mode we escape spaces with a slash
+				\""")
+		
 		.. versionchanged:: 1.5.1
-			The return value was added in 1.5.1.
+			The return value and reFlags were added in 1.5.1.
 
 		:param file: The name or relative/absolute path of the file to be searched.
 		
@@ -891,7 +903,13 @@ class BaseTest(ProcessUser):
 			assertion in log messages and the outcome reason. 
 
 		:param str filedir: The directory of the file (defaults to the testcase output subdirectory); this is 
-			deprecated, as it's simpler to just include the .
+			deprecated, as it's simpler to just include the directory in the file parameter. 
+
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
 
 		:return: The ``re.Match`` object, or None if there was no match (note the return value is not affected by 
 			the contains=True/False parameter). 
@@ -925,9 +943,9 @@ class BaseTest(ProcessUser):
 		namedGroupsMode = False
 		log.debug("Performing %s contains=%s grep on file: %s", 'regex' if not literal else 'literal/non-regex', contains, f)
 		try:
-			compiled = re.compile(expr)
+			compiled = re.compile(expr, flags=reFlags)
 			namedGroupsMode = compiled.groupindex
-			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f))
+			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
@@ -967,7 +985,7 @@ class BaseTest(ProcessUser):
 		return result
 
 	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], encoding=None, 
-			abortOnError=False, assertMessage=None):
+			abortOnError=False, assertMessage=None, reFlags=0):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
@@ -990,7 +1008,13 @@ class BaseTest(ProcessUser):
 
 		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 				
-		
+
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
 		:return: The ``re.Match`` object, or None if there was no match (note the return value is not affected by 
 			the contains=True/False parameter). 
 			
@@ -1009,9 +1033,9 @@ class BaseTest(ProcessUser):
 		msg = assertMessage or ('Grep on last line of %s %s %s'%(file, 'contains' if contains else 'not contains', quotestring(expr)))
 		namedGroupsMode = False
 		try:
-			compiled = re.compile(expr)
+			compiled = re.compile(expr, flags=reFlags)
 			namedGroupsMode = compiled.groupindex
-			match = lastgrep(f, expr, ignores, includes, encoding=encoding or self.getDefaultFileEncoding(f), returnMatch=True)
+			match = lastgrep(f, expr, ignores, includes, encoding=encoding or self.getDefaultFileEncoding(f), returnMatch=True, flags=reFlags)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
@@ -1030,7 +1054,7 @@ class BaseTest(ProcessUser):
 
 
 	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, encoding=None, 
-			abortOnError=False, assertMessage=None):   
+			abortOnError=False, assertMessage=None, reFlags=0):   
 		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
 		
 		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome 
@@ -1061,6 +1085,12 @@ class BaseTest(ProcessUser):
 		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 
 		"""
@@ -1074,7 +1104,7 @@ class BaseTest(ProcessUser):
 		msg = assertMessage or ('Ordered grep on input file %s' % file)
 		expr = None
 		try:
-			expr = orderedgrep(f, exprList, encoding=encoding or self.getDefaultFileEncoding(f))
+			expr = orderedgrep(f, exprList, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
@@ -1096,7 +1126,7 @@ class BaseTest(ProcessUser):
 
 	
 	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, encoding=None, 
-			abortOnError=False, assertMessage=None):
+			abortOnError=False, assertMessage=None, reFlags=0):
 		"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -1118,6 +1148,12 @@ class BaseTest(ProcessUser):
 		:param assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""	
 		assert expr, 'expr= argument must be specified'
@@ -1126,7 +1162,7 @@ class BaseTest(ProcessUser):
 		f = os.path.join(filedir, file)
 
 		try:
-			numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f))
+			numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
 			log.debug("Number of matching lines in %s is %d", f, numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)

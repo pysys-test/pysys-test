@@ -66,6 +66,15 @@ class PySysTest(BaseTest):
 		self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
 			**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*" in (?P<authSecs>[^ ]+) seconds\.'))
 
+		self.assertGrep('myserver.log', reFlags=re.VERBOSE | re.IGNORECASE, expr=r"""
+			in\   
+			\d +  # the integral part
+			\.    # the decimal point
+			\d *  # some fractional digits
+			\ seconds\. # in verbose regex mode we escape spaces with a slash
+			""")
+
+
 		self.assertThat('result == {}', 
 			result=self.assertGrep('myserver.log', expr='NO MATCH "(?P<username>[^"]*)"', contains=False))
 
