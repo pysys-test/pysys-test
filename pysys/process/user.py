@@ -1276,17 +1276,22 @@ class ProcessUser(object):
 	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0):
 		""" Searches for a regular expression in the specified file, and returns it. 
 
-		If the regex contains groups, the specified group is returned. If the expression is not found, an exception is raised,
+		If the regex contains unnamed groups, the specified group is returned. If the expression is not found, an exception is raised,
 		unless returnAll=True or returnNoneIfMissing=True. For example::
 
 			self.getExprFromFile('test.txt', 'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
 			self.getExprFromFile('test.txt', 'foo') # on a file containing 'myKey=foobar' would return "foo"
 		
+		See also `pysys.basetest.BaseTest.assertGrep` which should be used when instead of just finding out what's 
+		in the file you want to assert that a specific expression is matched. assertGrep also provides some additional 
+		functionality such as returning named groups which this method does not currently support. 
+		
 		:param str path: file to search (located in the output dir unless an absolute path is specified)
 		:param str expr: the regular expression, optionally containing the regex group operator ``(...)``
-		:param List[int] groups: which regex groups (as indicated by brackets in the regex) shoud be returned; default is ``[1]`` meaning 
-			the first group. If more than one group is specified, the result will be a tuple of group values, otherwise the
-			result will be the value of the group at the specified index.
+		:param List[int] groups: which regex group numbers (as indicated by brackets in the regex) should be returned; 
+			default is ``[1]`` meaning the first group. 
+			If more than one group is specified, the result will be a tuple of group values, otherwise the
+			result will be the value of the group at the specified index as a str.
 		:param bool returnAll: returns a list containing all matching lines if True, the first matching line otherwise.
 		:param bool returnNoneIfMissing: set this to return None instead of throwing an exception
 			if the regex is not found in the file
