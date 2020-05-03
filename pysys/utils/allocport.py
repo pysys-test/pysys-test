@@ -58,7 +58,7 @@ def getEphemeralTCPPortRange():
 			# but it's useful to avoid an error to help on environments like Windows Subsystem for Linux v1. 
 			# We pick the IANA range as our default
 			ephemeral_low, ephemeral_high = 49152, 65535
-			_log.warning('PySys cannot determine the local/ephemeral port range on this OS (%s) as "%s" is missing; falling back to default IANA range %d-%d. Consider using the PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max environment variable to explicitly configure this.', platform.platform(), port_file, ephemeral_low, ephemeral_high)
+			_log.warning('PySys cannot determine the local/ephemeral port range on this OS (%s) as "%s" is missing; falling back to default IANA range %d-%d. Consider using the PYSYS_PORTS=minport-maxport environment variable to explicitly configure the range of non-ephemeral/server ports for PySys to use.', platform.platform(), port_file, ephemeral_low, ephemeral_high)
 		else:
 			with open(port_file) as f:
 				s = f.readline().split()
