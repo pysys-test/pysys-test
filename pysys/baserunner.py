@@ -156,6 +156,8 @@ class BaseRunner(ProcessUser):
 		if not self.supportMultipleModesPerRun:
 			self.mode = mode
 
+		self.__resultWritingLock = threading.Lock() 
+
 		self.startTime = self.project.startTimestamp
 		
 		extraOptions = xargs.pop('__extraRunnerOptions', {})
@@ -277,7 +279,7 @@ class BaseRunner(ProcessUser):
 		This method is always invoked from a single thread, even in multi-threaded mode. 
 		
 		:param testObj: Reference to the `pysys.basetest.BaseTest` instance of the test just completed.
-		:param dir: The test output directory to perform the purge on.
+		:param dir: The absolute path of the test output directory to perform the purge on (testObj.output).
 				
 		"""
 		if self.purge:
@@ -510,13 +512,14 @@ class BaseRunner(ProcessUser):
 					self.log.info('Collected test output to directory: %s', os.path.normpath(collect['outputDir']))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
-			for writer in self.writers:
-				try: writer.cleanup()
-				except Exception as ex: 
-					log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
-					# might stop results being completely displayed to user
-					fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
-			del self.writers[:]
+			with self.__resultWritingLock:
+				for writer in self.writers:
+					try: writer.cleanup()
+					except Exception as ex: 
+						log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+						# might stop results being completely displayed to user
+						fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
+				del self.writers[:]
 	
 			# perform clean on the performance reporters
 			for perfreporter in self.performanceReporters:
@@ -594,55 +597,90 @@ class BaseRunner(ProcessUser):
 		:param container: A reference to the container object that ran the test
 
 		"""
+		# Most of the logic lives in writeTestOutcome, this method just contains the bits that only make 
+		# sense if this is a "standard" test executed by our scheduler. Custom runners can use writeTestOutcome 
+		# to add additional test results (e.g. to expand out individual unit test results)
+		
 		self.__remainingTests -= 1
 		
-		errors = []
-		
-		bufferedoutput = container.testFileHandlerStdoutBuffer.getvalue()
-
-		# print if we need to AND haven't already done so using single-threaded ALL print-as-we-go
-		if (self.printLogs==PrintLogs.ALL and self.threads > 1) or (
-			self.printLogs==PrintLogs.FAILURES and container.testObj.getOutcome() in FAILS): 
-			try:
-				# write out cached messages from the worker thread to stdout
-				# (use the stdoutHandler stream which includes coloring redirections if applicable, 
-				# but not print redirection which we don't want; also includes the 
-				# appropriate _UnicodeSafeStreamWrapper). 
-				stdoutHandler.stream.write(bufferedoutput)
-				
-			except Exception as ex:
-				# first write a simple message without any unusual characters, in case nothing else can be printed
-				sys.stdout.write('ERROR - failed to write buffered test output for %s\n'%container.descriptor.id)
-				errors.append('Failed to write buffered test output')
-				log.exception("Failed to write buffered test output for %s: "%container.descriptor.id)
-				
-		if self.printLogs != PrintLogs.NONE and stdoutHandler.level >= logging.WARN:
-			# print at least some information even if logging is turned down; 
-			# but if in PrintLogs.NONE mode truly do nothing, as there may be a CI writer doing a customized variant of this
-			log.critical("%s: %s (%s)", LOOKUP[container.testObj.getOutcome()], container.descriptor.id, container.descriptor.title)
-		
-		# call the hook for end of test execution
-		self.testComplete(container.testObj, container.outsubdir)
-				
-		# pass the test object to the test writers if recording
-		for writer in self.writers:
-			try: 
-				writer.processResult(container.testObj, cycle=container.cycle,
-									  testStart=container.testStart, testTime=container.testTime, runLogOutput=bufferedoutput)
-			except Exception as ex: 
-				log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], container.descriptor.id, writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
-				errors.append('Failed to record test result using writer %s: %s'%(repr(writer), ex))
+		self.reportTestOutcome(
+			testObj=container.testObj,
+			cycle=container.cycle,
+			testStart=container.testStart,
+			testDurationSecs=container.testTime,
+			runLogOutput=container.testFileHandlerStdoutBuffer.getvalue())
 		
 		# prompt for continuation on control-C
 		if container.kbrdInt == True: self.handleKbrdInt()
-	
-		# store the result
-		self.duration = self.duration + container.testTime
-		self.results[container.cycle][container.testObj.getOutcome()].append(container.descriptor.id)
 		
-		if errors:
-			raise Exception('Failed to process results from %s: %s'%(container.descriptor.id, '; '.join(errors)))
+		# call the hook for end of test execution
+		self.testComplete(container.testObj, container.outsubdir)
+
+	def reportTestOutcome(self, testObj, testStart, testDurationSecs, cycle=0, runLogOutput=u'', **kwargs):
+		"""
+		Records the result of a completed test, including notifying any configured writers, and writing the 
+		specified output to the console (if permitted by the `constants.PrintLogs` setting). 
 		
+		It is not supported to override this method. 
+		
+		This method is called at the end of each test's execution, but you can also call it (from any thread) 
+		to add additional test results that are not in this runner's set of descriptors, for example to 
+		expand out individual unit test results as if each had their own PySys test. 
+		
+		:meta private: Currently internal; will make this public in a future release.
+
+		:param pysys.basetest.BaseTest testObj: Reference to an instance of a L{pysys.basetest.BaseTest} class. 
+			The writer can extract data from this object but should not store a reference to it. 
+			The ``testObj.descriptor.id`` indicates the test that ran. 
+		:param int cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
+		:param float testDurationSecs: Duration of the test in seconds as a floating point number. 
+		:param float testStart: The time when the test started. 
+		:param str runLogOutput: The logging output written to run.log, as a unicode character string. 
+		:param kwargs: Additional keyword arguments may be added in future releases. 
+
+		"""
+		errors = []
+		descriptor = testObj.descriptor
+		
+		bufferedoutput = runLogOutput
+
+		with self.__resultWritingLock:
+			# print if we need to AND haven't already done so using single-threaded ALL print-as-we-go
+			if runLogOutput and ((self.printLogs==PrintLogs.ALL and self.threads > 1) or (
+				self.printLogs==PrintLogs.FAILURES and testObj.getOutcome() in FAILS)): 
+				try:
+					# write out cached messages from the worker thread to stdout
+					# (use the stdoutHandler stream which includes coloring redirections if applicable, 
+					# but not print redirection which we don't want; also includes the 
+					# appropriate _UnicodeSafeStreamWrapper). 
+					stdoutHandler.stream.write(bufferedoutput)
+					
+				except Exception as ex:
+					# first write a simple message without any unusual characters, in case nothing else can be printed
+					sys.stdout.write('ERROR - failed to write buffered test output for %s\n'%descriptor.id)
+					errors.append('Failed to write buffered test output')
+					log.exception("Failed to write buffered test output for %s: "%descriptor.id)
+					
+			if self.printLogs != PrintLogs.NONE and stdoutHandler.level >= logging.WARN:
+				# print at least some information even if logging is turned down; 
+				# but if in PrintLogs.NONE mode truly do nothing, as there may be a CI writer doing a customized variant of this
+				log.critical("%s: %s (%s)", LOOKUP[testObj.getOutcome()], descriptor.id, descriptor.title)
+			
+			# pass the test object to the test writers if recording
+			for writer in self.writers:
+				try: 
+					writer.processResult(testObj, cycle=cycle,
+										  testStart=testStart, testTime=testDurationSecs, runLogOutput=bufferedoutput)
+				except Exception as ex: 
+					log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], descriptor.id, writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+					errors.append('Failed to record test result using writer %s: %s'%(repr(writer), ex))
+			
+			# store the result
+			self.duration = self.duration + testDurationSecs
+			self.results[cycle][testObj.getOutcome()].append(descriptor.id)
+			
+			if errors:
+				raise Exception('Failed to process results from %s: %s'%(descriptor.id, '; '.join(errors)))
 
 	def containerExceptionCallback(self, thread, exc_info):
 		"""Callback method for unhandled exceptions thrown when running a test.
