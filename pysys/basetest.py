@@ -697,30 +697,30 @@ class BaseTest(ProcessUser):
 		
 			pysys.py run -XautoUpdateAssertDiffReferences
 		
-		:param file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. 
-		:param file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.
+		:param str file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. 
+		:param str file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.
 			The default is for file2 to be the same basename as file1. 
-		:param filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
-		:param filedir2: The dirname of the second file (defaults to the testcase reference directory)
-		:param ignores: A list of regular expressions used to denote lines in the files which should be ignored
-		:param sort: Boolean flag to indicate if the lines in the files should be sorted prior to the comparison
-		:param replace: List of tuples of the form ('regexpr', 'replacement'). For each regular expression in the 
+		:param str filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
+		:param str filedir2: The dirname of the second file (defaults to the testcase reference directory)
+		:param list[str] ignores: A list of regular expressions used to denote lines in the files which should be ignored
+		:param bool sort: Boolean flag to indicate if the lines in the files should be sorted prior to the comparison
+		:param list[(regexp:str,repl:str),...]replace: List of tuples of the form ('regexpr', 'replacement'). For each regular expression in the 
 			list, any occurences in the files are replaced with the replacement value prior to the comparison being 
 			carried out. This is often useful to replace timestamps in logfiles etc.
-		:param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
+		:param bool stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, 
 			which means indentation differences and whether the file ends with a blank line do not affect the outcome. 
 			If the value is ``None``, delegates to the value of the project property ``defaultAssertDiffStripWhitespace`` 
 			(which is True for old projects, but recommended to be False for new projects). 
-		:param includes: A list of regular expressions used to denote lines in the files which should be used in the 
+		:param list[str] includes: A list of regular expressions used to denote lines in the files which should be used in the 
 			comparison. Only lines which match an expression in the list are used for the comparison.
-		:param encoding: The encoding to use to open the file. 
+		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
-		:param abortOnError: Set to True to make the test immediately abort if the
+		:param bool abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
 		
-		:param assertMessage: Overrides the string used to describe this 
+		:param str assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. 
 			
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
