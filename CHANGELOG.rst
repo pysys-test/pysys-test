@@ -68,6 +68,8 @@ Miscellaneous new features
   then afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
   committing. 
 
+- `BaseTest.assertDiff` now has colour-coding of the added/removed lines when logging a diff to the console on failure. 
+  
 - `BaseTest.waitForGrep()` has been added as a new and clearer name for `BaseTest.waitForSignal()`, and we recommend 
   using waitForGrep in new tests from now on (see upgrade section for more information about this change).
 

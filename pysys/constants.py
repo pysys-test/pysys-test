@@ -209,6 +209,8 @@ LOG_TIMEOUTS = 'timed out'
 LOG_FAILURES = 'failed'
 LOG_PASSES = 'passed'
 LOG_SKIPS = 'skipped'
+LOG_DIFF_ADDED = 'diff+'
+LOG_DIFF_REMOVED = 'diff-'
 LOG_END = 'end'
 
 class PrintLogs(Enum):

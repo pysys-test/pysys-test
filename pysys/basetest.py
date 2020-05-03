@@ -27,6 +27,7 @@ from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
 from pysys.utils.linecount import linecount
 from pysys.utils.threadutils import BackgroundThread
+from pysys.utils.logutils import BaseLogFormatter
 from pysys.process.monitor import ProcessMonitorTextFileHandler
 from pysys.process.monitorimpl import DEFAULT_PROCESS_MONITOR
 from pysys.manual.ui import ManualTester
@@ -741,6 +742,13 @@ class BaseTest(ProcessUser):
 			self.__stripTestDirPrefix(f1), self.__stripTestDirPrefix(f2)))
 		unifiedDiffOutput=os.path.join(self.output, os.path.basename(f1)+'.diff')
 		result = False
+		
+		def logDiffLine(line):
+			if line.startswith('-'): extra = BaseLogFormatter.tag(LOG_DIFF_REMOVED)
+			elif line.startswith('+'): extra = BaseLogFormatter.tag(LOG_DIFF_ADDED)
+			else: extra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
+			self.log.info(u'  %s', line, extra=extra)
+
 		try:
 			for i in [0, 1]:
 				result = filediff(f1, f2, 
@@ -748,7 +756,7 @@ class BaseTest(ProcessUser):
 					stripWhitespace=stripWhitespace)
 				
 				if (not result) and self.getBoolProperty('autoUpdateAssertDiffReferences'):
-					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
+					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1), logFunction=logDiffLine)
 					log.warn('... -XautoUpdateAssertDiffReferences option is enabled, so overwriting reference file %s and retrying ... '%f2)
 					self.copy(f1, f2)
 					continue
@@ -764,7 +772,7 @@ class BaseTest(ProcessUser):
 				self.addOutcome(result, msg, abortOnError=abortOnError)
 			finally:
 				if result != PASSED:
-					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1))
+					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1), logFunction=logDiffLine)
 			return result
 
 	def __stripTestDirPrefix(self, path):

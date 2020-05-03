@@ -1285,22 +1285,29 @@ class ProcessUser(object):
 			raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
 
 
-	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None):
+	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, logFunction=None):
 		""" Logs some or all of the lines in the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
 		diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
 		to make test failures easier to triage quickly. 
-		
-		:param path: May be an absolute, or relative to the test output directory
-		:param includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
-		:param excludes: Optional list of regex strings. If specified, no line containing these will be logged
-		:param maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
-		:param tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
-		:param encoding: The encoding to use to open the file. 
+
+		.. versionchanged:: 1.5.1
+			Added logFunction parameter. 
+
+		:param str path: May be an absolute, or relative to the test output directory
+		:param list[str] includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
+		:param list[str] excludes: Optional list of regex strings. If specified, no line containing these will be logged
+		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
+		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
+		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
-			
+		:param Callable[[line],None] logFunction: The function that will be used to log individual lines from the file. 
+			Usually this is ``self.log.info(u'  %s', line, extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS))``	
+			but a custom implementation can be provided, for example to provide a different color using 
+			`pysys.utils.logutils.BaseLogFormatter.tag`.
+
 		:return: True if anything was logged, False if not.
 		
 		"""
@@ -1343,11 +1350,15 @@ class ProcessUser(object):
 			
 		if not tolog:
 			return False
-			
+		
 		logextra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
+		if logFunction is None: 
+			def logFunction(line):
+				self.log.info(u'  %s', l, extra=logextra)
+
 		self.log.info(u'Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
-			self.log.info(u'  %s'%(l), extra=logextra)
+			logFunction(l)
 		self.log.info('  -----', extra=logextra)
 		self.log.info('', extra=logextra)
 		return True
