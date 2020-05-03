@@ -3,6 +3,14 @@ from pysys.basetest import BaseTest
 
 class PySysTest(BaseTest):
 	def execute(self):
+		class MyClass:
+			def __init__(self, id): self.x = self.id = id
+			def getId(self): return self.x
+			def __repr__(self): return 'MyClass(%s)'%self.x
+		myDataStructure = {'item1':[MyClass('foobar')],
+			'item2':[MyClass('baz')],
+			}
+	
 		# start with the failures
 		self.log.info('--- Expected failures:')
 		self.assertThat('actual == expected', actual__eval="'prefix'+' foo bar '+'suffix'", expected='foobar')
@@ -20,6 +28,19 @@ class PySysTest(BaseTest):
 		self.assertThat('undefined_parameter+1', actual='foo')
 		reasonBlockedConditionEval = self.getOutcomeReason()
 		self.addOutcome(PASSED, override=True)
+
+		class MyClass2:
+			def __init__(self, id): self.x = id
+			def __str__(self): return 'MyClass2(%s)'%self.x
+
+		self.assertThat('actual == expected', actual=MyClass2("Hello"), expected=MyClass2("Hello there"))
+		self.assertThat('actual is expected', actual=MyClass2("Hello"), expected=MyClass2("Hello"))
+	
+		self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].getId()", expected='biz')
+		
+		self.addOutcome(PASSED, override=True)
+		
+		
 		
 		self.log.info('--- Checking the failures gave the right messages:')
 
@@ -37,13 +58,7 @@ class PySysTest(BaseTest):
 		msg = 'Started successfully'
 		v = 20
 
-		class MyClass:
-			def __init__(self, id): self.x = self.id = id
-			def getId(self): return self.x
-			def __repr__(self): return 'MyClass(%s)'%self.x
-		myDataStructure = {'item1':[MyClass('foobar')],
-			'item2':[MyClass('baz')],
-			}
+
 		self.write_text('myprocess-1.log', u'Server started in 51.9 seconds')
 		self.write_text('myprocess-2.log', u'Server started in 20.3 seconds')
 		self.write_text('foo.zip', '')

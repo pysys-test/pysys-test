@@ -17,6 +17,7 @@
 
 import os.path, time, threading, logging
 import inspect
+import difflib
 
 from pysys import log
 from pysys.constants import *
@@ -524,9 +525,16 @@ class BaseTest(ProcessUser):
 
 			# Produces self-describing log messages like this:
 			#  Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
-			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='baz' ... passed
+			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='biz' ... failed
+			#     expected: 'biz'
+			#       actual: 'baz'
+			#                 ^
 			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
-					
+		
+		As shown above, when two named parameters are provided and the condition string is a simple equality 
+		comparison (``==`` or ``is``), additional lines are logged if the assertion fails to show at what point the 
+		two arguments differ (based on finding the longest common substring). 
+		
 		.. versionchanged:: 1.5.1
 			The ability to pass named keyword= parameters was added in 1.5.1 
 			(prior to that this method was deprecated).
@@ -567,7 +575,7 @@ class BaseTest(ProcessUser):
 		for k,v in kwargs.items():
 			if k.endswith(EVAL_SUFFIX):
 				k = k[:-len(EVAL_SUFFIX)] # strip the suffix
-				displayvalues.append('%s (%s) '%(k, v))
+				displayvalues.append(u'%s (%s) '%(k, v))
 				try:
 					# evaluate in the namespace of the parent (which includes basetest)
 					namespace = dict(inspect.currentframe().f_back.f_locals)
@@ -583,7 +591,7 @@ class BaseTest(ProcessUser):
 			if '__' in k: raise Exception('Please do not use __ in any for keywords, this is reserved for future use')
 
 			# use repr if it's a string so we get escaping, other data structures are best using normal str()
-			displayvalues[-1]+='=%s'%(repr(v) if isstring(v) else str(v))
+			displayvalues[-1]+= ((u'=%r'%v) if isstring(v) else (u'=%s'%v))
 			namedvalues[k] = v
 
 		if positional_arguments: # yucky old-style mechanism
@@ -610,6 +618,31 @@ class BaseTest(ProcessUser):
 			return True
 		else:
 			self.addOutcome(FAILED, assertMessage, abortOnError=abortOnError)
+			if len(namedvalues) == 2 and re.match(r'^ *\w+ *(==|is) *\w+ *$', conditionstring): 
+				# if we're checking a==b we can help the user see why they didn't match; 
+				# this kind of highlighting might be misleading for other conditionstrings, and certainly less useful
+				pad = max(len(key) for key in namedvalues)+1
+
+				# use %s for most objects, but repr for strings (so we see the escaping) and objects where str() would make them look the same
+				v1 = u'%s'%(list(namedvalues.values())[0])
+				v2 = u'%s'%(list(namedvalues.values())[1])
+
+				if isstring(list(namedvalues.values())[0]) or v1==v2:
+					v1 = u'%r'%(list(namedvalues.values())[0])
+					v2 = u'%r'%(list(namedvalues.values())[1])
+				
+				seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
+				i, j, k = seq.find_longest_match(0, len(v1), 0, len(v2))
+				# where v1[i:i+k] == v2[j:j+k]
+
+				for (index, key) in enumerate(namedvalues.keys()):
+					value = [v1,v2][index]
+					x = [i, j][index]
+					self.log.info(u'  %{pad}s: %s%s%s'.format(pad=pad), key, 
+						value[:x], value[x:x+k], value[x+k:],
+						extra=BaseLogFormatter.tag(LOG_FAILURES, arg_index=[1,3]))
+				if i == 0 and j == 0 and k > 0: # if there's a common prefix, show where it ends
+					self.log.info(u'  %{pad}s %s ^'.format(pad=pad), '', ' '*k, extra=BaseLogFormatter.tag(LOG_FAILURES))
 			return False
 
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):

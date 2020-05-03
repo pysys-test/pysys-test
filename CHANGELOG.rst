@@ -37,13 +37,22 @@ Miscellaneous new features
   
      Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
      Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='blimey!' ... failed
+     
+     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='biz' ... failed
+       expected: 'biz'
+         actual: 'baz'
+                   ^     
      Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
   
-  As a result, the less powerful `BaseTest.assertEval` method is now deprecated and new tests should use assertThat 
-  instead. 
+  Note that when two named parameters are provided and the condition string is a simple equality 
+  comparison (``==`` or ``is``), additional lines are logged when the assertion fails to show at what point the 
+  two arguments differ. For best results make sure you have colours turned on. 
 
-  Both methods also now allow the condition/eval string to make use of some additional standard Python modules such as ``math`` 
-  and ``re``, and to use ``import_module('...').XXX`` to dynamically import additional modules. 
+  As a result of these changes to assertThat, the less powerful `BaseTest.assertEval` method is now deprecated and 
+  new tests should use assertThat instead. 
+
+  Both methods also now allow the condition/eval string to make use of some additional standard Python modules such as 
+  ``math`` and ``re``, and to use ``import_module('...').XXX`` to dynamically import additional modules. 
 
 - `BaseTest.assertGrep` (and `BaseTest.assertLastGrep`) now return the regular expression match object, or if any 
   ``(?P<groupName>...)`` named groups are present in the regular expression, a dictionary containing the matched values. 
