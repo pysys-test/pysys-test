@@ -477,7 +477,7 @@ class BaseTest(ProcessUser):
 			self.addOutcome(FAILED, 'Assertion %s failed %s'%(evalstring, display), abortOnError=abortOnError)
 			return False
 			
-	def assertThat(self, conditionstring, *args, **kwargs):
+	def assertThat(self, conditionstring, *positional_arguments, **kwargs):
 		"""Performs equality/range tests or any general-purpose validation by evaluating a Python ``eval()`` expression 
 		in the context of some named values.
 		
@@ -586,9 +586,9 @@ class BaseTest(ProcessUser):
 			displayvalues[-1]+='=%s'%(repr(v) if isstring(v) else str(v))
 			namedvalues[k] = v
 
-		if args: # yucky old-style mechanism
+		if positional_arguments: # yucky old-style mechanism
 			try:
-				conditionstring = conditionstring % args
+				conditionstring = conditionstring % positional_arguments
 			except Exception as e:
 				self.addOutcome(BLOCKED, 'Failed to substitute unnamed/positional arguments into %r using %% operator; this feature is deprecated, please use named arguments instead, e.g. assertThat("...", expected=..., actual=...)'%conditionstring, abortOnError=abortOnError)
 				return False
