@@ -38,8 +38,6 @@ Assertion and waitForGrep improvements
   This automatically produces informative log messages such as::
   
      Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
-     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='blimey!' ... failed
-     
      Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='biz' ... failed
        expected: 'biz'
          actual: 'baz'
