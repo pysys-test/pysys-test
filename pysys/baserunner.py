@@ -728,6 +728,26 @@ class BaseRunner(ProcessUser):
 		except KeyboardInterrupt:
 			self.handleKbrdInt(prompt)
 
+	def logTestHeader(self, descriptor, cycle, **kwargs):
+		"""
+		Logs the header for the specified descriptor before a test begin to execute, 
+		typically including the testId, title and (if applicable) cycle. 
+		
+		This method can be overridden if you wish to customize the information that is 
+		written to the run.log and console or how it is formatted. 
+		"""
+		assert not kwargs, 'reserved for future use'
+		log.info(62*"=")
+		title = textwrap.wrap(descriptor.title.replace('\n','').strip(), 56)
+		log.info("Id   : %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		if len(title)>0:
+			log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		for l in title[1:]:
+			log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		if self.cycle > 1: # only log if this runner is doing multiple cycles
+			log.info("Cycle: %s", str(cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		log.debug('Execution order hint: %s', descriptor.executionOrderHint)
+		log.info(62*"=")
 
 class TestContainer(object):
 	"""Internal class added to the work queue and used for co-ordinating the execution of a single test case.
@@ -829,17 +849,7 @@ class TestContainer(object):
 				if stdoutHandler.level == logging.DEBUG: self.testFileHandlerRunLog.setLevel(logging.DEBUG)
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout, self.testFileHandlerRunLog])
 
-				log.info(62*"=")
-				title = textwrap.wrap(self.descriptor.title.replace('\n','').strip(), 56)
-				log.info("Id   : %s", self.descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-				if len(title)>0:
-					log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-				for l in title[1:]:
-					log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-				if self.runner.cycle > 1:
-					log.info("Cycle: %s", str(self.cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-				log.debug('Execution order hint: %s', self.descriptor.executionOrderHint)
-				log.info(62*"=")
+				self.runner.logTestHeader(self.descriptor, self.cycle)
 				
 				# this often doesn't matter, but it's worth alerting the user as in rare cases it could cause a test failure
 				if initialOutputFiles and not self.runner.validateOnly:
