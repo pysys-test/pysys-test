@@ -259,8 +259,9 @@ or runtime information such as the current operating system.
 
 You can find the mode that this test is running in using `self.mode <BaseTest>`.
 To ensure typos and inconsistencies in individual test descriptor modes do 
-no go unnoticed, you may wish to provide validation and unpacking of modes 
-in the `BaseTest.setup` method of a custom BaseTest class like this::
+no go unnoticed, it is best to provide constants for the possible mode values 
+and/or do validation and unpacking of modes in the `BaseTest.setup` method of 
+a custom BaseTest class like this::
 
 	class MyBaseTest(BaseTest):
 		def setup(self):
@@ -273,12 +274,13 @@ in the `BaseTest.setup` method of a custom BaseTest class like this::
 			# This is a convenient pattern for specifying the method or class 
 			# constructor to call for each mode, and to get an exception if an 
 			# invalid mode is specified
-			self.dbHelperFactory = {
+			dbHelperFactory = {
 				'MockDatabase': MockDB,
 				'MyDatabase2.0': lambda: self.startMyDatabase('2.0')
 			}[self.databaseMode]
 			...
-			self.db = self.dbHelperFactory() # call the supplied method to instantiate the database
+			# Call the supplied method to start/configure the database
+			self.db = dbHelperFactory() 
 
 Finally, PySys provides a rich variety of ``pysys run`` arguments to control 
 which modes your tests will run with. By default it will run every test in its 
