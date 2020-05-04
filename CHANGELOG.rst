@@ -13,6 +13,8 @@ Change Log
 What's new in 1.5.1
 -------------------
 
+PySys 1.5.1 was released in May 2020. 
+
 Documentation improvements
 --------------------------
 PySys now uses Sphinx to build its documentation (instead of epydoc), and new content has also been written resulting 
@@ -254,6 +256,7 @@ Release History
 
 1.4.0 to 1.5.0
 --------------
+PySys 1.5.0 was released in July 2019. 
 
 PySys 1.5.0 brings some significant new features for large PySys projects 
 including support for running a test in multiple modes, and 
@@ -635,6 +638,7 @@ major release it is possible that some users might need to make changes:
 
 1.3.0 to 1.4.0
 --------------
+PySys 1.4.0 was released in April 2019. 
 
 Installation:
 
