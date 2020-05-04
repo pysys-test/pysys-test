@@ -231,14 +231,17 @@ need to run in multiple modes, and add a list of the supported modes::
    <classification>
 	<groups>...</groups>
 	<modes inherit="true">
-		<mode>MockDatabase</mode>
-		<mode>MyDatabase_2.0</mode>
+		<mode>MockDatabase_Firefox</mode>
+		<mode>MyDatabase2.0_Chrome</mode>
 	</modes>
    </classification>
 
 When naming modes, TitleCase is recommended, and dot and underscore characters 
-may be used. PySys will give an error if you use different capitalization for 
-the same mode in different places, as this would likely result in test bugs. 
+may be used; typically dot is useful for version numbers and underscore is 
+useful for separating out different dimensions e.g. database vs web browser 
+as in the above example. PySys will give an error if you use different 
+capitalization for the same mode in different places, as this would likely 
+result in test bugs. 
 
 The first mode listed is designated the "primary" mode which means it's the 
 one that is used by default when running your tests without a ``--mode`` 
@@ -254,15 +257,28 @@ create a custom DescriptorLoader subclass that dynamically adds modes
 from Python code, perhaps based on the groups specified in each descriptor 
 or runtime information such as the current operating system.  
 
-In your test case ``run.py`` (and/or in your test's base class if you have 
-customized it) you can use `self.mode <BaseTest>` to detect which mode the test is running 
-in and alter your behaviour accordingly::
+You can find the mode that this test is running in using `self.mode <BaseTest>`.
+To ensure typos and inconsistencies in individual test descriptor modes do 
+no go unnoticed, you may wish to provide validation and unpacking of modes 
+in the `BaseTest.setup` method of a custom BaseTest class like this::
 
-  if self.mode == 'MockDatabase': 
-	return MockDB()
-  elif self.mode == 'MyDatabase_2.0': 
-    return startMyDatabase()
-  else: raise Exception('Unknown mode: "%s"'%self.mode)
+	class MyBaseTest(BaseTest):
+		def setup(self):
+			super(MyBaseTest, self).setup()
+			
+			# Unpack and validate mode
+			self.databaseMode, self.browserMode = self.mode.split('_')
+			assert self.browserMode in ['Chrome', 'Firefox'], self.browserMode
+			
+			# This is a convenient pattern for specifying the method or class 
+			# constructor to call for each mode, and to get an exception if an 
+			# invalid mode is specified
+			self.dbHelperFactory = {
+				'MockDatabase': MockDB,
+				'MyDatabase2.0': lambda: self.startMyDatabase('2.0')
+			}[self.databaseMode]
+			...
+			self.db = self.dbHelperFactory() # call the supplied method to instantiate the database
 
 Finally, PySys provides a rich variety of ``pysys run`` arguments to control 
 which modes your tests will run with. By default it will run every test in its 
