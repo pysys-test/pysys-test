@@ -214,4 +214,4 @@ deploy:
     on: 
        # only publish doc for released version, or the special doc-updates branch (which is taken from release)
        # best to only publish from one platform to avoid possible race conditions
-       condition: $PYSYS_DOC_AND_DEPLOY = true AND (branch in (release, doc-updates))
+       condition: $PYSYS_DOC_AND_DEPLOY = true && $TRAVIS_BRANCH =~ ^(release|doc-updates)$
