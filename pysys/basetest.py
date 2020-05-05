@@ -539,7 +539,7 @@ class BaseTest(ProcessUser):
 			The ability to pass named keyword= parameters was added in 1.5.1 
 			(prior to that this method was deprecated).
 		
-		:param str conditionstring: A string containing Python code that will be evaluated usin ``eval()`` 
+		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` 
 			as a boolean expression. 
 			
 			Do not be tempted to use a Python f-string here, as that would deprive PySys of the 
