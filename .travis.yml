@@ -212,7 +212,6 @@ deploy:
     project-name: "PySys $PYSYS_VERSION"
     
     on: 
-       # only publish doc for released version
-       branch: release
+       # only publish doc for released version, or the special doc-updates branch (which is taken from release)
        # best to only publish from one platform to avoid possible race conditions
-       condition: $PYSYS_DOC_AND_DEPLOY = true
+       condition: $PYSYS_DOC_AND_DEPLOY = true AND (branch in (release, doc-updates))
