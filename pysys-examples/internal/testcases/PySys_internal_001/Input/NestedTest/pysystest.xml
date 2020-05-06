@@ -16,6 +16,11 @@
 
   <data>
     <class name="PySysTest" module="run"/>
+    <user-data name="testFloatProperty" value="0000"/> <!-- overridden with a -X -->
+    <user-data name="testFloatUserData" value="12.345"/> <!-- not overridden -->
+    <user-data name="testStringUserData" value="Hello ${non-existent}"/> <!-- use of ${...} is deliberately allowed but 
+		not automatically substituted since it's not clear from where (project props? other user-data? etc) and 
+		best to leave this for the user if they want to do it manually. -->
   </data>
   
   <traceability>

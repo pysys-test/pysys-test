@@ -17,6 +17,8 @@ Ensure that pysys print works without error, and also that it doesn't find any p
 
   <data>
     <class name="PySysTest" module="run"/>
+    <user-data name="myUserDataKey" value="12345"/>
+    <user-data name="myUserDataKey2" value="Hello \n world"/>
   </data>
   
   <traceability>

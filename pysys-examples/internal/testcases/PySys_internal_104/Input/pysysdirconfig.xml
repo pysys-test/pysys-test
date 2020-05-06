@@ -19,6 +19,8 @@
     <input path="Input-root"/>
     <output path="Output-root"/>
     <reference path="Reference-root"/>
+    <user-data name="myUserDataInt" value="50"/>
+    <user-data name="myUserDataBool" value="trUe"/>
   </data>
   
   <traceability>

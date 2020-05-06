@@ -30,7 +30,7 @@ import locale
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2
+from pysys.utils.pycompat import PY2, isstring
 
 log = logging.getLogger('pysys.xml.descriptor')
 
@@ -167,7 +167,8 @@ class TestDescriptor(object):
 		it's a normal testcase. 
 	
 	:ivar dict(str,obj) ~.userData: A dictionary that can be used for storing user-defined data 
-		in the descriptor.
+		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements e.g. 
+		``<data><user-data name="key" value="val"</user-data></data>``.
 	"""
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
@@ -180,7 +181,7 @@ class TestDescriptor(object):
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, 
 		testDir=None, 
-		isDirConfig=False):
+		isDirConfig=False, userData=None):
 		if skippedReason: state = 'skipped'
 		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
 		self.isDirConfig = isDirConfig
@@ -219,7 +220,7 @@ class TestDescriptor(object):
 		# NB: self.mode is set after construction and 
 		# cloning for each supported mode when supportMultipleModesPerRun=true
 		
-		self.userData = {}
+		self.userData = collections.OrderedDict() if userData is None else userData
 	
 	def _createDescriptorForMode(self, mode):
 		"""
@@ -260,6 +261,7 @@ class TestDescriptor(object):
 		d['input'] = self.input
 		d['output'] = self.output
 		d['reference'] = self.reference
+		d['userData'] = self.userData
 		
 		return d
 		
@@ -299,6 +301,8 @@ class TestDescriptor(object):
 		str=str+"Test output:       %s\n" % self.output
 		str=str+"Test reference:    %s\n" % self.reference
 		str=str+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
+		if self.userData:
+			str=str+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,repr(v).lstrip('u') if isstring(v) else str(v)) for k,v in (self.userData.items()))
 		str=str+""
 		return str
 	
@@ -418,6 +422,7 @@ class XMLDescriptorParser(object):
 										self.getExecutionOrderHint(), 
 										skippedReason=self.getSkippedReason(), 
 										testDir=self.dirname,
+										userData=self.getUserData(),
 										isDirConfig=not self.istest)
 
 
@@ -571,7 +576,18 @@ class XMLDescriptorParser(object):
 		except Exception:
 			return self.defaults.input
 
-			
+	def getUserData(self):
+		'''Return the userData from the user-data element.'''
+		# start with parent defaults, add children
+		result = collections.OrderedDict(self.defaults.userData)
+		for data in self.root.getElementsByTagName('data'):
+			for e in data.getElementsByTagName('user-data'):
+				key = e.getAttribute('name').strip()
+				assert key, 'name= must be specified'
+				assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # blacklist names that we reserve for use by the basetest/processuser
+				result[key] = e.getAttribute('value')
+		return result
+
 	def getTestOutput(self):
 		'''Return the test output path, contained in the output element.'''
 		try:

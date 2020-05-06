@@ -37,6 +37,7 @@
     <!-- Uncomment this to customize the directory to which test output is 
        written. Can be overridden by individual tests. -->
     <!-- <output path="Output"/>-->
+    <!-- <user-data name="myThing" value="foobar"/> -->
   </data>
 
   <traceability>

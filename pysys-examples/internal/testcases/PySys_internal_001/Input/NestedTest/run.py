@@ -9,6 +9,7 @@ class PySysTest(BaseTest):
 	testFloatProperty = 456.7
 	testStringProperty = '12345'
 	testNoneProperty = None
+	testFloatUserData = 0.0
 
 	def execute(self):
 		self.proj = self.project
@@ -32,11 +33,13 @@ class PySysTest(BaseTest):
 		self.log.info('getBoolProperty %s=%r', 'booldeffalse', self.getBoolProperty('bool-not-defined', False))		
 
 		# check type coersion based on base test type
-		self.assertEval('{testBooleanProperty} == True', testBooleanProperty=self.testBooleanProperty)
-		self.assertEval('{testIntProperty} == 1234', testIntProperty=self.testIntProperty)
-		self.assertEval('{testFloatProperty} == 456.78', testFloatProperty=self.testFloatProperty)
-		self.assertEval('{testStringProperty} == "123456"', testStringProperty=self.testStringProperty)
-		self.assertEval('{testNoneProperty} == "Hello"', testNoneProperty=self.testNoneProperty)
+		self.assertThat('testBooleanProperty is True', testBooleanProperty=self.testBooleanProperty)
+		self.assertThat('testIntProperty == 1234', testIntProperty=self.testIntProperty)
+		self.assertThat('testFloatProperty == 456.78', testFloatProperty=self.testFloatProperty)
+		self.assertThat('testStringProperty == "123456"', testStringProperty=self.testStringProperty)
+		self.assertThat('testNoneProperty == "Hello"', testNoneProperty=self.testNoneProperty)
+		self.assertThat('testStringUserData == expected', testStringUserData=self.testStringUserData, expected='Hello ${non-existent}')
+
 
 	def validate(self):
 		pass 

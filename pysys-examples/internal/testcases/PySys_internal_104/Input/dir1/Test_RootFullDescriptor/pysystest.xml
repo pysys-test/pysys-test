@@ -26,6 +26,8 @@
     <input path="Input-testcase"/>
     <output path="Output-testcase"/>
     <reference path="Reference-testcase"/>
+    <user-data name="myUserDataInt" value="100"/>
+    <user-data name="myExtraUserData" value="12345"/>
   </data>
   
   <traceability>

@@ -69,6 +69,7 @@ class BaseTest(ProcessUser):
 			self.mode = descriptor.mode
 		else:
 			self.mode = runner.mode 
+		self.setKeywordArgs(self.descriptor.userData)
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
 		self.__backgroundThreads = []

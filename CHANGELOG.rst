@@ -123,13 +123,6 @@ Improvements to the ``pysys.py`` tool
 
 - Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
   PySys was run from. 
-  
-- For advanced users, it is now possible to use project properties to specify the Python module to load for a given 
-  test in ``pysystest.xml`` (or ``pysysdirconfig.xml``), for example::
-
-     <data>
-        <class name="PySysTest" module="${testRootDir}/test-utils/custom_run_module.py"/>
-     </data>
 
 New project options
 -------------------
@@ -168,6 +161,33 @@ Port allocation improvements
   if ``/proc/sys/net/ipv4/ip_local_port_range`` is missing, PySys will fall back to using the default IANA ephemeral 
   port range (with a warning). This makes it possible to use PySys in environments such as 
   Windows Subsystem for Linux (WSL) v1 which may not have the usual Linux network stack. 
+
+Advanced pysystest.xml additions
+--------------------------------
+For advanced users there are a couple of additions to what you can do with ``pysystest.xml`` 
+(or ``pysysdirconfig.xml``):
+
+- It is now possible to use ``${...}`` project properties when specifying the Python module to load for a given test, 
+  for example::
+
+     <data>
+        <class name="PySysTest" module="${testRootDir}/test-utils/custom_run_module.py"/>
+     </data>
+
+- User-defined key/value data can be added to ``pysystest.xml`` (and will be inherited from any parent 
+  ``pysysdirconfig.xml`` files)::
+
+     <data>
+        <user-data name="myThing" value="foobar"/>
+     </data>
+     
+  Any user-defined data is available as a string in the ``userData`` field of `self.descriptor <pysys.xml.descriptor.TestDescriptor>`, 
+  and each named value will be set as a variable on the `BaseTest` class. If a static (non-instance) variable of the same name 
+  exists on the test class at construction then the ``<user-data>`` will override it, but its type will be coerced 
+  automatically to an int/float/bool to match the type of the variable. A ``pysys.py run -Xname=value`` argument can be 
+  specified to provide a temporary override for any items in the test's user data. Note that there is no 
+  automatic substituting of ``${...}`` properties in user data values. 
+  
 
 Bug fixes
 ---------

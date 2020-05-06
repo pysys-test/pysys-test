@@ -1,8 +1,8 @@
 [
    {
       "id": "rootprefix_dir3prefix_Test_SubdirMinimalDescriptor",
-      "testDir": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor",
-      "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml",
+      "testDir": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml",
       "type": "manual",
       "state": "skipped",
       "skippedReason": "<unknown skipped reason>",
@@ -34,12 +34,16 @@
       "module": "run_dir3",
       "input": "Input-dir3",
       "output": "Output-dir3",
-      "reference": "Reference-dir3"
+      "reference": "Reference-dir3",
+      "userData": {
+         "myUserDataInt": "50",
+         "myUserDataBool": "trUe"
+      }
    },
    {
       "id": "rootprefix_testprefix.Test_RootFullDescriptor",
-      "testDir": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor",
-      "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml",
+      "testDir": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml",
       "type": "manual",
       "state": "deprecated",
       "skippedReason": null,
@@ -71,12 +75,17 @@
       "module": "run_testcase",
       "input": "Input-testcase",
       "output": "Output-testcase",
-      "reference": "Reference-testcase"
+      "reference": "Reference-testcase",
+      "userData": {
+         "myUserDataInt": "100",
+         "myUserDataBool": "trUe",
+         "myExtraUserData": "12345"
+      }
    },
    {
       "id": "rootprefix_Test_RootMinimalDescriptor",
-      "testDir": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor",
-      "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\pysystest.xml",
+      "testDir": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\pysystest.xml",
       "type": "auto",
       "state": "runnable",
       "skippedReason": null,
@@ -102,12 +111,16 @@
       "module": "run_root",
       "input": "Input-root",
       "output": "Output-root",
-      "reference": "Reference-root"
+      "reference": "Reference-root",
+      "userData": {
+         "myUserDataInt": "50",
+         "myUserDataBool": "trUe"
+      }
    },
    {
       "id": "rootprefix_Test_RootNoInheritDescriptor",
-      "testDir": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor",
-      "xmlDescriptor": "c:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml",
+      "testDir": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml",
       "type": "auto",
       "state": "runnable",
       "skippedReason": null,
@@ -131,6 +144,10 @@
       "module": "run_root",
       "input": "Input-root",
       "output": "Output-root",
-      "reference": "Reference-root"
+      "reference": "Reference-root",
+      "userData": {
+         "myUserDataInt": "50",
+         "myUserDataBool": "trUe"
+      }
    }
 ]
