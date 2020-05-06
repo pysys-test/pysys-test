@@ -864,7 +864,12 @@ class TestContainer(object):
 			with global_lock:
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 				try:
-					runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module+'.py')
+					# replace any ${...} project properties in the module name
+					if '${' in self.descriptor.module:
+						self.descriptor.module =  re.sub(r'[$][{]([^}]+)[}]', 
+							lambda match: self.runner.project.properties[match.group(1)], self.descriptor.module)
+					if not self.descriptor.module.endswith('.py'): self.descriptor.module += '.py'
+					runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module)
 					with open(runpypath, 'rb') as runpyfile:
 						runpycode = compile(runpyfile.read(), runpypath, 'exec')
 					runpy_namespace = {}

@@ -123,6 +123,13 @@ Improvements to the ``pysys.py`` tool
 
 - Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
   PySys was run from. 
+  
+- For advanced users, it is now possible to use project properties to specify the Python module to load for a given 
+  test in ``pysystest.xml`` (or ``pysysdirconfig.xml``), for example::
+
+     <data>
+        <class name="PySysTest" module="${testRootDir}/test-utils/custom_run_module.py"/>
+     </data>
 
 New project options
 -------------------
