@@ -23,14 +23,14 @@ sys.path.append(PYSYS_ROOT_DIR)
 # -- Project information -----------------------------------------------------
 
 from datetime import date
-copyright = '2006-'+str(date.today().year)+' M.B. Grieve'
+copyright = f'2006-{date.today().year} M.B. Grieve; documentation last updated on {date.today().strftime("%Y-%m-%d")}'
 author = 'M.B. Grieve and Ben Spiller'
 
 # The full version, including alpha/beta/rc tags
 with open(PYSYS_ROOT_DIR+'/VERSION') as versionfile:
-	release = versionfile.read().strip()
+	pysys_release = versionfile.read().strip()
 
-project = f'PySys v{release}'
+project = f'PySys v{pysys_release}'
 
 # -- General configuration ---------------------------------------------------
 
