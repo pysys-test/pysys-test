@@ -7,8 +7,10 @@ class PySysTest(BaseTest):
 			def __init__(self, id): self.x = self.id = id
 			def getId(self): return self.x
 			def __repr__(self): return 'MyClass(%s)'%self.x
-		myDataStructure = {'item1':[MyClass('foobar')],
-			'item2':[MyClass('baz')],
+		myDataStructure = {
+			'item1':[MyClass('foo')],
+			'item2':[MyClass('bar')],
+			'item3':[MyClass('baZaar')],
 			}
 	
 		# start with the failures
@@ -36,7 +38,8 @@ class PySysTest(BaseTest):
 		self.assertThat('actual == expected', actual=MyClass2("Hello"), expected=MyClass2("Hello there"))
 		self.assertThat('actual is expected', actual=MyClass2("Hello"), expected=MyClass2("Hello"))
 	
-		self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].getId()", expected='biz')
+		self.assertThat("actual == expected", actual__eval="myDataStructure['item3'][-1].getId()", expected="baz")
+
 		
 		self.addOutcome(PASSED, override=True)
 		
@@ -64,7 +67,8 @@ class PySysTest(BaseTest):
 		self.write_text('foo.zip', '')
 
 		# examples are from our API doc:
-		self.assertThat("actualStartupMessage == expected", actualStartupMessage=msg, expected='Started successfully')
+		
+		self.assertThat("actualStartupMessage == expected", expected='Started successfully', actualStartupMessage=msg)
 		self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
 		self.assertThat("(0 <= actualValue < max) and type(actualValue)!=float", actualValue=v, max=100)
 
@@ -76,15 +80,20 @@ class PySysTest(BaseTest):
 		self.assertThat('float(startupTime) < 60.0', 
 			startupTime__eval="self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')")
 
-		self.assertThat('actual == expected', actual__eval="myDataStructure['item1'][-1].getId()", expected='foobar')
-		self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].getId()", expected='baz')
-		self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].id", expected='baz')
+		user = 'myuser'
+		self.assertThat('actualUser == expected', expected='myuser', actualUser=user)
+
+		self.assertThat("actual == expected", actual__eval="myDataStructure['item1'][-1].getId()", expected="foo")
+		self.assertThat("actual == expected", actual__eval="myDataStructure['item2'][-1].getId()", expected="bar")
+		#self.assertThat("actual == expected", actual__eval="myDataStructure['item3'][-1].getId()", expected="baz") # this would fail
+				
+		self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].id", expected='bar')
 		self.assertThat('len(actual) == 1', actual__eval="myDataStructure['item2']")
 
 		item = 5 # should be ignored
 		# this is advanced usage - using a previous named parameter in a named parameter eval, useful for unpacking complex data structures in a clear way
 		if sys.version_info[0:2] >= (3, 6):
-			self.assertThat('actual == expected', item__eval="myDataStructure['item1']", actual__eval="item[-1].getId()", expected='foobar', needsPython36=True)
+			self.assertThat('actual == expected', item__eval="myDataStructure['item1']", actual__eval="item[-1].getId()", expected='foo', needsPython36=True)
 
 		########
 

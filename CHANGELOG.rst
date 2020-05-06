@@ -26,24 +26,25 @@ potentially even re-package the documentation combined with their own extensions
 Assertion and waitForGrep improvements
 --------------------------------------
 - `BaseTest.assertThat` has been radically overhauled with a powerful mechanism that uses named parameters (e.g. 
-  ``actual=`` and ``expected=``) to produce self-describing log messages and outcome reasons, and even the ability to 
+  ``actualXXX=`` and ``expected=``) to produce self-describing log messages and outcome reasons, and even the ability to 
   evaluate arbitrary Python expressions in the parameters, for example::
   
-     self.assertThat("actualStartupMessage == expected", actualStartupMessage=msg, expected='Started successfully')
+     self.assertThat("actualStartupMessage == expected", expected='Started successfully', actualStartupMessage=msg)
+     self.assertThat('actualUser == expected', expected='myuser', actualUser=user)
 
-     self.assertThat('actual == expected', actual__eval="myDataStructure['item1'][-1].getId()", expected='foobar')
-     self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].getId()", expected='baz')
-     self.assertThat('actual == expected', actual__eval="myDataStructure['item2'][-1].id", expected='baz')
-  
+     self.assertThat("actual == expected", actual__eval="myDataStructure['item1'][-1].getId()", expected="foo")
+     self.assertThat("actual == expected", actual__eval="myDataStructure['item2'][-1].getId()", expected="bar")
+     self.assertThat("actual == expected", actual__eval="myDataStructure['item3'][-1].getId()", expected="baz")
+
   This automatically produces informative log messages such as::
-  
-     Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
-     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='biz' ... failed
-       expected: 'biz'
-         actual: 'baz'
-                   ^     
-     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
-  
+
+     Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foo', expected='foo' ... passed
+     Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='bar', expected='bar' ... passed
+     Assert that (actual == expected) with actual (myDataStructure['item3'][-1].getId()) ='baZaar', expected='baz' ... failed
+          actual: 'baZaar'
+        expected: 'baz'
+                    ^
+
   Note that when two named parameters are provided and the condition string is a simple equality 
   comparison (``==`` or ``is``), additional lines are logged when the assertion fails to show at what point the 
   two arguments differ. For best results make sure you have colours turned on. 

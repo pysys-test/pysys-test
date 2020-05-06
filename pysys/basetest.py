@@ -484,12 +484,13 @@ class BaseTest(ProcessUser):
 		
 		For example::
 		
-			# Equality comparison of an 'actual' vs 'expected' message from when our server started:
-			self.assertThat("actualStartupMessage == expected", actualStartupMessage=msg, expected='Started successfully')
+			# Equality comparison of an 'actual' vs 'expected' message from when our server started; 
+			# note the use of a descriptive name for the 'actualXXX=' keyword to produce a nice clear message if it fails
+			self.assertThat("actualStartupMessage == expected", expected='Started successfully', actualStartupMessage=msg)
+			self.assertThat('actualUser == expected', expected='myuser', actualUser=user)
 			
-			# Note the common pattern of having an "actual" and "expected" parameter and using an explicit name to 
-			# indicate what the actual value is for. This produces the following self-describing log message: 
-			#   Assert that (actualStartupMessage == expected) with actualStartupMessage='Started unsuccessfully', expected='Started successfully' ... failed
+			# This produces the self-describing log messages like: 
+			#   Assert that (actualStartupMessage == expected) with expected='Started successfully', actualStartupMessage='Started unsuccessfully' ... passed
 
 			# Any valid Python expression is permitted (not only equality testing):
 			self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
@@ -519,28 +520,33 @@ class BaseTest(ProcessUser):
 		namespace of the calling code, for example::
 		
 			myDataStructure = ...
-			self.assertThat("actual == expected", actual__eval="myDataStructure['item1'][-1].getId()", expected="foobar")
-			self.assertThat("actual == expected", actual__eval="myDataStructure['item2'][-1].getId()", expected="baz")
-			self.assertThat("actual == expected", actual__eval="myDataStructure['item2'][-1].id", expected="baz")
+			self.assertThat("actual == expected", actual__eval="myDataStructure['item1'][-1].getId()", expected="foo")
+			self.assertThat("actual == expected", actual__eval="myDataStructure['item2'][-1].getId()", expected="bar")
+			self.assertThat("actual == expected", actual__eval="myDataStructure['item3'][-1].getId()", expected="baz")
 
 			# Produces self-describing log messages like this:
-			#  Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foobar', expected='foobar' ... passed
-			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='baz', expected='biz' ... failed
-			#     expected: 'biz'
-			#       actual: 'baz'
+			#  Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foo', expected='foo' ... passed
+			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='bar', expected='bar' ... passed
+			#  Assert that (actual == expected) with actual (myDataStructure['item3'][-1].getId()) ='baZaar', expected='baz' ... failed
+			#       actual: 'baZaar'
+			#     expected: 'baz'
 			#                 ^
-			#  Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='baz', expected='baz' ... passed
 		
 		As shown above, when two named parameters are provided and the condition string is a simple equality 
 		comparison (``==`` or ``is``), additional lines are logged if the assertion fails to show at what point the 
-		two arguments differ (based on finding the longest common substring). 
+		two arguments differ (based on finding the longest common substring). So it's a good idea to include both 
+		the actual and expected value as named parameters rather than as literals inside the condition string. 
 		
 		.. versionchanged:: 1.5.1
 			The ability to pass named keyword= parameters was added in 1.5.1 
 			(prior to that this method was deprecated).
 		
 		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` 
-			as a boolean expression. 
+			as a boolean expression, for example ``actualXXX == expected``, where XXX is a brief description of 
+			what value is being tested. 
+			
+			It's best to put expected values into a separate named parameter (rather than using literals inside the 
+			conditionstring), since this will produce more informative messages if there is a failure. 
 			
 			Do not be tempted to use a Python f-string here, as that would deprive PySys of the 
 			opportunity to provide a self-describing message and outcome reason. 
