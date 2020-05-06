@@ -16,7 +16,10 @@
 	<!-- 
 	Get a reference to the environment, which can then be used as a substitution variable 
 	within the project file, e.g. ${env.PROCESSORS} would be substituted with the value of
-	the PROCESSORS environment variable if it is specified within the environment
+	the PROCESSORS environment variable if it is specified within the environment.
+	
+	Note that ${env.XXX} values can only be used within this file (they do not result in 
+	project properties being automatically defined for each environment variable). 
 	-->
 	<property environment="env"/>
 
