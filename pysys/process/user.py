@@ -934,7 +934,7 @@ class ProcessUser(object):
 			to the L{getDefaultFileEncoding()} method. 
 
 		:param str detailMessage: An extra string to add to the message logged when waiting to provide extra 
-			information about the wait condition. e.g. ``logSuffix='(downstream message received)'``. 
+			information about the wait condition. e.g. ``detailMessage='(downstream message received)'``. 
 			Added in v1.5.1. 
 
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
