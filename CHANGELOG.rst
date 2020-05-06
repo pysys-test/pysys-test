@@ -1,3 +1,4 @@
+
 Change Log
 ==========
 
@@ -9,22 +10,44 @@ Change Log
   request in the PySys test framework. For how-tos and advice, 
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
--------------------
-What's new in 1.5.1
--------------------
+---------------------------------------
+What's new in 1.6.0 (under development)
+---------------------------------------
+
+PySys 1.6.0 is under development. 
+
+New features
+------------
+
+- TODO
+
+Bug fixes
+---------
+
+- TODO
+
+Upgrade guide and compatibility
+-------------------------------
+
+- TODO
+
+
+---------------
+Release History
+---------------
 
 PySys 1.5.1 was released in May 2020. 
 
-Documentation improvements
---------------------------
+Documentation improvements:
+
 PySys now uses Sphinx to build its documentation (instead of epydoc), and new content has also been written resulting 
 in a significantly larger set of HTML documentation that is also easier to navigate, and brings together 
 the detailed API reference with information on usage and how to get started with PySys. The main ``.rst`` 
 documentation source files are shipped inside the binary distribution of PySys so that users can view and 
 potentially even re-package the documentation combined with their own extensions. 
 
-Assertion and waitForGrep improvements
---------------------------------------
+Assertion and waitForGrep improvements: 
+
 - `BaseTest.assertThat` has been radically overhauled with a powerful mechanism that uses named parameters (e.g. 
   ``actualXXX=`` and ``expected=``) to produce self-describing log messages and outcome reasons, and even the ability to 
   evaluate arbitrary Python expressions in the parameters, for example::
@@ -117,15 +140,14 @@ Assertion and waitForGrep improvements
   then afterwards be sure to carefully check the resulting diff to make sure the changes were as expected before 
   committing. 
 
-Improvements to the ``pysys.py`` tool
--------------------------------------
+Improvements to the ``pysys.py`` tool: 
 - PySys now supports v3.8 of Python. 
 
 - Added ``Test directory`` to ``pysys print --full``. The directory is given as a path relative to the directory 
   PySys was run from. 
 
-New project options
--------------------
+New project options:
+
 - The ``pysysproject.xml`` project configuration has a new ``<project-help>...</project-help>`` element which can be 
   used to provide project-specific text to be appended to the ``pysys run --help`` usage message. This could be useful 
   for documenting ``-Xkey=value`` options that are relevant for this project, and general usage information. A 
@@ -147,8 +169,7 @@ New project options
 - ``<pythonpath>`` can now be used (and is recommended) instead of ``<path>`` to add items to the PYTHONPATH. There is 
   no plan to remove support for ``<path>`` but this should increase clarity for new users. 
 
-Port allocation improvements
-----------------------------
+Port allocation improvements:
 
 - `BaseTest.getNextAvailableTCPPort` and `BaseTest.waitForSocket` now support IPv6, via the new 
   ``socketAddressFamily`` argument (IPv4 remains the default). It is also possible now to control which host 
@@ -162,10 +183,7 @@ Port allocation improvements
   port range (with a warning). This makes it possible to use PySys in environments such as 
   Windows Subsystem for Linux (WSL) v1 which may not have the usual Linux network stack. 
 
-Advanced pysystest.xml additions
---------------------------------
-For advanced users there are a couple of additions to what you can do with ``pysystest.xml`` 
-(or ``pysysdirconfig.xml``):
+Advanced pysystest.xml additions:
 
 - It is now possible to use ``${...}`` project properties when specifying the Python module to load for a given test, 
   for example::
@@ -188,9 +206,8 @@ For advanced users there are a couple of additions to what you can do with ``pys
   specified to provide a temporary override for any items in the test's user data. Note that there is no 
   automatic substituting of ``${...}`` properties in user data values. 
   
+Bug fixes:
 
-Bug fixes
----------
 - Handling of errors deleting previous test output has been improved. In 1.5.0, there was a usability regression in 
   which a test would fail to run if any part of its output directory could not be deleted due 
   to a shell or tool (e.g. tail) keeping it locked. Now, although error deleting files will still cause the test to 
@@ -215,8 +232,7 @@ Bug fixes
 - Changed `BaseTest.getNextAvailableTCPPort` to check the allocated port isn't in use on ``localhost`` (previously 
   we only checked ``INADDR_ANY`` which doesn't include the ``localhost`` interface). 
 
-Upgrade guide and compatibility
--------------------------------
+Upgrade guide and compatibility: 
 This is a minor release so is not expected to break existing tests, however we recommend reading the notes 
 below and making any 'recommended' changes at a convenient time after upgrading (to avoid problems in future major 
 upgrades), and also running your tests with the new version before upgrading to confirm everything still works as 
@@ -275,10 +291,6 @@ expected.
    - ``pysys.xml.descriptor.XMLDescriptorParser`` (replaced by `pysys.xml.descriptor.DescriptorLoader`)
    - ``pysys.xml.descriptor.XMLDescriptorContainer`` (replaced by `pysys.xml.descriptor.TestDescriptor`)
    - ``pysys.xml.descriptor.XMLDescriptorCreator`` and ``DESCRIPTOR_TEMPLATE`` (create descriptors manually if needed) 
-
----------------
-Release History
----------------
 
 1.4.0 to 1.5.0
 --------------
