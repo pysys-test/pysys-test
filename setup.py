@@ -80,9 +80,8 @@ setup(
 	name='PySys',
 	description='Python System Test Framework',
 	
-	url="https://github.com/pysys-test/pysys-test",
+	url="https://pysys-test.github.io/pysys-test",
 	project_urls={ # see PEP-0459
-		'Documentation':     'https://pysys-test.github.io/pysys-test',
 		'Repository':        'https://github.com/pysys-test/pysys-test',
 		'Tracker':           'https://github.com/pysys-test/pysys-test/issues',
 		'Change Log':        'https://pysys-test.github.io/pysys-test/ChangeLog.html',
