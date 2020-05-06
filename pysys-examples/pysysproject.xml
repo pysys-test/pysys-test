@@ -4,7 +4,7 @@
 	<!--
 	Specify a minimum required pysys version to run these tests
 	-->
-	<requires-pysys>1.5.0</requires-pysys>
+	<requires-pysys>1.5.1</requires-pysys>
 
 
 	<!--
@@ -206,7 +206,7 @@
 		</writer>
 		-->
 
-    	<!--
+		<!--
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
