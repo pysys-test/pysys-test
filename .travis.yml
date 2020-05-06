@@ -96,6 +96,12 @@ install:
   # build universal wheel and python source distribution
   - export PYSYS_VERSION=`cat VERSION`
   - "echo Using PySys version: $PYSYS_VERSION"
+  - |
+       set -e
+       # pre-process module file to include current date, which also goes into the epydoc
+       sed -i "s/__date__ = .*/__date__ = \"`date --iso-8601`\"/g" pysys/__init__.py
+       echo Build date:
+       grep __date__ pysys/__init__.py
   - $PY setup.py check --strict
   - $PY setup.py bdist_wheel
   - $PY setup.py sdist
@@ -104,9 +110,6 @@ install:
     if [[ -n $PYSYS_DOC_AND_DEPLOY ]]; then (
        set -e
        
-       # pre-process module file to include current date, which also goes into the epydoc
-       sed -i "s/__date__ = .*/__date__ = \"`date --iso-8601`\"/g" pysys/__init__.py
-
        # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
        echo --- Preparing PySys sample zip archives
        cp README.rst LICENSE.txt pysys-examples/
