@@ -1189,9 +1189,27 @@ class BaseTest(ProcessUser):
 		""" Reports a new performance number to the performance ``csv`` file, with an associated unique string key 
 		that identifies it for comparison purposes.
 		
-		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
-		rather than the total time taken, since this allows the number of iterations to be increased .
 		
+		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
+		rather than the total time taken, since this allows the number of iterations to be increased without affecting 
+		historical comparisons. For example::
+		
+			self.reportPerformanceResult(int(iterations)/float(calctime), 
+				'Fibonacci sequence calculation rate', '/s'))
+
+		If your test runs in multiple modes, make sure you include some information about the mode in the resultKey::
+		
+			self.reportPerformanceResult(int(iterations)/float(calctime), 
+				'Fibonacci sequence calculation rate using %s' % self.mode, '/s', 
+				resultDetails=[('mode',self.mode)])
+
+		While use of standard units such as '/s', 's' or 'ns' (nano-seconds) is recommended, custom units can be 
+		provided when needed using `pysys.utils.perfreporter.PerformanceUnit`::
+		
+			self.reportPerformanceResult(int(iterations)/float(calctime)/1000, 
+				'Fibonacci sequence calculation rate using %s with different units' % self.mode, 
+				unit=PerformanceUnit('kilo_fibonacci/s', biggerIsBetter=True))
+
 		:param value: The numeric value to be reported. If a str is provided, it will be converted to a float.
 
 		:param resultKey: A unique string that fully identifies what was measured, which will be
