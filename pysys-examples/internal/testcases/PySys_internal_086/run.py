@@ -20,7 +20,7 @@ class PySysTest(BaseTest):
 		
 		self.log.info('parent test: preferred encoding=%s, stdout encoding=%s', locale.getpreferredencoding(), sys.stdout.encoding)
 
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 

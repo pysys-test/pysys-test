@@ -13,7 +13,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 
 		# use multiple cycles since the buffering is different
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir'], workingDir=self.output+'/test', ignoreExitStatus=True)

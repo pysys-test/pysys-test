@@ -12,7 +12,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 
 		# output directory handling with modes
 		runPySys(self, 'run', ['run', '--mode=ALL'], workingDir='test')

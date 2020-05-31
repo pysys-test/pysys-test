@@ -19,7 +19,18 @@ PySys 1.6.0 is under development.
 New features
 ------------
 
-- TODO
+- `BaseTest.copy` improvements:
+
+  - `BaseTest.copy` can now be used to copy directories in addition to individual files. It is recommended to use 
+    this method instead of ``shutil.copytree`` as it provides a number of benefits including better error safety, 
+    long path support, and the ability to copy over an existing directory.
+  
+  - There is also support for line mappers to be notified when starting/finishing a new file, which allows for complex 
+    and stateful transformation of file contents based on file types/path if needed. 
+  
+  - `BaseTest.copy` now copies all file attributes including data/time, not just the Unix permissions/mode. 
+
+
 
 Bug fixes
 ---------

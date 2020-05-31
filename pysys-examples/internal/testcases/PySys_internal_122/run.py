@@ -11,7 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		runPySys(self, 'x', ['print', 'x'], workingDir='test', expectedExitStatus='==10')
 		runPySys(self, 'Prefix', ['print', 'Prefix'], workingDir='test')
 		runPySys(self, 'Suffix', ['print', 'Suffix'], workingDir='test') # without any id-prefix, this is an exact match

@@ -7,7 +7,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		script = "%s/workingdir.py" % self.input
-		shutil.copytree(self.input+'/dir', self.output+'/parent/my-working-dir')
+		self.copy(self.input+'/dir', self.output+'/parent/my-working-dir')
 		
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script],

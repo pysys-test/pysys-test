@@ -16,9 +16,83 @@ class PySysTest(BaseTest):
 
 		self.write_text('output-i18n.txt', self.utf8teststring, encoding='utf-8')
 		self.copy('output-i18n.txt', 'output-i18n-binary.txt')
+		self.copy('output-i18n.txt', 'output-i18n-binary.txt') # check overwrite works by default for files
 		self.copy('output-i18n.txt', 'output-i18n-processed.txt', encoding='utf-8', 
 			mappers=[lambda line: line.replace(self.utf8teststring, 'Foo bar')]
 			)
+		
+		# setup
+		self.mkdir('srcdirname/subdir1/subdir2')
+		self.write_text('srcdirname/src.txt', 'src.txt')
+		self.write_text('srcdirname/subdir1/subdir2/src2.txt', 'src2.txt')
+		try:
+			os.symlink(self.output+'/srcdirname/src.txt', self.output+'/srcdirname/symlink.txt')
+			symlinks = True
+		except Exception as ex:
+			self.log.info('This platform does not support symlinks, so skipping that bit of the test: %s', ex)
+			symlinks = False
+		self.mkdir('srcdirname/subdir3')
+		
+		# directory copies
+		self.assertPathExists(self.copy('srcdirname', 'dest-dir')) # dir doesn't already exist, so 
+		self.assertPathExists(self.output+'/dest-dir/src.txt')
+		self.assertPathExists(self.output+'/dest-dir/subdir1/subdir2/src2.txt')
+		self.assertPathExists(self.output+'/dest-dir/subdir3')
+		self.assertPathExists(self.output+'/dest-dir/symlink.txt', exists=symlinks)
+		
+		if symlinks:
+			self.copy('srcdirname', 'dest-dir-symlinks', symlinks=True)
+			self.assertThat('    os.path.islink(self.output+"/dest-dir-symlinks/symlink.txt")')
+			self.assertThat('not os.path.islink(self.output+"/dest-dir/symlink.txt")')
+			self.assertGrep(self.output+"/dest-dir-symlinks/symlink.txt", expr='.') # check not a broken link
+
+		self.copy('srcdirname', self.mkdir(self.output+'/dest-copyinto')+'/')
+		self.assertPathExists(self.output+'/dest-copyinto/srcdirname/src.txt')
+
+		self.copy('srcdirname', 'dest-dir-slash/')
+		self.assertPathExists(self.output+'/dest-dir-slash/srcdirname/src.txt')
+
+		self.copy('srcdirname', 'dest-dir-slash2\\')
+		self.assertPathExists(self.output+'/dest-dir-slash2/srcdirname/src.txt')
+
+		try:
+			self.copy('srcdirname', 'dest-dir-slash2\\')
+		except Exception as ex:
+			self.assertThat('"unless overwrite=True" in errorMessage', errorMessage=str(ex))
+		else:
+			self.addOutcome(FAILED, 'Expected error from copying to a path that already exists')
+		self.copy('srcdirname', 'dest-dir-slash2\\', overwrite=True)
+
+		self.copy('srcdirname', 'dest-with-ignores', ignoreIf=lambda src: src.endswith(('src2.txt', 'subdir3')))
+		self.assertPathExists(self.output+'/dest-with-ignores/src.txt')
+		self.assertPathExists(self.output+'/dest-with-ignores/subdir3/', exists=False)
+		self.assertPathExists(self.output+'/dest-with-ignores/subdir1/subdir2/')
+		self.assertPathExists(self.output+'/dest-with-ignores/subdir1/subdir2/src2.txt', exists=False)
+
+		self.copy('srcdirname', 'dest-with-skip-mappers', skipMappersIf=lambda src: src.endswith(('src.txt')), 
+			mappers=[lambda line: 'mapper-result'])
+		self.assertGrep('dest-with-skip-mappers/src.txt', expr='src.txt')
+		self.assertGrep('dest-with-skip-mappers/subdir1/subdir2/src2.txt', expr='src', contains=False)
+		self.assertGrep('dest-with-skip-mappers/subdir1/subdir2/src2.txt', expr='mapper-result')
+
+		# this example is in the doc
+		class CustomLineMapper(object):
+			def fileStarted(self, srcPath, destPath, srcFile, destFile):
+				self.src = os.path.basename(srcPath)
+			
+			def __call__(self, line):
+				return '"'+self.src+'": '+line
+			
+			def fileFinished(self, srcPath, destPath, srcFile, destFile):
+				destFile.write('\n' + 'footer added by CustomLineMapper')
+		# just to show we can also add them to lambdas if we want to
+		counter = lambda line: line
+		count = [0]
+		def incrementCounter(srcPath, destPath, srcFile, destFile): 
+			count[0]+=1
+		counter.fileStarted = incrementCounter
+		self.copy('srcdirname/src.txt', 'dest.txt', mappers=[CustomLineMapper(), counter, None])
+		self.assertThat('mappedFileCount == 1', mappedFileCount=count[0])
 
 	def validate(self):
 		self.assertDiff('output-processed.txt', 'ref-output-processed.txt')

@@ -9,7 +9,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/pysys-output', '-v', 'debug'], workingDir='test', ignoreExitStatus=True)
 		self.logFileContents('pysys.out', maxLines=0)
 

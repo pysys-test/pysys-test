@@ -1575,22 +1575,13 @@ class ProcessUser(object):
 		with openfile(os.path.join(self.output, file), 'w', encoding=encoding or self.getDefaultFileEncoding(file)) as f:
 			f.write(text)
 	
-	def copy(self, src, dest, mappers=[], encoding=None):
-		"""Copy a single text or binary file, optionally tranforming the 
-		contents by filtering each line through a list of mapping functions. 
+	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
+		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
 		
 		If any mappers are provided, the file is copied in text mode and 
 		each mapper is given the chance to modify or omit each line. 
 		If no mappers are provided, the file is copied in binary mode. 
-		
-		In addition to the file contents the mode is also copied, for example 
-		the executable permission will be retained. 
-		
-		This function is useful both for creating a modified version of an 
-		output file that's more suitable for later validation steps such as 
-		diff-ing, and also for copying required files from the input to the 
-		output directory. 
-		
+
 		For example::
 		
 			self.copy('output-raw.txt', 'output-processed.txt', encoding='utf-8', 
@@ -1598,44 +1589,161 @@ class ProcessUser(object):
 					lambda line: None if ('Timestamp: ' in line) else line, 
 					lambda line: line.replace('foo', 'bar'), 
 				])
+
+		In addition to the file contents the attributes such as modification time and 
+		executable permission will be copied where possible. 
 		
-		:param src: The source filename, which can be an absolute path, or 
+		This function is useful for creating a modified version of an 
+		output file that's more suitable for later validation steps such as 
+		diff-ing, and also for copying required files from the input to the 
+		output directory. 
+		
+		It can also be used for copying a whole directory, 
+		similar to ``shutil.copytree`` but with the advantages of support 
+		for long paths on Windows, better error safety, and that relative paths 
+		are evaluated relative to the self.output directory (which is both convenient, and 
+		safer than shutil's evaluation relative to the current working 
+		directory). 
+
+		For example::
+		
+			self.copy('src.txt', 'dest.txt')  # copies to outputdir/dest.txt
+			self.copy('src.txt', self.output) # copies to outputdir/src.txt, since self.output is an existing directory
+			self.copy('src.txt', 'foo/')      # copies to outputdir/foo/src.txt since destination ends with a slash
+			self.copy('srcdirname', 'foo/')   # copies to outputdir/foo/srcdirname since destination ends with a slash
+
+		Usually mappers are simple functions or lambdas, however for advanced use cases you can 
+		additionally provide ``mapper.fileStarted([self,] srcPath, destPath, srcFile, destFile)`` and/or  
+		``mapper.fileFinished(...)`` methods to allow stateful operations, or to perform extra read/write operations 
+		before lines are read/written. For example::
+		
+			class CustomLineMapper(object):
+				def fileStarted(self, srcPath, destPath, srcFile, destFile):
+					self.src = os.path.basename(srcPath)
+				
+				def __call__(self, line):
+					return '"'+self.src+'": '+line
+				
+				def fileFinished(self, srcPath, destPath, srcFile, destFile):
+					destFile.write('\\n' + 'footer added by CustomLineMapper')
+			self.copy('src.txt', 'dest.txt', mappers=[CustomLineMapper()])
+
+		.. versionchanged:: 1.6.0
+			Ability to copy directories was added, along with the ``overwrite=``, ``symlinks=``, 
+			``ignoreIf=`` and ``skipMappersIf=`` arguments. 
+
+		:param str src: The source filename or directory, which can be an absolute path, or 
 			a path relative to the ``self.output`` directory. 
 			Use ``src=self.input+'/myfile'`` if you wish to copy a file from the test 
 			input directory. 
 		
-		:param dest: The source filename, which can be an absolute path, or 
-			a path relative to the `self.output` directory. If this is a directory 
-			name, the file is copied to this directory with the same basename as src. 
+		:param str dest: The destination file or directory name, which can be an absolute path, or 
+			a path relative to the `self.output` directory. Destination file(s) are overwritten if the 
+			dest already exists. 
+			
+			As a convenience to avoid repeating the same text in the src and destination, 
+			if the dest ends with a slash, or the src is a file and the dest is an existing directory, 
+			the dest is taken as a parent directory into which the src will be copied in retaining its current name. 
 		
-		:param mappers: A list of filter functions that will be applied, 
-			in order, to each line read from the file. Each function accepts a string for 
+		:param bool overwrite: If True, source files will be allowed to 
+			overwrite destination files, if False an exception will be raised if a destination file already exists. 
+			By default overwrite=None which means it's enable for single file copy() but disabled for directory copies.
+		
+		:param List[callable[str]->str] mappers: A list of filter functions that will be applied, 
+			in order, to map each line from source to destination. Each function accepts a string for 
 			the current line as input and returns either a string to write or 
-			None if the line is to be omitted. 
-		
-		:param encoding: The encoding to use to open the file. 
+			None if the line is to be omitted. Any ``None`` items in the mappers list will be ignored. 
+			
+			If present the ``mapper.fileStarted(...)`` and/or ``mapper.fileFinished(...)`` methods will be called on each 
+			mapper in the list at the start and end of each file; see above for an example. 
+			
+			If your mapper is stateful, be sure to create separate instances for each test rather than 
+			sharing instances across multiple tests which would cause race conditions. 
+			
+		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
+		:param bool symlinks: Set to True if symbolic links in the source tree should be represented as symbolic 
+			links in the destination (rather than just being copied). 
+		
+		:param callable[str]->bool ignoreIf: A callable that accepts a source path and returns True if 
+			this file/directory should be omitted from a directory copy. 
+			For example: ``ignoreIf=lambda src: src.endswith(('.tmp', '.log')))``
+
+		:param callable[str]->bool skipMappersIf: A callable that accepts a source path and returns True if 
+			this file should be copied in binary mode (as if no mappers had been specified). 
+			For example: ``skipMappersIf=lambda src: not src.endswith(('.xml', '.properties')))``
+		
 		:return: the absolute path of the destination file. 
 		"""
+		origdest = dest
 		src = toLongPathSafe(os.path.join(self.output, src))
-		dest = toLongPathSafe(os.path.join(self.output, dest))
-		if os.path.isdir(dest): dest = toLongPathSafe(dest+'/'+os.path.basename(src))
+		srcIsDir = os.path.isdir(src)
+	
+		dest = toLongPathSafe(os.path.join(self.output, dest)).rstrip('/\\')
+		if origdest.endswith((os.sep, '/', '\\')) or (not srcIsDir and os.path.isdir(dest)): dest = toLongPathSafe(dest+os.sep+os.path.basename(src))
 		assert src != dest, 'Source and destination file cannot be the same'
+
+		if overwrite is None: overwrite = not srcIsDir
+
+		if srcIsDir:
+			destexists = os.path.isdir(dest)
+			if not destexists: self.mkdir(dest)
+			scandir = getattr(os, 'scandir', None)
+			for e in (os.listdir(src) if scandir is None else scandir(src)):
+				if scandir is None: # for python2 support
+					path = os.path.join(src, e)
+					isdir = os.path.isdir(path)
+					islink = os.path.islink(path)
+				else:
+					isdir = e.is_dir()
+					islink = e.is_symlink()
+					path = e.path
+				
+				if ignoreIf is not None and ignoreIf(path): continue
+				
+				if islink and symlinks:
+					dest = dest+os.sep+os.path.basename(path)
+					os.symlink(os.readlink(path), dest)
+					shutil.copystat(path, dest, follow_symlinks=False)
+					continue
+				
+				self.copy(path, dest+os.sep+os.path.basename(path), 
+					# must pass all other arguments through
+					mappers=mappers, encoding=encoding, symlinks=symlinks, ignoreIf=ignoreIf, skipMappersIf=skipMappersIf, overwrite=overwrite)
+				
+			# todo: error if already exists, e.g. to stop overwriting run.log by mistake
+			return dest
+
+		if skipMappersIf is not None and skipMappersIf(src): mappers = None
 		
+		if not overwrite and os.path.exists(dest):
+			raise Exception('copy() will not overwrite an existing file unless overwrite=True: %s'%dest)
+
 		if not mappers:
 			# simple binary copy
 			shutil.copyfile(src, dest)
 		else:
+			if None in mappers: mappers = [m for m in mappers if m]
+			
 			with openfile(src, 'r', encoding=encoding or self.getDefaultFileEncoding(src)) as srcf:
 				with openfile(dest, 'w', encoding=encoding or self.getDefaultFileEncoding(dest)) as destf:
+					# give mappers a change to setup initial state and/or read/write from the source and dest files
+					for mapper in mappers:
+						fn = getattr(mapper, 'fileStarted', None)
+						if fn: fn(src, dest, srcf, destf)
+
 					for line in srcf:
 						for mapper in mappers:
 							line = mapper(line)
 							if line is None: break
 						if line is not None: destf.write(line)
-			
-		shutil.copymode(src, dest)
+
+					for mapper in mappers:
+						fn = getattr(mapper, 'fileFinished', None)
+						if fn: fn(src, dest, srcf, destf)
+
+		shutil.copystat(src, dest)
 		return dest
 		

@@ -11,7 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, os.path.join(self.output,'test'))
+		self.copy(self.input, os.path.join(self.output,'test'))
 
 		subtest = 'enabled-defaults'
 		runPySys(self, subtest, ['run', '--record', '--threads', '1', '-o', subtest], 

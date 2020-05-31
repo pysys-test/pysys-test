@@ -11,7 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		runPySys(self, 'pysys-nomodes', ['run', '-o', 'pysys-nomodes'], workingDir='test')
 		runPySys(self, 'pysys-withmodes', ['run', '-o', 'pysys-withmodes', '-m', 'mode1'], workingDir='test')
 		runPySys(self, 'pysys-withemptymode', ['run', '-o', 'pysys-withemptymode', '-m', ''], workingDir='test')

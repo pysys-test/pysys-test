@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		try:
 			runPySys(self, 'pysys', ['run', '-XtestDurationSecs=%s'%self.testDurationSecs], defaultproject=True, workingDir='test')
 		finally:

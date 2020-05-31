@@ -13,7 +13,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 
 		longoutputdir = self.output+'/'+('x'*(256-len(self.output)))+'/outdir'
 		# since this path causes problems for many tools, delete it even if this tests isn't in purge mode

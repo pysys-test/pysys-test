@@ -13,8 +13,8 @@ class PySysTest(BaseTest):
 		
 		self.mkdir(self.output+'/test-exampleproject')
 		self.mkdir(self.output+'/test-notset')
-		shutil.copytree(self.input+'/NestedTest', self.output+'/test-exampleproject/NestedTest')
-		shutil.copytree(self.input+'/NestedTest', self.output+'/test-notset/NestedTest')
+		self.copy(self.input+'/NestedTest', self.output+'/test-exampleproject/NestedTest')
+		self.copy(self.input+'/NestedTest', self.output+'/test-notset/NestedTest')
 		
 		shutil.copyfile(self.input+'/pysysproject-notset.xml', self.output+'/test-notset/pysysproject.xml')
 		createProjectConfig(self.output+'/test-exampleproject')

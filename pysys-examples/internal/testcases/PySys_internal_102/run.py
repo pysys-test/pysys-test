@@ -9,7 +9,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/pysys-output', '--purge'], workingDir='test')
 		# run a recond time to prove earlier files aren't kept
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/pysys-output', '--purge', '--cycle', '2'], workingDir='test')

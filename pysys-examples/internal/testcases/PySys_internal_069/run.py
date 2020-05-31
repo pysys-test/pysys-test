@@ -10,7 +10,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, os.path.join(self.output,'test'))
+		self.copy(self.input, os.path.join(self.output,'test'))
 
 		p = runPySys(self, 'pysys', ['run', '-o', os.path.join(self.output,'myoutdir'), '--progress', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
 		self.assertThat('%d > 0', p.exitStatus)

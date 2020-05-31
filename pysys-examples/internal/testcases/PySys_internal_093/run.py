@@ -10,7 +10,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, os.path.join(self.output,'test'))
+		self.copy(self.input, os.path.join(self.output,'test'))
 
 		subtest = 'printLogs-all-ST'
 		runPySys(self, subtest, ['run', '--printLogs', 'aLL', '--threads', '1', '-o', subtest], workingDir='test', ignoreExitStatus=True)

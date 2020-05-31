@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
