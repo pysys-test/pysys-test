@@ -1704,16 +1704,15 @@ class ProcessUser(object):
 				if ignoreIf is not None and ignoreIf(path): continue
 				
 				if islink and symlinks:
-					dest = dest+os.sep+os.path.basename(path)
-					os.symlink(os.readlink(path), dest)
-					shutil.copystat(path, dest, follow_symlinks=False)
+					linkdest = dest+os.sep+os.path.basename(path)
+					os.symlink(os.readlink(path), linkdest)
+					shutil.copystat(path, linkdest, follow_symlinks=False)
 					continue
 				
 				self.copy(path, dest+os.sep+os.path.basename(path), 
 					# must pass all other arguments through
 					mappers=mappers, encoding=encoding, symlinks=symlinks, ignoreIf=ignoreIf, skipMappersIf=skipMappersIf, overwrite=overwrite)
 				
-			# todo: error if already exists, e.g. to stop overwriting run.log by mistake
 			return dest
 
 		if skipMappersIf is not None and skipMappersIf(src): mappers = None
