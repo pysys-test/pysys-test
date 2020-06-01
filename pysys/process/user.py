@@ -1706,7 +1706,7 @@ class ProcessUser(object):
 				if islink and symlinks:
 					linkdest = dest+os.sep+os.path.basename(path)
 					os.symlink(os.readlink(path), linkdest)
-					shutil.copystat(path, linkdest, follow_symlinks=False)
+					shutil.copystat(path, linkdest, **({} if PY2 else {'follow_symlinks':False}))
 					continue
 				
 				self.copy(path, dest+os.sep+os.path.basename(path), 
