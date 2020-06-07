@@ -86,6 +86,7 @@ class CommonProcessWrapper(object):
 		# these may be further updated by the subclass
 		self.stdout = stdout
 		self.stderr = stderr
+		self.stderr = stderr
 
 		# print process debug information
 		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
@@ -175,23 +176,24 @@ class CommonProcessWrapper(object):
 
 
 	def wait(self, timeout):
-		"""Wait for a process to complete execution.
+		"""Wait for a process to complete execution, raising an exception on timeout.
 		
-		The method will block until either the process is no longer running, or the timeout 
-		is exceeded. Note that the method will not terminate the process if the timeout is 
-		exceeded. 
+		This method provides basic functionality but does not check the exit status or log any messages; 
+		see `pysys.basetest.BaseTest.waitProcess` for a wrapper that adds additional functionality. 
 		
-		:param timeout: The timeout to wait in seconds. Always provide a 
-			timeout, otherwise your test may block indefinitely!
-		@raise pysys.exceptions.ProcessTimeout: Raised if the timeout is exceeded.
+		Note that this method will not terminate the process if the timeout is exceeded. 
+		
+		:param timeout: The timeout to wait in seconds, for example ``timeout=TIMEOUTS['WaitForProcess']``.
+		:raise pysys.exceptions.ProcessTimeout: Raised if the timeout is exceeded.
 		
 		"""
+		assert timeout > 0, 'timeout must always be specified'
 		startTime = time.time()
+		log.debug("Waiting up to %d secs for process %r", timeout, self)
 		while self.running():
-			if timeout:
-				currentTime = time.time()
-				if currentTime > startTime + timeout:
-					raise ProcessTimeout("Process timedout")
+			currentTime = time.time()
+			if currentTime > startTime + timeout:
+				raise ProcessTimeout('Waiting for completion of %s timed out after %d seconds'%(self, int(timeout)))
 			time.sleep(0.05)
 		
 

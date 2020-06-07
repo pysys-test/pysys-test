@@ -54,6 +54,8 @@ Upgrade guide and compatibility
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
+- `pysys.process.common.CommonProcessWrapper.wait` now returns an error if the specified timeout is isn't a positive 
+  number (giving the same behaviour as `BaseTest.waitProcess`). 
 
 ---------------
 Release History
