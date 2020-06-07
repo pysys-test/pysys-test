@@ -361,7 +361,7 @@ class ProcessUser(object):
 			when a process fails and abortOnError=True. 
 			
 			The ``self.logFileContentsDefaultExcludes`` variable can be used to add regular expressions to exclude 
-			unimportant lines of output such as standard startup lines (see `logFileContents). 
+			unimportant lines of output such as standard startup lines (see `logFileContents`). 
 		
 		:param bool quiet: If True, this method will not do any INFO or WARN level logging 
 			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
