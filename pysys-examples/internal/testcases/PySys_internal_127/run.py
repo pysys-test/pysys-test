@@ -5,7 +5,7 @@ class PySysTest(BaseTest):
 	
 	def startTestProcess(self, **kwargs):
 		try:
-			self.startPython([self.input+'/test.py']+kwargs.pop('arguments',[]), **kwargs)
+			self.startPython([self.input+'/test.py']+kwargs.pop('arguments',[]), disableCoverage=True, **kwargs)
 		except Exception as ex: # test abort
 			self.log.info('Suppressing exception: %s', ex)
 	
