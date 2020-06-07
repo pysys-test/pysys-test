@@ -1,0 +1,17 @@
+
+<default>, exit status 1
+Contents of default.err: 
+
+Timed out process
+Contents of default_timeout.err: 
+
+<onError=noop>, exit status 1
+
+<onError=logfile>, exit status 1
+Contents of logfile.log: 
+
+<onError=stdout>, exit status 1
+Contents of onError=stdout.out: 
+
+<onError=doc_example>, exit status 1
+Contents of onError=doc_example.err: 

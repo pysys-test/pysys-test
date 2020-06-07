@@ -30,7 +30,13 @@ New features
   
   - `BaseTest.copy` now copies all file attributes including data/time, not just the Unix permissions/mode. 
 
+- `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
+  behaviour can be customized with a new ``onError=`` parameter::
+  
+    self.startProcess(..., onError=lambda process: self.logFileContents(process.stdout, tail=True))
+    self.startProcess(..., onError=lambda process: None) # do nothing on error
 
+  If you already created some extensions 
 
 Bug fixes
 ---------

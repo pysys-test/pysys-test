@@ -259,7 +259,7 @@ class ProcessUser(object):
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=None, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None, 
+			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, onError=None, quiet=False, stdouterr=None, 
 			background=False):
 		"""Start a process running in the foreground or background, and return 
 		the `pysys.process.commonwrapper.CommonProcessWrapper` object.
@@ -343,6 +343,15 @@ class ProcessUser(object):
 			(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
 			compatibility with older PySys releases if no project property is set. 
 		
+		:param Callable[pysys.process.commonwrapper.CommonProcessWrapper] onError: A function that will be called 
+			if the process times out or returns an unexpected exit status (unless ignoreExitStatus=True), before 
+			an abort exception is raised (if abortOnError=True). This provides a convenient place to add gathering of 
+			diagnostic information (perhaps using the stdout/err of the process), for example 
+			``onError=lambda process: self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)``.
+			
+			If no onError function is specified, the default is to log the last few lines of stderr (or if empty, stdout) 
+			when a process fails and abortOnError=True. 
+		
 		:param bool quiet: If True, this method will not do any INFO or WARN level logging 
 			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
 			useful to avoid filling up the log where it is necessary to repeatedly execute a 
@@ -387,43 +396,54 @@ class ProcessUser(object):
 		if not environs: # a truly empty env isn't really usable, so populate it with a minimal default environment instead
 			environs = self.getDefaultEnvirons(command=command)
 		
+		startTime = time.time()
+		process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
+		hasFailed = True # in order to decide whether to log the process output
 		try:
-			startTime = time.time()
-			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
-			process.start()
-			if state == FOREGROUND:
-				correctExitStatus = pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
-				
-				logmethod = log.info if correctExitStatus else log.warn
-				if quiet: logmethod = log.debug
-				logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
-																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
-				
-				if not ignoreExitStatus and not correctExitStatus:
-					self.addOutcome(BLOCKED, 
-						('%s returned non-zero exit code %d'%(process, process.exitStatus))
-						if expectedExitStatus=='==0' else
-						('%s returned exit code %d (expected %s)'%(process, process.exitStatus, expectedExitStatus)), 
-						abortOnError=abortOnError)
+			try:
+				process.start()
+				if state == FOREGROUND:
+					correctExitStatus = pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
+					
+					logmethod = log.info if correctExitStatus else log.warn
+					if quiet: logmethod = log.debug
+					logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
+																		", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
+					
+					if not ignoreExitStatus and not correctExitStatus:
+						self.addOutcome(BLOCKED, 
+							('%s returned non-zero exit code %d'%(process, process.exitStatus))
+							if expectedExitStatus=='==0' else
+							('%s returned exit code %d (expected %s)'%(process, process.exitStatus, expectedExitStatus)), 
+							abortOnError=abortOnError)
+					else:
+						hasFailed = False
+				elif state == BACKGROUND:
+					(log.info if not quiet else log.debug)("Started %s with process id %d", displayName, process.pid)
+					hasFailed = False
+			except ProcessError as e:
+				if not ignoreExitStatus:
+					self.addOutcome(BLOCKED, 'Could not start %s process: %s'%(displayName, e), abortOnError=abortOnError)
+				else: # this wouldn't happen during a polling-until-success use case so is always worth logging even in quiet mode
+					log.info("%s", sys.exc_info()[1], exc_info=0)
+			except ProcessTimeout:
+				(log.warn if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+				self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
+				process.stop()
+			else:
+				with self.lock:
+					self.processList.append(process)
+					if displayName in self.processCount:
+						self.processCount[displayName] = self.processCount[displayName] + 1
+					else:
+						self.processCount[displayName] = 1
+		finally:
+			if hasFailed:
+				if onError: 
+					onError(process)
+				elif abortOnError:
+					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
 
-			elif state == BACKGROUND:
-				(log.info if not quiet else log.debug)("Started %s with process id %d", displayName, process.pid)
-		except ProcessError as e:
-			if not ignoreExitStatus:
-				self.addOutcome(BLOCKED, 'Could not start %s process: %s'%(displayName, e), abortOnError=abortOnError)
-			else: # this wouldn't happen during a polling-until-success use case so is always worth logging even in quiet mode
-				log.info("%s", sys.exc_info()[1], exc_info=0)
-		except ProcessTimeout:
-			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
-			(log.warn if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
-			process.stop()
-		else:
-			with self.lock:
-				self.processList.append(process)
-				if displayName in self.processCount:
-					self.processCount[displayName] = self.processCount[displayName] + 1
-				else:
-					self.processCount[displayName] = 1
 		return process	
 
 	def getDefaultEnvirons(self, command=None, **kwargs):
@@ -1407,7 +1427,9 @@ class ProcessUser(object):
 			def logFunction(line):
 				self.log.info(u'  %s', l, extra=logextra)
 
-		self.log.info(u'Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
+		path = os.path.normpath(path)
+		if path.startswith(self.output): path = path[len(self.output)+1:]
+		self.log.info(u'Contents of %s%s: ', path, ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
 			logFunction(l)
 		self.log.info('  -----', extra=logextra)
