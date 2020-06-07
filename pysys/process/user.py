@@ -1378,7 +1378,7 @@ class ProcessUser(object):
 		:param list[str] includes: Optional list of regex strings. If specified, only matches of these regexes will be logged.
 		:param list[str] excludes: Optional list of regex strings. If specified, no line containing these will be logged.
 		
-			The variable ``self.logFileContentsDefaultExcludes`` (= ``[]` `by default) is used when this method 
+			The variable ``self.logFileContentsDefaultExcludes`` (= ``[]`` by default) is used when this method 
 			is called with the default argument of ``excludes=None``, and can be used to provide a global set of 
 			default exclusion lines shared by all your tests, which is particularly useful if some processes always 
 			log some unimportant text to stderr (or stdout) that would be distracting to log out. 
