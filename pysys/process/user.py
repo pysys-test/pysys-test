@@ -286,6 +286,9 @@ class ProcessUser(object):
 		When starting a process that will listen on a server socket, use `getNextAvailableTCPPort` 
 		to allocate a free port before calling this method. 
 
+		.. versionchanged:: 1.6.0
+			Added onError parameter and default behaviour of logging stderr/out when there's a failure.
+
 		:param str command: The path to the executable to be launched (should include the full path)
 		:param list[str] arguments: A list of arguments to pass to the command
 		

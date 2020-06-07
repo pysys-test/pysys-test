@@ -46,7 +46,9 @@ Bug fixes
 Upgrade guide and compatibility
 -------------------------------
 
-- TODO
+- If you wrote extensions that log stderr/out after process failures, you may wish to remove them (to avoid 
+  duplication)  or change them to use the new ``onError=`` parameter now that `BaseTest.startProcess` logs stderr/out 
+  automatically in this case. 
 
 
 ---------------
