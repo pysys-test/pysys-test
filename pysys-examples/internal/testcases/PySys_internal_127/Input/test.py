@@ -1,5 +1,5 @@
 import sys, time
-sys.stdout.write('Process stdout output\nis here')
+sys.stdout.write('Process stdout output\nUmmmmm\nis here')
 sys.stderr.write('Process stderr output\nis here')
 if sys.argv[-1] == 'block':
 	sys.stdout.write('\nBlocking now')

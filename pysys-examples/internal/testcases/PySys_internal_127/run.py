@@ -10,6 +10,8 @@ class PySysTest(BaseTest):
 			self.log.info('Suppressing exception: %s', ex)
 	
 	def execute(self):
+		self.logFileContentsDefaultExcludes=['Umm.*']
+	
 		self.startTestProcess(stdouterr='default')
 		self.startTestProcess(stdouterr='default_timeout', arguments=['block'], timeout=0.1)
 		self.startTestProcess(stdouterr='onError=noop', onError=lambda process: None)
@@ -33,3 +35,4 @@ class PySysTest(BaseTest):
 
 	def validate(self):
 		self.assertDiff('output.txt')
+		self.assertGrep('run.log', expr='Ummmmm', contains=False)

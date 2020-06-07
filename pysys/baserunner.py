@@ -125,7 +125,9 @@ class BaseRunner(ProcessUser):
 		each test, the validation for each test should be re-run on the previous output. 
 
 	:ivar float ~.startTime: The time when the test run started (in seconds since the epoch).
-	
+
+	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
+
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):

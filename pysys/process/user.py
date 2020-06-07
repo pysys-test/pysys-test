@@ -80,6 +80,8 @@ class ProcessUser(object):
 		flag. It is recommended that any other languages supporting code coverage 
 		also check the self.disableCoverage flag. 
 	
+	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
+	
 	"""
 	
 	def __init__(self):
@@ -113,6 +115,9 @@ class ProcessUser(object):
 		A recursive lock that can be used for protecting the fields of this instance 
 		from access by background threads, as needed. 
 		"""
+		
+		# variables affecting a specific method (documented there rather than above)
+		self.logFileContentsDefaultExcludes = []
 
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
@@ -354,6 +359,9 @@ class ProcessUser(object):
 			
 			If no onError function is specified, the default is to log the last few lines of stderr (or if empty, stdout) 
 			when a process fails and abortOnError=True. 
+			
+			The ``self.logFileContentsDefaultExcludes`` variable can be used to add regular expressions to exclude 
+			unimportant lines of output such as standard startup lines (see `logFileContents). 
 		
 		:param bool quiet: If True, this method will not do any INFO or WARN level logging 
 			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
@@ -1355,20 +1363,28 @@ class ProcessUser(object):
 
 
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, logFunction=None, reFlags=0):
-		""" Logs some or all of the lines in the specified file.
+		""" Logs some or all of the lines from the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
 		diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
 		to make test failures easier to triage quickly. 
-
+		
 		.. versionchanged:: 1.5.1
 			Added logFunction parameter. 
+		.. versionchanged:: 1.6.0
+			Added self.logFileContentsDefaultExcludes variable. 
 
-		:param str path: May be an absolute, or relative to the test output directory
-		:param list[str] includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
-		:param list[str] excludes: Optional list of regex strings. If specified, no line containing these will be logged
+		:param str path: May be an absolute, or relative to the test output directory.
+		:param list[str] includes: Optional list of regex strings. If specified, only matches of these regexes will be logged.
+		:param list[str] excludes: Optional list of regex strings. If specified, no line containing these will be logged.
+		
+			The variable ``self.logFileContentsDefaultExcludes`` (= ``[]` `by default) is used when this method 
+			is called with the default argument of ``excludes=None``, and can be used to provide a global set of 
+			default exclusion lines shared by all your tests, which is particularly useful if some processes always 
+			log some unimportant text to stderr (or stdout) that would be distracting to log out. 
+		
 		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
-		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
+		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'.
 		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
@@ -1385,6 +1401,7 @@ class ProcessUser(object):
 		:return: True if anything was logged, False if not.
 		
 		"""
+		if excludes is None: excludes = self.logFileContentsDefaultExcludes
 		if not path: return False
 		actualpath= os.path.join(self.output, path)
 		try:

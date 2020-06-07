@@ -1,17 +1,17 @@
 
 <default>, exit status 1
-Contents of default.err: 
+Contents of default.err (filtered): 
 
 Timed out process
-Contents of default_timeout.err: 
+Contents of default_timeout.err (filtered): 
 
 <onError=noop>, exit status 1
 
 <onError=logfile>, exit status 1
-Contents of logfile.log: 
+Contents of logfile.log (filtered): 
 
 <onError=stdout>, exit status 1
-Contents of onError=stdout.out: 
+Contents of onError=stdout.out (filtered): 
 
 <onError=doc_example>, exit status 1
-Contents of onError=doc_example.err: 
+Contents of onError=doc_example.err (filtered): 

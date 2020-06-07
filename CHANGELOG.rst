@@ -36,7 +36,12 @@ New features
     self.startProcess(..., onError=lambda process: self.logFileContents(process.stdout, tail=True))
     self.startProcess(..., onError=lambda process: None) # do nothing on error
 
-  If you already created some extensions 
+- `BaseTest.logFileContents` now has a global variable ``self.logFileContentsDefaultExcludes`` (default ``[]``) which 
+  it uses to specify the line exclusion regular expressions if no ``excludes=[...]`` is passed as a parameter. This 
+  provides a convenient way to filter out lines that you usually don't care about at a global level (e.g. from a 
+  `BaseTest.setup` method shared by all tests), such as unimportant lines logged to stderr during startup of 
+  commonly used processes which would otherwise be logged by `BaseTest.startProcess` when a process fails to start. 
+
 
 Bug fixes
 ---------
@@ -46,10 +51,9 @@ Bug fixes
 Upgrade guide and compatibility
 -------------------------------
 
-- If you wrote extensions that log stderr/out after process failures, you may wish to remove them (to avoid 
-  duplication)  or change them to use the new ``onError=`` parameter now that `BaseTest.startProcess` logs stderr/out 
-  automatically in this case. 
-
+- Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
+  that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
+  to avoid duplication, or change them to use the new ``onError=`` mechanism. 
 
 ---------------
 Release History
