@@ -22,9 +22,12 @@ class PySysTest(BaseTest):
 		self.waitForBackgroundProcesses(checkExitStatus=False) # should succeed
 		self.waitForBackgroundProcesses(abortOnError=False) # should fail
 		
-		self.startTestProcess(stdouterr='timeout1', arguments=['block'], background=True)
-		self.startTestProcess(stdouterr='timeout2', arguments=['block'], background=True)
+		p1 = self.startTestProcess(stdouterr='timeout1', arguments=['block'], background=True)
+		p2 = self.startTestProcess(stdouterr='timeout2', arguments=['block'], background=True)
 		self.waitForBackgroundProcesses(timeout=0.1, abortOnError=False, checkExitStatus=True)  # should fail
+
+		p1.stop()
+		p2.stop()
 
 		self.addOutcome(PASSED, override=True)
 		def m(line):

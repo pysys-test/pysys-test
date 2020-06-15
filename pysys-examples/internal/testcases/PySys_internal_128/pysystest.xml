@@ -16,7 +16,7 @@
     </modes>
   </classification>
 
-  <skipped reason="temp skip while debugging hang"/> 
+  <!-- <skipped reason=""/> -->
 
   <data>
     <class name="PySysTest" module="run"/>
