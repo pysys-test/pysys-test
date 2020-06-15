@@ -14,7 +14,7 @@ class PySysTest(BaseTest):
 		self.logFileContentsDefaultExcludes=['Umm.*']
 	
 		self.startTestProcess(stdouterr='default')
-		self.startTestProcess(stdouterr='default_timeout', arguments=['block'], timeout=0.1)
+		#self.startTestProcess(stdouterr='default_timeout', arguments=['block'], timeout=0.1)
 		self.startTestProcess(stdouterr='onError=noop', onError=lambda process: None)
 		self.write_text('logfile.log', 'This is a log file')
 		self.startTestProcess(stdouterr='onError=logfile', onError=lambda process: self.logFileContents('logfile.log'))
