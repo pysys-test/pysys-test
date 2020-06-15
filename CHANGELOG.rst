@@ -36,6 +36,15 @@ New features
     self.startProcess(..., onError=lambda process: self.logFileContents(process.stdout, tail=True))
     self.startProcess(..., onError=lambda process: None) # do nothing on error
 
+- Added `BaseTest.waitForBackgroundProcesses` which waits to completion of all background processes and optionally 
+  checks for the expected exit status. This is especially useful when you have a test that needs to execute 
+  lots of processes but doesn't care about the order they execute in, since having them all execute concurrently in the 
+  background and then calling `waitForBackgroundProcesses()` will be a lot quicker than executing them serially in the 
+  foreground. 
+
+- `BaseTest.waitProcess` now has a ``checkExitStatus=`` argument that can be used to check the return code of the 
+  process for success. 
+
 - `BaseTest.logFileContents` now has a global variable ``self.logFileContentsDefaultExcludes`` (default ``[]``) which 
   it uses to specify the line exclusion regular expressions if no ``excludes=[...]`` is passed as a parameter. This 
   provides a convenient way to filter out lines that you usually don't care about at a global level (e.g. from a 

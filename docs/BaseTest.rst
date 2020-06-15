@@ -152,6 +152,7 @@ Processes
 	signalProcess
 	stopProcess
 	writeProcess
+	waitForBackgroundProcesses
 	startProcessMonitor
 	stopProcessMonitor
 
@@ -171,6 +172,7 @@ of which the most commonly used is `waitForGrep`.
 .. autosummary::
 	waitForGrep
 	waitForFile
+	waitForBackgroundProcesses
 	waitProcess
 	waitForSocket
 	wait

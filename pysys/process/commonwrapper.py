@@ -63,13 +63,17 @@ class CommonProcessWrapper(object):
 	:ivar str ~.displayName: Display name for this process (defaults to the basename if not explicitly specified). The 
 		display name is returned by calling ``str()`` on this instance. The display name and pid are returned by 
 		``repr()``.
+	:ivar str expectedExitStatus: The condition string used to determine whether the exit status/code 
+		returned by the process is correct, for example '==0'.
 
 	:ivar int ~.pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.
 	:ivar int ~.exitStatus: The process exit status for a completed process (for many processes 0 represents success), 
 		or None if it has not yet completed. 
 	"""
 
-	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None):
+	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None, 
+		expectedExitStatus=None):
+		
 		self.displayName = displayName if displayName else os.path.basename(command)
 		self.command = command
 		self.arguments = arguments
@@ -78,6 +82,7 @@ class CommonProcessWrapper(object):
 		self.workingDir = workingDir
 		self.state = state
 		self.timeout = timeout
+		self.expectedExitStatus = expectedExitStatus
 
 		# 'publicly' available data attributes set on execution
 		self.pid = None
@@ -173,7 +178,6 @@ class CommonProcessWrapper(object):
 		
 		"""
 		return self.setExitStatus() is None
-
 
 	def wait(self, timeout):
 		"""Wait for a process to complete execution, raising an exception on timeout.

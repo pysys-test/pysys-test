@@ -1,11 +1,12 @@
 from pysys.constants import *
+from pysys.exceptions import *
 from pysys.basetest import BaseTest
 
 class PySysTest(BaseTest):
 	
 	def startTestProcess(self, **kwargs):
 		try:
-			self.startPython([self.input+'/test.py']+kwargs.pop('arguments',[]), disableCoverage=True, **kwargs)
+			return self.startPython([self.input+'/test.py']+kwargs.pop('arguments',[]), disableCoverage=True, displayName='python<%s>'%kwargs['stdouterr'], **kwargs)
 		except Exception as ex: # test abort
 			self.log.info('Suppressing exception: %s', ex)
 	
@@ -23,12 +24,22 @@ class PySysTest(BaseTest):
 		self.startTestProcess(stdouterr='onError=doc_example', 
 			onError=lambda process: self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True))
 
-		self.addOutcome(NOTVERIFIED, override=True)
+		p = self.startTestProcess(stdouterr='background-wait', background=True, expectedExitStatus='<=0')
+		try:
+			self.waitProcess(p, timeout=100, checkExitStatus=True)
+		except AbortExecution as ex:
+			self.log.info('Got expected exception: %s'%ex)
+		else:
+			assert False, 'Should have got exception from waitProcess'
+		self.waitProcess(p, timeout=100) # default should not give an exception
+		
+		self.addOutcome(PASSED, override=True)
 		def m(line):
 			if 'Suppressing' in line: return None
 			if 'Executed' in line:	return '\n'+line[line.find('<'):]
 			if 'timed out' in line: return '\nTimed out process\n'
 			if 'Contents' in line: return line[line.find('Contents'):]
+			if 'Got expected exception' in line: return line[line.find('Got '):]
 			return None
 		self.copy('run.log', 'output.txt', mappers=[m])
 		

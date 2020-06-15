@@ -15,3 +15,5 @@ Contents of onError=stdout.out (filtered):
 
 <onError=doc_example>, exit status 1
 Contents of onError=doc_example.err (filtered): 
+Contents of background-wait.err (filtered): 
+Got expected exception: python<background-wait> returned exit status 1 (expected <=0)

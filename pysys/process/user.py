@@ -285,8 +285,11 @@ class ProcessUser(object):
 		or a time out occurs, or in the background in which case the method returns immediately to the caller
 		returning a handle to the process to allow manipulation at a later stage, typically with L{waitProcess}. 
 		
-		All processes started in the background and not explicitly killed using the returned process 
-		object are automatically killed on completion of the test via the L{cleanup()} destructor.
+		All processes started in the background are automatically killed on completion of the test via the L{cleanup()} 
+		destructor. To wait for background processes to complete during `execute` and/or before `verify` commences, 
+		call `waitForBackgroundProcesses()`. This is especially useful when you have a test that needs to execute 
+		lots of processes asynchronously, since having them all execute concurrently in the background and then calling 
+		`waitForBackgroundProcesses()` will be a lot quicker than executing them serially in the foreground. 
 
 		When starting a process that will listen on a server socket, use `getNextAvailableTCPPort` 
 		to allocate a free port before calling this method. 
@@ -408,7 +411,8 @@ class ProcessUser(object):
 			environs = self.getDefaultEnvirons(command=command)
 		
 		startTime = time.time()
-		process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
+		process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, 
+			displayName=displayName, expectedExitStatus=expectedExitStatus)
 		hasFailed = True # in order to decide whether to log the process output
 		try:
 			try:
@@ -717,35 +721,96 @@ class ProcessUser(object):
 					self.abort(BLOCKED, 'Unable to signal process %r'%(process), self.__callRecord())
 
 
-	def waitProcess(self, process, timeout, abortOnError=None):
-		"""Wait for a background process to terminate, completing on termination or expiry of the timeout.
+	def waitProcess(self, process, timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=False):
+		"""Wait for a background process to terminate.
 
-		Timeouts will result in an exception unless the project property ``defaultAbortOnError==False``.
+		For a convenient way to wait for all remaining background processes to complete, see `waitForBackgroundProcesses`. 
+
+		Timeouts will result in an exception and TIMEDOUT outcome unless the project property ``defaultAbortOnError==False`` 
+		is set.
 		
-		This method does not check the exit code for success, but you can manually 
-		check the return value (which is the same as ``process.exitStatus``) using `assertThat` if you wish to check it succeeded. 
-
-		:param process: The process handle returned from the L{startProcess} method
-		:param timeout: The timeout value in seconds to wait before returning
-		:param abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
+		:param pysys.process.commonwrapper.CommonProcessWrapperprocess: The process handle returned from the L{startProcess} method
+		:param int timeout: The timeout value in seconds to wait before returning, for example ``timeout=TIMEOUTS['WaitForProcess']``.
+		:param bool abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
 			(defaults to the defaultAbortOnError project setting)
+		:param bool checkExitStatus: By default this method does not check the exit status, but set this argument to True 
+			to check that the exit status matches the ``expectedExitStatus`` specified in the call to `startProcess` 
+			(typically ``==0``). 
+			Note that this argument is not affected by the ``defaultIgnoreExitStatus`` project property. 
+			The last few lines of the stderr (or stdout) will be logged if the exit status is wrong. 
 		:return: The process's ``exitStatus``. This will be None if the process timed out and abortOnError is disabled. 
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
-		assert timeout > 0, 'timeout must always be specified'
 		try:
 			log.info("Waiting up to %d secs for process %r", timeout, process)
 			t = time.time()
 			process.wait(timeout)
-			if time.time()-t > 10:
-				log.info("Process %s terminated after %d secs", process, time.time()-t)
+			if (time.time()-t > 10) or process.exitStatus != 0:
+				log.info("Process %s terminated after %d secs with exit status %d", process, time.time()-t, process.exitStatus)
+				
 		except ProcessTimeout:
 			if not abortOnError:
-				log.warn("Ignoring timeout waiting for process %r after %d secs", process, time.time() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+				log.warn("Ignoring timeout waiting for process %r after %d secs (as abortOnError=False)", process, time.time() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout), self.__callRecord())
+
+		else:
+			if checkExitStatus:
+				if not pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
+					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
+
+					self.addOutcome(BLOCKED, 
+						('%s returned exit status %d (expected %s)'%(process, process.exitStatus, process.expectedExitStatus)), 
+						abortOnError=abortOnError)
+
 		return process.exitStatus
+
+	def waitForBackgroundProcesses(self, timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
+		"""Wait for any running background processes to terminate and check for the expected exit status.
+
+		Timeouts will result in a TIMEDOUT outcome and an exception unless the project property ``defaultAbortOnError==False`` 
+		is set. 
+
+		:param int timeout: The total time in seconds to wait for all processes to have completed, for example ``timeout=TIMEOUTS['WaitForProcess']``.
+		:param bool abortOnError: If True aborts the test with an exception on any error, if False appends an outcome but does not 
+			raise an exception. 
+		:param bool checkExitStatus: By default this method not only waits for completion but also checks the exit status, but set this argument to False 
+			to disable checking that the exit status of all background processes matches the ``expectedExitStatus`` specified in 
+			the call to `startProcess` (typically ``==0``). 
+			The last few lines of the stderr (or stdout) will be logged if the exit status is wrong. 
+		"""
+
+		assert timeout>0, 'timeout must be specified'
+		starttime = time.time()
+		running = [p for p in self.processList if p.state==BACKGROUND and p.running()]
+		self.log.info('Waiting up to %d secs for %d background process(es) to complete', timeout, len(running))
+		for p in running:
+			try:
+				thistimeout = starttime+timeout-time.time()
+				if thistimeout <= 0: # we've run out of time
+					raise ProcessTimeout('waitForBackgroundProcesses timed out')
+				if p.running(): 
+					p.wait(timeout=thistimeout) # may raise ProcessTimeout
+			except ProcessTimeout:
+				stillrunning = [p for p in running if p.state==BACKGROUND and p.running()]
+				if stillrunning:
+					self.addOutcome(TIMEDOUT, 'Timed out waiting for %d processes after %d secs: %s'%(len(stillrunning), timeout, ', '.join(map(str, stillrunning))), abortOnError=abortOnError)
+					return False
+
+		# now check exit statuses - for all background processes, not only those that happen to have completed recently; 
+		# but only after we've confirmed (above) there were no timeouts
+		if checkExitStatus:
+			failures = []
+			for process in self.processList:
+				if process.state!=BACKGROUND: continue
+				if not pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
+					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
+
+					failures.append('%s returned exit status %d (expected %s)'%(process, process.exitStatus, process.expectedExitStatus))
+			if failures:
+				self.addOutcome(BLOCKED, ('%d processes failed: '%len(failures) if len(failures)>1 else 'Process ')+'; '.join(failures), abortOnError=abortOnError)
+		(self.log.info if (time.time()-starttime>10) else self.log.debug)('All processes completed, after waiting %d secs'%(time.time()-starttime))
 
 	def writeProcess(self, process, data, addNewLine=True):
 		"""Write binary data to the stdin of a process.
@@ -754,13 +819,13 @@ class ProcessUser(object):
 		wrapper around the write method of the process helper only adds checking of the process running status prior
 		to the write being performed, and logging to the testcase run log to detail the write.
 
-		:param process: The process handle returned from the L{startProcess()} method
-		:param data: The data to write to the process stdin. 
+		:param pysys.process.commonwrapper.CommonProcessWrapper process: The process handle returned from the L{startProcess()} method
+		:param bytes data: The data to write to the process stdin. 
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
 			given by locale.getpreferredencoding(). 
-		:param addNewLine: True if a new line character is to be added to the end of the data string
+		:param bool addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""
 		if process.running():

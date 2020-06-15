@@ -2,7 +2,7 @@
 <pysystest type="auto">
   
   <description> 
-    <title>Process - logFileOnError</title>    
+    <title>Process - logFileOnError, and waitProcess(checkExitStatus=)</title>    
     <purpose><![CDATA[
 ]]>
     </purpose>
