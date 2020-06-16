@@ -55,7 +55,7 @@ New features
 Bug fixes
 ---------
 
-- TODO
+- In some cases foreground processes could be left running after timing out; this is now fixed. 
 
 Upgrade guide and compatibility
 -------------------------------

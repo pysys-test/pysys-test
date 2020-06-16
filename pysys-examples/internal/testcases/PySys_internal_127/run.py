@@ -14,7 +14,7 @@ class PySysTest(BaseTest):
 		self.logFileContentsDefaultExcludes=['Umm.*']
 	
 		self.startTestProcess(stdouterr='default')
-		#self.startTestProcess(stdouterr='default_timeout', arguments=['block'], timeout=0.1)
+		self.startTestProcess(stdouterr='default_timeout', arguments=['block'], timeout=0.1)
 		self.startTestProcess(stdouterr='onError=noop', onError=lambda process: None)
 		self.write_text('logfile.log', 'This is a log file')
 		self.startTestProcess(stdouterr='onError=logfile', onError=lambda process: self.logFileContents('logfile.log'))
@@ -24,7 +24,7 @@ class PySysTest(BaseTest):
 		self.startTestProcess(stdouterr='onError=doc_example', 
 			onError=lambda process: self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True))
 
-		"""p = self.startTestProcess(stdouterr='background-wait', background=True, expectedExitStatus='<=0')
+		p = self.startTestProcess(stdouterr='background-wait', background=True, expectedExitStatus='<=0')
 		try:
 			self.waitProcess(p, timeout=100, checkExitStatus=True)
 		except AbortExecution as ex:
@@ -32,7 +32,7 @@ class PySysTest(BaseTest):
 		else:
 			assert False, 'Should have got exception from waitProcess'
 		self.waitProcess(p, timeout=100) # default should not give an exception
-		"""
+		
 		self.addOutcome(PASSED, override=True)
 		def m(line):
 			if 'Suppressing' in line: return None
@@ -45,5 +45,5 @@ class PySysTest(BaseTest):
 		
 
 	def validate(self):
-		#self.assertDiff('output.txt')
+		self.assertDiff('output.txt')
 		self.assertGrep('run.log', expr='Ummmmm', contains=False)

@@ -443,8 +443,8 @@ class ProcessUser(object):
 					log.info("%s", sys.exc_info()[1], exc_info=0)
 			except ProcessTimeout:
 				(log.warn if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
-				self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
 				process.stop()
+				self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
 			else:
 				with self.lock:
 					self.processList.append(process)
