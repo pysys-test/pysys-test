@@ -168,6 +168,9 @@ class ColorLogFormatter(BaseLogFormatter):
 		self.color = None
 		if 'color' in propertiesDict:
 			self.color = propertiesDict.pop('color','').lower() == 'true'
+		# env vars should take precedence over project settings
+		if os.getenv('NO_COLOR',''):
+			self.color = False # this is a growing cross-product standard way to disable color
 		if os.getenv('PYSYS_COLOR',None):
 			self.color = os.getenv('PYSYS_COLOR').lower() == 'true'
 

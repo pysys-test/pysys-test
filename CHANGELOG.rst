@@ -51,6 +51,8 @@ New features
   `BaseTest.setup` method shared by all tests), such as unimportant lines logged to stderr during startup of 
   commonly used processes which would otherwise be logged by `BaseTest.startProcess` when a process fails to start. 
 
+- Colored output is disabled if the ``NO_COLOR`` environment variable is set; this is a cross-product standard 
+  (https://no-color.org/). The ``PYSYS_COLOR`` variable take precedence if set. 
 
 Bug fixes
 ---------
