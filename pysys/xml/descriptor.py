@@ -584,7 +584,7 @@ class XMLDescriptorParser(object):
 			for e in data.getElementsByTagName('user-data'):
 				key = e.getAttribute('name').strip()
 				assert key, 'name= must be specified'
-				assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # blacklist names that we reserve for use by the basetest/processuser
+				assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # prevent names that we reserve for use by the basetest/processuser
 				result[key] = e.getAttribute('value')
 		return result
 
