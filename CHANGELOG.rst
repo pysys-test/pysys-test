@@ -54,6 +54,10 @@ New features
 - Colored output is disabled if the ``NO_COLOR`` environment variable is set; this is a cross-product standard 
   (https://no-color.org/). The ``PYSYS_COLOR`` variable take precedence if set. 
 
+- Added environment variable ``PYSYS_DEFAULT_THREADS_PER_CPU`` which can be used instead of ``PYSYS_DEFAULT_THREADS`` 
+  to specify a multiplier for the number of threads (instead of an absolute number) when running with 
+  ``pysys.py run --threads=auto``. This could be useful in CI and other automated testing environments. 
+
 Bug fixes
 ---------
 

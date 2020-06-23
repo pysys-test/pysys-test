@@ -100,8 +100,8 @@ Execution options
    -c, --cycle     INT         run each test the specified number of times
    -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path)
    -n, --threads   INT | auto  set the number of worker threads to run the tests (defaults to 1). 
-                               A value of 'auto' sets to the number of available CPUs, or if set, 
-                               the value of the PYSYS_DEFAULT_THREADS environment variable.
+                               A value of 'auto' sets to the number of available CPUs, or if set, the value of  
+                               the PYSYS_DEFAULT_THREADS or PYSYS_DEFAULT_THREADS_PER_CPU environment variables.
    -p, --purge                 purge all files except run.log from the output directory (unless test fails)
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
    -v, --verbosity CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
