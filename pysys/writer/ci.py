@@ -19,7 +19,7 @@
 """
 Contains writers for recording test results to Continuous Integration providers.
 
-These writers only generate output in ``--record`` mode, and only if the 
+These writers only generate output if the 
 environment variables associated with their CI system are set. 
 """
 
@@ -39,6 +39,7 @@ class TravisCIWriter(BaseRecordResultsWriter):
 	Writer for Travis CI. Only enabled when running under Travis (specifically, 
 	if the ``TRAVIS=true`` environment variable is set).
 	
+	Provides folding of test log details, and correct coloring of console output for Travis. 
 	"""
 		
 	def isEnabled(self, **kwargs):
@@ -46,8 +47,6 @@ class TravisCIWriter(BaseRecordResultsWriter):
 
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		self.runid = os.path.basename(testoutdir)
-		self.numTests = numTests
-		self.testsSoFar = 0
 		
 		if runner.printLogs is None:
 			# if setting was not overridden by user, default for Travis is 
