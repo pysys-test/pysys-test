@@ -1292,6 +1292,11 @@ class ProcessUser(object):
 		The method returns the integer value of the outcome as defined in `pysys.constants`. To convert this 
 		to a string representation use the `pysys.constants.LOOKUP` dictionary i.e. ``LOOKUP[test.getOutcome()]``.
 		
+		To find out whether this test has failed::
+		
+			if self.getOutcome() in FAILS:
+				...
+		
 		:return: The overall outcome
 
 		"""	
