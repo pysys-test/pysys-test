@@ -343,14 +343,20 @@ class BaseRunner(ProcessUser):
 
 
 	def isPurgableFile(self, path):
-		"""Determine if a file should be purged when empty at the end of a test run.
+		"""Decides if the specified non-empty file should be purged (deleted) after a test passes when 
+		``--purge`` is enabled.
+
+		By default this will return True, meaning that all files (other than the special case of run.log) 
+		will be purged.
 
 		This method is called by `testComplete` to provide runners with the ability to veto
 		deletion of non-empty files that should always be left in a test's output directory
-		even when the test has passed, by returning False from this method. For example this
-		could be used to avoid deleting code coverage files. By default this will return True.
+		even when the test has passed, by returning False from this method. 
 		
-		:param path: The absolute path of the file to be purged
+		It is recommended to use the ``collect-test-output`` project option to collect any required files 
+		(e.g code coverage, performance graphs etc) rather than using this method. 
+		
+		:param str path: The absolute path of the file to be purged. 
 
 		"""
 		return True
