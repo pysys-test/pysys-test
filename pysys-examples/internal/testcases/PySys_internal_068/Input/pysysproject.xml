@@ -8,6 +8,9 @@
 	<property name="defaultAbortOnError" value="true"/>
 
 	<writers>
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		</writer>
+
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary.xml">
 			<property name="outputDir" value="${root}"/>
 			<property name="stylesheet" value="./my-pysys-log.xsl"/>

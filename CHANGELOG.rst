@@ -58,6 +58,11 @@ New features
   to specify a multiplier for the number of threads (instead of an absolute number) when running with 
   ``pysys.py run --threads=auto``. This could be useful in CI and other automated testing environments. 
 
+- Added `pysys.writer.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
+  producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
+  Properties are provided to allow detailed control of the maximum number and size of archives generated, and the 
+  files to include/exclude. 
+
 Bug fixes
 ---------
 

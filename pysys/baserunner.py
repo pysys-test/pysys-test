@@ -435,7 +435,7 @@ class BaseRunner(ProcessUser):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
 				testoutdir=self.outsubdir, runner=self)
 			except Exception: 
-				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
 		
 		if self.printLogs is None: self.printLogs = PrintLogs.ALL # default value, unless overridden by user or writer.setup
@@ -524,7 +524,7 @@ class BaseRunner(ProcessUser):
 				for writer in self.writers:
 					try: writer.cleanup()
 					except Exception as ex: 
-						log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+						log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 						# might stop results being completely displayed to user
 						fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
 				del self.writers[:]
@@ -587,6 +587,7 @@ class BaseRunner(ProcessUser):
 				self.startPython(['-m', 'coverage', 'html']+args, abortOnError=False, 
 					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
 					disableCoverage=True)
+				self.log.info('Python coverage dir is: %s', os.path.normpath(pythonCoverageDir))
 	
 
 	def containerCallback(self, thread, container):
@@ -680,7 +681,7 @@ class BaseRunner(ProcessUser):
 					writer.processResult(testObj, cycle=cycle,
 										  testStart=testStart, testTime=testDurationSecs, runLogOutput=bufferedoutput)
 				except Exception as ex: 
-					log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], descriptor.id, writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+					log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], descriptor.id, writer, sys.exc_info()[1], exc_info=1)
 					errors.append('Failed to record test result using writer %s: %s'%(repr(writer), ex))
 			
 			# store the result
@@ -712,13 +713,13 @@ class BaseRunner(ProcessUser):
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			for writer in self.writers:
 				try: writer.cleanup()
-				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 			del self.writers[:]
 			try:
 				self.cycleComplete()
 				self.cleanup()
 			except Exception: 
-				log.warn("caught %s cleaning up runner after interrupt %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				log.warn("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			sys.exit(1)
 
 		try:
@@ -900,7 +901,7 @@ class TestContainer(object):
 					if hasattr(writer, 'processTestStarting'):
 						writer.processTestStarting(testObj=self.testObj, cycle=self.cycle)
 				except Exception: 
-					log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+					log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 
 			# execute the test if we can
 			try:

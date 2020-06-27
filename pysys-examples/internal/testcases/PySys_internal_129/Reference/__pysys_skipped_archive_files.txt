@@ -1,0 +1,3 @@
+test_output/PySys_NestedTestcaseFails/cycleN/f2.txt
+test_output/PySys_NestedTestcaseFails/cycleN/f3.txt
+test_output/PySys_NestedTestcaseFails/cycleN/a/b/nested.txt

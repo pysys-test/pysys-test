@@ -87,3 +87,6 @@ class PySysTest(BaseTest):
 		])
 		# check the option works to disable this
 		self.assertGrep('pysys.out', expr='List of non passing test ids:', contains=False)
+		
+		self.assertPathExists('__pysys_output_archives/NestedFail.cycle001.zip')
+		

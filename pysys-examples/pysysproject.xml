@@ -179,6 +179,13 @@
 	in a file created with a name of  testsummary-20081025213308.xml etc.
 	-->
 	<writers>
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="destDir" value="__pysys_output_archives/"/>
+			<property name="maxTotalSizeMB" value="1024.0"/>
+			<property name="maxArchiveSizeMB" value="200.0"/>
+			<property name="maxArchives" value="50"/>
+		</writer>
+
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="pysys-testsummary-%Y-%m-%d-%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 

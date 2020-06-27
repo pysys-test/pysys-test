@@ -1,0 +1,37 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+	<property root="testRootDir"/>
+
+	<writers>
+		<!-- defaults -->
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		</writer>
+
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="archiveAtEndOfRun" value="false"/>
+
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives_lowArchiveLimit"/>
+			<property name="maxArchiveSizeMB" value="0.002"/> <!-- 2kB; this limit is crafted to make sure we trigger the tmp zip logic -->
+			<property name="maxArchives" value="6"/>
+			<property name="fileExcludesRegex" value=".+NestedTestcase.*(f2.txt)"/>
+		</writer>
+
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="archiveAtEndOfRun" value="true"/>
+
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives_lowTotalLimit/@OUTDIR@"/>
+			<property name="maxTotalSizeMB" value="0.010"/> <!-- 10kB -->
+			<property name="maxArchives" value="1000"/>
+			<property name="fileIncludesRegex" value=".+NestedTestcase.*(f2.txt|f1.txt)"/>
+		</writer>
+
+		<!-- Should create no archives -->
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives_none"/>
+			<property name="fileIncludesRegex" value="non-existent-file"/>
+		</writer>
+
+	</writers>
+
+</pysysproject>
