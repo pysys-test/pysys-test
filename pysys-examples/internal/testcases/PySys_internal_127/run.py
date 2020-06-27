@@ -35,6 +35,7 @@ class PySysTest(BaseTest):
 		
 		self.addOutcome(PASSED, override=True)
 		def m(line):
+			if 'Contents of default_timeout.err' in line: return None # race condition whether this gets created in time
 			if 'Suppressing' in line: return None
 			if 'Executed' in line:	return '\n'+line[line.find('<'):]
 			if 'timed out' in line: return '\nTimed out process\n'

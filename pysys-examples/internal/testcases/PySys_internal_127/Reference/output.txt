@@ -3,7 +3,6 @@
 Contents of default.err (filtered): 
 
 Timed out process
-Contents of default_timeout.err (filtered): 
 
 <onError=noop>, exit status 1
 
