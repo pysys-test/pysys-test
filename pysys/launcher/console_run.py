@@ -23,9 +23,9 @@ from __future__ import print_function
 import os.path, stat, getopt, logging, traceback, sys
 import json
 import shlex
+import multiprocessing
 
 from pysys import log
-
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
@@ -53,7 +53,7 @@ class ConsoleLaunchHelper(object):
 		self.userOptions = {}
 		self.descriptors = []
 		self.grep = None
-		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:b:X:gG:'
+		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:j:b:X:gG:'
 		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=']
 
 
@@ -98,11 +98,11 @@ class ConsoleLaunchHelper(object):
 		print("""
 Execution options
 -----------------
-   -c, --cycle     INT         run each test the specified number of times
+   -c, --cycle     NUM         run each test the specified number of times
    -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path)
-   -n, --threads   INT | auto  set the number of worker threads to run the tests (defaults to 1). 
-                               A value of 'auto' sets to the number of available CPUs, or if set, the value of  
-                               the PYSYS_DEFAULT_THREADS or PYSYS_DEFAULT_THREADS_PER_CPU environment variables.
+   -j, --threads   NUM | xNUM  set the number of jobs (threads) to run tests in parallel (defaults to 1); 
+                               specify either an absolute number, or a multiplier on the number of CPUs e.g. "x1.5"; 
+                   auto | 0    equivalent to x1.0 (or the PYSYS_DEFAULT_THREADS env var if set)
    -p, --purge                 purge all files except run.log from the output directory (unless test fails)
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
    -v, --verbosity CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
@@ -167,7 +167,7 @@ to select an individual test, or a sequence of numbered tests:
    ^Test.*                    - All tests matching the specified regex
 
 e.g. 
-   {scriptname} run -c2 -w4 -u --threads=auto Test_007 Test_001: 3:5
+   {scriptname} run -c2 -w4 -u -j=x1.5 Test_007 Test_001: 3:5
    {scriptname} run -vDEBUG --include MYTESTS -Xhost=localhost
 """.format(scriptname=_PYSYS_SCRIPT_NAME))
 		
@@ -274,12 +274,14 @@ e.g.
 			elif option in ["--modeexclude"]:
 				self.modeexclude = self.modeexclude+[x.strip() for x in value.split(',')]
 
-			elif option in ("-n", "--threads"):
-				try:
-					self.threads = 0 if value.lower()=='auto' else int(value)
-				except Exception:
-					print("Error parsing command line arguments: A valid integer for the number of threads must be supplied")
-					sys.exit(1)
+			elif option in ["-n", "-j", "--threads"]:
+				N_CPUS = multiprocessing.cpu_count()
+				if value.lower()=='auto': value='0'
+				if value.lower().startswith('x'):
+					self.threads = max(1, int(float(value[1:])*N_CPUS))
+				else:
+					self.threads = int(value)
+					if self.threads <= 0: self.threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS))
 
 			elif option in ("-b", "--abort"):
 				setattr(Project.getInstance(), 'defaultAbortOnError', str(value.lower()=='true'))

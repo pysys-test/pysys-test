@@ -61,7 +61,9 @@ New features
     PYSYS_DEFAULT_ARGS=--progress --outdir __pysys_outdir
     pysys.py run
 
-- Added environment variable ``PYSYS_DEFAULT_THREADS_PER_CPU`` which can be used instead of ``PYSYS_DEFAULT_THREADS`` 
+- Added command line option ``-j`` as an alias for ``--threads``  and ``-n`` (to control the number of jobs/threads). 
+  As an alternative to specifying an absolute number of threads, a multiplier of the number of cores in the machine 
+  can be provided e.g. ``-j x1.5``.
   to specify a multiplier for the number of threads (instead of an absolute number) when running with 
   ``pysys.py run --threads=auto``. This could be useful in CI and other automated testing environments. 
 

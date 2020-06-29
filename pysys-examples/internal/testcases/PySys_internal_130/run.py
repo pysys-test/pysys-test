@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 	
 		runPySys(self, 'pysys', ['run', '-Xparam1=cmd line'],
 		environs={
-			'PYSYS_DEFAULT_ARGS':'"-Xparam1=env var" -Xparam2="env var"'
+			'PYSYS_DEFAULT_ARGS':'"-Xparam1=env var" -Xparam2="env var" -j x2.5'
 		}, workingDir='testroot')
 						
 	def validate(self):
