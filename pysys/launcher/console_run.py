@@ -22,6 +22,7 @@
 from __future__ import print_function
 import os.path, stat, getopt, logging, traceback, sys
 import json
+import shlex
 
 from pysys import log
 
@@ -114,8 +115,7 @@ Execution options
 		if printXOptions: printXOptions()
 		print("""
 Advanced:
-   -g, --progress              print progress updates after completion of each test (or set
-                               the PYSYS_PROGRESS=true environment variable)
+   -g, --progress              print progress updates after completion of each test
    -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
    --printLogs STRING          indicates for which outcome types the run.log output 
                                will be printed to the stdout console; 
@@ -125,6 +125,9 @@ Advanced:
    -XautoUpdateAssertDiffReferences 
                                this is a special command for automatically updating the reference files when an 
                                assertDiff fails
+
+The PYSYS_DEFAULT_ARGS environment variable can be used to specify any pysys run arguments that you always wish to use, 
+for example PYSYS_DEFAULT_ARGS=--progress --outdir __pysys_output. 
 
 Selection and filtering options
 -------------------------------
@@ -175,6 +178,11 @@ e.g.
 		sys.exit()
 
 	def parseArgs(self, args, printXOptions=None):
+		# add any default args first; shlex.split does a great job of providing consistent parsing from str->list
+		if os.getenv('PYSYS_DEFAULT_ARGS',''):
+			log.info('Using PYSYS_DEFAULT_ARGS = %s'%os.environ['PYSYS_DEFAULT_ARGS'])
+			args = shlex.split(os.environ['PYSYS_DEFAULT_ARGS']) + args
+		
 		try:
 			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
@@ -301,7 +309,7 @@ e.g.
 				print("Unknown option: %s"%option)
 				sys.exit(1)
 
-			
+		# retained for compatibility, but PYSYS_DEFAULT_ARGS is a better way to achieve the same thing
 		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True
 		
 		# special hidden dict of extra values to pass to the runner, since we can't change 
