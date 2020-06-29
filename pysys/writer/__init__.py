@@ -66,7 +66,7 @@ breaking writer implementations already in existence.
 
 """
 
-__all__ = ["BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", "ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter",  "TestOutputArchiveWriter"]
+__all__ = ["BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "ArtifactPublisher", "TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", "ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter",  "TestOutputArchiveWriter"]
 
 import time, stat, logging, sys, io
 import zipfile
@@ -84,9 +84,11 @@ from xml.dom.minidom import getDOMImplementation
 
 log = logging.getLogger('pysys.writer')
 
-
 class BaseResultsWriter(object):
 	"""Base class for all writers that get notified as and when test results are available.
+	
+	Writer can additionally subclass `ArtifactPublisher` to be notified of artifacts produced by other writers 
+	that they wish to publish. 
 
 	:param str logfile: Optional configuration property specifying a file to store output in. 
 		Does not apply to all writers, can be ignored if not needed. 
@@ -223,6 +225,30 @@ class BaseProgressResultsWriter(BaseResultsWriter):
 	"""
 	def isEnabled(self, record=False, **kwargs): 
 		return True # regardless of record flag
+
+
+class ArtifactPublisher(object):
+	"""Interface implemented by writers that implement publishing of file/directory artifacts. 
+	
+	For example, a writer for a CI provider that supports artifact uploading can subclass this interface to 
+	be notified when another writer (or performance reporter) produces an artifact.
+	
+	To publish an artifact to all registered writers, call `pysys.baserunner.BaseRunner.publishArtifact()`. 
+	
+	.. versionadded:: 1.6.0
+	"""
+
+	def publishArtifact(self, path, category, **kwargs):
+		"""
+		Called when a file or directory artifact has been written and is ready to be published (e.g. by another writer).
+		
+		:param str path: Absolute path of the file or directory, using forward slashes as the path separator. 
+		:param str category: A string identifying what kind of artifact this is, e.g. 
+			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
+			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
+			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
+		"""
+		pass
 
 class flushfile(): 
 	"""Utility class to flush on each write operation - for internal use only.  
@@ -805,6 +831,11 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	publishes the generated archives, be sure to include this writer first in the list of writers in your project 
 	configuration. 
 
+	Publishes artifacts with category name "TestOutputArchive" and the directory (unless there are no archives) 
+	as "TestOutputArchiveDir" for any enabled `ArtifactPublisher` writers. 
+
+	.. versionadded:: 1.6.0
+
 	The following properties can be set in the project configuration for this writer:		
 	"""
 
@@ -902,6 +933,9 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		
 		(log.info if self.archivesCreated else log.debug)('%s created %d test output archive artifacts in: %s', 
 			self.__class__.__name__, self.archivesCreated, self.destDir)
+
+		if self.archivesCreated:
+			self.runner.publishArtifact(self.destDir, 'TestOutputArchiveDir')
 
 	def shouldArchive(self, testObj, **kwargs):
 		"""
@@ -1035,6 +1069,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 				return
 	
 			self.__totalBytesRemaining -= os.path.getsize(zippath)
+			self.runner.publishArtifact(zippath, 'TestOutputArchive')
 	
 		except Exception:
 			self.skippedTests.append(outputDir)

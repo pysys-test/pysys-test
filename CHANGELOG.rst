@@ -63,14 +63,16 @@ New features
 
 - Added command line option ``-j`` as an alias for ``--threads``  and ``-n`` (to control the number of jobs/threads). 
   As an alternative to specifying an absolute number of threads, a multiplier of the number of cores in the machine 
-  can be provided e.g. ``-j x1.5``.
-  to specify a multiplier for the number of threads (instead of an absolute number) when running with 
-  ``pysys.py run --threads=auto``. This could be useful in CI and other automated testing environments. 
+  can be provided e.g. ``-j x1.5``. This could be useful in CI and other automated testing environments. 
 
 - Added `pysys.writer.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
   producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
   Properties are provided to allow detailed control of the maximum number and size of archives generated, and the 
   files to include/exclude. 
+
+- Added `pysys.writer.ArtifactPublisher` interface which can be implemented by writers that support some concept of 
+  artifact publishing, for example CI providers that 'upload' artifacts. Currently artifacts are published by 
+  `pysys.utils.perfreporter.CSVPerformanceReporter` and `pysys.writer.TestOutputArchiveWriter`. 
 
 Bug fixes
 ---------

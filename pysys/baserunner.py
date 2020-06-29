@@ -36,13 +36,13 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
-from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, pathexists
+from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.pycompat import *
 from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, pysysLogHandler
-from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
+from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter, ArtifactPublisher
 import pysys.utils.allocport
 
 global_lock = threading.Lock() # internal, do not use
@@ -195,6 +195,8 @@ class BaseRunner(ProcessUser):
 			self.writers.extend(summarywriters)
 		else:
 			self.writers.append(ConsoleSummaryResultsWriter())
+		
+		self.__artifactWriters = [w for w in self.writers if isinstance(w, ArtifactPublisher)]
 		
 		self.__collectTestOutput = []
 		for c in self.project.collectTestOutput:
@@ -509,6 +511,14 @@ class BaseRunner(ProcessUser):
 			for collect in self.__collectTestOutput:
 				if pathexists(collect['outputDir']):
 					self.log.info('Collected test output to directory: %s', os.path.normpath(collect['outputDir']))
+
+			# perform clean on the performance reporters - before the writers, in case the writers want to do something 
+			# with the perf output
+			for perfreporter in self.performanceReporters:
+					try: perfreporter.cleanup()
+					except Exception as ex: 
+						log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			with self.__resultWritingLock:
@@ -519,13 +529,6 @@ class BaseRunner(ProcessUser):
 						# might stop results being completely displayed to user
 						fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
 				del self.writers[:]
-	
-			# perform clean on the performance reporters
-			for perfreporter in self.performanceReporters:
-					try: perfreporter.cleanup()
-					except Exception as e: 
-						log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 		
 			self.processCoverageData()
 		finally:
@@ -681,6 +684,25 @@ class BaseRunner(ProcessUser):
 			
 			if errors:
 				raise Exception('Failed to process results from %s: %s'%(descriptor.id, '; '.join(errors)))
+
+
+	def publishArtifact(self, path, category):
+		"""
+		Notifies any interested `pysys.writer.ArtifactPublisher` writers about an artifact that they may wish to publish.  
+
+		Called when a file or directory artifact is published (e.g. by another writer).
+		
+		.. versionadded:: 1.6.0
+		
+		:param str path: Absolute path of the file or directory. 
+		:param str category: A string identifying what kind of artifact this is, e.g. 
+			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
+			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
+			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
+		"""
+		path = fromLongPathSafe(path).replace('\\','/')
+		for a in self.__artifactWriters:
+			a.publishArtifact(path, category)
 
 	def containerExceptionCallback(self, thread, exc_info):
 		"""Callback method for unhandled exceptions thrown when running a test.

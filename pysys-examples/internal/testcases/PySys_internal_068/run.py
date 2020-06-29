@@ -90,3 +90,7 @@ class PySysTest(BaseTest):
 		
 		self.assertPathExists('__pysys_output_archives/NestedFail.cycle001.zip')
 		
+		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchive: .+/NestedFail.cycle002.zip')
+		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchiveDir: .+/__pysys_output_archives')
+		self.assertGrep('pysys.out', expr='Published artifact CSVPerformanceReport: .+/perf_.*.csv')
+		

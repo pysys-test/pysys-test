@@ -7,8 +7,13 @@
 	<property name="verboseWaitForSignal" value="true"/>
 	<property name="defaultAbortOnError" value="true"/>
 
+	<pythonpath value="${root}/test/extrapath"/>
+
 	<writers>
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		</writer>
+
+		<writer classname="ArtifactPrinter" module="mypkg">
 		</writer>
 
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary.xml">

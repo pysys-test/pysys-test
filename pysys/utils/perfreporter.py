@@ -83,6 +83,9 @@ class CSVPerformanceReporter(object):
 	The per-run and per-result metadata is not arranged in columns since the structure 
 	differs from row to row.
 
+	After tests have run, the summary file is published with category "CSVPerformanceReport" 
+	using the `pysys.writer.ArtifactPublisher` interface. 
+
 	"""
 
 	def __init__(self, project, summaryfile, testoutdir, **kwargs):
@@ -119,6 +122,7 @@ class CSVPerformanceReporter(object):
 			}
 		
 		self.__runDetails = self.getRunDetails()
+		self.__summaryFilesWritten = set()
 		
 	def getRunDetails(self):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
@@ -177,7 +181,10 @@ class CSVPerformanceReporter(object):
 
 	def cleanup(self):
 		"""Called when PySys has finished executing tests."""
-		pass
+		with self._lock:
+			if self.runner is not None and self.__summaryFilesWritten:
+				for p in sorted(list(self.__summaryFilesWritten)):
+					self.runner.publishArtifact(p, 'CSVPerformanceReport')
 
 	def reportResult(self, testobj, value, resultKey, unit, toleranceStdDevs=None, resultDetails=None):
 		"""Report a performance result, with an associated unique key that identifies it.
@@ -294,6 +301,7 @@ class CSVPerformanceReporter(object):
 					testobj.log.info('Creating performance summary log file at: %s', path)
 					f.write(self.getRunHeader())
 				f.write(formatted)
+			self.__summaryFilesWritten.add(path)
 	
 
 class CSVPerformanceFile(object):
