@@ -179,8 +179,12 @@
 	in a file created with a name of  testsummary-20081025213308.xml etc.
 	-->
 	<writers>
+		<!-- This writer is useful for creating zip archives of failed test output directories when 
+			running in record mode on a machine where it is not otherwise easy to access the output 
+			directories. 
+		-->
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
-			<property name="destDir" value="__pysys_output_archives/"/>
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
 			<property name="maxArchives" value="50"/>

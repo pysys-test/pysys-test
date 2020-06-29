@@ -918,7 +918,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		if not self.shouldArchive(testObj): return 
 		
-		id = ('%s.cycle%03d'%(testObj.descriptor.id, testObj.testCycle)) if testObj.testCycle else testObj.id
+		id = ('%s.cycle%03d'%(testObj.descriptor.id, testObj.testCycle)) if testObj.testCycle else testObj.descriptor.id
 		
 		if self.archiveAtEndOfRun:
 			self.queuedInstructions.append([hash(id), id, testObj.output])

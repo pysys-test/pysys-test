@@ -26,6 +26,13 @@
 	-->
 
 	<writers>
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
+			<property name="maxTotalSizeMB" value="1024.0"/>
+			<property name="maxArchiveSizeMB" value="200.0"/>
+			<property name="maxArchives" value="50"/>
+		</writer>
+		
 		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
 
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
