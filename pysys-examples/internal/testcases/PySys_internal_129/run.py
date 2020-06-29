@@ -49,7 +49,8 @@ class PySysTest(BaseTest):
 			'f1.txt', 'run.log', '__pysys_skipped_archive_files.txt']), archive=os.path.basename(archivedir))
 		self.assertDiff(
 			self.copy('extracted-zip/__pysys_skipped_archive_files.txt', self.output, mappers=[
-				lambda l: re.sub('cycle[0-9]+', 'cycleN', l[l.rfind('test_output'):].strip().replace('\\','/'))+'\n'])
+				lambda l: re.sub('cycle[0-9]+', 'cycleN', l[l.rfind('test_output'):].strip().replace('\\','/'))+'\n'], 
+				encoding='utf-8'), encoding='utf-8'
 		)
 		self.assertThat('0.002*1024*1024-1000 < zipBytes < 0.002*1024*1024+200', zipBytes=os.path.getsize(glob.glob(archivedir+'/*.zip')[0]))
 		self.log.info('')
@@ -67,7 +68,7 @@ class PySysTest(BaseTest):
 			self.assertThat('badZipFiles is None', badZipFiles=zf.testzip())
 			members = sorted(zf.namelist())
 		self.assertThat('members == expected', members=sorted(members), expected=sorted([
-			'f1.txt', 'f2.txt', 'f3.txt', 'a/b/nested.txt', 'run.log']), archive=os.path.basename(archivedir))
+			'f1.txt', 'f2.txt', 'f3.txt', 'a/b/nested.txt', 'run.log', u'unicode_filename_\xa3.txt']), archive=os.path.basename(archivedir))
 		self.log.info('')
 
 		##########
@@ -81,10 +82,6 @@ class PySysTest(BaseTest):
 			members = sorted(zf.namelist())
 		# check that the includes works
 		self.assertThat('(members == ["f1.txt"]) or (members == ["f1.txt", "f2.txt"])', members=sorted(members), archive=os.path.basename(archivedir))
-		self.assertDiff(
-			self.copy('extracted-zip/__pysys_skipped_archive_files.txt', self.output, mappers=[
-				lambda l: re.sub('cycle[0-9]+', 'cycleN', l[l.rfind('test_output'):].strip().replace('\\','/'))+'\n'])
-		)
 		self.assertThat('0.010*1024*1024-1000 < totalBytes < 0.010*1024*1024+200', totalBytes=sum(
 			os.path.getsize(f) for f in glob.glob(archivedir+'/*.zip')))
 

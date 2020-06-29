@@ -14,7 +14,7 @@
 			<property name="destDir" value="${testRootDir}/__pysys_output_archives_lowArchiveLimit"/>
 			<property name="maxArchiveSizeMB" value="0.002"/> <!-- 2kB; this limit is crafted to make sure we trigger the tmp zip logic -->
 			<property name="maxArchives" value="6"/>
-			<property name="fileExcludesRegex" value=".+NestedTestcase.*(f2.txt)"/>
+			<property name="fileExcludesRegex" value=".+NestedTestcase.*(f2.txt|unicode_filename.*.txt)"/>
 		</writer>
 
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
