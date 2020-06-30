@@ -29,7 +29,7 @@ from pysys import log, process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
-from pysys.utils.logutils import BaseLogFormatter
+from pysys.utils.logutils import BaseLogFormatter, stripANSIEscapeCodes
 from pysys.xml.project import Project
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
@@ -1231,7 +1231,7 @@ class ProcessUser(object):
 					# messages and test outcome reasons don't get swallowed, add a 
 					# workaround for this here. Not a problem in python 3. 
 					outcomeReason = outcomeReason.decode('ascii', errors='replace')
-				outcomeReason = outcomeReason.strip().replace(u'\t', u' ').replace('\r','').replace('\n', ' ; ')
+				outcomeReason = stripANSIEscapeCodes(outcomeReason).strip().replace(u'\t', u' ').replace('\r','').replace('\n', ' ; ')
 			
 			if override: 
 				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', [LOOKUP[o] for o in self.outcome], self.__outcomeReason)

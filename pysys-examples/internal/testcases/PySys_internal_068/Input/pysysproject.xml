@@ -9,6 +9,14 @@
 
 	<pythonpath value="${root}/test/extrapath"/>
 
+
+	<formatters>
+		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
+				name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
+			<property name="color" value="true"/>
+		</formatter>
+	</formatters>
+	
 	<writers>
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
 		</writer>

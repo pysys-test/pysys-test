@@ -74,10 +74,17 @@ New features
   artifact publishing, for example CI providers that 'upload' artifacts. Currently artifacts are published by 
   `pysys.utils.perfreporter.CSVPerformanceReporter` and `pysys.writer.TestOutputArchiveWriter`. 
 
+- Added `pysys.utils.logutils.stripANSIEscapeCodes()` which can be used to remove ANSI escape codes such as console 
+  color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.BaseResultsWriter`), 
+  since usually you wouldn't want these if writing the output to a file. 
+
 Bug fixes
 ---------
 
 - In some cases foreground processes could be left running after timing out; this is now fixed. 
+
+- Ensure ANSI escape codes (e.g. for console coloring) do not appear in JUnit XML writer output files, or in test 
+  outcome reasons. 
 
 Upgrade guide and compatibility
 -------------------------------

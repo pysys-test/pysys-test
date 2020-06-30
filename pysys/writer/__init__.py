@@ -76,7 +76,7 @@ else:
 	from urllib.parse import urlunparse
 
 from pysys.constants import *
-from pysys.utils.logutils import ColorLogFormatter
+from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import PY2
 
@@ -170,7 +170,9 @@ class BaseResultsWriter(object):
 		:param int cycle: The cycle number. These start from 0, so please add 1 to this value before using. 
 		:param float testTime: Duration of the test in seconds as a floating point number. 
 		:param float testStart: The time when the test started. 
-		:param str runLogOutput: The logging output written to run.log, as a unicode character string. 
+		:param str runLogOutput: The logging output written to the console/run.log, as a unicode character string. This 
+			string will include ANSI escape codes if colored output is enabled; if desired these can be removed using 
+			`pysys.utils.logutils.stripANSIEscapeCodes()`.
 		:param kwargs: Additional keyword arguments may be added in future releases. 
 
 		"""
@@ -588,7 +590,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 			failure.appendChild(document.createTextNode( testObj.getOutcomeReason() ))		
 						
 			stdout = document.createElement('system-out')
-			runLogOutput = kwargs.get('runLogOutput','') # always unicode characters
+			runLogOutput = stripANSIEscapeCodes(kwargs.get('runLogOutput','')) # always unicode characters
 			stdout.appendChild(document.createTextNode(runLogOutput.replace('\r','').replace('\n', os.linesep)))
 			
 			testcase.appendChild(failure)

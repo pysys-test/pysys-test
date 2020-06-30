@@ -70,6 +70,9 @@ class PySysTest(BaseTest):
 			xml_NestedTimedout1="name={name}, tests={tests}, failures={failures}, skipped={skipped}".format(**dict(ET.parse(self.output+'/target/pysys-reports/TEST-NestedTimedout.2.xml').getroot().attrib)),
 			expected='name=NestedTimedout, tests=1, failures=1, skipped=0')
 		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness - %s</failure>'%TEST_STR, encoding='utf-8')
+		# check stdout is included, and does not have any ANSI control characters in it
+		self.assertThat('junitStdoutOutcome == expected', expected='TIMED OUT', 
+			junitStdoutOutcome=self.getExprFromFile('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='Test final outcome: *(.*)', encoding='utf-8'))
 		
 		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
 		if len(datedtestsum) != 1: self.addOutcome(FAILED, 'Did not find testsummary-<year>.log')
