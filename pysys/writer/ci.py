@@ -28,13 +28,13 @@ __all__ = ["TravisCIWriter"]
 import time, logging, sys, threading, os
 
 from pysys.constants import PrintLogs
-from pysys.writer import BaseRecordResultsWriter, ArtifactPublisher
+from pysys.writer import BaseRecordResultsWriter
 from pysys.utils.logutils import ColorLogFormatter, stdoutPrint
 from pysys.utils.pycompat import PY2
 
 log = logging.getLogger('pysys.writer')
 
-class TravisCIWriter(BaseRecordResultsWriter, ArtifactPublisher):
+class TravisCIWriter(BaseRecordResultsWriter):
 	"""
 	Writer for Travis CI. Only enabled when running under Travis (specifically, 
 	if the ``TRAVIS=true`` environment variable is set).
