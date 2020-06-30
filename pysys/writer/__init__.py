@@ -730,13 +730,13 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 		showOutputDir = str(self.showOutputDir).lower() == 'true'
 		showNonPassingTestIds = str(self.showTestIdList).lower() == 'true'
 
-		log.critical("Summary of non passes: ")
+		log.critical("Summary of failures: ")
 		fails = 0
 		for cycle in list(self.results.keys()):
 			for outcome in list(self.results[cycle].keys()):
 				if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
 		if fails == 0:
-			log.critical("	THERE WERE NO NON PASSES", extra=ColorLogFormatter.tag(LOG_PASSES))
+			log.critical("	THERE WERE NO FAILURES", extra=ColorLogFormatter.tag(LOG_PASSES))
 		else:
 			failedids = set()
 			for cycle in list(self.results.keys()):
@@ -758,7 +758,7 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
 				if len(failedids) > 20: # this feature is only useful for small test runs
 					failedids = failedids[:20]+['...']
 				log.critical('')
-				log.critical('List of non passing test ids:')
+				log.critical('List of failed test ids:')
 				log.critical('%s', ' '.join(failedids))
 
 class ConsoleProgressResultsWriter(BaseProgressResultsWriter):

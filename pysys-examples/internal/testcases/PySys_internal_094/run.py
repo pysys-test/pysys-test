@@ -39,7 +39,7 @@ class PySysTest(BaseTest):
 				'INFO .*Id.*:.*NestedTimedout',
 				# end folding before summary
 				'[@t]ravis_fold:[@e]nd:PySys-%s'%subtest,
-				'Summary of non passes:',
+				'Summary of failures:',
 				])
 
 		# this CI provider disables printing of non-failure logs by default

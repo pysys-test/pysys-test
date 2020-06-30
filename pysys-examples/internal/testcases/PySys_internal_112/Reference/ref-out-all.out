@@ -101,5 +101,5 @@ CRIT
 CRIT  Completed test run at:  Monday 2019-06-24 16:44:03 GMT Daylight Time
 CRIT  Total test duration:    0.04 secs
 CRIT  
-CRIT  Summary of non passes: 
-CRIT  	THERE WERE NO NON PASSES
+CRIT  Summary of failures: 
+CRIT  	THERE WERE NO FAILURES

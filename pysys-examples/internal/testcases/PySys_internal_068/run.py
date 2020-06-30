@@ -77,9 +77,9 @@ class PySysTest(BaseTest):
 		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
 		if len(datedtestsum) != 1: self.addOutcome(FAILED, 'Did not find testsummary-<year>.log')
 
-		self.assertLineCount('pysys.out', expr='Summary of non passes', condition='==1')
+		self.assertLineCount('pysys.out', expr='Summary of failures', condition='==1')
 		self.assertOrderedGrep('pysys.out', exprList=[
-			'Summary of non passes: ',
+			'Summary of failures: ',
 			'CYCLE 1.*TIMED OUT.*NestedTimedout',
 			'Reason for timed out outcome is general tardiness - %s'%(
 				# stdout seems to get written in utf-8 not local encoding on python2 for some unknown reason, so skip verification of extra chars on that version; 
@@ -89,7 +89,7 @@ class PySysTest(BaseTest):
 			'CYCLE 2.*TIMED OUT.*NestedTimedout',
 		])
 		# check the option works to disable this
-		self.assertGrep('pysys.out', expr='List of non passing test ids:', contains=False)
+		self.assertGrep('pysys.out', expr='List of failure test ids:', contains=False)
 		
 		self.assertPathExists('__pysys_output_archives/NestedFail.cycle001.zip')
 		

@@ -40,7 +40,7 @@ class PySysTest(BaseTest):
 			'Test progress: completed 5/6'
 		])
 		self.assertOrderedGrep('pysys.out', exprList=[
-			'Summary of non passes: ',
-			'List of non passing test ids:',
+			'Summary of failures: ',
+			'List of failed test ids:',
 			'CRIT .* NestedFail NestedTimedout$'
 			])

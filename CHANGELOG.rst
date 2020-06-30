@@ -94,6 +94,8 @@ Upgrade guide and compatibility
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
 - `pysys.process.common.CommonProcessWrapper.wait` now returns an error if the specified timeout is isn't a positive 
   number (giving the same behaviour as `BaseTest.waitProcess`). 
+- Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
+  "THERE WERE NO NON PASSES", and similarly for the "Summary of non passes:". 
 
 ---------------
 Release History
