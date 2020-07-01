@@ -322,8 +322,7 @@ class ProcessUser(object):
 		:param str stdouterr: The filename prefix to use for the stdout and stderr of the process 
 			(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
 			L{allocateUniqueStdOutErr}. 
-			The stdouterr prefix is also used to form a default display name for 
-			the process if none is explicitly provided. 
+			The stdouterr prefix is also used to form a default display name for the process if none is explicitly provided. 
 			The files are created relative to the test output directory. 
 			The filenames can be accessed from the returned process object using 
 			L{pysys.process.commonwrapper.CommonProcessWrapper.stdout} and 
@@ -426,6 +425,7 @@ class ProcessUser(object):
 																		", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
 					
 					if not ignoreExitStatus and not correctExitStatus:
+						log.warn('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
 						self.addOutcome(BLOCKED, 
 							('%s returned non-zero exit code %d'%(process, process.exitStatus))
 							if expectedExitStatus=='==0' else
