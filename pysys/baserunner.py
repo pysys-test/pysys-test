@@ -573,6 +573,11 @@ class BaseRunner(ProcessUser):
 				if self.startPython(['-m', 'coverage', 'combine'], abortOnError=False, 
 					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
 					disableCoverage=True).exitStatus != 0: return
+
+				# produces coverage.xml in a standard format that is useful to code coverage tools
+				self.startPython(['-m', 'coverage', 'xml'], abortOnError=False, 
+					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-xml', 
+					disableCoverage=True)
 					
 				args = []
 				if hasattr(self.project, 'pythonCoverageArgs'):
