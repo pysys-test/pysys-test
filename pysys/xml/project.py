@@ -497,14 +497,7 @@ class Project(object):
 	To get a reference to the current `Project` instance, use the 
 	`pysys.basetest.BaseTest.project` 
 	(or `pysys.process.user.ProcessUser.project`) field. 
-	
-	This class reads and parses the PySys project file if it exists and sets 
-	an instance attribute for every::
-	
-	   <property name="PROP_NAME">prop value</property>
-	
-	element in the file. 
-	
+		
 	:ivar dict(str,str) ~.properties: The resolved values of all project properties defined in the configuration file. 
 		In addition, each of these is set as an attribute onto the `Project` instance itself. 
 	:ivar str ~.root: Full path to the project root directory, as specified by the first PySys project
