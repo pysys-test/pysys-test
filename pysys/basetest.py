@@ -841,13 +841,15 @@ class BaseTest(ProcessUser):
 
 		For example::
 		
-			self.assertGrep('myserver.log', expr=' ERROR .*', contains=False)
+			self.assertGrep('myserver.log', expr=r' ERROR .*', contains=False)
 			
-			# in Python 3+, f-Strings can be used to substitute in parameters:
-			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{re.escape(username)}" in .* seconds\\.')
+			# in Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:
+			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{re.escape(username)}" in .* seconds[.]')
 			
-			# If you need to use ``\`` regular epression escapes use a raw string to avoid double-escaping
-			self.assertGrep('myserver.log', expr=r'c:\Foo\bar\.txt')
+			# If you need to use \ characters use a raw r'...' string to avoid the need for Python \ escaping in 
+			# addition to regex escaping. Square brackets are often the clearest way to escape regular expression 
+			# characters such as \ . and ()
+			self.assertGrep('myserver.log', expr=r'c:[\]Foo[\]bar[.]txt')
 		
 		You can get more descriptive failure messages, and also do more sophisticated checking of results, by 
 		using one or more ``(?P<groupName>...)`` named groups in the expression to extract information. A common 
@@ -881,8 +883,9 @@ class BaseTest(ProcessUser):
 		:param str expr: The regular expression to check for in the file (or a string literal if literal=True), 
 			for example ``" ERROR .*"``. 
 			
-			It's sometimes helpful to use a 'raw' Python string so that you don't need to double-escape 
-			slashes intended for the regular expression parser, e.g. ``self.assertGrep(..., expr=r'c:\Foo\bar\.txt')``.
+			Remember to escape regular expression special characters such as ``.``, ``(`` and ``\\`` if you want them to 
+			be treated as literal values. If you have a string with a lot of backslashes, it's best to use a 'raw' 
+			Python string so that you don't need to double-escape them, e.g. ``self.assertGrep(..., expr=r'c:\\Foo\\filename\.txt')``.
 			
 			If you wish to do something with the text inside the match you can use the ``re`` named 
 			group syntax ``(?P<groupName>...)`` to specify a name for parts of the regular expression.
