@@ -883,9 +883,15 @@ class BaseTest(ProcessUser):
 		:param str expr: The regular expression to check for in the file (or a string literal if literal=True), 
 			for example ``" ERROR .*"``. 
 			
-			Remember to escape regular expression special characters such as ``.``, ``(`` and ``\\`` if you want them to 
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
 			be treated as literal values. If you have a string with a lot of backslashes, it's best to use a 'raw' 
 			Python string so that you don't need to double-escape them, e.g. ``self.assertGrep(..., expr=r'c:\\Foo\\filename\.txt')``.
+			
+			If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
+			substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
+			through re.escape::
+			
+				expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)')
 			
 			If you wish to do something with the text inside the match you can use the ``re`` named 
 			group syntax ``(?P<groupName>...)`` to specify a name for parts of the regular expression.

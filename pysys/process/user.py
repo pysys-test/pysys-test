@@ -1394,9 +1394,15 @@ class ProcessUser(object):
 
 		:param str expr: the regular expression, optionally containing the regex group operator ``(...)``
 		
-			Remember to escape regular expression special characters such as ``.``, ``(`` and ``\\`` if you want them to 
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
 			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
 			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
+
+			If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
+			substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
+			through re.escape::
+			
+				expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)')
 
 		:param List[int] groups: which regex group numbers (as indicated by brackets in the regex) should be returned; 
 			default is ``[1]`` meaning the first group. 
