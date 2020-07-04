@@ -36,7 +36,7 @@ consider contributing your implementation back to the PySys project with a pull 
 
 __all__ = ["GitHubActionsCIWriter", "TravisCIWriter"]
 
-import time, logging, sys, threading, os, re
+import time, logging, sys, threading, os, re, collections
 
 from pysys.constants import PrintLogs, FAILS
 from pysys.writer import BaseRecordResultsWriter, TestOutcomeSummaryGenerator, ArtifactPublisher, stripANSIEscapeCodes
@@ -163,7 +163,8 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 			msg = stripANSIEscapeCodes(runLogOutput)
 			self.remainingAnnotations -= 1
 			if self.remainingAnnotations == 0: msg += '\n\n(annotation limit reached; for any additional test failures, see the detailed log)'
-			params = {u'file':os.path.join(testObj.descriptor.testDir, testObj.descriptor.module).replace(u'\\',u'/')}
+			params = collections.OrderedDict()
+			params[u'file'] = os.path.join(testObj.descriptor.testDir, testObj.descriptor.module).replace(u'\\',u'/')
 			if lineno: params[u'line'] = str(lineno)
 			self.failureTestLogAnnotations.append([u'warning', msg, params])
 			
