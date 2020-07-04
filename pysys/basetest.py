@@ -734,6 +734,14 @@ class BaseTest(ProcessUser):
 		Should the files after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, 
 		otherwise a C{FAILED} outcome is added.
 		
+		If you have any serialized dictionary/map data structures in the comparison files, or any lists that come from 
+		a directory listing, be really careful to ensure there is deterministic sorting of the keys/filenames, as 
+		by default the ordering is often subject to unpredictable changes when upgrading tools or switching between 
+		OSes, and you don't want to have to update lots of testcases every time the sorting changes. If you are able 
+		to get the data into a Python data structure (e.g. by serializing from JSON), 
+		Python's ``json.dump(..., sort_keys=True)`` can be a convenient way to produce a predictable order for 
+		dictionary keys.
+		
 		If you have a large set of test reference files which need to be updated after a behaviour or output formatting 
 		change, you can use a special command line option which makes ``assertDiff`` overwrite the reference files with 
 		a copy of the actual comparison file in cases where the diff would otherwise fail. 
