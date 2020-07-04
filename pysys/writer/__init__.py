@@ -66,7 +66,10 @@ breaking writer implementations already in existence.
 
 """
 
-__all__ = ["BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "ArtifactPublisher", "TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", "ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter",  "TestOutputArchiveWriter"]
+__all__ = [
+	"BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "ArtifactPublisher", "TestOutcomeSummaryGenerator", 
+	"TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", 
+	"ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter",  "TestOutputArchiveWriter"]
 
 import time, stat, logging, sys, io
 import zipfile
@@ -88,7 +91,8 @@ class BaseResultsWriter(object):
 	"""Base class for all writers that get notified as and when test results are available.
 	
 	Writer can additionally subclass `ArtifactPublisher` to be notified of artifacts produced by other writers 
-	that they wish to publish. 
+	that they wish to publish. If you are implementing a writer that needs a textual summary of the test outcomes, 
+	you can add `TestOutcomeSummaryGenerator` as a superclass to get this functionality. 
 
 	:param str logfile: Optional configuration property specifying a file to store output in. 
 		Does not apply to all writers, can be ignored if not needed. 
@@ -251,6 +255,127 @@ class ArtifactPublisher(object):
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
 		"""
 		pass
+
+class TestOutcomeSummaryGenerator(BaseResultsWriter):
+	"""Mix-in helper class that can be inherited by any writer to allow (configurable) generation of a textual 
+	summary of the test outcomes. 
+
+	If subclasses provide their own implementation of `setup` and `processResult` they must ensure this class's 
+	methods of those names are also called. Then the summary can be obtained from `logSummary` or `getSummaryText`, 
+	typically in the writer's `cleanup` method. 
+	"""
+	
+	showOutcomeReason = True
+	"""Configures whether the summary includes the reason for each failure."""
+	
+	showOutputDir = True
+	"""Configures whether the summary includes the (relative) path to the output directory for each failure. """
+	
+	showOutcomeStats = True
+	"""Configures whether the summary includes a count of the number of each outcomes."""
+	
+	showDuration = False
+	"""Configures whether the summary includes the total duration of all tests."""
+	
+	showTestIdList = False
+	"""Configures whether the summary includes a short list of the failing test ids in a form that's easy to paste onto the 
+	command line to re-run the failed tests. """
+
+	
+	def setup(self, cycles=0, threads=0, **kwargs):
+		self.results = {}
+		self.startTime = time.time()
+		self.duration = 0.0
+		for cycle in range(cycles):
+			self.results[cycle] = {}
+			for outcome in PRECEDENT: self.results[cycle][outcome] = []
+		self.threads = threads
+		self.outcomes = {o: 0 for o in PRECEDENT}
+
+	def processResult(self, testObj, cycle=-1, testTime=-1, testStart=-1, **kwargs):
+		self.results[cycle][testObj.getOutcome()].append( (testObj.descriptor.id, testObj.getOutcomeReason(), testObj.output))
+		self.outcomes[testObj.getOutcome()] += 1
+		self.duration = self.duration + testTime
+
+	def getSummaryText(self, **kwargs):
+		"""
+		Get the textual summary as a single string (with no coloring). 
+		
+		To customize what is included in the summary (rather than letting it be user-configurable), 
+		use the keyword arguments as for `logSummary`. 
+		
+		:return str: The summary as a string. 
+		"""
+		result = []
+		def log(fmt, *args, **kwargs):
+			result.append(fmt%args)
+		return '\n'.join(result)
+
+	def logSummary(self, log, showDuration=None, showOutcomeStats=None, showOutcomeReason=None, showOutputDir=None, showTestIdList=None, **kwargs):
+		"""
+		Writes a textual summary using the specified log function, with colored output if enabled.
+		
+		:param Callable[format,args,kwargs=] log: The function to call for each line of the summary (e.g. log.critical). 
+			The message is obtained with ``format % args``, and color information is available from the ``extra=`` 
+			keyword argument.
+		"""
+		assert not kwargs, kwargs.keys()
+
+		if showDuration is None: showDuration = str(self.showDuration).lower() == 'true'
+		if showOutcomeStats is None: showOutcomeStats = str(self.showOutcomeStats).lower() == 'true'
+		if showOutcomeReason is None: showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
+		if showOutputDir is None: showOutputDir = str(self.showOutputDir).lower() == 'true'
+		if showTestIdList is None: showTestIdList = str(self.showTestIdList).lower() == 'true'
+
+		if showDuration:
+			log(  "Completed test run at:  %s", time.strftime('%A %Y-%m-%d %H:%M:%S %Z', time.localtime(time.time())), extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
+			if self.threads > 1: 
+				log("Total test duration (absolute): %s", '%.2f secs'%(time.time() - self.startTime), extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
+				log("Total test duration (additive): %s", '%.2f secs'%self.duration, extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
+			else:
+				log("Total test duration:    %s", "%.2f secs"%(time.time() - self.startTime), extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
+			log('')		
+
+
+		if showOutcomeStats:
+			executed = sum(self.outcomes.values())
+			failednumber = sum([self.outcomes[o] for o in FAILS])
+			passed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o not in FAILS and self.outcomes[o]>0])
+			failed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o in FAILS and self.outcomes[o]>0])
+			if failed: log('Failure outcomes: %s (%0.1f%%)', failed, 100.0 * (failednumber) / executed, extra=ColorLogFormatter.tag(LOOKUP[FAILED].lower(), [0,1]))
+			if passed: log('Success outcomes: %s', passed, extra=ColorLogFormatter.tag(LOOKUP[PASSED].lower(), [0]))
+			log('')
+
+		log("Summary of failures: ")
+		fails = 0
+		for cycle in self.results:
+			for outcome, tests in self.results[cycle].items():
+				if outcome in FAILS : fails = fails + len(tests)
+		if fails == 0:
+			log("	THERE WERE NO FAILURES", extra=ColorLogFormatter.tag(LOG_PASSES))
+		else:
+			failedids = set()
+			for cycle in self.results:
+				cyclestr = ''
+				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
+				for outcome in FAILS:
+					for (id, reason, outputdir) in self.results[cycle][outcome]: 
+						failedids.add(id)
+						log("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra=ColorLogFormatter.tag(LOOKUP[outcome].lower()))
+						if showOutputDir:
+							log("      %s", os.path.normpath(os.path.relpath(outputdir))+os.sep)
+						if showOutcomeReason and reason:
+							log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
+		
+			if showTestIdList and len(failedids) > 1:
+				# display just the ids, in a way that's easy to copy and paste into a command line
+				failedids = list(failedids)
+				failedids.sort()
+				if len(failedids) > 20: # this feature is only useful for small test runs
+					failedids = failedids[:20]+['...']
+				log('')
+				log('List of failed test ids:')
+				log('%s', ' '.join(failedids))
 
 class flushfile(): 
 	"""Utility class to flush on each write operation - for internal use only.  
@@ -680,86 +805,21 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		csv.append(LOOKUP[testObj.getOutcome()])
 		self.fp.write('%s \n' % ','.join(csv))
 
-
-class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter):
+class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter, TestOutcomeSummaryGenerator):
 	"""Default summary writer that is used to list a summary of the test results at the end of execution.
 
+	Support the same configuration options as `TestOutcomeSummaryGenerator`.
 	"""
-	
+	# change some of the TestOutcomeSummaryGenerator defaults for the console
 	showOutcomeReason = False # option added in 1.3.0. May soon change the default to True. 
-	"""
-	Set to True to the outcome reason for each failed test. 
-	"""
-	
 	showOutputDir = False
-	"""
-	Set to True to include the relative path to the output directory for each failed test. 
-	"""
-	
+	showDuration = True
 	showTestIdList = True
-	""" Set to True to include a short list of the failing test ids in a form that's easy to paste onto the 
-	command line to re-run the failed tests. """
 	
-	def setup(self, cycles=0, threads=0, **kwargs):
-		self.results = {}
-		self.startTime = time.time()
-		self.duration = 0.0
-		for cycle in range(cycles):
-			self.results[cycle] = {}
-			for outcome in PRECEDENT: self.results[cycle][outcome] = []
-		self.threads = threads
-
-	def processResult(self, testObj, cycle=-1, testTime=-1, testStart=-1, **kwargs):
-		self.results[cycle][testObj.getOutcome()].append( (testObj.descriptor.id, testObj.getOutcomeReason(), testObj.output ))
-		self.duration = self.duration + testTime
-
 	def cleanup(self, **kwargs):
 		log = logging.getLogger('pysys.resultssummary')
 		log.critical("")
-		log.critical(  "Completed test run at:  %s", time.strftime('%A %Y-%m-%d %H:%M:%S %Z', time.localtime(time.time())))
-		if self.threads > 1: 
-			log.critical("Total test duration (absolute): %.2f secs", time.time() - self.startTime)		
-			log.critical("Total test duration (additive): %.2f secs", self.duration)
-		else:
-			log.critical("Total test duration:    %.2f secs", time.time() - self.startTime)		
-		log.critical("")		
-		self.printNonPassesSummary(log)
-		
-	def printNonPassesSummary(self, log):
-		showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
-		showOutputDir = str(self.showOutputDir).lower() == 'true'
-		showNonPassingTestIds = str(self.showTestIdList).lower() == 'true'
-
-		log.critical("Summary of failures: ")
-		fails = 0
-		for cycle in list(self.results.keys()):
-			for outcome in list(self.results[cycle].keys()):
-				if outcome in FAILS : fails = fails + len(self.results[cycle][outcome])
-		if fails == 0:
-			log.critical("	THERE WERE NO FAILURES", extra=ColorLogFormatter.tag(LOG_PASSES))
-		else:
-			failedids = set()
-			for cycle in list(self.results.keys()):
-				cyclestr = ''
-				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
-				for outcome in FAILS:
-					for (id, reason, outputdir) in self.results[cycle][outcome]: 
-						failedids.add(id)
-						log.critical("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra=ColorLogFormatter.tag(LOOKUP[outcome].lower()))
-						if showOutputDir:
-							log.critical("      %s", os.path.normpath(os.path.relpath(outputdir)))
-						if showOutcomeReason and reason:
-							log.critical("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
-		
-			if showNonPassingTestIds and len(failedids) > 1:
-				# display just the ids, in a way that's easy to copy and paste into a command line
-				failedids = list(failedids)
-				failedids.sort()
-				if len(failedids) > 20: # this feature is only useful for small test runs
-					failedids = failedids[:20]+['...']
-				log.critical('')
-				log.critical('List of failed test ids:')
-				log.critical('%s', ' '.join(failedids))
+		self.logSummary(log.critical)
 
 class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 	"""Default progress writer that logs a summary of progress so far to the console, after each test completes.
