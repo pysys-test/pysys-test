@@ -811,8 +811,8 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter, TestOutcomeSummaryGe
 	Support the same configuration options as `TestOutcomeSummaryGenerator`.
 	"""
 	# change some of the TestOutcomeSummaryGenerator defaults for the console
-	showOutcomeReason = False # option added in 1.3.0. May soon change the default to True. 
-	showOutputDir = False
+	showOutcomeReason = True
+	showOutputDir = True
 	showDuration = True
 	showTestIdList = True
 	
