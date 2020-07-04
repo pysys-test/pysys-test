@@ -488,10 +488,13 @@ class BaseTest(ProcessUser):
 			# Equality comparison of an 'actual' vs 'expected' message from when our server started; 
 			# note the use of a descriptive name for the 'actualXXX=' keyword to produce a nice clear message if it fails
 			self.assertThat("actualStartupMessage == expected", expected='Started successfully', actualStartupMessage=msg)
-			self.assertThat('actualUser == expected', expected='myuser', actualUser=user)
 			
 			# This produces the self-describing log messages like: 
 			#   Assert that (actualStartupMessage == expected) with expected='Started successfully', actualStartupMessage='Started unsuccessfully' ... passed
+
+			# Always design tests to give clear messages if there's a failure. Here's an example of adding an extra 
+			# parameter (fromLogFile) that's not used in the condition string, to indicate which server we're testing here
+			self.assertThat('actualUser == expected', expected='myuser', actualUser=user, fromLogFile='server1.log')
 
 			# Any valid Python expression is permitted (not only equality testing):
 			self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
@@ -533,10 +536,11 @@ class BaseTest(ProcessUser):
 			#     expected: 'baz'
 			#                 ^
 		
-		As shown above, when two named parameters are provided and the condition string is a simple equality 
-		comparison (``==`` or ``is``), additional lines are logged if the assertion fails to show at what point the 
-		two arguments differ (based on finding the longest common substring). So it's a good idea to include both 
-		the actual and expected value as named parameters rather than as literals inside the condition string. 
+		As shown above, when (at least) two named parameters are provided and the condition string is a simple equality 
+		comparison (``==``, ``is``, ``>=``, ``<=``) using the first two parameters, additional lines are logged if the 
+		assertion fails, showing at what point the two arguments differ (based on finding the longest common substring). 
+		So it's a good idea to include both the actual and expected value as named parameters rather than as literals 
+		inside the condition string. 
 		
 		.. versionchanged:: 1.5.1
 			The ability to pass named keyword= parameters was added in 1.5.1 
@@ -625,7 +629,7 @@ class BaseTest(ProcessUser):
 			return True
 		else:
 			self.addOutcome(FAILED, assertMessage, abortOnError=abortOnError)
-			if len(namedvalues) == 2 and re.match(r'^ *\w+ *(==|is) *\w+ *$', conditionstring): 
+			if re.match(r'^ *\w+ *(==|is|>=|<=) *\w+ *$', conditionstring) and len(namedvalues)>=2 and namedvalues[0] in conditionstring and namedvalues[1] in conditionstring: 
 				# if we're checking a==b we can help the user see why they didn't match; 
 				# this kind of highlighting might be misleading for other conditionstrings, and certainly less useful
 				pad = max(len(key) for key in namedvalues)+1
