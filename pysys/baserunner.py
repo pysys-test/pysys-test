@@ -571,6 +571,8 @@ class BaseRunner(ProcessUser):
 			if not pathexists(pythonCoverageDir):
 				self.log.info('No Python coverage files were generated.')
 			else:
+				self.log.info('Preparing Python coverage report in: %s', os.path.normpath(pythonCoverageDir))
+
 				if self.startPython(['-m', 'coverage', 'combine'], abortOnError=False, 
 					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
 					disableCoverage=True).exitStatus != 0: return
@@ -587,7 +589,12 @@ class BaseRunner(ProcessUser):
 				self.startPython(['-m', 'coverage', 'html']+args, abortOnError=False, 
 					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
 					disableCoverage=True)
-				self.log.info('Python coverage dir is: %s', os.path.normpath(pythonCoverageDir))
+				
+				# to avoid confusion, remove any zero byte out/err files from the above
+				for p in os.listdir(pythonCoverageDir):
+					p = os.path.join(pythonCoverageDir, p)
+					if p.endswith(('.out', '.err')) and os.path.getsize(p)==0:
+						os.remove(p)
 	
 
 	def containerCallback(self, thread, container):
