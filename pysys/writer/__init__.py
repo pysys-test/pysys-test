@@ -362,10 +362,10 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 					for (id, reason, outputdir) in self.results[cycle][outcome]: 
 						failedids.add(id)
 						log("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra=ColorLogFormatter.tag(LOOKUP[outcome].lower()))
-						if showOutputDir:
-							log("      %s", os.path.normpath(os.path.relpath(outputdir))+os.sep)
 						if showOutcomeReason and reason:
 							log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
+						if showOutputDir:
+							log("      %s", os.path.normpath(os.path.relpath(outputdir))+os.sep)
 		
 			if showTestIdList and len(failedids) > 1:
 				# display just the ids, in a way that's easy to copy and paste into a command line
