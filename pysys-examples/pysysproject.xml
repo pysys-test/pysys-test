@@ -183,7 +183,7 @@
 			<property name="maxArchives" value="50"/>
 		</writer>
 
-		<writer classname="XMLResultsWriter" module="pysys.writer" file="pysys-testsummary-%Y-%m-%d-%H.%M.%S.xml">
+		<writer classname="XMLResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
 			can be set are the stylesheet location, whether to use file URLs in all references 
@@ -212,7 +212,7 @@
 		<!--
 		Add in the test results writer if output to a text file is required 
 		
-		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
+		<writer classname="TextResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
@@ -221,7 +221,7 @@
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
-		<writer classname="CSVResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.csv">
+		<writer classname="CSVResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
@@ -233,7 +233,7 @@
 		produce one file per test into this output directory). 
 		-->
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${testRootDir}/pysys-junit-report"/>
+			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 		
 

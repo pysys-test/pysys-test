@@ -4,8 +4,8 @@ docs/autodocgen
 docs/build_output*
 
 # PySys Output directories
+__pysys_.*
 Output/
-pysys-junit-report/
 pysys-testsummary*.xml
 
 # Byte-compiled / optimized / DLL files

@@ -23,5 +23,5 @@ class PySysTest(BaseTest):
 			'Test final outcome:'])
 		
 		# check the mode shows up ok in the junit report
-		self.assertGrep('test/pysys-junit-report/TEST-DB_cor_001~MyDatabase_2012.xml', 
+		self.assertGrep('test/__pysys_junit_xml/TEST-DB_cor_001~MyDatabase_2012.xml', 
 			expr='<testsuite .*name="DB_cor_001~MyDatabase_2012"')

@@ -91,6 +91,9 @@ New features
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
   to make it easier to run in CI jobs. 
 
+- Sample project file introduces a new naming convention of ``__pysys_*`` for output directories and files created 
+  by PySys (for example, by writers). This helps avoid outputs getting mixed up with testcase directories and also 
+  allows for easier ignore rules for version control systems. 
 
 Bug fixes
 ---------
