@@ -36,10 +36,13 @@ log = logging.getLogger('pysys.writer')
 
 class TravisCIWriter(BaseRecordResultsWriter):
 	"""
-	Writer for Travis CI. Only enabled when running under Travis (specifically, 
-	if the ``TRAVIS=true`` environment variable is set).
+	Writer for Travis CI. 	
 	
 	Provides folding of test log details, and correct coloring of console output for Travis. 
+	
+	Only enabled when running under Travis (specifically, 
+	if the ``TRAVIS=true`` environment variable is set).
+
 	"""
 		
 	def isEnabled(self, **kwargs):
