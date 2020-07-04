@@ -312,6 +312,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		result = []
 		def log(fmt, *args, **kwargs):
 			result.append(fmt%args)
+		self.logSummary(log=log, **kwargs)
 		return '\n'.join(result)
 
 	def logSummary(self, log, showDuration=None, showOutcomeStats=None, showOutcomeReason=None, showTestTitle=None, showOutputDir=None, showTestIdList=None, **kwargs):
