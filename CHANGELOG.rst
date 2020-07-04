@@ -81,6 +81,9 @@ New features
 - The -XpythonCoverage option now produces an XML coverage.xml report in addition to the .coverage file and HTML 
   report. This is useful for some code coverage UI/aggregation services. 
 
+- Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
+  to make it easier to run in CI jobs. 
+
 Bug fixes
 ---------
 

@@ -54,7 +54,7 @@ class ConsoleLaunchHelper(object):
 		self.descriptors = []
 		self.grep = None
 		self.optionString = 'hrpyv:a:t:i:e:c:o:m:n:j:b:X:gG:'
-		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=']
+		self.optionList = ["help","record","purge","verbosity=","type=","trace=","include=","exclude=","cycle=","outdir=","mode=","modeinclude=","modeexclude=","threads=", "abort=", 'validateOnly', 'progress', 'printLogs=', 'grep=', 'ci']
 
 
 	def getProjectHelp(self):
@@ -99,13 +99,16 @@ class ConsoleLaunchHelper(object):
 Execution options
 -----------------
    -c, --cycle     NUM         run each test the specified number of times
-   -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path)
+   -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path); 
+                               setting this is helpful for tagging/naming test output for different invocations 
+                               of PySys as you try out various changes to the application under test
    -j, --threads   NUM | xNUM  set the number of jobs (threads) to run tests in parallel (defaults to 1); 
                                specify either an absolute number, or a multiplier on the number of CPUs e.g. "x1.5"; 
                    auto | 0    equivalent to x1.0 (or the PYSYS_DEFAULT_THREADS env var if set)
-   -p, --purge                 purge all files except run.log from the output directory (unless test fails)
+       --ci                    set optimal options for automated/non-interactive test execution in a CI job: 
+                                 --purge --record -j0 --mode=ALL --printLogs=FAILURES
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
-   -v, --verbosity CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
+                   CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
    -y, --validateOnly          test the validate() method without re-running execute()
    -h, --help                  print this message
  
@@ -117,9 +120,9 @@ Execution options
 Advanced:
    -g, --progress              print progress updates after completion of each test
    -r, --record                use configured 'writers' to record the test results (e.g. XML, JUnit, etc)
-   --printLogs STRING          indicates for which outcome types the run.log output 
-                               will be printed to the stdout console; 
-                               options are: all|none|failures, default is all.
+   -p, --purge                 purge files except run.log from the output directory to save space (unless test fails)
+   --printLogs     STRING      indicates for which outcome types the run.log output will be printed to the stdout 
+                               console; options are: all|none|failures (default is all).
    -b, --abort     STRING      set the default abort on error property (true|false, overrides 
                                that specified in the project properties)
    -XautoUpdateAssertDiffReferences 
@@ -183,16 +186,29 @@ e.g.
 			log.info('Using PYSYS_DEFAULT_ARGS = %s'%os.environ['PYSYS_DEFAULT_ARGS'])
 			args = shlex.split(os.environ['PYSYS_DEFAULT_ARGS']) + args
 		
+
+		printLogsDefault = PrintLogs.ALL
+		if '--ci' in args:
+			# to ensure identical behaviour, set these as if on the command line
+			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
+			# by CI writers and/or the command line; setting --mode=ALL would lead to weird results if supportMultipleModesPerRun=false)
+			if getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true': args = ['--mode=ALL']+args
+			args = ['--purge', '--record', '-j0']+args
+			printLogsDefault = PrintLogs.FAILURES
+
 		try:
 			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
 			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 
+		log.debug('PySys arguments: tests=%s options=%s', self.arguments, optlist)
+
 		EXPR1 = re.compile("^[\w\.]*=.*$")
 		EXPR2 = re.compile("^[\w\.]*$")
 
 		printLogs = None
+		ci = False
 		
 		logging.getLogger('pysys').setLevel(logging.INFO)
 
@@ -200,10 +216,13 @@ e.g.
 		# so that it doesn't get enabled with -vDEBUG only -vassertions=DEBUG 
 		# as it is incredibly verbose and slow and not often useful
 		logging.getLogger('pysys.assertions').setLevel(logging.INFO)
-		
+				
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage(printXOptions)	  
+
+			elif option in ['--ci']:
+				continue # handled above
 
 			elif option in ("-r", "--record"):
 				self.record = True
@@ -319,6 +338,7 @@ e.g.
 		self.userOptions['__extraRunnerOptions'] = {
 			'progressWritersEnabled':self.progress,
 			'printLogs': printLogs,
+			'printLogsDefault': printLogsDefault, # to use if not provided by a CI writer or cmdline
 		}
 		
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, 

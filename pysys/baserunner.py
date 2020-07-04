@@ -165,6 +165,7 @@ class BaseRunner(ProcessUser):
 		summarywriters = []
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
+		self.__printLogsDefault = extraOptions['printLogsDefault']
 		for classname, module, filename, properties in self.project.writers:
 			module = import_module(module, sys.path)
 			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
@@ -431,7 +432,7 @@ class BaseRunner(ProcessUser):
 				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
 		
-		if self.printLogs is None: self.printLogs = PrintLogs.ALL # default value, unless overridden by user or writer.setup
+		if self.printLogs is None: self.printLogs = self.__printLogsDefault # default value, unless overridden by cmdline or writer.setup
 		
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: 

@@ -21,6 +21,10 @@ class PySysTest(BaseTest):
 		runPySys(self, subtest, ['run', '--record', '--printLogs', 'all', '--threads', '2', '-o', subtest], 
 			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true'})
 
+		subtest = 'ci' 
+		runPySys(self, subtest, ['run', '--ci', '-o', subtest], 
+			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true'})
+
 		subtest = 'default-project' 
 		createProjectConfig(self.mkdir(self.output+'/defconfig'))
 		runPySys(self, subtest, ['run', '--record', '--printLogs', 'all', '--threads', '2', '-o', subtest], 
@@ -30,7 +34,7 @@ class PySysTest(BaseTest):
 			
 	def validate(self):
 
-		for subtest in ['enabled-defaults', 'default-project']:
+		for subtest in ['enabled-defaults', 'default-project', 'ci']:
 			self.assertOrderedGrep('%s.out'%subtest, exprList=[
 				# first folding, using the test outdir name
 				# avoid using the actual literal here else travis will try to fold it!
