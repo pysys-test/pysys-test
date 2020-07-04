@@ -36,7 +36,7 @@
 		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
 
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${testRootDir}/__pysys_junit"/>
+			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 		
 		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
