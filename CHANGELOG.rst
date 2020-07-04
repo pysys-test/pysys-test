@@ -423,7 +423,7 @@ Miscellaneous new features:
   project file shows how to use this feature to collect Python code 
   coverage files::
   
-     <property name="pythonCoverageDir" value="coverage-python-@OUTDIR@"/>
+     <property name="pythonCoverageDir" value="__pysys_coverage_python_@OUTDIR@"/>
 	 <collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 
   The output directory is wiped clean at the start of each test run to prevent 

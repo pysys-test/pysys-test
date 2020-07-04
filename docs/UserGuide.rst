@@ -168,7 +168,7 @@ as Java), this is easy to achieve by following the same pattern:
   by the code that will generate the report. For Python programs, you'd 
   configure PySys to do it like this::
   
-  	<property name="pythonCoverageDir" value="coverage-python-@OUTDIR@"/>
+  	<property name="pythonCoverageDir" value="__pysys_coverage_python_@OUTDIR@"/>
 	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 
   Note that ``collect-test-output`` will delete the specified outputDir each 

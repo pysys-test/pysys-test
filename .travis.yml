@@ -135,12 +135,12 @@ script:
   - $PY -m pip install coverage==4.5.4 codecov
 
   # main test run
-  - $PY -m coverage run --rcfile ./internal/utilities/python_coveragerc ../scripts/pysys.py run -X pythonCoverage=true --threads auto --purge --record --type auto --outdir main --mode ALL
+  - $PY -m coverage run --rcfile ./internal/utilities/python_coveragerc ../scripts/pysys.py run -X pythonCoverage=true --ci --outdir main
 
   # upload Python code coverage - since we're measuring PySys itself, include both 
   # top-level .coverage file and the files collected by PySys from its PySys subprocesses
-  - mv .coverage ./coverage-python-main/.coverage.toplevel
-  - cd coverage-python-main
+  - mv .coverage ./__pysys_coverage_python_main/.coverage.toplevel
+  - cd __pysys_coverage_python_main
   - codecov
   - cd ..
   
