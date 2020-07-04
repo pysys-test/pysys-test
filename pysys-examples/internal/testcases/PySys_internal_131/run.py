@@ -50,7 +50,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('default-project.out', expr='^::set-output name=artifact_TestOutputArchiveDir::..................*/__pysys_output_archives')
 		self.assertGrep('test-project.out', expr='^::set-output', contains=False)
 
-		self.assertGrep('defaultproject.out', expr='^::warning file=.*/run.py,line=7::.*Id.*NestedTimedout2%0A.*Test duration:') # includes line number
+		self.assertGrep('default-project.out', expr='^::warning file=.*/run.py,line=7::.*Id.*NestedTimedout2%0A.*Test duration:') # includes line number
 		self.assertLineCount('default-project.out', expr='::(warning|error)', condition='==4')
 		self.assertLineCount('test-project.out', expr='::(warning|error)', condition='==3') # =4 minus the one GitHub adds for the non-zero exit code
 		self.assertGrep('test-project.out', expr='(annotation limit reached; for any additional test failures, see the detailed log)', literal=True)
