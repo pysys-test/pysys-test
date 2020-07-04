@@ -242,6 +242,7 @@
 			list if no other "summary" writer is explicitly configured.
 		-->		
 		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+			<property name="showTestTitle" value="false"/>
 		</writer>
 	</writers>
 

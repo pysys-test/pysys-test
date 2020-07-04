@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Nested testcase</title>    
+    <title></title>  <!-- deliberately empty --> 
     <purpose><![CDATA[
 
 ]]>

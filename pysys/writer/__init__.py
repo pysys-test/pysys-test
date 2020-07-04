@@ -270,6 +270,9 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 	
 	showOutputDir = True
 	"""Configures whether the summary includes the (relative) path to the output directory for each failure. """
+
+	showTestTitle = False
+	"""Configures whether the summary includes the test title for each failure. """
 	
 	showOutcomeStats = True
 	"""Configures whether the summary includes a count of the number of each outcomes."""
@@ -293,7 +296,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		self.outcomes = {o: 0 for o in PRECEDENT}
 
 	def processResult(self, testObj, cycle=-1, testTime=-1, testStart=-1, **kwargs):
-		self.results[cycle][testObj.getOutcome()].append( (testObj.descriptor.id, testObj.getOutcomeReason(), testObj.output))
+		self.results[cycle][testObj.getOutcome()].append( (testObj.descriptor.id, testObj.getOutcomeReason(), testObj.descriptor.title, testObj.output))
 		self.outcomes[testObj.getOutcome()] += 1
 		self.duration = self.duration + testTime
 
@@ -311,7 +314,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			result.append(fmt%args)
 		return '\n'.join(result)
 
-	def logSummary(self, log, showDuration=None, showOutcomeStats=None, showOutcomeReason=None, showOutputDir=None, showTestIdList=None, **kwargs):
+	def logSummary(self, log, showDuration=None, showOutcomeStats=None, showOutcomeReason=None, showTestTitle=None, showOutputDir=None, showTestIdList=None, **kwargs):
 		"""
 		Writes a textual summary using the specified log function, with colored output if enabled.
 		
@@ -325,6 +328,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		if showOutcomeStats is None: showOutcomeStats = str(self.showOutcomeStats).lower() == 'true'
 		if showOutcomeReason is None: showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
 		if showOutputDir is None: showOutputDir = str(self.showOutputDir).lower() == 'true'
+		if showTestTitle is None: showTestTitle = str(self.showTestTitle).lower() == 'true'
 		if showTestIdList is None: showTestIdList = str(self.showTestIdList).lower() == 'true'
 
 		if showDuration:
@@ -359,9 +363,11 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 				cyclestr = ''
 				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
 				for outcome in FAILS:
-					for (id, reason, outputdir) in self.results[cycle][outcome]: 
+					for (id, reason, testTitle, outputdir) in self.results[cycle][outcome]: 
 						failedids.add(id)
 						log("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra=ColorLogFormatter.tag(LOOKUP[outcome].lower()))
+						if showTestTitle and testTitle:
+							log("      (title: %s)", testTitle, extra=ColorLogFormatter.tag(LOG_DEBUG))
 						if showOutcomeReason and reason:
 							log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
 						if showOutputDir:

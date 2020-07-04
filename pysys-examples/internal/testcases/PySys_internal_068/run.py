@@ -80,6 +80,8 @@ class PySysTest(BaseTest):
 		self.assertLineCount('pysys.out', expr='Total test duration:', condition='==1')
 		self.assertLineCount('pysys.out', expr='Failure outcomes: .*2 TIMED OUT, 2 FAILED', condition='==1')
 		self.assertLineCount('pysys.out', expr='Success outcomes: .*2 PASSED', condition='==1')
+		self.assertGrep('pysys.out', expr=' +[(]title: .*Nested testcase fail.*[)]')
+
 
 		self.assertLineCount('pysys.out', expr='Summary of failures', condition='==1')
 		self.assertOrderedGrep('pysys.out', exprList=[

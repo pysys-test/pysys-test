@@ -77,9 +77,10 @@ New features
 - Added `pysys.writer.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI writers to 
   get a summary of test outcomes. 
 
-- Changed the default `pysys.writer.ConsoleSummaryResultsWriter` settings to showOutcomeReason=True and 
-  showOutputDir=True, which are recommended for better visibility into why tests failed. They can be disabled if 
-  desired in the project configuration. 
+- Added `pysys.writer.ConsoleSummaryResultsWriter` property for ``showTestTitle`` (default=False) as sometimes seeing 
+  the titles of tests can be helpful when triaging results. Also changed the defaults for some other properties 
+  to showOutcomeReason=True and showOutputDir=True, which are recommended for better visibility into why tests failed. 
+  They can be disabled if desired in the project configuration. 
 
 - Added `pysys.utils.logutils.stripANSIEscapeCodes()` which can be used to remove ANSI escape codes such as console 
   color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.BaseResultsWriter`), 
