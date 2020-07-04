@@ -20,9 +20,11 @@
 	<writers>
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
 		</writer>
-<!-- TODO: add travis here-->
 		<writer classname="ArtifactPrinter" module="mypkg">
 		</writer>
+
+		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
 
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary.xml">
 			<property name="outputDir" value="${root}"/>

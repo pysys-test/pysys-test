@@ -1,0 +1,33 @@
+INFO  ==============================================================
+INFO  Id   : <CYAN>PySys_NestedTestcase<END>
+INFO  Title: <CYAN>Nested testcase<END>
+INFO  ==============================================================
+INFO  Sample message info
+WARN  <MAGENTA>Sample message warn<END>
+ERROR <RED>Sample message at error with exception trace: <END>
+<RED>Traceback (most recent call last):
+  File "c:\dev\pysys-code\pysys-examples\internal\testcases\PySys_internal_067\Output\win32\test\PySys_NestedTestcase\run.py", line 10, in execute
+    raise Exception('My exception')
+Exception: My exception<END>
+INFO  skipped reason message ... <YELLOW>skipped<END>
+WARN  blocked reason message ... <RED>blocked<END> [run.py:15]
+WARN  dumpedcore reason message ... <YELLOW>dumped core<END> [run.py:16]
+WARN  timedout reason message ... <MAGENTA>timed out<END> [run.py:17]
+WARN  failed reason message ... <RED>failed<END> [run.py:18]
+INFO  notverified reason message ... <GREEN>not verified<END>
+INFO  passed reason message ... <GREEN>passed<END>
+WARN  abort reason message ... <RED>failed<END> 
+WARN  <MAGENTA>Aborted test due to abortOnError set to true<END>
+DEBUG <BLUE>ProcessUser cleanup function done.<END>
+INFO  
+INFO  Test duration: <BLUE>0.05 secs<END>
+INFO  Test final outcome:  <RED>FAILED<END>
+INFO  Test outcome reason: <CYAN>abort reason message<END>
+INFO  
+CRIT  
+CRIT  Completed test run at:  Monday 2018-04-02 18:13:28 GMT Daylight Time
+CRIT  Total test duration:    0.06 secs
+CRIT  
+CRIT  Summary of failures: 
+CRIT  <RED>  FAILED: PySys_NestedTestcase <END>
+DEBUG <BLUE>ProcessUser cleanup function done.<END>

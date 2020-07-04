@@ -33,6 +33,7 @@
 			<property name="maxArchives" value="50"/>
 		</writer>
 		
+		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
 		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
 
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">

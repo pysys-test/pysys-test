@@ -77,21 +77,22 @@ class PySysTest(BaseTest):
 		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
 		if len(datedtestsum) != 1: self.addOutcome(FAILED, 'Did not find testsummary-<year>.log')
 
-		self.assertLineCount('pysys.out', expr='Total test duration:', condition='==1')
-		self.assertLineCount('pysys.out', expr='Failure outcomes: .*2 TIMED OUT, 2 FAILED', condition='==1')
-		self.assertLineCount('pysys.out', expr='Success outcomes: .*2 PASSED', condition='==1')
+		# check these appear only once in log lines (i.e. starting with a digit; excludes repetitions from CI providers)
+		self.assertLineCount('pysys.out', expr='[0-9].*Total test duration:', condition='==1')
+		self.assertLineCount('pysys.out', expr='[0-9].*Failure outcomes: .*2 TIMED OUT, 2 FAILED', condition='==1')
+		self.assertLineCount('pysys.out', expr='[0-9].*Success outcomes: .*2 PASSED', condition='==1')
 		self.assertGrep('pysys.out', expr=' +[(]title: .*Nested testcase fail.*[)]')
 
 		self.assertLineCount('pysys.out', expr='Summary of failures', condition='==1')
 		self.assertOrderedGrep('pysys.out', exprList=[
-			'Summary of failures: ',
-			'CYCLE 1.*TIMED OUT.*NestedTimedout',
-			'Reason for timed out outcome is general tardiness - %s'%(
+			'[0-9].*Summary of failures: ',
+			'[0-9].*CYCLE 1.*TIMED OUT.*NestedTimedout',
+			'[0-9].*Reason for timed out outcome is general tardiness - %s'%(
 				# stdout seems to get written in utf-8 not local encoding on python2 for some unknown reason, so skip verification of extra chars on that version; 
 				# for python 3 we can do the full verification
 				'Hello' if sys.version_info[0] == 2 else TEST_STR),
-			'CYCLE 1.*FAILED.*NestedFail',
-			'CYCLE 2.*TIMED OUT.*NestedTimedout',
+			'[0-9].*CYCLE 1.*FAILED.*NestedFail',
+			'[0-9].*CYCLE 2.*TIMED OUT.*NestedTimedout',
 		])
 		# check the title and output dirs
 		self.assertOrderedGrep('pysys.out', exprList=[

@@ -74,6 +74,11 @@ New features
   artifact publishing, for example CI providers that 'upload' artifacts. Currently artifacts are published by 
   `pysys.utils.perfreporter.CSVPerformanceReporter` and `pysys.writer.TestOutputArchiveWriter`. 
 
+- Added `pysys.writer.GitHubActionsCIWriter` which if added to your pysysproject.xml will automatically enable 
+  various features when run from GitHub Actions including annotations summarizing failures, grouping/folding of 
+  detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
+  test output etc) which can be used to upload the artifacts when present. 
+
 - Added `pysys.writer.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI writers to 
   get a summary of test outcomes. 
 

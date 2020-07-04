@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<writers>
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		</writer>
+	
+		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci">
+			<property name="maxAnnotations" value="4"/>
+			<property name="failureTestLogAnnotations" value="true"/>
+		</writer>
+	</writers>
+</pysysproject>

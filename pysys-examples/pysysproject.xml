@@ -183,6 +183,22 @@
 			<property name="maxArchives" value="50"/>
 		</writer>
 
+		<!-- CI writers automatically enable themselves only if running under 
+			the associated CI environment. 
+		-->
+		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
+
+		<!--
+		Add in the JUnit results writer for PySys test output to be written in the widely-used Apache Ant JUnit XML format.
+		
+		Use the outputDir property to define the output directory for the JUnit test summary files (the writer will 
+		produce one file per test into this output directory). 
+		-->
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
+		</writer>
+
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
@@ -204,11 +220,6 @@
 			-->
 		</writer>
 		
-		<!-- CI writers automatically enable themselves only if running under 
-			the associated CI environment. 
-		-->
-		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
-
 		<!--
 		Add in the test results writer if output to a text file is required 
 		
@@ -224,18 +235,7 @@
 		<writer classname="CSVResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
-		-->
-
-		<!--
-		Add in the JUnit results writer for PySys test output to be written in the widely-used Apache Ant JUnit XML format.
-		
-		Use the outputDir property to define the output directory for the JUnit test summary files (the writer will 
-		produce one file per test into this output directory). 
-		-->
-		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
-		</writer>
-		
+		-->		
 
 		<!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run, 
 			optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
