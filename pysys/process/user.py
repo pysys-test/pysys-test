@@ -1694,11 +1694,14 @@ class ProcessUser(object):
 		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+			
+		:return str: Return the absolute path of the generated file. 
 		"""
 		# This method provides similar functionality to the Python3 pathlib write_text method. 
-		
+		out = os.path.join(self.output, file)
 		with openfile(os.path.join(self.output, file), 'w', encoding=encoding or self.getDefaultFileEncoding(file)) as f:
 			f.write(text)
+		:return str: the absolute path of the destination file. 
 	
 	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
 		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
@@ -1800,7 +1803,7 @@ class ProcessUser(object):
 			this file should be copied in binary mode (as if no mappers had been specified). 
 			For example: ``skipMappersIf=lambda src: not src.endswith(('.xml', '.properties')))``
 		
-		:return: the absolute path of the destination file. 
+		:return str: the absolute path of the destination file. 
 		"""
 		origdest = dest
 		src = toLongPathSafe(os.path.join(self.output, src))
