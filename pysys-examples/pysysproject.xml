@@ -325,7 +325,7 @@
 	
 	<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/internal/utilities/python_coveragerc"/>
 
-	<property name="pythonCoverageDir" value="${testRootDir}/__pysys_coverage_@OUTDIR@"/>
+	<property name="pythonCoverageDir" value="${testRootDir}/__coverage_python_@OUTDIR@"/>
 	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 	
 	<project-help>

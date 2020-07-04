@@ -3,10 +3,10 @@ docs/ProjectConfig.rst
 docs/autodocgen
 docs/build_output*
 
-# PySys Output directories
+# PySys outputs
 __pysys_.*
+__coverage_.*
 Output/
-pysys-testsummary*.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
