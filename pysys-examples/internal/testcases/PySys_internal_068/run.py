@@ -82,7 +82,6 @@ class PySysTest(BaseTest):
 		self.assertLineCount('pysys.out', expr='Success outcomes: .*2 PASSED', condition='==1')
 		self.assertGrep('pysys.out', expr=' +[(]title: .*Nested testcase fail.*[)]')
 
-
 		self.assertLineCount('pysys.out', expr='Summary of failures', condition='==1')
 		self.assertOrderedGrep('pysys.out', exprList=[
 			'Summary of failures: ',
@@ -94,6 +93,16 @@ class PySysTest(BaseTest):
 			'CYCLE 1.*FAILED.*NestedFail',
 			'CYCLE 2.*TIMED OUT.*NestedTimedout',
 		])
+		# check the title and output dirs
+		self.assertOrderedGrep('pysys.out', exprList=[
+			'Summary of failures:',
+			'CYCLE 1.*FAILED.*NestedFail',
+			'[(]title: .*Nested testcase fail[)]',
+			 'NestedFail.',
+			 '.*myoutdir.NestedFail.cycle1.',
+		])
+
+		
 		# check the option works to disable this
 		self.assertGrep('pysys.out', expr='List of failure test ids:', contains=False)
 		

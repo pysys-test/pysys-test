@@ -20,7 +20,7 @@
 	<writers>
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
 		</writer>
-
+<!-- TODO: add travis here-->
 		<writer classname="ArtifactPrinter" module="mypkg">
 		</writer>
 
