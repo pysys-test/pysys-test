@@ -629,24 +629,28 @@ class BaseTest(ProcessUser):
 			return True
 		else:
 			self.addOutcome(FAILED, assertMessage, abortOnError=abortOnError)
-			if re.match(r'^ *\w+ *(==|is|>=|<=) *\w+ *$', conditionstring) and len(namedvalues)>=2 and namedvalues[0] in conditionstring and namedvalues[1] in conditionstring: 
+			
+			# namesInUse impl is a bit rough-and-ready, but does a good enough job at identifying when it makes 
+			# sense to compare two of the parameters passed in
+			namesInUse = [x for x in namedvalues.keys() if x in conditionstring]
+			if re.match(r'^ *\w+ *(==|is|>=|<=) *\w+ *$', conditionstring) and len(namesInUse)==2: 
 				# if we're checking a==b we can help the user see why they didn't match; 
 				# this kind of highlighting might be misleading for other conditionstrings, and certainly less useful
-				pad = max(len(key) for key in namedvalues)+1
+				pad = max(len(key) for key in namesInUse)+1
 
 				# use %s for most objects, but repr for strings (so we see the escaping) and objects where str() would make them look the same
-				v1 = u'%s'%(list(namedvalues.values())[0])
-				v2 = u'%s'%(list(namedvalues.values())[1])
+				v1 = u'%s'%(namedvalues[namesInUse[0]])
+				v2 = u'%s'%(namedvalues[namesInUse[1]])
 
-				if isstring(list(namedvalues.values())[0]) or v1==v2:
-					v1 = u'%r'%(list(namedvalues.values())[0])
-					v2 = u'%r'%(list(namedvalues.values())[1])
+				if isstring(namedvalues[namesInUse[0]]) or v1==v2:
+					v1 = u'%r'%(namedvalues[namesInUse[0]])
+					v2 = u'%r'%(namedvalues[namesInUse[1]])
 				
 				seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
 				i, j, k = seq.find_longest_match(0, len(v1), 0, len(v2))
 				# where v1[i:i+k] == v2[j:j+k]
 
-				for (index, key) in enumerate(namedvalues.keys()):
+				for (index, key) in enumerate(namesInUse):
 					value = [v1,v2][index]
 					x = [i, j][index]
 					self.log.info(u'  %{pad}s: %s%s%s'.format(pad=pad), key, 
