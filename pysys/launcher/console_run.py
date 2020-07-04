@@ -106,7 +106,7 @@ Execution options
                                specify either an absolute number, or a multiplier on the number of CPUs e.g. "x1.5"; 
                    auto | 0    equivalent to x1.0 (or the PYSYS_DEFAULT_THREADS env var if set)
        --ci                    set optimal options for automated/non-interactive test execution in a CI job: 
-                                 --purge --record -j0 --mode=ALL --printLogs=FAILURES
+                                 --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
                    CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
    -y, --validateOnly          test the validate() method without re-running execute()
@@ -193,7 +193,7 @@ e.g.
 			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
 			# by CI writers and/or the command line; setting --mode=ALL would lead to weird results if supportMultipleModesPerRun=false)
 			if getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true': args = ['--mode=ALL']+args
-			args = ['--purge', '--record', '-j0']+args
+			args = ['--purge', '--record', '-j0', '--type=auto']+args
 			printLogsDefault = PrintLogs.FAILURES
 
 		try:
