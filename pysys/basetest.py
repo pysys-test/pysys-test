@@ -537,7 +537,7 @@ class BaseTest(ProcessUser):
 			#                 ^
 		
 		As shown above, when (at least) two named parameters are provided and the condition string is a simple equality 
-		comparison (``==``, ``is``, ``>=``, ``<=``) using the first two parameters, additional lines are logged if the 
+		comparison (``==``, ``is``, ``>=``, ``<=``) using exactly two of the parameters, additional lines are logged if the 
 		assertion fails, showing at what point the two arguments differ (based on finding the longest common substring). 
 		So it's a good idea to include both the actual and expected value as named parameters rather than as literals 
 		inside the condition string. 
