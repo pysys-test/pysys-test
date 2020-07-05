@@ -347,8 +347,8 @@ class BaseRunner(ProcessUser):
 		deletion of non-empty files that should always be left in a test's output directory
 		even when the test has passed, by returning False from this method. 
 		
-		It is recommended to use the ``collect-test-output`` project option to collect any required files 
-		(e.g code coverage, performance graphs etc) rather than using this method. 
+		Usually it is best to avoid customizing this method and instead use the ``collect-test-output`` project option 
+		to collect any required files (e.g code coverage, performance graphs etc), as collection happens before purging. 
 		
 		:param str path: The absolute path of the file to be purged. 
 

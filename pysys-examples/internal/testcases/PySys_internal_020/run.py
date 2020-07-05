@@ -7,6 +7,16 @@ class PySysTest(BaseTest):
 	def execute(self):
 		script = "%s/internal/utilities/scripts/counter.py" % self.project.root
 	
+
+		try:
+			self.startProcess(command='./non-existent-process',
+							  arguments=[],
+							  state=FOREGROUND)
+		except Exception as ex:
+			self.addOutcome(PASSED, 'Got exception as expected: %s'%ex, override=True)
+		else:
+			self.abort('Expected exception from failed process start')
+			
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script, "2", "3"],
 						  environs = os.environ,
