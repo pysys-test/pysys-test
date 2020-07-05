@@ -45,7 +45,7 @@ class ConsoleLaunchHelper(object):
 		self.includes = []
 		self.excludes = []
 		self.cycle = 1
-		self.outsubdir = PLATFORM
+		self.outsubdir = 'win' if PLATFORM=='win32' else PLATFORM
 		self.modeinclude = []
 		self.modeexclude = []
 		self.threads = 1

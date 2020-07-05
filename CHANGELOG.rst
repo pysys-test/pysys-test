@@ -114,6 +114,14 @@ Bug fixes
 Upgrade guide and compatibility
 -------------------------------
 
+- As this is a major version release of PySys we have take the opportunity do cleanup some aspects which could 
+  cause some minor breakage or changes (though in many cases no action will be needed):
+  
+    - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 
+      There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you 
+      prefer a different output directory on your machine you could customize it by setting environment variable 
+      ``PYSYS_DEFAULT_ARGS=--outdir __myoutputdir``. 
+
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
