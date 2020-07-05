@@ -121,6 +121,10 @@ Upgrade guide and compatibility
       There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you 
       prefer a different output directory on your machine you could customize it by setting environment variable 
       ``PYSYS_DEFAULT_ARGS=--outdir __myoutputdir``. 
+    - The default directory for performance output is now under ``__pysys_performance/`` rather than 
+      ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it. 
+      Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
+      see `pysys.utils.perfreporter` for details. 
 
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
