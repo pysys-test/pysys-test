@@ -175,6 +175,7 @@ e.g.
 """.format(scriptname=_PYSYS_SCRIPT_NAME))
 		
 		# show project help at the end so it's more prominent
+		Project.findAndLoadProject()
 		help = self.getProjectHelp()
 		if help: print(help)
 		
@@ -191,9 +192,9 @@ e.g.
 		if '--ci' in args:
 			# to ensure identical behaviour, set these as if on the command line
 			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
-			# by CI writers and/or the command line; setting --mode=ALL would lead to weird results if supportMultipleModesPerRun=false)
-			if getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true': args = ['--mode=ALL']+args
-			args = ['--purge', '--record', '-j0', '--type=auto']+args
+			# by CI writers and/or the command line; note that setting --mode=ALL would be incorrect if 
+			# supportMultipleModesPerRun=false but that's a legacy options so we raise an exception later if this happened)
+			args = ['--purge', '--record', '-j0', '--type=auto', '--mode=ALL']+args
 			printLogsDefault = PrintLogs.FAILURES
 
 		try:
@@ -209,7 +210,8 @@ e.g.
 
 		printLogs = None
 		ci = False
-		
+		defaultAbortOnError = None
+
 		logging.getLogger('pysys').setLevel(logging.INFO)
 
 		# as a special case, set a non-DEBUG log level for the implementation of assertions 
@@ -303,8 +305,8 @@ e.g.
 					if self.threads <= 0: self.threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS))
 
 			elif option in ("-b", "--abort"):
-				setattr(Project.getInstance(), 'defaultAbortOnError', str(value.lower()=='true'))
-
+				defaultAbortOnError = str(value.lower()=='true')
+				
 			elif option in ["-g", "--progress"]:
 				self.progress = True
 
@@ -316,7 +318,7 @@ e.g.
 
 			elif option in ["-X"]:
 				if EXPR1.search(value) is not None:
-				  self.userOptions[value.split('=')[0]] = value.split('=')[1]
+				  self.userOptions[value.split('=', 1)[0]] = value.split('=', 1)[1]
 				if EXPR2.search(value) is not None:
 					self.userOptions[value] = True
 			
@@ -340,6 +342,14 @@ e.g.
 			'printLogs': printLogs,
 			'printLogsDefault': printLogsDefault, # to use if not provided by a CI writer or cmdline
 		}
+		
+		# load project AFTER we've parsed the arguments, which opens the possibility of using cmd line config in 
+		# project properties if needed
+		Project.findAndLoadProject()
+		
+		if defaultAbortOnError is not None: setattr(Project.getInstance(), 'defaultAbortOnError', defaultAbortOnError)
+		if '--ci' in args and getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()!='true': 
+			raise UserError('Cannot use --ci option with a legacy supportMultipleModesPerRun=false project')
 		
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, 
 			modeincludes=self.modeinclude, modeexcludes=self.modeexclude, expandmodes=True)

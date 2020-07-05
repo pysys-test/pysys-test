@@ -600,7 +600,7 @@ class Project(object):
 		raise Exception('Cannot call Project.getInstance() as the project has not been loaded yet')
 	
 	@staticmethod
-	def findAndLoadProject(startdir):
+	def findAndLoadProject(startdir=None):
 		"""Find and load a project file, starting from the specified directory. 
 		
 		If this fails an error is logged and the process is terminated. 
@@ -620,7 +620,7 @@ class Project(object):
 
 		"""
 		projectFile = os.getenv('PYSYS_PROJECTFILE', None)
-		search = startdir
+		search = startdir or os.getcwd()
 		if not projectFile:
 			projectFileSet = set(DEFAULT_PROJECTFILE)
 			
@@ -653,6 +653,8 @@ class Project(object):
 		try:
 			project = Project(search, projectFile)
 			stdoutHandler.setFormatter(project.formatters.stdout)
+			import pysys.constants
+			pysys.constants.PROJECT = project # for compatibility for old tests
 			Project.__INSTANCE = project # set singleton
 			return project
 		except UserError as e: 

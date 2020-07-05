@@ -25,16 +25,6 @@ def main(args=None):
 	
 	if args is None: args = sys.argv[1:]
 
-	# Until we can remove constants.PROJECT the only way to see debug messages from project loading is this
-	if any((arg.lower() in ['-vdebug', '--verbosity=debug']) for arg in args):
-		logging.getLogger('pysys').setLevel(logging.DEBUG)
-	
-	import pysys.constants
-	# if user selected an option that needs a project, must set 
-	# constants.PROJECT before any modules start importing * from constants
-	if len(args) >= 1 and args[0] in ['run', 'make', 'print', 'clean']:
-		pysys.constants.loadproject(os.getcwd())
-
 	import pysys.launcher.console
 	return pysys.launcher.console.main(args)
 if __name__ == "__main__": 

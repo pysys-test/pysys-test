@@ -152,6 +152,8 @@ class ConsolePrintHelper(object):
 				sys.exit(1)
 
 	def printTests(self):
+			Project.findAndLoadProject()
+	
 			# nb: mode filtering happens later
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, expandmodes=False)
 			

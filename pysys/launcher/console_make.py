@@ -141,6 +141,7 @@ class ConsoleMakeTestHelper(object):
 			log.info("Created test class module %s " % os.path.join(self.testdir, self.testId, "%s.py" % module))	
 
 def makeTest(args):
+	Project.findAndLoadProject()
 	module = import_module(Project.getInstance().makerModule, sys.path)
 	maker = getattr(module, Project.getInstance().makerClassname)("make")
 	maker.parseArgs(args)

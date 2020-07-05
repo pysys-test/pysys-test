@@ -96,6 +96,8 @@ class ConsoleCleanTestHelper(object):
 
 
 	def clean(self):
+			Project.findAndLoadProject()
+
 			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir, expandmodes=False)
 			supportMultipleModesPerRun = getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true'
 
