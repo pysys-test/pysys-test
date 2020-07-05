@@ -111,6 +111,9 @@ Bug fixes
 - Ensure ANSI escape codes (e.g. for console coloring) do not appear in JUnit XML writer output files, or in test 
   outcome reasons. 
 
+- Setting the project property ``redirectPrintToLogger`` to any value (including ``false``) was treated as if 
+  it had been set to ``true``; this is now fixed. 
+
 Upgrade guide and compatibility
 -------------------------------
 

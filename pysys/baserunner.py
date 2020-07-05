@@ -411,7 +411,7 @@ class BaseRunner(ProcessUser):
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
-		if getattr(self.project, 'redirectPrintToLogger', False):
+		if getattr(self.project, 'redirectPrintToLogger', 'false').lower()=='true':
 			sys.stdout = PySysPrintRedirector()
 		
 		# call the hook to setup prior to running tests
