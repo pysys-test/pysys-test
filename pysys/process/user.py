@@ -1775,7 +1775,7 @@ class ProcessUser(object):
 		
 		:param bool overwrite: If True, source files will be allowed to 
 			overwrite destination files, if False an exception will be raised if a destination file already exists. 
-			By default overwrite=None which means it's enable for single file copy() but disabled for directory copies.
+			By default overwrite=None which means it's enabled for single file copy() but disabled for directory copies.
 		
 		:param List[callable[str]->str] mappers: A list of filter functions that will be applied, 
 			in order, to map each line from source to destination. Each function accepts a string for 
@@ -1788,7 +1788,8 @@ class ProcessUser(object):
 			If your mapper is stateful, be sure to create separate instances for each test rather than 
 			sharing instances across multiple tests which would cause race conditions. 
 			
-		:param str encoding: The encoding to use to open the file. 
+		:param str encoding: The encoding to use to open the file (only used if mappers are provided; if not, it is 
+			opened in binary mode). 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
