@@ -11,7 +11,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '--cycle', '10', '-n', '20'], workingDir='test')
 		self.logFileContents('pysys.out', maxLines=0)

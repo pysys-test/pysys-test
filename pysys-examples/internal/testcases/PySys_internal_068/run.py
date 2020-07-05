@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 		
 		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
@@ -70,20 +70,46 @@ class PySysTest(BaseTest):
 			xml_NestedTimedout1="name={name}, tests={tests}, failures={failures}, skipped={skipped}".format(**dict(ET.parse(self.output+'/target/pysys-reports/TEST-NestedTimedout.2.xml').getroot().attrib)),
 			expected='name=NestedTimedout, tests=1, failures=1, skipped=0')
 		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness - %s</failure>'%TEST_STR, encoding='utf-8')
+		# check stdout is included, and does not have any ANSI control characters in it
+		self.assertThat('junitStdoutOutcome == expected', expected='TIMED OUT', 
+			junitStdoutOutcome=self.getExprFromFile('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='Test final outcome: *(.*)', encoding='utf-8'))
 		
 		datedtestsum = glob.glob(self.output+'/testsummary-*.log')
 		if len(datedtestsum) != 1: self.addOutcome(FAILED, 'Did not find testsummary-<year>.log')
 
-		self.assertLineCount('pysys.out', expr='Summary of non passes', condition='==1')
+		# check these appear only once in log lines (i.e. starting with a digit; excludes repetitions from CI providers)
+		self.assertLineCount('pysys.out', expr='[0-9].*Total test duration:', condition='==1')
+		self.assertLineCount('pysys.out', expr='[0-9].*Failure outcomes: .*2 TIMED OUT, 2 FAILED', condition='==1')
+		self.assertLineCount('pysys.out', expr='[0-9].*Success outcomes: .*2 PASSED', condition='==1')
+		self.assertGrep('pysys.out', expr=' +[(]title: .*Nested testcase fail.*[)]')
+
+		self.assertLineCount('pysys.out', expr='Summary of failures', condition='==1')
 		self.assertOrderedGrep('pysys.out', exprList=[
-			'Summary of non passes: ',
-			'CYCLE 1.*TIMED OUT.*NestedTimedout',
-			'Reason for timed out outcome is general tardiness - %s'%(
+			'[0-9].*Summary of failures: ',
+			'[0-9].*CYCLE 1.*TIMED OUT.*NestedTimedout',
+			'[0-9].*Reason for timed out outcome is general tardiness - %s'%(
 				# stdout seems to get written in utf-8 not local encoding on python2 for some unknown reason, so skip verification of extra chars on that version; 
 				# for python 3 we can do the full verification
 				'Hello' if sys.version_info[0] == 2 else TEST_STR),
-			'CYCLE 1.*FAILED.*NestedFail',
-			'CYCLE 2.*TIMED OUT.*NestedTimedout',
+			'[0-9].*CYCLE 1.*FAILED.*NestedFail',
+			'[0-9].*CYCLE 2.*TIMED OUT.*NestedTimedout',
 		])
+		# check the title and output dirs
+		self.assertOrderedGrep('pysys.out', exprList=[
+			'Summary of failures:',
+			'CYCLE 1.*FAILED.*NestedFail',
+			'[(]title: .*Nested testcase fail[)]',
+			 'NestedFail.',
+			 '.*myoutdir.NestedFail.cycle1.',
+		])
+
+		
 		# check the option works to disable this
-		self.assertGrep('pysys.out', expr='List of non passing test ids:', contains=False)
+		self.assertGrep('pysys.out', expr='List of failure test ids:', contains=False)
+		
+		self.assertPathExists('__pysys_output_archives/NestedFail.cycle001.zip')
+		
+		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchive: .+/NestedFail.cycle002.zip')
+		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchiveDir: .+/__pysys_output_archives')
+		self.assertGrep('pysys.out', expr='Published artifact CSVPerformanceReport: .+/perf_.*.csv')
+		

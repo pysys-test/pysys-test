@@ -7,7 +7,25 @@
 	<property name="verboseWaitForSignal" value="true"/>
 	<property name="defaultAbortOnError" value="true"/>
 
+	<pythonpath value="${root}/test/extrapath"/>
+
+
+	<formatters>
+		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
+				name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
+			<property name="color" value="true"/>
+		</formatter>
+	</formatters>
+	
 	<writers>
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		</writer>
+		<writer classname="ArtifactPrinter" module="mypkg">
+		</writer>
+
+		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
+
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary.xml">
 			<property name="outputDir" value="${root}"/>
 			<property name="stylesheet" value="./my-pysys-log.xsl"/>
@@ -31,10 +49,7 @@
 		</writer>
 
 		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
-			<property name="showOutcomeReason" value="true"/>
-			<property name="showOutputDir" value="true"/>
-			<property name="showTestIdList" value="false"/>
-			
+			<property name="showTestTitle" value="true"/>
 		</writer>
 		
 	</writers>		

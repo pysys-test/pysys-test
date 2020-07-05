@@ -8,7 +8,7 @@ import pysys
 class PySysTest(BaseTest):
 	
 	def execute(self):
-		# these items are deliberately omitted from the autosummary tables e.g. because they're really internal or unfortunate details we don't want to encourage people to use directly
+		# these items are deliberately omitted from the autosummary tables e.g. because they're really internal or unfortunate details we don't want to encourage people to use directly, or are documented in the associated method rather than centrally
 		IGNORE_LIST = """
 defaultAbortOnError
 defaultIgnoreExitStatus
@@ -23,6 +23,7 @@ deletedir
 cleanup
 pythonCoverage
 waitForSignal
+logFileContentsDefaultExcludes
 		""".strip().split('\n')
 
 		def filter_member(m):

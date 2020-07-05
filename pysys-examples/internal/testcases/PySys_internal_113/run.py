@@ -11,7 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 
 		runPySys(self, 'pysys-print-full', ['print', '--full'], workingDir='test')
 		runPySys(self, 'pysys-print', ['print'], workingDir='test')

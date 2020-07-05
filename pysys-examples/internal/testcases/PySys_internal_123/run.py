@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 			ephemeral_port_range_max=ephrange[1]
 		)
 
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 
 		# this has a custom runner which tries to override the default method of getting ephemeral ports
 		runPySys(self, 'pysys-expect-failure', ['run'], workingDir='test', expectedExitStatus='!=0')

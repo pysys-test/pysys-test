@@ -11,7 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, os.path.join(self.output,'test'))
+		self.copy(self.input, os.path.join(self.output,'test'))
 
 		subtest = 'enabled-defaults'
 		runPySys(self, subtest, ['run', '--record', '--threads', '1', '-o', subtest], 
@@ -19,6 +19,10 @@ class PySysTest(BaseTest):
 
 		subtest = 'enabled-printLogsOverride' 
 		runPySys(self, subtest, ['run', '--record', '--printLogs', 'all', '--threads', '2', '-o', subtest], 
+			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true'})
+
+		subtest = 'ci' 
+		runPySys(self, subtest, ['run', '--ci', '-o', subtest], 
 			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true'})
 
 		subtest = 'default-project' 
@@ -30,7 +34,7 @@ class PySysTest(BaseTest):
 			
 	def validate(self):
 
-		for subtest in ['enabled-defaults', 'default-project']:
+		for subtest in ['enabled-defaults', 'default-project', 'ci']:
 			self.assertOrderedGrep('%s.out'%subtest, exprList=[
 				# first folding, using the test outdir name
 				# avoid using the actual literal here else travis will try to fold it!
@@ -39,7 +43,7 @@ class PySysTest(BaseTest):
 				'INFO .*Id.*:.*NestedTimedout',
 				# end folding before summary
 				'[@t]ravis_fold:[@e]nd:PySys-%s'%subtest,
-				'Summary of non passes:',
+				'Summary of failures:',
 				])
 
 		# this CI provider disables printing of non-failure logs by default

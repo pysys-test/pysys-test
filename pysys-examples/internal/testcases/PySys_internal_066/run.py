@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		for subtest in ['customformat', 'customclass']:
-			shutil.copytree(self.input, self.output+'/'+subtest)
+			self.copy(self.input, self.output+'/'+subtest)
 			os.rename(self.output+'/'+subtest+'/pysysproject-%s.xml'%subtest, self.output+'/'+subtest+'/pysysproject.xml')
 	
 			runPySys(self, subtest+'_pysys', ['run', '-o', self.output+'/'+subtest+'_output'], workingDir=subtest)

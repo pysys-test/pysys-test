@@ -28,6 +28,6 @@ CRIT
 CRIT  Completed test run at:  Monday 2018-04-02 18:13:28 GMT Daylight Time
 CRIT  Total test duration:    0.06 secs
 CRIT  
-CRIT  Summary of non passes: 
+CRIT  Summary of failures: 
 CRIT  <RED>  FAILED: PySys_NestedTestcase <END>
 DEBUG <BLUE>ProcessUser cleanup function done.<END>

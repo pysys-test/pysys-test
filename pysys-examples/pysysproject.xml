@@ -162,24 +162,44 @@
 
 
 	<!--
-	Set the test writers to write the test summary at runtime when the -r option is 
-	passed to the run mode of the pysys launcher. Multiple test writers can be configured
-	and properties can be set on the writers using a nested property tag; these are then set 
-	as attributes of the class. PySys ships the XMLResultsWriter, TextResultsWriter and 
-	JUnitXMLResultsWriter class as three example writers, though custom writers can be created 
-	e.g. to insert into a relational database etc (see pysys.writers.__init__.py for the source 
-	code for the distributed writers). If no writer is specified in the project file, the 
-	XMLResultsWriter is used. 
+	Configures the writers that implement reporting of test outcomes, typically to disk, to the console, or 
+	to a CI system. 
 	
-	The writer tag details the classname (which should be added to the pythonpath)
-	and the module of the writer class. Where single file output is produced by the 
-	writer, the optional filename attribute is used to denote the filename template for the output 
-	logging. The filename template is processed through time.strftime so that time information can 
-	be set into the filename, e.g. a filename template of 'testsummary-%Y%m%d%H%M%S.xml' will result 
-	in a file created with a name of  testsummary-20081025213308.xml etc.
+	For full details of the configuration properties of each writer, and the API for creating custom writers, 
+	see `pysys.writer` in the API reference. 
+	
+	The writer element specifies the module (which should be available on the pythonpath) and writer classname.
 	-->
 	<writers>
-		<writer classname="XMLResultsWriter" module="pysys.writer" file="pysys-testsummary-%Y-%m-%d-%H.%M.%S.xml">
+		<!-- This writer is useful for creating zip archives of failed test output directories when 
+			running in record mode on a machine where it is not otherwise easy to access the output 
+			directories. The destDir could then be uploaded to a CI system (some CI writers 
+			implement this automatically) or manually copied to a file share. 
+		-->
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
+			<property name="maxTotalSizeMB" value="1024.0"/>
+			<property name="maxArchiveSizeMB" value="200.0"/>
+			<property name="maxArchives" value="50"/>
+		</writer>
+
+		<!-- CI writers automatically enable themselves only if running under 
+			the associated CI environment. 
+		-->
+		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
+
+		<!--
+		Add in the JUnit results writer for PySys test output to be written in the widely-used Apache Ant JUnit XML format.
+		
+		Use the outputDir property to define the output directory for the JUnit test summary files (the writer will 
+		produce one file per test into this output directory). 
+		-->
+		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
+		</writer>
+
+		<writer classname="XMLResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
 			can be set are the stylesheet location, whether to use file URLs in all references 
@@ -190,21 +210,20 @@
 			from any location on the local disk, but cannot load resources when referenced by a
 			file URL. 
 
+			The filename template is processed through time.strftime so that time information can 
+			be set into the filename, e.g. a filename template of 'testsummary-%Y%m%d%H%M%S.xml' will result 
+			in a file created with a name of  testsummary-20081025213308.xml etc.
+
 			<property name="outputDir" value="${testRootDir}"/>
 			<property name="stylesheet" value="./pysys-log.xsl"/>
 			<property name="useFileURL" value="true"/>
 			-->
 		</writer>
 		
-		<!-- CI writers automatically enable themselves only if running under 
-			the associated CI environment. 
-		-->
-		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
-
 		<!--
-		Add in the test results writer if straight text output is required 
+		Add in the test results writer if output to a text file is required 
 		
-		<writer classname="TextResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.log">
+		<writer classname="TextResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
@@ -213,29 +232,17 @@
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
-		<writer classname="CSVResultsWriter" module="pysys.writer" file="testsummary-%Y%m%d%H%M%S.csv">
+		<writer classname="CSVResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
-		-->
-
-		<!--
-		Add in the JUnit results writer for PySys test output to be written in the widely-used Apache Ant JUnit XML format. 
-		Use the outputDir property to define the output directory for the JUnit test summary files (the writer will 
-		produce one file per test into this output directory). If not specified this defaults to the current 
-		working directory.
-		-->
-		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${testRootDir}/pysys-junit-report"/>
-		</writer>
-		
+		-->		
 
 		<!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run, 
 			optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
-			list if no other "summary" writer is explicitly configured. 
+			list if no other "summary" writer is explicitly configured.
 		-->		
 		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
-			<property name="showOutputDir" value="false"/>
-			<property name="showOutcomeReason" value="true"/>
+			<property name="showTestTitle" value="false"/>
 		</writer>
 	</writers>
 
@@ -318,7 +325,7 @@
 	
 	<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/internal/utilities/python_coveragerc"/>
 
-	<property name="pythonCoverageDir" value="coverage-python-@OUTDIR@"/>
+	<property name="pythonCoverageDir" value="${testRootDir}/__coverage_python_@OUTDIR@"/>
 	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 	
 	<project-help>

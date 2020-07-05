@@ -11,7 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		runPySys(self, 'pysys', ['run', '--record', '--threads', '2', '-o', 'pysys-output'], workingDir='test')
 		self.logFileContents('pysys.out', maxLines=0)
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)

@@ -21,6 +21,17 @@ Exceptions used and raised by PySys methods.
 
 """
 
+from pysys.constants import TIMEDOUT
+
+class AbortExecution(Exception):
+	"""Raised to abort execution of a test."""
+
+	def __init__(self, outcome, outcomeReason, callRecord=None):
+		self.outcome, self.value, self.callRecord = outcome, outcomeReason, callRecord
+		
+	def __str__(self):
+		return self.value
+
 class FileNotFoundException(Exception):
 	"""Exception raised when a file cannot be found."""
 
@@ -57,14 +68,11 @@ class ProcessError(Exception):
 	def __str__(self):
 		return self.value
 
-class ProcessTimeout(Exception):
+class ProcessTimeout(AbortExecution):
 	"""Exception raised when a process times out."""
 
 	def __init__(self,value):
-		self.value=value
-		
-	def __str__(self):
-		return self.value
+		super(ProcessTimeout, self).__init__(TIMEDOUT, value)
 
 class InvalidDescriptorException(Exception):
 	"""Exception raised when a testcase descriptor is invalid."""
@@ -80,15 +88,6 @@ class InvalidXMLException(Exception):
 
 	def __init__(self,value):
 		self.value=value
-		
-	def __str__(self):
-		return self.value
-
-class AbortExecution(Exception):
-	"""Raised to abort execution of a test."""
-
-	def __init__(self, outcome, outcomeReason, callRecord=None):
-		self.outcome, self.value, self.callRecord = outcome, outcomeReason, callRecord
 		
 	def __str__(self):
 		return self.value

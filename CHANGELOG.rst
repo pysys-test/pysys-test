@@ -19,18 +19,108 @@ PySys 1.6.0 is under development.
 New features
 ------------
 
-- TODO
+- `BaseTest.copy` improvements:
+
+  - `BaseTest.copy` can now be used to copy directories in addition to individual files. It is recommended to use 
+    this method instead of ``shutil.copytree`` as it provides a number of benefits including better error safety, 
+    long path support, and the ability to copy over an existing directory.
+  
+  - There is also support for line mappers to be notified when starting/finishing a new file, which allows for complex 
+    and stateful transformation of file contents based on file types/path if needed. 
+  
+  - `BaseTest.copy` now copies all file attributes including data/time, not just the Unix permissions/mode. 
+
+- `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
+  behaviour can be customized with a new ``onError=`` parameter::
+  
+    self.startProcess(..., onError=lambda process: self.logFileContents(process.stdout, tail=True))
+    self.startProcess(..., onError=lambda process: None) # do nothing on error
+
+- Added `BaseTest.waitForBackgroundProcesses` which waits to completion of all background processes and optionally 
+  checks for the expected exit status. This is especially useful when you have a test that needs to execute 
+  lots of processes but doesn't care about the order they execute in, since having them all execute concurrently in the 
+  background and then calling `waitForBackgroundProcesses()` will be a lot quicker than executing them serially in the 
+  foreground. 
+
+- `BaseTest.waitProcess` now has a ``checkExitStatus=`` argument that can be used to check the return code of the 
+  process for success. 
+
+- `BaseTest.logFileContents` now has a global variable ``self.logFileContentsDefaultExcludes`` (default ``[]``) which 
+  it uses to specify the line exclusion regular expressions if no ``excludes=[...]`` is passed as a parameter. This 
+  provides a convenient way to filter out lines that you usually don't care about at a global level (e.g. from a 
+  `BaseTest.setup` method shared by all tests), such as unimportant lines logged to stderr during startup of 
+  commonly used processes which would otherwise be logged by `BaseTest.startProcess` when a process fails to start. 
+
+- Colored output is disabled if the ``NO_COLOR`` environment variable is set; this is a cross-product standard 
+  (https://no-color.org/). The ``PYSYS_COLOR`` variable take precedence if set. 
+
+- Added environment variable ``PYSYS_DEFAULT_ARGS`` which can be used to specify default arguments that the current 
+  user/machine should use with pysys run, to avoid the need to explicitly provide them on the command line 
+  each time, for example::
+  
+    PYSYS_DEFAULT_ARGS=--progress --outdir __pysys_outdir
+    pysys.py run
+
+- Added command line option ``-j`` as an alias for ``--threads``  and ``-n`` (to control the number of jobs/threads). 
+  As an alternative to specifying an absolute number of threads, a multiplier of the number of cores in the machine 
+  can be provided e.g. ``-j x1.5``. This could be useful in CI and other automated testing environments. 
+
+- Added `pysys.writer.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
+  producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
+  Properties are provided to allow detailed control of the maximum number and size of archives generated, and the 
+  files to include/exclude. 
+
+- Added `pysys.writer.ArtifactPublisher` interface which can be implemented by writers that support some concept of 
+  artifact publishing, for example CI providers that 'upload' artifacts. Currently artifacts are published by 
+  `pysys.utils.perfreporter.CSVPerformanceReporter` and `pysys.writer.TestOutputArchiveWriter`. 
+
+- Added `pysys.writer.GitHubActionsCIWriter` which if added to your pysysproject.xml will automatically enable 
+  various features when run from GitHub Actions including annotations summarizing failures, grouping/folding of 
+  detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
+  test output etc) which can be used to upload the artifacts when present. 
+
+- Added `pysys.writer.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI writers to 
+  get a summary of test outcomes. 
+
+- Added `pysys.writer.ConsoleSummaryResultsWriter` property for ``showTestTitle`` (default=False) as sometimes seeing 
+  the titles of tests can be helpful when triaging results. There is also a new ``showTestDir`` which allows the 
+  testDir to be displayed in addition to the output dir in cases where the output dir is not located underneath 
+  the test dir (due to --outdir). Also changed the defaults for some other properties to 
+  showOutcomeReason=True and showOutputDir=True, which are recommended for better visibility into why tests failed. 
+  They can be disabled if desired in the project configuration. 
+
+- Added `pysys.utils.logutils.stripANSIEscapeCodes()` which can be used to remove ANSI escape codes such as console 
+  color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.BaseResultsWriter`), 
+  since usually you wouldn't want these if writing the output to a file. 
+
+- The -XpythonCoverage option now produces an XML coverage.xml report in addition to the .coverage file and HTML 
+  report. This is useful for some code coverage UI/aggregation services. 
+
+- Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
+  to make it easier to run in CI jobs. 
+
+- Sample project file introduces a new naming convention of ``__pysys_*`` for output directories and files created 
+  by PySys (for example, by writers). This helps avoid outputs getting mixed up with testcase directories and also 
+  allows for easier ignore rules for version control systems. 
 
 Bug fixes
 ---------
 
-- TODO
+- In some cases foreground processes could be left running after timing out; this is now fixed. 
+
+- Ensure ANSI escape codes (e.g. for console coloring) do not appear in JUnit XML writer output files, or in test 
+  outcome reasons. 
 
 Upgrade guide and compatibility
 -------------------------------
 
-- TODO
-
+- Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
+  that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
+  to avoid duplication, or change them to use the new ``onError=`` mechanism. 
+- `pysys.process.common.CommonProcessWrapper.wait` now returns an error if the specified timeout is isn't a positive 
+  number (giving the same behaviour as `BaseTest.waitProcess`). 
+- Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
+  "THERE WERE NO NON PASSES", and similarly for the "Summary of non passes:". 
 
 ---------------
 Release History
@@ -340,7 +430,7 @@ Miscellaneous new features:
   project file shows how to use this feature to collect Python code 
   coverage files::
   
-     <property name="pythonCoverageDir" value="coverage-python-@OUTDIR@"/>
+     <property name="pythonCoverageDir" value="__pysys_coverage_python_@OUTDIR@"/>
 	 <collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 
   The output directory is wiped clean at the start of each test run to prevent 

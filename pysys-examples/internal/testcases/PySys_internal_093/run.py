@@ -10,7 +10,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, os.path.join(self.output,'test'))
+		self.copy(self.input, os.path.join(self.output,'test'))
 
 		subtest = 'printLogs-all-ST'
 		runPySys(self, subtest, ['run', '--printLogs', 'aLL', '--threads', '1', '-o', subtest], workingDir='test', ignoreExitStatus=True)
@@ -54,7 +54,7 @@ class PySysTest(BaseTest):
 		
 		# should still get summary at end in all cases
 		for subtest in subtests:
-			self.assertOrderedGrep('%s.out'%subtest, exprList=['Summary of non passes:', 'NestedTimedout'])
+			self.assertOrderedGrep('%s.out'%subtest, exprList=['Summary of failures:', 'NestedTimedout'])
 		self.log.info('')
 
 		# even at WARN level we normally all log outcomes, even though run.log printing is suppressed by the log level
@@ -62,10 +62,10 @@ class PySysTest(BaseTest):
 			'FAILED: *NestedFail',
 			'PASSED: *NestedPass',
 			'WARN.*Reason for timed out outcome is general tardiness',
-			'Summary of non passes:'
+			'Summary of failures:'
 			])
 		# except in NONE mode
 		self.assertOrderedGrep('printLogs-none-ST-warn.out', exprList=[
 			'FAILED: *NestedFail',
-			'Summary of non passes:'
+			'Summary of failures:'
 			], contains=False)

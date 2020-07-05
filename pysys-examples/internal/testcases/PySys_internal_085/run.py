@@ -16,10 +16,10 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		
+		self.log.info('Preferred encoding = %s, test string = %s', locale.getpreferredencoding(), TEST_STR)
 		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/myoutdir', '--record', '--cycle', '2', '-n', '2'], ignoreExitStatus=True, workingDir='test')
 		self.logFileContents('pysys.out', maxLines=0)

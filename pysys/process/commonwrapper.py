@@ -63,13 +63,17 @@ class CommonProcessWrapper(object):
 	:ivar str ~.displayName: Display name for this process (defaults to the basename if not explicitly specified). The 
 		display name is returned by calling ``str()`` on this instance. The display name and pid are returned by 
 		``repr()``.
+	:ivar str expectedExitStatus: The condition string used to determine whether the exit status/code 
+		returned by the process is correct, for example '==0'.
 
 	:ivar int ~.pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.
 	:ivar int ~.exitStatus: The process exit status for a completed process (for many processes 0 represents success), 
 		or None if it has not yet completed. 
 	"""
 
-	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None):
+	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None, 
+		expectedExitStatus=None):
+		
 		self.displayName = displayName if displayName else os.path.basename(command)
 		self.command = command
 		self.arguments = arguments
@@ -78,6 +82,7 @@ class CommonProcessWrapper(object):
 		self.workingDir = workingDir
 		self.state = state
 		self.timeout = timeout
+		self.expectedExitStatus = expectedExitStatus
 
 		# 'publicly' available data attributes set on execution
 		self.pid = None
@@ -85,6 +90,7 @@ class CommonProcessWrapper(object):
 		
 		# these may be further updated by the subclass
 		self.stdout = stdout
+		self.stderr = stderr
 		self.stderr = stderr
 
 		# print process debug information
@@ -173,25 +179,25 @@ class CommonProcessWrapper(object):
 		"""
 		return self.setExitStatus() is None
 
-
 	def wait(self, timeout):
-		"""Wait for a process to complete execution.
+		"""Wait for a process to complete execution, raising an exception on timeout.
 		
-		The method will block until either the process is no longer running, or the timeout 
-		is exceeded. Note that the method will not terminate the process if the timeout is 
-		exceeded. 
+		This method provides basic functionality but does not check the exit status or log any messages; 
+		see `pysys.basetest.BaseTest.waitProcess` for a wrapper that adds additional functionality. 
 		
-		:param timeout: The timeout to wait in seconds. Always provide a 
-			timeout, otherwise your test may block indefinitely!
-		@raise pysys.exceptions.ProcessTimeout: Raised if the timeout is exceeded.
+		Note that this method will not terminate the process if the timeout is exceeded. 
+		
+		:param timeout: The timeout to wait in seconds, for example ``timeout=TIMEOUTS['WaitForProcess']``.
+		:raise pysys.exceptions.ProcessTimeout: Raised if the timeout is exceeded.
 		
 		"""
+		assert timeout > 0, 'timeout must always be specified'
 		startTime = time.time()
+		log.debug("Waiting up to %d secs for process %r", timeout, self)
 		while self.running():
-			if timeout:
-				currentTime = time.time()
-				if currentTime > startTime + timeout:
-					raise ProcessTimeout("Process timedout")
+			currentTime = time.time()
+			if currentTime > startTime + timeout:
+				raise ProcessTimeout('Waiting for completion of %s timed out after %d seconds'%(self, int(timeout)))
 			time.sleep(0.05)
 		
 

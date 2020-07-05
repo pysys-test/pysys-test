@@ -237,7 +237,7 @@ class TCPPortOwner(object):
 		either one or all non-localhost IPv4 addresses) and also ``localhost``. 
 		Many machines have multiple network cards each with its own host IP address, and typically you'll only be using 
 		one of them in your test, most commonly ``localhost``. If you do know which host/IP you'll actually be using, 
-		just specify that directly to save time, and avoid needlessly opening remote ports on hosts your're not using. 
+		just specify that directly to save time, and avoid needlessly opening remote ports on hosts you're not using. 
 		A list of available host addresses and corresponding family/type/proto can be found from 
 		``socket.getaddrinfo('', None)``.
 	

@@ -1,0 +1,6 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+	<property root="testRootDir"/>
+
+</pysysproject>

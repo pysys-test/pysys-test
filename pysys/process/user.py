@@ -29,7 +29,7 @@ from pysys import log, process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
-from pysys.utils.logutils import BaseLogFormatter
+from pysys.utils.logutils import BaseLogFormatter, stripANSIEscapeCodes
 from pysys.xml.project import Project
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
@@ -80,6 +80,8 @@ class ProcessUser(object):
 		flag. It is recommended that any other languages supporting code coverage 
 		also check the self.disableCoverage flag. 
 	
+	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
+	
 	"""
 	
 	def __init__(self):
@@ -113,6 +115,9 @@ class ProcessUser(object):
 		A recursive lock that can be used for protecting the fields of this instance 
 		from access by background threads, as needed. 
 		"""
+		
+		# variables affecting a specific method (documented there rather than above)
+		self.logFileContentsDefaultExcludes = []
 
 	def __getattr__(self, name):
 		"""Set self.input or self.output to the current working directory if not defined.
@@ -259,7 +264,7 @@ class ProcessUser(object):
 
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=None, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
-			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, quiet=False, stdouterr=None, 
+			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, onError=None, quiet=False, stdouterr=None, 
 			background=False):
 		"""Start a process running in the foreground or background, and return 
 		the `pysys.process.commonwrapper.CommonProcessWrapper` object.
@@ -280,11 +285,17 @@ class ProcessUser(object):
 		or a time out occurs, or in the background in which case the method returns immediately to the caller
 		returning a handle to the process to allow manipulation at a later stage, typically with L{waitProcess}. 
 		
-		All processes started in the background and not explicitly killed using the returned process 
-		object are automatically killed on completion of the test via the L{cleanup()} destructor.
+		All processes started in the background are automatically killed on completion of the test via the L{cleanup()} 
+		destructor. To wait for background processes to complete during `execute` and/or before `verify` commences, 
+		call `waitForBackgroundProcesses()`. This is especially useful when you have a test that needs to execute 
+		lots of processes asynchronously, since having them all execute concurrently in the background and then calling 
+		`waitForBackgroundProcesses()` will be a lot quicker than executing them serially in the foreground. 
 
 		When starting a process that will listen on a server socket, use `getNextAvailableTCPPort` 
 		to allocate a free port before calling this method. 
+
+		.. versionchanged:: 1.6.0
+			Added onError parameter and default behaviour of logging stderr/out when there's a failure.
 
 		:param str command: The path to the executable to be launched (should include the full path)
 		:param list[str] arguments: A list of arguments to pass to the command
@@ -311,8 +322,7 @@ class ProcessUser(object):
 		:param str stdouterr: The filename prefix to use for the stdout and stderr of the process 
 			(`.out`/`.err` will be appended), or a tuple of (stdout,stderr) as returned from 
 			L{allocateUniqueStdOutErr}. 
-			The stdouterr prefix is also used to form a default display name for 
-			the process if none is explicitly provided. 
+			The stdouterr prefix is also used to form a default display name for the process if none is explicitly provided. 
 			The files are created relative to the test output directory. 
 			The filenames can be accessed from the returned process object using 
 			L{pysys.process.commonwrapper.CommonProcessWrapper.stdout} and 
@@ -342,6 +352,18 @@ class ProcessUser(object):
 			be taken from the project property defaultIgnoreExitStatus, which can be configured in the project XML 
 			(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
 			compatibility with older PySys releases if no project property is set. 
+		
+		:param Callable[pysys.process.commonwrapper.CommonProcessWrapper] onError: A function that will be called 
+			if the process times out or returns an unexpected exit status (unless ignoreExitStatus=True), before 
+			an abort exception is raised (if abortOnError=True). This provides a convenient place to add gathering of 
+			diagnostic information (perhaps using the stdout/err of the process), for example 
+			``onError=lambda process: self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)``.
+			
+			If no onError function is specified, the default is to log the last few lines of stderr (or if empty, stdout) 
+			when a process fails and abortOnError=True. 
+			
+			The ``self.logFileContentsDefaultExcludes`` variable can be used to add regular expressions to exclude 
+			unimportant lines of output such as standard startup lines (see `logFileContents`). 
 		
 		:param bool quiet: If True, this method will not do any INFO or WARN level logging 
 			(only DEBUG level), unless a failure outcome is appended. This parameter can be 
@@ -387,43 +409,56 @@ class ProcessUser(object):
 		if not environs: # a truly empty env isn't really usable, so populate it with a minimal default environment instead
 			environs = self.getDefaultEnvirons(command=command)
 		
+		startTime = time.time()
+		process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, 
+			displayName=displayName, expectedExitStatus=expectedExitStatus)
+		hasFailed = True # in order to decide whether to log the process output
 		try:
-			startTime = time.time()
-			process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, displayName=displayName)
-			process.start()
-			if state == FOREGROUND:
-				correctExitStatus = pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
-				
-				logmethod = log.info if correctExitStatus else log.warn
-				if quiet: logmethod = log.debug
-				logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
-																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
-				
-				if not ignoreExitStatus and not correctExitStatus:
-					self.addOutcome(BLOCKED, 
-						('%s returned non-zero exit code %d'%(process, process.exitStatus))
-						if expectedExitStatus=='==0' else
-						('%s returned exit code %d (expected %s)'%(process, process.exitStatus, expectedExitStatus)), 
-						abortOnError=abortOnError)
+			try:
+				process.start()
+				if state == FOREGROUND:
+					correctExitStatus = pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
+					
+					logmethod = log.info if correctExitStatus else log.warn
+					if quiet: logmethod = log.debug
+					logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
+																		", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
+					
+					if not ignoreExitStatus and not correctExitStatus:
+						log.warn('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
+						self.addOutcome(BLOCKED, 
+							('%s returned non-zero exit code %d'%(process, process.exitStatus))
+							if expectedExitStatus=='==0' else
+							('%s returned exit code %d (expected %s)'%(process, process.exitStatus, expectedExitStatus)), 
+							abortOnError=abortOnError)
+					else:
+						hasFailed = False
+				elif state == BACKGROUND:
+					(log.info if not quiet else log.debug)("Started %s with process id %d", displayName, process.pid)
+					hasFailed = False
+			except ProcessError as e:
+				if not ignoreExitStatus:
+					self.addOutcome(BLOCKED, 'Could not start %s process: %s'%(displayName, e), abortOnError=abortOnError)
+				else: # this wouldn't happen during a polling-until-success use case so is always worth logging even in quiet mode
+					log.info("%s", sys.exc_info()[1], exc_info=0)
+			except ProcessTimeout:
+				(log.warn if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+				process.stop()
+				self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
+			else:
+				with self.lock:
+					self.processList.append(process)
+					if displayName in self.processCount:
+						self.processCount[displayName] = self.processCount[displayName] + 1
+					else:
+						self.processCount[displayName] = 1
+		finally:
+			if hasFailed:
+				if onError: 
+					onError(process)
+				elif abortOnError:
+					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
 
-			elif state == BACKGROUND:
-				(log.info if not quiet else log.debug)("Started %s with process id %d", displayName, process.pid)
-		except ProcessError as e:
-			if not ignoreExitStatus:
-				self.addOutcome(BLOCKED, 'Could not start %s process: %s'%(displayName, e), abortOnError=abortOnError)
-			else: # this wouldn't happen during a polling-until-success use case so is always worth logging even in quiet mode
-				log.info("%s", sys.exc_info()[1], exc_info=0)
-		except ProcessTimeout:
-			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds'%(process, timeout), printReason=False, abortOnError=abortOnError)
-			(log.warn if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
-			process.stop()
-		else:
-			with self.lock:
-				self.processList.append(process)
-				if displayName in self.processCount:
-					self.processCount[displayName] = self.processCount[displayName] + 1
-				else:
-					self.processCount[displayName] = 1
 		return process	
 
 	def getDefaultEnvirons(self, command=None, **kwargs):
@@ -686,35 +721,96 @@ class ProcessUser(object):
 					self.abort(BLOCKED, 'Unable to signal process %r'%(process), self.__callRecord())
 
 
-	def waitProcess(self, process, timeout, abortOnError=None):
-		"""Wait for a background process to terminate, completing on termination or expiry of the timeout.
+	def waitProcess(self, process, timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=False):
+		"""Wait for a background process to terminate.
 
-		Timeouts will result in an exception unless the project property ``defaultAbortOnError==False``.
+		For a convenient way to wait for all remaining background processes to complete, see `waitForBackgroundProcesses`. 
+
+		Timeouts will result in an exception and TIMEDOUT outcome unless the project property ``defaultAbortOnError==False`` 
+		is set.
 		
-		This method does not check the exit code for success, but you can manually 
-		check the return value (which is the same as ``process.exitStatus``) using `assertThat` if you wish to check it succeeded. 
-
-		:param process: The process handle returned from the L{startProcess} method
-		:param timeout: The timeout value in seconds to wait before returning
-		:param abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
+		:param pysys.process.commonwrapper.CommonProcessWrapperprocess: The process handle returned from the L{startProcess} method
+		:param int timeout: The timeout value in seconds to wait before returning, for example ``timeout=TIMEOUTS['WaitForProcess']``.
+		:param bool abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
 			(defaults to the defaultAbortOnError project setting)
+		:param bool checkExitStatus: By default this method does not check the exit status, but set this argument to True 
+			to check that the exit status matches the ``expectedExitStatus`` specified in the call to `startProcess` 
+			(typically ``==0``). 
+			Note that this argument is not affected by the ``defaultIgnoreExitStatus`` project property. 
+			The last few lines of the stderr (or stdout) will be logged if the exit status is wrong. 
 		:return: The process's ``exitStatus``. This will be None if the process timed out and abortOnError is disabled. 
 
 		"""
 		if abortOnError == None: abortOnError = self.defaultAbortOnError
-		assert timeout > 0, 'timeout must always be specified'
 		try:
 			log.info("Waiting up to %d secs for process %r", timeout, process)
 			t = time.time()
 			process.wait(timeout)
-			if time.time()-t > 10:
-				log.info("Process %s terminated after %d secs", process, time.time()-t)
+			if (time.time()-t > 10) or process.exitStatus != 0:
+				log.info("Process %s terminated after %d secs with exit status %d", process, time.time()-t, process.exitStatus)
+				
 		except ProcessTimeout:
 			if not abortOnError:
-				log.warn("Ignoring timeout waiting for process %r after %d secs", process, time.time() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+				log.warn("Ignoring timeout waiting for process %r after %d secs (as abortOnError=False)", process, time.time() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout), self.__callRecord())
+
+		else:
+			if checkExitStatus:
+				if not pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
+					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
+
+					self.addOutcome(BLOCKED, 
+						('%s returned exit status %d (expected %s)'%(process, process.exitStatus, process.expectedExitStatus)), 
+						abortOnError=abortOnError)
+
 		return process.exitStatus
+
+	def waitForBackgroundProcesses(self, timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
+		"""Wait for any running background processes to terminate and check for the expected exit status.
+
+		Timeouts will result in a TIMEDOUT outcome and an exception unless the project property ``defaultAbortOnError==False`` 
+		is set. 
+
+		:param int timeout: The total time in seconds to wait for all processes to have completed, for example ``timeout=TIMEOUTS['WaitForProcess']``.
+		:param bool abortOnError: If True aborts the test with an exception on any error, if False appends an outcome but does not 
+			raise an exception. 
+		:param bool checkExitStatus: By default this method not only waits for completion but also checks the exit status, but set this argument to False 
+			to disable checking that the exit status of all background processes matches the ``expectedExitStatus`` specified in 
+			the call to `startProcess` (typically ``==0``). 
+			The last few lines of the stderr (or stdout) will be logged if the exit status is wrong. 
+		"""
+
+		assert timeout>0, 'timeout must be specified'
+		starttime = time.time()
+		running = [p for p in self.processList if p.state==BACKGROUND and p.running()]
+		self.log.info('Waiting up to %d secs for %d background process(es) to complete', timeout, len(running))
+		for p in running:
+			try:
+				thistimeout = starttime+timeout-time.time()
+				if thistimeout <= 0: # we've run out of time
+					raise ProcessTimeout('waitForBackgroundProcesses timed out')
+				if p.running(): 
+					p.wait(timeout=thistimeout) # may raise ProcessTimeout
+			except ProcessTimeout:
+				stillrunning = [p for p in running if p.state==BACKGROUND and p.running()]
+				if stillrunning:
+					self.addOutcome(TIMEDOUT, 'Timed out waiting for %d processes after %d secs: %s'%(len(stillrunning), timeout, ', '.join(map(str, stillrunning))), abortOnError=abortOnError)
+					return False
+
+		# now check exit statuses - for all background processes, not only those that happen to have completed recently; 
+		# but only after we've confirmed (above) there were no timeouts
+		if checkExitStatus:
+			failures = []
+			for process in self.processList:
+				if process.state!=BACKGROUND: continue
+				if not pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
+					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
+
+					failures.append('%s returned exit status %d (expected %s)'%(process, process.exitStatus, process.expectedExitStatus))
+			if failures:
+				self.addOutcome(BLOCKED, ('%d processes failed: '%len(failures) if len(failures)>1 else 'Process ')+'; '.join(failures), abortOnError=abortOnError)
+		(self.log.info if (time.time()-starttime>10) else self.log.debug)('All processes completed, after waiting %d secs'%(time.time()-starttime))
 
 	def writeProcess(self, process, data, addNewLine=True):
 		"""Write binary data to the stdin of a process.
@@ -723,13 +819,13 @@ class ProcessUser(object):
 		wrapper around the write method of the process helper only adds checking of the process running status prior
 		to the write being performed, and logging to the testcase run log to detail the write.
 
-		:param process: The process handle returned from the L{startProcess()} method
-		:param data: The data to write to the process stdin. 
+		:param pysys.process.commonwrapper.CommonProcessWrapper process: The process handle returned from the L{startProcess()} method
+		:param bytes data: The data to write to the process stdin. 
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
 			given by locale.getpreferredencoding(). 
-		:param addNewLine: True if a new line character is to be added to the end of the data string
+		:param bool addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""
 		if process.running():
@@ -1135,7 +1231,7 @@ class ProcessUser(object):
 					# messages and test outcome reasons don't get swallowed, add a 
 					# workaround for this here. Not a problem in python 3. 
 					outcomeReason = outcomeReason.decode('ascii', errors='replace')
-				outcomeReason = outcomeReason.strip().replace(u'\t', u' ').replace('\r','').replace('\n', ' ; ')
+				outcomeReason = stripANSIEscapeCodes(outcomeReason).strip().replace(u'\t', u' ').replace('\r','').replace('\n', ' ; ')
 			
 			if override: 
 				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', [LOOKUP[o] for o in self.outcome], self.__outcomeReason)
@@ -1196,6 +1292,11 @@ class ProcessUser(object):
 		The method returns the integer value of the outcome as defined in `pysys.constants`. To convert this 
 		to a string representation use the `pysys.constants.LOOKUP` dictionary i.e. ``LOOKUP[test.getOutcome()]``.
 		
+		To find out whether this test has failed::
+		
+			if self.getOutcome() in FAILS:
+				...
+		
 		:return: The overall outcome
 
 		"""	
@@ -1238,7 +1339,7 @@ class ProcessUser(object):
 			
 			Many machines have multiple network cards each with its own host IP address, and typically you'll only be using 
 			one of them in your test, most commonly ``localhost``. If you do know which host/IP you'll actually be using, 
-			just specify that directly to save time, and avoid needlessly opening remote ports on hosts your're not using. 
+			just specify that directly to save time, and avoid needlessly opening remote ports on hosts you're not using. 
 			A list of available host addresses can be found from 
 			``socket.getaddrinfo('', None)``.
 
@@ -1282,19 +1383,32 @@ class ProcessUser(object):
 		If the regex contains unnamed groups, the specified group is returned. If the expression is not found, an exception is raised,
 		unless returnAll=True or returnNoneIfMissing=True. For example::
 
-			self.getExprFromFile('test.txt', 'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
-			self.getExprFromFile('test.txt', 'foo') # on a file containing 'myKey=foobar' would return "foo"
+			self.getExprFromFile('test.txt', r'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
+			self.getExprFromFile('test.txt', r'foo') # on a file containing 'myKey=foobar' would return "foo"
 		
 		See also `pysys.basetest.BaseTest.assertGrep` which should be used when instead of just finding out what's 
 		in the file you want to assert that a specific expression is matched. assertGrep also provides some additional 
 		functionality such as returning named groups which this method does not currently support. 
 		
 		:param str path: file to search (located in the output dir unless an absolute path is specified)
+
 		:param str expr: the regular expression, optionally containing the regex group operator ``(...)``
+		
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
+			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
+
+			If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
+			substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
+			through re.escape::
+			
+				expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)')
+
 		:param List[int] groups: which regex group numbers (as indicated by brackets in the regex) should be returned; 
 			default is ``[1]`` meaning the first group. 
 			If more than one group is specified, the result will be a tuple of group values, otherwise the
 			result will be the value of the group at the specified index as a str.
+
 		:param bool returnAll: returns a list containing all matching lines if True, the first matching line otherwise.
 		:param bool returnNoneIfMissing: set this to return None instead of throwing an exception
 			if the regex is not found in the file
@@ -1332,20 +1446,28 @@ class ProcessUser(object):
 
 
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, logFunction=None, reFlags=0):
-		""" Logs some or all of the lines in the specified file.
+		""" Logs some or all of the lines from the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
 		diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
 		to make test failures easier to triage quickly. 
-
+		
 		.. versionchanged:: 1.5.1
 			Added logFunction parameter. 
+		.. versionchanged:: 1.6.0
+			Added self.logFileContentsDefaultExcludes variable. 
 
-		:param str path: May be an absolute, or relative to the test output directory
-		:param list[str] includes: Optional list of regex strings. If specified, only matches of these regexes will be logged
-		:param list[str] excludes: Optional list of regex strings. If specified, no line containing these will be logged
+		:param str path: May be an absolute, or relative to the test output directory.
+		:param list[str] includes: Optional list of regex strings. If specified, only matches of these regexes will be logged.
+		:param list[str] excludes: Optional list of regex strings. If specified, no line containing these will be logged.
+		
+			The variable ``self.logFileContentsDefaultExcludes`` (= ``[]`` by default) is used when this method 
+			is called with the default argument of ``excludes=None``, and can be used to provide a global set of 
+			default exclusion lines shared by all your tests, which is particularly useful if some processes always 
+			log some unimportant text to stderr (or stdout) that would be distracting to log out. 
+		
 		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
-		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'
+		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'.
 		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
@@ -1362,6 +1484,7 @@ class ProcessUser(object):
 		:return: True if anything was logged, False if not.
 		
 		"""
+		if excludes is None: excludes = self.logFileContentsDefaultExcludes
 		if not path: return False
 		actualpath= os.path.join(self.output, path)
 		try:
@@ -1407,7 +1530,9 @@ class ProcessUser(object):
 			def logFunction(line):
 				self.log.info(u'  %s', l, extra=logextra)
 
-		self.log.info(u'Contents of %s%s: ', os.path.normpath(path), ' (filtered)' if includes or excludes else '', extra=logextra)
+		path = os.path.normpath(path)
+		if path.startswith(self.output): path = path[len(self.output)+1:]
+		self.log.info(u'Contents of %s%s: ', path, ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
 			logFunction(l)
 		self.log.info('  -----', extra=logextra)
@@ -1569,28 +1694,22 @@ class ProcessUser(object):
 		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+			
+		:return str: Return the absolute path of the generated file. 
 		"""
 		# This method provides similar functionality to the Python3 pathlib write_text method. 
-		
+		out = os.path.join(self.output, file)
 		with openfile(os.path.join(self.output, file), 'w', encoding=encoding or self.getDefaultFileEncoding(file)) as f:
 			f.write(text)
+		return out
 	
-	def copy(self, src, dest, mappers=[], encoding=None):
-		"""Copy a single text or binary file, optionally tranforming the 
-		contents by filtering each line through a list of mapping functions. 
+	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
+		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
 		
 		If any mappers are provided, the file is copied in text mode and 
 		each mapper is given the chance to modify or omit each line. 
 		If no mappers are provided, the file is copied in binary mode. 
-		
-		In addition to the file contents the mode is also copied, for example 
-		the executable permission will be retained. 
-		
-		This function is useful both for creating a modified version of an 
-		output file that's more suitable for later validation steps such as 
-		diff-ing, and also for copying required files from the input to the 
-		output directory. 
-		
+
 		For example::
 		
 			self.copy('output-raw.txt', 'output-processed.txt', encoding='utf-8', 
@@ -1598,44 +1717,161 @@ class ProcessUser(object):
 					lambda line: None if ('Timestamp: ' in line) else line, 
 					lambda line: line.replace('foo', 'bar'), 
 				])
+
+		In addition to the file contents the attributes such as modification time and 
+		executable permission will be copied where possible. 
 		
-		:param src: The source filename, which can be an absolute path, or 
+		This function is useful for creating a modified version of an 
+		output file that's more suitable for later validation steps such as 
+		diff-ing, and also for copying required files from the input to the 
+		output directory. 
+		
+		It can also be used for copying a whole directory, 
+		similar to ``shutil.copytree`` but with the advantages of support 
+		for long paths on Windows, better error safety, and that relative paths 
+		are evaluated relative to the self.output directory (which is both convenient, and 
+		safer than shutil's evaluation relative to the current working 
+		directory). 
+
+		For example::
+		
+			self.copy('src.txt', 'dest.txt')  # copies to outputdir/dest.txt
+			self.copy('src.txt', self.output) # copies to outputdir/src.txt, since self.output is an existing directory
+			self.copy('src.txt', 'foo/')      # copies to outputdir/foo/src.txt since destination ends with a slash
+			self.copy('srcdirname', 'foo/')   # copies to outputdir/foo/srcdirname since destination ends with a slash
+
+		Usually mappers are simple functions or lambdas, however for advanced use cases you can 
+		additionally provide ``mapper.fileStarted([self,] srcPath, destPath, srcFile, destFile)`` and/or  
+		``mapper.fileFinished(...)`` methods to allow stateful operations, or to perform extra read/write operations 
+		before lines are read/written. For example::
+		
+			class CustomLineMapper(object):
+				def fileStarted(self, srcPath, destPath, srcFile, destFile):
+					self.src = os.path.basename(srcPath)
+				
+				def __call__(self, line):
+					return '"'+self.src+'": '+line
+				
+				def fileFinished(self, srcPath, destPath, srcFile, destFile):
+					destFile.write('\\n' + 'footer added by CustomLineMapper')
+			self.copy('src.txt', 'dest.txt', mappers=[CustomLineMapper()])
+
+		.. versionchanged:: 1.6.0
+			Ability to copy directories was added, along with the ``overwrite=``, ``symlinks=``, 
+			``ignoreIf=`` and ``skipMappersIf=`` arguments. 
+
+		:param str src: The source filename or directory, which can be an absolute path, or 
 			a path relative to the ``self.output`` directory. 
 			Use ``src=self.input+'/myfile'`` if you wish to copy a file from the test 
 			input directory. 
 		
-		:param dest: The source filename, which can be an absolute path, or 
-			a path relative to the `self.output` directory. If this is a directory 
-			name, the file is copied to this directory with the same basename as src. 
+		:param str dest: The destination file or directory name, which can be an absolute path, or 
+			a path relative to the `self.output` directory. Destination file(s) are overwritten if the 
+			dest already exists. 
+			
+			As a convenience to avoid repeating the same text in the src and destination, 
+			if the dest ends with a slash, or the src is a file and the dest is an existing directory, 
+			the dest is taken as a parent directory into which the src will be copied in retaining its current name. 
 		
-		:param mappers: A list of filter functions that will be applied, 
-			in order, to each line read from the file. Each function accepts a string for 
+		:param bool overwrite: If True, source files will be allowed to 
+			overwrite destination files, if False an exception will be raised if a destination file already exists. 
+			By default overwrite=None which means it's enabled for single file copy() but disabled for directory copies.
+		
+		:param List[callable[str]->str] mappers: A list of filter functions that will be applied, 
+			in order, to map each line from source to destination. Each function accepts a string for 
 			the current line as input and returns either a string to write or 
-			None if the line is to be omitted. 
-		
-		:param encoding: The encoding to use to open the file. 
+			None if the line is to be omitted. Any ``None`` items in the mappers list will be ignored. 
+			
+			If present the ``mapper.fileStarted(...)`` and/or ``mapper.fileFinished(...)`` methods will be called on each 
+			mapper in the list at the start and end of each file; see above for an example. 
+			
+			If your mapper is stateful, be sure to create separate instances for each test rather than 
+			sharing instances across multiple tests which would cause race conditions. 
+			
+		:param str encoding: The encoding to use to open the file (only used if mappers are provided; if not, it is 
+			opened in binary mode). 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
 		
-		:return: the absolute path of the destination file. 
-		"""
-		src = toLongPathSafe(os.path.join(self.output, src))
-		dest = toLongPathSafe(os.path.join(self.output, dest))
-		if os.path.isdir(dest): dest = toLongPathSafe(dest+'/'+os.path.basename(src))
-		assert src != dest, 'Source and destination file cannot be the same'
+		:param bool symlinks: Set to True if symbolic links in the source tree should be represented as symbolic 
+			links in the destination (rather than just being copied). 
 		
+		:param callable[str]->bool ignoreIf: A callable that accepts a source path and returns True if 
+			this file/directory should be omitted from a directory copy. 
+			For example: ``ignoreIf=lambda src: src.endswith(('.tmp', '.log')))``
+
+		:param callable[str]->bool skipMappersIf: A callable that accepts a source path and returns True if 
+			this file should be copied in binary mode (as if no mappers had been specified). 
+			For example: ``skipMappersIf=lambda src: not src.endswith(('.xml', '.properties')))``
+		
+		:return str: the absolute path of the destination file. 
+		"""
+		origdest = dest
+		src = toLongPathSafe(os.path.join(self.output, src))
+		srcIsDir = os.path.isdir(src)
+	
+		dest = toLongPathSafe(os.path.join(self.output, dest)).rstrip('/\\')
+		if origdest.endswith((os.sep, '/', '\\')) or (not srcIsDir and os.path.isdir(dest)): dest = toLongPathSafe(dest+os.sep+os.path.basename(src))
+		assert src != dest, 'Source and destination file cannot be the same'
+
+		if overwrite is None: overwrite = not srcIsDir
+
+		if srcIsDir:
+			destexists = os.path.isdir(dest)
+			if not destexists: self.mkdir(dest)
+			scandir = getattr(os, 'scandir', None)
+			for e in (os.listdir(src) if scandir is None else scandir(src)):
+				if scandir is None: # for python2 support
+					path = os.path.join(src, e)
+					isdir = os.path.isdir(path)
+					islink = os.path.islink(path)
+				else:
+					isdir = e.is_dir()
+					islink = e.is_symlink()
+					path = e.path
+				
+				if ignoreIf is not None and ignoreIf(path): continue
+				
+				if islink and symlinks:
+					linkdest = dest+os.sep+os.path.basename(path)
+					os.symlink(os.readlink(path), linkdest)
+					shutil.copystat(path, linkdest, **({} if PY2 else {'follow_symlinks':False}))
+					continue
+				
+				self.copy(path, dest+os.sep+os.path.basename(path), 
+					# must pass all other arguments through
+					mappers=mappers, encoding=encoding, symlinks=symlinks, ignoreIf=ignoreIf, skipMappersIf=skipMappersIf, overwrite=overwrite)
+				
+			return dest
+
+		if skipMappersIf is not None and skipMappersIf(src): mappers = None
+		
+		if not overwrite and os.path.exists(dest):
+			raise Exception('copy() will not overwrite an existing file unless overwrite=True: %s'%dest)
+
 		if not mappers:
 			# simple binary copy
 			shutil.copyfile(src, dest)
 		else:
+			if None in mappers: mappers = [m for m in mappers if m]
+			
 			with openfile(src, 'r', encoding=encoding or self.getDefaultFileEncoding(src)) as srcf:
 				with openfile(dest, 'w', encoding=encoding or self.getDefaultFileEncoding(dest)) as destf:
+					# give mappers a change to setup initial state and/or read/write from the source and dest files
+					for mapper in mappers:
+						fn = getattr(mapper, 'fileStarted', None)
+						if fn: fn(src, dest, srcf, destf)
+
 					for line in srcf:
 						for mapper in mappers:
 							line = mapper(line)
 							if line is None: break
 						if line is not None: destf.write(line)
-			
-		shutil.copymode(src, dest)
+
+					for mapper in mappers:
+						fn = getattr(mapper, 'fileFinished', None)
+						if fn: fn(src, dest, srcf, destf)
+
+		shutil.copystat(src, dest)
 		return dest
 		

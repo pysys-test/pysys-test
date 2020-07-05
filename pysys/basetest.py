@@ -488,10 +488,13 @@ class BaseTest(ProcessUser):
 			# Equality comparison of an 'actual' vs 'expected' message from when our server started; 
 			# note the use of a descriptive name for the 'actualXXX=' keyword to produce a nice clear message if it fails
 			self.assertThat("actualStartupMessage == expected", expected='Started successfully', actualStartupMessage=msg)
-			self.assertThat('actualUser == expected', expected='myuser', actualUser=user)
 			
 			# This produces the self-describing log messages like: 
 			#   Assert that (actualStartupMessage == expected) with expected='Started successfully', actualStartupMessage='Started unsuccessfully' ... passed
+
+			# Always design tests to give clear messages if there's a failure. Here's an example of adding an extra 
+			# parameter (fromLogFile) that's not used in the condition string, to indicate which server we're testing here
+			self.assertThat('actualUser == expected', expected='myuser', actualUser=user, fromLogFile='server1.log')
 
 			# Any valid Python expression is permitted (not only equality testing):
 			self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
@@ -533,10 +536,11 @@ class BaseTest(ProcessUser):
 			#     expected: 'baz'
 			#                 ^
 		
-		As shown above, when two named parameters are provided and the condition string is a simple equality 
-		comparison (``==`` or ``is``), additional lines are logged if the assertion fails to show at what point the 
-		two arguments differ (based on finding the longest common substring). So it's a good idea to include both 
-		the actual and expected value as named parameters rather than as literals inside the condition string. 
+		As shown above, when (at least) two named parameters are provided and the condition string is a simple equality 
+		comparison (``==``, ``is``, ``>=``, ``<=``) using exactly two of the parameters, additional lines are logged if the 
+		assertion fails, showing at what point the two arguments differ (based on finding the longest common substring). 
+		So it's a good idea to include both the actual and expected value as named parameters rather than as literals 
+		inside the condition string. 
 		
 		.. versionchanged:: 1.5.1
 			The ability to pass named keyword= parameters was added in 1.5.1 
@@ -625,24 +629,28 @@ class BaseTest(ProcessUser):
 			return True
 		else:
 			self.addOutcome(FAILED, assertMessage, abortOnError=abortOnError)
-			if len(namedvalues) == 2 and re.match(r'^ *\w+ *(==|is) *\w+ *$', conditionstring): 
+			
+			# namesInUse impl is a bit rough-and-ready, but does a good enough job at identifying when it makes 
+			# sense to compare two of the parameters passed in
+			namesInUse = [x for x in namedvalues.keys() if x in conditionstring]
+			if re.match(r'^ *\w+ *(==|is|>=|<=) *\w+ *$', conditionstring) and len(namesInUse)==2: 
 				# if we're checking a==b we can help the user see why they didn't match; 
 				# this kind of highlighting might be misleading for other conditionstrings, and certainly less useful
-				pad = max(len(key) for key in namedvalues)+1
+				pad = max(len(key) for key in namesInUse)+1
 
 				# use %s for most objects, but repr for strings (so we see the escaping) and objects where str() would make them look the same
-				v1 = u'%s'%(list(namedvalues.values())[0])
-				v2 = u'%s'%(list(namedvalues.values())[1])
+				v1 = u'%s'%(namedvalues[namesInUse[0]])
+				v2 = u'%s'%(namedvalues[namesInUse[1]])
 
-				if isstring(list(namedvalues.values())[0]) or v1==v2:
-					v1 = u'%r'%(list(namedvalues.values())[0])
-					v2 = u'%r'%(list(namedvalues.values())[1])
+				if isstring(namedvalues[namesInUse[0]]) or v1==v2:
+					v1 = u'%r'%(namedvalues[namesInUse[0]])
+					v2 = u'%r'%(namedvalues[namesInUse[1]])
 				
 				seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
 				i, j, k = seq.find_longest_match(0, len(v1), 0, len(v2))
 				# where v1[i:i+k] == v2[j:j+k]
 
-				for (index, key) in enumerate(namedvalues.keys()):
+				for (index, key) in enumerate(namesInUse):
 					value = [v1,v2][index]
 					x = [i, j][index]
 					self.log.info(u'  %{pad}s: %s%s%s'.format(pad=pad), key, 
@@ -725,6 +733,14 @@ class BaseTest(ProcessUser):
 		
 		Should the files after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, 
 		otherwise a C{FAILED} outcome is added.
+		
+		If you have any serialized dictionary/map data structures in the comparison files, or any lists that come from 
+		a directory listing, be really careful to ensure there is deterministic sorting of the keys/filenames, as 
+		by default the ordering is often subject to unpredictable changes when upgrading tools or switching between 
+		OSes, and you don't want to have to update lots of testcases every time the sorting changes. If you are able 
+		to get the data into a Python data structure (e.g. by serializing from JSON), 
+		Python's ``json.dump(..., sort_keys=True)`` can be a convenient way to produce a predictable order for 
+		dictionary keys.
 		
 		If you have a large set of test reference files which need to be updated after a behaviour or output formatting 
 		change, you can use a special command line option which makes ``assertDiff`` overwrite the reference files with 
@@ -841,13 +857,15 @@ class BaseTest(ProcessUser):
 
 		For example::
 		
-			self.assertGrep('myserver.log', expr=' ERROR .*', contains=False)
+			self.assertGrep('myserver.log', expr=r' ERROR .*', contains=False)
 			
-			# in Python 3+, f-Strings can be used to substitute in parameters:
-			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{re.escape(username)}" in .* seconds\\.')
+			# in Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:
+			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{re.escape(username)}" in .* seconds[.]')
 			
-			# If you need to use ``\`` regular epression escapes use a raw string to avoid double-escaping
-			self.assertGrep('myserver.log', expr=r'c:\Foo\bar\.txt')
+			# If you need to use \ characters use a raw r'...' string to avoid the need for Python \ escaping in 
+			# addition to regex escaping. Square brackets are often the clearest way to escape regular expression 
+			# characters such as \ . and ()
+			self.assertGrep('myserver.log', expr=r'c:[\]Foo[\]bar[.]txt')
 		
 		You can get more descriptive failure messages, and also do more sophisticated checking of results, by 
 		using one or more ``(?P<groupName>...)`` named groups in the expression to extract information. A common 
@@ -881,8 +899,15 @@ class BaseTest(ProcessUser):
 		:param str expr: The regular expression to check for in the file (or a string literal if literal=True), 
 			for example ``" ERROR .*"``. 
 			
-			It's sometimes helpful to use a 'raw' Python string so that you don't need to double-escape 
-			slashes intended for the regular expression parser, e.g. ``self.assertGrep(..., expr=r'c:\Foo\bar\.txt')``.
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			be treated as literal values. If you have a string with a lot of backslashes, it's best to use a 'raw' 
+			Python string so that you don't need to double-escape them, e.g. ``self.assertGrep(..., expr=r'c:\\Foo\\filename\.txt')``.
+			
+			If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
+			substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
+			through re.escape::
+			
+				expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)')
 			
 			If you wish to do something with the text inside the match you can use the ``re`` named 
 			group syntax ``(?P<groupName>...)`` to specify a name for parts of the regular expression.
@@ -1189,9 +1214,27 @@ class BaseTest(ProcessUser):
 		""" Reports a new performance number to the performance ``csv`` file, with an associated unique string key 
 		that identifies it for comparison purposes.
 		
-		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
-		rather than the total time taken, since this allows the number of iterations to be increased .
 		
+		Where possible it is better to report the rate at which an operation can be performed (e.g. throughput)
+		rather than the total time taken, since this allows the number of iterations to be increased without affecting 
+		historical comparisons. For example::
+		
+			self.reportPerformanceResult(int(iterations)/float(calctime), 
+				'Fibonacci sequence calculation rate', '/s'))
+
+		If your test runs in multiple modes, make sure you include some information about the mode in the resultKey::
+		
+			self.reportPerformanceResult(int(iterations)/float(calctime), 
+				'Fibonacci sequence calculation rate using %s' % self.mode, '/s', 
+				resultDetails=[('mode',self.mode)])
+
+		While use of standard units such as '/s', 's' or 'ns' (nano-seconds) is recommended, custom units can be 
+		provided when needed using `pysys.utils.perfreporter.PerformanceUnit`::
+		
+			self.reportPerformanceResult(int(iterations)/float(calctime)/1000, 
+				'Fibonacci sequence calculation rate using %s with different units' % self.mode, 
+				unit=PerformanceUnit('kilo_fibonacci/s', biggerIsBetter=True))
+
 		:param value: The numeric value to be reported. If a str is provided, it will be converted to a float.
 
 		:param resultKey: A unique string that fully identifies what was measured, which will be

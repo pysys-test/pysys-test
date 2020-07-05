@@ -41,8 +41,7 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 	# since we might be running this from not an installation
 	environs['PYTHONPATH'] = os.pathsep.join(sys.path)
 
-	try:
-		result = processowner.startPython(
+	result = processowner.startPython(
 			arguments = args,
 			environs = environs,
 			expectedExitStatus=expectedExitStatus,
@@ -50,9 +49,4 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 			stdout=stdouterr+'.out', stderr=stdouterr+'.err', 
 			displayName='pysys %s'%stdouterr, 
 			**kwargs)
-	except Exception:
-		processowner.logFileContents(stdouterr+'.out')
-		raise
-	finally: # in case there was any error printed to stderr
-		processowner.logFileContents(stdouterr+'.err')
 	return result

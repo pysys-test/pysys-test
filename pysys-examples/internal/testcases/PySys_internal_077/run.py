@@ -11,7 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 
 		exitcode = runPySys(self, 'pysys', ['run'], ignoreExitStatus=True, workingDir='test')
 		self.assertThat('%d != 0', exitcode.exitStatus)

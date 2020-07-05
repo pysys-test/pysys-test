@@ -9,7 +9,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		shutil.copytree(self.input, self.output+'/test')
+		self.copy(self.input, self.output+'/test')
 		
 		ports = [self.getNextAvailableTCPPort() for i in range(5)]
 		self.write_text('allocated-ports.txt', '\n'.join(str(p) for p in ports)+'\n')

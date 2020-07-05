@@ -21,6 +21,7 @@ class PySysTest(BaseTest):
 		
 		# wait for the process to complete (after 10 loops)
 		self.waitProcess(self.hprocess, timeout=10)
+		self.hprocess.wait(timeout=15) # to to prove this method behaves the same as the above
 		
 		# check the process status
 		self.finalstatus = self.hprocess.running()

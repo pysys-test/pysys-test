@@ -13,7 +13,7 @@
 
 	<writers>
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${testRootDir}/pysys-junit-report"/>
+			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 	</writers>		
 

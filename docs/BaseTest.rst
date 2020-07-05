@@ -91,6 +91,8 @@ can be accessed via instance attributes on ``self``:
   or performance-measuring test. Typically this would be set in an individual testcase, or in the `setup` method of 
   a `BaseTest` subclass based on groups in the ``self.descriptor`` that indicate what kind of test this is.
 
+Additional variables that affect only the behaviour of a single method are documented in the associated method. 
+
 .. _assertions-and-outcomes:
 
 Assertions and outcomes
@@ -150,6 +152,7 @@ Processes
 	signalProcess
 	stopProcess
 	writeProcess
+	waitForBackgroundProcesses
 	startProcessMonitor
 	stopProcessMonitor
 
@@ -169,6 +172,7 @@ of which the most commonly used is `waitForGrep`.
 .. autosummary::
 	waitForGrep
 	waitForFile
+	waitForBackgroundProcesses
 	waitProcess
 	waitForSocket
 	wait

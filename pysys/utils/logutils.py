@@ -26,6 +26,18 @@ from pysys.constants import *
 from pysys.utils.pycompat import *
 import pysys, threading
 
+def stripANSIEscapeCodes(text):
+	"""Remove any ANSI escape sequences (for example to set console color) present in the specified string. 
+	
+	..versionadded:: 1.6.0
+	"""
+	if not text: return text
+	
+	if PY2 and isinstance(text, binary_type):
+		return re.sub(b'\\033\\[[0-9;]+m', b'', text)
+	else:
+		return re.sub(u'\\033\\[[0-9;]+m', u'', text)
+
 class BaseLogFormatter(logging.Formatter):
 	"""Base class for formatting log messages.
 	
@@ -168,6 +180,9 @@ class ColorLogFormatter(BaseLogFormatter):
 		self.color = None
 		if 'color' in propertiesDict:
 			self.color = propertiesDict.pop('color','').lower() == 'true'
+		# env vars should take precedence over project settings
+		if os.getenv('NO_COLOR',''):
+			self.color = False # this is a growing cross-product standard way to disable color
 		if os.getenv('PYSYS_COLOR',None):
 			self.color = os.getenv('PYSYS_COLOR').lower() == 'true'
 

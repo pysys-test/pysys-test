@@ -26,15 +26,21 @@
 	-->
 
 	<writers>
+		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
+			<property name="maxTotalSizeMB" value="1024.0"/>
+			<property name="maxArchiveSizeMB" value="200.0"/>
+			<property name="maxArchives" value="50"/>
+		</writer>
+		
+		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
 		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
 
 		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
-			<property name="outputDir" value="${testRootDir}/pysys-junit-report"/>
+			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 		
 		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
-			<property name="showOutputDir" value="false"/>
-			<property name="showOutcomeReason" value="true"/>
 		</writer>
 	</writers>
 

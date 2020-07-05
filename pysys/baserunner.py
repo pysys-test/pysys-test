@@ -36,24 +36,16 @@ from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
 from pysys.utils.loader import import_module
-from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, pathexists
+from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
 from pysys.utils.logutils import BaseLogFormatter
 from pysys.utils.pycompat import *
 from pysys.internal.initlogging import _UnicodeSafeStreamWrapper, pysysLogHandler
-from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter
+from pysys.writer import ConsoleSummaryResultsWriter, ConsoleProgressResultsWriter, BaseSummaryResultsWriter, BaseProgressResultsWriter, ArtifactPublisher
 import pysys.utils.allocport
 
 global_lock = threading.Lock() # internal, do not use
-
-N_CPUS = 1 # internal, do not use
-try:
-	# multiprocessing is a new module in 2.6 so we can't assume it
-	import multiprocessing
-	N_CPUS = multiprocessing.cpu_count()
-except ImportError:
-	pass
 
 class BaseRunner(ProcessUser):
 	"""A single instance of the runner class is responsible for orchestrating 
@@ -125,7 +117,9 @@ class BaseRunner(ProcessUser):
 		each test, the validation for each test should be re-run on the previous output. 
 
 	:ivar float ~.startTime: The time when the test run started (in seconds since the epoch).
-	
+
+	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
+
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
@@ -164,14 +158,14 @@ class BaseRunner(ProcessUser):
 		
 		self.setKeywordArgs(xargs)
 
-		if self.threads <= 0:
-			self.threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS)) 
+		if len(descriptors)==1: self.threads = 1
 		if self.threads > 1: log.info('Running tests with %d threads', self.threads)
 	
 		self.writers = []
 		summarywriters = []
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
+		self.__printLogsDefault = extraOptions['printLogsDefault']
 		for classname, module, filename, properties in self.project.writers:
 			module = import_module(module, sys.path)
 			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
@@ -202,6 +196,8 @@ class BaseRunner(ProcessUser):
 			self.writers.extend(summarywriters)
 		else:
 			self.writers.append(ConsoleSummaryResultsWriter())
+		
+		self.__artifactWriters = [w for w in self.writers if isinstance(w, ArtifactPublisher)]
 		
 		self.__collectTestOutput = []
 		for c in self.project.collectTestOutput:
@@ -341,14 +337,20 @@ class BaseRunner(ProcessUser):
 
 
 	def isPurgableFile(self, path):
-		"""Determine if a file should be purged when empty at the end of a test run.
+		"""Decides if the specified non-empty file should be purged (deleted) after a test passes when 
+		``--purge`` is enabled.
+
+		By default this will return True, meaning that all files (other than the special case of run.log) 
+		will be purged.
 
 		This method is called by `testComplete` to provide runners with the ability to veto
 		deletion of non-empty files that should always be left in a test's output directory
-		even when the test has passed, by returning False from this method. For example this
-		could be used to avoid deleting code coverage files. By default this will return True.
+		even when the test has passed, by returning False from this method. 
 		
-		:param path: The absolute path of the file to be purged
+		Usually it is best to avoid customizing this method and instead use the ``collect-test-output`` project option 
+		to collect any required files (e.g code coverage, performance graphs etc), as collection happens before purging. 
+		
+		:param str path: The absolute path of the file to be purged. 
 
 		"""
 		return True
@@ -427,10 +429,10 @@ class BaseRunner(ProcessUser):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
 				testoutdir=self.outsubdir, runner=self)
 			except Exception: 
-				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
 		
-		if self.printLogs is None: self.printLogs = PrintLogs.ALL # default value, unless overridden by user or writer.setup
+		if self.printLogs is None: self.printLogs = self.__printLogsDefault # default value, unless overridden by cmdline or writer.setup
 		
 		# create the thread pool if running with more than one thread
 		if self.threads > 1: 
@@ -510,23 +512,24 @@ class BaseRunner(ProcessUser):
 			for collect in self.__collectTestOutput:
 				if pathexists(collect['outputDir']):
 					self.log.info('Collected test output to directory: %s', os.path.normpath(collect['outputDir']))
+
+			# perform clean on the performance reporters - before the writers, in case the writers want to do something 
+			# with the perf output
+			for perfreporter in self.performanceReporters:
+					try: perfreporter.cleanup()
+					except Exception as ex: 
+						log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			with self.__resultWritingLock:
 				for writer in self.writers:
 					try: writer.cleanup()
 					except Exception as ex: 
-						log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+						log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 						# might stop results being completely displayed to user
 						fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
 				del self.writers[:]
-	
-			# perform clean on the performance reporters
-			for perfreporter in self.performanceReporters:
-					try: perfreporter.cleanup()
-					except Exception as e: 
-						log.warn("caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 		
 			self.processCoverageData()
 		finally:
@@ -568,9 +571,16 @@ class BaseRunner(ProcessUser):
 			if not pathexists(pythonCoverageDir):
 				self.log.info('No Python coverage files were generated.')
 			else:
+				self.log.info('Preparing Python coverage report in: %s', os.path.normpath(pythonCoverageDir))
+
 				if self.startPython(['-m', 'coverage', 'combine'], abortOnError=False, 
 					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
 					disableCoverage=True).exitStatus != 0: return
+
+				# produces coverage.xml in a standard format that is useful to code coverage tools
+				self.startPython(['-m', 'coverage', 'xml'], abortOnError=False, 
+					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-xml', 
+					disableCoverage=True)
 					
 				args = []
 				if hasattr(self.project, 'pythonCoverageArgs'):
@@ -579,6 +589,12 @@ class BaseRunner(ProcessUser):
 				self.startPython(['-m', 'coverage', 'html']+args, abortOnError=False, 
 					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
 					disableCoverage=True)
+				
+				# to avoid confusion, remove any zero byte out/err files from the above
+				for p in os.listdir(pythonCoverageDir):
+					p = os.path.join(pythonCoverageDir, p)
+					if p.endswith(('.out', '.err')) and os.path.getsize(p)==0:
+						os.remove(p)
 	
 
 	def containerCallback(self, thread, container):
@@ -672,7 +688,7 @@ class BaseRunner(ProcessUser):
 					writer.processResult(testObj, cycle=cycle,
 										  testStart=testStart, testTime=testDurationSecs, runLogOutput=bufferedoutput)
 				except Exception as ex: 
-					log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], descriptor.id, writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+					log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], descriptor.id, writer, sys.exc_info()[1], exc_info=1)
 					errors.append('Failed to record test result using writer %s: %s'%(repr(writer), ex))
 			
 			# store the result
@@ -681,6 +697,25 @@ class BaseRunner(ProcessUser):
 			
 			if errors:
 				raise Exception('Failed to process results from %s: %s'%(descriptor.id, '; '.join(errors)))
+
+
+	def publishArtifact(self, path, category):
+		"""
+		Notifies any interested `pysys.writer.ArtifactPublisher` writers about an artifact that they may wish to publish.  
+
+		Called when a file or directory artifact is published (e.g. by another writer).
+		
+		.. versionadded:: 1.6.0
+		
+		:param str path: Absolute path of the file or directory. 
+		:param str category: A string identifying what kind of artifact this is, e.g. 
+			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
+			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
+			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
+		"""
+		path = fromLongPathSafe(path).replace('\\','/')
+		for a in self.__artifactWriters:
+			a.publishArtifact(path, category)
 
 	def containerExceptionCallback(self, thread, exc_info):
 		"""Callback method for unhandled exceptions thrown when running a test.
@@ -704,13 +739,13 @@ class BaseRunner(ProcessUser):
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			for writer in self.writers:
 				try: writer.cleanup()
-				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 			del self.writers[:]
 			try:
 				self.cycleComplete()
 				self.cleanup()
 			except Exception: 
-				log.warn("caught %s cleaning up runner after interrupt %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+				log.warn("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			sys.exit(1)
 
 		try:
@@ -892,7 +927,7 @@ class TestContainer(object):
 					if hasattr(writer, 'processTestStarting'):
 						writer.processTestStarting(testObj=self.testObj, cycle=self.cycle)
 				except Exception: 
-					log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer.__class__.__name__, sys.exc_info()[1], exc_info=1)
+					log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 
 			# execute the test if we can
 			try:
