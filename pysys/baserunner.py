@@ -559,7 +559,7 @@ class BaseRunner(ProcessUser):
 		coverage data from other languages, e.g. Java. 		
 		"""
 		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
-		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir is not None:
+		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir:
 			pythonCoverageDir = os.path.join(self.project.root, pythonCoverageDir
 				.replace('@OUTDIR@', os.path.basename(self.outsubdir))) # matches collect-test-output logic
 			if not pathexists(pythonCoverageDir):
