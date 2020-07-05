@@ -134,9 +134,9 @@ class BaseRunner(ProcessUser):
 		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
 		# runner subclasses to do so if required. 
 		if os.path.isabs(outsubdir):
-			self.output = os.path.join(outsubdir, 'pysys-runner')
+			self.output = os.path.join(outsubdir, '__pysys_runner')
 		else:
-			self.output = os.path.join(self.project.root, 'pysys-runner-%s'%outsubdir)
+			self.output = os.path.join(self.project.root, '__pysys_runner_%s'%outsubdir)
 
 		self.record = record
 		self.purge = purge

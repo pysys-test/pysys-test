@@ -125,6 +125,8 @@ Upgrade guide and compatibility
       ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it. 
       Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
       see `pysys.utils.perfreporter` for details. 
+    - The ``self.output`` directory for the runner (if used) is now named ``__pysys_runner/`` instead of 
+      ``pysys-runner/``. It is not very likely anything will be depending on this directory. 
 
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
