@@ -1701,6 +1701,7 @@ class ProcessUser(object):
 		out = os.path.join(self.output, file)
 		with openfile(os.path.join(self.output, file), 'w', encoding=encoding or self.getDefaultFileEncoding(file)) as f:
 			f.write(text)
+		return out
 	
 	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
 		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
