@@ -139,7 +139,9 @@ script:
 
   # upload Python code coverage - since we're measuring PySys itself, include both 
   # top-level .coverage file and the files collected by PySys from its PySys subprocesses
+  # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
   - mv .coverage ./__coverage_python_main/.coverage.toplevel
+  - rm ./__coverage_python_main/coverage.xml
   - cd __coverage_python_main
   - codecov
   - cd ..
