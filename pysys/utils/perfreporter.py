@@ -96,6 +96,9 @@ class CSVPerformanceReporter(object):
 		the platform, or when there are multiple test runs on the same machine 
 		may be used to distinguish between them. This is usually a relative path 
 		but may be an absolute path. 
+		
+	:param runner: Pass this through to the superclass. 
+	:param kwargs: Pass any additional keyword arguments through to the super class. 
 	"""
 
 	DEFAULT_SUMMARY_FILE = '__pysys_performance/@OUTDIR@_@HOSTNAME@/perf_@DATE@_@TIME@.csv'
@@ -103,8 +106,8 @@ class CSVPerformanceReporter(object):
 	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. 
 	"""
 
-	def __init__(self, project, summaryfile, testoutdir, **kwargs):
-		self.runner = kwargs.pop('runner', None) or self._runnerSingleton
+	def __init__(self, project, summaryfile, testoutdir, runner, **kwargs):
+		self.runner = runner
 		assert self.runner is not None
 		assert not kwargs, kwargs.keys() # **kwargs allows constructor to be extended in future if needed; give error if any unexpected args are passed
 		

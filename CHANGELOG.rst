@@ -129,6 +129,9 @@ Upgrade guide and compatibility
       ``pysys-runner/``. It is not very likely anything will be depending on this directory. 
     - You may want to add ``__pysys_*`` and possibly ``__coverage_*`` to your version control system's ignore patterns 
       so that paths created by the PySys runner don't show up in local changes. 
+    - If you created a custom subclass of `pysys.utils.perfreporter.CSVPerformanceReporter` using the 1.3.0 release and 
+      it does not yet have (and pass through to the superclass) a ``runner`` and/or ``**kwargs`` argument you will need 
+      to add these. 
 
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
