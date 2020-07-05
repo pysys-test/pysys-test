@@ -127,6 +127,8 @@ Upgrade guide and compatibility
       see `pysys.utils.perfreporter` for details. 
     - The ``self.output`` directory for the runner (if used) is now named ``__pysys_runner/`` instead of 
       ``pysys-runner/``. It is not very likely anything will be depending on this directory. 
+    - You may want to add ``__pysys_*`` and possibly ``__coverage_*`` to your version control system's ignore patterns 
+      so that paths created by the PySys runner don't show up in local changes. 
 
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
