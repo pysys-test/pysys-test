@@ -16,8 +16,12 @@ class PySysTest(BaseTest):
 		self.startTestProcess(stdouterr='failure1', background=True)
 		self.waitForBackgroundProcesses(checkExitStatus=True, abortOnError=False)  # should fail
 
-		self.startTestProcess(stdouterr='failure2', background=True)
-		self.startTestProcess(stdouterr='failure-expected', expectedExitStatus='!=0', background=True)
+		p1 = self.startTestProcess(stdouterr='failure2', background=True)
+		p2 = self.startTestProcess(stdouterr='failure-expected', expectedExitStatus='!=0', background=True)
+		
+		# avoid race by manually waiting for these two to ensure a consistent state before we test waitForBackgroundProcesses
+		p1.wait(60)
+		p2.wait(60)
 		
 		self.waitForBackgroundProcesses(checkExitStatus=False) # should succeed
 		self.waitForBackgroundProcesses(abortOnError=False) # should fail
