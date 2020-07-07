@@ -3,6 +3,8 @@
 	<requires-pysys>@PYSYS_VERSION@</requires-pysys>
 	<requires-python>@PYTHON_VERSION@</requires-python>
 	
+	<!-- Pre-defined properties include: ${testRootDir}, ${os}, ${startDate}, ${startTime}, ${hostname}. -->
+	
 	<!-- User-defined properties -->
 	<!--
 	<property name="myProperty" value="myValue"/>	
