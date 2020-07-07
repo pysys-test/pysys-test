@@ -103,6 +103,13 @@ New features
   by PySys (for example, by writers). This helps avoid outputs getting mixed up with testcase directories and also 
   allows for easier ignore rules for version control systems. 
 
+- Added a standard property ``${os}`` to the project file as a more modern alternative to ``${osfamily}``. This takes 
+  its value from Python's ``platform.system().lower()``, taking values such as ``windows``, ``linux``, etc. 
+
+- The standard project property ``testRootDir`` is now defined automatically without the need to 
+  add the boilerplate ``<property root= ... />`` to your project configuration. The old property name ``root`` 
+  continues to be defined for compatibility with older projects. 
+
 Bug fixes
 ---------
 

@@ -14,32 +14,16 @@
 
 
 	<!-- 
-	Get a reference to the environment, which can then be used as a substitution variable 
-	within the project file, e.g. ${env.PROCESSORS} would be substituted with the value of
-	the PROCESSORS environment variable if it is specified within the environment.
-	
-	Note that ${env.XXX} values can only be used within this file (they do not result in 
-	project properties being automatically defined for each environment variable). 
+		The following standard project properties are always defined and can be accessed through ${prop} syntax:
+		
+			${testRootDir} - Path of the root directory containing the pysysproject.xml file
+			${os}          - The operating system family e.g. 'windows', 'linux', 'darwin'
+			${startDate}   - The date that this test run was started, in a form that can be used in filenames. 
+			${startTime}   - The (local) time that this test run was started, in a form that can be used in filenames. 
+			${hostname}    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
+ 		
+		In addition, within this file ${env.VARNAME} syntax can be used to access environment variables. 
 	-->
-	<property environment="env"/>
-
-	
-	<!-- 
-	Get a reference to the osfamily, which can then be used as a substitution variable 
-	within the project file, e.g. ${osfamily} would take the value windows on win32 systems,
-	and unix on Linux or Solaris.
-	-->
-	<property osfamily="osfamily"/>
-
-
-	<!-- 
-	Get a reference to project root location (the location of this file), which can then be used 
-	as a substitution variable within the project file. Note that this is only for local expansion 
-	within the project file, where the project root location is required for full paths, e.g. 
-	stylesheets etc. Within a test class, the root location can be referenced using the 
-	self.project.root class variable. If not specified, defaults to "root".
-	-->
-	<property root="testRootDir"/>
 	
 	
 	<!-- 
@@ -48,9 +32,6 @@
 	Project properties can be used as substitution variables within the project file, and 
 	are set as attributes on the Project class for use by tests. In the example below, "user" 
 	would be available to tests as "self.project.user".
-	
-	Property values can make use of other project properties using ${XXX} syntax, or environment 
-	variables using ${env.XXX} syntax. 
 
 	If a property value contains any properties or environment variables that do not exist, 
 	the "default" is used instead (or "" if a default is not explicitly specified). If the default 
@@ -126,7 +107,7 @@
 	so for example other project properties can be referenced withint the values 
 	using ${...} syntax. 
 	 -->
-	<property file="${osfamily}.properties" pathMustExist="false"/>
+	<property file="${os}.properties" pathMustExist="false"/>
 
 
 	<!-- 
@@ -136,7 +117,7 @@
 	the path is treated as absolute, e.g. to add the src directory to the python path at runtime 
 	use;
 	
-	<pythonpath value="./src" relative="true" />
+	<pythonpath value="${testRootDir}/pysys-extensions" relative="true" />
 	-->
 
 

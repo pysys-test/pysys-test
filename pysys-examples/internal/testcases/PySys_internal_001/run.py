@@ -1,7 +1,7 @@
 from pysys import stdoutHandler
 from pysys.constants import *
 from pysys.basetest import BaseTest
-import shutil
+import shutil, platform
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
@@ -28,6 +28,9 @@ class PySysTest(BaseTest):
 			self.logFileContents('pysys.out', maxLines=0)
 			self.logFileContents('pysys.err')
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
+		
+		name = '${os}_${hostname}_${startDate}_${startTime}'
+		self.write_text(name+'.txt', 'xxx') # check these don't contain any non-file system characters
 
 	def validate(self):
 		# mostly checked by nested testcase, but also:
@@ -36,4 +39,9 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='booldeftrue=True')
 		self.assertGrep('pysys.out', expr='booldeffalse=False')
 		self.assertGrep('pysys.out', expr='cmdlineoverride=True')
+		
+		self.assertThat('prop == expected', prop__eval='self.project.os', expected=platform.system().lower())
+		self.assertThat('prop != ""', prop__eval='self.project.startDate')
+		self.assertThat('prop != ""', prop__eval='self.project.startTime')
+		self.assertThat('prop != ""', prop__eval='self.project.hostname')
 		

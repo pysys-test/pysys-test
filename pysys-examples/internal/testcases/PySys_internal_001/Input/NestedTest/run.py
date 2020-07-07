@@ -12,6 +12,8 @@ class PySysTest(BaseTest):
 	testFloatUserData = 0.0
 
 	def execute(self):
+		self.write_text(self.project.sample_path+'.txt', 'xxx') # check these don't contain any non-file system characters
+	
 		self.proj = self.project
 		self.assertTrue(self.proj.env_user == "Felicity Kendal")
 		self.assertTrue(self.proj.env_user_prepend == "append-on-front-Felicity Kendal")

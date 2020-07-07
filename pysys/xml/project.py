@@ -24,6 +24,7 @@ user-defined project properties.
 __all__ = ['Project'] # Project is the only member we expose/document from this module
 
 import os.path, logging, xml.dom.minidom, collections, codecs, time
+import platform
 
 from pysys.constants import *
 from pysys import __version__
@@ -94,20 +95,25 @@ class XMLProjectParser(object):
 		self.dirname = dirname
 		self.xmlfile = os.path.join(dirname, file)
 		log.debug('Loading project file: %s', self.xmlfile)
-		self.rootdir = 'root'
 		self.environment = 'env'
-		self.osfamily = 'osfamily'
 		
 		# project load time is a reasonable proxy for test start time, 
 		# and we might want to substitute the date/time into property values
 		self.startTimestamp = time.time()
 		
 		self.properties = {
-			self.rootdir:self.dirname, 
-			self.osfamily:OSFAMILY, 
-			'hostname':HOSTNAME.lower().split('.')[0],
+			'testRootDir':self.dirname,
+			
 			'startDate':time.strftime('%Y-%m-%d', time.localtime(self.startTimestamp)),
 			'startTime':time.strftime('%H.%M.%S', time.localtime(self.startTimestamp)),
+			'startTimestamp':self.startTimestamp,
+
+			'hostname':HOSTNAME.lower().split('.')[0],
+			'os':platform.system().lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
+
+			# old names
+			'root':self.dirname, # old name for testRootDir
+			'osfamily':OSFAMILY, 
 		}
 		
 		if not os.path.exists(self.xmlfile):
@@ -149,20 +155,18 @@ class XMLProjectParser(object):
 		propertyNodeList = [element for element in self.root.getElementsByTagName('property') if element.parentNode == self.root]
 
 		for propertyNode in propertyNodeList:
+		
+			# use of these options for customizing the property names of env/root/osfamily is no longer encouraged; just kept for compat
 			if propertyNode.hasAttribute("environment"):
 				self.environment = propertyNode.getAttribute("environment")
-
-			elif propertyNode.hasAttribute("root"):
-				self.properties.pop(self.rootdir, "")
-				self.rootdir = propertyNode.getAttribute("root")
-				self.properties[self.rootdir] = self.dirname
-				log.debug('Setting project property %s="%s"', self.rootdir, self.dirname)
-
-			elif propertyNode.hasAttribute("osfamily"):
-				self.properties.pop(self.osfamily, "")
-				self.osfamily = propertyNode.getAttribute("osfamily")
-				self.properties[self.osfamily] = OSFAMILY
-				log.debug('Setting project property %s="%s"', self.osfamily, OSFAMILY)
+			elif propertyNode.hasAttribute("root"): 
+				propname = propertyNode.getAttribute("root")
+				self.properties[propname] = self.dirname
+				log.debug('Setting project property %s="%s"', propname, self.dirname)
+			elif propertyNode.hasAttribute("osfamily"): # just for older configs, better to use ${os} now
+				propname = propertyNode.getAttribute("osfamily")
+				self.properties[propname] = OSFAMILY
+				log.debug('Setting project property %s="%s"', propname, OSFAMILY)
 					
 			elif propertyNode.hasAttribute("file"): 
 				file = self.expandFromProperty(propertyNode.getAttribute("file"), propertyNode.getAttribute("default"))

@@ -3,10 +3,6 @@
 	<requires-pysys>@PYSYS_VERSION@</requires-pysys>
 	<requires-python>@PYTHON_VERSION@</requires-python>
 	
-	<property root="testRootDir"/>
-	<property environment="env"/>
-	<property osfamily="osfamily"/>
-
 	<!-- User-defined properties -->
 
 	<!-- Standard default settings. See sample project file and API docs for more details. -->
@@ -20,7 +16,7 @@
 
 	<!-- Custom test framework extensions, if needed -->
 	<!--
-	<pythonpath value="../framework" relative="true" />
+	<pythonpath value="../pysys-extensions" relative="true" />
 	<runner classname="MyRunner" module="my.organization"/>
 	<maker classname="MyTestMaker" module="my.organization"/>
 	-->

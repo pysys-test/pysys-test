@@ -12,5 +12,7 @@
 	
 	<property name="projectbool" value="tRue"/>
 	<property name="projectbooloverride" value="tRue"/>
-	
+
+	<property name="sample_path" value="${os}_${hostname}_${startDate}_${startTime}"/>
+
 </pysysproject>
