@@ -94,8 +94,12 @@ class ProcessUser(object):
 		self.project = Project.getInstance()
 		"""The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
 
-		assert self.project or 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing
-		
+		if self.project is None:
+			assert 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing
+		else:
+			self.defaultAbortOnError = self.project.getProperty('defaultAbortOnError', False)
+			self.defaultIgnoreExitStatus = self.project.getProperty('defaultIgnoreExitStatus', True)
+			
 		self.processList = []
 		self.processCount = {}
 		self.__cleanupFunctions = []
@@ -103,8 +107,6 @@ class ProcessUser(object):
 		self.outcome = [] # internal, do NOT use directly
 		self.__outcomeReason = ''
 		
-		self.defaultAbortOnError = self.project.getProperty('defaultAbortOnError', False)
-		self.defaultIgnoreExitStatus = self.project.getProperty('defaultIgnoreExitStatus', True)
 		self.__uniqueProcessKeys = {}
 		self.__pythonCoverageFile = 0
 		
