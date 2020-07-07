@@ -374,7 +374,7 @@ class BaseProcessMonitor(object):
 		
 		"""
 		
-		datetime = time.gmtime(time.time())
+		datetime = time.localtime(time.time())
 		data[ProcessMonitorKey.DATE_TIME] = time.strftime("%Y-%m-%d %H:%M:%S", datetime)
 		data[ProcessMonitorKey.DATE_TIME_LEGACY] = time.strftime(
 			"%d/%m/%y %H:%M:%S" if IS_WINDOWS else "%m/%d/%y %H:%M:%S", datetime)

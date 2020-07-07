@@ -453,7 +453,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 	
 	def __init__(self, logfile, **kwargs):
 		# substitute into the filename template
-		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.cycle = -1
 		self.fp = None
 
@@ -464,7 +464,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 
 		self.fp = flushfile(open(self.logfile, "w"))
-		self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
+		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
 		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
 
@@ -526,7 +526,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 
 	def __init__(self, logfile, **kwargs):
 		# substitute into the filename template
-		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.cycle = -1
 		self.numResults = 0
 		self.fp = None
@@ -558,7 +558,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	
 			# add the data node
 			element = self.document.createElement("timestamp")
-			element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+			element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
 			self.rootElement.appendChild(element)
 
 			# add the platform node
@@ -626,7 +626,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		resultElement.appendChild(element)
 		
 		element = self.document.createElement("timestamp")
-		element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+		element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
 		resultElement.appendChild(element)
 
 		element = self.document.createElement("descriptor")
@@ -794,7 +794,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 	def __init__(self, logfile, **kwargs):
 		# substitute into the filename template
-		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.fp = None
 
 	def setup(self, **kwargs):
@@ -824,7 +824,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		csv.append(testObj.descriptor.id)
 		csv.append('\"%s\"'%testObj.descriptor.title)
 		csv.append(str(cycle))
-		csv.append((time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(testStart))))
+		csv.append((time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(testStart))))
 		csv.append(str(testTime))
 		csv.append(LOOKUP[testObj.getOutcome()])
 		self.fp.write('%s \n' % ','.join(csv))

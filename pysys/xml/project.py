@@ -106,8 +106,8 @@ class XMLProjectParser(object):
 			self.rootdir:self.dirname, 
 			self.osfamily:OSFAMILY, 
 			'hostname':HOSTNAME.lower().split('.')[0],
-			'startDate':time.strftime('%Y-%m-%d', time.gmtime(self.startTimestamp)),
-			'startTime':time.strftime('%H.%M.%S', time.gmtime(self.startTimestamp)),
+			'startDate':time.strftime('%Y-%m-%d', time.localtime(self.startTimestamp)),
+			'startTime':time.strftime('%H.%M.%S', time.localtime(self.startTimestamp)),
 		}
 		
 		if not os.path.exists(self.xmlfile):

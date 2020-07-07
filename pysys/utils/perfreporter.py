@@ -140,7 +140,7 @@ class CSVPerformanceReporter(object):
 		d = collections.OrderedDict()
 		d['outdir'] = self.testoutdir
 		d['hostname'] = self.hostname
-		d['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.runStartTime))
+		d['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.runStartTime))
 		return d
 	
 	def valueToDisplayString(self, value):
@@ -173,8 +173,8 @@ class CSVPerformanceReporter(object):
 		summaryfile = summaryfile\
 			.replace('@OUTDIR@', os.path.basename(self.testoutdir)) \
 			.replace('@HOSTNAME@', self.hostname) \
-			.replace('@DATE@', time.strftime('%Y-%m-%d', time.gmtime(self.runStartTime))) \
-			.replace('@TIME@', time.strftime('%H.%M.%S', time.gmtime(self.runStartTime))) \
+			.replace('@DATE@', time.strftime('%Y-%m-%d', time.localtime(self.runStartTime))) \
+			.replace('@TIME@', time.strftime('%H.%M.%S', time.localtime(self.runStartTime))) \
 			.replace('@TESTID@', testobj.descriptor.id)
 		
 		assert summaryfile, repr(getRunSummaryFile) # must not be empty

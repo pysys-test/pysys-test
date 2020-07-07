@@ -136,6 +136,9 @@ Upgrade guide and compatibility
       it does not yet have (and pass through to the superclass) a ``runner`` and/or ``**kwargs`` argument you will need 
       to add these. 
 
+- Changed timestamps in process monitor output, writers, performance reporter and similar places from UTC to local time. 
+  This means these timestamps will match up with the times in run.log output which have always been local time. 
+
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
