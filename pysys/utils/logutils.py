@@ -78,11 +78,13 @@ class BaseLogFormatter(logging.Formatter):
 		:param propertiesDict: dictionary of formatter-specific options
 
 		"""
-		self.name = propertiesDict.pop('name', None)
+		self.name = propertiesDict.pop('name', None) # probably not used
+		
+		__formatterName = propertiesDict.pop('__formatterName', None)
 
 		super(BaseLogFormatter, self).__init__(
 			propertiesDict.pop('messagefmt', DEFAULT_FORMAT),
-			propertiesDict.pop('datefmt', None) )
+			propertiesDict.pop('datefmt', '%H:%M:%S' if __formatterName=='stdout' else None) )
 		assert not isinstance(self._fmt, binary_type), 'message format must be a unicode not a byte string otherwise % arg formatting will not work consistently'
 		if propertiesDict: raise Exception('Unknown formatter option(s) specified: %s'%', '.join(list(propertiesDict.keys())))
 

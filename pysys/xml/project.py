@@ -321,9 +321,11 @@ class XMLProjectParser(object):
 
 				if fname == 'stdout':
 					cls, options = self._parseClassAndConfigDict(formatterNode, 'pysys.utils.logutils.ColorLogFormatter')
+					options['__formatterName'] = 'stdout'
 					stdout = cls(options)
 				else:
 					cls, options = self._parseClassAndConfigDict(formatterNode, 'pysys.utils.logutils.BaseLogFormatter')
+					options['__formatterName'] = 'runlog'
 					runlog = cls(options)
 		return stdout, runlog
 
@@ -587,8 +589,8 @@ class Project(object):
 				# set the data attributes
 				parser.unlink()
 
-		if not stdoutformatter: stdoutformatter = ColorLogFormatter({})
-		if not runlogformatter: runlogformatter = BaseLogFormatter({})
+		if not stdoutformatter: stdoutformatter = ColorLogFormatter({'__formatterName':'stdout'})
+		if not runlogformatter: runlogformatter = BaseLogFormatter({'__formatterName':'runlog'})
 		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
 

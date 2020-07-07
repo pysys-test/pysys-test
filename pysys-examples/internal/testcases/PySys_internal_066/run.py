@@ -26,6 +26,6 @@ class PySysTest(BaseTest):
 		self.assertGrep('customformat'+'_pysys.out', expr=r'STDOUT_DATE_FORMAT \d\d\d\d-\d\d.*STDOUT_PREFIX Sample log message')
 		self.assertGrep('customformat_output/PySys_NestedTestcase/run.log', expr=r'\d\d\d\d-\d\d.*RUNLOG_PREFIX Sample log message')
 		
-		self.assertGrep('customclass'+'_pysys.out', expr=r'CUSTOM_STDOUT_PREFIX \d\d\d\d-\d\d.*Sample log message')
+		self.assertGrep('customclass'+'_pysys.out', expr=r'CUSTOM_STDOUT_PREFIX \d\d:.*Sample log message')
 		self.assertGrep('customclass_output/PySys_NestedTestcase/run.log', expr=r'CUSTOM_RUNLOG_PREFIX \d\d\d\d-\d\d.*Sample log message')
 

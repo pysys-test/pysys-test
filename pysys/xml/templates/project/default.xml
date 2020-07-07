@@ -44,15 +44,7 @@
 		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
 	</default-file-encodings>	
 	
-	<formatters>
-		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils" 
-			name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
-		</formatter>
-
-		<formatter classname="BaseLogFormatter" module="pysys.utils.logutils" 
-			name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
-	</formatters>
-	
 	<project-help>
+		<!-- Add project-specific text to be appended to the "pysys run -h". -->
 	</project-help>
 </pysysproject>

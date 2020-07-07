@@ -221,6 +221,9 @@
 	</execution-order>
 	
 	<!--
+	In most projects there is no reason to provide a <formatters> element, but it can be used if you wish to customize 
+	the log line format (incl date/time format) or console coloring. 
+	
 	Specify custom formatters for logging to the console or run.log, and/or configure the formatter
 	appropriately through custom properties. Custom formatters should be defined using the classname
 	and module attributes and should extend the pysys.utils.logutils.BaseLogFormatter class. If no
