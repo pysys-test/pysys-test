@@ -146,7 +146,7 @@ class BaseRunner(ProcessUser):
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
-		self.supportMultipleModesPerRun = getattr(self.project, 'supportMultipleModesPerRun', '').lower()=='true'
+		self.supportMultipleModesPerRun = self.project.getProperty('supportMultipleModesPerRun', True)
 		if not self.supportMultipleModesPerRun:
 			self.mode = mode
 
@@ -411,7 +411,7 @@ class BaseRunner(ProcessUser):
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
-		if getattr(self.project, 'redirectPrintToLogger', 'false').lower()=='true':
+		if self.project.getProperty('redirectPrintToLogger', True):
 			sys.stdout = PySysPrintRedirector()
 		
 		# call the hook to setup prior to running tests

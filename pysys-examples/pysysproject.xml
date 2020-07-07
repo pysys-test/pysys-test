@@ -42,58 +42,11 @@
 
 
 	<!-- 
-	Controls whether tests will abort as a fail as soon as a process or wait operation
-	completes with errors. The default value as specified below will be used when the abortOnError 
-	parameter to the function is not specified. 
-	-->
-	<property name="defaultAbortOnError" value="true"/>	
-
-
-	<!-- 
-	Controls whether by default tests will report a failure outcome when a process completes with 
-	a non-zero return code. The default value as specified below will be used when the ignoreExitStatus 
-	parameter to the function is not specified. 
-	-->
-	<property name="defaultIgnoreExitStatus" value="false"/>
-	
-	<!-- 
 	Set default LANG for child processes on Unix. 
 	Useful for making all machines behave the same. Ensure that the specified 
 	locale is installed on all machines. 
 	-->
 	<!-- <property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/> -->
-
-	<!-- 
-	Set temporary directory for child processes to the testcase output 
-	directory to avoid cluttering up common file locations. 
-	-->
-	<property name="defaultEnvironsTempDir" value="self.output"/>
-
-	<!-- Recommended behaviour is to not strip whitespace unless explicitly requested; this option exists to keep 
-		compatibility for old projects. 
-	-->
-	<property name="defaultAssertDiffStripWhitespace" value="False"/>
-
-
-	<!-- 
-	Controls whether print() and sys.stdout.write() statements will be 
-	converted into logger.info() calls. If redirection is enabled, output 
-	from print() statements will not be captured in run.log files and will 
-	often not appear in the correct place on the console when running 
-	multi-threaded. 
-	
-	Note that this affects writers as well as testcases. 
-	
-	Use pysys.utils.logutils.stdoutPrint() to write to stdout without any 
-	redirection. 
-	-->
-	<property name="redirectPrintToLogger" value="false"/>
-	
-	<!-- Set this to true unless you need pre-1.4.1 mode behaviour for compatibility reasons. -->
-	<property name="supportMultipleModesPerRun" value="true"/>
-
-	<!-- Produces more informative messages from waitForGrep/Signal. -->
-	<property name="verboseWaitForGrep" value="true"/>
 
 	<!-- 
 	Import project properties from a file. 

@@ -81,7 +81,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	# must sort by id for range matching and dup detection to work deterministically
 	descriptors.sort(key=lambda d: [d.id, d.file])
 	
-	supportMultipleModesPerRun = getattr(project, 'supportMultipleModesPerRun', '').lower()=='true'
+	supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)
 	
 	# as a convenience support !mode syntax in the includes
 	modeexcludes = modeexcludes+[x[1:] for x in modeincludes if x.startswith('!')]

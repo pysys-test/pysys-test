@@ -219,7 +219,7 @@ class ConsolePrintHelper(object):
 				if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
 			maxsize = maxsize + 2
 			
-			supportMultipleModesPerRun = getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true'
+			supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)
 
 			for descriptor in descriptors:
 				if self.modefilter and self.modefilter not in descriptor.modes: continue

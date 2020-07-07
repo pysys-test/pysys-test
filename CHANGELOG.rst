@@ -127,6 +127,57 @@ Bug fixes
 Upgrade guide and compatibility
 -------------------------------
 
+As this is a major version release of PySys we have taken the opportunity do cleanup some aspects which could 
+cause some minor breakage or changes (though in many cases no action will be needed):
+
+- The default values of several project properties have been changed to reflect best practice. The new defaults match 
+  the values that have been in the sample/template project files for the last few releases so this change will mostly 
+  affect users who created their project a long time ago and haven't updated it recently. 
+  
+  If you are migrating an existing project it's simplest to initially keep current behaviour by adding the following 
+  properties to your project configuration (except for any that you already define ``<property .../>`` overrides for). 
+  Then once the PySys upgrade is complete and all tests passing you can switch to the new defaults (by removing these) 
+  if and when convenient. 
+  
+  The properties to add to keep the same behaviour as pre-1.6.0 versions of PySys are::
+  
+    <!-- Controls whether by default tests will report a failure outcome when a process completes with 
+        a non-zero return code. The default value as specified below will be used when the ignoreExitStatus 
+        parameter to the function is not specified. -->
+    <property name="defaultIgnoreExitStatus" value="true"/>
+    
+    <!-- Controls whether tests will abort as a fail as soon as a process or wait operation
+        completes with errors. The default value as specified below will be used when the abortOnError 
+        parameter to the function is not specified. -->
+    <property name="defaultAbortOnError" value="false"/>
+    
+    <!-- Recommended behaviour is to NOT strip whitespace unless explicitly requested with the stripWhitespace= 
+	    option; this option exists to keep compatibility for old projects. -->
+    <property name="defaultAssertDiffStripWhitespace" value="true"/>
+    
+    <!-- Set this to true unless you used the "mode" feature before it was redesigned in PySys 1.4.1. -->
+    <property name="supportMultipleModesPerRun" value="false"/>
+    
+    <!-- Set temporary directory end var for child processes to the testcase output directory to avoid cluttering up 
+        common file locations. Empty string means don't do this. "self.output" is recommended. 
+    -->
+    <property name="defaultEnvironsTempDir" value=""/>
+    
+    <!-- Controls whether print() and sys.stdout.write() statements will be automatically converted into logger.info() 
+        calls. If redirection is disabled, output from print() statements will not be captured in run.log files and will 
+        often not appear in the correct place on the console when running multi-threaded. 
+        
+        Note that this affects custom writers as well as testcases. If you have a custom writer, use 
+        pysys.utils.logutils.stdoutPrint() to write to stdout without any redirection. -->
+    <property name="redirectPrintToLogger" value="false"/>
+    
+    <!-- Produces more informative messages from waitForGrep/Signal. Can be set to false for old behaviour if 
+	    preferred. -->
+    <property name="verboseWaitForGrep" value="false"/>
+
+  The list is ordered with the properties most likely to break existing tests at the top of the list, so you may wish 
+  to start with the easier ones at the bottom of the list. 
+
 - As this is a major version release of PySys we have taken the opportunity do cleanup some aspects which could 
   cause some minor breakage or changes (though in many cases no action will be needed):
   

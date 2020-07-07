@@ -4,16 +4,10 @@
 	<requires-python>@PYTHON_VERSION@</requires-python>
 	
 	<!-- User-defined properties -->
-
-	<!-- Standard default settings. See sample project file and API docs for more details. -->
-	<property name="defaultAbortOnError" value="true"/>	
-	<property name="defaultIgnoreExitStatus" value="false"/>
-	<property name="defaultEnvironsTempDir" value="self.output"/>
-	<property name="defaultAssertDiffStripWhitespace" value="False"/>
-	<property name="redirectPrintToLogger" value="false"/>
-	<property name="supportMultipleModesPerRun" value="true"/>
-	<property name="verboseWaitForGrep" value="true"/>
-
+	<!--
+	<property name="myProperty" value="myValue"/>	
+	-->
+	
 	<!-- Custom test framework extensions, if needed -->
 	<!--
 	<pythonpath value="../pysys-extensions" relative="true" />

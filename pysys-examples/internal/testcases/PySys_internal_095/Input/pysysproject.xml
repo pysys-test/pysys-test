@@ -6,7 +6,8 @@
 
 	<property name="verboseWaitForSignal" value="true"/>
 	<property name="defaultAbortOnError" value="true"/>
-	
+	<property name="redirectPrintToLogger" value="false"/>
+
 	<path value="${root}/extrapath"/>
 	
 	<writers>

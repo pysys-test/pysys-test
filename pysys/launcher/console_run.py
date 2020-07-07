@@ -348,7 +348,7 @@ e.g.
 		Project.findAndLoadProject()
 		
 		if defaultAbortOnError is not None: setattr(Project.getInstance(), 'defaultAbortOnError', defaultAbortOnError)
-		if '--ci' in args and getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()!='true': 
+		if '--ci' in args and not Project.getInstance().getProperty('supportMultipleModesPerRun', True): 
 			raise UserError('Cannot use --ci option with a legacy supportMultipleModesPerRun=false project')
 		
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, 

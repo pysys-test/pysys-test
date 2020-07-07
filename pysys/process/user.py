@@ -97,8 +97,8 @@ class ProcessUser(object):
 		if self.project is None:
 			assert 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing
 		else:
-			self.defaultAbortOnError = self.project.getProperty('defaultAbortOnError', False)
-			self.defaultIgnoreExitStatus = self.project.getProperty('defaultIgnoreExitStatus', True)
+			self.defaultAbortOnError = self.project.getProperty('defaultAbortOnError', True)
+			self.defaultIgnoreExitStatus = self.project.getProperty('defaultIgnoreExitStatus', False)
 			
 		self.processList = []
 		self.processCount = {}
@@ -537,8 +537,8 @@ class ProcessUser(object):
 
 		e = {}
 
-		# allows setting TEMP to output dir to avoid contamination/filling up of system location
-		if getattr(self.project, 'defaultEnvironsTempDir',None)!=None:
+		# allows setting TEMP to output dir to avoid contamination/filling up of system location; set to blank to do nothing
+		if self.project.getProperty('defaultEnvironsTempDir',''):
 			tempDir = pysys.internal.safe_eval.safe_eval(self.project.defaultEnvironsTempDir, extraNamespace={'self':self})
 			
 			self.mkdir(tempDir)
@@ -1073,7 +1073,7 @@ class ProcessUser(object):
 
 		log.debug("Performing wait for grep signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
 		
-		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', False) or self.getBoolProperty('verboseWaitForGrep', False)
+		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', True) and self.getBoolProperty('verboseWaitForGrep', True)
 		if verboseWaitForSignal: 
 			# if verbose, log when starting (which is very helpful for debugging hangs); non-verbose users get the message only when it's done
 			log.info('%s%s', msg, '; timeout=%ss'%timeout if timeout!=TIMEOUTS['WaitForSignal'] else '')

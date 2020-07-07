@@ -799,7 +799,7 @@ class BaseTest(ProcessUser):
 
 		log.debug("Performing file comparison diff with file1=%s and file2=%s", f1, f2)
 		
-		if stripWhitespace is None: stripWhitespace = self.getBoolProperty('defaultAssertDiffStripWhitespace', default=True)
+		if stripWhitespace is None: stripWhitespace = self.getBoolProperty('defaultAssertDiffStripWhitespace', default=False)
 		
 		msg = assertMessage or ('File comparison between %s and %s'%(
 			self.__stripTestDirPrefix(f1), self.__stripTestDirPrefix(f2)))
