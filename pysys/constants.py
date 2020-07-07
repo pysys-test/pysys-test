@@ -170,7 +170,6 @@ DEFAULT_MAKER =  ['ConsoleMakeTestHelper', 'pysys.launcher.console']
 DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml', {}]
 DEFAULT_STYLESHEET = None # deprecated
 DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
-DEFAULT_ABORT_ON_ERROR=False
 
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn', '__pycache__', '.git' ]
 """ A list of directory names to exclude when recursively walking a directory tree. 

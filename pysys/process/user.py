@@ -103,8 +103,8 @@ class ProcessUser(object):
 		self.outcome = [] # internal, do NOT use directly
 		self.__outcomeReason = ''
 		
-		self.defaultAbortOnError = self.project.defaultAbortOnError.lower()=='true' if hasattr(self.project, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
-		self.defaultIgnoreExitStatus = self.project.defaultIgnoreExitStatus.lower()=='true' if hasattr(self.project, 'defaultIgnoreExitStatus') else True
+		self.defaultAbortOnError = self.project.getProperty('defaultAbortOnError', False)
+		self.defaultIgnoreExitStatus = self.project.getProperty('defaultIgnoreExitStatus', True)
 		self.__uniqueProcessKeys = {}
 		self.__pythonCoverageFile = 0
 		
@@ -219,7 +219,7 @@ class ProcessUser(object):
 		val = getattr(self, propertyName, None)
 		if val is None: val = getattr(self.project, propertyName, None)
 		if val is None: return default
-		if val==True or val==False: return val
+		if val is True or val is False: return val
 		return val.lower()=='true'
 
 	def startPython(self, arguments, disableCoverage=False, **kwargs):

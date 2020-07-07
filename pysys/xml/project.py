@@ -501,7 +501,11 @@ class Project(object):
 	To get a reference to the current `Project` instance, use the 
 	`pysys.basetest.BaseTest.project` 
 	(or `pysys.process.user.ProcessUser.project`) field. 
-		
+	
+	All project properties are strings. If you need to get a project property value that's a a bool/int/float it is 
+	recommended to use `getProperty()` which will automatically perform the conversion. For string properties 
+	you can just use ``project.propName`` or ``project.properties['propName']``. 
+	
 	:ivar dict(str,str) ~.properties: The resolved values of all project properties defined in the configuration file. 
 		In addition, each of these is set as an attribute onto the `Project` instance itself. 
 	:ivar str ~.root: Full path to the project root directory, as specified by the first PySys project
@@ -587,6 +591,31 @@ class Project(object):
 		if not runlogformatter: runlogformatter = BaseLogFormatter({})
 		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
+
+	def getProperty(self, key, default):
+		"""
+		Get the specified project property value, or a default if it is not defined, with type conversion from string 
+		to int/float/bool (matching the default's type). 
+		
+		:param str key: The name of the property.
+		:param bool/int/float/str default: The default value to return if the property is not set or is an empty string. 
+			The type of the default parameter will be used to convert the property value from a string if it is 
+			provided. An exception will be raised if the value is non-empty but cannot be converted to the indicated type. 
+		"""
+		if not self.properties.get(key): return default
+		val = self.properties[key]
+		if default is True or default is False:
+			if val.lower()=='true': return True
+			if val.lower()=='false': return False
+			raise Exception('Unexpected value for boolean project property %s=%s'%(key, val))
+		elif isinstance(default, int):
+			return int(val)
+		elif isinstance(default, float):
+			return float(val)
+		elif isinstance(default, str):
+			return val # nothing to do
+		else:
+			raise Exception('Unsupported type for "%s" property default: %s'%(key, type(default).__name__))
 
 	@staticmethod
 	def getInstance():

@@ -110,6 +110,9 @@ New features
   add the boilerplate ``<property root= ... />`` to your project configuration. The old property name ``root`` 
   continues to be defined for compatibility with older projects. 
 
+- Added `pysys.xml.project.Project.getProperty()` which is a convenient and safe way to get a project property 
+  of bool/int/float type. 
+
 Bug fixes
 ---------
 
@@ -124,7 +127,7 @@ Bug fixes
 Upgrade guide and compatibility
 -------------------------------
 
-- As this is a major version release of PySys we have take the opportunity do cleanup some aspects which could 
+- As this is a major version release of PySys we have taken the opportunity do cleanup some aspects which could 
   cause some minor breakage or changes (though in many cases no action will be needed):
   
     - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 
