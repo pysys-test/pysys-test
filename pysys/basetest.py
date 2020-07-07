@@ -500,6 +500,10 @@ class BaseTest(ProcessUser):
 			self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
 			self.assertThat("re.match(expected, actualStartupMessage)", expected=".* successfully", actualStartupMessage=msg)
 			self.assertThat("(0 <= actualValue < max) and type(actualValue)!=float", actualValue=v, max=100)
+
+			# Use ``is`` for comparisons to True/False/None as in Python ``==``/``!=`` don't always do what you'd 
+			# expect for these types. 
+			self.assertThat("actualValue is not None", actualValue=v)
 			
 		This method is powerful enough for almost any validation that the other assert methods don't 
 		handle, and by enforcing the discipline of naming values it generates self-describing log messages and 
