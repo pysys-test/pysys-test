@@ -357,7 +357,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			failednumber = sum([self.outcomes[o] for o in FAILS])
 			passed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if not o.isFailure() and self.outcomes[o]>0])
 			failed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if o.isFailure() and self.outcomes[o]>0])
-			if failed: log('Failure outcomes: %s (%0.1f%%)', failed, 100.0 * (failednumber) / executed, extra=ColorLogFormatter.tag(str(FAILED).lower(), [0,1]))
+			if failed: log('Failure outcomes: %s (%0.1f%%)', failed, 100.0 * (failednumber) / executed, extra=ColorLogFormatter.tag(str(FAILED).lower(), [0]))
 			if passed: log('Success outcomes: %s', passed, extra=ColorLogFormatter.tag(str(PASSED).lower(), [0]))
 			log('')
 

@@ -58,7 +58,8 @@ class BaseLogFormatter(logging.Formatter):
 
 		:param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
 		:param arg_index: The index of argument in the string expansion to color. This can be either a single
-			integer value representing the index, or a list of integers representing a set of indexes
+			integer value representing the index, or a list of integers representing a set of indexes to be colored. 
+			Note that format arguments for coloring must be of string type. 
 		:return: A dictionary that can then be used in calls to the logger
 		"""
 		if type(arg_index) is int: return {cls.CATEGORY:category, cls.ARG_INDEX:[arg_index]}
