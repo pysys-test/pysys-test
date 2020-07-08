@@ -454,7 +454,7 @@ class BaseRunner(ProcessUser):
 				# loop through tests for the cycle
 				try:
 					self.results[cycle] = {}
-					for outcome in PRECEDENT: self.results[cycle][outcome] = []
+					for outcome in OUTCOMES: self.results[cycle][outcome] = []
 			
 					for descriptor in self.descriptors:
 						container = TestContainer(descriptor, cycle, self)
@@ -657,7 +657,7 @@ class BaseRunner(ProcessUser):
 		with self.__resultWritingLock:
 			# print if we need to AND haven't already done so using single-threaded ALL print-as-we-go
 			if runLogOutput and ((self.printLogs==PrintLogs.ALL and self.threads > 1) or (
-				self.printLogs==PrintLogs.FAILURES and testObj.getOutcome() in FAILS)): 
+				self.printLogs==PrintLogs.FAILURES and testObj.getOutcome().isFailure())): 
 				try:
 					# write out cached messages from the worker thread to stdout
 					# (use the stdoutHandler stream which includes coloring redirections if applicable, 
@@ -674,7 +674,7 @@ class BaseRunner(ProcessUser):
 			if self.printLogs != PrintLogs.NONE and stdoutHandler.level >= logging.WARN:
 				# print at least some information even if logging is turned down; 
 				# but if in PrintLogs.NONE mode truly do nothing, as there may be a CI writer doing a customized variant of this
-				log.critical("%s: %s (%s)", LOOKUP[testObj.getOutcome()], descriptor.id, descriptor.title)
+				log.critical("%s: %s (%s)", testObj.getOutcome(), descriptor.id, descriptor.title)
 			
 			# pass the test object to the test writers if recording
 			for writer in self.writers:
@@ -981,7 +981,7 @@ class TestContainer(object):
 				self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
 				log.info("")
 				log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
-				log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra=BaseLogFormatter.tag(LOOKUP[self.testObj.getOutcome()].lower(), 0))
+				log.info("Test final outcome:  %s", str(self.testObj.getOutcome()), extra=BaseLogFormatter.tag(str(self.testObj.getOutcome()).lower(), 0))
 				if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
 					log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
 				log.info("")

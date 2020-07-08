@@ -125,16 +125,7 @@ For example::
 		self.assertGrep('myserver.log', expr='Successfully authenticated user ".*"')
 		self.assertThat('actualNumberOfLogFiles == expected', actualNumberOfLogFiles=len(glob.glob(self.output+'/myserver*.log')), expected=3)
 
-The available outcomes for each assertion are contained in the `pysys.constants` module:
-
-.. autosummary::
-	pysys.constants.PASSED
-	pysys.constants.NOTVERIFIED
-	pysys.constants.FAILED
-	pysys.constants.TIMEDOUT
-	pysys.constants.DUMPEDCORE
-	pysys.constants.BLOCKED
-	pysys.constants.SKIPPED
+The available test outcomes are listed in `pysys.constants.OUTCOMES`. 
 
 There are some deprecated methods which we do not recommend using: `assertEval`, `assertTrue`, `assertFalse` 
 (`assertThat` should be used instead of these). 

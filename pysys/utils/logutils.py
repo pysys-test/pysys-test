@@ -222,9 +222,9 @@ class ColorLogFormatter(BaseLogFormatter):
 		super(ColorLogFormatter, self).__init__(propertiesDict)
 
 		# ensure all outcomes are permitted as possible precedents		
-		for outcome in PRECEDENT:
-			if LOOKUP[outcome].lower() not in self.COLOR_CATEGORIES:
-				self.COLOR_CATEGORIES[LOOKUP[outcome].lower()] = self.COLOR_CATEGORIES[LOG_FAILURES] if outcome in FAILS else self.COLOR_CATEGORIES[LOG_PASSES]
+		for outcome in OUTCOMES:
+			if str(outcome).lower() not in self.COLOR_CATEGORIES:
+				self.COLOR_CATEGORIES[str(outcome).lower()] = self.COLOR_CATEGORIES[LOG_FAILURES] if outcome.isFailure() else self.COLOR_CATEGORIES[LOG_PASSES]
 		for cat in self.COLOR_CATEGORIES: assert self.COLOR_CATEGORIES[cat] in self.COLOR_ESCAPE_CODES, cat
 
 

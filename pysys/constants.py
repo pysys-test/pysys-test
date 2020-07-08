@@ -43,7 +43,8 @@ HOSTNAME = socket.getfqdn()
 
 if re.search('win32', sys.platform):
 	PLATFORM='win32'
-	"""OS platform - current values are: `linux`, `win32` (Windows), `sunos` (Solaris), `darwin` (Mac). """
+	"""OS platform - current values are: `linux`, `win32` (Windows), `sunos` (Solaris), `darwin` (Mac). 
+	It is recommended to use standard Python functions such as ``sys.platform`` rather than this constant. """
 	OSFAMILY='windows'
 	DEVNULL = 'nul'
 	WINDIR = os.getenv('windir', 'c:\WINDOWS')
@@ -113,48 +114,81 @@ FOREGROUND = 11
 """Constant indicating a process is to be run synchronously in the foreground. """
 
 # outcomes
-PASSED = 20
-""" Non-failure test outcome indicating successful validation steps. """
-INSPECT = 21
-""" Non-failure test outcome indicating that manual inspection of the test output is required (in addition to any automated checks). """
-NOTVERIFIED = 22
-""" Non-failure test outcome indicating that it was not possible to positively validate correct operation. This is not treated as a failure outcome. """
-FAILED = 23
-""" Failure test outcome indicating validation steps with a negative outcome. """
-TIMEDOUT = 24
-""" Failure test outcome indicating that the test timed out while performing execution or validation operations. """
-DUMPEDCORE = 25
-""" Failure test outcome indicating that a crash occurred, and a `core` file was generated (UNIX only). """
-BLOCKED = 26
-""" Failure test outcome indicating that something went wrong, for example an exception was raised by the testcase or a required file could not be found. """
-SKIPPED = 27
-""" Non-failure test outcome indicating that the test was ignored as it is not currently required to run on this platform/mode. 
+class Outcome:
+	"""Represents a PySys test outcome that can be reported using `pysys.basetest.BaseTest.addOutcome()`. 
+	
+	The possible outcomes are listed in `OUTCOMES`. 
+	
+	Use ``str()`` or ``%s`` to get the display name for an outcome (e.g. "TIMED OUT"), and `isFailure()` to check 
+	if it's a failure outcome. 
+	"""
+	__alreadyInstantiated = set()
+	def __init__(self, id, isFailure, displayName=None):
+		displayName = (displayName or id).upper()
+		assert displayName not in Outcome.__alreadyInstantiated # avoid duplicate instances, since we use reference equality to compare these
+		Outcome.__alreadyInstantiated.add(displayName)
+		self.__id, self.__name, self.__isFailure = id, displayName, isFailure
+	def __repr__(self): return '%s%s'%(self.__id, ('' if self.__isFailure else '(non-failure)')) # use the constant id for this __repr__ string that shows in the doc
+	def __str__(self): return self.__name
+	def isFailure(self): 
+		""":return bool: True if this outcome is classed as failure, or False if not (e.g. `SKIPPED` and `NOTVERIFIED` are not failures).""" 
+		return self.__isFailure
+
+PASSED = Outcome('PASSED', isFailure=False)
+""" Non-failure test `Outcome` indicating successful validation steps. """
+INSPECT = Outcome('INSPECT', isFailure=False, displayName='REQUIRES INSPECTION')
+""" Non-failure test `Outcome` indicating that manual inspection of the test output is required (in addition to any automated checks). """
+NOTVERIFIED = Outcome('NOTVERIFIED', isFailure=False, displayName='NOT VERIFIED')
+""" Non-failure test `Outcome` indicating that it was not possible to positively validate correct operation. This is not treated as a failure outcome. """
+FAILED = Outcome('FAILED', isFailure=True)
+""" Failure test `Outcome` indicating validation steps with a negative outcome. """
+TIMEDOUT = Outcome('TIMEDOUT', isFailure=True, displayName='TIMED OUT')
+""" Failure test `Outcome` indicating that the test timed out while performing execution or validation operations. """
+DUMPEDCORE = Outcome('DUMPEDCORE', isFailure=True, displayName='DUMPED CORE')
+""" Failure test `Outcome` indicating that a crash occurred, and a `core` file was generated (UNIX only). """
+BLOCKED = Outcome('BLOCKED', isFailure=True)
+""" Failure test `Outcome` indicating that something went wrong, for example an exception was raised by the testcase or a required file could not be found. """
+SKIPPED = Outcome('SKIPPED', isFailure=False)
+""" Non-failure test `Outcome` indicating that the test was ignored as it is not currently required to run on this platform/mode. 
 	See `pysys.basetest.BaseTest.skipTest`.
 """
 
-LOOKUP = {}
+
+# set the precedent for the test outcomes
+OUTCOMES = (SKIPPED, BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED, NOTVERIFIED, INSPECT, PASSED)
+"""
+Lists all possible test outcomes, in descending order of precedence. 
+
+.. autosummary::
+	SKIPPED
+	BLOCKED
+	DUMPEDCORE
+	TIMEDOUT
+	FAILED
+	NOTVERIFIED
+	INSPECT
+	PASSED
+
+If a test adds multiple outcomes, the outcome with highest precedence is used as the final test outcome 
+(i.e. SKIPPED rather than FAILED, FAILED rather than PASSED etc). 
+
+Each item is an instance of `Outcome`. Use `Outcome.isFailure()` to check whether a given outcome is classed as a failure for reporting purposes. 
+
+"""
+PRECEDENT = OUTCOMES
+""":deprecated: The old name for `OUTCOMES`.  """
+FAILS = [__outcome for __outcome in OUTCOMES if __outcome.isFailure() ]
+""" Lists the test outcomes treated as failures. To test whether a specific outcome is a failure, use `Outcome.isFailure()`. """
+
+
+LOOKUP = {__outcome: str(__outcome) for __outcome in OUTCOMES}
 """Lookup dictionary providing the string representation of test outcomes.
+:deprecated: Use ``str(outcome)`` on the `Outcome` to convert to the display name. 
 """
 LOOKUP[True] = "TRUE"
 LOOKUP[False] = "FALSE"
 LOOKUP[TRUE] = "TRUE"
 LOOKUP[FALSE] = "FALSE"
-LOOKUP[PASSED] = "PASSED"
-LOOKUP[INSPECT] = "REQUIRES INSPECTION"
-LOOKUP[NOTVERIFIED] = "NOT VERIFIED"
-LOOKUP[FAILED] = "FAILED"
-LOOKUP[TIMEDOUT] = "TIMED OUT"
-LOOKUP[DUMPEDCORE] = "DUMPED CORE"
-LOOKUP[BLOCKED] = "BLOCKED"
-LOOKUP[SKIPPED] = "SKIPPED"
-
-# set the precedent for the test outcomes
-PRECEDENT = [SKIPPED, BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED, NOTVERIFIED, INSPECT, PASSED]
-""" Lists all test outcomes in order of precedence. If a test has multiple outcomes, 
-the one that appears first in this list takes precedence over any other. """
-FAILS = [ BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED ]
-""" Lists the test outcomes treated as failure. 
-Outcomes such as L{NOTVERIFIED} and L{SKIPPED} are not considered failures. """
 
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_PROJECTFILE = ['pysysproject.xml', '.pysysproject']

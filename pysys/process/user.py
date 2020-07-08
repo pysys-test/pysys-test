@@ -1220,7 +1220,7 @@ class ProcessUser(object):
 			that this outcome is the one and only one reported even if an existing outcome 
 			has higher precedence. 
 		"""
-		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
+		assert outcome in OUTCOMES, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
 		with self.lock:
 			if abortOnError == None: abortOnError = self.defaultAbortOnError
 			if outcomeReason is None:
@@ -1236,7 +1236,7 @@ class ProcessUser(object):
 				outcomeReason = stripANSIEscapeCodes(outcomeReason).strip().replace(u'\t', u' ').replace('\r','').replace('\n', ' ; ')
 			
 			if override: 
-				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', [LOOKUP[o] for o in self.outcome], self.__outcomeReason)
+				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', self.outcome, self.__outcomeReason)
 				del self.outcome[:]
 				self.__outcomeReason = None
 			old = self.getOutcome()
@@ -1248,17 +1248,17 @@ class ProcessUser(object):
 			# although we should print whatever is passed in, store a version with control characters stripped 
 			# out so that it's easier to read (e.g. coloring codes from third party tools)
 			if self.getOutcome() != old: self.__outcomeReason = re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F]', '', outcomeReason)
-			if outcome in FAILS and abortOnError:
+			if outcome.isFailure() and abortOnError:
 				if callRecord==None: callRecord = self.__callRecord()
 				self.abort(outcome, outcomeReason, callRecord)
 
 			if outcomeReason and printReason:
-				if outcome in FAILS:
+				if outcome.isFailure():
 					if callRecord==None: callRecord = self.__callRecord()
-					log.warn(u'%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
-							 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+					log.warn(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
+							 extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 				else:
-					log.info(u'%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+					log.info(u'%s ... %s', outcomeReason, str(outcome).lower(), extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
 		"""Raise an AbortException with the specified outcome and reason.
@@ -1284,27 +1284,19 @@ class ProcessUser(object):
 		raise AbortExecution(SKIPPED, outcomeReason, callRecord)
 
 	def getOutcome(self):
-		"""Get the overall outcome based on the precedence order.
-				
-		The method returns the overall outcome of the test based on the outcomes stored in the internal data
-		structure. The `pysys.constants.PRECEDENT` order of the possible outcomes is used to determined the overall outcome 
-		of the test, e.g. if `pysys.constants.PASSED`, `pysys.constants.BLOCKED` and `pysys.constants.FAILED` were 
-		recorded during the execution of the test, the overall outcome would be `pysys.constants.BLOCKED`. 
-		
-		The method returns the integer value of the outcome as defined in `pysys.constants`. To convert this 
-		to a string representation use the `pysys.constants.LOOKUP` dictionary i.e. ``LOOKUP[test.getOutcome()]``.
+		"""Get the final outcome for this test, based on the precedence order defined in `pysys.constants.OUTCOMES`.
 		
 		To find out whether this test has failed::
 		
-			if self.getOutcome() in FAILS:
+			if self.getOutcome().isFailure():
 				...
 		
-		:return: The overall outcome
+		:return pysys.constants.Outcome: The overall outcome. Use ``%s`` or ``str()`` to convert to a display name. 
 
 		"""	
 		with self.lock:
 			if len(self.outcome) == 0: return NOTVERIFIED
-			return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
+			return sorted(self.outcome, key=lambda x: OUTCOMES.index(x))[0]
 
 
 	def getOutcomeReason(self):
@@ -1315,7 +1307,7 @@ class ProcessUser(object):
 
 		"""	
 		with self.lock:
-			fails = len([o for o in self.outcome if o in FAILS])
+			fails = len([o for o in self.outcome if o.isFailure()])
 			if self.__outcomeReason and (fails > 1): return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
 			return self.__outcomeReason
 

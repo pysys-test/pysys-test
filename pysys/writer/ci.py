@@ -154,7 +154,7 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 		super(GitHubActionsCIWriter, self).processResult(testObj, cycle=cycle, testTime=testTime, 
 			testStart=testStart, runLogOutput=runLogOutput, **kwargs)
 		
-		if self.remainingAnnotations > 0 and testObj.getOutcome() in FAILS:
+		if self.remainingAnnotations > 0 and testObj.getOutcome().isFailure():
 			# Currently, GitHub actions doesn't show the annotation against the source code unless the specified line 
 			# number is one of the lines changes or surrounding context lines, but we do the best we can
 			m = re.search(u' \\[run\\.py:(\\d+)\\]', runLogOutput or u'')
