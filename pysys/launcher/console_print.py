@@ -58,7 +58,7 @@ class ConsolePrintHelper(object):
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
 
 		#######                                                                                                                       |
-		print("\nPySys System Test Framework (version %s): Console print test helper" % __version__) 
+		print("\nPySys System Test Framework (version %s): Test list printer" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("    where options include:")
 		print("       -h | --help                 print this message")

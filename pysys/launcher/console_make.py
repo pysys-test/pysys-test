@@ -52,7 +52,7 @@ class ConsoleMakeTestHelper(object):
 		""" Print help info and exit. """
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
 		#######                                                                                                                        |
-		print("\nPySys System Test Framework (version %s): Test maker" % __version__) 
+		print("\nPySys System Test Framework (version %s): New test maker" % __version__) 
 		print("\nUsage: %s %s [option]+ TESTID" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes:")
 		print("       -d | --dir      STRING      parent directory in which to create TESTID (default is current working dir)")
