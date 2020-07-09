@@ -25,6 +25,7 @@ __all__ = ['Project'] # Project is the only member we expose/document from this 
 
 import os.path, logging, xml.dom.minidom, collections, codecs, time
 import platform
+import locale
 
 from pysys.constants import *
 from pysys import __version__
@@ -33,6 +34,7 @@ from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.stringutils import compareVersions
 from pysys.utils.fileutils import mkdir
 from pysys.utils.pycompat import openfile
+from pysys.utils.properties import readProperties
 from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.project')
@@ -196,16 +198,16 @@ class XMLProjectParser(object):
 			log.debug('Skipping project properties file which not exist: "%s"', file)
 			return
 
-		with open(file, 'r') as fp:
-			for line in fp:
-				line = line.split('=', 1)
-				if len(line) == 2:
-					name, value = line[0], line[1]
-					value = self.expandFromProperty(value, "")	
-					name = name.strip()
-					value = value.strip()
-					self.properties[name] = value
-					log.debug('Setting project property %s="%s" (from %s)', name, self.properties[name], file)
+		try:
+			props = readProperties(file) # since PySys 1.6.0 this is UTF-8 by default
+		except UnicodeDecodeError:
+			# fall back to ISO8859-1 if not valid UTF-8 (matching Java 9+ behaviour)
+			props = readProperties(file, encoding='iso8859-1')
+		
+		for name, value in props.items():
+			value = self.expandFromProperty(value, "")	
+			self.properties[name] = value
+			log.debug('Setting project property %s="%s" (from %s)', name, self.properties[name], file)
 
 
 	def expandFromEnvironent(self, value, default):
