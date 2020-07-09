@@ -24,6 +24,7 @@ any resources that are shared across multiple tests.
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
 import fnmatch
+import re
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -769,8 +770,14 @@ class BaseRunner(ProcessUser):
 		log.info(62*"=")
 		title = textwrap.wrap(descriptor.title.replace('\n','').strip(), 56)
 		log.info("Id   : %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+
+		badchars = re.sub('[\\w_.-]+','', descriptor.id) 
+		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
+		if badchars: log.warn('Unsupported characters "%s" found in test id "%s"; please use alphanumeric characters and underscore for test ids', badchars, descriptor.id)
+
 		if len(title)>0:
 			log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		
 		for l in title[1:]:
 			log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		if self.cycle > 1: # only log if this runner is doing multiple cycles

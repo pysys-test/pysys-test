@@ -51,15 +51,16 @@ class ConsoleMakeTestHelper(object):
 	def printUsage(self):
 		""" Print help info and exit. """
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
-
-		print("\nPySys System Test Framework (version %s): Console make test helper" % __version__) 
-		print("\nUsage: %s %s [option]+ [testid]" % (_PYSYS_SCRIPT_NAME, self.name))
+		#######                                                                                                                        |
+		print("\nPySys System Test Framework (version %s): Test maker" % __version__) 
+		print("\nUsage: %s %s [option]+ TESTID" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes:")
-		print("       -h | --help                 print this message")
+		print("       -d | --dir      STRING      parent directory in which to create TESTID (default is current working dir)")
 		print("       -a | --type     STRING      set the test type (auto or manual, default is auto)")
-		print("       -d | --dir      STRING      base path to testcase (default is current working dir)")
+		print("       -h | --help                 print this message")
 		print("")
-		print("   and where [testid] is the mandatory test identifier.")
+		print("   and where TESTID is the id of the new test which should consist of letters, numbers and underscores, ")
+		print("   for example: MyApp_perf_001 (numeric style) or InvalidFooBarProducesError (test-that-XXX long string style).")
 		sys.exit()
 
 

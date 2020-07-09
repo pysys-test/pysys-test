@@ -242,15 +242,15 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				elif '~' in t:
 					# The utility of this would be close to zero and lots more to implement/test, so not worth it
 					raise UserError('A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
-				elif re.search('^:[\w_.]*', t):
+				elif re.search('^:[\w_.-]*', t):
 					index = findMatchingIndex(t.split(':')[1])
 					matches = descriptors[:index+1]
 
-				elif re.search('^[\w_.]*:$', t):
+				elif re.search('^[\w_.-]*:$', t):
 					index = findMatchingIndex(t.split(':')[0])
 					matches = descriptors[index:]
 
-				elif re.search('^[\w_.]*:[\w_.]*$', t):
+				elif re.search('^[\w_.-]*:[\w_.-]*$', t):
 					index1 = findMatchingIndex(t.split(':')[0])
 					index2 = findMatchingIndex(t.split(':')[1])
 					if index1 > index2:
