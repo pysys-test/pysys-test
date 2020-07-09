@@ -259,7 +259,10 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 
 				else: 
 					# regex match
-					matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
+					try:
+						matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
+					except Exception as ex:
+						raise UserError('"%s" contains characters not valid in a test id, but isn\'t a valid regular expression either: %s'%(t, ex))
 					if not matches: raise UserError("No test ids found matching regular expression: \"%s\""%t)
 
 				if not matches: raise UserError("No test ids found matching: \"%s\""%st)
