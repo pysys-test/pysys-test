@@ -108,7 +108,7 @@ class XMLProjectParser(object):
 			
 			'startDate':time.strftime('%Y-%m-%d', time.localtime(self.startTimestamp)),
 			'startTime':time.strftime('%H.%M.%S', time.localtime(self.startTimestamp)),
-			'startTimestamp':self.startTimestamp,
+			'startTimeSecs':'%0.3f'%self.startTimestamp,
 
 			'hostname':HOSTNAME.lower().split('.')[0],
 			'os':platform.system().lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
