@@ -759,26 +759,6 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def _serializeXMLDocumentToBytes(self, document):
 		return replaceIllegalXMLCharacters(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep).decode('utf-8')).encode('utf-8')
 
-	def purgeDirectory(self, dir, delTop=False): # pragma: no cover
-		"""
-		:meta private: Deprecated, use L{pysys.utils.fileutils.deletedir} instead. 
-		"""
-		for file in os.listdir(dir):
-			path = os.path.join(dir, file)
-			if PLATFORM in ['sunos', 'linux']:
-				mode = os.lstat(path)[stat.ST_MODE]
-			else:
-				mode = os.stat(path)[stat.ST_MODE]
-		
-			if stat.S_ISLNK(mode):
-				os.unlink(path)
-			if stat.S_ISREG(mode):
-				os.remove(path)
-			elif stat.S_ISDIR(mode):
-				self.purgeDirectory(path, delTop=True)
-
-		if delTop: 
-			os.rmdir(dir)
 
 
 class CSVResultsWriter(BaseRecordResultsWriter):

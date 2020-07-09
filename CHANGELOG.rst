@@ -191,11 +191,16 @@ cause some minor breakage or changes (though in many cases no action will be nee
   standard for .properties file and makes it impossible to share a .properties file across tests running in different 
   locales. The PySys implementation still does not claim to fully implement the .properties file format, for example 
   ``\`` are treated as literals not escape sequences. See `pysys.utils.properties.readPropertes()` for details. 
+  
 - Changed timestamps in process monitor output, writers, performance reporter and similar places from UTC to local time. 
   This means these timestamps will match up with the times in run.log output which have always been local time. 
+  
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
+
+- The method `pysys.basetest.BaseTest.addResource` is deprecated and will be removed in a future release, so please 
+  change tests to stop using it; use `pysys.basetest.BaseTest.addCleanupFunction` instead. 
 
 - There are some additional changes which could potentially cause a problem but are highly unlikely to affect anyone 
   in practice. In most cases no change will be needed, so you can probably ignore these unless 
@@ -226,6 +231,12 @@ cause some minor breakage or changes (though in many cases no action will be nee
       the LOOKUP dictionary (which still works, but is now deprecated). It also allows easier checking if an outcome 
       represents a failure using `pysys.constants.Outcome.isFailure()`. The `pysys.constants.PRECEDENT` constant is 
       deprecated in favour of `pysys.constants.OUTCOMES` which has an identical value.
+    - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
+    - Removed deprecated method ``purgeDirectory`` from `pysys.baserunner.BaseRunner` and 
+     `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
+    - Removed deprecated classes ``ThreadedStreamHandler``, ``ThreadedFileHandler``, and ``ThreadFilter`` from the 
+      ``pysys.`` module as there is no reason for PySys to provide these. These are trivial to implement using the 
+      Python logging API is anyone does need similar functionality. 
     - Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
       "THERE WERE NO NON PASSES", and similarly for the "Summary of non passes:". 
     - `pysys.process.common.CommonProcessWrapper.wait` now raises an error if the specified timeout isn't a positive 

@@ -1004,37 +1004,6 @@ class TestContainer(object):
 		finally:
 			pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread)
 	
-	# utility methods
-	def purgeDirectory(self, dir, delTop=False): # pragma: no cover (deprecated, no longer used)
-		"""Recursively purge a directory removing all files and sub-directories.
-		
-		:param dir: The top level directory to be purged
-		:param delTop: Indicates if the top level directory should also be deleted
-
-		@deprecated: Use L{pysys.utils.fileutils.deletedir} instead. 
-		"""
-		try:
-			for file in os.listdir(toLongPathSafe(dir)):
-				path = toLongPathSafe(os.path.join(dir, file))
-				if PLATFORM in ['sunos', 'linux']:
-					mode = os.lstat(path)[stat.ST_MODE]
-				else:
-					mode = os.stat(path)[stat.ST_MODE]
-			
-				if stat.S_ISLNK(mode):
-					os.unlink(path)
-				if stat.S_ISREG(mode):
-					os.remove(path)
-				elif stat.S_ISDIR(mode):
-					self.purgeDirectory(path, delTop=True)
-			if delTop: os.rmdir(toLongPathSafe(dir))
-
-		except OSError as ex:
-			log.warning("Caught OSError in purgeDirectory():")
-			log.warning(ex)
-			log.warning("Directory %s may not be completely purged" % dir)
-
-
 	def detectCore(self, dir):
 		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
 		
