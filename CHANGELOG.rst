@@ -215,6 +215,10 @@ cause some minor breakage or changes (though in many cases no action will be nee
     - Made it an error to change project properties after the project has been loaded. This was never intended, as projects 
       are immutable. In the unlikely event you do this, change to storing user-defined cross-test/global state in your 
       runner class instead. 
+    - Project properties whose name clashes with one of the pre-defined members of `pysys.xml.project.Project` 
+      (e.g. "properties" or "root") will no longer override those members - which would most likely not work correctly 
+      anyway. If you need to access a property whose name clashes with a built-in member, use 
+      `pysys.xml.project.Project.properties`.
     - Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
       `pysys.constants.Outcome` rather than an integer. It is unlikely this change will affect existing code (unless you 
       have created any custom outcome types, which is not documented). The use of objects to represent outcomes allows for 

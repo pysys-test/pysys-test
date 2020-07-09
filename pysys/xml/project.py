@@ -554,7 +554,9 @@ class Project(object):
 				properties = parser.getProperties()
 				keys = list(properties.keys())
 				keys.sort()
-				for key in keys: setattr(self, key, properties[key])
+				for key in keys: 
+					if not hasattr(self, key): # don't overwrite existing props; people will have to use .getProperty() to access them
+						setattr(self, key, properties[key])
 				self.properties = dict(properties)
 				
 				# add to the python path
