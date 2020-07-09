@@ -33,7 +33,7 @@ from pysys.utils.loader import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.stringutils import compareVersions
 from pysys.utils.fileutils import mkdir
-from pysys.utils.pycompat import openfile
+from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.utils.properties import readProperties
 from pysys.exceptions import UserError
 
@@ -520,7 +520,8 @@ class Project(object):
 	"""
 	
 	__INSTANCE = None
-		
+	__frozen = False
+	
 	def __init__(self, root, projectFile):
 		self.root = root
 		self.startTimestamp = time.time()
@@ -590,11 +591,19 @@ class Project(object):
 				
 				# set the data attributes
 				parser.unlink()
-
+		
 		if not stdoutformatter: stdoutformatter = ColorLogFormatter({'__formatterName':'stdout'})
 		if not runlogformatter: runlogformatter = BaseLogFormatter({'__formatterName':'runlog'})
 		PySysFormatters = collections.namedtuple('PySysFormatters', ['stdout', 'runlog'])
 		self.formatters = PySysFormatters(stdoutformatter, runlogformatter)
+		
+		# for safety (test independence, and thread-safety), make it hard for people to accidentally edit project properties later
+		self.properties = makeReadOnlyDict(self.properties)
+		self.__frozen = True
+
+	def __setattr__(self, name, value):
+		if self.__frozen: raise Exception('Project cannot be modified after it has been loaded (use the runner to store global state if needed)')
+		object.__setattr__(self, name, value)
 
 	def getProperty(self, key, default):
 		"""

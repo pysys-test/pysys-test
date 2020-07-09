@@ -210,6 +210,9 @@ cause some minor breakage or changes (though in many cases no action will be nee
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
+- Made it an error to change project properties after the project has been loaded. This was never intended, as projects 
+  are immutable. In the unlikely event you do this, change to storing user-defined cross-test/global state in your 
+  runner class instead. 
 - `pysys.process.common.CommonProcessWrapper.wait` now raises an error if the specified timeout isn't a positive 
   number (giving the same behaviour as `BaseTest.waitProcess`). 
 - Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
