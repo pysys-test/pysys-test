@@ -180,24 +180,10 @@ cause some minor breakage or changes (though in many cases no action will be nee
   The list is ordered with the properties most likely to break existing tests at the top of the list, so you may wish 
   to start with the easier ones at the bottom of the list. 
 
-- As this is a major version release of PySys we have taken the opportunity do cleanup some aspects which could 
-  cause some minor breakage or changes (though in many cases no action will be needed):
-  
-    - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 
-      There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you 
-      prefer a different output directory on your machine you could customize it by setting environment variable 
-      ``PYSYS_DEFAULT_ARGS=--outdir __myoutputdir``. 
-    - The default directory for performance output is now under ``__pysys_performance/`` rather than 
-      ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it. 
-      Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
-      see `pysys.utils.perfreporter` for details. 
-    - The ``self.output`` directory for the runner (if used) is now named ``__pysys_runner/`` instead of 
-      ``pysys-runner/``. It is not very likely anything will be depending on this directory. 
-    - You may want to add ``__pysys_*`` and possibly ``__coverage_*`` to your version control system's ignore patterns 
-      so that paths created by the PySys runner don't show up in local changes. 
-    - If you created a custom subclass of `pysys.utils.perfreporter.CSVPerformanceReporter` using the 1.3.0 release and 
-      it does not yet have (and pass through to the superclass) a ``runner`` and/or ``**kwargs`` argument you will need 
-      to add these. 
+- The default directory for performance output is now under ``__pysys_performance/`` rather than 
+  ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it. 
+  Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
+  see `pysys.utils.perfreporter` for details. 
 
 - Properties files referenced in the project properties are now read using UTF-8 encoding if possible, falling back to 
   ISO8859-1 if they contain invalid UTF-8. This follows Java(R) 9+ behaviour and provides for more stable results 
@@ -210,20 +196,36 @@ cause some minor breakage or changes (though in many cases no action will be nee
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
-- Made it an error to change project properties after the project has been loaded. This was never intended, as projects 
-  are immutable. In the unlikely event you do this, change to storing user-defined cross-test/global state in your 
-  runner class instead. 
-- `pysys.process.common.CommonProcessWrapper.wait` now raises an error if the specified timeout isn't a positive 
-  number (giving the same behaviour as `BaseTest.waitProcess`). 
-- Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
-  `pysys.constants.Outcome` rather than an integer. It is unlikely this change will affect existing code (unless you 
-  have created any custom outcome types, which is not documented). The use of objects to represent outcomes allows for 
-  simpler and more efficient conversion to display name using a ``%s`` format string or ``str()`` without the need for 
-  the LOOKUP dictionary (which still works, but is now deprecated). It also allows easier checking if an outcome 
-  represents a failure using `pysys.constants.Outcome.isFailure()`. The `pysys.constants.PRECEDENT` constant is 
-  deprecated in favour of `pysys.constants.OUTCOMES` which has an identical value.
-- Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
-  "THERE WERE NO NON PASSES", and similarly for the "Summary of non passes:". 
+
+- There are some additional changes which could potentially cause a problem but are highly unlikely to affect anyone 
+  in practice. In most cases no change will be needed, so you can probably ignore these unless 
+  you get a problem when running your tests:
+  
+    - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 
+      There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you 
+      prefer a different output directory on your machine you could customize it by setting environment variable 
+      ``PYSYS_DEFAULT_ARGS=--outdir __myoutputdir``. 
+    - The ``self.output`` directory for the runner (if used) is now named ``__pysys_runner/`` instead of 
+      ``pysys-runner/``. It is not very likely anything will be depending on this directory. 
+    - You may want to add ``__pysys_*`` and possibly ``__coverage_*`` to your version control system's ignore patterns 
+      so that paths created by the PySys runner don't show up in local changes. 
+    - If you created a custom subclass of `pysys.utils.perfreporter.CSVPerformanceReporter` using the 1.3.0 release and 
+      it does not yet have (and pass through to the superclass) a ``runner`` and/or ``**kwargs`` argument you will need 
+      to add these. 
+    - Made it an error to change project properties after the project has been loaded. This was never intended, as projects 
+      are immutable. In the unlikely event you do this, change to storing user-defined cross-test/global state in your 
+      runner class instead. 
+    - Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
+      `pysys.constants.Outcome` rather than an integer. It is unlikely this change will affect existing code (unless you 
+      have created any custom outcome types, which is not documented). The use of objects to represent outcomes allows for 
+      simpler and more efficient conversion to display name using a ``%s`` format string or ``str()`` without the need for 
+      the LOOKUP dictionary (which still works, but is now deprecated). It also allows easier checking if an outcome 
+      represents a failure using `pysys.constants.Outcome.isFailure()`. The `pysys.constants.PRECEDENT` constant is 
+      deprecated in favour of `pysys.constants.OUTCOMES` which has an identical value.
+    - Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
+      "THERE WERE NO NON PASSES", and similarly for the "Summary of non passes:". 
+    - `pysys.process.common.CommonProcessWrapper.wait` now raises an error if the specified timeout isn't a positive 
+      number (giving the same behaviour as `BaseTest.waitProcess`). 
 
 ---------------
 Release History
