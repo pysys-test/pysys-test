@@ -1596,7 +1596,7 @@ class ProcessUser(object):
 			additional information can be passed to this method in future releases. 
 		
 		:return: The encoding to use for this file, or None if default behaviour is 
-			to be used.
+			to be used. For example, ``utf-8`` or (for UTF-8 with a Byte Order Mark), ``utf-8-sig``. 
 		"""
 		file = file.replace('\\','/').lower() # normalize slashes and ignore case
 		for e in self.project.defaultFileEncodings:
