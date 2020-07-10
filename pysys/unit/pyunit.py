@@ -22,7 +22,6 @@ A suite of PyUnit tests becomes a single PySys test.
 """
 
 from __future__ import print_function
-from pysys import ThreadFilter
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.utils.pycompat import openfile
@@ -67,15 +66,12 @@ class PyUnitTest(BaseTest):
 		if instance: dstdout  = "%s.%d" % (dstdout, instance)
 		if instance: dstderr  = "%s.%d" % (dstderr, instance)
 		arguments = [__file__, testFile]		
-		filter = ThreadFilter()
-		self.log.addFilter(filter)
 		environ = os.environ.copy()
 		environ['PYTHONPATH'] = os.pathsep.join(self.getPythonPath() + sys.path)
 		process = self.startPython(arguments, environs=environ, workingDir=self.output, 
 			state=FOREGROUND, timeout=DEFAULT_TIMEOUT, 
 			stdout=dstdout, stderr=dstderr, 
-			displayName=displayName, ignoreExitStatus=True)
-		self.log.removeFilter(filter)		
+			displayName=displayName, ignoreExitStatus=True, quiet=True)
 		if process.exitStatus:
 			self.addOutcome(FAILED, 'Non-zero exit code from %s'%os.path.basename(testFile), printReason=False)
 		else:
