@@ -17,7 +17,7 @@
 		The following standard project properties are always defined and can be accessed through ${prop} syntax:
 		
 			${testRootDir} - Path of the root directory containing the pysysproject.xml file
-			${os}          - The operating system family e.g. 'windows', 'linux', 'darwin'
+			${os}          - The operating system name e.g. 'windows', 'linux', 'darwin'
 			${startDate}   - The date that this test run was started, in a form that can be used in filenames. 
 			${startTime}   - The (local) time that this test run was started, in a form that can be used in filenames. 
 			${hostname}    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
@@ -65,23 +65,22 @@
 
 	<!-- 
 	Add a path to the python path to allow importing custom modules, e.g. extensions to the 
-	BaseTest or BaseRunner classes, or customer test output writers. If the relative attribute 
-	is set to true, then the path is treated as relative to the project root location; otherwise 
-	the path is treated as absolute, e.g. to add the src directory to the python path at runtime 
-	use;
-	
-	<pythonpath value="${testRootDir}/pysys-extensions" relative="true" />
+	BaseTest or BaseRunner classes, or customer test output writers. 
+	-->
+	<!--
+	<pythonpath value="${testRootDir}/pysys-extensions" />
 	-->
 
 
 	<!-- 
 	Use a custom runner class that extends the BaseRunner class distributed with PySys. Extensions to 
 	the BaseRunner are used to define custom setup and tear down operations before running the set of 
-	selected tests (e.g. to load test data into a relational database prior to the test runs, and then 
+	selected tests (e.g. to load test data into a database prior to the test runs, and then 
 	clear out the data on completion), as well as to defined operations between the execution of individual 
 	tests and after completion of a cycle of tests. For example, to use the MyRunner class in the 
-	com.company.test module use;
-	
+	com.company.test module use:
+	-->
+	<!--
 	<runner classname="com.company.test.MyRunner"/>
 	-->
 
@@ -90,7 +89,8 @@
 	Use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
 	ConsoleMakeTestHelper class in order to create templated run.py scripts e.g. when a test module has
 	a repeatable pattern for running or validating etc. 
-	
+	-->
+	<!--
 	<maker classname="com.company.test.MyMaker"/>
 	-->
 
@@ -166,7 +166,7 @@
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
-		<writer classname="pysys.writer,CSVResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
+		<writer classname="pysys.writer.CSVResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->		
