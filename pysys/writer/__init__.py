@@ -354,7 +354,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 
 		if showOutcomeStats:
 			executed = sum(self.outcomes.values())
-			failednumber = sum([self.outcomes[o] for o in FAILS])
+			failednumber = sum([self.outcomes[o] for o in OUTCOMES if o.isFailure()])
 			passed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if not o.isFailure() and self.outcomes[o]>0])
 			failed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if o.isFailure() and self.outcomes[o]>0])
 			if failed: log('Failure outcomes: %s (%0.1f%%)', failed, 100.0 * (failednumber) / executed, extra=ColorLogFormatter.tag(str(FAILED).lower(), [0]))
@@ -374,7 +374,8 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 				for cycle in self.results:
 					cyclestr = ''
 					if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
-					for outcome in FAILS:
+					for outcome in OUTCOMES:
+						if not outcome.isFailure(): continue
 						for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
 							failedids.add(id)
 							log("  %s%s: %s ", cyclestr, outcome, id, extra=ColorLogFormatter.tag(str(outcome).lower()))
@@ -875,7 +876,7 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		log.info('Test progress: %s = %s of tests in %d %s', ('completed %d/%d' % (executed, self.numTests)),
 				'%0.1f%%' % (100.0 * executed / self.numTests), int((time.time()-self.startTime)/timediv),
 				'seconds' if timediv==1 else 'minutes', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS, [0,1]))
-		failednumber = sum([self.outcomes[o] for o in FAILS])
+		failednumber = sum([self.outcomes[o] for o in OUTCOMES if o.isFailure()])
 		passed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if not o.isFailure() and self.outcomes[o]>0])
 		failed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if o.isFailure() and self.outcomes[o]>0])
 		if passed: log.info('   %s (%0.1f%%)', passed, 100.0 * (executed-failednumber) / executed, extra=ColorLogFormatter.tag(LOG_PASSES))

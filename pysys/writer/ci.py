@@ -38,7 +38,7 @@ __all__ = ["GitHubActionsCIWriter", "TravisCIWriter"]
 
 import time, logging, sys, threading, os, re, collections
 
-from pysys.constants import PrintLogs, FAILS
+from pysys.constants import PrintLogs
 from pysys.writer import BaseRecordResultsWriter, TestOutcomeSummaryGenerator, ArtifactPublisher, stripANSIEscapeCodes
 from pysys.utils.logutils import ColorLogFormatter, stdoutPrint
 from pysys.utils.pycompat import PY2
@@ -134,7 +134,7 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 			if os.path.exists(paths[0]): # auto-skip things that don't exist
 				self.outputGitHubCommand(u'set-output', u','.join(paths), params={u'name':u'artifact_'+category})
 		
-		if sum([self.outcomes[o] for o in FAILS]):
+		if sum([self.outcomes[o] for o in OUTCOMES if o.isFailure()]):
 			self.outputGitHubCommand(u'group', u'(GitHub test failure annotations)')
 			
 			if str(self.failureSummaryAnnotations).lower()=='true':
