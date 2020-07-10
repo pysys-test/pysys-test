@@ -405,8 +405,12 @@ class BaseRunner(ProcessUser):
 				self.last = None
 				self.encoding = sys.stdout.encoding
 				self.log = logging.getLogger('pysys.stdout')
+				self.logWarning = True
 			def flush(self): pass
 			def write(self, s): 
+				if self.logWarning is True:
+					self.logWarning = False
+					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) instead of print() within PySys tests')
 				# heuristic for coping with \n happening in a separate write to the message - ignore first newline after a non-newline
 				if s!='\n' or self.last=='\n': 
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
