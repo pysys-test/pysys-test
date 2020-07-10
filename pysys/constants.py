@@ -199,9 +199,8 @@ DEFAULT_TESTCLASS = 'PySysTest'
 DEFAULT_INPUT = 'Input'
 DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
-DEFAULT_RUNNER =  ['BaseRunner', 'pysys.baserunner']
-DEFAULT_MAKER =  ['ConsoleMakeTestHelper', 'pysys.launcher.console']
-DEFAULT_WRITER =  ['XMLResultsWriter', 'pysys.writer', 'testsummary_%Y%m%d%H%M%S.xml', {}]
+DEFAULT_RUNNER = 'pysys.baserunner.BaseRunner'
+DEFAULT_MAKER = 'pysys.launcher.console.ConsoleMakeTestHelper'
 DEFAULT_STYLESHEET = None # deprecated
 DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 

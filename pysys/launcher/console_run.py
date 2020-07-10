@@ -369,8 +369,10 @@ def runTest(args):
 	try:
 		launcher = ConsoleLaunchHelper(os.getcwd(), "run")
 		args = launcher.parseArgs(args)
-		module = import_module(Project.getInstance().runnerModule, sys.path)
-		runner = getattr(module, Project.getInstance().runnerClassname)(*args)
+		
+		cls = Project.getInstance().runnerClassname.split('.')
+		module = import_module('.'.join(cls[:-1]), sys.path)
+		runner = getattr(module, cls[-1])(*args)
 		runner.start()
 	
 		for cycledict in runner.results.values():

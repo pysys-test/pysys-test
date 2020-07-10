@@ -82,7 +82,7 @@
 	tests and after completion of a cycle of tests. For example, to use the MyRunner class in the 
 	com.company.test module use;
 	
-	<runner classname="MyRunner" module="com.company.test"/>
+	<runner classname="com.company.test.MyRunner"/>
 	-->
 
 
@@ -91,7 +91,7 @@
 	ConsoleMakeTestHelper class in order to create templated run.py scripts e.g. when a test module has
 	a repeatable pattern for running or validating etc. 
 	
-	<maker classname="MyMaker" module="com.company.test"/>
+	<maker classname="com.company.test.MyMaker"/>
 	-->
 
 
@@ -110,7 +110,7 @@
 			directories. The destDir could then be uploaded to a CI system (some CI writers 
 			implement this automatically) or manually copied to a file share. 
 		-->
-		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		<writer classname="pysys.writer.TestOutputArchiveWriter">
 			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
@@ -120,8 +120,8 @@
 		<!-- CI writers automatically enable themselves only if running under 
 			the associated CI environment. 
 		-->
-		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
-		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
+		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
 
 		<!--
 		Add in the JUnit results writer for PySys test output to be written in the widely-used Apache Ant JUnit XML format.
@@ -129,11 +129,11 @@
 		Use the outputDir property to define the output directory for the JUnit test summary files (the writer will 
 		produce one file per test into this output directory). 
 		-->
-		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+		<writer classname="pysys.writer.JUnitXMLResultsWriter">
 			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 
-		<writer classname="XMLResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.xml">
+		<writer classname="pysys.writer.XMLResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
 			can be set are the stylesheet location, whether to use file URLs in all references 
@@ -157,7 +157,7 @@
 		<!--
 		Add in the test results writer if output to a text file is required 
 		
-		<writer classname="TextResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log">
+		<writer classname="pysys.writer.TextResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
@@ -166,7 +166,7 @@
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
-		<writer classname="CSVResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
+		<writer classname="pysys.writer,CSVResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->		
@@ -175,7 +175,7 @@
 			optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
 			list if no other "summary" writer is explicitly configured.
 		-->		
-		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+		<writer classname="pysys.writer.ConsoleSummaryResultsWriter">
 			<property name="showTestTitle" value="false"/>
 		</writer>
 	</writers>
@@ -236,7 +236,7 @@
 	GREEN, YELLOW, RED, MAGENTA, CYAN, WHITE and BLACK.
 	-->
 	<formatters>
-		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
+		<formatter classname="pysys.utils.logutils.ColorLogFormatter" 
 				name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
 			<!-- 
 			<property name="color" value="true"/>
@@ -256,7 +256,7 @@
 			<property name="color:skipped" value="YELLOW"/>
 		</formatter>
 
-		<formatter classname="BaseLogFormatter" module="pysys.utils.logutils"
+		<formatter classname="pysys.utils.logutils.BaseLogFormatter" 
 				name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 	</formatters>
 	

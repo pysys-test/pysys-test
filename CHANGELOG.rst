@@ -242,6 +242,8 @@ cause some minor breakage or changes (though in many cases no action will be nee
       the LOOKUP dictionary (which still works, but is now deprecated). It also allows easier checking if an outcome 
       represents a failure using `pysys.constants.Outcome.isFailure()`. The `pysys.constants.PRECEDENT` constant is 
       deprecated in favour of `pysys.constants.OUTCOMES` which has an identical value.
+    - There is no longer a default writer so if you choose delete the <writers> element from your project you won't 
+      have any writers. 
     - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
     - Removed deprecated method ``purgeDirectory`` from `pysys.baserunner.BaseRunner` and 
      `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 

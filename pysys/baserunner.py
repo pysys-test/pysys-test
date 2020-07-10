@@ -167,10 +167,10 @@ class BaseRunner(ProcessUser):
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		self.__printLogsDefault = extraOptions['printLogsDefault']
-		for classname, module, filename, properties in self.project.writers:
-			module = import_module(module, sys.path)
-			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
-			for key in list(properties.keys()): setattr(writer, key, properties[key])
+		for writerclass, writerprops in self.project.writers:
+			writer = writerclass(logfile=writerprops.pop('file', None)) # invoke writer's constructor
+			writer.runner = self
+			for key, value in writerprops.items(): setattr(writer, key, value)
 			
 			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
 			

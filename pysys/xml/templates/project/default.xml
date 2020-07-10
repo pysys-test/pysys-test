@@ -12,27 +12,27 @@
 	
 	<!-- Custom test framework extensions, if needed -->
 	<!--
-	<pythonpath value="../pysys-extensions" relative="true" />
-	<runner classname="MyRunner" module="my.organization"/>
-	<maker classname="MyTestMaker" module="my.organization"/>
+	<pythonpath value="./pysys-extensions" />
+	<runner classname="my.organization.MyRunner"/>
+	<maker classname="my.organization.MyTestMaker"/>
 	-->
 
 	<writers>
-		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		<writer classname="pysys.writer.TestOutputArchiveWriter">
 			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
 			<property name="maxArchives" value="50"/>
 		</writer>
 		
-		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
-		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
+		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
 
-		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+		<writer classname="pysys.writer.JUnitXMLResultsWriter">
 			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 		
-		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+		<writer classname="pysys.writer.ConsoleSummaryResultsWriter">
 		</writer>
 	</writers>
 

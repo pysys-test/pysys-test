@@ -143,8 +143,11 @@ class ConsoleMakeTestHelper(object):
 
 def makeTest(args):
 	Project.findAndLoadProject()
-	module = import_module(Project.getInstance().makerModule, sys.path)
-	maker = getattr(module, Project.getInstance().makerClassname)("make")
+
+	cls = Project.getInstance().makerClassname.split('.')
+	module = import_module('.'.join(cls[:-1]), sys.path)
+	maker = getattr(module, cls[-1])("make")
+
 	maker.parseArgs(args)
 	maker.makeTest()
 

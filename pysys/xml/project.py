@@ -198,11 +198,13 @@ class XMLProjectParser(object):
 
 	def getRunnerDetails(self):
 		try:
-			runnerNodeList = self.root.getElementsByTagName('runner')[0]
-			return [runnerNodeList.getAttribute('classname'), runnerNodeList.getAttribute('module')]
+			node = self.root.getElementsByTagName('runner')[0]
 		except Exception:
 			return DEFAULT_RUNNER
-
+		else:
+			classname, propertiesdict = self._parseClassAndConfigDict(node, None, returnClassAsName=True)
+			assert not propertiesdict, 'Properties are not supported under <runner>'
+			return classname
 
 	def getCollectTestOutputDetails(self):
 		r = []
@@ -248,12 +250,14 @@ class XMLProjectParser(object):
 
 	def getMakerDetails(self):
 		try:
-			makerNodeList = self.root.getElementsByTagName('maker')[0]
-			return [makerNodeList.getAttribute('classname'), makerNodeList.getAttribute('module')]
+			node = self.root.getElementsByTagName('maker')[0]
 		except Exception:
 			return DEFAULT_MAKER
-
-
+		else:
+			classname, propertiesdict = self._parseClassAndConfigDict(node, None, returnClassAsName=True)
+			assert not propertiesdict, 'Properties are not supported under <maker>'
+			return classname
+	
 	def createFormatters(self):
 		stdout = runlog = None
 		
@@ -328,27 +332,15 @@ class XMLProjectParser(object):
 
 	def getWriterDetails(self):
 		writersNodeList = self.root.getElementsByTagName('writers')
-		if writersNodeList == []: return [DEFAULT_WRITER]
+		if writersNodeList == []: return []
 		
-		try:
-			writers = []
-			writerNodeList = writersNodeList[0].getElementsByTagName('writer')
-			if writerNodeList != []:
-				for writerNode in writerNodeList:
-					file = writerNode.getAttribute('file') if writerNode.hasAttribute('file') else None
-					writer = [writerNode.getAttribute('classname'), writerNode.getAttribute('module'), file, {}]
-
-					propertyNodeList = writerNode.getElementsByTagName('property')
-					for propertyNode in propertyNodeList:
-						name = propertyNode.getAttribute("name")					
-						writer[3][name] = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name='writer %s'%name)
-					writers.append(writer)				
-			else:
-				writers.append(DEFAULT_WRITER)
-			return writers
-		except Exception:
-			return [DEFAULT_WRITER]
-		
+		writers = []
+		writerNodeList = writersNodeList[0].getElementsByTagName('writer')
+		if not writerNodeList: return []
+		for writerNode in writerNodeList:
+			pythonclassconstructor, propertiesdict = self._parseClassAndConfigDict(writerNode, None)
+			writers.append( (pythonclassconstructor, propertiesdict) )
+		return writers
 
 	def addToPath(self):		
 		for elementname in ['path', 'pythonpath']:
@@ -375,16 +367,16 @@ class XMLProjectParser(object):
 		f.close()
 
 
-	def _parseClassAndConfigDict(self, node, defaultClass):
+	def _parseClassAndConfigDict(self, node, defaultClass, returnClassAsName=False):
 		"""Parses a dictionary of arbitrary options and a python class out of the specified XML node.
 
 		The node may optionally contain classname and module (if not specified as a separate attribute,
 		module will be extracted from the first part of classname); any other attributes will be returned in
-		the optionsDict, as will <option name=""></option> child elements.
+		the optionsDict, as will <property name=""></property> child elements.
 
 		:param node: The node, may be None
 		:param defaultClass: a string specifying the default fully-qualified class
-		:return: a tuple of (pythonclassconstructor, propertiesdict)
+		:return: a tuple of (pythonclassconstructor, propertiesdict), or if returnClassAsName (classname, propertiesDict)
 		"""
 		optionsDict = {}
 		if node:
@@ -397,6 +389,9 @@ class XMLProjectParser(object):
 		classname = optionsDict.pop('classname', defaultClass)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
 		classname = classname.split('.')[-1]
+
+		if returnClassAsName:
+			return (mod+'.'+classname).strip('.'), optionsDict
 
 		# defer importing the module until we actually need to instantiate the 
 		# class, to avoid introducing tricky module import order problems, given 
@@ -459,9 +454,9 @@ class Project(object):
 	def __init__(self, root, projectFile):
 		self.root = root
 		self.startTimestamp = time.time()
-		self.runnerClassname, self.runnerModule = DEFAULT_RUNNER
-		self.makerClassname, self.makerModule = DEFAULT_MAKER
-		self.writers = [DEFAULT_WRITER]
+		self.runnerClassname = DEFAULT_RUNNER
+		self.makerClassname = DEFAULT_MAKER
+		self.writers = []
 		self.perfReporterConfig = None
 		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
 		self.collectTestOutput = []
@@ -497,10 +492,10 @@ class Project(object):
 				parser.addToPath()
 		
 				# get the runner if specified
-				self.runnerClassname, self.runnerModule = parser.getRunnerDetails()
+				self.runnerClassname = parser.getRunnerDetails()
 		
 				# get the maker if specified
-				self.makerClassname, self.makerModule = parser.getMakerDetails()
+				self.makerClassname = parser.getMakerDetails()
 
 				# get the loggers to use
 				self.writers = parser.getWriterDetails()
