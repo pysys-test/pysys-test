@@ -32,9 +32,8 @@ from pysys import __version__
 from pysys.utils.loader import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.stringutils import compareVersions
-from pysys.utils.fileutils import mkdir
+from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
-from pysys.utils.properties import readProperties
 from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.project')
@@ -199,10 +198,10 @@ class XMLProjectParser(object):
 			return
 
 		try:
-			props = readProperties(file) # since PySys 1.6.0 this is UTF-8 by default
+			props = loadProperties(file) # since PySys 1.6.0 this is UTF-8 by default
 		except UnicodeDecodeError:
 			# fall back to ISO8859-1 if not valid UTF-8 (matching Java 9+ behaviour)
-			props = readProperties(file, encoding='iso8859-1')
+			props = loadProperties(file, encoding='iso8859-1')
 		
 		for name, value in props.items():
 			value = self.expandFromProperty(value, "")	

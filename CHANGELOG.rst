@@ -113,7 +113,9 @@ New features
 - Added `pysys.xml.project.Project.getProperty()` which is a convenient and safe way to get a project property 
   of bool/int/float type. 
 
-- Added `pysys.utils.properties.readPropertes()` for reading .properties files. 
+- Added `pysys.utils.fileutils.loadProperties()` for reading .properties files. 
+
+- Added `pysys.utils.fileutils.loadJSON()` for loading .json files. 
 
 Bug fixes
 ---------
@@ -190,7 +192,7 @@ cause some minor breakage or changes (though in many cases no action will be nee
   than the previous PySys behaviour of using whatever the default locale encoding is, which does not conform to any 
   standard for .properties file and makes it impossible to share a .properties file across tests running in different 
   locales. The PySys implementation still does not claim to fully implement the .properties file format, for example 
-  ``\`` are treated as literals not escape sequences. See `pysys.utils.properties.readPropertes()` for details. 
+  ``\`` are treated as literals not escape sequences. See `pysys.utils.fileutils.loadPropertes()` for details. 
   
 - Changed timestamps in process monitor output, writers, performance reporter and similar places from UTC to local time. 
   This means these timestamps will match up with the times in run.log output which have always been local time. 
