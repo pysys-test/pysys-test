@@ -106,7 +106,7 @@ class XMLProjectParser(object):
 		propertyNodeList = [element for element in self.root.getElementsByTagName('property') if element.parentNode == self.root]
 
 		for propertyNode in propertyNodeList:
-		
+
 			# use of these options for customizing the property names of env/root/osfamily is no longer encouraged; just kept for compat
 			if propertyNode.hasAttribute("environment"):
 				self.environment = propertyNode.getAttribute("environment")
@@ -120,22 +120,25 @@ class XMLProjectParser(object):
 				log.debug('Setting project property %s="%s"', propname, OSFAMILY)
 					
 			elif propertyNode.hasAttribute("file"): 
-				file = self.expandFromProperty(propertyNode.getAttribute("file"), propertyNode.getAttribute("default"))
+				file = self.expandProperties(propertyNode.getAttribute("file"), default=propertyNode, name='properties file reading')
 				self.getPropertiesFromFile(os.path.normpath(os.path.join(self.dirname, file)) if file else '', 
 					pathMustExist=(propertyNode.getAttribute("pathMustExist") or '').lower()=='true')
 			
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
-				value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
-				self.properties[name] = value = self.expandFromProperty(value, propertyNode.getAttribute("default"))
+				value = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name=name)
+				self.properties[name] = value
 				log.debug('Setting project property %s="%s"', name, value)
 
 				if (propertyNode.getAttribute("pathMustExist") or '').lower()=='true':
 					if not (value and os.path.exists(os.path.join(self.dirname, value))):
 						raise UserError('Cannot find path referenced in project property "%s": "%s"'%(
 							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
-
+			else:
+				raise UserError('Found <property> with no name= or file=')
+		
 		return self.properties
+
 
 
 	def getPropertiesFromFile(self, file, pathMustExist=False):
@@ -154,53 +157,44 @@ class XMLProjectParser(object):
 			props = loadProperties(file, encoding='iso8859-1')
 		
 		for name, value in props.items():
-			value = self.expandFromProperty(value, "")	
+			# when loading properties files it's not so helpful to give errors (and there's nowhere else to put an empty value) so default to empty string
+			value = self.expandProperties(value, default='', name=name)	
 			self.properties[name] = value
 			log.debug('Setting project property %s="%s" (from %s)', name, self.properties[name], file)
 
+	def expandProperties(self, value, default, name=None):
+		"""
+		Expand any ${...} project properties or env vars, with ${$} for escaping.
+		The "default" is expanded and used if value contains some undefined variables. 
+		If default=None then an error is raised instead. If default is a node, its "default" attribute is used
+		
+		The "name" is used to generate more informative error messages
+		"""
+		envprefix = self.environment+'.'
+		errorprefix = ('Error setting project property "%s": '%name) if name else ''
+		
+		if hasattr(default, 'getAttribute'):
+			default = default.getAttribute("default") if default.hasAttribute("default") else None
 
-	def expandFromEnvironent(self, value, default):
-		PROPERTY_EXPAND_ENV = "(?P<replace>\${%s.(?P<key>.*?)})"
-		regex = re.compile(PROPERTY_EXPAND_ENV%self.environment, re.M)
-		while regex.search(value) is not None:
-			matches = regex.findall(value)				
-			for m in matches:
-				try:
-					insert = os.environ[m[1]]
-				except Exception:
-					# this means that if the default also contains something that can't be resolved we get a hard failure 
-					# (otherwise would stack overflow)
-					if default==value:
-						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
-					log.debug('Failed to expand property from environment variables; "%s" env var does not exist so using default "%s"', m[1], default)
-
-					value = default
-					break
-				value = value.replace(m[0], insert)
-				log.debug('Expanding project property from environment: %s->"%s"', m[0], insert)
-
-		return value		
-
-
-	def expandFromProperty(self, value, default):
-		PROPERTY_EXPAND = "(?P<replace>\${(?P<key>.*?)})"
-		regex = re.compile(PROPERTY_EXPAND, re.M)
-		while regex.search(value) is not None:
-			matches = regex.findall(value)
-			for m in matches:
-				try:
-					insert = self.properties[m[1]]
-				except Exception as e:
-					# this means that if the default also contains something that can't be resolved we get a hard failure 
-					# (otherwise would stack overflow)
-					if default==value:
-						raise Exception('Cannot expand default property value "%s": cannot resolve %s'%(default or value, m[1]))
-					log.debug('Failed to expand property %s in "%s" (will use default "%s") - %s: %s', m[1], value, default, e.__class__.__name__, e)
-					value = default
-					break
-				value = value.replace(m[0], insert)
-		return value
-
+		def expandProperty(m):
+			m = m.group(1)
+			if m == '$': return '$'
+			try:
+				if m.startswith(envprefix): 
+					return os.environ[m[len(envprefix):]]
+			except KeyError as ex:
+				raise UserError(errorprefix+'cannot find environment variable "%s"'%m[len(envprefix):])
+			
+			if m in self.properties:
+				return self.properties[m]
+			else:
+				raise UserError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file"'%m)
+		try:
+			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, value)
+		except UserError:
+			if default is None: raise
+			log.debug('Failed to resolve value "%s" of property "%s", so falling back to default value', value, name or '<unknown>')
+			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, default)
 
 	def getRunnerDetails(self):
 		try:
@@ -215,7 +209,7 @@ class XMLProjectParser(object):
 		for n in self.root.getElementsByTagName('collect-test-output'):
 			x = {
 				'pattern':n.getAttribute('pattern'),
-				'outputDir':self.expandFromProperty(n.getAttribute('outputDir'), n.getAttribute('outputDir')),
+				'outputDir':self.expandProperties(n.getAttribute('outputDir'), default=None, name='collect-test-output outputDir'),
 				'outputPattern':n.getAttribute('outputPattern'),
 			}
 			assert 'pattern' in x, x
@@ -231,7 +225,7 @@ class XMLProjectParser(object):
 		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.utils.perfreporter.CSVPerformanceReporter')
 			
 		summaryfile = optionsDict.pop('summaryfile', '')
-		summaryfile = self.expandFromProperty(summaryfile, summaryfile)
+		summaryfile = self.expandProperties(summaryfile, default=None, name='performance-reporter summaryfile')
 		if optionsDict: raise Exception('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
 		
 		return cls, summaryfile
@@ -341,21 +335,14 @@ class XMLProjectParser(object):
 			writerNodeList = writersNodeList[0].getElementsByTagName('writer')
 			if writerNodeList != []:
 				for writerNode in writerNodeList:
-					try:
-						file = writerNode.getAttribute('file') if writerNode.hasAttribute('file') else None
-						writer = [writerNode.getAttribute('classname'), writerNode.getAttribute('module'), file, {}]
-					except Exception:
-						pass
-					else:
-						propertyNodeList = writerNode.getElementsByTagName('property')
-						for propertyNode in propertyNodeList:
-							try:
-								name = propertyNode.getAttribute("name") 
-								value = self.expandFromEnvironent(propertyNode.getAttribute("value"), propertyNode.getAttribute("default"))
-								writer[3][name] = self.expandFromProperty(value, propertyNode.getAttribute("default"))
-							except Exception:
-								pass
-						writers.append(writer)				
+					file = writerNode.getAttribute('file') if writerNode.hasAttribute('file') else None
+					writer = [writerNode.getAttribute('classname'), writerNode.getAttribute('module'), file, {}]
+
+					propertyNodeList = writerNode.getElementsByTagName('property')
+					for propertyNode in propertyNodeList:
+						name = propertyNode.getAttribute("name")					
+						writer[3][name] = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name='writer %s'%name)
+					writers.append(writer)				
 			else:
 				writers.append(DEFAULT_WRITER)
 			return writers
@@ -368,19 +355,17 @@ class XMLProjectParser(object):
 			pathNodeList = self.root.getElementsByTagName(elementname)
 
 			for pathNode in pathNodeList:
-					raw = self.expandFromEnvironent(pathNode.getAttribute("value"), "")
-					value = self.expandFromProperty(raw, "")
+					value = self.expandProperties(pathNode.getAttribute("value"), default=None, name='pythonpath')
 					relative = pathNode.getAttribute("relative")
 					if not value: 
-						log.warn('Cannot add directory to the python <path>: "%s"', raw)
-						continue
+						raise UserError('Cannot add directory to the pythonpath: "%s"'%value)
 
 					if relative == "true": value = os.path.join(self.dirname, value)
 					value = os.path.normpath(value)
 					if not os.path.isdir(value): 
-						log.warn('Cannot add non-existent directory to the python <path>: "%s"', value)
+						raise UserError('Cannot add non-existent directory to the python <path>: "%s"'%value)
 					else:
-						log.debug('Adding value to path ')
+						log.debug('Adding value to path: %s', value)
 						sys.path.append(value)
 
 
@@ -404,13 +389,11 @@ class XMLProjectParser(object):
 		optionsDict = {}
 		if node:
 			for att in range(node.attributes.length):
-				value = self.expandFromEnvironent(node.attributes.item(att).value, None)
-				optionsDict[node.attributes.item(att).name] = self.expandFromProperty(value, None)
+				name = node.attributes.item(att).name.strip()
+				optionsDict[name] = self.expandProperties(node.attributes.item(att).value, default=None, name=name)
 			for tag in node.getElementsByTagName('property'):
 				assert tag.getAttribute('name')
-				value = self.expandFromEnvironent(tag.getAttribute("value"), tag.getAttribute("default"))
-				optionsDict[tag.getAttribute('name')] = self.expandFromProperty(value, tag.getAttribute("default"))
-
+				optionsDict[tag.getAttribute('name')] = self.expandProperties(tag.getAttribute("value"), default=tag, name=tag.getAttribute('name'))
 		classname = optionsDict.pop('classname', defaultClass)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
 		classname = classname.split('.')[-1]
@@ -536,11 +519,7 @@ class Project(object):
 				self.collectTestOutput = parser.getCollectTestOutputDetails()
 				
 				self.projectHelp = parser.getProjectHelp()
-				def expandProperty(m):
-					m = m.group(1)
-					if m == '$': return '$'
-					return properties[m] # expand ${...} property in project help
-				self.projectHelp = re.sub(r'[$][{]([^}]+)[}]', expandProperty, self.projectHelp)
+				self.projectHelp = parser.expandProperties(self.projectHelp, default=None, name='project-help')
 				
 				# set the data attributes
 				parser.unlink()

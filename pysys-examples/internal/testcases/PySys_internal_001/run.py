@@ -21,6 +21,7 @@ class PySysTest(BaseTest):
 				'-XtestFloatProperty=456.78',
 				'-XtestStringProperty=123456',
 				'-XtestNoneProperty=Hello',
+				'-vDEBUG',
 				], workingDir='test', environs={
 				'TEST_USER':"Felicity Kendal"
 			})

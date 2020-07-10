@@ -18,6 +18,7 @@ class PySysTest(BaseTest):
 		self.assertThat('%s != ""', repr(self.proj.hostname))
 		self.assertThat('re.match(r"\d\d\d\d-\d\d-\d\d$", %s)', repr(self.proj.startDate))
 		self.assertThat('re.match(r"\d\d\.\d\d\.\d\d$", %s)', repr(self.proj.startTime))
+		self.assertThat('re.match(r"[\d.]+$", startTimeSecs)', startTimeSecs=self.proj.startTimeSecs)
 		
 		for k,v in self.proj.properties.items():
 			self.log.info('%r = %r'%(k, v))
@@ -55,6 +56,7 @@ class PySysTest(BaseTest):
 		self.assertTrue(self.proj.lib == 'lib_%s_1.0.so'%OSFAMILY)
 		self.assertTrue(self.proj.library == 'jstore1.0.jar')
 		self.assertTrue(self.proj.version == '1.0')
-		
+		self.assertThat('expected == actual', actual__eval="self.proj.myprop", expected="prop1prop2YY")
+		self.assertThat('expected == actual', actual__eval="self.proj.user", expected="default_value")
 		
 		

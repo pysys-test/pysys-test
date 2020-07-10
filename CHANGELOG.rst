@@ -181,7 +181,7 @@ cause some minor breakage or changes (though in many cases no action will be nee
 
   The list is ordered with the properties most likely to break existing tests at the top of the list, so you may wish 
   to start with the easier ones at the bottom of the list. 
-
+  
 - The default directory for performance output is now under ``__pysys_performance/`` rather than 
   ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it. 
   Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
@@ -192,8 +192,17 @@ cause some minor breakage or changes (though in many cases no action will be nee
   than the previous PySys behaviour of using whatever the default locale encoding is, which does not conform to any 
   standard for .properties file and makes it impossible to share a .properties file across tests running in different 
   locales. The PySys implementation still does not claim to fully implement the .properties file format, for example 
-  ``\`` are treated as literals not escape sequences. See `pysys.utils.fileutils.loadPropertes()` for details. 
-  
+  ``\`` are treated as literals not escape sequences. See `pysys.utils.fileutils.loadProperties()` for details. 
+
+- PySys used to silently ignore project (or writer) properties that use a missing (or typo'd) property or environment 
+  variable, setting it to "" or the default value is specified. To ensure errors are noticed upfront, it is now a fatal 
+  error if a property's value value cannot be resolved - unless a ``default=`` value is provided in which case the 
+  default is used (but it would be an error if the default also references a non-existent variable). This is unlikely 
+  to cause problems for working projects, however if you have some unused properties with invalid values you may 
+  have to remove them. The new behaviour only applies to ``<property name="..." value="..." [default="..."]/>`` 
+  elements, it does not apply to properties read from .properties file which still default to "" if unresolved. 
+  Run your tests with ``-vDEBUG`` logging if you need help debugging properties problems. 
+
 - Changed timestamps in process monitor output, writers, performance reporter and similar places from UTC to local time. 
   This means these timestamps will match up with the times in run.log output which have always been local time. 
   
