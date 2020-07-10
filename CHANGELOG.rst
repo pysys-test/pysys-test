@@ -187,6 +187,13 @@ cause some minor breakage or changes (though in many cases no action will be nee
   Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
   see `pysys.utils.perfreporter` for details. 
 
+- To unify the PySys eco-system, the rarely used alternative names for test descriptor files (``.pysystest`` and 
+  ``descriptor.xml``, rather than the canonical ``pysystest.xml``) and for project files (``.pysysproject`` rather than 
+  ``pysysproject.xml``) are no longer supported. If you have a project configuration file called ``.pysysproject`` 
+  you need to rename it to ``pysysproject.xml``. If you have testcases using the alternative descriptor names, you 
+  can avoid having to renaming them all by setting the project property ``pysysTestDescriptorFileNames`` to a 
+  comma-separated list of the names you want to use e.g. "pysystest.xml, .pysystest, descriptor.xml".
+
 - Properties files referenced in the project properties are now read using UTF-8 encoding if possible, falling back to 
   ISO8859-1 if they contain invalid UTF-8. This follows Java(R) 9+ behaviour and provides for more stable results 
   than the previous PySys behaviour of using whatever the default locale encoding is, which does not conform to any 

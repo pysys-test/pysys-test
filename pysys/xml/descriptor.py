@@ -670,7 +670,8 @@ class DescriptorLoader(object):
 		
 		descriptors = []
 		ignoreSet = set(OSWALK_IGNORES)
-		descriptorSet =set(DEFAULT_DESCRIPTOR)
+		
+		descriptorSet = set(map(str.strip, project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')))
 		
 		projectfound = project.projectFile != None
 		log = logging.getLogger('pysys.launcher')

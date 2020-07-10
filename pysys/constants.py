@@ -191,8 +191,8 @@ LOOKUP[TRUE] = "TRUE"
 LOOKUP[FALSE] = "FALSE"
 
 # set the default descriptor filename, input, output and reference directory names
-DEFAULT_PROJECTFILE = ['pysysproject.xml', '.pysysproject']
-DEFAULT_DESCRIPTOR = ['pysystest.xml', '.pysystest', 'descriptor.xml']  
+DEFAULT_PROJECTFILE = ['pysysproject.xml']
+DEFAULT_DESCRIPTOR = ['pysystest.xml'] # can be customized with the pysysTestDescriptorFileNames project property
 DEFAULT_MODULE = 'run'
 DEFAULT_GROUP = ""
 DEFAULT_TESTCLASS = 'PySysTest'
