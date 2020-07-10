@@ -60,7 +60,7 @@ class ConsoleMakeTestHelper(object):
 		print("       -h | --help                 print this message")
 		print("")
 		print("   and where TESTID is the id of the new test which should consist of letters, numbers and underscores, ")
-		print("   for example: MyApp_perf_001 (numeric style) or InvalidFooBarProducesError (test-that-XXX long string style).")
+		print("   for example: MyApp_perf_001 (numeric style) or InvalidFooBarProducesError ('test that XXX' long string style).")
 		sys.exit()
 
 
