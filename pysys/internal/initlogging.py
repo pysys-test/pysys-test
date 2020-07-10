@@ -123,6 +123,29 @@ class DelegatingPerThreadLogHandler(logging.Handler):
 	def flush(self): 
 		for h in self.getLogHandlersForCurrentThread(): h.flush()
 
+class ThreadFilter(logging.Filterer):
+	"""Filter to disallow log records from the current thread.
+	
+	Deprecated. 
+	
+	Within pysys, logging to standard output is only enabled from the main thread 
+	of execution (that in which the test runner class executes). When running with
+	more than one test worker thread, logging to file of the test run log is 
+	performed through a file handler, which only allows logging from that thread. 
+	To disable either of these, use an instance of this class from the thread in 
+	question, adding to the root logger via log.addFilter(ThreadFilter()).
+	
+	"""
+	def __init__(self):
+		"""Overrides logging.Filterer.__init__"""
+		self.threadId = threading.current_thread().ident
+		logging.Filterer.__init__(self)
+		
+	def filter(self, record):
+		"""Implementation of logging.Filterer.filter to block from the creating thread."""
+		if self.threadId != threading.current_thread().ident: return True
+		return False
+
 #####################################
 
 # Initialize Python logging for PySys

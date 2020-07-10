@@ -220,6 +220,9 @@ cause some minor breakage or changes (though in many cases no action will be nee
 - The method `pysys.basetest.BaseTest.addResource` is deprecated and will be removed in a future release, so please 
   change tests to stop using it; use `pysys.basetest.BaseTest.addCleanupFunction` instead. 
 
+- Deprecated the ``ThreadFilter`` class as there is no reason for PySys to provide these. Usually it is not recommended 
+  to suppress log output and alternatives are available, e.g. the quiet=True option for `BaseTest.startProcess`. 
+
 - There are some additional changes which could potentially cause a problem but are highly unlikely to affect anyone 
   in practice. In most cases no change will be needed, so you can probably ignore these unless 
   you get a problem when running your tests:
@@ -254,7 +257,7 @@ cause some minor breakage or changes (though in many cases no action will be nee
     - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
     - Removed deprecated method ``purgeDirectory`` from `pysys.baserunner.BaseRunner` and 
      `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
-    - Removed deprecated classes ``ThreadedStreamHandler``, ``ThreadedFileHandler``, and ``ThreadFilter`` from the 
+    - Removed deprecated classes ``ThreadedStreamHandler`` and ``ThreadedFileHandler``` from the 
       ``pysys.`` module as there is no reason for PySys to provide these. These are trivial to implement using the 
       Python logging API is anyone does need similar functionality. 
     - Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
