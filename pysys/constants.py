@@ -178,7 +178,7 @@ Each item is an instance of `Outcome`. Use `Outcome.isFailure()` to check whethe
 PRECEDENT = OUTCOMES
 """:deprecated: The old name for `OUTCOMES`.  """
 FAILS = [__outcome for __outcome in OUTCOMES if __outcome.isFailure() ]
-""" Lists the test outcomes treated as failures. To test whether a specific outcome is a failure, use `Outcome.isFailure()`. """
+""":deprecated: To test whether a specific outcome from OUTCOMES is a failure, use `Outcome.isFailure()`. """
 
 
 LOOKUP = {__outcome: str(__outcome) for __outcome in OUTCOMES}
