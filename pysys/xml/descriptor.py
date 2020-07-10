@@ -34,40 +34,6 @@ from pysys.utils.pycompat import PY2, isstring
 
 log = logging.getLogger('pysys.xml.descriptor')
 
-DTD='''
-<!ELEMENT pysystest (description, classification?, skipped?, execution-order?, id-prefix?, data?, traceability?) > 
-<!ELEMENT description (title, purpose) >
-<!ELEMENT classification (groups?, modes?) >
-<!ELEMENT data (class?, input?, output?, reference?) >
-<!ELEMENT traceability (requirements) >
-<!ELEMENT id-prefix (#PCDATA) >
-<!ELEMENT title (#PCDATA) >
-<!ELEMENT purpose (#PCDATA) >
-<!ELEMENT groups (group)+ >
-<!ELEMENT modes (mode)+ >
-<!ELEMENT class EMPTY >
-<!ELEMENT input EMPTY >
-<!ELEMENT output EMPTY >
-<!ELEMENT reference EMPTY >
-<!ELEMENT requirements (requirement)+ >  
-<!ELEMENT group (#PCDATA) >
-<!ELEMENT mode (#PCDATA) >
-<!ELEMENT requirement EMPTY >
-<!ATTLIST pysystest type (auto | manual ) "auto" >
-<!ATTLIST pysystest state (runnable | deprecated | skipped) "runnable" >
-<!ATTLIST execution-order hint>
-<!ATTLIST skipped reason >
-<!ATTLIST class name CDATA #REQUIRED
-                module CDATA #REQUIRED >
-<!ATTLIST input path CDATA #REQUIRED >
-<!ATTLIST output path CDATA #REQUIRED >
-<!ATTLIST reference path CDATA #REQUIRED >
-<!ATTLIST groups inherit (true | false) "true" >
-<!ATTLIST modes inherit (true | false) "true" >
-<!ATTLIST requirement id CDATA #REQUIRED >
-'''
-
-
 DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
 <pysystest type="%s">
   

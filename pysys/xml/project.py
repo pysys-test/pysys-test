@@ -38,56 +38,6 @@ from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.project')
 
-DTD='''
-<!DOCTYPE pysysproject [
-<!ELEMENT pysysproject (property*, path*, requires-python?, requires-pysys?, runner?, maker?, writers?, default-file-encodings?, formatters?, performance-reporter?), collect-test-output*, project-help >
-<!ELEMENT property (#PCDATA)>
-<!ELEMENT path (#PCDATA)>
-<!ELEMENT requires-python (#PCDATA)>
-<!ELEMENT requires-pysys (#PCDATA)>
-<!ELEMENT runner (#PCDATA)>
-<!ELEMENT performance-reporter (property*)>
-<!ELEMENT maker (#PCDATA)>
-<!ELEMENT default-file-encodings (default-file-encoding+) >
-<!ELEMENT formatters (formatter+) >
-<!ELEMENT formatter (property*) >
-<!ELEMENT project-help (#PCDATA)>
-<!ELEMENT writers (writer+) >
-<!ELEMENT writer (property*) >
-<!ATTLIST property root CDATA #IMPLIED>
-<!ATTLIST property environment CDATA #IMPLIED>
-<!ATTLIST property osfamily CDATA #IMPLIED>
-<!ATTLIST property file CDATA #IMPLIED>
-<!ATTLIST property name CDATA #IMPLIED>
-<!ATTLIST property value CDATA #IMPLIED>
-<!ATTLIST property default CDATA #IMPLIED>
-<!ATTLIST path value CDATA #REQUIRED>
-<!ATTLIST path relative CDATA #IMPLIED>
-<!ATTLIST runner classname CDATA #REQUIRED>
-<!ATTLIST runner module CDATA #REQUIRED>
-<!ATTLIST performance-reporter classname CDATA #REQUIRED>
-<!ATTLIST performance-reporter module CDATA #REQUIRED>
-<!ATTLIST performance-reporter summaryfile CDATA #REQUIRED>
-<!ATTLIST maker classname CDATA #REQUIRED>
-<!ATTLIST maker module CDATA #REQUIRED>
-<!ATTLIST formatter name CDATA #REQUIRED>
-<!ATTLIST formatter messagefmt CDATA #IMPLIED>
-<!ATTLIST formatter datefmt CDATA #IMPLIED>
-<!ATTLIST formatter classname CDATA #IMPLIED>
-<!ATTLIST formatter module CDATA #IMPLIED>
-<!ATTLIST writer classname CDATA #REQUIRED>
-<!ATTLIST writer module CDATA #REQUIRED>
-<!ATTLIST writer file CDATA #IMPLIED>
-<!ATTLIST default-file-encoding pattern CDATA #REQUIRED>
-<!ATTLIST default-file-encoding encoding CDATA #REQUIRED>
-<!ATTLIST collect-test-output pattern outputDir outputPattern #REQUIRED>
-]>
-'''
-
-PROPERTY_EXPAND_ENV = "(?P<replace>\${%s.(?P<key>.*?)})"
-PROPERTY_EXPAND = "(?P<replace>\${(?P<key>.*?)})"
-
-
 class XMLProjectParser(object):
 	"""
 	:meta private: Not public API. 
@@ -210,6 +160,7 @@ class XMLProjectParser(object):
 
 
 	def expandFromEnvironent(self, value, default):
+		PROPERTY_EXPAND_ENV = "(?P<replace>\${%s.(?P<key>.*?)})"
 		regex = re.compile(PROPERTY_EXPAND_ENV%self.environment, re.M)
 		while regex.search(value) is not None:
 			matches = regex.findall(value)				
@@ -232,6 +183,7 @@ class XMLProjectParser(object):
 
 
 	def expandFromProperty(self, value, default):
+		PROPERTY_EXPAND = "(?P<replace>\${(?P<key>.*?)})"
 		regex = re.compile(PROPERTY_EXPAND, re.M)
 		while regex.search(value) is not None:
 			matches = regex.findall(value)
