@@ -192,7 +192,7 @@ cause some minor breakage or changes (though in many cases no action will be nee
   Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
   see `pysys.utils.perfreporter` for details. 
 
--  If you have testcases using the non-standard descriptor names ``.pysystest`` or ``descriptor.xml`` (rather than the 
+- If you have testcases using the non-standard descriptor names ``.pysystest`` or ``descriptor.xml`` (rather than the 
   usual ``pysystest.xml``) they will not be found by this version of PySys by default, so action is required to have 
   them execute as normal. If you wish to avoid renaming the files, just set the new project 
   property ``pysysTestDescriptorFileNames`` to a comma-separated list of the names you want to use, 
