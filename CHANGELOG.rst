@@ -262,9 +262,9 @@ cause some minor breakage or changes (though in many cases no action will be nee
     - Removed undocumented ``TEST_TEMPLATE`` constant from ``pysys.basetest`` (it's now in 
       `pysys.console.ConsoleMakeTestHelper` but still not part of the public PySys API). 
     - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
-    - Removed deprecated method ``purgeDirectory`` from `pysys.baserunner.BaseRunner` and 
-     `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
-    - Removed deprecated classes ``ThreadedStreamHandler`` and ``ThreadedFileHandler``` from the 
+    - Removed deprecated method ``purgeDirectory()`` from `pysys.baserunner.BaseRunner` 
+      and `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
+    - Removed deprecated classes ``ThreadedStreamHandler`` and ``ThreadedFileHandler`` from the 
       ``pysys.`` module as there is no reason for PySys to provide these. These are trivial to implement using the 
       Python logging API is anyone does need similar functionality. 
     - `pysys.process.user.ProcessUser` no longer sets ``self.output``, and sets ``self.input`` to the project's 
