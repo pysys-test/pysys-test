@@ -161,7 +161,7 @@ cause some minor breakage or changes (though in many cases no action will be nee
     <property name="defaultAbortOnError" value="false"/>
     
     <!-- Recommended behaviour is to NOT strip whitespace unless explicitly requested with the stripWhitespace= 
-	    option; this option exists to keep compatibility for old projects. -->
+         option; this option exists to keep compatibility for old projects. -->
     <property name="defaultAssertDiffStripWhitespace" value="true"/>
     
     <!-- Set this to true unless you used the "mode" feature before it was redesigned in PySys 1.4.1. -->
@@ -181,7 +181,7 @@ cause some minor breakage or changes (though in many cases no action will be nee
     <property name="redirectPrintToLogger" value="false"/>
     
     <!-- Produces more informative messages from waitForGrep/Signal. Can be set to false for old behaviour if 
-	    preferred. -->
+         preferred. -->
     <property name="verboseWaitForGrep" value="false"/>
 
   The list is ordered with the properties most likely to break existing tests at the top of the list, so you may wish 
@@ -192,12 +192,14 @@ cause some minor breakage or changes (though in many cases no action will be nee
   Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
   see `pysys.utils.perfreporter` for details. 
 
-- To unify the PySys eco-system, the rarely used alternative names for test descriptor files (``.pysystest`` and 
-  ``descriptor.xml``, rather than the canonical ``pysystest.xml``) and for project files (``.pysysproject`` rather than 
-  ``pysysproject.xml``) are no longer supported. If you have a project configuration file called ``.pysysproject`` 
-  you need to rename it to ``pysysproject.xml``. If you have testcases using the alternative descriptor names, you 
-  can avoid having to renaming them all by setting the project property ``pysysTestDescriptorFileNames`` to a 
-  comma-separated list of the names you want to use e.g. "pysystest.xml, .pysystest, descriptor.xml".
+-  If you have testcases using the non-standard descriptor names ``.pysystest`` or ``descriptor.xml`` (rather than the 
+  usual ``pysystest.xml``) they will not be found by this version of PySys by default, so action is required to have 
+  them execute as normal. If you wish to avoid renaming the files, just set the new project 
+  property ``pysysTestDescriptorFileNames`` to a comma-separated list of the names you want to use, 
+  e.g. "pysystest.xml, .pysystest, descriptor.xml".
+
+- If you use the non-standard filename ``.pysysproject`` rather than ``pysysproject.xml`` for your project 
+  configuration file you will need to rename it. 
 
 - Properties files referenced in the project properties are now read using UTF-8 encoding if possible, falling back to 
   ISO8859-1 if they contain invalid UTF-8. This follows Java(R) 9+ behaviour and provides for more stable results 
