@@ -99,7 +99,10 @@ class ProcessUser(object):
 		else:
 			self.defaultAbortOnError = self.project.getProperty('defaultAbortOnError', True)
 			self.defaultIgnoreExitStatus = self.project.getProperty('defaultIgnoreExitStatus', False)
-			
+			self.input = self.project.testRootDir
+
+		self.output = None # must be set by subclass
+
 		self.processList = []
 		self.processCount = {}
 		self.__cleanupFunctions = []
@@ -120,16 +123,7 @@ class ProcessUser(object):
 		
 		# variables affecting a specific method (documented there rather than above)
 		self.logFileContentsDefaultExcludes = []
-
-	def __getattr__(self, name):
-		"""Set self.input or self.output to the current working directory if not defined.
 		
-		"""
-		if name == "input" or name == "output":
-			return os.getcwd()
-		else:
-			raise AttributeError("Unknown class attribute ", name)
-	
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
 		which can be used for the `startProcess` ``stdouterr`` parameter. 

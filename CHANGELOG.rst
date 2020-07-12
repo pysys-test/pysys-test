@@ -260,6 +260,9 @@ cause some minor breakage or changes (though in many cases no action will be nee
     - Removed deprecated classes ``ThreadedStreamHandler`` and ``ThreadedFileHandler``` from the 
       ``pysys.`` module as there is no reason for PySys to provide these. These are trivial to implement using the 
       Python logging API is anyone does need similar functionality. 
+    - `pysys.process.user.ProcessUser` no longer sets ``self.output``, and sets ``self.input`` to the project's 
+      testRootDir instead of the current directory. Since these are overridden by `pysys.basetest.BaseTest` and 
+      `pysys.baserunner.BaseRunner` it is unlikely this will affect anyone.
     - Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
       "THERE WERE NO NON PASSES", and similarly for the "Summary of non passes:". 
     - `pysys.process.common.CommonProcessWrapper.wait` now raises an error if the specified timeout isn't a positive 
