@@ -37,18 +37,6 @@ from pysys.utils.pycompat import *
 from pysys.utils.fileutils import pathexists
 import pysys.internal.safe_eval
 
-TEST_TEMPLATE = '''%s
-%s
-
-class %s(%s):
-	def execute(self):
-		pass
-
-	def validate(self):
-		pass
-''' # not public API, do not use
-
-	
 class BaseTest(ProcessUser):
 	"""BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your 
 	test logic and then to validate the results against the expected behaviour. 

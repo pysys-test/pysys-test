@@ -29,7 +29,6 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
 from pysys.xml.project import Project
-from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
 
@@ -39,6 +38,17 @@ class ConsoleMakeTestHelper(object):
 	
 	A custom subclass can be specified in the project if required. 
 	"""
+
+	TEST_TEMPLATE = '''%s
+	%s
+
+	class %s(%s):
+		def execute(self):
+			pass
+
+		def validate(self):
+			pass
+	''' # not public API, do not use
 
 
 	def __init__(self, name=""):
@@ -135,7 +145,7 @@ class ConsoleMakeTestHelper(object):
 			log.info("Created descriptor %s " % os.path.join(self.testdir, self.testId, descriptor))
 			testclass_fp = open(os.path.join(self.testdir, self.testId, "%s.py" % module), "w")
 			if teststring == None:
-				testclass_fp.write(TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
+				testclass_fp.write(self.TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
 			else:
 				testclass_fp.write(teststring)
 			testclass_fp.close()
