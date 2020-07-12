@@ -965,7 +965,7 @@ class TestContainer(object):
 					except AbortExecution as e:
 						del self.testObj.outcome[:]
 						self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
-						log.warn('Aborted test due to abortOnError set to true')
+						log.warn('Aborted test due to %s outcome'%e.outcome) # nb: this could be due to SKIPPED
 
 					if self.detectCore(self.outsubdir):
 						self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory', abortOnError=False)

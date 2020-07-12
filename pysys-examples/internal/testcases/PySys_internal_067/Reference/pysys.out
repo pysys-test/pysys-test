@@ -19,7 +19,7 @@ WARN  failed reason message ... <RED>failed<END> [run.py:18]
 INFO  notverified reason message ... <GREEN>not verified<END>
 INFO  passed reason message ... <GREEN>passed<END>
 WARN  abort reason message ... <RED>failed<END> 
-WARN  <MAGENTA>Aborted test due to abortOnError set to true<END>
+WARN  <MAGENTA>Aborted test due to FAILED outcome<END>
 DEBUG <BLUE>--- test cleanup<END>
 DEBUG <BLUE>ProcessUser cleanup function done.<END>
 INFO  
