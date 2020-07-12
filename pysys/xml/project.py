@@ -455,21 +455,21 @@ class Project(object):
 	
 	def __init__(self, root, projectFile, outdir=None):
 		self.root = root
-		self.startTimestamp = time.time()
-		self.runnerClassname = DEFAULT_RUNNER
-		self.makerClassname = DEFAULT_MAKER
-		self.writers = []
-		self.perfReporterConfig = None
-		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
-		self.collectTestOutput = []
-		self.projectHelp = None
 		if not outdir: outdir = DEFAULT_OUTDIR
-		self.properties = {'outDirName':os.path.basename(outdir)}
-		
-		stdoutformatter, runlogformatter = None, None
 
-		self.projectFile = None
-		if projectFile is not None:
+		if projectFile is None: # very old legacy behaviour
+			self.startTimestamp = time.time()
+			self.runnerClassname = DEFAULT_RUNNER
+			self.makerClassname = DEFAULT_MAKER
+			self.writers = []
+			self.perfReporterConfig = None
+			self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
+			self.collectTestOutput = []
+			self.projectHelp = None
+			self.properties = {'outDirName':os.path.basename(outdir)}
+			stdoutformatter, runlogformatter = None, None
+			self.projectFile = None
+		else:
 			if not os.path.exists(os.path.join(root, projectFile)):
 				raise Exception("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
 			from pysys.xml.project import XMLProjectParser
