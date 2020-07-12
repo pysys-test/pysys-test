@@ -869,7 +869,7 @@ class BaseTest(ProcessUser):
 				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
 
 			self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
-				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
 		
 		The behaviour of the regular expression can be controlled using ``reFlags=``. For example, to perform 
 		case-insensitive matching and to use Python's verbose regular expression syntax which permits whitespace 

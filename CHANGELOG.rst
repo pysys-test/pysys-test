@@ -51,6 +51,11 @@ New features
   `BaseTest.setup` method shared by all tests), such as unimportant lines logged to stderr during startup of 
   commonly used processes which would otherwise be logged by `BaseTest.startProcess` when a process fails to start. 
 
+- `BaseTest.getExprFromFile` now supported ``(?P<groupName>...)`` named regular expression groups, and will return 
+  a dictionary containing the matched groups if any are present in the regular expression. For example::
+
+    authInfo = self.getExprFromFile('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+
 - Colored output is disabled if the ``NO_COLOR`` environment variable is set; this is a cross-product standard 
   (https://no-color.org/). The ``PYSYS_COLOR`` variable take precedence if set. 
 
@@ -333,7 +338,7 @@ Assertion and waitForGrep improvements:
       **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
     
     self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
-      **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+      **self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*" in (?P<authSecs>[^ ]+) seconds\.'))
  
   `BaseTest.waitForGrep` now provides the same dictionary return value when given a regular expression with named 
   groups, so the above trick can also be used during execution of the test when convenient. 

@@ -1368,16 +1368,28 @@ class ProcessUser(object):
 	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0):
 		""" Searches for a regular expression in the specified file, and returns it. 
 
-		If the regex contains unnamed groups, the specified group is returned. If the expression is not found, an exception is raised,
+		If the regex contains unnamed groups using ``(expr)`` syntax, the specified group is returned. 
+		If the expression is not found, an exception is raised,
 		unless returnAll=True or returnNoneIfMissing=True. For example::
 
-			self.getExprFromFile('test.txt', r'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
-			self.getExprFromFile('test.txt', r'foo') # on a file containing 'myKey=foobar' would return "foo"
+			myKey = self.getExprFromFile('test.txt', r'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
+			err = self.getExprFromFile('test.txt', r'ERROR .*') # on a file containing 'ERROR It went wrong' would return "that entire string"
 		
+		If you have a complex expression with multiple values to extract, it is usually clearer to 
+		use ``(?P<groupName>...)`` named groups rather than unnamed groups referenced by index. This produces a 
+		dictionary 
+		
+			authInfo = self.getExprFromFile('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+
+			allAuthList = self.getExprFromFile('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.', returnAll=True))
+
 		See also `pysys.basetest.BaseTest.assertGrep` which should be used when instead of just finding out what's 
-		in the file you want to assert that a specific expression is matched. assertGrep also provides some additional 
-		functionality such as returning named groups which this method does not currently support. 
-		
+		in the file you want to assert that a specific expression is matched. The documentation for assertGrep also 
+		provides some helpful examples of regular expressions that could also be applied to this method. 
+
+		.. versionchanged:: 1.6.0
+			Support for named groups was added in 1.6.0.
+
 		:param str path: file to search (located in the output dir unless an absolute path is specified)
 
 		:param str expr: the regular expression, optionally containing the regex group operator ``(...)``
@@ -1392,41 +1404,53 @@ class ProcessUser(object):
 			
 				expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)')
 
-		:param List[int] groups: which regex group numbers (as indicated by brackets in the regex) should be returned; 
+		:param List[int] groups: which numeric regex group numbers (as indicated by brackets in the regex) should be returned; 
 			default is ``[1]`` meaning the first group. 
 			If more than one group is specified, the result will be a tuple of group values, otherwise the
 			result will be the value of the group at the specified index as a str.
+			This parameter is ignored if the regular expression contains any ``(?P<groupName>...)`` named groups. 
 
 		:param bool returnAll: returns a list containing all matching lines if True, the first matching line otherwise.
-		:param bool returnNoneIfMissing: set this to return None instead of throwing an exception
-			if the regex is not found in the file
+		:param bool returnNoneIfMissing: True to return None instead of raising an exception
+			if the regex is not found in the file (not needed when returnAll is used). 
+			
 		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+		
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
 			
 			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
 			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
 
-		:return: A List[List[str]] if returnAll=True and groups contains multiple groups, a List[str] if only one of 
-			those conditions is true, or else a simple str containing just the first match found. 
+		:return: For a regular expression with one unnamed group, the match value is a str; 
+			if there are multiple unnamed numeric groups it is List[str] (with values corresponding to the groups= argument); 
+			if it contains any ``(?P<groupName>...)`` named groups a dict[str,str] is returned where the keys are the groupNames. 
+			
+			If returnAll=True, the return value is a list of all the match values, with types as above. 
 		"""
+		
+		namedGroupsMode = False
+		compiled = re.compile(expr, flags=reFlags)
+		namedGroupsMode = compiled.groupindex
+		
 		with openfile(os.path.join(self.output, path), 'r', encoding=encoding or self.getDefaultFileEncoding(os.path.join(self.output, path))) as f:
 			matches = []
 			for l in f:
-				match = re.search(expr, l, flags=reFlags)
+				match = compiled.search(l)
 				if not match: continue
-				if match.groups():
-					if returnAll: 
-						matches.append(match.group(*groups))
-					else: 
-						return match.group(*groups) 
+				if namedGroupsMode:
+					val = match.groupdict()
+				elif match.groups():
+					val = match.group(*groups)
 				else:
-					if returnAll: 
-						matches.append(match.group(0))
-					else: 
-						return match.group(0)
+					val = match.group(0)
+					
+				if returnAll: 
+					matches.append(val)
+				else: 
+					return val
 
 			if returnAll: return matches
 			if returnNoneIfMissing: return None

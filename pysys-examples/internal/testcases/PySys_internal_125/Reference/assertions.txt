@@ -11,6 +11,8 @@ Assert that (IS_WINDOWS or re.match(expected, actual)) with actual='foo', expect
 Assert that (import_module('tarfile').is_tarfile(self.output+file) is False) with file='/foo.zip' ... passed
 Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')) ='51.9' ... passed
 Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')) ='20.3' ... passed
+Assert that (serverStartInfo == expected) with expected={'startupTime': '20.3', 'user': None}, serverStartInfo (self.getExprFromFile('myprocess-2.log', 'Server started in (?P<startupTime>[0-9.]+) seconds(?P<user> as user .*)?')) ={'startupTime': '20.3', 'user': None} ... passed
+Assert that (serverStartInfo == expected) with expected=[{'startupTime': '20.3', 'user': None}], serverStartInfo (self.getExprFromFile('myprocess-2.log', 'Server started in (?P<startupTime>[0-9.]+) seconds(?P<user> as user .*)?', returnAll=True)) =[{'startupTime': '20.3', 'user': None}] ... passed
 Assert that (actualUser == expected) with expected='myuser', actualUser='myuser' ... passed
 Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foo', expected='foo' ... passed
 Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='bar', expected='bar' ... passed
