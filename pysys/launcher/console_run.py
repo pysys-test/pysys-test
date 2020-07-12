@@ -377,7 +377,7 @@ def runTest(args):
 	
 		for cycledict in runner.results.values():
 			for outcome in OUTCOMES:
-				if outcome.isFailure(): cycledict.get(outcome, None): sys.exit(2)
+				if outcome.isFailure() and cycledict.get(outcome, None): sys.exit(2)
 		sys.exit(0)
 	except Exception as e:
 		sys.stderr.write('\nPYSYS FATAL ERROR: %s\n' % e)
