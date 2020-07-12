@@ -38,7 +38,7 @@ __all__ = ["GitHubActionsCIWriter", "TravisCIWriter"]
 
 import time, logging, sys, threading, os, re, collections
 
-from pysys.constants import PrintLogs
+from pysys.constants import PrintLogs, OUTCOMES
 from pysys.writer import BaseRecordResultsWriter, TestOutcomeSummaryGenerator, ArtifactPublisher, stripANSIEscapeCodes
 from pysys.utils.logutils import ColorLogFormatter, stdoutPrint
 from pysys.utils.pycompat import PY2
