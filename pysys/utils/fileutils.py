@@ -198,6 +198,6 @@ def loadJSON(path, **kwargs):
 	:param kwargs: Keyword arguments will be passed to ``json.load()``.
 	:return obj: A dict, list, or other Python object representing the contents of the JSON file. 
 	"""
-	with openfile(path, mode='r', encoding=None if PY2 else 'utf-8-sig', errors='strict') as fp:
+	with openfile(path, mode='r', encoding='utf-8-sig', errors='strict') as fp:
 		return json.load(fp, **kwargs)
 		

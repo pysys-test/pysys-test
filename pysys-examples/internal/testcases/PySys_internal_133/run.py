@@ -5,7 +5,7 @@ class PySysTest(pysys.basetest.BaseTest):
 
 	def execute(self):
 		self.assertThat('actual == expected', actual=pysys.utils.fileutils.loadJSON(self.input+'/test.json'), expected={
-			'PoundSign':['\xa3'],
+			'PoundSign':[u'\xa3'],
 			'Number': [123, 456.789]
 		})
 
