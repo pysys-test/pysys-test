@@ -34,7 +34,7 @@ class ConsoleCleanTestHelper(object):
 	def __init__(self, workingDir, name=""):
 		self.workingDir = workingDir
 		self.arguments = []
-		self.outsubdir = PLATFORM
+		self.outsubdir = DEFAULT_OUTDIR
 		self.all = False
 		self.name = name
 		self.optionString = 'hav:o:'
@@ -96,7 +96,7 @@ class ConsoleCleanTestHelper(object):
 
 
 	def clean(self):
-			Project.findAndLoadProject()
+			Project.findAndLoadProject(outdir=self.outsubdir)
 
 			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir, expandmodes=False)
 			supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)

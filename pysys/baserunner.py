@@ -80,8 +80,8 @@ class BaseRunner(ProcessUser):
 	Do not override the ``__init__`` constructor when creating a runner subclass; instead, add any initialization logic 
 	to your `setup()` method. 
 	
-	:ivar str ~.outsubdir: The directory name for the the output of each testcase. Typically a relative path,
-		but can also be an absolute path. 
+	:ivar str ~.outsubdir: The ``--outdir`` for this test run, which gives the directory to be used for the output of 
+		each testcase. Typically a relative path, but can also be an absolute path. 
 
 	:ivar str ~.output: The full path of the output directory that this runner can use for storing any persistent state, 
 		e.g. logs for any servers started in the runner `setup` method. The runner output directory is formed based 

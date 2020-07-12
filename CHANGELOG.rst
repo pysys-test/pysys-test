@@ -106,6 +106,11 @@ New features
 - Added a standard property ``${os}`` to the project file as a more modern alternative to ``${osfamily}``. This takes 
   its value from Python's ``platform.system().lower()``, taking values such as ``windows``, ``linux``, etc. 
 
+- Added a standard property ``${outDirName}`` to the project file which is the basename from the ``-outdir``, giving 
+  a user-customizable "name" for the current test run that can be used in project property paths to keep test 
+  runs separate, for example, this could be used to label performance CSV files from separate test runs with 
+  ``--outdir perf_baseline`` and ``--outdir after_perf_improvements``. 
+
 - The standard project property ``testRootDir`` is now defined automatically without the need to 
   add the boilerplate ``<property root= ... />`` to your project configuration. The old property name ``root`` 
   continues to be defined for compatibility with older projects. 

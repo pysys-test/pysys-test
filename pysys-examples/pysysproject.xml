@@ -17,6 +17,8 @@
 		The following standard project properties are always defined and can be accessed through ${prop} syntax:
 		
 			${testRootDir} - Path of the root directory containing the pysysproject.xml file
+			${outDirName}  - The basename (with parent dirs removed) from the outdir for this test run. 
+			                 This may be the name of the current OS or a unique user-specified name for the test run.
 			${os}          - The operating system name e.g. 'windows', 'linux', 'darwin'
 			${startDate}   - The date that this test run was started, in a form that can be used in filenames. 
 			${startTime}   - The (local) time that this test run was started, in a form that can be used in filenames. 
@@ -133,7 +135,7 @@
 			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 
-		<writer classname="pysys.writer.XMLResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.xml">
+		<writer classname="pysys.writer.XMLResultsWriter" file="__pysys_testsummary_${outDirName}_%Y-%m-%d_%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
 			can be set are the stylesheet location, whether to use file URLs in all references 
@@ -262,7 +264,7 @@
 	
 	<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/internal/utilities/python_coveragerc"/>
 
-	<property name="pythonCoverageDir" value="${testRootDir}/__coverage_python_@OUTDIR@"/>
+	<property name="pythonCoverageDir" value="${testRootDir}/__coverage_python_${outDirName}"/>
 	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 	
 	<project-help>

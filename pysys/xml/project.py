@@ -42,7 +42,7 @@ class XMLProjectParser(object):
 	"""
 	:meta private: Not public API. 
 	"""
-	def __init__(self, dirname, file):
+	def __init__(self, dirname, file, outdir):
 		self.dirname = dirname
 		self.xmlfile = os.path.join(dirname, file)
 		log.debug('Loading project file: %s', self.xmlfile)
@@ -54,6 +54,8 @@ class XMLProjectParser(object):
 		
 		self.properties = {
 			'testRootDir':self.dirname,
+			
+			'outDirName':outdir,
 			
 			'startDate':time.strftime('%Y-%m-%d', time.localtime(self.startTimestamp)),
 			'startTime':time.strftime('%H.%M.%S', time.localtime(self.startTimestamp)),
@@ -451,7 +453,7 @@ class Project(object):
 	__INSTANCE = None
 	__frozen = False
 	
-	def __init__(self, root, projectFile):
+	def __init__(self, root, projectFile, outdir=None):
 		self.root = root
 		self.startTimestamp = time.time()
 		self.runnerClassname = DEFAULT_RUNNER
@@ -461,7 +463,9 @@ class Project(object):
 		self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
 		self.collectTestOutput = []
 		self.projectHelp = None
-		self.properties = {}
+		if not outdir: outdir = DEFAULT_OUTDIR
+		self.properties = {'outDirName':os.path.basename(outdir)}
+		
 		stdoutformatter, runlogformatter = None, None
 
 		self.projectFile = None
@@ -470,7 +474,9 @@ class Project(object):
 				raise Exception("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
 			from pysys.xml.project import XMLProjectParser
 			try:
-				parser = XMLProjectParser(root, projectFile)
+				parser = XMLProjectParser(root, projectFile, outdir=outdir)
+			except UserError:
+				raise
 			except Exception as e: 
 				raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
 			else:
@@ -573,7 +579,7 @@ class Project(object):
 		raise Exception('Cannot call Project.getInstance() as the project has not been loaded yet')
 	
 	@staticmethod
-	def findAndLoadProject(startdir=None):
+	def findAndLoadProject(startdir=None, outdir=None):
 		"""Find and load a project file, starting from the specified directory. 
 		
 		If this fails an error is logged and the process is terminated. 
@@ -589,7 +595,9 @@ class Project(object):
 		file, and then make a call to it prior to importing all names within the
 		constants module.
 
-		:param startdir: The initial path to start from when trying to locate the project file
+		:param st rstartdir: The initial path to start from when trying to locate the project file
+		:param str outdir: The output directory specified on the command line. Some project properties may depend on 
+			this. 
 
 		"""
 		projectFile = os.getenv('PYSYS_PROJECTFILE', None)
@@ -624,7 +632,7 @@ class Project(object):
 					sys.exit(1)
 
 		try:
-			project = Project(search, projectFile)
+			project = Project(search, projectFile, outdir=outdir)
 			stdoutHandler.setFormatter(project.formatters.stdout)
 			import pysys.constants
 			pysys.constants.PROJECT = project # for compatibility for old tests

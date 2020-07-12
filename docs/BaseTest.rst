@@ -56,8 +56,9 @@ can be accessed via instance attributes on ``self``:
   test should write output files, temporary files and logs. The output directory is automatically created and 
   cleaned of existing content before the test runs to ensure separate runs do not influence each other. 
   There are separate output directories when a test is run for multiple cycles or in multiple modes. 
-  The directory is usually ``<testdir>/Output/<outdir>`` but the path can be customized in the testcase descriptor.  
-	
+  The directory is usually ``<testdir>/Output/<outdir>`` but the path can be customized in the testcase descriptor and 
+  the ``--outdir`` command line argument. 
+  
 - ``self.reference`` *(str)*: Full path to the reference directory of the testcase, which is where reference comparison files 
   are stored (typically for use with `assertDiff`).
   The directory is usually ``<testdir>/Reference`` but the path can be customized in the testcase descriptor. 

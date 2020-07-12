@@ -94,6 +94,7 @@ else:  # pragma: no cover
 	LIBRARY_PATH_ENV_VAR = 'LD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
+
 ENVSEPERATOR = os.pathsep
 """ Deprecated. 
 :meta private: Use ``os.pathsep`` instead. """
@@ -203,6 +204,7 @@ DEFAULT_RUNNER = 'pysys.baserunner.BaseRunner'
 DEFAULT_MAKER = 'pysys.launcher.console.ConsoleMakeTestHelper'
 DEFAULT_STYLESHEET = None # deprecated
 DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
+DEFAULT_OUTDIR = 'win' if PLATFORM=='win32' else PLATFORM # this constant is not currently public API
 
 OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn', '__pycache__', '.git' ]
 """ A list of directory names to exclude when recursively walking a directory tree. 

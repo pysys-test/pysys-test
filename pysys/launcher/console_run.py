@@ -45,7 +45,7 @@ class ConsoleLaunchHelper(object):
 		self.includes = []
 		self.excludes = []
 		self.cycle = 1
-		self.outsubdir = 'win' if PLATFORM=='win32' else PLATFORM
+		self.outsubdir = DEFAULT_OUTDIR
 		self.modeinclude = []
 		self.modeexclude = []
 		self.threads = 1
@@ -101,7 +101,8 @@ Execution options
    -c, --cycle     NUM         run each test the specified number of times
    -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path); 
                                setting this is helpful for tagging/naming test output for different invocations 
-                               of PySys as you try out various changes to the application under test
+                               of PySys as you try out various changes to the application under test; tests can 
+                               access the final dir name of the outdir using the ${outDirName} project property
    -j, --threads   NUM | xNUM  set the number of jobs (threads) to run tests in parallel (defaults to 1); 
                                specify either an absolute number, or a multiplier on the number of CPUs e.g. "x1.5"; 
                    auto | 0    equivalent to x1.0 (or the PYSYS_DEFAULT_THREADS env var if set)
@@ -345,7 +346,7 @@ e.g.
 		
 		# load project AFTER we've parsed the arguments, which opens the possibility of using cmd line config in 
 		# project properties if needed
-		Project.findAndLoadProject()
+		Project.findAndLoadProject(outdir=self.outsubdir)
 		
 		if defaultAbortOnError is not None: setattr(Project.getInstance(), 'defaultAbortOnError', defaultAbortOnError)
 		if '--ci' in args and not Project.getInstance().getProperty('supportMultipleModesPerRun', True): 
