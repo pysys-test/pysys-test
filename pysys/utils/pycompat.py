@@ -118,5 +118,12 @@ if PY2:
 		val = getattr(MyEnum, 'option1'.upper(), None)
 		if val is None: raise Exception('Bad option: "%s"'%...)
 	"""
+	
+	def makeReadOnlyDict(input): return input
+	# We can just make do without the additional safety in Python2
+
 else:
 	from enum import Enum
+
+	from types import MappingProxyType as makeReadOnlyDict
+	# May replace this with frozenmap once available

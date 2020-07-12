@@ -58,7 +58,7 @@ class ConsolePrintHelper(object):
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
 
 		#######                                                                                                                       |
-		print("\nPySys System Test Framework (version %s): Console print test helper" % __version__) 
+		print("\nPySys System Test Framework (version %s): Test list printer" % __version__) 
 		print("\nUsage: %s %s [option]* [tests]*" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("    where options include:")
 		print("       -h | --help                 print this message")
@@ -152,6 +152,8 @@ class ConsolePrintHelper(object):
 				sys.exit(1)
 
 	def printTests(self):
+			Project.findAndLoadProject()
+	
 			# nb: mode filtering happens later
 			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, expandmodes=False)
 			
@@ -217,7 +219,7 @@ class ConsolePrintHelper(object):
 				if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
 			maxsize = maxsize + 2
 			
-			supportMultipleModesPerRun = getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true'
+			supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)
 
 			for descriptor in descriptors:
 				if self.modefilter and self.modefilter not in descriptor.modes: continue

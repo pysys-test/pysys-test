@@ -45,7 +45,7 @@ class ConsoleLaunchHelper(object):
 		self.includes = []
 		self.excludes = []
 		self.cycle = 1
-		self.outsubdir = PLATFORM
+		self.outsubdir = DEFAULT_OUTDIR
 		self.modeinclude = []
 		self.modeexclude = []
 		self.threads = 1
@@ -101,7 +101,8 @@ Execution options
    -c, --cycle     NUM         run each test the specified number of times
    -o, --outdir    STRING      set the directory to use for each test's output (a relative or absolute path); 
                                setting this is helpful for tagging/naming test output for different invocations 
-                               of PySys as you try out various changes to the application under test
+                               of PySys as you try out various changes to the application under test; tests can 
+                               access the final dir name of the outdir using the ${outDirName} project property
    -j, --threads   NUM | xNUM  set the number of jobs (threads) to run tests in parallel (defaults to 1); 
                                specify either an absolute number, or a multiplier on the number of CPUs e.g. "x1.5"; 
                    auto | 0    equivalent to x1.0 (or the PYSYS_DEFAULT_THREADS env var if set)
@@ -175,6 +176,7 @@ e.g.
 """.format(scriptname=_PYSYS_SCRIPT_NAME))
 		
 		# show project help at the end so it's more prominent
+		Project.findAndLoadProject()
 		help = self.getProjectHelp()
 		if help: print(help)
 		
@@ -191,9 +193,9 @@ e.g.
 		if '--ci' in args:
 			# to ensure identical behaviour, set these as if on the command line
 			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
-			# by CI writers and/or the command line; setting --mode=ALL would lead to weird results if supportMultipleModesPerRun=false)
-			if getattr(Project.getInstance(), 'supportMultipleModesPerRun', '').lower()=='true': args = ['--mode=ALL']+args
-			args = ['--purge', '--record', '-j0', '--type=auto']+args
+			# by CI writers and/or the command line; note that setting --mode=ALL would be incorrect if 
+			# supportMultipleModesPerRun=false but that's a legacy options so we raise an exception later if this happened)
+			args = ['--purge', '--record', '-j0', '--type=auto', '--mode=ALL']+args
 			printLogsDefault = PrintLogs.FAILURES
 
 		try:
@@ -209,7 +211,8 @@ e.g.
 
 		printLogs = None
 		ci = False
-		
+		defaultAbortOnError = None
+
 		logging.getLogger('pysys').setLevel(logging.INFO)
 
 		# as a special case, set a non-DEBUG log level for the implementation of assertions 
@@ -303,8 +306,8 @@ e.g.
 					if self.threads <= 0: self.threads = int(os.getenv('PYSYS_DEFAULT_THREADS', N_CPUS))
 
 			elif option in ("-b", "--abort"):
-				setattr(Project.getInstance(), 'defaultAbortOnError', str(value.lower()=='true'))
-
+				defaultAbortOnError = str(value.lower()=='true')
+				
 			elif option in ["-g", "--progress"]:
 				self.progress = True
 
@@ -316,7 +319,7 @@ e.g.
 
 			elif option in ["-X"]:
 				if EXPR1.search(value) is not None:
-				  self.userOptions[value.split('=')[0]] = value.split('=')[1]
+				  self.userOptions[value.split('=', 1)[0]] = value.split('=', 1)[1]
 				if EXPR2.search(value) is not None:
 					self.userOptions[value] = True
 			
@@ -341,6 +344,14 @@ e.g.
 			'printLogsDefault': printLogsDefault, # to use if not provided by a CI writer or cmdline
 		}
 		
+		# load project AFTER we've parsed the arguments, which opens the possibility of using cmd line config in 
+		# project properties if needed
+		Project.findAndLoadProject(outdir=self.outsubdir)
+		
+		if defaultAbortOnError is not None: setattr(Project.getInstance(), 'defaultAbortOnError', defaultAbortOnError)
+		if '--ci' in args and not Project.getInstance().getProperty('supportMultipleModesPerRun', True): 
+			raise UserError('Cannot use --ci option with a legacy supportMultipleModesPerRun=false project')
+		
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, 
 			modeincludes=self.modeinclude, modeexcludes=self.modeexclude, expandmodes=True)
 		descriptors.sort(key=lambda d: [d.executionOrderHint, d._defaultSortKey])
@@ -359,13 +370,15 @@ def runTest(args):
 	try:
 		launcher = ConsoleLaunchHelper(os.getcwd(), "run")
 		args = launcher.parseArgs(args)
-		module = import_module(Project.getInstance().runnerModule, sys.path)
-		runner = getattr(module, Project.getInstance().runnerClassname)(*args)
+		
+		cls = Project.getInstance().runnerClassname.split('.')
+		module = import_module('.'.join(cls[:-1]), sys.path)
+		runner = getattr(module, cls[-1])(*args)
 		runner.start()
 	
 		for cycledict in runner.results.values():
-			for outcome in FAILS:
-				if cycledict.get(outcome, None): sys.exit(2)
+			for outcome in OUTCOMES:
+				if outcome.isFailure() and cycledict.get(outcome, None): sys.exit(2)
 		sys.exit(0)
 	except Exception as e:
 		sys.stderr.write('\nPYSYS FATAL ERROR: %s\n' % e)

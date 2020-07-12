@@ -37,18 +37,6 @@ from pysys.utils.pycompat import *
 from pysys.utils.fileutils import pathexists
 import pysys.internal.safe_eval
 
-TEST_TEMPLATE = '''%s
-%s
-
-class %s(%s):
-	def execute(self):
-		pass
-
-	def validate(self):
-		pass
-''' # not public API, do not use
-
-	
 class BaseTest(ProcessUser):
 	"""BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your 
 	test logic and then to validate the results against the expected behaviour. 
@@ -500,6 +488,10 @@ class BaseTest(ProcessUser):
 			self.assertThat("actualStartupMessage.endswith('successfully')", actualStartupMessage=msg)
 			self.assertThat("re.match(expected, actualStartupMessage)", expected=".* successfully", actualStartupMessage=msg)
 			self.assertThat("(0 <= actualValue < max) and type(actualValue)!=float", actualValue=v, max=100)
+
+			# Use ``is`` for comparisons to True/False/None as in Python ``==``/``!=`` don't always do what you'd 
+			# expect for these types. 
+			self.assertThat("actualValue is not None", actualValue=v)
 			
 		This method is powerful enough for almost any validation that the other assert methods don't 
 		handle, and by enforcing the discipline of naming values it generates self-describing log messages and 
@@ -795,7 +787,7 @@ class BaseTest(ProcessUser):
 
 		log.debug("Performing file comparison diff with file1=%s and file2=%s", f1, f2)
 		
-		if stripWhitespace is None: stripWhitespace = self.getBoolProperty('defaultAssertDiffStripWhitespace', default=True)
+		if stripWhitespace is None: stripWhitespace = self.getBoolProperty('defaultAssertDiffStripWhitespace', default=False)
 		
 		msg = assertMessage or ('File comparison between %s and %s'%(
 			self.__stripTestDirPrefix(f1), self.__stripTestDirPrefix(f2)))

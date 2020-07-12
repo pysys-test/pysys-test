@@ -5,7 +5,7 @@
 
 	<writers>
 		<!-- defaults -->
-		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		<writer classname="pysys.writer.TestOutputArchiveWriter">
 		</writer>
 
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">

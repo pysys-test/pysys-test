@@ -106,7 +106,7 @@ class BaseResultsWriter(object):
 		BaseResultsWriter.__writerInstance += 1
 		self.__writerRepr = 'writer#%d<%s>'%(BaseResultsWriter.__writerInstance, self.__class__.__name__)
 	
-	def __repr__(self): return self.__writerRepr
+	def __repr__(self): return getattr(self, '__writerRepr', self.__class__.__name__)
 
 	def isEnabled(self, record=False, **kwargs): 
 		""" Determines whether this writer can be used in the current environment. 
@@ -296,9 +296,9 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		self.duration = 0.0
 		for cycle in range(cycles):
 			self.results[cycle] = {}
-			for outcome in PRECEDENT: self.results[cycle][outcome] = []
+			for outcome in OUTCOMES: self.results[cycle][outcome] = []
 		self.threads = threads
-		self.outcomes = {o: 0 for o in PRECEDENT}
+		self.outcomes = {o: 0 for o in OUTCOMES}
 
 	def processResult(self, testObj, cycle=-1, testTime=-1, testStart=-1, **kwargs):
 		self.results[cycle][testObj.getOutcome()].append( (testObj.descriptor.id, testObj.getOutcomeReason(), testObj.descriptor.title, testObj.descriptor.testDir, testObj.output))
@@ -354,11 +354,11 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 
 		if showOutcomeStats:
 			executed = sum(self.outcomes.values())
-			failednumber = sum([self.outcomes[o] for o in FAILS])
-			passed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o not in FAILS and self.outcomes[o]>0])
-			failed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o in FAILS and self.outcomes[o]>0])
-			if failed: log('Failure outcomes: %s (%0.1f%%)', failed, 100.0 * (failednumber) / executed, extra=ColorLogFormatter.tag(LOOKUP[FAILED].lower(), [0,1]))
-			if passed: log('Success outcomes: %s', passed, extra=ColorLogFormatter.tag(LOOKUP[PASSED].lower(), [0]))
+			failednumber = sum([self.outcomes[o] for o in OUTCOMES if o.isFailure()])
+			passed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if not o.isFailure() and self.outcomes[o]>0])
+			failed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if o.isFailure() and self.outcomes[o]>0])
+			if failed: log('Failure outcomes: %s (%0.1f%%)', failed, 100.0 * (failednumber) / executed, extra=ColorLogFormatter.tag(str(FAILED).lower(), [0]))
+			if passed: log('Success outcomes: %s', passed, extra=ColorLogFormatter.tag(str(PASSED).lower(), [0]))
 			log('')
 
 		if showFailureSummary:
@@ -366,7 +366,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			fails = 0
 			for cycle in self.results:
 				for outcome, tests in self.results[cycle].items():
-					if outcome in FAILS : fails = fails + len(tests)
+					if outcome.isFailure(): fails = fails + len(tests)
 			if fails == 0:
 				log("	THERE WERE NO FAILURES", extra=ColorLogFormatter.tag(LOG_PASSES))
 			else:
@@ -374,10 +374,11 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 				for cycle in self.results:
 					cyclestr = ''
 					if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
-					for outcome in FAILS:
+					for outcome in OUTCOMES:
+						if not outcome.isFailure(): continue
 						for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
 							failedids.add(id)
-							log("  %s%s: %s ", cyclestr, LOOKUP[outcome], id, extra=ColorLogFormatter.tag(LOOKUP[outcome].lower()))
+							log("  %s%s: %s ", cyclestr, outcome, id, extra=ColorLogFormatter.tag(str(outcome).lower()))
 							if showTestTitle and testTitle:
 								log("      (title: %s)", testTitle, extra=ColorLogFormatter.tag(LOG_DEBUG))
 							if showOutcomeReason and reason:
@@ -453,7 +454,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 	
 	def __init__(self, logfile, **kwargs):
 		# substitute into the filename template
-		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.cycle = -1
 		self.fp = None
 
@@ -464,7 +465,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
 
 		self.fp = flushfile(open(self.logfile, "w"))
-		self.fp.write('DATE:       %s (GMT)\n' % (time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time())) ))
+		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
 		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
 
@@ -484,7 +485,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 				self.cycle = kwargs["cycle"]
 				self.fp.write('\n[Cycle %d]:\n'%(self.cycle+1))
 		
-		self.fp.write("%s: %s\n" % (LOOKUP[testObj.getOutcome()], testObj.descriptor.id))
+		self.fp.write("%s: %s\n" % (testObj.getOutcome(), testObj.descriptor.id))
 
 def replaceIllegalXMLCharacters(unicodeString, replaceWith=u'?'):
 	"""
@@ -526,7 +527,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 
 	def __init__(self, logfile, **kwargs):
 		# substitute into the filename template
-		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.cycle = -1
 		self.numResults = 0
 		self.fp = None
@@ -558,7 +559,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	
 			# add the data node
 			element = self.document.createElement("timestamp")
-			element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+			element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
 			self.rootElement.appendChild(element)
 
 			# add the platform node
@@ -617,7 +618,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		nameAttribute = self.document.createAttribute("id")
 		outcomeAttribute = self.document.createAttribute("outcome")  
 		nameAttribute.value=testObj.descriptor.id
-		outcomeAttribute.value=LOOKUP[testObj.getOutcome()]
+		outcomeAttribute.value=str(testObj.getOutcome())
 		resultElement.setAttributeNode(nameAttribute)
 		resultElement.setAttributeNode(outcomeAttribute)
 
@@ -626,7 +627,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		resultElement.appendChild(element)
 		
 		element = self.document.createElement("timestamp")
-		element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))))
+		element.appendChild(self.document.createTextNode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
 		resultElement.appendChild(element)
 
 		element = self.document.createElement("descriptor")
@@ -710,7 +711,7 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		attr2 = document.createAttribute('tests')
 		attr2.value='1'
 		attr3 = document.createAttribute('failures')
-		attr3.value = '%d'%(int)(testObj.getOutcome() in FAILS)	
+		attr3.value = '%d'%(int)(testObj.getOutcome().isFailure())	
 		attr4 = document.createAttribute('skipped')	
 		attr4.value = '%d'%(int)(testObj.getOutcome() == SKIPPED)		
 		attr5 = document.createAttribute('time')	
@@ -731,10 +732,10 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		testcase.setAttributeNode(attr2)
 		
 		# add in failure information if the test has failed
-		if (testObj.getOutcome() in FAILS):
+		if (testObj.getOutcome().isFailure()):
 			failure = document.createElement('failure')
 			attr1 = document.createAttribute('message')
-			attr1.value = LOOKUP[testObj.getOutcome()]
+			attr1.value = str(testObj.getOutcome())
 			failure.setAttributeNode(attr1)
 			failure.appendChild(document.createTextNode( testObj.getOutcomeReason() ))		
 						
@@ -759,26 +760,6 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def _serializeXMLDocumentToBytes(self, document):
 		return replaceIllegalXMLCharacters(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep).decode('utf-8')).encode('utf-8')
 
-	def purgeDirectory(self, dir, delTop=False): # pragma: no cover
-		"""
-		:meta private: Deprecated, use L{pysys.utils.fileutils.deletedir} instead. 
-		"""
-		for file in os.listdir(dir):
-			path = os.path.join(dir, file)
-			if PLATFORM in ['sunos', 'linux']:
-				mode = os.lstat(path)[stat.ST_MODE]
-			else:
-				mode = os.stat(path)[stat.ST_MODE]
-		
-			if stat.S_ISLNK(mode):
-				os.unlink(path)
-			if stat.S_ISREG(mode):
-				os.remove(path)
-			elif stat.S_ISDIR(mode):
-				self.purgeDirectory(path, delTop=True)
-
-		if delTop: 
-			os.rmdir(dir)
 
 
 class CSVResultsWriter(BaseRecordResultsWriter):
@@ -794,7 +775,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 	def __init__(self, logfile, **kwargs):
 		# substitute into the filename template
-		self.logfile = time.strftime(logfile, time.gmtime(time.time()))
+		self.logfile = time.strftime(logfile, time.localtime(time.time()))
 		self.fp = None
 
 	def setup(self, **kwargs):
@@ -824,9 +805,9 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		csv.append(testObj.descriptor.id)
 		csv.append('\"%s\"'%testObj.descriptor.title)
 		csv.append(str(cycle))
-		csv.append((time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(testStart))))
+		csv.append((time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(testStart))))
 		csv.append(str(testTime))
-		csv.append(LOOKUP[testObj.getOutcome()])
+		csv.append(str(testObj.getOutcome()))
 		self.fp.write('%s \n' % ','.join(csv))
 
 class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter, TestOutcomeSummaryGenerator):
@@ -858,7 +839,7 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		self.startTime = time.time()
 
 		self.outcomes = {}
-		for o in PRECEDENT: self.outcomes[o] = 0
+		for o in OUTCOMES: self.outcomes[o] = 0
 		self._recentFailureReasons = []
 		self.threads = threads
 		self.inprogress = set() # this is thread-safe for add/remove
@@ -883,8 +864,8 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		
 		executed = sum(self.outcomes.values())
 		
-		if outcome in FAILS:
-			m = LOOKUP[outcome]+': '+id
+		if outcome.isFailure():
+			m = '%s: %s'%(outcome, id)
 			if testObj.getOutcomeReason(): m += ': '+testObj.getOutcomeReason()
 			self._recentFailureReasons.append(m)
 			self._recentFailureReasons = self._recentFailureReasons[-1*self.recentFailures:] # keep last N
@@ -895,9 +876,9 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		log.info('Test progress: %s = %s of tests in %d %s', ('completed %d/%d' % (executed, self.numTests)),
 				'%0.1f%%' % (100.0 * executed / self.numTests), int((time.time()-self.startTime)/timediv),
 				'seconds' if timediv==1 else 'minutes', extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS, [0,1]))
-		failednumber = sum([self.outcomes[o] for o in FAILS])
-		passed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o not in FAILS and self.outcomes[o]>0])
-		failed = ', '.join(['%d %s'%(self.outcomes[o], LOOKUP[o]) for o in PRECEDENT if o in FAILS and self.outcomes[o]>0])
+		failednumber = sum([self.outcomes[o] for o in OUTCOMES if o.isFailure()])
+		passed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if not o.isFailure() and self.outcomes[o]>0])
+		failed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if o.isFailure() and self.outcomes[o]>0])
 		if passed: log.info('   %s (%0.1f%%)', passed, 100.0 * (executed-failednumber) / executed, extra=ColorLogFormatter.tag(LOG_PASSES))
 		if failed: log.info('   %s', failed, extra=ColorLogFormatter.tag(LOG_FAILURES))
 		if self._recentFailureReasons:
@@ -1033,7 +1014,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		:param pysys.basetest.BaseTest testObj: The test object under consideration.
 		:return bool: True if this test's output can be archived. 
 		"""
-		return testObj.getOutcome() in FAILS
+		return testObj.getOutcome().isFailure()
 
 	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		if not self.shouldArchive(testObj): return 

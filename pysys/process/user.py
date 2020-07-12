@@ -94,8 +94,15 @@ class ProcessUser(object):
 		self.project = Project.getInstance()
 		"""The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
 
-		assert self.project or 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing
-		
+		if self.project is None:
+			assert 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing
+		else:
+			self.defaultAbortOnError = self.project.getProperty('defaultAbortOnError', True)
+			self.defaultIgnoreExitStatus = self.project.getProperty('defaultIgnoreExitStatus', False)
+			self.input = self.project.testRootDir
+
+		self.output = None # must be set by subclass
+
 		self.processList = []
 		self.processCount = {}
 		self.__cleanupFunctions = []
@@ -103,8 +110,6 @@ class ProcessUser(object):
 		self.outcome = [] # internal, do NOT use directly
 		self.__outcomeReason = ''
 		
-		self.defaultAbortOnError = self.project.defaultAbortOnError.lower()=='true' if hasattr(self.project, 'defaultAbortOnError') else DEFAULT_ABORT_ON_ERROR
-		self.defaultIgnoreExitStatus = self.project.defaultIgnoreExitStatus.lower()=='true' if hasattr(self.project, 'defaultIgnoreExitStatus') else True
 		self.__uniqueProcessKeys = {}
 		self.__pythonCoverageFile = 0
 		
@@ -118,16 +123,7 @@ class ProcessUser(object):
 		
 		# variables affecting a specific method (documented there rather than above)
 		self.logFileContentsDefaultExcludes = []
-
-	def __getattr__(self, name):
-		"""Set self.input or self.output to the current working directory if not defined.
 		
-		"""
-		if name == "input" or name == "output":
-			return os.getcwd()
-		else:
-			raise AttributeError("Unknown class attribute ", name)
-	
 	def allocateUniqueStdOutErr(self, processKey):
 		"""Allocate unique filenames of the form ``processKey[.n].out/.err`` 
 		which can be used for the `startProcess` ``stdouterr`` parameter. 
@@ -219,7 +215,7 @@ class ProcessUser(object):
 		val = getattr(self, propertyName, None)
 		if val is None: val = getattr(self.project, propertyName, None)
 		if val is None: return default
-		if val==True or val==False: return val
+		if val is True or val is False: return val
 		return val.lower()=='true'
 
 	def startPython(self, arguments, disableCoverage=False, **kwargs):
@@ -535,8 +531,8 @@ class ProcessUser(object):
 
 		e = {}
 
-		# allows setting TEMP to output dir to avoid contamination/filling up of system location
-		if getattr(self.project, 'defaultEnvironsTempDir',None)!=None:
+		# allows setting TEMP to output dir to avoid contamination/filling up of system location; set to blank to do nothing
+		if self.project.getProperty('defaultEnvironsTempDir',''):
 			tempDir = pysys.internal.safe_eval.safe_eval(self.project.defaultEnvironsTempDir, extraNamespace={'self':self})
 			
 			self.mkdir(tempDir)
@@ -1071,7 +1067,7 @@ class ProcessUser(object):
 
 		log.debug("Performing wait for grep signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
 		
-		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', False) or self.getBoolProperty('verboseWaitForGrep', False)
+		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', True) and self.getBoolProperty('verboseWaitForGrep', True)
 		if verboseWaitForSignal: 
 			# if verbose, log when starting (which is very helpful for debugging hangs); non-verbose users get the message only when it's done
 			log.info('%s%s', msg, '; timeout=%ss'%timeout if timeout!=TIMEOUTS['WaitForSignal'] else '')
@@ -1218,7 +1214,7 @@ class ProcessUser(object):
 			that this outcome is the one and only one reported even if an existing outcome 
 			has higher precedence. 
 		"""
-		assert outcome in PRECEDENT, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
+		assert outcome in OUTCOMES, outcome # ensure outcome type is known, and that numeric not string constant was specified! 
 		with self.lock:
 			if abortOnError == None: abortOnError = self.defaultAbortOnError
 			if outcomeReason is None:
@@ -1234,7 +1230,7 @@ class ProcessUser(object):
 				outcomeReason = stripANSIEscapeCodes(outcomeReason).strip().replace(u'\t', u' ').replace('\r','').replace('\n', ' ; ')
 			
 			if override: 
-				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', [LOOKUP[o] for o in self.outcome], self.__outcomeReason)
+				log.debug('addOutcome is removing existing outcome(s): %s with reason "%s"', self.outcome, self.__outcomeReason)
 				del self.outcome[:]
 				self.__outcomeReason = None
 			old = self.getOutcome()
@@ -1246,17 +1242,17 @@ class ProcessUser(object):
 			# although we should print whatever is passed in, store a version with control characters stripped 
 			# out so that it's easier to read (e.g. coloring codes from third party tools)
 			if self.getOutcome() != old: self.__outcomeReason = re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F]', '', outcomeReason)
-			if outcome in FAILS and abortOnError:
+			if outcome.isFailure() and abortOnError:
 				if callRecord==None: callRecord = self.__callRecord()
 				self.abort(outcome, outcomeReason, callRecord)
 
 			if outcomeReason and printReason:
-				if outcome in FAILS:
+				if outcome.isFailure():
 					if callRecord==None: callRecord = self.__callRecord()
-					log.warn(u'%s ... %s %s', outcomeReason, LOOKUP[outcome].lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
-							 extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+					log.warn(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
+							 extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 				else:
-					log.info(u'%s ... %s', outcomeReason, LOOKUP[outcome].lower(), extra=BaseLogFormatter.tag(LOOKUP[outcome].lower(),1))
+					log.info(u'%s ... %s', outcomeReason, str(outcome).lower(), extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 
 	def abort(self, outcome, outcomeReason, callRecord=None):
 		"""Raise an AbortException with the specified outcome and reason.
@@ -1282,27 +1278,19 @@ class ProcessUser(object):
 		raise AbortExecution(SKIPPED, outcomeReason, callRecord)
 
 	def getOutcome(self):
-		"""Get the overall outcome based on the precedence order.
-				
-		The method returns the overall outcome of the test based on the outcomes stored in the internal data
-		structure. The `pysys.constants.PRECEDENT` order of the possible outcomes is used to determined the overall outcome 
-		of the test, e.g. if `pysys.constants.PASSED`, `pysys.constants.BLOCKED` and `pysys.constants.FAILED` were 
-		recorded during the execution of the test, the overall outcome would be `pysys.constants.BLOCKED`. 
-		
-		The method returns the integer value of the outcome as defined in `pysys.constants`. To convert this 
-		to a string representation use the `pysys.constants.LOOKUP` dictionary i.e. ``LOOKUP[test.getOutcome()]``.
+		"""Get the final outcome for this test, based on the precedence order defined in `pysys.constants.OUTCOMES`.
 		
 		To find out whether this test has failed::
 		
-			if self.getOutcome() in FAILS:
+			if self.getOutcome().isFailure():
 				...
 		
-		:return: The overall outcome
+		:return pysys.constants.Outcome: The overall outcome. Use ``%s`` or ``str()`` to convert to a display name. 
 
 		"""	
 		with self.lock:
 			if len(self.outcome) == 0: return NOTVERIFIED
-			return sorted(self.outcome, key=lambda x: PRECEDENT.index(x))[0]
+			return sorted(self.outcome, key=lambda x: OUTCOMES.index(x))[0]
 
 
 	def getOutcomeReason(self):
@@ -1313,7 +1301,7 @@ class ProcessUser(object):
 
 		"""	
 		with self.lock:
-			fails = len([o for o in self.outcome if o in FAILS])
+			fails = len([o for o in self.outcome if o.isFailure()])
 			if self.__outcomeReason and (fails > 1): return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
 			return self.__outcomeReason
 
@@ -1602,7 +1590,7 @@ class ProcessUser(object):
 			additional information can be passed to this method in future releases. 
 		
 		:return: The encoding to use for this file, or None if default behaviour is 
-			to be used.
+			to be used. For example, ``utf-8`` or (for UTF-8 with a Byte Order Mark), ``utf-8-sig``. 
 		"""
 		file = file.replace('\\','/').lower() # normalize slashes and ignore case
 		for e in self.project.defaultFileEncodings:

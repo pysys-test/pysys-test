@@ -14,32 +14,18 @@
 
 
 	<!-- 
-	Get a reference to the environment, which can then be used as a substitution variable 
-	within the project file, e.g. ${env.PROCESSORS} would be substituted with the value of
-	the PROCESSORS environment variable if it is specified within the environment.
-	
-	Note that ${env.XXX} values can only be used within this file (they do not result in 
-	project properties being automatically defined for each environment variable). 
+		The following standard project properties are always defined and can be accessed through ${prop} syntax:
+		
+			${testRootDir} - Path of the root directory containing the pysysproject.xml file
+			${outDirName}  - The basename (with parent dirs removed) from the outdir for this test run. 
+			                 This may be the name of the current OS or a unique user-specified name for the test run.
+			${os}          - The operating system name e.g. 'windows', 'linux', 'darwin'
+			${startDate}   - The date that this test run was started, in a form that can be used in filenames. 
+			${startTime}   - The (local) time that this test run was started, in a form that can be used in filenames. 
+			${hostname}    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
+ 		
+		In addition, within this file ${env.VARNAME} syntax can be used to access environment variables. 
 	-->
-	<property environment="env"/>
-
-	
-	<!-- 
-	Get a reference to the osfamily, which can then be used as a substitution variable 
-	within the project file, e.g. ${osfamily} would take the value windows on win32 systems,
-	and unix on Linux or Solaris.
-	-->
-	<property osfamily="osfamily"/>
-
-
-	<!-- 
-	Get a reference to project root location (the location of this file), which can then be used 
-	as a substitution variable within the project file. Note that this is only for local expansion 
-	within the project file, where the project root location is required for full paths, e.g. 
-	stylesheets etc. Within a test class, the root location can be referenced using the 
-	self.project.root class variable. If not specified, defaults to "root".
-	-->
-	<property root="testRootDir"/>
 	
 	
 	<!-- 
@@ -48,9 +34,6 @@
 	Project properties can be used as substitution variables within the project file, and 
 	are set as attributes on the Project class for use by tests. In the example below, "user" 
 	would be available to tests as "self.project.user".
-	
-	Property values can make use of other project properties using ${XXX} syntax, or environment 
-	variables using ${env.XXX} syntax. 
 
 	If a property value contains any properties or environment variables that do not exist, 
 	the "default" is used instead (or "" if a default is not explicitly specified). If the default 
@@ -61,58 +44,11 @@
 
 
 	<!-- 
-	Controls whether tests will abort as a fail as soon as a process or wait operation
-	completes with errors. The default value as specified below will be used when the abortOnError 
-	parameter to the function is not specified. 
-	-->
-	<property name="defaultAbortOnError" value="true"/>	
-
-
-	<!-- 
-	Controls whether by default tests will report a failure outcome when a process completes with 
-	a non-zero return code. The default value as specified below will be used when the ignoreExitStatus 
-	parameter to the function is not specified. 
-	-->
-	<property name="defaultIgnoreExitStatus" value="false"/>
-	
-	<!-- 
 	Set default LANG for child processes on Unix. 
 	Useful for making all machines behave the same. Ensure that the specified 
 	locale is installed on all machines. 
 	-->
 	<!-- <property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/> -->
-
-	<!-- 
-	Set temporary directory for child processes to the testcase output 
-	directory to avoid cluttering up common file locations. 
-	-->
-	<property name="defaultEnvironsTempDir" value="self.output"/>
-
-	<!-- Recommended behaviour is to not strip whitespace unless explicitly requested; this option exists to keep 
-		compatibility for old projects. 
-	-->
-	<property name="defaultAssertDiffStripWhitespace" value="False"/>
-
-
-	<!-- 
-	Controls whether print() and sys.stdout.write() statements will be 
-	converted into logger.info() calls. If redirection is enabled, output 
-	from print() statements will not be captured in run.log files and will 
-	often not appear in the correct place on the console when running 
-	multi-threaded. 
-	
-	Note that this affects writers as well as testcases. 
-	
-	Use pysys.utils.logutils.stdoutPrint() to write to stdout without any 
-	redirection. 
-	-->
-	<property name="redirectPrintToLogger" value="false"/>
-	
-	<!-- Set this to true unless you need pre-1.4.1 mode behaviour for compatibility reasons. -->
-	<property name="supportMultipleModesPerRun" value="true"/>
-
-	<!-- Produces more informative messages from waitForGrep/Signal. -->
-	<property name="verboseWaitForGrep" value="true"/>
 
 	<!-- 
 	Import project properties from a file. 
@@ -126,29 +62,28 @@
 	so for example other project properties can be referenced withint the values 
 	using ${...} syntax. 
 	 -->
-	<property file="${osfamily}.properties" pathMustExist="false"/>
+	<property file="${os}.properties" pathMustExist="false"/>
 
 
 	<!-- 
 	Add a path to the python path to allow importing custom modules, e.g. extensions to the 
-	BaseTest or BaseRunner classes, or customer test output writers. If the relative attribute 
-	is set to true, then the path is treated as relative to the project root location; otherwise 
-	the path is treated as absolute, e.g. to add the src directory to the python path at runtime 
-	use;
-	
-	<pythonpath value="./src" relative="true" />
+	BaseTest or BaseRunner classes, or customer test output writers. 
+	-->
+	<!--
+	<pythonpath value="${testRootDir}/pysys-extensions" />
 	-->
 
 
 	<!-- 
 	Use a custom runner class that extends the BaseRunner class distributed with PySys. Extensions to 
 	the BaseRunner are used to define custom setup and tear down operations before running the set of 
-	selected tests (e.g. to load test data into a relational database prior to the test runs, and then 
+	selected tests (e.g. to load test data into a database prior to the test runs, and then 
 	clear out the data on completion), as well as to defined operations between the execution of individual 
 	tests and after completion of a cycle of tests. For example, to use the MyRunner class in the 
-	com.company.test module use;
-	
-	<runner classname="MyRunner" module="com.company.test"/>
+	com.company.test module use:
+	-->
+	<!--
+	<runner classname="com.company.test.MyRunner"/>
 	-->
 
 
@@ -156,8 +91,9 @@
 	Use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
 	ConsoleMakeTestHelper class in order to create templated run.py scripts e.g. when a test module has
 	a repeatable pattern for running or validating etc. 
-	
-	<maker classname="MyMaker" module="com.company.test"/>
+	-->
+	<!--
+	<maker classname="com.company.test.MyMaker"/>
 	-->
 
 
@@ -176,7 +112,7 @@
 			directories. The destDir could then be uploaded to a CI system (some CI writers 
 			implement this automatically) or manually copied to a file share. 
 		-->
-		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		<writer classname="pysys.writer.TestOutputArchiveWriter">
 			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
@@ -186,8 +122,8 @@
 		<!-- CI writers automatically enable themselves only if running under 
 			the associated CI environment. 
 		-->
-		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
-		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
+		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
 
 		<!--
 		Add in the JUnit results writer for PySys test output to be written in the widely-used Apache Ant JUnit XML format.
@@ -195,11 +131,11 @@
 		Use the outputDir property to define the output directory for the JUnit test summary files (the writer will 
 		produce one file per test into this output directory). 
 		-->
-		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+		<writer classname="pysys.writer.JUnitXMLResultsWriter">
 			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 
-		<writer classname="XMLResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.xml">
+		<writer classname="pysys.writer.XMLResultsWriter" file="__pysys_testsummary_${outDirName}_%Y-%m-%d_%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
 			can be set are the stylesheet location, whether to use file URLs in all references 
@@ -223,7 +159,7 @@
 		<!--
 		Add in the test results writer if output to a text file is required 
 		
-		<writer classname="TextResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log">
+		<writer classname="pysys.writer.TextResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
@@ -232,7 +168,7 @@
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
-		<writer classname="CSVResultsWriter" module="pysys.writer" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
+		<writer classname="pysys.writer.CSVResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->		
@@ -241,7 +177,7 @@
 			optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
 			list if no other "summary" writer is explicitly configured.
 		-->		
-		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+		<writer classname="pysys.writer.ConsoleSummaryResultsWriter">
 			<property name="showTestTitle" value="false"/>
 		</writer>
 	</writers>
@@ -287,6 +223,9 @@
 	</execution-order>
 	
 	<!--
+	In most projects there is no reason to provide a <formatters> element, but it can be used if you wish to customize 
+	the log line format (incl date/time format) or console coloring. 
+	
 	Specify custom formatters for logging to the console or run.log, and/or configure the formatter
 	appropriately through custom properties. Custom formatters should be defined using the classname
 	and module attributes and should extend the pysys.utils.logutils.BaseLogFormatter class. If no
@@ -299,7 +238,7 @@
 	GREEN, YELLOW, RED, MAGENTA, CYAN, WHITE and BLACK.
 	-->
 	<formatters>
-		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
+		<formatter classname="pysys.utils.logutils.ColorLogFormatter" 
 				name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
 			<!-- 
 			<property name="color" value="true"/>
@@ -319,13 +258,13 @@
 			<property name="color:skipped" value="YELLOW"/>
 		</formatter>
 
-		<formatter classname="BaseLogFormatter" module="pysys.utils.logutils"
+		<formatter classname="pysys.utils.logutils.BaseLogFormatter" 
 				name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 	</formatters>
 	
 	<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/internal/utilities/python_coveragerc"/>
 
-	<property name="pythonCoverageDir" value="${testRootDir}/__coverage_python_@OUTDIR@"/>
+	<property name="pythonCoverageDir" value="${testRootDir}/__coverage_python_${outDirName}"/>
 	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 	
 	<project-help>

@@ -103,6 +103,25 @@ New features
   by PySys (for example, by writers). This helps avoid outputs getting mixed up with testcase directories and also 
   allows for easier ignore rules for version control systems. 
 
+- Added a standard property ``${os}`` to the project file as a more modern alternative to ``${osfamily}``. This takes 
+  its value from Python's ``platform.system().lower()``, taking values such as ``windows``, ``linux``, etc. 
+
+- Added a standard property ``${outDirName}`` to the project file which is the basename from the ``-outdir``, giving 
+  a user-customizable "name" for the current test run that can be used in project property paths to keep test 
+  runs separate, for example, this could be used to label performance CSV files from separate test runs with 
+  ``--outdir perf_baseline`` and ``--outdir after_perf_improvements``. 
+
+- The standard project property ``testRootDir`` is now defined automatically without the need to 
+  add the boilerplate ``<property root= ... />`` to your project configuration. The old property name ``root`` 
+  continues to be defined for compatibility with older projects. 
+
+- Added `pysys.xml.project.Project.getProperty()` which is a convenient and safe way to get a project property 
+  of bool/int/float type. 
+
+- Added `pysys.utils.fileutils.loadProperties()` for reading .properties files. 
+
+- Added `pysys.utils.fileutils.loadJSON()` for loading .json files. 
+
 Bug fixes
 ---------
 
@@ -111,16 +130,153 @@ Bug fixes
 - Ensure ANSI escape codes (e.g. for console coloring) do not appear in JUnit XML writer output files, or in test 
   outcome reasons. 
 
+- Setting the project property ``redirectPrintToLogger`` to any value (including ``false``) was treated as if 
+  it had been set to ``true``; this is now fixed. 
+
 Upgrade guide and compatibility
 -------------------------------
 
+As this is a major version release of PySys we have taken the opportunity do cleanup some aspects which could 
+cause some minor breakage or changes (though in many cases no action will be needed):
+
+- The default values of several project properties have been changed to reflect best practice. The new defaults match 
+  the values that have been in the sample/template project files for the last few releases so this change will mostly 
+  affect users who created their project a long time ago and haven't updated it recently. 
+  
+  If you are migrating an existing project it's simplest to initially keep current behaviour by adding the following 
+  properties to your project configuration (except for any that you already define ``<property .../>`` overrides for). 
+  Then once the PySys upgrade is complete and all tests passing you can switch to the new defaults (by removing these) 
+  if and when convenient. 
+  
+  The properties to add to keep the same behaviour as pre-1.6.0 versions of PySys are::
+  
+    <!-- Controls whether by default tests will report a failure outcome when a process completes with 
+        a non-zero return code. The default value as specified below will be used when the ignoreExitStatus 
+        parameter to the function is not specified. -->
+    <property name="defaultIgnoreExitStatus" value="true"/>
+    
+    <!-- Controls whether tests will abort as a fail as soon as a process or wait operation
+        completes with errors. The default value as specified below will be used when the abortOnError 
+        parameter to the function is not specified. -->
+    <property name="defaultAbortOnError" value="false"/>
+    
+    <!-- Recommended behaviour is to NOT strip whitespace unless explicitly requested with the stripWhitespace= 
+         option; this option exists to keep compatibility for old projects. -->
+    <property name="defaultAssertDiffStripWhitespace" value="true"/>
+    
+    <!-- Set this to true unless you used the "mode" feature before it was redesigned in PySys 1.4.1. -->
+    <property name="supportMultipleModesPerRun" value="false"/>
+    
+    <!-- Set temporary directory end var for child processes to the testcase output directory to avoid cluttering up 
+        common file locations. Empty string means don't do this. "self.output" is recommended. 
+    -->
+    <property name="defaultEnvironsTempDir" value=""/>
+    
+    <!-- Controls whether print() and sys.stdout.write() statements will be automatically converted into logger.info() 
+        calls. If redirection is disabled, output from print() statements will not be captured in run.log files and will 
+        often not appear in the correct place on the console when running multi-threaded. 
+        
+        Note that this affects custom writers as well as testcases. If you have a custom writer, use 
+        pysys.utils.logutils.stdoutPrint() to write to stdout without any redirection. -->
+    <property name="redirectPrintToLogger" value="false"/>
+    
+    <!-- Produces more informative messages from waitForGrep/Signal. Can be set to false for old behaviour if 
+         preferred. -->
+    <property name="verboseWaitForGrep" value="false"/>
+
+  The list is ordered with the properties most likely to break existing tests at the top of the list, so you may wish 
+  to start with the easier ones at the bottom of the list. 
+  
+- The default directory for performance output is now under ``__pysys_performance/`` rather than 
+  ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it. 
+  Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
+  see `pysys.utils.perfreporter` for details. 
+
+- If you have testcases using the non-standard descriptor names ``.pysystest`` or ``descriptor.xml`` (rather than the 
+  usual ``pysystest.xml``) they will not be found by this version of PySys by default, so action is required to have 
+  them execute as normal. If you wish to avoid renaming the files, just set the new project 
+  property ``pysysTestDescriptorFileNames`` to a comma-separated list of the names you want to use, 
+  e.g. "pysystest.xml, .pysystest, descriptor.xml".
+
+- If you use the non-standard filename ``.pysysproject`` rather than ``pysysproject.xml`` for your project 
+  configuration file you will need to rename it. 
+
+- Properties files referenced in the project properties are now read using UTF-8 encoding if possible, falling back to 
+  ISO8859-1 if they contain invalid UTF-8. This follows Java(R) 9+ behaviour and provides for more stable results 
+  than the previous PySys behaviour of using whatever the default locale encoding is, which does not conform to any 
+  standard for .properties file and makes it impossible to share a .properties file across tests running in different 
+  locales. The PySys implementation still does not claim to fully implement the .properties file format, for example 
+  ``\`` are treated as literals not escape sequences. See `pysys.utils.fileutils.loadProperties()` for details. 
+
+- PySys used to silently ignore project (or writer) properties that use a missing (or typo'd) property or environment 
+  variable, setting it to "" or the default value is specified. To ensure errors are noticed upfront, it is now a fatal 
+  error if a property's value value cannot be resolved - unless a ``default=`` value is provided in which case the 
+  default is used (but it would be an error if the default also references a non-existent variable). This is unlikely 
+  to cause problems for working projects, however if you have some unused properties with invalid values you may 
+  have to remove them. The new behaviour only applies to ``<property name="..." value="..." [default="..."]/>`` 
+  elements, it does not apply to properties read from .properties file which still default to "" if unresolved. 
+  Run your tests with ``-vDEBUG`` logging if you need help debugging properties problems. 
+
+- Changed timestamps in process monitor output, writers, performance reporter and similar places from UTC to local time. 
+  This means these timestamps will match up with the times in run.log output which have always been local time. 
+  
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
-- `pysys.process.common.CommonProcessWrapper.wait` now returns an error if the specified timeout is isn't a positive 
-  number (giving the same behaviour as `BaseTest.waitProcess`). 
-- Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
-  "THERE WERE NO NON PASSES", and similarly for the "Summary of non passes:". 
+
+- The method `pysys.basetest.BaseTest.addResource` is deprecated and will be removed in a future release, so please 
+  change tests to stop using it; use `pysys.basetest.BaseTest.addCleanupFunction` instead. 
+
+- Deprecated the ``ThreadFilter`` class as there is no reason for PySys to provide these. Usually it is not recommended 
+  to suppress log output and alternatives are available, e.g. the quiet=True option for `BaseTest.startProcess`. 
+
+- There are some additional changes which could potentially cause a problem but are highly unlikely to affect anyone 
+  in practice. In most cases no change will be needed, so you can probably ignore these unless 
+  you get a problem when running your tests:
+  
+    - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 
+      There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you 
+      prefer a different output directory on your machine you could customize it by setting environment variable 
+      ``PYSYS_DEFAULT_ARGS=--outdir __myoutputdir``. 
+    - The ``self.output`` directory for the runner (if used) is now named ``__pysys_runner/`` instead of 
+      ``pysys-runner/``. It is not very likely anything will be depending on this directory. 
+    - You may want to add ``__pysys_*`` and possibly ``__coverage_*`` to your version control system's ignore patterns 
+      so that paths created by the PySys runner don't show up in local changes. 
+    - If you created a custom subclass of `pysys.utils.perfreporter.CSVPerformanceReporter` using the 1.3.0 release and 
+      it does not yet have (and pass through to the superclass) a ``runner`` and/or ``**kwargs`` argument you will need 
+      to add these. 
+    - Made it an error to change project properties after the project has been loaded. This was never intended, as projects 
+      are immutable. In the unlikely event you do this, change to storing user-defined cross-test/global state in your 
+      runner class instead. 
+    - Project properties whose name clashes with one of the pre-defined members of `pysys.xml.project.Project` 
+      (e.g. "properties" or "root") will no longer override those members - which would most likely not work correctly 
+      anyway. If you need to access a property whose name clashes with a built-in member, use 
+      `pysys.xml.project.Project.properties`.
+    - Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
+      `pysys.constants.Outcome` rather than an integer. It is unlikely this change will affect existing code (unless you 
+      have created any custom outcome types, which is not documented). The use of objects to represent outcomes allows for 
+      simpler and more efficient conversion to display name using a ``%s`` format string or ``str()`` without the need for 
+      the LOOKUP dictionary (which still works, but is now deprecated). It also allows easier checking if an outcome 
+      represents a failure using `pysys.constants.Outcome.isFailure()`. The `pysys.constants.PRECEDENT` constant is 
+      deprecated in favour of `pysys.constants.OUTCOMES` which has an identical value.
+    - There is no longer a default writer so if you choose delete the <writers> element from your project you won't 
+      have any writers. 
+    - Removed undocumented ``TEST_TEMPLATE`` constant from ``pysys.basetest`` and ``DESCRIPTOR_TEMPLATE`` 
+      from `pysys.xml.descriptor`` (they're now constants on `pysys.console.ConsoleMakeTestHelper` if you really need 
+      them, but this is unlikely and they are still not part of the public PySys API). 
+    - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
+    - Removed deprecated method ``purgeDirectory()`` from `pysys.baserunner.BaseRunner` 
+      and `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
+    - Removed deprecated classes ``ThreadedStreamHandler`` and ``ThreadedFileHandler`` from the 
+      ``pysys.`` module as there is no reason for PySys to provide these. These are trivial to implement using the 
+      Python logging API is anyone does need similar functionality. 
+    - `pysys.process.user.ProcessUser` no longer sets ``self.output``, and sets ``self.input`` to the project's 
+      testRootDir instead of the current directory. Since these are overridden by `pysys.basetest.BaseTest` and 
+      `pysys.baserunner.BaseRunner` it is unlikely this will affect anyone.
+    - Changed the log messages at the end of a test run to say "THERE WERE NO FAILURES" instead of 
+      "THERE WERE NO NON PASSES", and similarly for the "Summary of non passes:". 
+    - `pysys.process.common.CommonProcessWrapper.wait` now raises an error if the specified timeout isn't a positive 
+      number (giving the same behaviour as `BaseTest.waitProcess`). 
 
 ---------------
 Release History

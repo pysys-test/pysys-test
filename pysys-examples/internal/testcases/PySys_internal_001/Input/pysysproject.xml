@@ -4,7 +4,7 @@
 	<property name="env_user_prepend" value="append-on-front-${env.TEST_USER}" />
 	<property name="env_user_append" value="${env.TEST_USER}-append-on-back" />
 	<property name="env_default" value="${env.NOT_EXIST}" default="default value"/>
-	<property name="env_default_none" value="${env.NOT_EXIST}" />
+	<property name="env_default_none" value="${env.NOT_EXIST}" default=""/> 
 	<property name="user_firstname" value="Simon" />
 	<property name="user_lastname" value="Smith" />
 	<property name="user_title" value="Professor" />
@@ -12,5 +12,10 @@
 	
 	<property name="projectbool" value="tRue"/>
 	<property name="projectbooloverride" value="tRue"/>
-	
+
+	<property name="sample_path" value="${os}_${hostname}_${startDate}_${startTime}"/>
+
+	<property name="projectint" value="1234"/>
+	<property name="projectfloat" value="456.78"/>
+
 </pysysproject>

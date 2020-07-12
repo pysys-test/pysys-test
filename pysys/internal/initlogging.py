@@ -92,78 +92,6 @@ class _UnicodeSafeStreamWrapper(object):
 		stream.flush()
 		stream.close()
 
-class ThreadedStreamHandler(logging.StreamHandler): # pragma: no cover
-	"""Stream handler to only log from the creating thread.
-	
-	Overrides logging.StreamHandler to only allow logging to a stream 
-	from the thread that created the class instance and added to the root 
-	logger via log.addHandler(ThreadedStreamHandler(stream)).
-
-	This is used to pass log output from the specific test that creates this 
-	handler to stdout, either immediately or (when multiple threads are in use) 
-	at the end of each test's execution. 
-	
-	@deprecated: For internal use and backwards compatibility only, do not use. 
-	"""
-	def __init__(self, strm):
-		"""Overrides logging.StreamHandler.__init__.
-		:param strm: the stream
-		"""
-		self.threadId = threading.current_thread().ident
-		logging.StreamHandler.__init__(self, strm)
-		
-	def emit(self, record):
-		"""Overrides logging.StreamHandler.emit."""
-		if self.threadId != threading.current_thread().ident: return
-		logging.StreamHandler.emit(self, record)
-
-
-class ThreadedFileHandler(logging.FileHandler): # pragma: no cover
-	"""File handler to only log from the creating thread.
-	
-	Overrides logging.FileHandler to only allow logging to file from 
-	the thread than created the class instance and added to the root 
-	logger via log.addHandler(ThreadFileHandler(filename)).
-	
-	This is used to pass log output from the specific test 
-	that creates this handler to the associated run.log. 
-
-	@deprecated: No longer used, will be removed. 
-	"""
-	def __init__(self, filename, encoding=None):
-		"""Overrides logging.FileHandler.__init__"""
-		self.threadId = threading.current_thread().ident
-		logging.FileHandler.__init__(self, filename, "a", encoding=self.__streamencoding)
-
-	def emit(self, record):
-		"""Overrides logging.FileHandler.emit."""
-		if self.threadId != threading.current_thread().ident: return
-		# must put formatted messages into the buffer otherwise we lose log level 
-		# and (critically) exception tracebacks from the output
-		logging.FileHandler.emit(self, record)
-		
-
-class ThreadFilter(logging.Filterer):
-	"""Filter to disallow log records from the current thread.
-	
-	Within pysys, logging to standard output is only enabled from the main thread 
-	of execution (that in which the test runner class executes). When running with
-	more than one test worker thread, logging to file of the test run log is 
-	performed through a file handler, which only allows logging from that thread. 
-	To disable either of these, use an instance of this class from the thread in 
-	question, adding to the root logger via log.addFilter(ThreadFilter()).
-	
-	"""
-	def __init__(self):
-		"""Overrides logging.Filterer.__init__"""
-		self.threadId = threading.current_thread().ident
-		logging.Filterer.__init__(self)
-		
-	def filter(self, record):
-		"""Implementation of logging.Filterer.filter to block from the creating thread."""
-		if self.threadId != threading.current_thread().ident: return True
-		return False
-
 class DelegatingPerThreadLogHandler(logging.Handler):
 	"""A log handler that delegates emits to a list of handlers, 
 	set on a per-thread basis. If no handlers are setup for this 
@@ -194,6 +122,29 @@ class DelegatingPerThreadLogHandler(logging.Handler):
 					emitFunction(record)
 	def flush(self): 
 		for h in self.getLogHandlersForCurrentThread(): h.flush()
+
+class ThreadFilter(logging.Filterer):
+	"""Filter to disallow log records from the current thread.
+	
+	Deprecated. 
+	
+	Within pysys, logging to standard output is only enabled from the main thread 
+	of execution (that in which the test runner class executes). When running with
+	more than one test worker thread, logging to file of the test run log is 
+	performed through a file handler, which only allows logging from that thread. 
+	To disable either of these, use an instance of this class from the thread in 
+	question, adding to the root logger via log.addFilter(ThreadFilter()).
+	
+	"""
+	def __init__(self):
+		"""Overrides logging.Filterer.__init__"""
+		self.threadId = threading.current_thread().ident
+		logging.Filterer.__init__(self)
+		
+	def filter(self, record):
+		"""Implementation of logging.Filterer.filter to block from the creating thread."""
+		if self.threadId != threading.current_thread().ident: return True
+		return False
 
 #####################################
 

@@ -4,4 +4,5 @@
 		<writer classname="TravisCIWriter" module="pysys.writer.ci">
 		</writer>
 	</writers>
+	<property name="supportMultipleModesPerRun" value="true"/> <!-- since ci option doesn't work otherwise -->
 </pysysproject>

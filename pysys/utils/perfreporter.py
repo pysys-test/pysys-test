@@ -86,24 +86,30 @@ class CSVPerformanceReporter(object):
 	After tests have run, the summary file is published with category "CSVPerformanceReport" 
 	using the `pysys.writer.ArtifactPublisher` interface. 
 
+	:param project: The project configuration instance.
+	:param str summaryfile: The filename pattern used for the summary file(s). 
+		If not specified explicitly, the summary file for the CSVPerformanceReporter can be configured 
+		with the project property ``csvPerformanceReporterSummaryFile``. See `getRunSummaryFile()`. 
+	
+	:param str testoutdir: The output directory used for this test run 
+		(equal to `runner.outsubdir`), an identifying string which often contains 
+		the platform, or when there are multiple test runs on the same machine 
+		may be used to distinguish between them. This is usually a relative path 
+		but may be an absolute path. 
+		
+	:param runner: Pass this through to the superclass. 
+	:param kwargs: Pass any additional keyword arguments through to the super class. 
 	"""
 
-	def __init__(self, project, summaryfile, testoutdir, **kwargs):
-		"""Construct an instance of the performance reporter.
+	DEFAULT_SUMMARY_FILE = '__pysys_performance/@OUTDIR@_@HOSTNAME@/perf_@DATE@_@TIME@.csv'
+	"""The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or 
+	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. 
+	"""
 
-		:param project: The project configuration instance.
-		:param summaryfile: The filename pattern used for the summary file(s)
-		
-		:param testoutdir: The output directory used for this test run 
-			(equal to `runner.outsubdir`), an identifying string which often contains 
-			the platform, or when there are multiple test runs on the same machine 
-			may be used to distinguish between them. This is usually a relative path 
-			but may be an absolute path. 
-
-		"""
-		self.runner = kwargs.pop('runner', None) or self._runnerSingleton
+	def __init__(self, project, summaryfile, testoutdir, runner, **kwargs):
+		self.runner = runner
 		assert self.runner is not None
-		assert not kwargs, kwargs.keys() # **kwargs allows constructor to be extended in future fi needed; give error if any unexpected args are passed
+		assert not kwargs, kwargs.keys() # **kwargs allows constructor to be extended in future if needed; give error if any unexpected args are passed
 		
 		self.testoutdir = os.path.basename(testoutdir)
 		self.summaryfile = summaryfile
@@ -134,7 +140,7 @@ class CSVPerformanceReporter(object):
 		d = collections.OrderedDict()
 		d['outdir'] = self.testoutdir
 		d['hostname'] = self.hostname
-		d['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.runStartTime))
+		d['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.runStartTime))
 		return d
 	
 	def valueToDisplayString(self, value):
@@ -155,20 +161,20 @@ class CSVPerformanceReporter(object):
 	def getRunSummaryFile(self, testobj):
 		"""Return the fully substituted location of the file to which summary performance results will be written.
 
-		This may include the following substitutions: @OUTDIR@ (the basename of the output directory for this run,
-		e.g. "linux"), @HOSTNAME@, @DATE@, @TIME@, and @TESTID. The default is '@OUTDIR@_@HOSTNAME@/perf_@DATE@_@TIME@.csv'.
+		This may include the following substitutions: ``@OUTDIR@`` (the basename of the output directory for this run,
+		e.g. "linux"), ``@HOSTNAME@``, ``@DATE@``, ``@TIME@``, and ``@TESTID@``. The default is given by `DEFAULT_SUMMARY_FILE`. 
 		If the specified file does not exist it will be created; it is possible to use multiple summary files from the same
 		run. The path will be resolved relative to the pysys project root directory unless an absolute path is specified.
 
 		:param testobj: the test case instance registering the value
 
 		"""
-		summaryfile = self.summaryfile or 'performance_output/@OUTDIR@_@HOSTNAME@/perf_@DATE@_@TIME@.csv'
+		summaryfile = self.summaryfile or getattr(self.project, 'csvPerformanceReporterSummaryFile', '') or self.DEFAULT_SUMMARY_FILE
 		summaryfile = summaryfile\
 			.replace('@OUTDIR@', os.path.basename(self.testoutdir)) \
 			.replace('@HOSTNAME@', self.hostname) \
-			.replace('@DATE@', time.strftime('%Y-%m-%d', time.gmtime(self.runStartTime))) \
-			.replace('@TIME@', time.strftime('%H.%M.%S', time.gmtime(self.runStartTime))) \
+			.replace('@DATE@', time.strftime('%Y-%m-%d', time.localtime(self.runStartTime))) \
+			.replace('@TIME@', time.strftime('%H.%M.%S', time.localtime(self.runStartTime))) \
 			.replace('@TESTID@', testobj.descriptor.id)
 		
 		assert summaryfile, repr(getRunSummaryFile) # must not be empty
@@ -245,7 +251,7 @@ class CSVPerformanceReporter(object):
 			else:
 				self.__previousResultKeys[resultKey] = (testobj.descriptor.id, testobj.testCycle, d)
 
-		if testobj.getOutcome() in FAILS:
+		if testobj.getOutcome().isFailure():
 			testobj.log.warn('   Performance result "%s" will not be recorded as test has failed', resultKey)
 			return
 
@@ -298,7 +304,7 @@ class CSVPerformanceReporter(object):
 			alreadyexists = os.path.exists(path)
 			with open(path, 'a') as f:
 				if not alreadyexists: 
-					testobj.log.info('Creating performance summary log file at: %s', path)
+					testobj.log.info('Creating performance summary log file at: %s', os.path.normpath(path))
 					f.write(self.getRunHeader())
 				f.write(formatted)
 			self.__summaryFilesWritten.add(path)

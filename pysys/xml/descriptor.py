@@ -34,73 +34,6 @@ from pysys.utils.pycompat import PY2, isstring
 
 log = logging.getLogger('pysys.xml.descriptor')
 
-DTD='''
-<!ELEMENT pysystest (description, classification?, skipped?, execution-order?, id-prefix?, data?, traceability?) > 
-<!ELEMENT description (title, purpose) >
-<!ELEMENT classification (groups?, modes?) >
-<!ELEMENT data (class?, input?, output?, reference?) >
-<!ELEMENT traceability (requirements) >
-<!ELEMENT id-prefix (#PCDATA) >
-<!ELEMENT title (#PCDATA) >
-<!ELEMENT purpose (#PCDATA) >
-<!ELEMENT groups (group)+ >
-<!ELEMENT modes (mode)+ >
-<!ELEMENT class EMPTY >
-<!ELEMENT input EMPTY >
-<!ELEMENT output EMPTY >
-<!ELEMENT reference EMPTY >
-<!ELEMENT requirements (requirement)+ >  
-<!ELEMENT group (#PCDATA) >
-<!ELEMENT mode (#PCDATA) >
-<!ELEMENT requirement EMPTY >
-<!ATTLIST pysystest type (auto | manual ) "auto" >
-<!ATTLIST pysystest state (runnable | deprecated | skipped) "runnable" >
-<!ATTLIST execution-order hint>
-<!ATTLIST skipped reason >
-<!ATTLIST class name CDATA #REQUIRED
-                module CDATA #REQUIRED >
-<!ATTLIST input path CDATA #REQUIRED >
-<!ATTLIST output path CDATA #REQUIRED >
-<!ATTLIST reference path CDATA #REQUIRED >
-<!ATTLIST groups inherit (true | false) "true" >
-<!ATTLIST modes inherit (true | false) "true" >
-<!ATTLIST requirement id CDATA #REQUIRED >
-'''
-
-
-DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
-<pysystest type="%s">
-  
-  <description> 
-    <title></title>    
-    <purpose><![CDATA[
-]]>
-    </purpose>
-  </description>
-  
-  <classification>
-    <groups inherit="true">
-      <group>%s</group>
-    </groups>
-    <modes inherit="true">
-    </modes>
-  </classification>
-
-  <!-- <skipped reason=""/> -->
-
-  <data>
-    <class name="%s" module="%s"/>
-  </data>
-  
-  <traceability>
-    <requirements>
-      <requirement id=""/>     
-    </requirements>
-  </traceability>
-</pysystest>
-''' 
-
-
 class TestDescriptor(object):
 	"""Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory 
 	subtree (``pysysdirconfig.xml``). 
@@ -704,7 +637,8 @@ class DescriptorLoader(object):
 		
 		descriptors = []
 		ignoreSet = set(OSWALK_IGNORES)
-		descriptorSet =set(DEFAULT_DESCRIPTOR)
+		
+		descriptorSet = set(map(str.strip, project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')))
 		
 		projectfound = project.projectFile != None
 		log = logging.getLogger('pysys.launcher')

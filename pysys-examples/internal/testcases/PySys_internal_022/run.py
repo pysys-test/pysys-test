@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 		self.initialstatus = self.hprocess.running()
 		
 		# wait for ten iterations and then stop the process
-		self.waitForGrep('counter.out', expr='Count is 9', timeout=6)
+		self.waitForGrep('counter.out', expr='Count is 9')
 		self.stopProcess(self.hprocess)
 		
 		# check the process status

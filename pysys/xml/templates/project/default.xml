@@ -3,44 +3,36 @@
 	<requires-pysys>@PYSYS_VERSION@</requires-pysys>
 	<requires-python>@PYTHON_VERSION@</requires-python>
 	
-	<property root="testRootDir"/>
-	<property environment="env"/>
-	<property osfamily="osfamily"/>
-
+	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${startDate}, ${startTime}, ${hostname}. -->
+	
 	<!-- User-defined properties -->
-
-	<!-- Standard default settings. See sample project file and API docs for more details. -->
-	<property name="defaultAbortOnError" value="true"/>	
-	<property name="defaultIgnoreExitStatus" value="false"/>
-	<property name="defaultEnvironsTempDir" value="self.output"/>
-	<property name="defaultAssertDiffStripWhitespace" value="False"/>
-	<property name="redirectPrintToLogger" value="false"/>
-	<property name="supportMultipleModesPerRun" value="true"/>
-	<property name="verboseWaitForGrep" value="true"/>
-
+	<!--
+	<property name="myProperty" value="myValue"/>	
+	-->
+	
 	<!-- Custom test framework extensions, if needed -->
 	<!--
-	<pythonpath value="../framework" relative="true" />
-	<runner classname="MyRunner" module="my.organization"/>
-	<maker classname="MyTestMaker" module="my.organization"/>
+	<pythonpath value="./pysys-extensions" />
+	<runner classname="my.organization.MyRunner"/>
+	<maker classname="my.organization.MyTestMaker"/>
 	-->
 
 	<writers>
-		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
+		<writer classname="pysys.writer.TestOutputArchiveWriter">
 			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
 			<property name="maxArchives" value="50"/>
 		</writer>
 		
-		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
-		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
+		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
 
-		<writer classname="JUnitXMLResultsWriter" module="pysys.writer">
+		<writer classname="pysys.writer.JUnitXMLResultsWriter">
 			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
 		</writer>
 		
-		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
+		<writer classname="pysys.writer.ConsoleSummaryResultsWriter">
 		</writer>
 	</writers>
 
@@ -52,15 +44,7 @@
 		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
 	</default-file-encodings>	
 	
-	<formatters>
-		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils" 
-			name="stdout" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt="%H:%M:%S">
-		</formatter>
-
-		<formatter classname="BaseLogFormatter" module="pysys.utils.logutils" 
-			name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
-	</formatters>
-	
 	<project-help>
+		<!-- Add project-specific text to be appended to the "pysys run -h". -->
 	</project-help>
 </pysysproject>

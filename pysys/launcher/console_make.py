@@ -27,9 +27,7 @@ from pysys import log
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
-from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
 from pysys.xml.project import Project
-from pysys.basetest import TEST_TEMPLATE
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
 
@@ -40,6 +38,48 @@ class ConsoleMakeTestHelper(object):
 	A custom subclass can be specified in the project if required. 
 	"""
 
+	TEST_TEMPLATE = '''%s
+%s
+
+class %s(%s):
+	def execute(self):
+		pass
+
+	def validate(self):
+		pass
+	''' # not public API, do not use
+
+	DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="%s">
+  
+  <description> 
+	<title></title>    
+	<purpose><![CDATA[
+]]>
+	</purpose>
+  </description>
+  
+  <classification>
+	<groups inherit="true">
+	  <group>%s</group>
+	</groups>
+	<modes inherit="true">
+	</modes>
+  </classification>
+
+  <!-- <skipped reason=""/> -->
+
+  <data>
+	<class name="%s" module="%s"/>
+  </data>
+  
+  <traceability>
+	<requirements>
+	  <requirement id=""/>     
+	</requirements>
+  </traceability>
+</pysystest>
+''' 
 
 	def __init__(self, name=""):
 		self.name = name
@@ -51,15 +91,16 @@ class ConsoleMakeTestHelper(object):
 	def printUsage(self):
 		""" Print help info and exit. """
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
-
-		print("\nPySys System Test Framework (version %s): Console make test helper" % __version__) 
-		print("\nUsage: %s %s [option]+ [testid]" % (_PYSYS_SCRIPT_NAME, self.name))
+		#######                                                                                                                        |
+		print("\nPySys System Test Framework (version %s): New test maker" % __version__) 
+		print("\nUsage: %s %s [option]+ TESTID" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes:")
-		print("       -h | --help                 print this message")
+		print("       -d | --dir      STRING      parent directory in which to create TESTID (default is current working dir)")
 		print("       -a | --type     STRING      set the test type (auto or manual, default is auto)")
-		print("       -d | --dir      STRING      base path to testcase (default is current working dir)")
+		print("       -h | --help                 print this message")
 		print("")
-		print("   and where [testid] is the mandatory test identifier.")
+		print("   and where TESTID is the id of the new test which should consist of letters, numbers and underscores, ")
+		print("   for example: MyApp_perf_001 (numeric style) or InvalidFooBarProducesError ('test that XXX' long string style).")
 		sys.exit()
 
 
@@ -129,20 +170,24 @@ class ConsoleMakeTestHelper(object):
 			os.makedirs(os.path.join(self.testdir, self.testId, reference))
 			log.info("Created directory %s " % os.path.join(self.testdir, self.testId, reference))
 			descriptor_fp = open(os.path.join(self.testdir, self.testId, descriptor), "w")
-			descriptor_fp.write(DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
+			descriptor_fp.write(self.DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
 			descriptor_fp.close()
 			log.info("Created descriptor %s " % os.path.join(self.testdir, self.testId, descriptor))
 			testclass_fp = open(os.path.join(self.testdir, self.testId, "%s.py" % module), "w")
 			if teststring == None:
-				testclass_fp.write(TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
+				testclass_fp.write(self.TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
 			else:
 				testclass_fp.write(teststring)
 			testclass_fp.close()
 			log.info("Created test class module %s " % os.path.join(self.testdir, self.testId, "%s.py" % module))	
 
 def makeTest(args):
-	module = import_module(Project.getInstance().makerModule, sys.path)
-	maker = getattr(module, Project.getInstance().makerClassname)("make")
+	Project.findAndLoadProject()
+
+	cls = Project.getInstance().makerClassname.split('.')
+	module = import_module('.'.join(cls[:-1]), sys.path)
+	maker = getattr(module, cls[-1])("make")
+
 	maker.parseArgs(args)
 	maker.makeTest()
 

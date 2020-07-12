@@ -27,6 +27,8 @@ from pysys.utils.pycompat import openfile
 def replace(input, output, dict={}, marker='', encoding=None):
 	"""Read an input file, and write to output tailoring the file to replace set keywords with values.
 
+	:deprecated: It is recommended to use `pysys.basetest.BaseTest.copy()` instead of this method. 
+
 	The replace method reads in the contents of the input file line by line, checks for matches in 
 	each line to the keys in the dictionary dict parameter, and replaces each match with the value
 	of the dictionary for that key, writing the line to the output file. The marker parameter is a

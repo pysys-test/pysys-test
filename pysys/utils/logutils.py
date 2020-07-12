@@ -58,7 +58,8 @@ class BaseLogFormatter(logging.Formatter):
 
 		:param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}
 		:param arg_index: The index of argument in the string expansion to color. This can be either a single
-			integer value representing the index, or a list of integers representing a set of indexes
+			integer value representing the index, or a list of integers representing a set of indexes to be colored. 
+			Note that format arguments for coloring must be of string type. 
 		:return: A dictionary that can then be used in calls to the logger
 		"""
 		if type(arg_index) is int: return {cls.CATEGORY:category, cls.ARG_INDEX:[arg_index]}
@@ -78,11 +79,13 @@ class BaseLogFormatter(logging.Formatter):
 		:param propertiesDict: dictionary of formatter-specific options
 
 		"""
-		self.name = propertiesDict.pop('name', None)
+		self.name = propertiesDict.pop('name', None) # probably not used
+		
+		__formatterName = propertiesDict.pop('__formatterName', None)
 
 		super(BaseLogFormatter, self).__init__(
 			propertiesDict.pop('messagefmt', DEFAULT_FORMAT),
-			propertiesDict.pop('datefmt', None) )
+			propertiesDict.pop('datefmt', '%H:%M:%S' if __formatterName=='stdout' else None) )
 		assert not isinstance(self._fmt, binary_type), 'message format must be a unicode not a byte string otherwise % arg formatting will not work consistently'
 		if propertiesDict: raise Exception('Unknown formatter option(s) specified: %s'%', '.join(list(propertiesDict.keys())))
 
@@ -220,9 +223,9 @@ class ColorLogFormatter(BaseLogFormatter):
 		super(ColorLogFormatter, self).__init__(propertiesDict)
 
 		# ensure all outcomes are permitted as possible precedents		
-		for outcome in PRECEDENT:
-			if LOOKUP[outcome].lower() not in self.COLOR_CATEGORIES:
-				self.COLOR_CATEGORIES[LOOKUP[outcome].lower()] = self.COLOR_CATEGORIES[LOG_FAILURES] if outcome in FAILS else self.COLOR_CATEGORIES[LOG_PASSES]
+		for outcome in OUTCOMES:
+			if str(outcome).lower() not in self.COLOR_CATEGORIES:
+				self.COLOR_CATEGORIES[str(outcome).lower()] = self.COLOR_CATEGORIES[LOG_FAILURES] if outcome.isFailure() else self.COLOR_CATEGORIES[LOG_PASSES]
 		for cat in self.COLOR_CATEGORIES: assert self.COLOR_CATEGORIES[cat] in self.COLOR_ESCAPE_CODES, cat
 
 

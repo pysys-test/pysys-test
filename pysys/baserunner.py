@@ -24,6 +24,7 @@ any resources that are shared across multiple tests.
 from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
 import fnmatch
+import re
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -79,8 +80,8 @@ class BaseRunner(ProcessUser):
 	Do not override the ``__init__`` constructor when creating a runner subclass; instead, add any initialization logic 
 	to your `setup()` method. 
 	
-	:ivar str ~.outsubdir: The directory name for the the output of each testcase. Typically a relative path,
-		but can also be an absolute path. 
+	:ivar str ~.outsubdir: The ``--outdir`` for this test run, which gives the directory to be used for the output of 
+		each testcase. Typically a relative path, but can also be an absolute path. 
 
 	:ivar str ~.output: The full path of the output directory that this runner can use for storing any persistent state, 
 		e.g. logs for any servers started in the runner `setup` method. The runner output directory is formed based 
@@ -134,9 +135,9 @@ class BaseRunner(ProcessUser):
 		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
 		# runner subclasses to do so if required. 
 		if os.path.isabs(outsubdir):
-			self.output = os.path.join(outsubdir, 'pysys-runner')
+			self.output = os.path.join(outsubdir, '__pysys_runner')
 		else:
-			self.output = os.path.join(self.project.root, 'pysys-runner-%s'%outsubdir)
+			self.output = os.path.join(self.project.root, '__pysys_runner_%s'%outsubdir)
 
 		self.record = record
 		self.purge = purge
@@ -146,7 +147,7 @@ class BaseRunner(ProcessUser):
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
-		self.supportMultipleModesPerRun = getattr(self.project, 'supportMultipleModesPerRun', '').lower()=='true'
+		self.supportMultipleModesPerRun = self.project.getProperty('supportMultipleModesPerRun', True)
 		if not self.supportMultipleModesPerRun:
 			self.mode = mode
 
@@ -166,10 +167,10 @@ class BaseRunner(ProcessUser):
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		self.__printLogsDefault = extraOptions['printLogsDefault']
-		for classname, module, filename, properties in self.project.writers:
-			module = import_module(module, sys.path)
-			writer = getattr(module, classname)(logfile=filename) # invoke writer's constructor
-			for key in list(properties.keys()): setattr(writer, key, properties[key])
+		for writerclass, writerprops in self.project.writers:
+			writer = writerclass(logfile=writerprops.pop('file', None)) # invoke writer's constructor
+			writer.runner = self
+			for key, value in writerprops.items(): setattr(writer, key, value)
 			
 			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
 			
@@ -397,27 +398,25 @@ class BaseRunner(ProcessUser):
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet
 			from pysys.utils.perfreporter import CSVPerformanceReporter
-			try:
-				self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir, runner=self)]
-			except Exception:
-				# support for passing kwargs was added in 1.4.0; this branch is a hack to provide compatibility with 1.3.0 custom reporter classes
-				CSVPerformanceReporter._runnerSingleton = self
-				self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir)]
-				del CSVPerformanceReporter._runnerSingleton
+			self.performanceReporters = [self.project.perfReporterConfig[0](self.project, self.project.perfReporterConfig[1], self.outsubdir, runner=self)]
 		
 		class PySysPrintRedirector(object):
 			def __init__(self):
 				self.last = None
 				self.encoding = sys.stdout.encoding
 				self.log = logging.getLogger('pysys.stdout')
+				self.logWarning = True
 			def flush(self): pass
 			def write(self, s): 
+				if self.logWarning is True:
+					self.logWarning = False
+					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) instead of print() within PySys tests')
 				# heuristic for coping with \n happening in a separate write to the message - ignore first newline after a non-newline
 				if s!='\n' or self.last=='\n': 
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
-		if getattr(self.project, 'redirectPrintToLogger', False):
+		if self.project.getProperty('redirectPrintToLogger', True):
 			sys.stdout = PySysPrintRedirector()
 		
 		# call the hook to setup prior to running tests
@@ -460,7 +459,7 @@ class BaseRunner(ProcessUser):
 				# loop through tests for the cycle
 				try:
 					self.results[cycle] = {}
-					for outcome in PRECEDENT: self.results[cycle][outcome] = []
+					for outcome in OUTCOMES: self.results[cycle][outcome] = []
 			
 					for descriptor in self.descriptors:
 						container = TestContainer(descriptor, cycle, self)
@@ -565,7 +564,7 @@ class BaseRunner(ProcessUser):
 		coverage data from other languages, e.g. Java. 		
 		"""
 		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
-		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir is not None:
+		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir:
 			pythonCoverageDir = os.path.join(self.project.root, pythonCoverageDir
 				.replace('@OUTDIR@', os.path.basename(self.outsubdir))) # matches collect-test-output logic
 			if not pathexists(pythonCoverageDir):
@@ -663,7 +662,7 @@ class BaseRunner(ProcessUser):
 		with self.__resultWritingLock:
 			# print if we need to AND haven't already done so using single-threaded ALL print-as-we-go
 			if runLogOutput and ((self.printLogs==PrintLogs.ALL and self.threads > 1) or (
-				self.printLogs==PrintLogs.FAILURES and testObj.getOutcome() in FAILS)): 
+				self.printLogs==PrintLogs.FAILURES and testObj.getOutcome().isFailure())): 
 				try:
 					# write out cached messages from the worker thread to stdout
 					# (use the stdoutHandler stream which includes coloring redirections if applicable, 
@@ -680,7 +679,7 @@ class BaseRunner(ProcessUser):
 			if self.printLogs != PrintLogs.NONE and stdoutHandler.level >= logging.WARN:
 				# print at least some information even if logging is turned down; 
 				# but if in PrintLogs.NONE mode truly do nothing, as there may be a CI writer doing a customized variant of this
-				log.critical("%s: %s (%s)", LOOKUP[testObj.getOutcome()], descriptor.id, descriptor.title)
+				log.critical("%s: %s (%s)", testObj.getOutcome(), descriptor.id, descriptor.title)
 			
 			# pass the test object to the test writers if recording
 			for writer in self.writers:
@@ -775,8 +774,14 @@ class BaseRunner(ProcessUser):
 		log.info(62*"=")
 		title = textwrap.wrap(descriptor.title.replace('\n','').strip(), 56)
 		log.info("Id   : %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+
+		badchars = re.sub('[\\w_.-]+','', descriptor.id) 
+		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
+		if badchars: log.warn('Unsupported characters "%s" found in test id "%s"; please use alphanumeric characters and underscore for test ids', badchars, descriptor.id)
+
 		if len(title)>0:
 			log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		
 		for l in title[1:]:
 			log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		if self.cycle > 1: # only log if this runner is doing multiple cycles
@@ -987,7 +992,7 @@ class TestContainer(object):
 				self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
 				log.info("")
 				log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
-				log.info("Test final outcome:  %s", LOOKUP[self.testObj.getOutcome()], extra=BaseLogFormatter.tag(LOOKUP[self.testObj.getOutcome()].lower(), 0))
+				log.info("Test final outcome:  %s", str(self.testObj.getOutcome()), extra=BaseLogFormatter.tag(str(self.testObj.getOutcome()).lower(), 0))
 				if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
 					log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
 				log.info("")
@@ -1003,37 +1008,6 @@ class TestContainer(object):
 		finally:
 			pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread)
 	
-	# utility methods
-	def purgeDirectory(self, dir, delTop=False): # pragma: no cover (deprecated, no longer used)
-		"""Recursively purge a directory removing all files and sub-directories.
-		
-		:param dir: The top level directory to be purged
-		:param delTop: Indicates if the top level directory should also be deleted
-
-		@deprecated: Use L{pysys.utils.fileutils.deletedir} instead. 
-		"""
-		try:
-			for file in os.listdir(toLongPathSafe(dir)):
-				path = toLongPathSafe(os.path.join(dir, file))
-				if PLATFORM in ['sunos', 'linux']:
-					mode = os.lstat(path)[stat.ST_MODE]
-				else:
-					mode = os.stat(path)[stat.ST_MODE]
-			
-				if stat.S_ISLNK(mode):
-					os.unlink(path)
-				if stat.S_ISREG(mode):
-					os.remove(path)
-				elif stat.S_ISDIR(mode):
-					self.purgeDirectory(path, delTop=True)
-			if delTop: os.rmdir(toLongPathSafe(dir))
-
-		except OSError as ex:
-			log.warning("Caught OSError in purgeDirectory():")
-			log.warning(ex)
-			log.warning("Directory %s may not be completely purged" % dir)
-
-
 	def detectCore(self, dir):
 		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
 		

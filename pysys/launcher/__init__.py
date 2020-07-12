@@ -81,7 +81,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	# must sort by id for range matching and dup detection to work deterministically
 	descriptors.sort(key=lambda d: [d.id, d.file])
 	
-	supportMultipleModesPerRun = getattr(project, 'supportMultipleModesPerRun', '').lower()=='true'
+	supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)
 	
 	# as a convenience support !mode syntax in the includes
 	modeexcludes = modeexcludes+[x[1:] for x in modeincludes if x.startswith('!')]
@@ -242,15 +242,15 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				elif '~' in t:
 					# The utility of this would be close to zero and lots more to implement/test, so not worth it
 					raise UserError('A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
-				elif re.search('^:[\w_.]*', t):
+				elif re.search('^:[\w_.-]*', t):
 					index = findMatchingIndex(t.split(':')[1])
 					matches = descriptors[:index+1]
 
-				elif re.search('^[\w_.]*:$', t):
+				elif re.search('^[\w_.-]*:$', t):
 					index = findMatchingIndex(t.split(':')[0])
 					matches = descriptors[index:]
 
-				elif re.search('^[\w_.]*:[\w_.]*$', t):
+				elif re.search('^[\w_.-]*:[\w_.-]*$', t):
 					index1 = findMatchingIndex(t.split(':')[0])
 					index2 = findMatchingIndex(t.split(':')[1])
 					if index1 > index2:
@@ -259,7 +259,10 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 
 				else: 
 					# regex match
-					matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
+					try:
+						matches = [descriptors[i] for i in range(0,len(descriptors)) if re.search(t, descriptors[i].id)]
+					except Exception as ex:
+						raise UserError('"%s" contains characters not valid in a test id, but isn\'t a valid regular expression either: %s'%(t, ex))
 					if not matches: raise UserError("No test ids found matching regular expression: \"%s\""%t)
 
 				if not matches: raise UserError("No test ids found matching: \"%s\""%st)

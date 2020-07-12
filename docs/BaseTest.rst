@@ -56,8 +56,9 @@ can be accessed via instance attributes on ``self``:
   test should write output files, temporary files and logs. The output directory is automatically created and 
   cleaned of existing content before the test runs to ensure separate runs do not influence each other. 
   There are separate output directories when a test is run for multiple cycles or in multiple modes. 
-  The directory is usually ``<testdir>/Output/<outdir>`` but the path can be customized in the testcase descriptor.  
-	
+  The directory is usually ``<testdir>/Output/<outdir>`` but the path can be customized in the testcase descriptor and 
+  the ``--outdir`` command line argument. 
+  
 - ``self.reference`` *(str)*: Full path to the reference directory of the testcase, which is where reference comparison files 
   are stored (typically for use with `assertDiff`).
   The directory is usually ``<testdir>/Reference`` but the path can be customized in the testcase descriptor. 
@@ -125,16 +126,7 @@ For example::
 		self.assertGrep('myserver.log', expr='Successfully authenticated user ".*"')
 		self.assertThat('actualNumberOfLogFiles == expected', actualNumberOfLogFiles=len(glob.glob(self.output+'/myserver*.log')), expected=3)
 
-The available outcomes for each assertion are contained in the `pysys.constants` module:
-
-.. autosummary::
-	pysys.constants.PASSED
-	pysys.constants.NOTVERIFIED
-	pysys.constants.FAILED
-	pysys.constants.TIMEDOUT
-	pysys.constants.DUMPEDCORE
-	pysys.constants.BLOCKED
-	pysys.constants.SKIPPED
+The available test outcomes are listed in `pysys.constants.OUTCOMES`. 
 
 There are some deprecated methods which we do not recommend using: `assertEval`, `assertTrue`, `assertFalse` 
 (`assertThat` should be used instead of these). 

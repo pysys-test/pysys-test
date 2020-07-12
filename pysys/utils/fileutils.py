@@ -18,13 +18,15 @@
 
 """
 File and directory handling utility functions such as mkdir and deletedir, with enhanced error handling and 
-support for long paths on Windows.
+support for long paths on Windows. Also some simple utilities for loading properties and JSON files. 
 """
 
 import os, shutil, time, locale
+import collections
+import json
 
 from pysys.constants import IS_WINDOWS
-from pysys.utils.pycompat import PY2
+from pysys.utils.pycompat import PY2, openfile
 
 def toLongPathSafe(path, onlyIfNeeded=False):
 	"""
@@ -160,3 +162,42 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 		time.sleep(0.5) # work around windows file-locking issues
 		deletedir(path, retries = retries-1, onerror=onerror)
 
+def loadProperties(path, encoding='utf-8-sig'):
+	"""
+	Reads keys and values from the specified ``.properties`` file. 
+	
+	Support ``#`` and ``!`` comments but does not perform any special handling of backslash ``\\`` characters 
+	(either for escaping or for line continuation). Leading and trailing whitespace around keys and values 
+	is stripped. If you need handling of ``\\`` escapes and/or expansion of ``${...}`` placeholders this should be 
+	performed manually on the returned values. 
+	
+	:param str path: The path to the properties file. 
+	:param str encoding: The encoding to use (unless running under Python 2 in which case byte strings are always returned). 
+		The default is UTF-8 (with optional Byte Order Mark). 
+	:return dict[str:str]: An ordered dictionary containing the keys and values from the file. 
+	"""
+	result = collections.OrderedDict()
+	with openfile(path, mode='r', encoding=None if PY2 else encoding, errors='strict') as fp:
+		for line in fp:
+			line = line.lstrip()
+			if len(line)==0 or line.startswith(('#','!')): continue
+			line = line.split('=', 1)
+			if len(line) != 2: continue
+			result[line[0].strip()] = line[1].strip()
+
+	return result
+
+
+def loadJSON(path, **kwargs):
+	"""
+	Reads JSON from the specified path. 
+	
+	This is a small wrapper around Python's ``json.load()`` function. 
+	
+	:param str path: The path to the JSON file, which must be encoded using UTF-8 (with optional Byte Order Mark). 
+	:param kwargs: Keyword arguments will be passed to ``json.load()``.
+	:return obj: A dict, list, or other Python object representing the contents of the JSON file. 
+	"""
+	with openfile(path, mode='r', encoding='utf-8-sig', errors='strict') as fp:
+		return json.load(fp, **kwargs)
+		

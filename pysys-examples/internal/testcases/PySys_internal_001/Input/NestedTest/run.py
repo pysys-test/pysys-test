@@ -12,6 +12,8 @@ class PySysTest(BaseTest):
 	testFloatUserData = 0.0
 
 	def execute(self):
+		self.write_text(self.project.sample_path+'.txt', 'xxx') # check these don't contain any non-file system characters
+	
 		self.proj = self.project
 		self.assertTrue(self.proj.env_user == "Felicity Kendal")
 		self.assertTrue(self.proj.env_user_prepend == "append-on-front-Felicity Kendal")
@@ -40,6 +42,14 @@ class PySysTest(BaseTest):
 		self.assertThat('testNoneProperty == "Hello"', testNoneProperty=self.testNoneProperty)
 		self.assertThat('testStringUserData == expected', testStringUserData=self.testStringUserData, expected='Hello ${non-existent}')
 
+		# check coersion based on default value supplied
+		self.assertThat('projectbool is True', projectbool__eval="self.project.getProperty('projectbool', False)")
+		self.assertThat('projectint == 1234', projectint__eval="self.project.getProperty('projectint', -1)")
+		self.assertThat('projectfloat == 456.78', projectfloat__eval="self.project.getProperty('projectfloat', 0.0)")
+		self.assertThat('user_lastname == "Smith"', user_lastname__eval="self.project.getProperty('user_lastname', 'xxx')")
+
+		#self.assertThat('throws1', testStringProperty__eval="self.project.getProperty('projectfloat', -1)")
+		#self.assertThat('throws2', testStringProperty__eval="self.project.getProperty('projectfloat', None)")
 
 	def validate(self):
 		pass 

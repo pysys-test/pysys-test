@@ -16,9 +16,8 @@ class PySysTest(BaseTest):
 		runPySys(self, 'makeproject-custom', ['makeproject', '--dir', self.output+'/mytestRootDir', '--template=default'])
 		
 		# should not overwrite even though filename is different
-		open(self.mkdir(self.output+'/fakeprojroot')+'/.pysysproject','w').close()
-		exitcode = runPySys(self, 'makeproject-alreadyexists', ['makeproject', '--dir', 'fakeprojroot'], ignoreExitStatus=True).exitStatus
-		self.assertThat('%d != 0'%exitcode)
+		open(self.mkdir(self.output+'/fakeprojroot')+'/pysysproject.xml','w').close()
+		exitcode = runPySys(self, 'makeproject-alreadyexists', ['makeproject', '--dir', 'fakeprojroot'], expectedExitStatus='!=0')
 
 		runPySys(self, 'make', ['make', 'mynewtest'])
 		runPySys(self, 'run', ['run','mynewtest'])

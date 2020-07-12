@@ -1,5 +1,8 @@
 <?xml version="1.0" standalone="yes"?>
 <pysysproject>
-	<property environment="env"/>
-	
+<!-- Pre-1.6.0 default -->	
+
+  	<property name="defaultAbortOnError" value="false"/>	
+	<property name="defaultIgnoreExitStatus" value="true"/>
+
 </pysysproject>
