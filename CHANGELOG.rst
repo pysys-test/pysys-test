@@ -259,8 +259,9 @@ cause some minor breakage or changes (though in many cases no action will be nee
       deprecated in favour of `pysys.constants.OUTCOMES` which has an identical value.
     - There is no longer a default writer so if you choose delete the <writers> element from your project you won't 
       have any writers. 
-    - Removed undocumented ``TEST_TEMPLATE`` constant from ``pysys.basetest`` (it's now in 
-      `pysys.console.ConsoleMakeTestHelper` but still not part of the public PySys API). 
+    - Removed undocumented ``TEST_TEMPLATE`` constant from ``pysys.basetest`` and ``DESCRIPTOR_TEMPLATE`` 
+      from `pysys.xml.descriptor`` (they're now constants on `pysys.console.ConsoleMakeTestHelper` if you really need 
+      them, but this is unlikely and they are still not part of the public PySys API). 
     - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
     - Removed deprecated method ``purgeDirectory()`` from `pysys.baserunner.BaseRunner` 
       and `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 

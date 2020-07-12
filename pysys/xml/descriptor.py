@@ -34,39 +34,6 @@ from pysys.utils.pycompat import PY2, isstring
 
 log = logging.getLogger('pysys.xml.descriptor')
 
-DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
-<pysystest type="%s">
-  
-  <description> 
-    <title></title>    
-    <purpose><![CDATA[
-]]>
-    </purpose>
-  </description>
-  
-  <classification>
-    <groups inherit="true">
-      <group>%s</group>
-    </groups>
-    <modes inherit="true">
-    </modes>
-  </classification>
-
-  <!-- <skipped reason=""/> -->
-
-  <data>
-    <class name="%s" module="%s"/>
-  </data>
-  
-  <traceability>
-    <requirements>
-      <requirement id=""/>     
-    </requirements>
-  </traceability>
-</pysystest>
-''' 
-
-
 class TestDescriptor(object):
 	"""Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory 
 	subtree (``pysysdirconfig.xml``). 

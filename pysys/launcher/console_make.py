@@ -27,7 +27,6 @@ from pysys import log
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
-from pysys.xml.descriptor import DESCRIPTOR_TEMPLATE
 from pysys.xml.project import Project
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
@@ -40,16 +39,47 @@ class ConsoleMakeTestHelper(object):
 	"""
 
 	TEST_TEMPLATE = '''%s
-	%s
+%s
 
-	class %s(%s):
-		def execute(self):
-			pass
+class %s(%s):
+	def execute(self):
+		pass
 
-		def validate(self):
-			pass
+	def validate(self):
+		pass
 	''' # not public API, do not use
 
+	DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="%s">
+  
+  <description> 
+	<title></title>    
+	<purpose><![CDATA[
+]]>
+	</purpose>
+  </description>
+  
+  <classification>
+	<groups inherit="true">
+	  <group>%s</group>
+	</groups>
+	<modes inherit="true">
+	</modes>
+  </classification>
+
+  <!-- <skipped reason=""/> -->
+
+  <data>
+	<class name="%s" module="%s"/>
+  </data>
+  
+  <traceability>
+	<requirements>
+	  <requirement id=""/>     
+	</requirements>
+  </traceability>
+</pysystest>
+''' 
 
 	def __init__(self, name=""):
 		self.name = name
@@ -140,7 +170,7 @@ class ConsoleMakeTestHelper(object):
 			os.makedirs(os.path.join(self.testdir, self.testId, reference))
 			log.info("Created directory %s " % os.path.join(self.testdir, self.testId, reference))
 			descriptor_fp = open(os.path.join(self.testdir, self.testId, descriptor), "w")
-			descriptor_fp.write(DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
+			descriptor_fp.write(self.DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
 			descriptor_fp.close()
 			log.info("Created descriptor %s " % os.path.join(self.testdir, self.testId, descriptor))
 			testclass_fp = open(os.path.join(self.testdir, self.testId, "%s.py" % module), "w")
