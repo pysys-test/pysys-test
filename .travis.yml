@@ -200,7 +200,7 @@ deploy:
     overwrite: true
     on: 
        # by default we only create a draft release for commits to release
-       branch: release
+       branch: 1.6additional
        
        # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
        condition: $PYSYS_DOC_AND_DEPLOY = true
