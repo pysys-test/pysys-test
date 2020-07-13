@@ -25,6 +25,7 @@ import json
 import shlex
 import multiprocessing
 
+import pysys
 from pysys import log
 from pysys import __version__
 from pysys.constants import *
@@ -109,7 +110,8 @@ Execution options
        --ci                    set optimal options for automated/non-interactive test execution in a CI job: 
                                  --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
-                   CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
+                   CAT=LEVEL   set the verbosity for a specific PySys logging category e.g. -vassertions=, -vprocess=
+                               (or to set the verbosity for a non-PySys Python logger category use "python:CAT=LEVEL")
    -y, --validateOnly          test the validate() method without re-running execute()
    -h, --help                  print this message
  
@@ -238,7 +240,13 @@ e.g.
 				if '=' in verbosity:
 					loggername, verbosity = value.split('=')
 					assert not loggername.startswith('pysys.'), 'The "pysys." prefix is assumed and should not be explicitly specified'
-					loggername = 'pysys.'+loggername
+					if loggername.startswith('python:'):
+						loggername = loggername[len('python:'):]
+						assert not loggername.startswith('pysys'), 'Cannot use python: with pysys.*' # would produce a duplicate log handler
+						# in the interests of performance and simplicity we normally only add the pysys.* category 
+						logging.getLogger(loggername).addHandler(pysys.internal.initlogging.pysysLogHandler)
+					else:
+						loggername = 'pysys.'+loggername
 				else:
 					loggername = None
 				

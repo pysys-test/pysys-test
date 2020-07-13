@@ -104,6 +104,11 @@ New features
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
   to make it easier to run in CI jobs. 
 
+- Added support for including Python log messages for categories other than pysys.* in the PySys test output, 
+  using a "python:" prefix on the category name, e.g.::
+  
+    pysys run -vpython:myorg.mycategory=debug
+
 - Sample project file introduces a new naming convention of ``__pysys_*`` for output directories and files created 
   by PySys (for example, by writers). This helps avoid outputs getting mixed up with testcase directories and also 
   allows for easier ignore rules for version control systems. 
