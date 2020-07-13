@@ -1,0 +1,153 @@
+[
+   {
+      "id": "rootprefix_dir3prefix_Test_SubdirMinimalDescriptor",
+      "testDir": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml",
+      "type": "manual",
+      "state": "skipped",
+      "skippedReason": "<unknown skipped reason>",
+      "title": "Nested testcase",
+      "purpose": "Nested purpose",
+      "groups": [
+         "root-group1",
+         "root-group2",
+         "dir2-group",
+         "dir3-group"
+      ],
+      "modes": [
+         "root-mode1",
+         "root-mode2",
+         "dir2-mode",
+         "dir3-mode"
+      ],
+      "primaryMode": "root-mode1",
+      "requirements": [
+         "root-req1",
+         "root-req2",
+         "dir2-req",
+         "dir3-req"
+      ],
+      "executionOrderHint": [
+         -5.2
+      ],
+      "classname": "PySysTest-dir3",
+      "module": "run_dir3",
+      "input": "Input-dir3",
+      "output": "Output-dir3",
+      "reference": "Reference-dir3",
+      "userData": {
+         "myUserDataInt": "50",
+         "myUserDataBool": "trUe"
+      }
+   },
+   {
+      "id": "rootprefix_testprefix.Test_RootFullDescriptor",
+      "testDir": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml",
+      "type": "manual",
+      "state": "deprecated",
+      "skippedReason": null,
+      "title": "Nested testcase",
+      "purpose": "Nested purpose",
+      "groups": [
+         "root-group1",
+         "root-group2",
+         "testcase-group1",
+         "testcase-group2"
+      ],
+      "modes": [
+         "root-mode1",
+         "root-mode2",
+         "testcase-mode1",
+         "testcase-mode2"
+      ],
+      "primaryMode": "root-mode1",
+      "requirements": [
+         "root-req1",
+         "root-req2",
+         "testcase-req1",
+         "testcase-req2"
+      ],
+      "executionOrderHint": [
+         9.9
+      ],
+      "classname": "PySysTest-testcase",
+      "module": "run_testcase",
+      "input": "Input-testcase",
+      "output": "Output-testcase",
+      "reference": "Reference-testcase",
+      "userData": {
+         "myUserDataInt": "100",
+         "myUserDataBool": "trUe",
+         "myExtraUserData": "12345"
+      }
+   },
+   {
+      "id": "rootprefix_Test_RootMinimalDescriptor",
+      "testDir": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\pysystest.xml",
+      "type": "auto",
+      "state": "runnable",
+      "skippedReason": null,
+      "title": "Nested testcase",
+      "purpose": "Nested purpose",
+      "groups": [
+         "root-group1",
+         "root-group2"
+      ],
+      "modes": [
+         "root-mode1",
+         "root-mode2"
+      ],
+      "primaryMode": "root-mode1",
+      "requirements": [
+         "root-req1",
+         "root-req2"
+      ],
+      "executionOrderHint": [
+         -4.1
+      ],
+      "classname": "PySysTest-root",
+      "module": "run_root",
+      "input": "Input-root",
+      "output": "Output-root",
+      "reference": "Reference-root",
+      "userData": {
+         "myUserDataInt": "50",
+         "myUserDataBool": "trUe"
+      }
+   },
+   {
+      "id": "rootprefix_Test_RootNoInheritDescriptor",
+      "testDir": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys-test\\pysys-examples\\internal\\testcases\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml",
+      "type": "auto",
+      "state": "runnable",
+      "skippedReason": null,
+      "title": "Nested testcase",
+      "purpose": "Nested purpose",
+      "groups": [
+         "TestSpecificGroup"
+      ],
+      "modes": [
+         "TestSpecificMode"
+      ],
+      "primaryMode": "TestSpecificMode",
+      "requirements": [
+         "root-req1",
+         "root-req2"
+      ],
+      "executionOrderHint": [
+         -4.1
+      ],
+      "classname": "PySysTest-root",
+      "module": "run_root",
+      "input": "Input-root",
+      "output": "Output-root",
+      "reference": "Reference-root",
+      "userData": {
+         "myUserDataInt": "50",
+         "myUserDataBool": "trUe"
+      }
+   }
+]
