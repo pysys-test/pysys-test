@@ -284,6 +284,14 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 	
 	showDuration = False
 	"""Configures whether the summary includes the total duration of all tests."""
+
+	showInspectSummary = True
+	"""Configures whether the summary includes a summary of INSPECT outcomes (if any). 	
+	"""
+	
+	showNotVerifiedSummary = True
+	"""Configures whether the summary includes a summary of NOTVERIFIED outcomes (if any). 	
+	"""
 	
 	showTestIdList = False
 	"""Configures whether the summary includes a short list of the failing test ids in a form that's easy to paste onto the 
@@ -335,13 +343,16 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 
 		if showDuration is None: showDuration = str(self.showDuration).lower() == 'true'
 		if showOutcomeStats is None: showOutcomeStats = str(self.showOutcomeStats).lower() == 'true'
-		if showTestIdList is None: showTestIdList = str(self.showTestIdList).lower() == 'true' # relies on showFailureSummary=True
+		if showTestIdList is None: showTestIdList = str(self.showTestIdList).lower() == 'true'
 
 		# details from showFailureSummary:
 		showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
 		showOutputDir = str(self.showOutputDir).lower() == 'true'
 		showTestDir = str(self.showTestDir).lower() == 'true'
 		showTestTitle = str(self.showTestTitle).lower() == 'true'
+
+		showInspectSummary = str(self.showInspectSummary).lower() == 'true'
+		showNotVerifiedSummary = str(self.showNotVerifiedSummary).lower() == 'true'
 
 		if showDuration:
 			log(  "Completed test run at:  %s", time.strftime('%A %Y-%m-%d %H:%M:%S %Z', time.localtime(time.time())), extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
@@ -361,6 +372,37 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			if passed: log('Success outcomes: %s', passed, extra=ColorLogFormatter.tag(str(PASSED).lower(), [0]))
 			log('')
 
+		def logForOutcome(decider):
+			for cycle in self.results:
+				cyclestr = ''
+				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
+				for outcome in OUTCOMES:
+					if not decider(outcome): continue
+					for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
+						log("  %s%s: %s ", cyclestr, outcome, id, extra=ColorLogFormatter.tag(str(outcome).lower()))
+						if showTestTitle and testTitle:
+							log("      (title: %s)", testTitle, extra=ColorLogFormatter.tag(LOG_DEBUG))
+						if showOutcomeReason and reason:
+							log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
+							
+						outputdir = os.path.normpath(os.path.relpath(outputdir))+os.sep
+						testDir = os.path.normpath(os.path.relpath(testDir))+os.sep
+						if showTestDir and not (showOutputDir and outputdir.startswith(testDir)):
+							# don't confuse things by showing the testDir unless its information is not present in the outputDir (due to --outdir)
+							log("      %s", testDir)
+						if showOutputDir:
+							log("      %s", outputdir)
+
+		if showNotVerifiedSummary and self.outcomes[NOTVERIFIED] > 0:
+			log("Summary of NOTVERIFIED outcomes:")
+			logForOutcome(lambda outcome: outcome == NOTVERIFIED)
+			log('')
+
+		if showInspectSummary and self.outcomes[INSPECT] > 0:
+			log("Summary of INSPECT outcomes: ")
+			logForOutcome(lambda outcome: outcome == INSPECT)
+			log('')
+
 		if showFailureSummary:
 			log("Summary of failures: ")
 			fails = 0
@@ -370,37 +412,25 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			if fails == 0:
 				log("	THERE WERE NO FAILURES", extra=ColorLogFormatter.tag(LOG_PASSES))
 			else:
-				failedids = set()
-				for cycle in self.results:
-					cyclestr = ''
-					if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
-					for outcome in OUTCOMES:
-						if not outcome.isFailure(): continue
-						for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
-							failedids.add(id)
-							log("  %s%s: %s ", cyclestr, outcome, id, extra=ColorLogFormatter.tag(str(outcome).lower()))
-							if showTestTitle and testTitle:
-								log("      (title: %s)", testTitle, extra=ColorLogFormatter.tag(LOG_DEBUG))
-							if showOutcomeReason and reason:
-								log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
-								
-							outputdir = os.path.normpath(os.path.relpath(outputdir))+os.sep
-							testDir = os.path.normpath(os.path.relpath(testDir))+os.sep
-							if showTestDir and not (showOutputDir and outputdir.startswith(testDir)):
-								# don't confuse things by showing the testDir unless its information is not present in the outputDir (due to --outdir)
-								log("      %s", testDir)
-							if showOutputDir:
-								log("      %s", outputdir)
-		
-				if showTestIdList and len(failedids) > 1:
-					# display just the ids, in a way that's easy to copy and paste into a command line
-					failedids = list(failedids)
-					failedids.sort()
-					if len(failedids) > 20: # this feature is only useful for small test runs
-						failedids = failedids[:20]+['...']
-					log('')
-					log('List of failed test ids:')
-					log('%s', ' '.join(failedids))
+				logForOutcome(lambda outcome: outcome.isFailure())
+			log('')
+
+		if showTestIdList:
+			failedids = set()
+			for cycle in self.results:
+				for outcome in OUTCOMES:
+					if not outcome.isFailure(): continue
+					for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
+						failedids.add(id)
+
+			if len(failedids) > 1:
+				# display just the ids, in a way that's easy to copy and paste into a command line
+				failedids = list(failedids)
+				failedids.sort()
+				if len(failedids) > 20: # this feature is only useful for small test runs
+					failedids = failedids[:20]+['...']
+				log('List of failed test ids:')
+				log('%s', ' '.join(failedids))
 
 class flushfile(): 
 	"""Utility class to flush on each write operation - for internal use only.  

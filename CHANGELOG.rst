@@ -127,6 +127,10 @@ New features
 
 - Added `pysys.utils.fileutils.loadJSON()` for loading .json files. 
 
+- Added a summary of INSPECT and NOTVERIFIED outcomes at the end of test execution (similar to the existing failures 
+  summary), since often these outcomes do require human attention. This can be disabled using the properties on 
+  `pysys.writer.ConsoleSummaryResultsWriter` if desired. 
+
 Bug fixes
 ---------
 
