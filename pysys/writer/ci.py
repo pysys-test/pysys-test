@@ -47,7 +47,7 @@ log = logging.getLogger('pysys.writer')
 
 class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator, ArtifactPublisher):
 	"""
-	Writer for GitHub Actions. 
+	Writer for GitHub(R) Actions. 
 	
 	Produces annotations summarizing failures, adds grouping/folding of detailed test output, and 
 	sets step output variables for any published artifacts (e.g. performance .csv files, archived test output etc) 
@@ -171,7 +171,7 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 
 class TravisCIWriter(BaseRecordResultsWriter):
 	"""
-	Writer for Travis CI. 	
+	Writer for Travis CI(R). 	
 	
 	Provides folding of test log details, and correct coloring of console output for Travis. 
 	

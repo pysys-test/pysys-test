@@ -80,7 +80,7 @@ New features
   `pysys.utils.perfreporter.CSVPerformanceReporter` and `pysys.writer.TestOutputArchiveWriter`. 
 
 - Added `pysys.writer.GitHubActionsCIWriter` which if added to your pysysproject.xml will automatically enable 
-  various features when run from GitHub Actions including annotations summarizing failures, grouping/folding of 
+  various features when run from GitHub(R) Actions including annotations summarizing failures, grouping/folding of 
   detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
   test output etc) which can be used to upload the artifacts when present. 
 
@@ -989,7 +989,7 @@ Improvements to the `pysys.py` tool:
 
 New project options:
 
-- Added support for running PySys tests under Travis CI to the sample 
+- Added support for running PySys tests under Travis CI(R) to the sample 
   `pysysproject.xml` file. Travis support includes by default only printing 
   `run.log` output for failed tests, and containing that detailed output within 
   a folded section that can be expanded if needed. To enable this just ensure 
