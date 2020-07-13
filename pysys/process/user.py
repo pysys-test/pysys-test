@@ -1457,17 +1457,13 @@ class ProcessUser(object):
 			raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
 
 
-	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, logFunction=None, reFlags=0):
+	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, 
+			logFunction=None, reFlags=0, stripWhitespace=True):
 		""" Logs some or all of the lines from the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
 		diagnostic information (e.g. error messages from tools executed by the test) directly in run.log, or
 		to make test failures easier to triage quickly. 
-		
-		.. versionchanged:: 1.5.1
-			Added logFunction parameter. 
-		.. versionchanged:: 1.6.0
-			Added self.logFileContentsDefaultExcludes variable. 
 
 		:param str path: May be an absolute, or relative to the test output directory.
 		:param list[str] includes: Optional list of regex strings. If specified, only matches of these regexes will be logged.
@@ -1477,16 +1473,23 @@ class ProcessUser(object):
 			is called with the default argument of ``excludes=None``, and can be used to provide a global set of 
 			default exclusion lines shared by all your tests, which is particularly useful if some processes always 
 			log some unimportant text to stderr (or stdout) that would be distracting to log out. 
+			
+			Added in PySys 1.6.0. 
 		
 		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
 		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'.
+		
 		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+			
 		:param Callable[[line],None] logFunction: The function that will be used to log individual lines from the file. 
 			Usually this is ``self.log.info(u'  %s', line, extra=BaseLogFormatter.tag(LOG_FILE_CONTENTS))``	
 			but a custom implementation can be provided, for example to provide a different color using 
 			`pysys.utils.logutils.BaseLogFormatter.tag`.
+			
+			Added in PySys 1.5.1. 
+			
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
 			
