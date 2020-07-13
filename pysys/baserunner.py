@@ -560,6 +560,10 @@ class BaseRunner(ProcessUser):
 		added to the arguments passed to the run and html report coverage 
 		commands. 
 		
+		If coverage is generated, the directory containing all coverage files is published 
+		as an artifact named "PythonCoverageDir". 
+		 
+		
 		Custom runner subclasses may replace or add to this by processing 
 		coverage data from other languages, e.g. Java. 		
 		"""
@@ -588,13 +592,15 @@ class BaseRunner(ProcessUser):
 				self.startPython(['-m', 'coverage', 'html']+args, abortOnError=False, 
 					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
 					disableCoverage=True)
-				
+
 				# to avoid confusion, remove any zero byte out/err files from the above
 				for p in os.listdir(pythonCoverageDir):
 					p = os.path.join(pythonCoverageDir, p)
 					if p.endswith(('.out', '.err')) and os.path.getsize(p)==0:
 						os.remove(p)
-	
+				
+				self.publishArtifact(pythonCoverageDir, 'PythonCoverageDir')
+
 
 	def containerCallback(self, thread, container):
 		"""Callback method on completion of running a test.
