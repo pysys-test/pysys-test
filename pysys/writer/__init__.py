@@ -79,7 +79,7 @@ else:
 	from urllib.parse import urlunparse
 
 from pysys.constants import *
-from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes
+from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import PY2
 
