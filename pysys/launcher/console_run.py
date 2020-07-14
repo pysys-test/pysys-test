@@ -341,6 +341,9 @@ e.g.
 				print("Unknown option: %s"%option)
 				sys.exit(1)
 
+		# log this once we've got the log levels setup
+		log.debug('PySys is installed at: %s; python from %s', os.path.dirname(pysys.__file__), sys.executable)
+
 		# retained for compatibility, but PYSYS_DEFAULT_ARGS is a better way to achieve the same thing
 		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True
 		
