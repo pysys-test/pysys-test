@@ -103,7 +103,13 @@ class PySysTest(BaseTest):
 			 '.*myoutdir.NestedFail.cycle1.',
 		])
 
-		
+
+		self.assertOrderedGrep('pysys.out', exprList=[
+			r'Run details:',
+			r'      *outDirName: [^/\\]*myoutdir',
+			r'      *hostname: .+',
+			])
+
 		# check the option works to disable this
 		self.assertGrep('pysys.out', expr='List of failure test ids:', contains=False)
 		

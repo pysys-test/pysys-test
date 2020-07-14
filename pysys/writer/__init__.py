@@ -285,6 +285,10 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 	showDuration = False
 	"""Configures whether the summary includes the total duration of all tests."""
 
+	showRunDetails = False
+	"""Configures whether the summary includes the ``runDetails`` from the `pysys.baserunner.BaseRunner`, 
+	such as ``outDirName`` and ``hostname``."""
+
 	showInspectSummary = True
 	"""Configures whether the summary includes a summary of INSPECT outcomes (if any). 	
 	"""
@@ -299,6 +303,8 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 
 	
 	def setup(self, cycles=0, threads=0, **kwargs):
+		super(TestOutcomeSummaryGenerator, self).setup(cycles=cycles, threads=threads, **kwargs)
+
 		self.results = {}
 		self.startTime = time.time()
 		self.duration = 0.0
@@ -307,6 +313,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			for outcome in OUTCOMES: self.results[cycle][outcome] = []
 		self.threads = threads
 		self.outcomes = {o: 0 for o in OUTCOMES}
+		self.numTests = kwargs['numTests']
 
 	def processResult(self, testObj, cycle=-1, testTime=-1, testStart=-1, **kwargs):
 		self.results[cycle][testObj.getOutcome()].append( (testObj.descriptor.id, testObj.getOutcomeReason(), testObj.descriptor.title, testObj.descriptor.testDir, testObj.output))
@@ -328,7 +335,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		self.logSummary(log=log, **kwargs)
 		return '\n'.join(result)
 
-	def logSummary(self, log, showDuration=None, showOutcomeStats=None, showTestIdList=None, showFailureSummary=True, **kwargs):
+	def logSummary(self, log, showDuration=None, showOutcomeStats=None, showTestIdList=None, showFailureSummary=True, showRunDetails=None, **kwargs):
 		"""
 		Writes a textual summary using the specified log function, with colored output if enabled.
 		
@@ -341,9 +348,10 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		"""
 		assert not kwargs, kwargs.keys()
 
-		if showDuration is None: showDuration = str(self.showDuration).lower() == 'true'
-		if showOutcomeStats is None: showOutcomeStats = str(self.showOutcomeStats).lower() == 'true'
-		if showTestIdList is None: showTestIdList = str(self.showTestIdList).lower() == 'true'
+		if showDuration is None: showDuration = (str(self.showDuration).lower() == 'true') and self.numTests>1
+		if showOutcomeStats is None: showOutcomeStats = (str(self.showOutcomeStats).lower() == 'true') and self.numTests>1
+		if showTestIdList is None: showTestIdList = (str(self.showTestIdList).lower() == 'true') and self.numTests>1
+		if showRunDetails is None: showRunDetails = (str(self.showRunDetails).lower() == 'true') and self.numTests>1
 
 		# details from showFailureSummary:
 		showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
@@ -351,6 +359,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		showTestDir = str(self.showTestDir).lower() == 'true'
 		showTestTitle = str(self.showTestTitle).lower() == 'true'
 
+		
 		showInspectSummary = str(self.showInspectSummary).lower() == 'true'
 		showNotVerifiedSummary = str(self.showNotVerifiedSummary).lower() == 'true'
 
@@ -362,6 +371,12 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			else:
 				log("Total test duration:    %s", "%.2f secs"%(time.time() - self.startTime), extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
 			log('')		
+
+		if showRunDetails:
+			log("Run details:")
+			for k, v in self.runner.runDetails.items():
+				log(" %23s%s", k+': ', v, extra=ColorLogFormatter.tag(LOG_TEST_DETAILS, 1))
+			log("")
 
 		if showOutcomeStats:
 			executed = sum(self.outcomes.values())
@@ -498,6 +513,10 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
 		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
+		self.fp.write('\n')
+		for k, v in kwargs['runner'].runDetails.items():
+			if k in {'startTime', 'hostname'}: continue # don't duplicate the above
+			self.fp.write("%-12s%s\n"%(k+': ', v))
 
 	def cleanup(self, **kwargs):
 		# Flushes and closes the file handle to the logfile.  
@@ -544,7 +563,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 	
 	The class creates a DOM document to represent the test output results and writes the DOM to the 
 	logfile using toprettyxml(). The outputDir, stylesheet, useFileURL attributes of the class can 
-	be over-ridden in the PySys project file using the nested <property> tag on the <writer> tag.
+	be overridden in the PySys project file using the nested <property> tag on the <writer> tag.
 	 
 	:ivar str ~.outputDir: Path to output directory to write the test summary files
 	:ivar str ~.stylesheet: Path to the XSL stylesheet
@@ -850,6 +869,7 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter, TestOutcomeSummaryGe
 	showOutputDir = True
 	showDuration = True
 	showTestIdList = True
+	showRunDetails = True
 	
 	def cleanup(self, **kwargs):
 		log = logging.getLogger('pysys.resultssummary')
@@ -864,6 +884,7 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		self.recentFailures = 5  # configurable
 
 	def setup(self, cycles=-1, numTests=-1, threads=-1, **kwargs):
+		super(ConsoleProgressResultsWriter, self).setup(cycles=cycles, numTests=numTests, threads=threads, **kwargs)
 		self.cycles = cycles
 		self.numTests = numTests
 		self.startTime = time.time()

@@ -25,6 +25,8 @@ from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
 import fnmatch
 import re
+import collections
+import platform
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -81,7 +83,8 @@ class BaseRunner(ProcessUser):
 	to your `setup()` method. 
 	
 	:ivar str ~.outsubdir: The ``--outdir`` for this test run, which gives the directory to be used for the output of 
-		each testcase. Typically a relative path, but can also be an absolute path. 
+		each testcase. Typically a relative path, but can also be an absolute path. The basename of this (outDirName) 
+		is often used as an identifier for the current test run. 
 
 	:ivar str ~.output: The full path of the output directory that this runner can use for storing any persistent state, 
 		e.g. logs for any servers started in the runner `setup` method. The runner output directory is formed based 
@@ -89,6 +92,15 @@ class BaseRunner(ProcessUser):
 	
 	:ivar logging.Logger ~.log: The Python ``Logger`` instance that should be used to record progress and status 
 		information. 
+	
+	:ivar dict[str,str] ~.runDetails: A dictionary of metadata about this test run that is included in performance
+		summary reports and by some writers. 
+		
+		The default contains a few standard values (currently these include ``outDirName``, ``hostname`` 
+		and ``startTime``), and additional items can be added by runner subclasses 
+		in the `setup` method - for example the build number of the application under test. 
+		
+		Note that it is not permitted to try to change this dictionary after setup has completed. 
 	
 	:ivar pysys.xml.project.Project ~.project: A reference to the singleton project instance containing the 
 		configuration of this PySys test project as defined by ``pysysproject.xml``. 
@@ -222,6 +234,13 @@ class BaseRunner(ProcessUser):
 		# (initially) undocumented hook for customizing which jobs the threadpool takes 
 		# off the queue and when. Standard implementation is a simple blocking queue. 
 		self._testScheduler = queue.Queue()
+		
+		self.runDetails = collections.OrderedDict()
+		for p in ['outDirName', 'hostname']:
+			self.runDetails[p] = self.project.properties[p]
+		if threads>1: self.runDetails['testThreads'] = str(threads)
+		self.runDetails['os'] = platform.platform().replace('-',' ')
+		self.runDetails['startTime'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.startTime))
 		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -394,6 +413,7 @@ class BaseRunner(ProcessUser):
 			results.
 
 		"""
+		self.runDetails = makeReadOnlyDict(self.runDetails)
 		if self.project.perfReporterConfig:
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet

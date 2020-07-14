@@ -132,6 +132,18 @@ New features
 
 - Added `pysys.utils.fileutils.loadJSON()` for loading .json files. 
 
+- Added a ``runDetails`` dictionary to `pysys.baserunner.BaseRunner`. This is a dictionary of string metadata about 
+  this test run, and is included in performance summary CSV reports and by some writers. The console summary writer 
+  logs the runDetails when executing 2 or more tests. 
+  
+  The default runDetails contains a few standard values (currently these include ``outDirName``, ``hostname``, ``os`` 
+  and ``startTime``). Additional items can be added by runner subclasses in the `pysys.baserunner.BaseRunner.setup()` 
+  method - for example you could add the build number of your application (perhaps read 
+  using `pysys.utils.fileutils.loadProperties()`). 
+  
+  If you had previously created a custom `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()` method it 
+  is recommended to remove it and instead provide the same information in the runner ``runDetails``. 
+		
 - Added a summary of INSPECT and NOTVERIFIED outcomes at the end of test execution (similar to the existing failures 
   summary), since often these outcomes do require human attention. This can be disabled using the properties on 
   `pysys.writer.ConsoleSummaryResultsWriter` if desired. 
@@ -251,6 +263,10 @@ and consult it only if you get new test failures (or problems running ``pysys ma
   have to remove them. The new behaviour only applies to ``<property name="..." value="..." [default="..."]/>`` 
   elements, it does not apply to properties read from .properties file which still default to "" if unresolved. 
   Run your tests with ``-vDEBUG`` logging if you need help debugging properties problems. 
+- Performance CSV files contain some details about the test run. A couple of these have been renamed: ``time`` is 
+  now ``startTime`` and ``outdir`` is now ``outDirName``. The keys and values can be changed as needed using 
+  the ``runDetails`` field of `pysys.baserunner.BaseRunner`. It is encouraged to use this rather than the previous 
+  mechanism of `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()`.
 - Changed timestamps in process monitor output, writers, performance reporter and similar places from UTC to local time. 
   This means these timestamps will match up with the times in run.log output which have always been local time. 
 - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 

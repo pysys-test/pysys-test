@@ -55,7 +55,7 @@ class XMLProjectParser(object):
 		self.properties = {
 			'testRootDir':self.dirname,
 			
-			'outDirName':outdir,
+			'outDirName':os.path.basename(outdir),
 			
 			'startDate':time.strftime('%Y-%m-%d', time.localtime(self.startTimestamp)),
 			'startTime':time.strftime('%H.%M.%S', time.localtime(self.startTimestamp)),

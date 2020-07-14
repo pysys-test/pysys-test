@@ -133,15 +133,11 @@ class CSVPerformanceReporter(object):
 	def getRunDetails(self):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
 		
-		Subclasses may wish to override this to add additional items such as 
-		version, build number, or configuration information obtained from self.runner.
-
+		This method is deprecated; customization of the run details should be performed by changing 
+		the ``runner.runDetails`` dictionary from the `pysys.baserunner.BaseRunner.setup()` method. 
+		
 		"""
-		d = collections.OrderedDict()
-		d['outdir'] = self.testoutdir
-		d['hostname'] = self.hostname
-		d['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.runStartTime))
-		return d
+		return collections.OrderedDict(self.runner.runDetails)
 	
 	def valueToDisplayString(self, value):
 		"""Pretty-print an integer or float value to a moderate number of significant figures.
