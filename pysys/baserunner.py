@@ -27,6 +27,7 @@ import fnmatch
 import re
 import collections
 import platform
+import shlex
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -240,6 +241,19 @@ class BaseRunner(ProcessUser):
 			self.runDetails[p] = self.project.properties[p]
 		if threads>1: self.runDetails['testThreads'] = str(threads)
 		self.runDetails['os'] = platform.platform().replace('-',' ')
+		
+		commitCmd = shlex.split(self.project.properties.get('versionControlGetCommitCommand',''))
+		import subprocess
+		if commitCmd:
+			try:
+				commit = subprocess.run(commitCmd, encoding=locale.getpreferredencoding(), errors='replace', 
+					check=True, stdout=subprocess.PIPE, cwd=self.project.testRootDir).stdout.strip().split('\n')
+				if commit and commit[0]:
+					self.runDetails['vcsCommit'] = commit[0]
+
+			except Exception as ex:
+				log.debug('Failed to get VCS commit using %s: %s', commitCmd, ex)
+
 		self.runDetails['startTime'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.startTime))
 		
 	def __str__(self): 

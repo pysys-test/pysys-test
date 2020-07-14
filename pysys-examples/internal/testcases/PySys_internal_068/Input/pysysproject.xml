@@ -7,6 +7,8 @@
 	<property name="verboseWaitForSignal" value="true"/>
 	<property name="defaultAbortOnError" value="true"/>
 
+	<property name="versionControlGetCommitCommand" value="git show -s --format=%h"/>
+
 	<pythonpath value="${root}/test/extrapath"/>
 
 

@@ -143,7 +143,12 @@ New features
   
   If you had previously created a custom `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()` method it 
   is recommended to remove it and instead provide the same information in the runner ``runDetails``. 
-		
+
+- Added property property ``versionControlGetCommitCommand`` which if set results in the specified command line 
+  being executed (in the testRootDir) when the test run starts and used to populate the ``vcsCommit`` key in the 
+  runner's ``runDetails`` with a commit/revision number from your version control system. This is a convenient way to 
+  ensure writers and performance reports include the version of the application you're testing with. 
+	
 - Added a summary of INSPECT and NOTVERIFIED outcomes at the end of test execution (similar to the existing failures 
   summary), since often these outcomes do require human attention. This can be disabled using the properties on 
   `pysys.writer.ConsoleSummaryResultsWriter` if desired. 

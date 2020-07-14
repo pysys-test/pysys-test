@@ -43,6 +43,10 @@
 	<property name="user" value="${env.USERNAME}" default="guest"/>	
 
 
+	<!-- If provided, the specified command line will be executed (in testRootDir) to populate the vcsCommit field 
+		in runner.runDetails with the current commit number from your version control system. -->
+	<property name="versionControlGetCommitCommand" value="git show -s --format=%h"/>
+
 	<!-- 
 	Set default LANG for child processes on Unix. 
 	Useful for making all machines behave the same. Ensure that the specified 

@@ -119,3 +119,4 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchiveDir: .+/__pysys_output_archives')
 		self.assertGrep('pysys.out', expr='Published artifact CSVPerformanceReport: .+/perf_.*.csv')
 		
+		self.assertThat('len(vcsCommit) > 4', vcsCommit__eval="self.runner.runDetails['vcsCommit']")
