@@ -1,3 +1,4 @@
+import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 
@@ -80,6 +81,16 @@ class PySysTest(BaseTest):
 
 		self.assertThat('result is None', 
 			result=self.assertGrep('myserver.log', expr='NO MATCH "([^"]*)"', contains=False))
+
+		# example from doc:
+		self.write_text('example.log', 'Foo\nBar\nError message FAILURE - stack trace is:\n   MyClass.class\n\nNow have Bar')
+		
+		self.assertGrep('example.log', expr=r'MyClass', mappers=[
+				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
+			])
+		self.assertGrep('example.log', expr=r'Bar', contains=False, mappers=[
+				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
+			])
 
 		
 	def checkForFailedOutcome(self):

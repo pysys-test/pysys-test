@@ -70,7 +70,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0):
 		return matches
 
 
-def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0):
+def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0, mappers=[]):
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
 	
 	:param file: The full path to the input file
@@ -78,6 +78,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 	:param ignores: Optional list of regular expression strings to ignore when searching file. 
 	:param returnMatch: return the regex match object instead of a simple boolean
 	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:param mappers: Mappers to pre-process the file. 
 
 	:return: success (True / False), unless returnMatch=True in which case it returns the regex match 
 		object (or None if not matched)
@@ -88,8 +89,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 	if not pathexists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
-		f = openfile(file, 'r', encoding=encoding)
-		try:
+		with openfile(file, 'r', encoding=encoding) as f:
 			if log.isEnabledFor(logging.DEBUG):
 				contents = f.readlines()
 				logContents("Contents of %s;" % os.path.basename(file), contents)
@@ -99,7 +99,16 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 			ignores = [re.compile(i, flags=flags) for i in (ignores or [])]
 			
 			regexpr = re.compile(expr, flags=flags)
+			
+			if None in mappers: mappers = [m for m in mappers if m]
+
 			for line in contents:
+				# pre-process
+				for mapper in mappers:
+					line = mapper(line)
+					if line is None: break
+				if line is None: continue
+
 				m = regexpr.search(line)
 				if m is not None: 
 					if not any([i.search(line) for i in ignores]): 
@@ -107,8 +116,6 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 						return True
 			if returnMatch: return None
 			return False
-		finally:
-			f.close()
 
 
 def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False, flags=0):

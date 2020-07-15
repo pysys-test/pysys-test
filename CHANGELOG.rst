@@ -27,8 +27,29 @@ New features
   
   - There is also support for line mappers to be notified when starting/finishing a new file, which allows for complex 
     and stateful transformation of file contents based on file types/path if needed. 
-  
-  - `BaseTest.copy` now copies all file attributes including data/time, not just the Unix permissions/mode. 
+
+  - PySys now comes with some predefined mappers for common preprocessing tasks such as selecting multiple lines of 
+    interest between two regular expressions, and stripping out regular timestamps. These can be found in the new 
+    `pysys.mappers` module and are particularly useful when using copy to pre-process a file before 
+    calling `BaseTest.assertDiff`. For example::
+    
+       self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[
+            pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
+            pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.TIMESTAMP_REGEX, '<timestamp>'),
+		]))
+
+  - `BaseTest.copy` now copies all file attributes including date/time, not just the Unix permissions/mode. 
+
+- `BaseTest.assertGrep` has a new mappers= argument that can be used to pre-process the file before grepping. The 
+  main use of this is to allow grepping within a range of lines, as defined by 
+  the `pysys.mappers.IncludeLinesBetween` mapper::
+    
+       self.assertGrep('example.log', expr=r'MyClass', mappers=[
+            pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$') ])
+
+  This is more reliable than trying to achieve the same effect with `BaseTest.assertOrderedGrep` (which can give 
+  incorrect results if the section markers appear more than once in the file). There are now few cases where 
+  assertOrderedGrep() is really the best choice; try to use `BaseTest.assertDiff` or `BaseTest.assertGrep`.
 
 - `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
   behaviour can be customized with a new ``onError=`` parameter::

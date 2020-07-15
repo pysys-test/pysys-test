@@ -1,7 +1,7 @@
+import pysys
 from pysys.constants import *
-from pysys.basetest import BaseTest
 
-class PySysTest(BaseTest):
+class PySysTest(pysys.basetest.BaseTest):
 	utf8teststring = b'utf8_European\\xe1\\xc1x\\xdf_Katakana\\uff89\\uff81\\uff90\\uff81\\uff7f\\uff78\\uff81\\uff7d\\uff81\\uff7f\\uff76\\uff72\\uff7d\\uff84_Hiragana\\u65e5\\u672c\\u8a9e_Symbols\\u2620\\u2622\\u2603_abc123@#\\xa3!~=\\xa3x'.decode('unicode_escape')
 
 	def execute(self):
@@ -85,6 +85,15 @@ class PySysTest(BaseTest):
 			
 			def fileFinished(self, srcPath, destPath, srcFile, destFile):
 				destFile.write('\n' + 'footer added by CustomLineMapper')
+				
+		# and this one (mix of samples from assertDiff() and copy()
+		self.write_text('myfile.txt', 'Hello\nError message BAD THING 2020-01-02 01:23:45.1234:\n   stack trace\n   here\n\nMore text after the blank line')
+		self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[
+			pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
+			pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.TIMESTAMP_REGEX, '<timestamp>'),
+		]))
+
+		
 		# just to show we can also add them to lambdas if we want to
 		counter = lambda line: line
 		count = [0]

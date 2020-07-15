@@ -1731,6 +1731,8 @@ class ProcessUser(object):
 				mappers=[
 					lambda line: None if ('Timestamp: ' in line) else line, 
 					lambda line: line.replace('foo', 'bar'), 
+					pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
+					pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.TIMESTAMP_REGEX, '<timestamp>'),
 				])
 
 		In addition to the file contents the attributes such as modification time and 
@@ -1755,7 +1757,7 @@ class ProcessUser(object):
 			self.copy('src.txt', 'foo/')      # copies to outputdir/foo/src.txt since destination ends with a slash
 			self.copy('srcdirname', 'foo/')   # copies to outputdir/foo/srcdirname since destination ends with a slash
 
-		Usually mappers are simple functions or lambdas, however for advanced use cases you can 
+		Usually custom mappers are simple functions or lambdas, however for advanced use cases you can 
 		additionally provide ``mapper.fileStarted([self,] srcPath, destPath, srcFile, destFile)`` and/or  
 		``mapper.fileFinished(...)`` methods to allow stateful operations, or to perform extra read/write operations 
 		before lines are read/written. For example::
@@ -1797,11 +1799,13 @@ class ProcessUser(object):
 			the current line as input and returns either a string to write or 
 			None if the line is to be omitted. Any ``None`` items in the mappers list will be ignored. 
 			
+			See `pysys.mappers` for some useful predefined mappers such as `pysys.mappers.IncludeLinesBetween` 
+			and `pysys.mappers.RegexReplace`. 
+			
 			If present the ``mapper.fileStarted(...)`` and/or ``mapper.fileFinished(...)`` methods will be called on each 
 			mapper in the list at the start and end of each file; see above for an example. 
 			
-			If your mapper is stateful, be sure to create separate instances for each test rather than 
-			sharing instances across multiple tests which would cause race conditions. 
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 			
 		:param str encoding: The encoding to use to open the file (only used if mappers are provided; if not, it is 
 			opened in binary mode). 
