@@ -409,12 +409,12 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 							log("      %s", outputdir)
 
 		if showNotVerifiedSummary and self.outcomes[NOTVERIFIED] > 0:
-			log("Summary of NOTVERIFIED outcomes:")
+			log("Summary of not verified outcomes:")
 			logForOutcome(lambda outcome: outcome == NOTVERIFIED)
 			log('')
 
 		if showInspectSummary and self.outcomes[INSPECT] > 0:
-			log("Summary of INSPECT outcomes: ")
+			log("Summary of inspect outcomes: ")
 			logForOutcome(lambda outcome: outcome == INSPECT)
 			log('')
 
