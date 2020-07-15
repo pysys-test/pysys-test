@@ -1137,7 +1137,9 @@ class ProcessUser(object):
 		Cleanup functions should have no arguments, and are invoked in reverse order with the most recently added first (LIFO), and
 		before the automatic termination of any remaining processes associated with this object.
 		
-		e.g. self.addCleanupFunction(lambda: self.cleanlyShutdownProcessX(params))
+		e.g.::
+		
+			self.addCleanupFunction(lambda: self.cleanlyShutdownMyProcess(params))
 		
 		"""
 		with self.lock:

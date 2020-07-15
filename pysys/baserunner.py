@@ -70,14 +70,14 @@ class BaseRunner(ProcessUser):
 	This class is the default runner implementation, and it can be subclassed 
 	if customizations are needed, for example:
 	
-		- override `setup` and `cleanup` if you need to provision and tear down resources 
+		- override `setup()` if you need to provision resources 
 		  (e.g. virtual machines, servers, user accounts, populating a database, etc) that must be shared by many 
-		  testcases.
-		- override `setup` if you want to customize the order or contents of the ``self.descriptors`` list of tests to 
+		  testcases. The corresponding teardown should be implemented by calling `addCleanupFunction()`. 
+		- override `setup()` if you want to customize the order or contents of the ``self.descriptors`` list of tests to 
 		  be run.
-		- override `testComplete` to customize how test output directories are cleaned up at the end of a test's 
+		- override `testComplete()` to customize how test output directories are cleaned up at the end of a test's 
 		  execution.
-		- override `processCoverageData` to provide support for producing a code coverage report at the end of 
+		- override `processCoverageData()` to provide support for producing a code coverage report at the end of 
 		  executing all tests. 
 		
 	Do not override the ``__init__`` constructor when creating a runner subclass; instead, add any initialization logic 
@@ -416,7 +416,7 @@ class BaseRunner(ProcessUser):
 	def start(self, printSummary=True):
 		"""Starts the execution of a set of testcases.
 		
-		Do not override this method - instead, override ``setup`` and/or ``cleanup`` to customize the behaviour 
+		Do not override this method - instead, override ``setup`` and/or call ``addCleanupFunction`` to customize the behaviour 
 		of this runner. 
 		
 		The start method is the main method for executing the set of requested testcases. The set of testcases 
@@ -589,12 +589,12 @@ class BaseRunner(ProcessUser):
 		return self.results
 
 	def processCoverageData(self):
-		""" Called after execution of all tests has completed to allow 
+		""" Called during cleanup after execution of all tests has completed to allow 
 		processing of coverage data (if enabled), for example generating 
 		reports etc. 
 		
 		The default implementation collates Python coverage data from 
-		coverage.py and produces an HTML report. It assumes a project property 
+		coverage.py and produces an HTML report. Python coverage is collected only if a project property 
 		`pythonCoverageDir` is set to the directory coverage files are 
 		collected into, and that PySys was run with `-X pythonCoverage=true`. 
 		If a property named pythonCoverageArgs exists then its value will be 
@@ -604,9 +604,9 @@ class BaseRunner(ProcessUser):
 		If coverage is generated, the directory containing all coverage files is published 
 		as an artifact named "PythonCoverageDir". 
 		 
-		
 		Custom runner subclasses may replace or add to this by processing 
-		coverage data from other languages, e.g. Java. 		
+		coverage data from other languages. Alternatively you could use `addCleanupFunction()` to schedule 
+		your own coverage processing function to be executed after tests have completed. 
 		"""
 		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
 		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir:
