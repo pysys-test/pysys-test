@@ -246,10 +246,17 @@ class BaseRunner(ProcessUser):
 		import subprocess
 		if commitCmd:
 			try:
-				commit = subprocess.run(commitCmd, encoding=locale.getpreferredencoding(), errors='replace', 
-					check=True, stdout=subprocess.PIPE, cwd=self.project.testRootDir).stdout.strip().split('\n')
+				kwargs = {} if PY2 else {'encoding':locale.getpreferredencoding(), 'errors':'replace'}
+				vcsProcess = subprocess.Popen(commitCmd, cwd=self.project.testRootDir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+				(stdoutdata, stderrdata) = vcsProcess.communicate()
+				if vcsProcess.returncode != 0:
+					raise Exception('Process failed with %d: %s'%(vcsProcess.returncode, stderrdata.strip() or stdoutdata.strip() or '<no output>'))
+				
+				commit = stdoutdata.strip().split('\n')
 				if commit and commit[0]:
 					self.runDetails['vcsCommit'] = commit[0]
+				else:
+					raise Exception('No stdout output')
 
 			except Exception as ex:
 				log.debug('Failed to get VCS commit using %s: %s', commitCmd, ex)
