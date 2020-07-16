@@ -435,17 +435,21 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			log('')
 
 		if showTestIdList:
-			failedids = set()
+			failedids = []
+			failedidsAlreadyDone = set()
 			for cycle in self.results:
 				for outcome in OUTCOMES:
 					if not outcome.isFailure(): continue
+					
 					for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
-						failedids.add(id)
+						if id in failedidsAlreadyDone: continue
+						failedidsAlreadyDone.add(id)
+						failedids.append(id)
 
 			if len(failedids) > 1:
 				# display just the ids, in a way that's easy to copy and paste into a command line; 
 				# for maximum usability, use the sort order given above
-				failedids = list(failedids)
+				failedids = failedids
 				if len(failedids) > 100: # this feature is only useful for small test runs
 					failedids = failedids[:100]+['...']
 				log('List of failed test ids:')

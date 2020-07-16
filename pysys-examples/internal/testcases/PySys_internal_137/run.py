@@ -11,6 +11,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
+		if pysys.utils.pycompat.PY2: self.skipTest('this sample does not work well on PY2 as it uses stderr not stdout for printing the version')
 		runPySys(self, self.output+'/pysys', ['run', '-o', self.output+'/pysys_output'], workingDir=self.input)
 
 	def validate(self):
