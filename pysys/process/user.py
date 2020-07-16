@@ -1041,8 +1041,8 @@ class ProcessUser(object):
 		:return list[re.Match]: Usually this returns a list of ``re.Match`` objects found for the ``expr``, or an 
 			empty list if there was no match.
 		
-			If the expr contains any ``(?P<groupName>...)`` named groups, and assuming the condition still the 
-			default of ">=1" (i.e. not trying to find multiple matches), then a dict is returned 
+			If the expr contains any ``(?P<groupName>...)`` named groups, and assuming the condition is still the 
+			default of ">=1" (i.e. not trying to find multiple matches), then instead of a list, a dict is returned 
 			containing ``dict(groupName: str, matchValue: str or None)`` (or an empty ``{}`` dict if there is no match) 
 			which allows the result to be passed to `assertThat` for further checking of the matched groups (typically 
 			unpacked using the ``**`` operator; see example above). 
@@ -1437,7 +1437,9 @@ class ProcessUser(object):
 		compiled = re.compile(expr, flags=reFlags)
 		namedGroupsMode = compiled.groupindex
 		
-		with openfile(os.path.join(self.output, path), 'r', encoding=encoding or self.getDefaultFileEncoding(os.path.join(self.output, path))) as f:
+		path = os.path.join(self.output, path)
+		
+		with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
 			matches = []
 			for l in f:
 				match = compiled.search(l)
@@ -1454,9 +1456,11 @@ class ProcessUser(object):
 				else: 
 					return val
 
-			if returnAll: return matches
-			if returnNoneIfMissing: return None
-			raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
+		if returnAll: return matches
+		if returnNoneIfMissing: return None
+		if os.path.getsize(path) == 0: # can happen due to race conditions in file system writing; maybe they need a waitForGrep
+			raise Exception('Could not find expression %s in %s because file is empty'%(quotestring(expr), os.path.basename(path)))
+		raise Exception('Could not find expression %s in %s'%(quotestring(expr), os.path.basename(path)))
 
 
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, 
