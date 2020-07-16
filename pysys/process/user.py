@@ -421,7 +421,7 @@ class ProcessUser(object):
 																		", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
 					
 					if not ignoreExitStatus and not correctExitStatus:
-						if not stderr: log.warn('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
+						if not stderr and not quiet: log.warn('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
 						self.addOutcome(BLOCKED, 
 							('%s returned non-zero exit code %d'%(process, process.exitStatus))
 							if expectedExitStatus=='==0' else
