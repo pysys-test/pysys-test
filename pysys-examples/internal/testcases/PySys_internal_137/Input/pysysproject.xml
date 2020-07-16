@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<pythonpath value="${testRootDir}/pysys-extensions"/>
+	
+	<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myorg" prop1="val1"/>
+	<runner-plugin classname="myorg.runnerplugin.MyRunnerPlugin" alias="myorg"/>
+
+	<!-- Check it also works with no alias -->
+	<test-plugin classname="myorg.testplugin.MyTestPlugin">
+		<property name="prop2" value="val2"/>
+	</test-plugin>
+	<runner-plugin classname="myorg.runnerplugin.MyRunnerPlugin2" />
+
+</pysysproject>

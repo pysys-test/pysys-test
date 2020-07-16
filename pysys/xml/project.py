@@ -250,6 +250,22 @@ class XMLProjectParser(object):
 		
 		return cls
 
+	def getTestPlugins(self):
+		plugins = []
+		for node in self.root.getElementsByTagName('test-plugin'):
+			cls, optionsDict = self._parseClassAndConfigDict(node, None)
+			alias = optionsDict.pop('alias', None)
+			plugins.append( (cls, alias, optionsDict) )
+		return plugins
+		
+	def getRunnerPlugins(self):
+		plugins = []
+		for node in self.root.getElementsByTagName('runner-plugin'):
+			cls, optionsDict = self._parseClassAndConfigDict(node, None)
+			alias = optionsDict.pop('alias', None)
+			plugins.append( (cls, alias, optionsDict) )
+		return plugins
+
 	def getMakerDetails(self):
 		try:
 			node = self.root.getElementsByTagName('maker')[0]
@@ -466,6 +482,8 @@ class Project(object):
 			self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
 			self.collectTestOutput = []
 			self.projectHelp = None
+			self.testPlugins = []
+			self.runnerPlugins = []
 			self.properties = {'outDirName':os.path.basename(outdir)}
 			stdoutformatter, runlogformatter = None, None
 			self.projectFile = None
@@ -503,8 +521,9 @@ class Project(object):
 				# get the maker if specified
 				self.makerClassname = parser.getMakerDetails()
 
-				# get the loggers to use
 				self.writers = parser.getWriterDetails()
+				self.testPlugins = parser.getTestPlugins()
+				self.runnerPlugins = parser.getRunnerPlugins()
 
 				self.perfReporterConfig = parser.getPerformanceReporterDetails()
 				

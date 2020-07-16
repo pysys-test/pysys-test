@@ -19,6 +19,70 @@ PySys 1.6.0 is under development.
 New features
 ------------
 
+- This release introduces a significant new concept - test and runner "plugins". Existing users will be familiar with 
+  the pattern of creating one or more BaseTest framework subclasses to provide a convenient place for functionality 
+  needed by many tests, such as launching the applications you're testing, or starting compilation or 
+  deployment tools. This traditional approach of using *inheritance* to share functionality does 
+  have some merits, but in many projects it can lead to unhelpful complexity because:
+  
+    a) it's not always clear what functionality is provided by your custom subclasses rather than by PySys itself 
+       (which makes it hard to know which documentation to look at)
+    b) there is no automatic namespacing to prevent custom functionality clashing with methods PySys may add in future
+    c) sometimes a test needs functionality from more than one base class, and it's easy to get multiple inheritance 
+       wrong
+    d) none of this really lends itself well to third parties implementing and distributing additional PySys 
+       capabilities to support additional tools/languages etc
+    
+  So, in this release we introduce the concept of "plugins" which use *composition* rather than *inheritance* to 
+  provide a simpler way to share functionality across tests. There are currently two kinds of plugin: 
+  
+    - **test plugins**; instances of test plugins are created every time a `BaseTest` is instantiated, which allows them 
+      to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
+      would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
+      class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. 
+    - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
+      before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
+      all tests. 
+      Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
+      class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
+
+  A test plugin could look like this::
+  
+        class MyTestPlugin(object):
+            def __init__(self, testobj, pluginProperties):
+                self.owner = self.testobj = testobj
+                self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
+                self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
+
+                testobj.addCleanupFunction(self.__myPluginCleanup)
+            
+            def __myPluginCleanup(self):
+                self.log.info('Cleaning up MyTestPlugin instance')
+
+            # An example of providing a method that can be accessed from each test
+            def getPythonVersion(self):
+                self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
+                return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
+  
+  With configuration like this::
+  
+    <pysysproject>
+        <test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias"/>
+    </pysysproject>
+  
+  ... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
+  
+  You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific 
+  to your application, and third party PySys plugins supporting standard tools and languages. 
+  
+  In addition to the alias-based lookup, plugins can get a list of the other plugin instances 
+  using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `pysys.baserunner.BaseRunner`), which 
+  provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
+  particular project configuration.  
+
+  For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
+  its constructor, see the sample ``pysysproject.xml`` file. 
+
 - `BaseTest.copy` improvements:
 
   - `BaseTest.copy` can now be used to copy directories in addition to individual files. It is recommended to use 

@@ -47,17 +47,66 @@ the need to open up the individual logs to find out what happened, and makes it
 much easier to triage test failures, especially if several tests fail for the 
 same reason. 
 
-Sharing logic for validation across tests
------------------------------------------
-Often you may have some standard logic that needs to be used in the validation 
-of many/all testcases, such as checking log files for errors. 
+Sharing logic across tests using plugins
+----------------------------------------
+Often you will have some standard logic that needs to be used in the execute or validation 
+of many/all testcases, such as starting the application you're testing, or checking log files for errors. 
 
-One recommended pattern for this is to define a helper function in a custom `BaseTest` 
-subclassed by all your tests that is named after what is being checked - for 
-example ``checkLogsForErrors()`` - and explicitly call that method from 
-the `BaseTest.validate()` method of each test. That approach allows you to later 
-customize the logic by changing just one single place, and also to omit it for 
-specific tests where it is not wanted. 
+The recommended way to do that in PySys is to create one or more "plugins". There are currently two kinds of plugin: 
+
+    - **test plugins**; instances of test plugins are created every time a `BaseTest` is instantiated, which allows them 
+      to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
+      would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
+      class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. 
+    - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
+      before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
+      all tests. 
+      Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
+      class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
+
+A test plugin could look like this::
+  
+        class MyTestPlugin(object):
+            def __init__(self, testobj, pluginProperties):
+                self.owner = self.testobj = testobj
+                self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
+                self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
+
+                testobj.addCleanupFunction(self.__myPluginCleanup)
+            
+            def __myPluginCleanup(self):
+                self.log.info('Cleaning up MyTestPlugin instance')
+
+            # An example of providing a method that can be accessed from each test
+            def getPythonVersion(self):
+                self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
+                return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
+               
+            # A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
+            # That approach allows you to later customize the logic by changing just one single place, and also to omit 
+            # it for specific tests where it is not wanted. 
+            def checkLogsForErrors(self):
+		        self.assertGrep('myapp.log', ' ERROR .*', contains=False)
+
+With configuration like this::
+
+<pysysproject>
+	<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias"/>
+</pysysproject>
+
+... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
+
+You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific 
+to your application, and third party PySys plugins supporting standard tools and languages. 
+
+In addition to the alias-based lookup, plugins can get a list of the other plugin instances 
+using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `pysys.baserunner.BaseRunner`), which 
+provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
+particular project configuration.  
+
+For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
+its constructor, see the sample Project Configuration file. 
+
 
 Configuring and overriding test options
 ---------------------------------------

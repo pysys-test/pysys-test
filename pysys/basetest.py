@@ -67,6 +67,15 @@ class BaseTest(ProcessUser):
 		self.manualTester = None
 		self.resources = []
 		self.testCycle = getattr(BaseTest, '_currentTestCycle', None) # set when constructed by runner
+		
+		self.testPlugins = []
+		for pluginClass, pluginAlias, pluginProperties in self.project.testPlugins:
+			plugin = pluginClass(self, pluginProperties)
+			self.testPlugins.append(plugin)
+			if not pluginAlias: continue
+			if hasattr(self, pluginAlias): raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on this test object; please select a different name'%(pluginAlias))
+			setattr(self, pluginAlias, plugin)
+
 	
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
@@ -84,8 +93,12 @@ class BaseTest(ProcessUser):
 		Contains setup actions to be executed before the test is executed. 
 		
 		The ``setup`` method may be overridden by individual test classes, or (more commonly) in a custom `BaseTest` 
-		subclass that provides common functionality for multiple individual tests. If you override this method, be 
-		sure to call ``super(BASETEST_CLASS_HERE, self).setup()`` to allow the setup commands from the base test to run. 
+		subclass that provides common functionality for multiple individual tests. However before implementing a custom 
+		BaseTest subclass with its own setup() method, consider whether the PySys concept of test plugins would meet 
+		your needs. 
+		
+		If you do override this method, be sure to call ``super(BASETEST_CLASS_HERE, self).setup()`` to allow the 
+		setup commands from the base test to run. 
 		
 		If ``setup`` throws an exception, the `cleanup` method will still be called, to allow for clean up resources 
 		that were already allocated.

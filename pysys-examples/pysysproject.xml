@@ -77,17 +77,53 @@
 	<pythonpath value="${testRootDir}/pysys-extensions" />
 	-->
 
+	<!-- Test plugins are additional classes instantiated when each test's BaseTest is instantiated, and accessible 
+	to testcases (using the specified alias) as a field of the BaseTest. They provide a way to expose extra 
+	functionality for use by your testcases, for example support for additional languages and technologies. 
 
+	Each plugin class must provide a constructor __init__(self, testobj, pluginProperties) that accepts the owner 
+	testobj (BaseTest instance) as a parameter and a dictionary of plugin properties provided as attributes 
+	and/or <property> elements.
+
+	Each plugin class must provide a constructor that accepts the parent testobj (BaseTest instance) as a parameter.
+	The plugin instance is assigned as a field of the test object using the specified "alias" so that its 
+	methods and fields are available for use. The alias can be any valid Python identifier but must not conflict 
+	with other plugins or fields that PySys sets on the BaseTest; usually a brief lowercase name 
+	identifying your organization or the purpose of the plugin is best. -->
+	<!--
+		<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myorg">
+			<property name="myProp" value="..."/>
+		</test-plugin>
+	-->
+	
+	<!-- Runner plugins are classes that are instantiated when the BaseRunner performs its setup() at 
+	the beginning of a test run. They can provide extra functionality both at the beginning of a test 
+	run, and also (by calling addCleanupFunction from setup()) at the end after testing has finished. For example, 
+	a runner plugin could be used to add support for starting a database server or virtual machine to be shared 
+	by all tests, or to collect.
+	
+	Each plugin class must provide a constructor __init__(self, runner, pluginProperties) that accepts the owner 
+	runner (BaseRunner instance) as a parameter and a dictionary of plugin properties provided as attributes 
+	and/or <property> elements.
+	
+	The plugin instance can optionally be assigned as a field of the runner using the specified "alias" so that its 
+	methods and fields are available for use by tests. The alias can be any valid Python identifier but must not 
+	conflict with other plugins or fields that PySys sets on the BaseRunner; usually a brief lowercase name 
+	identifying your organization or the purpose of the plugin is best. -->
+	<!--
+		<runner-plugin classname="myorg.runnerplugin.MyRunnerPlugin" alias="myorg">
+			<property name="myProp" value="..."/>
+		</runner-plugin>
+	-->
+	
 	<!-- 
-	Use a custom runner class that extends the BaseRunner class distributed with PySys. Extensions to 
-	the BaseRunner are used to define custom setup and tear down operations before running the set of 
-	selected tests (e.g. to load test data into a database prior to the test runs, and then 
-	clear out the data on completion), as well as to defined operations between the execution of individual 
-	tests and after completion of a cycle of tests. For example, to use the MyRunner class in the 
-	com.company.test module use:
+	For advanced cases it is possible to provide a custom BaseRunner subclass. However, consider whether the 
+	composition "runner-plugin" approach would do the job before using runner inheritance. 
+	
+	For example, to use the MyRunner class in the myorg module use:
 	-->
 	<!--
-	<runner classname="com.company.test.MyRunner"/>
+		<runner classname="myorg.MyRunner"/>
 	-->
 
 
@@ -97,7 +133,7 @@
 	a repeatable pattern for running or validating etc. 
 	-->
 	<!--
-	<maker classname="com.company.test.MyMaker"/>
+	<maker classname="myorg.MyMaker"/>
 	-->
 
 

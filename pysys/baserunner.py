@@ -79,6 +79,8 @@ class BaseRunner(ProcessUser):
 		  execution.
 		- override `processCoverageData()` to provide support for producing a code coverage report at the end of 
 		  executing all tests. 
+    
+    However where possible it is recommended to create one or more runner plugins rather than subclassing BaseRunner. 
 		
 	Do not override the ``__init__`` constructor when creating a runner subclass; instead, add any initialization logic 
 	to your `setup()` method. 
@@ -131,9 +133,20 @@ class BaseRunner(ProcessUser):
 		each test, the validation for each test should be re-run on the previous output. 
 
 	:ivar float ~.startTime: The time when the test run started (in seconds since the epoch).
+	
+	:ivar list[object] ~.runnerPlugins: A list of any plugin instances configured for this runner. This allows plugins 
+		to access the functionality of other plugins if needed (for example looking them up by type in this list). 
 
 	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
 
+	There is also a field for each runner plugin listed in the project configuration. Plugins provide additional 
+	functionality such as methods for starting and working with a particular language or tool. A runner plugin is 
+	just a class whose constructor has the signature ``__init__(self, runner, pluginProperties)`` and provides methods and 
+	fields to be shared across all tests. Each runner plugin listed in the the project configuration 
+	with ``<runner-plugin classname="..." alias="..."/>`` is instantiated once by the runner, and can be accessed using 
+	``self.<alias>`` on the runner object if an alias is provided. If you are using a third party PySys runner 
+	plugin, consult the documentation for the third party test plugin class to find out what methods and fields are 
+	available using ``runner.<alias>.*``. 
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
@@ -434,7 +447,6 @@ class BaseRunner(ProcessUser):
 			results.
 
 		"""
-		self.runDetails = makeReadOnlyDict(self.runDetails)
 		if self.project.perfReporterConfig:
 			# must construct perf reporters here in start(), since if we did it in baserunner constructor, runner 
 			# might not be fully constructed yet
@@ -459,9 +471,26 @@ class BaseRunner(ProcessUser):
 				self.last = s
 		if self.project.getProperty('redirectPrintToLogger', True):
 			sys.stdout = PySysPrintRedirector()
+
+		# before we setup the runner plugins, this is a good time to sanity-check aliases for the test plugins, since we don't want to start testing if this is wrong
+		testPluginAliases = set()
+		for pluginClass, pluginAlias, pluginProperties in self.project.testPlugins:
+			if not pluginAlias: continue
+			if hasattr(BaseTest, pluginAlias) or pluginAlias in testPluginAliases: raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on BaseTest; please select a different name'%(pluginAlias))
+			testPluginAliases.add(pluginAlias)
+
+		# call the hook to setup prior to running tests... but setup plugins first. 
+		self.runnerPlugins = []
+		for pluginClass, pluginAlias, pluginProperties in self.project.runnerPlugins:
+			plugin = pluginClass(self, pluginProperties) # if this throws, its a fatal error and we shouldn't run any tests
+			self.runnerPlugins.append(plugin)
+			if not pluginAlias: continue
+			if hasattr(self, pluginAlias): raise UserError('Alias "%s" for runner-plugin conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
+			setattr(self, pluginAlias, plugin)
 		
-		# call the hook to setup prior to running tests
 		self.setup()
+
+		self.runDetails = makeReadOnlyDict(self.runDetails)
 
 		# call the hook to setup the test output writers
 		self.__remainingTests = self.cycle * len(self.descriptors)
