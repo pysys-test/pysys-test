@@ -956,7 +956,7 @@ class ProcessUser(object):
 			
 	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
 			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None, detailMessage='', filedir=None, 
-			reFlags=0):
+			reFlags=0, mappers=[]):
 		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
 		directory (waitForGrep was formerly known as `waitForSignal`).
 		
@@ -1015,6 +1015,15 @@ class ProcessUser(object):
 
 		:param list[str] ignores: A list of regular expressions used to identify lines in the files which should be ignored 
 			when matching both `expr` and `errorExpr`. 
+
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+			Added in PySys 1.6.0.
 
 		:param float poll: The time in seconds between to poll the file looking for the regular expression and to check against the condition
 				
@@ -1082,7 +1091,7 @@ class ProcessUser(object):
 		timetaken = time.time()
 		while 1:
 			if pathexists(f):
-				matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags)
+				matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers)
 
 				if pysys.internal.safe_eval.safe_eval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
 					timetaken = time.time()-timetaken
@@ -1098,7 +1107,7 @@ class ProcessUser(object):
 				
 				if errorExpr:
 					for err in errorExpr:
-						errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags) # add .* to capture entire err msg for a better outcome reason
+						errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers) # add .* to capture entire err msg for a better outcome reason
 						if errmatches:
 							err = errmatches[0].group(0).strip()
 							msg = '%s found while %s'%(quotestring(err), msg)
@@ -1367,7 +1376,7 @@ class ProcessUser(object):
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
 
 
-	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0):
+	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0, mappers=[]):
 		""" Searches for a regular expression in the specified file, and returns it. 
 
 		If the regex contains unnamed groups using ``(expr)`` syntax, the specified group is returned. 
@@ -1419,7 +1428,16 @@ class ProcessUser(object):
 		:param str encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
-		
+
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+			Added in PySys 1.6.0.
+
 		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
 			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
 			
@@ -1438,10 +1456,17 @@ class ProcessUser(object):
 		namedGroupsMode = compiled.groupindex
 		
 		path = os.path.join(self.output, path)
-		
+
+		if None in mappers: mappers = [m for m in mappers if m]
+
 		with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
 			matches = []
 			for l in f:
+				for mapper in mappers:
+					l = mapper(l)
+					if l is None: break
+				if l is None: continue
+			
 				match = compiled.search(l)
 				if not match: continue
 				if namedGroupsMode:

@@ -581,7 +581,9 @@ class BaseTest(ProcessUser):
 
 		:param assertMessage='': Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. We do not recommend using this as the automatically 
-			generated assertion message is usually clearer. 
+			generated assertion message is usually clearer. If you want to add some additional information to 
+			that message (e.g. which file/server it pertains to etc), just add the info as a string with an extra 
+			keyword argument. 
 		
 		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). 
 		"""
@@ -935,9 +937,9 @@ class BaseTest(ProcessUser):
 			ignored when reading the file. 
 		
 		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
-			line from the file (returning None if the line is to be filtered out). This provides a more powerful 
-			capability than the ignores= parameter as mappers can such as `pysys.mappers.IncludeLinesBetween` 
-			provide the ability to filter in/out sections of a file. 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 			
@@ -964,6 +966,7 @@ class BaseTest(ProcessUser):
 			
 			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
 			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+			
 
 		:return: The ``re.Match`` object, or None if there was no match (note the return value is not affected by 
 			the contains=True/False parameter). 

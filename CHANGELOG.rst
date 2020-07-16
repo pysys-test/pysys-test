@@ -115,6 +115,8 @@ New features
   incorrect results if the section markers appear more than once in the file). There are now few cases where 
   assertOrderedGrep() is really the best choice; try to use `BaseTest.assertDiff` or `BaseTest.assertGrep`.
 
+- `BaseTest.waitForGrep` and `BaseTest.getExprFromFile` also now support a mappers= argument. 
+
 - `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
   behaviour can be customized with a new ``onError=`` parameter::
   

@@ -31,7 +31,7 @@ from pysys.utils.fileutils import pathexists
 
 log = logging.getLogger('pysys.assertions')
 
-def getmatches(file, regexpr, ignores=None, encoding=None, flags=0):
+def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[]):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches.
 	
 	:param file: The full path to the input file
@@ -50,12 +50,20 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0):
 
 	ignores = [re.compile(i, flags=flags) for i in (ignores or [])]
 
+	if None in mappers: mappers = [m for m in mappers if m]
 
 	if not pathexists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
 			for l in f:
+				# pre-process
+				for mapper in mappers:
+					l = mapper(l)
+					if l is None: break
+				if l is None: continue
+
+			
 				match = rexp.search(l)
 				if match is not None: 
 					shouldignore = False
