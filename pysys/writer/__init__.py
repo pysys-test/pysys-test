@@ -393,6 +393,10 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
 				for outcome in OUTCOMES:
 					if not decider(outcome): continue
+					
+					# sort similar outcomes together to make the results easier to read; by reason then testDir
+					self.results[cycle][outcome].sort(key=lambda test: [test[1], test[3]])
+					
 					for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
 						log("  %s%s: %s ", cyclestr, outcome, id, extra=ColorLogFormatter.tag(str(outcome).lower()))
 						if showTestTitle and testTitle:
@@ -439,11 +443,11 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 						failedids.add(id)
 
 			if len(failedids) > 1:
-				# display just the ids, in a way that's easy to copy and paste into a command line
+				# display just the ids, in a way that's easy to copy and paste into a command line; 
+				# for maximum usability, use the sort order given above
 				failedids = list(failedids)
-				failedids.sort()
-				if len(failedids) > 20: # this feature is only useful for small test runs
-					failedids = failedids[:20]+['...']
+				if len(failedids) > 100: # this feature is only useful for small test runs
+					failedids = failedids[:100]+['...']
 				log('List of failed test ids:')
 				log('%s', ' '.join(failedids))
 
