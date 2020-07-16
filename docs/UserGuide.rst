@@ -90,9 +90,9 @@ A test plugin could look like this::
 
 With configuration like this::
 
-<pysysproject>
-	<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias"/>
-</pysysproject>
+    <pysysproject>
+	    <test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias"/>
+    </pysysproject>
 
 ... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
 
@@ -106,7 +106,6 @@ particular project configuration.
 
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
 its constructor, see the sample Project Configuration file. 
-
 
 Configuring and overriding test options
 ---------------------------------------
