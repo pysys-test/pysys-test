@@ -119,6 +119,7 @@ Assertions and outcomes
 	addOutcome
 	getOutcome
 	getOutcomeReason
+	getOutcomeLocation
 	reportPerformanceResult
 
 PySys has a library of assertion methods that are great for typical system testing validation tasks such as 

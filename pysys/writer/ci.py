@@ -164,8 +164,11 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 			self.remainingAnnotations -= 1
 			if self.remainingAnnotations == 0: msg += '\n\n(annotation limit reached; for any additional test failures, see the detailed log)'
 			params = collections.OrderedDict()
-			params[u'file'] = os.path.join(testObj.descriptor.testDir, testObj.descriptor.module).replace(u'\\',u'/')
-			if lineno: params[u'line'] = str(lineno)
+			
+			file, lineno = testObj.getOutcomeLocation()
+			if file:
+				params[u'file'] = file.replace(u'\\',u'/')
+				if lineno: params[u'line'] = lineno
 			self.failureTestLogAnnotations.append([u'warning', msg, params])
 			
 

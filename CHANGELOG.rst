@@ -189,7 +189,10 @@ New features
   color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.BaseResultsWriter`), 
   since usually you wouldn't want these if writing the output to a file. 
 
-- The -XpythonCoverage option now produces an XML coverage.xml report in addition to the .coverage file and HTML 
+- Added `BaseTest.getOutcomeLocation()` which can be used from custom writers to record the file and line number 
+  corresponding to the outcome, if known. 
+
+- The -XpythonCoverage option now produces an XML ``coverage.xml`` report in addition to the .coverage file and HTML 
   report. This is useful for some code coverage UI/aggregation services. 
 
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 

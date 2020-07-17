@@ -33,7 +33,7 @@ from pysys.utils.logutils import BaseLogFormatter, stripANSIEscapeCodes
 from pysys.xml.project import Project
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
-from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe
+from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
 from pysys.utils.stringutils import compareVersions
 import pysys.internal.safe_eval
@@ -109,6 +109,8 @@ class ProcessUser(object):
 
 		self.outcome = [] # internal, do NOT use directly
 		self.__outcomeReason = ''
+		self.__outcomeLocation = (None,None)
+
 		
 		self.__uniqueProcessKeys = {}
 		self.__pythonCoverageFile = 0
@@ -1207,21 +1209,21 @@ class ProcessUser(object):
 		Although this method exists on all subclasses of `pysys.process.user.ProcessUser`, in practice only 
 		`pysys.basetest.BaseTest` subclasses actually do anything with the resulting outcome. 
 		
-		:param outcome: The outcome to add, e.g. `pysys.constants.FAILED`.
+		:param pysys.constants.Outcome outcome: The outcome to add, e.g. `pysys.constants.FAILED`.
 		
-		:param outcomeReason: A string summarizing the reason for the outcome, 
+		:param str outcomeReason: A string summarizing the reason for the outcome, 
 			for example "Grep on x.log contains 'ERROR: server failed'". 
 		
-		:param printReason: If True the specified outcomeReason will be printed
+		:param bool printReason: If True the specified outcomeReason will be printed
 		
-		:param abortOnError: If true abort the test on any error outcome. This should usually be set to 
+		:param bool abortOnError: If true abort the test on any error outcome. This should usually be set to 
 			False for assertions, or the configured `self.defaultAbortOnError` setting (typically True) for 
 			operations that involve waiting. 
 		
-		:param callRecord: An array of strings indicating the call stack that lead to this outcome. This will be appended
-			to the log output for better test triage.
+		:param list[str] callRecord: An array of strings of the form path:lineno indicating the call stack that lead 
+			to this outcome. This will be appended to the log output for better test triage.
 		
-		:param override: Remove any existing test outcomes when adding this one, ensuring 
+		:param bool override: Remove any existing test outcomes when adding this one, ensuring 
 			that this outcome is the one and only one reported even if an existing outcome 
 			has higher precedence. 
 		"""
@@ -1248,19 +1250,35 @@ class ProcessUser(object):
 			if (old == NOTVERIFIED and not self.__outcomeReason): old = None
 			self.outcome.append(outcome)
 
+			if callRecord==None: callRecord = self.__callRecord()
+			def parseLocation(cr):
+				if not cr or ':' not in cr: return None
+				return cr[:cr.rfind(':')], cr[cr.rfind(':')+1:]
+
 			#store the reason of the highest precedent outcome
 			
 			# although we should print whatever is passed in, store a version with control characters stripped 
 			# out so that it's easier to read (e.g. coloring codes from third party tools)
-			if self.getOutcome() != old: self.__outcomeReason = re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F]', '', outcomeReason)
+			if self.getOutcome() != old: 
+				self.__outcomeReason = re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F]', '', outcomeReason)
+				
+				self.__outcomeLocation = None, None
+				if callRecord:
+					
+					locations = [parseLocation(loc) for loc in callRecord]
+					if len(locations)>1: # if possible, try to prioritize locations under the testDir above shared framework classes
+						locations = [loc for loc in locations if loc[0].lower().startswith(self.descriptor.testDir.lower()) ]
+						if len(locations) == 0: locations = [parseLocation(loc) for loc in callRecord]
+					loc = locations[0]
+					self.__outcomeLocation = (os.path.normpath(fromLongPathSafe(loc[0])), loc[1])
 			if outcome.isFailure() and abortOnError:
 				if callRecord==None: callRecord = self.__callRecord()
 				self.abort(outcome, outcomeReason, callRecord)
 
 			if outcomeReason and printReason:
 				if outcome.isFailure():
-					if callRecord==None: callRecord = self.__callRecord()
-					log.warn(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(callRecord) if callRecord!=None else u'',
+					log.warn(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(
+						u'%s:%s'%(os.path.basename(loc[0]), loc[1]) for loc in map(parseLocation,callRecord)) if callRecord!=None else u'',
 							 extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 				else:
 					log.info(u'%s ... %s', outcomeReason, str(outcome).lower(), extra=BaseLogFormatter.tag(str(outcome).lower(),1))
@@ -1316,6 +1334,16 @@ class ProcessUser(object):
 			if self.__outcomeReason and (fails > 1): return u'%s (+%d other failures)'%(self.__outcomeReason, fails-1)
 			return self.__outcomeReason
 
+	def getOutcomeLocation(self):
+		"""Get the location in the Python source file where this location was added. 
+		
+		.. versionadded:: 1.6.0
+		
+		:return (str,str): The absolute filename, and the line number. Returns (None,None) if not known. 
+
+		"""	
+		with self.lock:
+			return self.__outcomeLocation
 
 	def getNextAvailableTCPPort(self, hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET):
 		"""Allocate a free TCP port which can be used for starting a server on this machine.
@@ -1361,7 +1389,7 @@ class ProcessUser(object):
 				info = inspect.getframeinfo(record[0])
 				if (self.__skipFrame(info.filename, ProcessUser) ): continue
 				if (self.__skipFrame(info.filename, BaseTest) ): continue
-				stack.append( '%s:%s' % (os.path.basename(info.filename).strip(), info.lineno) )
+				stack.append( '%s:%s' % (info.filename.strip(), info.lineno) )
 				if (os.path.splitext(info.filename)[0] == os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] and (info.function == 'execute' or info.function == 'validate')): return stack
 		return None
 
