@@ -170,10 +170,21 @@ New features
   artifact publishing, for example CI providers that 'upload' artifacts. Currently artifacts are published by 
   `pysys.utils.perfreporter.CSVPerformanceReporter` and `pysys.writer.TestOutputArchiveWriter`. 
 
-- Added `pysys.writer.GitHubActionsCIWriter` which if added to your pysysproject.xml will automatically enable 
+- Added `pysys.writer.ci.GitHubActionsCIWriter` which if added to your pysysproject.xml will automatically enable 
   various features when run from GitHub(R) Actions including annotations summarizing failures, grouping/folding of 
   detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
   test output etc) which can be used to upload the artifacts when present. 
+
+- Added `pysys.writer.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
+  failure, for IDEs and CI providers that can highlight failures found by regular expression stdout parsing. 
+  An instance of this writer is automatically added to every project, and enables itself if 
+  the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set, producing make-style console output::
+  
+    C:\project\test\MyTest_001\run.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness (MyTest_001 [CYCLE 02])
+	
+  The format can be customized using the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable, or alternatively 
+  additional instances can be added to the project writers configuration and configured using the properties 
+  described in the writer class.
 
 - Added `pysys.writer.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI writers to 
   get a summary of test outcomes. 

@@ -213,6 +213,12 @@ class BaseRunner(ProcessUser):
 				if hasattr(writer, 'isEnabled') or self.record: 
 					self.writers.append(writer)
 		
+		# special-case this as for maximum usability we want it to run whenever the env var is set regardless of 
+		# whether someone thought to add it to their project or not
+		annotationsWriter = pysys.writer.ConsoleFailureAnnotationsWriter()
+		if annotationsWriter.isEnabled(record=self.record):
+			self.writers.append(annotationsWriter)
+		
 		if extraOptions.get('progressWritersEnabled', False):
 			if progresswriters: 
 				self.writers.extend(progresswriters)
@@ -620,7 +626,7 @@ class BaseRunner(ProcessUser):
 		
 		if fatalerrors:
 			# these are so serious we need to make sure the user notices by returning a failure exit code
-			raise Exception('Test runner encountered fatal problems: %s'%'\n\t'.join(fatalerrors))
+			raise UserError('Test runner encountered fatal problems: %s'%'\n\t'.join(fatalerrors))
 
 		# return the results dictionary
 		return self.results

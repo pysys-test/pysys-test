@@ -22,7 +22,11 @@ class PySysTest(BaseTest):
 		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
-		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
+		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], 
+			workingDir='test', ignoreExitStatus=True, environs={
+				# this is a good test in which to test the default behaviour works when enabled
+				'PYSYS_CONSOLE_FAILURE_ANNOTATIONS':'',
+			})
 		self.logFileContents('pysys.out', maxLines=0)
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			
@@ -120,3 +124,10 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='Published artifact CSVPerformanceReport: .+/perf_.*.csv')
 		
 		self.assertThat('len(vcsCommit) > 4', vcsCommit__eval="self.runner.runDetails['vcsCommit']")
+		
+		# check PYSYS_CONSOLE_FAILURE_ANNOTATIONS did its thing
+		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*error: .*NestedTimedout .* 02.*'), 
+			expected='NestedTimedout%srun.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness - %s (NestedTimedout [CYCLE 02])'%(os.sep, TEST_STR))
+
+		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*warning: .*NestedNotVerified .* 02.*'), 
+			expected='2%srun.log:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])'%os.sep)

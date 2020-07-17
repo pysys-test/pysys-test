@@ -69,7 +69,7 @@ breaking writer implementations already in existence.
 __all__ = [
 	"BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "ArtifactPublisher", "TestOutcomeSummaryGenerator", 
 	"TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", 
-	"ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter",  "TestOutputArchiveWriter"]
+	"ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter", "ConsoleFailureAnnotationsWriter", "TestOutputArchiveWriter"]
 
 import time, stat, logging, sys, io
 import zipfile
@@ -82,6 +82,7 @@ from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import PY2
+from pysys.exceptions import UserError
 
 from xml.dom.minidom import getDOMImplementation
 
@@ -949,6 +950,109 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 			log.info('Currently executing: %s', ', '.join(sorted(inprogress)), extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 		log.info('')
 
+
+class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
+	"""Writer that prints a single annotation line to stdout for each test failure, for IDEs 
+	and CI providers that can highlight failures found by regular expression stdout parsing.
+	
+	An instance of this writer is automatically added to every project, and enables itself only 
+	if the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set. 
+	
+	This class is designed for simple cases. If you need to output in a format that requires escaping of special 
+	characters it is best to create a custom writer class. 
+	"""
+	
+	format = ""
+	"""
+	The format that will be written to stdout. If not specified, the environment 
+	variable ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` will be used as the format. 
+	
+	The format can include the following placeholders:
+	
+		- ``@testFile@``: the absolute path to the test file (e.g. run.py), using platform-specific slashes.
+		- ``@testFile/@``: the absolute path to the test file, using forward slashes on all OSes.
+		- ``@testFileLine@``: the line number in the test file (if available, else 0).
+		- ``@runLogFile@``: the absolute path to the run log (e.g. run.log), using platform-specific slashes.
+		- ``@runLogFile/@``: the absolute path to the run log (e.g. run.log), using forward slashes on all OSes.
+		- ``@category@``: either ``error`` or if it's a non-failure outcome, ``warning``. 
+		- ``@outcome@``: the outcome e.g. ``FAILED``.
+		- ``@outcomeReason@``: the string containing the reason for the failure; this string can 
+		  contain any characters (other than newline).
+		- ``@testIdAndCycle@``: the test identifier, with a cycle suffix if this is a multi-cycle test.
+	
+	The default format if the environment variable is empty and format is not provided is `DEFAULT_FORMAT`. 
+	"""
+	
+	DEFAULT_FORMAT = "@testFile@:@testFileLine@: @category@: @outcome@ - @outcomeReason@ (@testIdAndCycle@)"
+	"""
+	This is the default format if the environment variable is empty and ``format`` is not provided. 
+
+	The output looks like this::
+	
+		c:\\myproject\\tests\\MyTest_001\\run.py:4: error: TIMED OUT - This test timed out (MyTest_001 [CYCLE 03])
+	
+	which is similar to output from "make" and so should be parseable by many tools and IDEs. 
+	
+	"""
+
+	includeNonFailureOutcomes = 'NOT VERIFIED'
+	"""
+	In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be reported 
+	(with a ``@category@`` of ``warning`` rather than ``error``). 
+	"""
+	
+	enableIfEnvironmentVariable = "PYSYS_CONSOLE_FAILURE_ANNOTATIONS"
+	"""
+	The environment variable used to control whether it is enabled. 
+	
+	This writer will be enabled if the specified environment variable is set (either to any empty string or to any 
+	value other than "false"). 
+	
+	Set enableIfEnvironmentVariable to "" to ignore the environment and instead enable when running with ``--record``. 
+	"""
+
+	def setup(self, cycles=-1, **kwargs):
+		super(ConsoleFailureAnnotationsWriter, self).setup(cycles=cycles, **kwargs)
+		self.cycles=cycles
+		self.format = self.format or os.getenv('PYSYS_CONSOLE_FAILURE_ANNOTATIONS','') or self.DEFAULT_FORMAT
+		self.includeNonFailureOutcomes = [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
+		for o in self.includeNonFailureOutcomes:
+			if not any(o == str(outcome) for outcome in OUTCOMES):
+				raise UserError('Unknown outcome display name "%s" in includeNonFailureOutcomes'%o)
+
+	def isEnabled(self, record=False, **kwargs): 
+		if not self.enableIfEnvironmentVariable: return record
+		
+		env = os.getenv(self.enableIfEnvironmentVariable, None)
+		if env is None or env.lower()=='false': return False
+		return True
+
+	def processResult(self, testObj, cycle=-1, **kwargs):
+		outcome = testObj.getOutcome()
+		if outcome.isFailure():
+			category = 'error'
+		elif str(outcome) in self.includeNonFailureOutcomes:
+			category = 'warning'
+		else:
+			return
+		
+		loc = testObj.getOutcomeLocation()
+		if not loc[0]: loc = (os.path.normpath(testObj.output+'/run.log'), 0) # this is a reasonable fallback
+		stdoutPrint(self.format\
+			.replace('@testFile@', self.escape(loc[0]))
+			.replace('@testFile/@', self.escape((loc[0]).replace(os.sep,'/')))
+			.replace('@testFileLine@', loc[1] or '0')
+			.replace('@runLogFile@', self.escape(testObj.output+'/run.log'))
+			.replace('@runLogFile/@', self.escape((testObj.output+'/run.log').replace(os.sep,'/')))
+			.replace('@category@', category)
+			.replace('@outcome@', str(testObj.getOutcome()))
+			.replace('@outcomeReason@', self.escape(testObj.getOutcomeReason() or '(no outcome reason)'))
+			.replace('@testIdAndCycle@', self.escape(testObj.descriptor.id+(' [CYCLE %02d]'%(cycle+1) if self.cycles>1 else '')))
+			)
+	
+	def escape(self, str):
+		return str.replace('\r','').replace('\n', '; ')
+
 class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	"""Writer that creates zip archives of each failed test's output directory, 
 	producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
@@ -1200,5 +1304,4 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		except Exception:
 			self.skippedTests.append(outputDir)
 			raise
-		
 		
