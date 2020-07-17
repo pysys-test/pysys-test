@@ -90,7 +90,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.write_text('myfile.txt', 'Hello\nError message BAD THING 2020-01-02 01:23:45.1234:\n   stack trace\n   here\n\nMore text after the blank line')
 		self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[
 			pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
-			pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.TIMESTAMP_REGEX, '<timestamp>'),
+			pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
 		]))
 
 		

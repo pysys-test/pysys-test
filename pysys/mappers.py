@@ -40,20 +40,20 @@ class RegexReplace(object):
 	
 	For example::
 	
-		self.copy('myfile.txt', 'myfile-processed.txt', mappers=[RegexReplace(RegexReplace.TIMESTAMP_REGEX, '<timestamp>')])
+		self.copy('myfile.txt', 'myfile-processed.txt', mappers=[RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')])
 	
 	:param str|compiled_regex regex: The regular expression to search for. 
 	:param str replacement: The string to replace it with. This can contain backslash references to groups in the 
 		regex; see ``re.sub()`` in the Python documentation for more information. 
 
 
-	>>> RegexReplace(RegexReplace.TIMESTAMP_REGEX, '<timestamp>')('Test string x=2020-07-15T19:22:34+00:00.')
+	>>> RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')('Test string x=2020-07-15T19:22:34+00:00.')
 	'Test string x=<timestamp>.'
 
-	>>> RegexReplace(RegexReplace.TIMESTAMP_REGEX, '<timestamp>')('Test string x=5/7/2020 19:22:34.1234.')
+	>>> RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')('Test string x=5/7/2020 19:22:34.1234.')
 	'Test string x=<timestamp>.'
 
-	>>> RegexReplace(RegexReplace.TIMESTAMP_REGEX, '<timestamp>')('Test string x=20200715T192234Z.')
+	>>> RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')('Test string x=20200715T192234Z.')
 	'Test string x=<timestamp>.'
 
 	>>> RegexReplace(RegexReplace.NUMBER_REGEX, '<number>')('Test string x=123.')
@@ -63,7 +63,7 @@ class RegexReplace(object):
 	'Test string x=<number>.'
 	"""
 	
-	TIMESTAMP_REGEX = '(%s)'%'|'.join([
+	DATETIME_REGEX = '(%s)'%'|'.join([
 		'([0-9]{1,4}[/-][0-9]{1,2}[/-][0-9]{2,4}[ T]?)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}([.][0-9]+|Z|[+-][0-9][0-9](:[0-9][0-9])?)?',
 		'[0-9]{8}T[0-9]{6}(Z|[+-][0-9][0-9]:)?',
 		])

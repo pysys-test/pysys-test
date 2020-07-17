@@ -1791,7 +1791,7 @@ class ProcessUser(object):
 					lambda line: None if ('Timestamp: ' in line) else line, 
 					lambda line: line.replace('foo', 'bar'), 
 					pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
-					pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.TIMESTAMP_REGEX, '<timestamp>'),
+					pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
 				])
 
 		In addition to the file contents the attributes such as modification time and 

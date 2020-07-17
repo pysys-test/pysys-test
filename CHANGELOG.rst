@@ -103,7 +103,7 @@ New features
     
        self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[
             pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
-            pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.TIMESTAMP_REGEX, '<timestamp>'),
+            pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
 		]))
 
   - `BaseTest.copy` now copies all file attributes including date/time, not just the Unix permissions/mode. 
