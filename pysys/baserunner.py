@@ -36,6 +36,7 @@ else:
 	from io import StringIO
 	import queue
 
+import pysys
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
@@ -178,6 +179,7 @@ class BaseRunner(ProcessUser):
 			self.mode = mode
 
 		self.__resultWritingLock = threading.Lock() 
+		self.runnerErrors = [] # list of strings
 
 		self.startTime = self.project.startTimestamp
 		
@@ -600,7 +602,12 @@ class BaseRunner(ProcessUser):
 						fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
 				del self.writers[:]
 		
-			self.processCoverageData()
+			try:
+				self.processCoverageData()
+			except Exception as ex: 
+				log.warn("caught %s processing coverage data %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+				fatalerrors.append('Failed to process coverage data: %s'%ex)
+
 		finally:
 			# call the hook to cleanup after running tests
 			try:
@@ -609,10 +616,11 @@ class BaseRunner(ProcessUser):
 				log.warn("caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
+		fatalerrors = self.runnerErrors+fatalerrors
 		
 		if fatalerrors:
-			# these are so serious we need to make sure the user notices
-			raise Exception('Test runner encountered fatal problems: %s'%'; '.join(fatalerrors))
+			# these are so serious we need to make sure the user notices by returning a failure exit code
+			raise Exception('Test runner encountered fatal problems: %s'%'\n\t'.join(fatalerrors))
 
 		# return the results dictionary
 		return self.results
@@ -771,7 +779,7 @@ class BaseRunner(ProcessUser):
 			self.results[cycle][testObj.getOutcome()].append(descriptor.id)
 			
 			if errors:
-				raise Exception('Failed to process results from %s: %s'%(descriptor.id, '; '.join(errors)))
+				self.runnerErrors.append('Failed to process results from %s: %s'%(descriptor.id, '; '.join(errors)))
 
 
 	def publishArtifact(self, path, category):
@@ -801,6 +809,7 @@ class BaseRunner(ProcessUser):
 		 
 		"""
 		log.warn("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+		self.runnerErrors.append("caught %s from executing test container: %s"%(exc_info[0], exc_info[1]))
 
 
 	def handleKbrdInt(self, prompt=True): # pragma: no cover (can't auto-test keyboard interrupt handling)
@@ -1101,3 +1110,4 @@ class TestContainer(object):
 		except OSError as ex:
 			log.warning("Caught OSError in detectCore():")
 			log.warning(ex)
+			
