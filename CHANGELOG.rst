@@ -72,10 +72,14 @@ New features
   
   ... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
   
+  Alternatively, you can create a trivial `BaseTest` subclass that instantiates plugins in code (rather than XML) 
+  which would allow code completion (if your editor of choice supports this) but still provide the benefits of 
+  the modular composition approach. 
+  
   You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific 
   to your application, and third party PySys plugins supporting standard tools and languages. 
   
-  In addition to the alias-based lookup, plugins can get a list of the other plugin instances 
+  In addition to the alias-based lookup, plugins can get a list of the other plugin instances added through the XML 
   using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `pysys.baserunner.BaseRunner`), which 
   provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
   particular project configuration.  

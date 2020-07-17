@@ -96,6 +96,10 @@ With configuration like this::
 
 ... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
 
+Alternatively, you can create a trivial `BaseTest` subclass that instantiates plugins in code (rather than XML) 
+which would allow code completion (if your editor of choice supports this) but still provide the benefits of 
+the modular composition approach. 
+
 You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific 
 to your application, and third party PySys plugins supporting standard tools and languages. 
 
