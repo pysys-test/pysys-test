@@ -89,7 +89,19 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 
 	def outputGitHubCommand(self, cmd, value=u'', params={}):
 		# syntax is: ::workflow-command parameter1={data},parameter2={data}::{command value}
-		stdoutPrint(u'::%s%s::%s'%(cmd, (u' '+u','.join(u'%s=%s'%(k,v) for k,v in params.items())).replace('::', '__') if params else u'', value.replace('%', '%25').replace('\n', '%0A')))
+		# escaping based on https://github.com/actions/toolkit/blob/master/packages/core/src/command.ts
+		stdoutPrint(u'::%s%s::%s'%(cmd, 
+			(u' '+u','.join(u'%s=%s'%(k,v\
+				.replace('%', '%25')\
+				.replace('\r', '%0D')\
+				.replace('\n', '%0A')\
+				.replace(':', '%3A')\
+				.replace(',', '%2C')
+				) for k,v in params.items())) if params else u'', value\
+				.replace('%', '%25')\
+				.replace('\r', '%0D')\
+				.replace('\n', '%0A')
+				))
 
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		super(GitHubActionsCIWriter, self).setup(numTests=numTests, cycles=cycles, xargs=xargs, threads=threads, 
