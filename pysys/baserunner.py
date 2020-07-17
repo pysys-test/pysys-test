@@ -851,7 +851,7 @@ class BaseRunner(ProcessUser):
 		title = textwrap.wrap(descriptor.title.replace('\n','').strip(), 56)
 		log.info("Id   : %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 
-		badchars = re.sub('[\\w_.-]+','', descriptor.id) 
+		badchars = re.sub('[\\w_.-~]+','', descriptor.id) 
 		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
 		if badchars: log.warn('Unsupported characters "%s" found in test id "%s"; please use alphanumeric characters and underscore for test ids', badchars, descriptor.id)
 
