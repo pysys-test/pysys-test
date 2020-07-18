@@ -339,6 +339,13 @@ The changes that everyone should pay attention to are:
 - If you use the non-standard filename ``.pysysproject`` rather than ``pysysproject.xml`` for your project 
   configuration file you will need to rename it. 
 
+- If your BaseTest or BaseRunner makes use of ``-Xkey[=value]`` command line overrides you should review your code 
+  and/or test thoroughly as in this release a) -Xkey and -Xkey=true/false now consistently produce a boolean True/False 
+  (previously -Xkey=true would produce a string ``"true"`` whereas -Xkey would produce a boolean ``True``) and 
+  b) -X attributes set on BaseRunner now undergo conversion from string to match the bool/int/float type of the 
+  default value if a static field of that name already exists on the runner class (which brings BaseRunner into line 
+  with the behaviour that BaseTest has had since 1.5.0). 
+
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 

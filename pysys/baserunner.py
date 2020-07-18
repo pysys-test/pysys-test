@@ -127,8 +127,9 @@ class BaseRunner(ProcessUser):
 	:ivar list[pysys.xml.descriptor.TestDescriptor] ~.descriptors: A list of all the `pysys.xml.descriptor.TestDescriptor` test 
 		descriptors that are selected for execution by the runner. 
 
-	:ivar dict(str,str) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
-		set as data attributes on the class.
+	:ivar dict(str,str|bool) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
+		set as data attributes on the class (but with automatic conversion to match the default value's bool/int/float 
+		type if a static variable of the same name exists on the class).
 
 	:ivar bool ~.validateOnly: True if the user has requested that instead of cleaning output directories and running 
 		each test, the validation for each test should be re-run on the previous output. 
@@ -290,21 +291,6 @@ class BaseRunner(ProcessUser):
 		The format of this string may change without notice. 
 		"""
 		return self.__class__.__name__ # there's usually only one base runner so class name is sufficient
-
-	def setKeywordArgs(self, xargs):
-		"""Set the xargs as data attributes of the class.
-				
-		Values in the xargs dictionary are set as data attributes using the builtin C{setattr()} method. 
-		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
-		form C{self.foo} with C{value bar}. 
-		
-		:param xargs: A dictionary of the user defined extra arguments
-		
-		"""
-		# in the next major release we'll delete this method and have baserunner inherit the same logic that 
-		# basetest uses
-		for key in list(xargs.keys()):
-			setattr(self, key, xargs[key])
 
 	# methods to allow customer actions to be performed before a test run, after a test, after 
 	# a cycle of all tests, and after all cycles
@@ -639,7 +625,7 @@ class BaseRunner(ProcessUser):
 		The default implementation collates Python coverage data from 
 		coverage.py and produces an HTML report. Python coverage is collected only if a project property 
 		`pythonCoverageDir` is set to the directory coverage files are 
-		collected into, and that PySys was run with `-X pythonCoverage=true`. 
+		collected into, and that PySys was run with `-XpythonCoverage`. 
 		If a property named pythonCoverageArgs exists then its value will be 
 		added to the arguments passed to the run and html report coverage 
 		commands. 

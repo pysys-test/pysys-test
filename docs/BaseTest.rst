@@ -101,6 +101,12 @@ with ``<test-plugin classname="..." alias="..."/>`` is instantiated for each
 plugin, consult the documentation for the third party test plugin class to find out what methods and fields are 
 available using ``self.<alias>.*``. 
 
+If you wish to support test parameters that can be overridden on the command line using ``-Xkey=value``, just add a 
+static variable just after the ```class MyClass(BaseTest):`` line containing the default value, and access it using 
+``self.key``. If a new value for that key is specified with ``-Xkey=value``, that value will be set as an attribute by 
+the BaseTest constructor, with automatic conversion from string to the correct type if the default value is a 
+bool/int/float.
+
 .. _assertions-and-outcomes:
 
 Assertions and outcomes

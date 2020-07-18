@@ -326,10 +326,21 @@ e.g.
 					sys.exit(1)
 
 			elif option in ["-X"]:
-				if EXPR1.search(value) is not None:
-				  self.userOptions[value.split('=', 1)[0]] = value.split('=', 1)[1]
-				if EXPR2.search(value) is not None:
-					self.userOptions[value] = True
+				if '=' in value:
+					key, value = value.split('=', 1)
+				else:
+					key, value = value, 'true'
+				
+				# best not to risk unintended consequences with matching of other types, but for boolean 
+				# it's worth it to resolve the inconsistent behaviour of -Xkey=true and -Xkey that existed until 1.6.0, 
+				# and because getting a bool where you expected a string is a bit more likely to give an exception 
+				# and be noticed that getting a string where you expected a boolean (e.g. the danger of if "false":)
+				if value.lower() == 'true':
+					value = True
+				elif value.lower() == 'false':
+					value = False
+				
+				self.userOptions[key] = value
 			
 			elif option in ("-y", "--validateOnly"):
 				self.userOptions['validateOnly'] = True
