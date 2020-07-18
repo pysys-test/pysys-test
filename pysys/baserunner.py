@@ -258,7 +258,12 @@ class BaseRunner(ProcessUser):
 		# (initially) undocumented hook for customizing which jobs the threadpool takes 
 		# off the queue and when. Standard implementation is a simple blocking queue. 
 		self._testScheduler = queue.Queue()
-		
+
+		# Only do wrapping if we're outputting to console (to avoid making life difficult for tools parsing the output 
+		# and because it's not very useful); remove 16chars which is how wide a typical 
+		self._testHeaderWrap = 0 if not (sys.stdout) or (not sys.stdout.isatty()) else ( 
+			max(40, ((shutil.get_terminal_size()[0] if hasattr(shutil, 'get_terminal_size') else 80) - len('22:34:09 WARN  ')-1)))
+
 		self.runDetails = collections.OrderedDict()
 		for p in ['outDirName', 'hostname']:
 			self.runDetails[p] = self.project.properties[p]
@@ -454,6 +459,7 @@ class BaseRunner(ProcessUser):
 				self.encoding = sys.stdout.encoding
 				self.log = logging.getLogger('pysys.stdout')
 				self.logWarning = True
+				self.__origStdout = sys.stdout
 			def flush(self): pass
 			def write(self, s): 
 				if self.logWarning is True:
@@ -464,6 +470,7 @@ class BaseRunner(ProcessUser):
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
+			def __getattr__(self, name): return getattr(self.__origStdout, name)
 		if self.project.getProperty('redirectPrintToLogger', True):
 			sys.stdout = PySysPrintRedirector()
 
@@ -857,19 +864,25 @@ class BaseRunner(ProcessUser):
 		written to the run.log and console or how it is formatted. 
 		"""
 		assert not kwargs, 'reserved for future use'
-		log.info(62*"=")
-		title = textwrap.wrap(descriptor.title.replace('\n','').strip(), 56)
-		log.info("Id   : %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		
+		wrap = self._testHeaderWrap - len('Title: ')
+		
+		# No need to make these fill the entire available width
+		log.info("="*62)
+		
+		log.info("Id:    %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 
 		badchars = re.sub('[\\w_.-~]+','', descriptor.id) 
 		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
 		if badchars: log.warn('Unsupported characters "%s" found in test id "%s"; please use alphanumeric characters and underscore for test ids', badchars, descriptor.id)
 
-		if len(title)>0:
-			log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		title = descriptor.title.replace('\n','').strip()
+		if title:
+			title = textwrap.wrap(title, wrap) if wrap>0 else [title]
+			log.info("Title: %s", (title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+			for l in title[1:]:
+				log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		
-		for l in title[1:]:
-			log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		if self.cycle > 1: # only log if this runner is doing multiple cycles
 			log.info("Cycle: %s", str(cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		log.debug('Execution order hint: %s', descriptor.executionOrderHint)
