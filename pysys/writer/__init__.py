@@ -1262,29 +1262,35 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 							skippedFiles.append(fn)
 							continue
 						
-						if fileSize > bytesRemaining:
-							if triedTmpZipFile: # to save effort, don't keep trying once we're close - from now on only attempt small files
-								skippedFiles.append(fn)
-								continue
-							triedTmpZipFile = True
-							
-							# Only way to know if it'll fit is to try compressing it
-							log.debug('File size of %s might push the archive above the limit; creating a temp zip to check', fn)
-							tmpname, tmpzip = self._newArchive(id+'.tmp')
-							try:
-								with tmpzip:
-									tmpzip.write(fn, 'tmp')
-									compressedSize = tmpzip.getinfo('tmp').compress_size
-									if compressedSize > bytesRemaining:
-										log.debug('Skipping file as compressed size of %s bytes exceeds remaining limit of %s bytes: %s', 
-											compressedSize, bytesRemaining, fn)
-										skippedFiles.append(fn)
-										continue
-							finally:
-								os.remove(tmpname)
-						
-						memberName = fn[rootlen:].replace('\\','/')
-						myzip.write(fn, memberName)
+						try:
+							if fileSize > bytesRemaining:
+								if triedTmpZipFile: # to save effort, don't keep trying once we're close - from now on only attempt small files
+									skippedFiles.append(fn)
+									continue
+								triedTmpZipFile = True
+								
+								# Only way to know if it'll fit is to try compressing it
+								log.debug('File size of %s might push the archive above the limit; creating a temp zip to check', fn)
+								tmpname, tmpzip = self._newArchive(id+'.tmp')
+								try:
+									with tmpzip:
+										tmpzip.write(fn, 'tmp')
+										compressedSize = tmpzip.getinfo('tmp').compress_size
+										if compressedSize > bytesRemaining:
+											log.debug('Skipping file as compressed size of %s bytes exceeds remaining limit of %s bytes: %s', 
+												compressedSize, bytesRemaining, fn)
+											skippedFiles.append(fn)
+											continue
+								finally:
+									os.remove(tmpname)
+									
+							# Here's where we actually add it to the real archive
+							memberName = fn[rootlen:].replace('\\','/')
+							myzip.write(fn, memberName)
+						except Exception as ex: # might happen due to file locking or similar
+							log.warning('Failed to add output file "%s" to archive: %s', fn, ex)
+							skippedFiles.append(fn)
+							continue
 						filesInZip += 1
 						bytesRemaining -= myzip.getinfo(memberName).compress_size
 				
