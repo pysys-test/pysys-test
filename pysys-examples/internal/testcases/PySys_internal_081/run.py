@@ -27,4 +27,4 @@ class PySysTest(BaseTest):
 			self.abort(FAILED, 'waitForSocket returned without error when it should have failed')
 				
 	def validate(self):
-		return
+		self.assertTrue(True, assertMessage='verification is above')
