@@ -50,20 +50,22 @@ class PySysTest(BaseTest):
 
 		# output directory handling with modes
 		runPySys(self, 'run-relative-outdir', 
-			['run', '--outdir', 'outdir-relative', '--mode=ALL'], workingDir='test')
+			['run', '--outdir', 'outdir-relative', '--mode=ALL'], workingDir='test', background=True)
 
 		runPySys(self, 'run-absolute-outdir', 
-			['run', '--outdir', self.output+'/outdir-absolute', '--mode=ALL'], workingDir='test')
+			['run', '--outdir', self.output+'/outdir-absolute', '--mode=ALL'], workingDir='test', background=True)
 
 		runPySys(self, 'run-absolute-outdir-cycles', 
-			['run', '--outdir', self.output+'/outdir-absolute-cycles', '-c', '2'], workingDir='test')
+			['run', '--outdir', self.output+'/outdir-absolute-cycles', '-c', '2'], workingDir='test', background=True)
 			
 		# detailed testcase selection testing
 		for subid, args, _ in reversed(self.RUN_SUBTESTS):
-			runPySys(self, subid, [args[0]]+['--outdir', 'out-%s'%subid]+args[1:], workingDir='test')
+			runPySys(self, subid, [args[0]]+['--outdir', 'out-%s'%subid]+args[1:], workingDir='test', background=True)
 	
 		for subid, args, _ in reversed(self.PRINT_SUBTESTS):
-			runPySys(self, subid, args, workingDir='test')
+			runPySys(self, subid, args, workingDir='test', background=True)
+		
+		self.waitForBackgroundProcesses()
 	
 		# failure cases
 		runPySys(self, 'error-run-specific-test-with-mode-exclusion', 
@@ -95,7 +97,7 @@ class PySysTest(BaseTest):
 	def validate(self):
 		for subid, args, expectedids in self.RUN_SUBTESTS:
 			self.log.info('%s:', subid)
-			actualids = self.getExprFromFile(subid+'.out', expr='Id   *: *([^ \n]+)', returnAll=True)
+			actualids = self.getExprFromFile(subid+'.out', expr='Id *: *([^ \n]+)', returnAll=True)
 			self.assertThat('%r == %r', expectedids, ','.join(actualids))
 			self.assertLineCount(subid+'.out', expr='Test final outcome: *PASSED', condition='==%d'%len(actualids))
 			self.log.info('')

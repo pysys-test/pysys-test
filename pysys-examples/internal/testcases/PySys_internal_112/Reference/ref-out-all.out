@@ -1,14 +1,15 @@
+INFO  Running 11 tests with 1 threads using PySys 1.6.0.dev1 in Python 3.6.6
 INFO  ==============================================================
-INFO  Id   : DB_cor_001~MockDatabase
+INFO  Id:    DB_cor_001~MockDatabase
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MockDatabase
 INFO  
-INFO  Test duration: 0.00 secs
+INFO  Test duration: 0.02 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_cor_001~MyDatabase_2012
+INFO  Id:    DB_cor_001~MyDatabase_2012
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MyDatabase_2012
@@ -17,43 +18,43 @@ INFO  Test duration: 0.00 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_cor_001~MyDatabase_2016
+INFO  Id:    DB_cor_001~MyDatabase_2016
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MyDatabase_2016
 INFO  
-INFO  Test duration: 0.00 secs
+INFO  Test duration: 0.04 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_cor_001~WithDebugging
+INFO  Id:    DB_cor_001~WithDebugging
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database WithDebugging
 INFO  
-INFO  Test duration: 0.00 secs
+INFO  Test duration: 0.01 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_cor_002~MockDatabase
+INFO  Id:    DB_cor_002~MockDatabase
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MockDatabase
 INFO  
-INFO  Test duration: 0.00 secs
+INFO  Test duration: 0.02 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_cor_002~MyDatabase_2012
+INFO  Id:    DB_cor_002~MyDatabase_2012
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MyDatabase_2012
 INFO  
-INFO  Test duration: 0.00 secs
+INFO  Test duration: 0.01 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_cor_002~MyDatabase_2016
+INFO  Id:    DB_cor_002~MyDatabase_2016
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MyDatabase_2016
@@ -62,7 +63,7 @@ INFO  Test duration: 0.00 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : Other_cor_003
+INFO  Id:    Other_cor_003
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Running with mode: None
@@ -71,7 +72,7 @@ INFO  Test duration: 0.00 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_perf_001~MockDatabase
+INFO  Id:    DB_perf_001~MockDatabase
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MockDatabase
@@ -80,7 +81,7 @@ INFO  Test duration: 0.00 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_perf_001~MyDatabase_2012
+INFO  Id:    DB_perf_001~MyDatabase_2012
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MyDatabase_2012
@@ -89,7 +90,7 @@ INFO  Test duration: 0.00 secs
 INFO  Test final outcome:  PASSED
 INFO  
 INFO  ==============================================================
-INFO  Id   : DB_perf_001~MyDatabase_2016
+INFO  Id:    DB_perf_001~MyDatabase_2016
 INFO  Title: Test
 INFO  ==============================================================
 INFO  Starting database MyDatabase_2016
@@ -98,8 +99,17 @@ INFO  Test duration: 0.00 secs
 INFO  Test final outcome:  PASSED
 INFO  
 CRIT  
-CRIT  Completed test run at:  Monday 2019-06-24 16:44:03 GMT Daylight Time
-CRIT  Total test duration:    0.04 secs
+CRIT  Completed test run at:  Sunday 2020-07-19 00:06:41 GMT Daylight Time
+CRIT  Total test duration:    0.21 secs
+CRIT  
+CRIT  Run details:
+CRIT              outDirName: win
+CRIT                hostname: sag-f4lblq2
+CRIT                      os: Windows 10 10.0.18362 SP0
+CRIT               startTime: 2020-07-19 00:06:40
+CRIT  
+CRIT  Success outcomes: 11 PASSED
 CRIT  
 CRIT  Summary of failures: 
 CRIT  	THERE WERE NO FAILURES
+CRIT  

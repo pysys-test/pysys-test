@@ -1,5 +1,13 @@
+DEBUG PySys is installed at: c:\dev\pysys-test\pysys; python from C:\dev\venv-py3\Scripts\python.exe
+DEBUG Loading project file: C:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_067\Output\win\test\pysysproject.xml
+DEBUG Setting project property osfamily="windows"
+DEBUG Setting project property verboseWaitForSignal="true"
+DEBUG Setting project property defaultAbortOnError="true"
+DEBUG Adding value to path: C:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_067\Output\win\test\extrapath
+DEBUG Successfully initialized the coloring library
+INFO  Running 1 tests with 1 threads using PySys 1.6.0.dev1 in Python 3.6.6
 INFO  ==============================================================
-INFO  Id   : <CYAN>PySys_NestedTestcase<END>
+INFO  Id:    <CYAN>PySys_NestedTestcase<END>
 INFO  Title: <CYAN>Nested testcase<END>
 DEBUG <BLUE>Execution order hint: 0.0<END>
 INFO  ==============================================================
@@ -8,7 +16,7 @@ INFO  Sample message info
 WARN  <MAGENTA>Sample message warn<END>
 ERROR <RED>Sample message at error with exception trace: <END>
 <RED>Traceback (most recent call last):
-  File "C:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_067\Output\win32\test\PySys_NestedTestcase\run.py", line 10, in execute
+  File "C:\dev\pysys-test\pysys-examples\internal\testcases\PySys_internal_067\Output\win\test\PySys_NestedTestcase\run.py", line 10, in execute
     raise Exception('My exception')
 Exception: My exception<END>
 INFO  skipped reason message ... <YELLOW>skipped<END>
@@ -23,16 +31,15 @@ WARN  <MAGENTA>Aborted test due to FAILED outcome<END>
 DEBUG <BLUE>--- test cleanup<END>
 DEBUG <BLUE>ProcessUser cleanup function done.<END>
 INFO  
-INFO  Test duration: <BLUE>0.06 secs<END>
+INFO  Test duration: <BLUE>0.10 secs<END>
 INFO  Test final outcome:  <RED>FAILED<END>
 INFO  Test outcome reason: <CYAN>abort reason message<END>
 INFO  
 CRIT  
-CRIT  Completed test run at:  <BLUE>Saturday 2020-07-04 18:49:58 GMT Daylight Time<END>
-CRIT  Total test duration:    <BLUE>0.07 secs<END>
-CRIT  
 CRIT  Summary of failures: 
 CRIT  <RED>  FAILED: PySys_NestedTestcase <END>
-CRIT        ..\myoutdir\PySys_NestedTestcase\
 CRIT  <CYAN>      abort reason message<END>
+CRIT        PySys_NestedTestcase\
+CRIT        ..\myoutdir\PySys_NestedTestcase\
+CRIT  
 DEBUG <BLUE>ProcessUser cleanup function done.<END>
