@@ -131,7 +131,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 	"""
 	for file in file1, file2:
 		if not pathexists(file):
-			raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+			raise FileNotFoundException("unable to find file \"%s\"" % file)
 	else:
 		stripchars = None if stripWhitespace else '\r\n' # None means all whitespace
 

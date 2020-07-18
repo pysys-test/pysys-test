@@ -53,7 +53,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[]):
 	if None in mappers: mappers = [m for m in mappers if m]
 
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
 			for l in f:
@@ -95,7 +95,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 	
 	"""
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
 			if log.isEnabledFor(logging.DEBUG):
@@ -141,7 +141,7 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False
 	
 	"""
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
 			contents = f.readlines()
@@ -190,7 +190,7 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	regexpr = re.compile(expr, flags=flags)
 
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+		raise FileNotFoundException('unable to find file "%s"' % (file))
 	
 	
 	with openfile(file, 'r', encoding=encoding) as f:
