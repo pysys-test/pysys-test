@@ -1070,13 +1070,13 @@ class ProcessUser(object):
 		matches = []
 		startTime = time.time()
 		msg = "Waiting for {expr} {condition}in {file}{detail}".format(
-			expr=repr(expr), # repr performs escaping of embedded quotes, newlines, etc
+			expr=quotestring(expr), # repr performs escaping of embedded quotes, newlines, etc
 			condition=condition.strip()+' ' if condition!='>=1' else '', # only include if non-default
 			file=os.path.basename(file),
 			detail=' '+detailMessage.strip(' ') if detailMessage else ''
 			)
 
-		log.debug("Performing wait for grep signal '%s' %s in file %s with ignores %s", expr, condition, f, ignores)
+		log.debug("Performing wait for grep signal %s %s in file %s with ignores %s", expr, condition, f, ignores)
 		
 		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', True) and self.getBoolProperty('verboseWaitForGrep', True)
 		if verboseWaitForSignal: 

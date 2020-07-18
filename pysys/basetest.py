@@ -611,9 +611,9 @@ class BaseTest(ProcessUser):
 				
 			if '__' in k: raise Exception('Please do not use __ in any for keywords, this is reserved for future use')
 
-			# use repr if it's a string so we get escaping, other data structures are best using normal str()
+			# use quotestring which uses repr() for escaping only if we need it; other data structures are best using normal str()
 			
-			displayvalues[-1]+= ((u'=%r'%(v,)) if isstring(v) else (u'=%s'%(v,)))
+			displayvalues[-1]+= (u'=%s'%quotestring(v) if isstring(v) else (u'=%s'%(v,)))
 			namedvalues[k] = v
 
 		if positional_arguments: # yucky old-style mechanism
@@ -654,7 +654,12 @@ class BaseTest(ProcessUser):
 				v1 = u'%s'%(namedvalues[namesInUse[0]],)
 				v2 = u'%s'%(namedvalues[namesInUse[1]],)
 
-				if isstring(namedvalues[namesInUse[0]]) or v1==v2:
+				if isstring(namedvalues[namesInUse[0]]) and ( # for strings do minimal escaping, but only if we can do it consistently for both strings
+						('\\' in repr(namedvalues[namesInUse[0]]).replace('\\\\','')) == 
+						('\\' in repr(namedvalues[namesInUse[1]]).replace('\\\\','')) ):
+					v1 = quotestring(namedvalues[namesInUse[0]])
+					v2 = quotestring(namedvalues[namesInUse[1]])
+				elif v1==v2 or isstring(namedvalues[namesInUse[0]]):
 					v1 = u'%r'%(namedvalues[namesInUse[0]],)
 					v2 = u'%r'%(namedvalues[namesInUse[1]],)
 				

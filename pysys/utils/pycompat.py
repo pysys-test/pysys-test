@@ -40,16 +40,27 @@ def isstring(s):
 	return isinstance(s, string_types)
 
 def quotestring(s):
-	""" Adds double quotation marks around the specified character string 
-	(but does not escape quotes contained within it). 
+	""" Adds double quotation marks around the specified character or byte string, 
+	and additional escaping only if needed to make the meaning clear, but trying to 
+	avoid double-slashes unless actually needed since it makes paths harder to read
+	
 	If a byte string is provided and this is Python 3+ then the 
 	``repr()`` representation is used instead. 
 	"""
-	# this function exists to provide the same quoting behaviour 
+	# this function exists primarily to provide the same quoting behaviour 
 	# for str/unicode in Python 2 and str in Python 3, but avoiding 
 	# the confusing "b'valuehere'" representation that "%s" would 
 	# produce for python 3 bytes objects
-	return '"%s"'%s if isstring(s) else repr(s)
+	r = repr(s)
+	if not isstring(s): return r
+	
+	if '\\' in r.replace('\\\\',''): # if it contains escape sequences like \n to \" we'd better just use repr so it's unambiguous
+		return r
+	
+	# repr uses single quotes, so using double quotes is a good way to make it distinguishable 
+	# (the other option would be using r'...' since essentially this is like a Python raw string
+
+	return '"%s"'%s
 	
 def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	"""

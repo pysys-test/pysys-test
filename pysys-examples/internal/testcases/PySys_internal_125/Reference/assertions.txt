@@ -1,24 +1,24 @@
-Assert that (actual == expected) with actual ('prefix'+' foo bar '+'suffix') ='prefix foo bar suffix', extraParamNotUsed='baz', expected='foobar' ... failed [run.py:18]
-Assert that (actual == expected) with actual='prefix foo bar suffix', expected='foobar' ... failed [run.py:22]
+Assert that (actual == expected) with actual ('prefix'+' foo bar '+'suffix') ="prefix foo bar suffix", extraParamNotUsed="baz", expected="foobar" ... failed [run.py:18]
+Assert that (actual == expected) with actual="prefix f\oo bar suffix", expected="f\oobar" ... failed [run.py:22]
 Assert that (actual == expected) with actual=MyClass2(Hello), expected=MyClass2(Hello there) ... failed [run.py:38]
 Assert that (actual is expected) with actual=MyClass2(Hello), expected=MyClass2(Hello) ... failed [run.py:39]
-Assert that (actual == expected) with actual (myDataStructure['item3'][-1].getId()) ='baZaar', expected='baz' ... failed [run.py:41]
-Assert that (reasonFailedEvalAssert.startswith(expected)) with reasonFailedEvalAssert="Assert that (actual == expected) with actual ('prefix'+' foo bar '+'suffix') ='prefix foo bar suffix', extraParamNotUsed='baz', expected='foobar'", expected='Assert that (actual == expected) with ' ... passed
-Assert that (actualStartupMessage == expected) with expected='Started successfully', actualStartupMessage='Started successfully' ... passed
-Assert that (actualStartupMessage.endswith('successfully')) with actualStartupMessage='Started successfully' ... passed
+Assert that (actual == expected) with actual (myDataStructure['item3'][-1].getId()) ="baZaar", expected="baz" ... failed [run.py:41]
+Assert that (reasonFailedEvalAssert.startswith(expected)) with reasonFailedEvalAssert='Assert that (actual == expected) with actual (\'prefix\'+\' foo bar \'+\'suffix\') ="prefix foo bar suffix", extraParamNotUsed="baz", expected="foobar"', expected="Assert that (actual == expected) with " ... passed
+Assert that (actualStartupMessage == expected) with expected="Started successfully", actualStartupMessage="Started successfully" ... passed
+Assert that (actualStartupMessage.endswith('successfully')) with actualStartupMessage="Started successfully" ... passed
 Assert that ((0 <= actualValue < max) and type(actualValue)!=float) with actualValue=20, max=100 ... passed
-Assert that (IS_WINDOWS or re.match(expected, actual)) with actual='foo', expected='f.*' ... passed
-Assert that (import_module('tarfile').is_tarfile(self.output+file) is False) with file='/foo.zip' ... passed
-Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')) ='51.9' ... passed
-Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')) ='20.3' ... passed
+Assert that (IS_WINDOWS or re.match(expected, actual)) with actual="foo", expected="f.*" ... passed
+Assert that (import_module('tarfile').is_tarfile(self.output+file) is False) with file="/foo.zip" ... passed
+Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-1.log', 'Server started in ([0-9.]+) seconds')) ="51.9" ... passed
+Assert that (float(startupTime) < 60.0) with startupTime (self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')) ="20.3" ... passed
 Assert that (serverStartInfo == expected) with expected={'startupTime': '20.3', 'user': None}, serverStartInfo (self.getExprFromFile('myprocess-2.log', 'Server started in (?P<startupTime>[0-9.]+) seconds(?P<user> as user .*)?')) ={'startupTime': '20.3', 'user': None} ... passed
 Assert that (serverStartInfo == expected) with expected=[{'startupTime': '20.3', 'user': None}], serverStartInfo (self.getExprFromFile('myprocess-2.log', 'Server started in (?P<startupTime>[0-9.]+) seconds(?P<user> as user .*)?', returnAll=True)) =[{'startupTime': '20.3', 'user': None}] ... passed
-Assert that (actualUser == expected) with expected='myuser', actualUser='myuser' ... passed
-Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ='foo', expected='foo' ... passed
-Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ='bar', expected='bar' ... passed
-Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ='bar', expected='bar' ... passed
+Assert that (actualUser == expected) with expected="myuser", actualUser="myuser" ... passed
+Assert that (actual == expected) with actual (myDataStructure['item1'][-1].getId()) ="foo", expected="foo" ... passed
+Assert that (actual == expected) with actual (myDataStructure['item2'][-1].getId()) ="bar", expected="bar" ... passed
+Assert that (actual == expected) with actual (myDataStructure['item2'][-1].id) ="bar", expected="bar" ... passed
 Assert that (len(actual) == 1) with actual (myDataStructure['item2']) =[MyClass(bar)] ... passed
-Assert that (actual == expected) with item (myDataStructure['item1']) =[MyClass(foo)], actual (item[-1].getId()) ='foo', expected='foo', needsPython36=True ... passed
+Assert that (actual == expected) with item (myDataStructure['item1']) =[MyClass(foo)], actual (item[-1].getId()) ="foo", expected="foo", needsPython36=True ... passed
 Assert that (actualErrorMessage == "Foo\"\'\nbar") with actualErrorMessage='Foo"\'\nbar' ... passed
 Assert that (actualFileSize > 0) with actualFileSize (os.path.getsize(self.output+'/file1.dat')) =3 ... passed
 Assert that (actualFileSize > 0) with actualFileSize (os.path.getsize(self.output+'/file2.dat')) =3 ... passed
