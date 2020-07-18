@@ -121,6 +121,14 @@ New features
 
 - `BaseTest.waitForGrep` and `BaseTest.getExprFromFile` also now support a mappers= argument. 
 
+- All assertion methods that have the (deprecated and unnecessary) ``filedir`` as their second positional (non-keyword) 
+  argument now support the more natural pattern of giving the expr/exprList as the second positional argument, 
+  so instead of doing ``self.assertGrep('file', expr='Foo.*')`` you can also now use the more 
+  natural ``self.assertGrep('file', 'Foo.*')``. For compatibility with existing testcases, the old signature of 
+  ``self.assertGrep('file', 'filedir', [expr=]'expr')`` continues to behave as before, but the recommended usage 
+  in new tests is now to avoid all use of filedir as a positional argument for consistency and readability. (If you 
+  need to set the filedir, you can use the keyword argument or just add it as a prefix to the ``file`` argument).
+  
 - `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
   behaviour can be customized with a new ``onError=`` parameter::
   

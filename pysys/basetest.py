@@ -856,8 +856,8 @@ class BaseTest(ProcessUser):
 		path = os.path.normpath(path)
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
-	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0, mappers=[]):
+	def assertGrep(self, file, _expr=None, _unused=None, contains=True, ignores=None, literal=False, encoding=None, 
+			abortOnError=False, assertMessage=None, reFlags=0, mappers=[], expr='', filedir=None):
 		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
 		This method searches through the specified text file until it finds a line matching the regular expression. 
@@ -932,6 +932,8 @@ class BaseTest(ProcessUser):
 			For contains=False matches, you should end the expr with `.*` if you wish to include just the 
 			matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
 			then the entire matching line will be included in the outcome failure reason. 
+			
+			This can be 
 		
 		:param bool contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
@@ -979,6 +981,13 @@ class BaseTest(ProcessUser):
 			unpacked using the ``**`` operator; see example above). 
 		
 		"""
+		# support the natural pattern of passing expr as 2nd positional parameter whilst retaining pre-1.6.0 compatibility support for
+		# assertGrep(file, filedir, expr, True), assertGrep(file, filedir, expr='foo')
+		if not _unused and not expr: # modern usage: expr as positional and filedir not positional
+			expr = _expr
+		elif _expr or _unused: # older usage - either or both may be set via positional
+			filedir, expr = filedir or _expr, expr or _unused
+		
 		assert expr, 'expr= argument must be specified'
 		
 		if filedir is None: filedir = self.output
@@ -1044,8 +1053,8 @@ class BaseTest(ProcessUser):
 		
 		return result
 
-	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0):
+	def assertLastGrep(self, file, _expr='', _unused=None, contains=True, ignores=[], includes=[], encoding=None, 
+			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
 		
 		Rather than using this method, use `getExprFromFile` with `assertThat` for better error messages and more 
@@ -1087,8 +1096,13 @@ class BaseTest(ProcessUser):
 			which allows the result to be passed to `assertThat` for further checking (typically 
 			unpacked using the ``**`` operator; see `assertGrep` for a similar example). 
 		"""
+		if not _unused and not expr: # modern usage: expr as positional and filedir not positional
+			expr = _expr
+		elif _expr or _unused: # older usage - either or both may be set via positional
+			filedir, expr = filedir or _expr, expr or _unused
+
 		assert expr, 'expr= argument must be specified'
-		
+
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
@@ -1117,8 +1131,8 @@ class BaseTest(ProcessUser):
 		return match
 
 
-	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0):   
+	def assertOrderedGrep(self, file, _exprList=[], _unused=None, contains=True, encoding=None, 
+			abortOnError=False, assertMessage=None, reFlags=0, exprList=[], filedir=None):   
 		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
 		
 		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome 
@@ -1163,7 +1177,12 @@ class BaseTest(ProcessUser):
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 
 		"""
-		assert exprList, 'expr= argument must be specified'
+		if not _unused and not exprList: # modern usage: expr as positional and filedir not positional
+			exprList = _exprList
+		elif _exprList or _unused: # older usage - either or both may be set via positional
+			filedir, exprList = filedir or _exprList, exprList or _unused
+
+		assert exprList, 'exprList= argument must be specified'
 		
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
@@ -1194,8 +1213,8 @@ class BaseTest(ProcessUser):
 		return False
 
 	
-	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0):
+	def assertLineCount(self, file, _expr='', _unused=None, condition=">=1", ignores=None, encoding=None, 
+			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None):
 		"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -1225,6 +1244,11 @@ class BaseTest(ProcessUser):
 
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""	
+		if not _unused and not expr: # modern usage: expr as positional and filedir not positional
+			expr = _expr
+		elif _expr or _unused: # older usage - either or both may be set via positional
+			filedir, expr = filedir or _expr, expr or _unused
+
 		assert expr, 'expr= argument must be specified'
 		
 		if filedir is None: filedir = self.output

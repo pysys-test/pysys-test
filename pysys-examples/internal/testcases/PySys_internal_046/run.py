@@ -51,7 +51,15 @@ class PySysTest(BaseTest):
 		self.assertThat('grepResult==expected', expected=('westlin winds',),
 			grepResult=self.assertGrep(file='file.txt', filedir=self.input, expr='(Now eastlin|westlin winds)').groups(),
 		)
-		
+
+
+		# check new and old positional arguments
+		self.assertGrep('file.txt', 'moon.*bright', filedir=self.input) # new, expr as 2nd arg
+		self.assertGrep('file.txt', self.input, 'moon.*bright', True) # old
+		self.assertGrep(self.input+'/file.txt', None, 'moon.*bright', True) #old
+		self.assertGrep('file.txt', self.input, expr='moon.*bright') # old
+
+
 		self.write_text('myserver.log', u'Successfully authenticated user "myuser" in 0.6 seconds.')
 		MAX_AUTH_TIME = 60
 		
