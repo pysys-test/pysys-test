@@ -1103,7 +1103,13 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	Alternatively you can this property to false if you wish to create archives during the test run as each failure 
 	occurs. 
 	"""
-	
+
+
+	includeNonFailureOutcomes = 'REQUIRES INSPECTION'
+	"""
+	In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be archived. 
+	"""
+
 	fileExcludesRegex = u''
 	"""
 	A regular expression indicating test output paths that will be excluded from archiving, for example large 
@@ -1149,6 +1155,11 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 		self.skippedTests = []
 		self.archivesCreated = 0
+		
+		self.includeNonFailureOutcomes = [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
+		for o in self.includeNonFailureOutcomes:
+			if not any(o == str(outcome) for outcome in OUTCOMES):
+				raise UserError('Unknown outcome display name "%s" in includeNonFailureOutcomes'%o)
 
 	def cleanup(self, **kwargs):
 		if self.archiveAtEndOfRun:
@@ -1171,13 +1182,14 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		"""
 		Decides whether this test is eligible for archiving of its output. 
 		
-		The default implementation archives only tests that have a failure outcome, 
-		but this can be customized if needed by subclasses. 
+		The default implementation archives only tests that have a failure outcome, or are listed in 
+		``includeNonFailureOutcomes``, but this can be customized if needed by subclasses. 
 		
 		:param pysys.basetest.BaseTest testObj: The test object under consideration.
 		:return bool: True if this test's output can be archived. 
 		"""
-		return testObj.getOutcome().isFailure()
+		return testObj.getOutcome().isFailure() or str(testObj.getOutcome()) in self.includeNonFailureOutcomes
+
 
 	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		if not self.shouldArchive(testObj): return 
