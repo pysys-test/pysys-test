@@ -383,6 +383,10 @@ Be sure to remove use of the following deprecated items at your earliest conveni
 - The method `pysys.basetest.BaseTest.addResource` is deprecated and will be removed in a future release, so please 
   change tests to stop using it; use `pysys.basetest.BaseTest.addCleanupFunction` instead. 
 
+- The ``pysys.process.commonwrapper.CommonProcessWrapper`` class which is now renamed to `pysys.process.Process`. A 
+  redirection module exists, so any code that depends on the old location will still work, but please change references 
+  to the new name as it will be removed in a future release. 
+
 Finally there are also some additional fixes and cleanup that could require changes (typically to extension/framework 
 classes rather than individual tests) but in most cases will not be noticed. Most users can ignore the following list 
 and consult it only if you get new test failures (or problems running ``pysys make``) after upgrading PySys:

@@ -241,7 +241,7 @@ class ProcessUser(object):
 			process. Coverage can also be disabled by setting 
 			``self.disableCoverage==True`` on this test instance. 
 		:return: The process handle of the process.
-		:rtype: pysys.process.commonwrapper.CommonProcessWrapper
+		:rtype: pysys.process.Process
 		
 		"""
 		args = arguments
@@ -265,7 +265,7 @@ class ProcessUser(object):
 			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, onError=None, quiet=False, stdouterr=None, 
 			background=False):
 		"""Start a process running in the foreground or background, and return 
-		the `pysys.process.commonwrapper.CommonProcessWrapper` object.
+		the `pysys.process.Process` object.
 		
 		Typical use is::
 		
@@ -322,9 +322,8 @@ class ProcessUser(object):
 			L{allocateUniqueStdOutErr}. 
 			The stdouterr prefix is also used to form a default display name for the process if none is explicitly provided. 
 			The files are created relative to the test output directory. 
-			The filenames can be accessed from the returned process object using 
-			L{pysys.process.commonwrapper.CommonProcessWrapper.stdout} and 
-			L{pysys.process.commonwrapper.CommonProcessWrapper.stderr}.
+			The filenames can be accessed from the returned process object using ``.stdout/err`` from 
+			`pysys.process.Process`.
 		
 		:param str stdout: The filename used to capture the stdout of the process. It is usually simpler to use `stdouterr` instead of this. 
 		:param str stderr: The filename used to capture the stderr of the process. It is usually simpler to use `stdouterr` instead of this. 
@@ -351,7 +350,7 @@ class ProcessUser(object):
 			(the recommended default property value is defaultIgnoreExitStatus=False), or is set to True for 
 			compatibility with older PySys releases if no project property is set. 
 		
-		:param Callable[pysys.process.commonwrapper.CommonProcessWrapper]->str onError: A function that will be called 
+		:param Callable[pysys.process.Process]->str onError: A function that will be called 
 			if the process times out or returns an unexpected exit status (unless ignoreExitStatus=True), before 
 			any abort exception is raised. This provides a convenient place to add logging of 
 			diagnostic information (perhaps using the stdout/err of the process) and/or extracting and returning an 
@@ -377,7 +376,7 @@ class ProcessUser(object):
 			failure exit statuses are valid. 
 
 		:return: The process wrapper object.
-		:rtype: pysys.process.commonwrapper.CommonProcessWrapper
+		:rtype: pysys.process.Process
 
 		"""
 		if state is None: state = FOREGROUND
@@ -684,7 +683,7 @@ class ProcessUser(object):
 
 		Does nothing if the process is not running. 
 		
-		This is equivalent to calling `pysys.process.commonwrapper.CommonProcessWrapper.stop()`, except it also 
+		This is equivalent to calling `pysys.process.Process.stop()`, except it also 
 		logs an info message when the process is stopped.
 
 		:param process: The process handle returned from the L{startProcess} method
@@ -707,7 +706,7 @@ class ProcessUser(object):
 	def signalProcess(self, process, signal, abortOnError=None):
 		"""Send a signal to a running process.
 
-		This method uses the `pysys.process.commonwrapper.CommonProcessWrapper.signal` to send a signal to a 
+		This method uses the `pysys.process.Process.signal` method to send a signal to a 
 		running process. 
 		
 		Should the request to send the signal to the running process fail, a C{BLOCKED} outcome will be added to the
@@ -738,7 +737,7 @@ class ProcessUser(object):
 		Timeouts will result in an exception and TIMEDOUT outcome unless the project property ``defaultAbortOnError==False`` 
 		is set.
 		
-		:param pysys.process.commonwrapper.CommonProcessWrapperprocess: The process handle returned from the L{startProcess} method
+		:param pysys.process.Process process: The process handle returned from the L{startProcess} method
 		:param int timeout: The timeout value in seconds to wait before returning, for example ``timeout=TIMEOUTS['WaitForProcess']``.
 		:param bool abortOnError: If True aborts the test with an exception on any error, if False just log it as a warning. 
 			(defaults to the defaultAbortOnError project setting)
@@ -824,11 +823,11 @@ class ProcessUser(object):
 	def writeProcess(self, process, data, addNewLine=True):
 		"""Write binary data to the stdin of a process.
 
-		This method uses `pysys.process.commonwrapper.CommonProcessWrapper.write` to write binary data to the stdin of a process. This
+		This method uses `pysys.process.Process.write` to write binary data to the stdin of a process. This
 		wrapper around the write method of the process helper only adds checking of the process running status prior
 		to the write being performed, and logging to the testcase run log to detail the write.
 
-		:param pysys.process.commonwrapper.CommonProcessWrapper process: The process handle returned from the L{startProcess()} method
+		:param pysys.process.Process process: The process handle returned from the L{startProcess()} method
 		:param bytes data: The data to write to the process stdin. 
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
@@ -1017,7 +1016,7 @@ class ProcessUser(object):
 		:param int timeout: The number of seconds to wait for the regular expression before giving up and aborting 
 			the test with `pysys.constants.TIMEDOUT` (unless abortOnError=False in which case execution will continue).
 		
-		:param pysys.process.commonwrapper.CommonProcessWrapper process: The process that is generating the specified 
+		:param pysys.process.Process process: The process that is generating the specified 
 			file, to allow the wait to fail fast (instead of timing out) if the process dies before the expected signal 
 			appears. Can be None if the process is not known or is expected to terminate itself during this period. 
 		
