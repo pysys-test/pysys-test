@@ -113,6 +113,7 @@ Assertions and outcomes
 =======================
 
 .. autosummary::
+	assertThatGrep
 	assertGrep
 	assertLineCount
 	assertDiff
@@ -137,8 +138,12 @@ even if some early ones fail.
 For example::
 
 	def validate(self):
-		self.assertGrep('myserver.log', expr='Successfully authenticated user ".*"')
-		self.assertThat('actualNumberOfLogFiles == expected', actualNumberOfLogFiles=len(glob.glob(self.output+'/myserver*.log')), expected=3)
+		self.assertGrep('myserver.log', expr=' (ERROR|FATAL|WARN) .*', contains=False)
+		
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)"', 
+			"value == expected", expected='myuser')
+
+		self.assertThat('actualNumberOfLogFiles == expected', actualNumberOfLogFiles__eval="len(glob.glob(self.output+'/myserver*.log'))", expected=3)
 
 The available test outcomes are listed in `pysys.constants.OUTCOMES`. 
 

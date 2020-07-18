@@ -87,6 +87,13 @@ New features
   For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
   its constructor, see the sample ``pysysproject.xml`` file. 
 
+- Added `BaseTest.assertThatGrep` which makes it easier to do the common operation of extracting a value using grep 
+  and then performing a validation on it using `BaseTest.assertThat`. This is essentially just a simplified wrapper 
+  around the functionality added in 1.5.1, which avoids the need for slightly complex syntax and hopefully will 
+  encourage people to use the extract-then-assert paradigm rather than trying to do them both at the same time 
+  with a single `BaseTest.assertGrep` which is less powerful and produces much less informative messages when there's 
+  a failure. 
+
 - `BaseTest.copy` improvements:
 
   - `BaseTest.copy` can now be used to copy directories in addition to individual files. It is recommended to use 

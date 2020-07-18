@@ -861,11 +861,93 @@ class BaseTest(ProcessUser):
 		path = os.path.normpath(path)
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
+	def assertThatGrep(self, file, grepRegex, conditionstring, encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
+		"""Perform a validation by using a regular expression to extract a "value" from a text file and then check 
+		the extracted value using an `assertThat` conditionstring.
+
+		For example:
+			# This is the typical case - "value" is assigned to the first (...) regex group, and keyword parameters 
+			# (e.g. "expected=") are used to validate that the "value" is correct
+			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)"', 
+				"value == expected", expected='myuser')
+			
+			# In cases where you need multiple regex groups for matching purpose, name the one containing the value using (?P<value>...)
+			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', 
+				"0.0 <= float(value) <= 60.0")
+
+		This method is implemented using `getExprFromFile` and `assertThat`, so see those methods for more detailed 
+		information on the parameters. 
+
+		.. versionadded:: 1.6.0.
+
+		:param file: The name or relative/absolute path of the file to be searched.
+		
+		:param str grepRegex: The regular expression to check for in the file (or a string literal if literal=True), 
+			for example ``" ERROR .*"``. See `assertGrep` for more tips on using and escape expressions. 
+		
+		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` 
+			to validate that "value" is correct. For example ``value == expected``.
+			
+			It's best to put expected values into a separate named parameter (rather than using literals inside the 
+			conditionstring), since this will produce more informative messages if there is a failure. 
+			
+			Do not be tempted to use a Python f-string here, as that would deprive PySys of the 
+			opportunity to provide a self-describing message and outcome reason. 
+
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+		:param str encoding: The encoding to use to open the file. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
+		
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time.
+
+		:param abortOnError=False: Set to True to make the test immediately abort if the
+			assertion fails. By default this method produces a BLOCKED output 
+			but does not throw if the eval(...) cannot be executed. 
+
+		:param assertMessage='': Overrides the string used to describe this 
+			assertion in log messages and the outcome reason. We do not recommend using this as the automatically 
+			generated assertion message is usually clearer. If you want to add some additional information to 
+			that message (e.g. which file/server it pertains to etc), just add the info as a string with an extra 
+			keyword argument. 
+			
+		:param \**kwargs: All additional keyword arguments are treated as values which will be made available 
+			when evaluating the condition string. Any keyword ending in the special suffix ``__eval`` will be treated 
+			as a Python expression string (rather than a string literal) and will be be evaluated in a namespace 
+			containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.  
+		
+		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). 
+
+		"""
+		def getExprFromFile(file, expr):
+			e = self.getExprFromFile(file, expr, encoding=encoding, reFlags=reFlags, mappers=mappers)
+			# in case it has named parameters
+			if isinstance(e, dict) and 'value' in e: return e['value']
+			return e
+		return self.assertThat(conditionstring, value__eval='getExprFromFile(%r, %r)'%(file, grepRegex), 
+			**kwargsForAssertThat)
+
 	def assertGrep(self, file, _expr=None, _unused=None, contains=True, ignores=None, literal=False, encoding=None, 
 			abortOnError=False, assertMessage=None, reFlags=0, mappers=[], expr='', filedir=None):
 		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
-		This method searches through the specified text file until it finds a line matching the regular expression. 
+		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
+		use `assertThatGrep` instead of this function, as assertThatGrep can produce better message on failure, and 
+		also allows for more powerful matching using a full Python expression 
+		(e.g. numeric range checks, pre-processing strings to normalize case, etc). 
+
+		The assertGrep method is good for checking in a log to confirm that something happened, or to check that 
+		there are no error messages. 
 		When contains=True it adds a `PASSED <pysys.constants.PASSED>` outcome if found or a 
 		`FAILED <pysys.constants.FAILED>` outcome if not found (except when where are named groups in the expression 
 		in which case `BLOCKED <pysys.constants.BLOCKED>` is used to indicate that the return value is not valid).
@@ -888,18 +970,6 @@ class BaseTest(ProcessUser):
 			self.assertGrep('myserver.log', expr=r'MyClass', mappers=[
 				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
 			])
-		
-		You can get more descriptive failure messages, and also do more sophisticated checking of results, by 
-		using one or more ``(?P<groupName>...)`` named groups in the expression to extract information. A common 
-		pattern is to unpack the resulting dict using ``**kwargs`` syntax and pass to `BaseTest.assertThat`. For 
-		example, the grep shown above for checking that a log message contains the correct username could be rewritten 
-		as::
-		
-			self.assertThat('username == expected', expected='myuser',
-				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
-
-			self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
-				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
 		
 		The behaviour of the regular expression can be controlled using ``reFlags=``. For example, to perform 
 		case-insensitive matching and to use Python's verbose regular expression syntax which permits whitespace 

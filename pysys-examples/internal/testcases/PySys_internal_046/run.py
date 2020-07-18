@@ -52,7 +52,6 @@ class PySysTest(BaseTest):
 			grepResult=self.assertGrep(file='file.txt', filedir=self.input, expr='(Now eastlin|westlin winds)').groups(),
 		)
 
-
 		# check new and old positional arguments
 		self.assertGrep('file.txt', 'moon.*bright', filedir=self.input) # new, expr as 2nd arg
 		self.assertGrep('file.txt', self.input, 'moon.*bright', True) # old
@@ -61,6 +60,14 @@ class PySysTest(BaseTest):
 
 
 		self.write_text('myserver.log', u'Successfully authenticated user "myuser" in 0.6 seconds.')
+
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in ([^ ]+) seconds', "value == expected", expected='myuser')
+
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in ([^ ]+) seconds', "value == expected", expected='myuser')
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "(?P<value>[^"]*)"', "value == expected", expected='myuser')
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', "0.0 <= float(value) <= 60.0")
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "(?P<username>[^"]*)"', "value['username'] == expected", expected='myuser')
+
 		MAX_AUTH_TIME = 60
 		
 		self.assertThat('username == expected', expected='myuser',
