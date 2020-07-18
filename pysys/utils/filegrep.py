@@ -158,9 +158,10 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False
 
 
 def orderedgrep(file, exprList, encoding=None, flags=0):
-	"""Seach for ordered matches to a set of regular expressions in an input file, returning true if the matches occur in the correct order.
-	
-	The ordered grep method will only return true if matches to the set of regular expression in the expression 
+	"""Seach for ordered matches to a set of regular expressions in an input file, returning None 
+	on success, and a string indicating the missing expression something is missing.
+		
+	The ordered grep method will only pass if matches to the set of regular expression in the expression 
 	list occur in the input file in the order they appear in the expression list. Matches to the regular expressions 
 	do not have to be across sequential lines in the input file, only in the correct order. For example, for a file 
 	with contents ::
@@ -177,7 +178,7 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	:param exprList: A list of regular expressions (uncompiled) to search for in the input file
 	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	
-	:return: None on success, or on failure the string expression that was not found. 
+	:return: None on success, or on failure the string expression that was not found (with an indicator of its index in the array). 
 	:rtype: string
 	:raises FileNotFoundException: Raised if the input file does not exist
 		
@@ -185,11 +186,12 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	list = copy.deepcopy(exprList)
 	list.reverse()
 	
-	expr = list.pop()
+	expr, exprIndex = list.pop(), 1
 	regexpr = re.compile(expr, flags=flags)
 
 	if not pathexists(file):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+	
 	
 	with openfile(file, 'r', encoding=encoding) as f:
 		for line in f:
@@ -197,10 +199,10 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 				if len(list) == 0:
 					return None # success - found them all
 				
-				expr = list.pop()
+				expr, exprIndex = list.pop(), exprIndex+1
 				regexpr = re.compile(expr, flags=flags)
 
-	return expr # the expression we were trying to match
+	return '#%d: %s'%(exprIndex, expr) # the expression we were trying to match
 
 
 def logContents(message, list):
