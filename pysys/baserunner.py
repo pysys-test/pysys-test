@@ -1106,6 +1106,7 @@ class TestContainer(object):
 			except Exception as ex: # really should never happen so if it does make sure we know why
 				sys.stderr.write('Error in callback for %s: %s\n'%(self.descriptor.id, ex))
 				traceback.print_exc()
+				self.runner.runnerErrors.append('Error in callback for %s: %s'%(self.descriptor.id, ex))
 			
 			# return a reference to self
 			return self
