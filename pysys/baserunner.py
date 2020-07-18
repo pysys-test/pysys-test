@@ -789,6 +789,14 @@ class BaseRunner(ProcessUser):
 			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
 		"""
+		log.debug('publishArtifact was called with category=%s, path=%s', category, path)
+		
+		assert category, 'A category must be specified when publishing artifacts (%s)'%path
+		catfilter = self.project.properties.get('publishArtifactCategoryIncludeRegex','')
+		if catfilter and not re.match(catfilter, category):
+			log.debug('Not publishing artifact as category %s is filtered out by publishArtifactCategoryIncludeRegex'%category)
+			return
+
 		path = fromLongPathSafe(path).replace('\\','/')
 		for a in self.__artifactWriters:
 			a.publishArtifact(path, category)

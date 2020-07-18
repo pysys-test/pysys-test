@@ -242,6 +242,10 @@ class ArtifactPublisher(object):
 	
 	To publish an artifact to all registered writers, call `pysys.baserunner.BaseRunner.publishArtifact()`. 
 	
+	It is possible to restrict artifact publishing to just the categories you care about by setting the 
+	project property ``publishArtifactCategoryIncludeRegex`` which (if specified) must match the category name 
+	in order for writers to be notified. 
+	
 	.. versionadded:: 1.6.0
 	"""
 
