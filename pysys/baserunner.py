@@ -189,8 +189,9 @@ class BaseRunner(ProcessUser):
 		self.setKeywordArgs(xargs)
 
 		if len(descriptors)==1: self.threads = 1
-		if self.threads > 1: log.info('Running tests with %d threads', self.threads)
-	
+		log.info('Running {numDescriptors:,} tests with {threads} threads using PySys {pysysVersion} in Python {pythonVersion}'.format(
+			numDescriptors=len(self.descriptors), threads=self.threads, pysysVersion=pysys.__version__, pythonVersion='%s.%s.%s'%
+			sys.version_info[0:3]))
 		self.writers = []
 		summarywriters = []
 		progresswriters = []
