@@ -24,6 +24,7 @@ shared functionality of subclasses `pysys.basetest.BaseTest` and `pysys.baserunn
 import time, collections, inspect, locale, fnmatch, sys
 import threading
 import shutil
+import contextlib
 
 from pysys import log, process_lock
 from pysys.constants import *
@@ -1786,6 +1787,26 @@ class ProcessUser(object):
 		with openfile(os.path.join(self.output, file), 'w', encoding=encoding or self.getDefaultFileEncoding(file)) as f:
 			f.write(text)
 		return out
+	
+	@contextlib.contextmanager
+	def pauseLogging(self):
+		"""
+		Temporarily pauses logging for the current thread. 
+		
+		For example::
+		
+			with self.pauseLogging():
+				self.startProcess(...)
+		
+		.. versionadded:: 1.6.0
+		
+		"""
+		saved = pysys.internal.initlogging.pysysLogHandler.getLogHandlersForCurrentThread() 
+		pysys.internal.initlogging.pysysLogHandler.setLogHandlersForCurrentThread([])
+		try:
+			yield None
+		finally:
+			pysys.internal.initlogging.pysysLogHandler.setLogHandlersForCurrentThread(saved)
 	
 	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
 		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 

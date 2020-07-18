@@ -163,10 +163,13 @@ New features
   `BaseTest.setup` method shared by all tests), such as unimportant lines logged to stderr during startup of 
   commonly used processes which would otherwise be logged by `BaseTest.startProcess` when a process fails to start. 
 
-- `BaseTest.getExprFromFile` now supported ``(?P<groupName>...)`` named regular expression groups, and will return 
+- `BaseTest.getExprFromFile` now supports ``(?P<groupName>...)`` named regular expression groups, and will return 
   a dictionary containing the matched groups if any are present in the regular expression. For example::
 
     authInfo = self.getExprFromFile('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+
+- Added `BaseTest.pauseLogging()` for cases where you need to pause logging (e.g. while repeatedly polling) to avoid 
+  cluttering the run log.  
 
 - Colored output is disabled if the ``NO_COLOR`` environment variable is set; this is a cross-product standard 
   (https://no-color.org/). The ``PYSYS_COLOR`` variable take precedence if set. 
@@ -377,8 +380,9 @@ The changes that everyone should pay attention to are:
 Be sure to remove use of the following deprecated items at your earliest convenience:
 
 - Deprecated the ``ThreadFilter`` class. Usually it is not recommended 
-  to suppress log output and alternatives are available, e.g. the quiet=True option for `BaseTest.startProcess`. 
-  Please remove uses of this class from your code as it will be removed in a future release. 
+  to suppress log output and better alternatives are available, e.g. the quiet=True option for `BaseTest.startProcess`, 
+  and the `BaseTest.pauseLogging()` method. 
+  Please remove uses of ThreadFilter from your code as it will be removed in a future release. 
 
 - The method `pysys.basetest.BaseTest.addResource` is deprecated and will be removed in a future release, so please 
   change tests to stop using it; use `pysys.basetest.BaseTest.addCleanupFunction` instead. 

@@ -999,6 +999,8 @@ class TestContainer(object):
 			except Exception:
 				exc_info.append(sys.exc_info())
 				
+			logHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
+				
 			# import the test class
 			with global_lock:
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
@@ -1085,7 +1087,10 @@ class TestContainer(object):
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
-				
+			
+			# in case these got overwritten by a naughty test, restore before printing the final summary
+			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)
+			
 			# print summary and close file handles
 			try:
 				self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
