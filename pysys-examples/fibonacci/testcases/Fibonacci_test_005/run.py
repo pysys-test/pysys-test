@@ -1,4 +1,6 @@
 import time, shutil, os
+
+import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.utils.perfreporter import PerformanceUnit

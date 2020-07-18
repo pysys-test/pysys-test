@@ -38,7 +38,8 @@ class ConsoleMakeTestHelper(object):
 	A custom subclass can be specified in the project if required. 
 	"""
 
-	TEST_TEMPLATE = '''%s
+	TEST_TEMPLATE = '''import pysys
+%s
 %s
 
 class %s(%s):
