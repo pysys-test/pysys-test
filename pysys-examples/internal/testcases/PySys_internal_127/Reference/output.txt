@@ -1,18 +1,29 @@
 
 <default>, exit status 1
 Contents of default.err (filtered): 
+Got expected exception: python<default> returned non-zero exit code 1
+
+Timed out process
 
 Timed out process
 
 <onError=noop>, exit status 1
+Got expected exception: python<onError=noop> returned non-zero exit code 1
 
 <onError=logfile>, exit status 1
 Contents of logfile.log (filtered): 
+Got expected exception: python<onError=logfile> returned non-zero exit code 1
 
 <onError=stdout>, exit status 1
 Contents of onError=stdout.out (filtered): 
+Got expected exception: python<onError=stdout> returned non-zero exit code 1
+
+<onError=doc_example_suffix>, exit status 1
+Contents of onError=doc_example_suffix.err (filtered): 
+Got expected exception: python<onError=doc_example_suffix> returned non-zero exit code 1 - bad thing happened
 
 <onError=doc_example>, exit status 1
 Contents of onError=doc_example.err (filtered): 
+Got expected exception: python<onError=doc_example> returned non-zero exit code 1
 Contents of background-wait.err (filtered): 
 Got expected exception: python<background-wait> returned exit status 1 (expected <=0)

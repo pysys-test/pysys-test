@@ -132,8 +132,14 @@ New features
 - `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
   behaviour can be customized with a new ``onError=`` parameter::
   
+    # Log stdout instead of stderr
     self.startProcess(..., onError=lambda process: self.logFileContents(process.stdout, tail=True))
-    self.startProcess(..., onError=lambda process: None) # do nothing on error
+    
+    # Unless stderr is empty, log it and then use it to extract an error message (which will appear in the outcome reason)
+    self.startProcess(..., onError=lambda process: self.logFileContents(process.stderr, tail=True) and self.getExprFromFile(process.stderr, 'Error: (.*)')
+    
+    # Do nothing on error
+    self.startProcess(..., onError=lambda process: None)
 
 - Added `BaseTest.waitForBackgroundProcesses` which waits to completion of all background processes and optionally 
   checks for the expected exit status. This is especially useful when you have a test that needs to execute 
