@@ -126,8 +126,8 @@ class PySysTest(BaseTest):
 		self.assertThat('len(vcsCommit) > 4', vcsCommit__eval="self.runner.runDetails['vcsCommit']")
 		
 		# check PYSYS_CONSOLE_FAILURE_ANNOTATIONS did its thing
-		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*error: .*NestedTimedout .* 02.*'), 
-			expected='NestedTimedout%srun.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness - %s (NestedTimedout [CYCLE 02])'%(os.sep, TEST_STR))
+		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*error: .*NestedTimedout .* 02.*', encoding=locale.getpreferredencoding()), 
+			expected=u'NestedTimedout%srun.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness - %s (NestedTimedout [CYCLE 02])'%(os.sep, TEST_STR))
 
 		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*warning: .*NestedNotVerified .* 02.*'), 
 			expected='2%srun.log:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])'%os.sep)
