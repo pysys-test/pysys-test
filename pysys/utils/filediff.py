@@ -25,7 +25,7 @@ import logging
 
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.utils.pycompat import openfile
+from pysys.utils.pycompat import openfile, isstring
 from pysys.utils.fileutils import pathexists
 
 log = logging.getLogger('pysys.assertions')
@@ -77,6 +77,8 @@ def replace(list, replacementList, flags=0):
 	
 	"""
 	for pair in replacementList:
+		assert not isstring(pair), 'Each item in the replacement list must be a tuple of (string,string)'
+		x, y = pair
 		regexp = re.compile(pair[0], flags=flags)
 		for j in range(0, len(list)):
 			list[j] = re.sub(regexp, pair[1], list[j])
