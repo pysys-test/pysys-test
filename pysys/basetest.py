@@ -865,7 +865,8 @@ class BaseTest(ProcessUser):
 		"""Perform a validation by using a regular expression to extract a "value" from a text file and then check 
 		the extracted value using an `assertThat` conditionstring.
 
-		For example:
+		For example::
+		
 			# This is the typical case - "value" is assigned to the first (...) regex group, and keyword parameters 
 			# (e.g. "expected=") are used to validate that the "value" is correct
 			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)"', 
