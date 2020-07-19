@@ -28,6 +28,7 @@ import re
 import collections
 import platform
 import shlex
+import warnings
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -254,6 +255,9 @@ class BaseRunner(ProcessUser):
 		self.results = {}
 		
 		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
+		
+		self.__pythonWarnings = 0
+		self._configurePythonWarningsHandler()
 		
 		# (initially) undocumented hook for customizing which jobs the threadpool takes 
 		# off the queue and when. Standard implementation is a simple blocking queue. 
@@ -616,6 +620,9 @@ class BaseRunner(ProcessUser):
 				log.warn("caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
+		if self.__pythonWarnings:
+			log.warn('Python reported %d warnings during execution of tests; is is recommended to do a test run with -Werror and fix them if possible, or filter them out if not (see Python\'s warnings module for details)', self.__pythonWarnings)
+
 		fatalerrors = self.runnerErrors+fatalerrors
 		
 		if fatalerrors:
@@ -887,6 +894,20 @@ class BaseRunner(ProcessUser):
 			log.info("Cycle: %s", str(cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		log.debug('Execution order hint: %s', descriptor.executionOrderHint)
 		log.info(62*"=")
+	
+	def _configurePythonWarningsHandler(self):
+		# By default python prints warnings to stderr which is very unhelpful for us
+		warningLogger = logging.getLogger('pysys.pythonwarnings')
+		def handlePythonWarning(message, category, filename, lineno, file=None, line=None, **kwargs):
+			self.__pythonWarnings += 1
+			msg = warnings.formatwarning(message, category, filename, lineno, line=None, **kwargs)
+			# add a stack trace as otherwise it's not easy to see where in run.py the problem originated, as the 
+			# warning is usually logged from as shared base class
+			msg = '%s\n%s'%(msg.strip(), ''.join(traceback.format_stack()))
+			warningLogger.warn('Python reported a warning: %s', msg)
+			
+		warnings.showwarning = handlePythonWarning
+		
 
 class TestContainer(object):
 	"""Internal class added to the work queue and used for co-ordinating the execution of a single test case.

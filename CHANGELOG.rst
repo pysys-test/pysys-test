@@ -282,6 +282,11 @@ New features
   summary), since often these outcomes do require human attention. This can be disabled using the properties on 
   `pysys.writer.ConsoleSummaryResultsWriter` if desired. 
 
+- Added a handler for warnings from Python's ''warnings'' module so that if any warnings are logged to run.log with 
+  a stack trace (rather than just in stderr which is hard to track down). There is also a summary warn message at the 
+  end of the test run if any Python warnings were encountered. There is however no error so users can choose when 
+  to deal with the warnings. 
+
 Bug fixes
 ---------
 
