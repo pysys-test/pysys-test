@@ -374,11 +374,14 @@ The changes that everyone should pay attention to are:
   configuration file you will need to rename it. 
 
 - If your BaseTest or BaseRunner makes use of ``-Xkey[=value]`` command line overrides you should review your code 
-  and/or test thoroughly as in this release a) -Xkey and -Xkey=true/false now consistently produce a boolean True/False 
+  and/or test thoroughly as there are now automatic conversions from string to int/float/bool in some cases where 
+  previous the string type would have been retained. 
+  a) -Xkey and -Xkey=true/false now consistently produce a boolean True/False 
   (previously -Xkey=true would produce a string ``"true"`` whereas -Xkey would produce a boolean ``True``) and 
   b) -X attributes set on BaseRunner now undergo conversion from string to match the bool/int/float type of the 
   default value if a static field of that name already exists on the runner class (which brings BaseRunner into line 
-  with the behaviour that BaseTest has had since 1.5.0). 
+  with the behaviour that BaseTest has had since 1.5.0). This applies to the attributes set on  the object, but 
+  not to the contents of the xargs dictionary. 
 
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
@@ -416,6 +419,8 @@ and consult it only if you get new test failures (or problems running ``pysys ma
   standard for .properties file and makes it impossible to share a .properties file across tests running in different 
   locales. The PySys implementation still does not claim to fully implement the .properties file format, for example 
   ``\`` are treated as literals not escape sequences. See `pysys.utils.fileutils.loadProperties()` for details. 
+- Duplicate ``<property name="..." .../>`` project properties now produce an error to avoid unintentional mistakes. 
+  However it it still permitted to overwrite project properties from a .properties file. 
 - PySys used to silently ignore project (or writer) properties that use a missing (or typo'd) property or environment 
   variable, setting it to "" or the default value is specified. To ensure errors are noticed upfront, it is now a fatal 
   error if a property's value value cannot be resolved - unless a ``default=`` value is provided in which case the 

@@ -129,6 +129,8 @@ class XMLProjectParser(object):
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
 				value = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name=name)
+				if name in self.properties:
+					raise UserError('Cannot set project property "%s" as it is already set'%name)
 				self.properties[name] = value
 				log.debug('Setting project property %s="%s"', name, value)
 
@@ -161,6 +163,12 @@ class XMLProjectParser(object):
 		for name, value in props.items():
 			# when loading properties files it's not so helpful to give errors (and there's nowhere else to put an empty value) so default to empty string
 			value = self.expandProperties(value, default='', name=name)	
+			
+			if name in self.properties and value != self.properties[name]:
+				# Whereas we want a hard error for duplicate <property name=".../> entries, for properties files 
+				# there's a good case to allow overwriting of properties, but it log it at INFO
+				log.info('Overwriting previous value of project property "%s" with new value "%s" from "%s"'%(name, value, os.path.basename(file)))
+
 			self.properties[name] = value
 			log.debug('Setting project property %s="%s" (from %s)', name, self.properties[name], file)
 

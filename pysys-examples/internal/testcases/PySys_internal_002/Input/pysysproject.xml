@@ -3,6 +3,7 @@
 	<property osfamily="osfamily"/>
 	<property file="${osfamily}.properties" />
 	<property file="test.properties" pathMustExist="true"/>
+	<property file="test.properties" pathMustExist="true"/> <!-- deliberately set it twice, should be ok -->
 	<property file="missing.properties" pathMustExist="false"/>
 	<property name="lib" value="lib_${osfamily}_${version}.so"/>
 	<property osfamily="os"/>
