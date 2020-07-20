@@ -1,9 +1,8 @@
 Welcome to PySys!
 =================
 
-PySys is an easy-to-use cross-platform framework for writing and orchestrating 
-all your system/integration tests, combined seamlessly with your unit and 
-manual tests. 
+PySys is a powerful cross-platform framework for easily writing great system/integration tests, 
+in a unified framework that can also run your unit and manual tests. 
 
 It provides a comprehensive package of methods to make all the common 
 system/integration testing operations a breeze, as well as the flexibility to 
@@ -23,9 +22,10 @@ Key features include:
   systems. Includes common operations such as:
 
    * dynamic port allocation, 
-   * waiting until a server is running on a specified port
+   * waiting until a server is running on a specified port,
    * waiting until a file contains a specified message, 
-   * aborting early if an error message is detected
+   * powerful primitives for pre-processing text files (e.g. configuration input files, or output logs)
+   * aborting early with a clear failure messages if an error is detected in a log file
 
 - Support for executing tests in parallel to significantly speed up execution 
   time, with a flexible mechanism for controlling execution order.
@@ -37,8 +37,9 @@ Key features include:
   throughput and other performance metrics.
 
 - A pluggable "writers" framework for recording test outcomes in any format, 
-  including a standard JUnit-compatible XML results writer in the box, and 
-  support for running tests under Travis CI.
+  including a standard JUnit-compatible XML results writer and output archiver 
+  in the box, and support for running tests under CI providers such as 
+  GitHub(R) Actions and Travis CI(R).
 - Integrated support for running PyUnit tests and doctests, in case your 
   application is also written in Python.
 - Integrated support for executing manual/interactively driven test cases.
