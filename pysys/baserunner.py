@@ -292,7 +292,7 @@ class BaseRunner(ProcessUser):
 					raise Exception('No stdout output')
 
 			except Exception as ex:
-				log.debug('Failed to get VCS commit using %s: %s', commitCmd, ex)
+				log.info('Failed to get VCS commit using %s: %s', commitCmd, ex)
 
 		self.runDetails['startTime'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.startTime))
 		
