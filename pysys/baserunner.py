@@ -279,9 +279,10 @@ class BaseRunner(ProcessUser):
 		import subprocess
 		if commitCmd:
 			try:
-				kwargs = {} if PY2 else {'encoding':locale.getpreferredencoding(), 'errors':'replace'}
-				vcsProcess = subprocess.Popen(commitCmd, cwd=self.project.testRootDir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+				vcsProcess = subprocess.Popen(commitCmd, cwd=self.project.testRootDir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				(stdoutdata, stderrdata) = vcsProcess.communicate()
+				stdoutdata = stdoutdata.decode(locale.getpreferredencoding(), errors='replace')
+				stderrdata = stderrdata.decode(locale.getpreferredencoding(), errors='replace')
 				if vcsProcess.returncode != 0:
 					raise Exception('Process failed with %d: %s'%(vcsProcess.returncode, stderrdata.strip() or stdoutdata.strip() or '<no output>'))
 				
