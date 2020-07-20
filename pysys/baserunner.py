@@ -163,11 +163,11 @@ class BaseRunner(ProcessUser):
 		# Set a sensible default output dir for the runner. Many projects do not actually write 
 		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
 		# runner subclasses to do so if required. 
-		runnerBaseName = self.project.getProperty('pysysRunnerDirName', '__pysys_runner')
+		runnerBaseName = self.project.getProperty('pysysRunnerDirName', self.project.expandProperties('__pysys_runner.${outDirName}'))
 		if os.path.isabs(outsubdir):
 			self.output = os.path.join(outsubdir, runnerBaseName)
 		else:
-			self.output = os.path.join(self.project.root, '%s_%s'%(runnerBaseName, outsubdir))
+			self.output = os.path.join(self.project.root, runnerBaseName)
 
 		self.record = record
 		self.purge = purge

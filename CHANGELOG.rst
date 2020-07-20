@@ -331,10 +331,10 @@ The changes that everyone should pay attention to are:
          option; this option exists to keep compatibility for old projects. Default was changed to false in PySys 1.6.0.  -->
     <property name="defaultAssertDiffStripWhitespace" value="true"/>
 
-	<!-- Overrides the default name use to for the runner ``self.output`` directory (which may be used for things 
-		like code coverage reports, temporary files etc). Default was changed to "__pysys_runner" in PySys 1.6.0. 
+	<!-- Overrides the default name use to for the runner's ``self.output`` directory (which may be used for things 
+		like code coverage reports, temporary files etc). Default was changed to "__pysys_runner.${outDirName}" in PySys 1.6.0. 
 	-->
-  	<property name="pysysRunnerDirName" value="pysys_runner"/>
+  	<property name="pysysRunnerDirName" value="pysys_runner_${outDirName}"/>
 
 	<!-- Overrides the default name use to for the performance summary .csv file. 
 		Default was changed to "__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}_${outDirName}.csv" in PySys 1.6.0. 
