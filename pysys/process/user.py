@@ -193,18 +193,7 @@ class ProcessUser(object):
 		:param xargs: A dictionary of the user defined extra arguments
 		
 		"""
-		for key in list(xargs.keys()):
-			val = xargs[key]
-			basetestDefaultValue = getattr(self, key, None) # most of the time these will not be on the basetest
-			if basetestDefaultValue is not None and isstring(val):
-				# attempt type coersion to keep the type the same
-				if basetestDefaultValue is True or basetestDefaultValue is False:
-					val = val.lower()=='true'
-				elif isinstance(basetestDefaultValue, int):
-					val = int(val)
-				elif isinstance(basetestDefaultValue, float):
-					val = float(val)
-			setattr(self, key, val)
+		pysys.utils.stringutils.setInstanceVariablesFromDict(self, xargs)
 	
 	def getBoolProperty(self, propertyName, default=False):
 		"""
