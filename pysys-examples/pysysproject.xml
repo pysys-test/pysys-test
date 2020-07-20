@@ -12,7 +12,6 @@
 	-->
 	<requires-python>2.7.0</requires-python>
 
-
 	<!-- 
 		The following standard project properties are always defined and can be accessed through ${prop} syntax:
 		

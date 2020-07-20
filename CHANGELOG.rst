@@ -319,17 +319,22 @@ The changes that everyone should pay attention to are:
   
     <!-- Controls whether by default tests will report a failure outcome when a process completes with 
         a non-zero return code. The default value as specified below will be used when the ignoreExitStatus 
-        parameter to the function is not specified. -->
+        parameter to the function is not specified. Default was changed to false in PySys 1.6.0. -->
     <property name="defaultIgnoreExitStatus" value="true"/>
     
     <!-- Controls whether tests will abort as a fail as soon as a process or wait operation
         completes with errors. The default value as specified below will be used when the abortOnError 
-        parameter to the function is not specified. -->
+        parameter to the function is not specified. Default was changed to true in PySys 1.6.0. -->
     <property name="defaultAbortOnError" value="false"/>
     
     <!-- Recommended behaviour is to NOT strip whitespace unless explicitly requested with the stripWhitespace= 
-         option; this option exists to keep compatibility for old projects. -->
+         option; this option exists to keep compatibility for old projects. Default was changed to false in PySys 1.6.0.  -->
     <property name="defaultAssertDiffStripWhitespace" value="true"/>
+
+	<!-- Overrides the default name use to form the runner ``self.output`` directory (which may be used for things 
+		like code coverage reports, temporary files etc). Default was changed to "__pysys_runner" in PySys 1.6.0. 
+	-->
+  	<property name="pysysRunnerDirName" value="pysys_runner"/>
     
     <!-- Set this to true unless you used the "mode" feature before it was redesigned in PySys 1.4.1. -->
     <property name="supportMultipleModesPerRun" value="false"/>
@@ -424,8 +429,6 @@ and consult it only if you get new test failures (or problems running ``pysys ma
   There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you 
   prefer a different output directory on your machine you could customize it by setting environment variable 
   ``PYSYS_DEFAULT_ARGS=--outdir __myoutputdir``. 
-- The ``self.output`` directory for the runner (if used) is now named ``__pysys_runner/`` instead of 
-  ``pysys-runner/``. It is not very likely anything will be depending on this directory. 
 - If you created a custom subclass of `pysys.utils.perfreporter.CSVPerformanceReporter` using the 1.3.0 release and 
   it does not yet have (and pass through to the superclass) a ``runner`` and/or ``**kwargs`` argument you will need 
   to add these. 
