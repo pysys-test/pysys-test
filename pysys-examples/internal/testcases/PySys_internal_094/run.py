@@ -22,7 +22,7 @@ class PySysTest(BaseTest):
 			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true'})
 
 		subtest = 'ci' 
-		runPySys(self, subtest, ['run', '--ci', '-o', subtest], 
+		runPySys(self, subtest, ['run', '--ci', '-j1', '-o', subtest], # prevent multi-threaded else we'll have non-determnistic ordering
 			workingDir='test', ignoreExitStatus=True, environs={'TRAVIS':'true'})
 
 		subtest = 'default-project' 
