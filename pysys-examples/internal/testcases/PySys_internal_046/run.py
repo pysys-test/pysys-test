@@ -65,8 +65,8 @@ class PySysTest(BaseTest):
 
 		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in ([^ ]+) seconds', "value == expected", expected='myuser')
 		self.assertThatGrep('myserver.log', r'Successfully authenticated user "(?P<value>[^"]*)"', "value == expected", expected='myuser')
-		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', "0.0 <= float(value) <= 60.0")
-		self.assertThatGrep('myserver.log', r'Successfully authenticated user "(?P<username>[^"]*)"', "value['username'] == expected", expected='myuser')
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<authSecs>[^ ]+) seconds', "0.0 <= float(value) <= 60.0")
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds', "value['username'] == expected", expected='myuser')
 
 		MAX_AUTH_TIME = 60
 		

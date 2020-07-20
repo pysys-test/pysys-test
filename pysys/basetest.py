@@ -861,7 +861,7 @@ class BaseTest(ProcessUser):
 		path = os.path.normpath(path)
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
-	def assertThatGrep(self, file, grepRegex, conditionstring, encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
+	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
 		"""Perform a validation by using a regular expression to extract a "value" from a text file and then check 
 		the extracted value using an `assertThat` conditionstring.
 
@@ -933,7 +933,7 @@ class BaseTest(ProcessUser):
 		def getExprFromFile(file, expr):
 			e = self.getExprFromFile(file, expr, encoding=encoding, reFlags=reFlags, mappers=mappers)
 			# in case it has named parameters
-			if isinstance(e, dict) and 'value' in e: return e['value']
+			if isinstance(e, dict) and len(e)==1: return next(iter(e.values()))
 			return e
 		return self.assertThat(conditionstring, value__eval='getExprFromFile(%r, %r)'%(file, grepRegex), 
 			**kwargsForAssertThat)
