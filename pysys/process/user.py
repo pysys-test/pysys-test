@@ -1789,20 +1789,28 @@ class ProcessUser(object):
 		return out
 	
 	@contextlib.contextmanager
-	def pauseLogging(self):
+	def disableLogging(self):
 		"""
-		Temporarily pauses logging for the current thread. 
+		Temporarily stops logging for the current thread. 
 		
 		For example::
 		
-			with self.pauseLogging():
+			with self.disableLogging():
 				self.startProcess(...)
 		
+		Note that this method will do nothing if the log level if pysys ir run with ``-vDEBUG`` or ``-vdisabledLogging=DEBUG``. 
+			
 		.. versionadded:: 1.6.0
 		
 		"""
+		logger = logging.getLogger('pysys.disabledLogging')
+
 		saved = pysys.internal.initlogging.pysysLogHandler.getLogHandlersForCurrentThread() 
-		pysys.internal.initlogging.pysysLogHandler.setLogHandlersForCurrentThread([])
+
+		if logger.isEnabledFor(logging.DEBUG):
+			logger.debug('Ignoring disableLogging() request as debug logging is enabled')
+		else:
+			pysys.internal.initlogging.pysysLogHandler.setLogHandlersForCurrentThread([])
 		try:
 			yield None
 		finally:

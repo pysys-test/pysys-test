@@ -210,12 +210,13 @@ Miscellaneous
 =============
 .. autosummary::
 	compareVersions
-	getBoolProperty
+	disableLogging
 	startBackgroundThread
 	pythonDocTest
 	startManualTester
 	stopManualTester
 	waitManualTester
+	getBoolProperty
 
 
 .. currentmodule:: pysys.basetest

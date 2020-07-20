@@ -168,7 +168,7 @@ New features
 
     authInfo = self.getExprFromFile('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
 
-- Added `BaseTest.pauseLogging()` for cases where you need to pause logging (e.g. while repeatedly polling) to avoid 
+- Added `BaseTest.disableLogging()` for cases where you need to pause logging (e.g. while repeatedly polling) to avoid 
   cluttering the run log.  
 
 - Colored output is disabled if the ``NO_COLOR`` environment variable is set; this is a cross-product standard 
@@ -391,7 +391,7 @@ Be sure to remove use of the following deprecated items at your earliest conveni
 
 - Deprecated the ``ThreadFilter`` class. Usually it is not recommended 
   to suppress log output and better alternatives are available, e.g. the quiet=True option for `BaseTest.startProcess`, 
-  and the `BaseTest.pauseLogging()` method. 
+  and the `BaseTest.disableLogging()` method. 
   Please remove uses of ThreadFilter from your code as it will be removed in a future release. 
 
 - The method `pysys.basetest.BaseTest.addResource` is deprecated and will be removed in a future release, so please 
