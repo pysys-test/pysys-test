@@ -804,10 +804,16 @@ class BaseRunner(ProcessUser):
 			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
 			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
+			Use alphanumeric characters and underscores only. 
 		"""
 		log.debug('publishArtifact was called with category=%s, path=%s', category, path)
 		
 		assert category, 'A category must be specified when publishing artifacts (%s)'%path
+
+		badchars = re.sub('[\\w_]+','', category) 
+		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
+		assert not badchars, 'Unsupported characters "%s" found in category "%s"; please use alphanumeric characters and underscore only'%(badchars, category)
+	
 		catfilter = self.project.properties.get('publishArtifactCategoryIncludeRegex','')
 		if catfilter and not re.match(catfilter, category):
 			log.debug('Not publishing artifact as category %s is filtered out by publishArtifactCategoryIncludeRegex'%category)
