@@ -17,7 +17,7 @@ What's new in 1.6.0 (under development)
 PySys 1.6.0 is under development. 
 
 PySys 1.6.0 has significant new features including a library of mappers for copy and grep 
-line pre-processsing, new test result writers (including a test output archiver and GitHub Actions), 
+line pre-processing, new test result writers (including a test output archiver and GitHub Actions), 
 a new "plugins" concept, pysys.py and project configuration enhancements, 
 and a host of minor additions to support simpler writing of tests. 
 
@@ -29,7 +29,7 @@ existing project with the new version.
 
 More powerful copy and line mapping
 -----------------------------------
-- PySys now comes with some predefined mappers for common preprocessing tasks such as selecting multiple lines of 
+- PySys now comes with some predefined mappers for common pre-processing tasks such as selecting multiple lines of 
   interest between two regular expressions, and stripping out timestamps and other regular expressions. 
   These can be found in the new `pysys.mappers` module and are particularly useful when using copy to pre-process a 
   file before calling `BaseTest.assertDiff`. For example::
@@ -474,7 +474,7 @@ and consult it only if you get new test failures after upgrading PySys:
   locales. The PySys implementation still does not claim to fully implement the .properties file format, for example 
   ``\`` are treated as literals not escape sequences. See `pysys.utils.fileutils.loadProperties()` for details. 
 - Duplicate ``<property name="..." .../>`` project properties now produce an error to avoid unintentional mistakes. 
-  However it it still permitted to overwrite project properties from a .properties file. 
+  However it is still permitted to overwrite project properties from a .properties file. 
 - PySys used to silently ignore project and writer properties that use a missing (or typo'd) property or environment 
   variable, setting it to "" (or the default value if specified). To ensure errors are noticed up-front, it is now a 
   fatal error if a property's value value cannot be resolved - unless a ``default=`` value is provided in which case 
@@ -489,7 +489,7 @@ and consult it only if you get new test failures after upgrading PySys:
   ``PYSYS_DEFAULT_ARGS=--outdir __myoutputdir``. 
 - If you created a custom subclass of `pysys.utils.perfreporter.CSVPerformanceReporter` using the 1.3.0 release and 
   it does not yet have (and pass through to the superclass) a ``runner`` and/or ``**kwargs`` argument you will need 
-  to add these, as an exception will be generated otherwose. 
+  to add these, as an exception will be generated otherwise. 
 - Made it an error to change project properties after the project has been loaded. This was never intended, as projects 
   are immutable. In the unlikely event you do this, change to storing user-defined cross-test/global state in your 
   runner class instead. 
