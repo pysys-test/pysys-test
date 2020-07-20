@@ -3,7 +3,7 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 import pysys.utils.perfreporter
 from pysys.utils.perfreporter import CSVPerformanceFile
-import os, sys, math, shutil
+import os, sys, math, shutil, glob
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
@@ -18,6 +18,11 @@ class PySysTest(BaseTest):
 		self.logFileContents('pysys.out', maxLines=0)
 		self.logFileContents('pysys.err')
 		self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
+
+		self.copy(self.input+'/pysysproject.xml', self.output+'/test/', 
+			mappers=[pysys.mappers.ExcludeLinesMatching('.*csvPerformanceReporterSummaryFile')])
+
+		runPySys(self, 'default-perf-config', ['run', '-o', 'default-perf-config'], workingDir='test')
 		
 		# test standalone entrypoint
 		perfreporterexe = os.path.dirname(pysys.utils.perfreporter.__file__)+'/perfreporter.py'
@@ -27,6 +32,12 @@ class PySysTest(BaseTest):
 		self.startPython([perfreporterexe, 'aggregate', self.input+'/sample.csv'], stdouterr='perfreporter-aggregate', abortOnError=False)
 		
 	def validate(self):
+		defaultPerfFilename=glob.glob(self.output+'/test/__pysys_performance/*/*.csv')[0]
+		defaultPerfFilename = '/'.join(defaultPerfFilename.replace('\\','/').split('/')[-3:])
+		self.assertThat('"$" not in defaultPerfFilename', defaultPerfFilename=defaultPerfFilename)
+		self.assertThat('re.match(expected, defaultPerfFilename)', defaultPerfFilename=defaultPerfFilename, 
+			expected=r'__pysys_performance/default-perf-config_.+/perf_\d\d\d\d-\d\d-\d\d_\d\d.\d\d.\d\d.default-perf-config.csv')
+
 		self.assertGrep('perfreporter-aggregate.out', expr='# resultKey,.*')
 		self.assertLineCount('perfreporter-aggregate.out', expr='Sample small integer performance result', condition='==1')
 		self.assertGrep('perfreporter-aggregate.out', expr=',150.0,') # average value

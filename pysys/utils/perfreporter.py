@@ -101,7 +101,7 @@ class CSVPerformanceReporter(object):
 	:param kwargs: Pass any additional keyword arguments through to the super class. 
 	"""
 
-	DEFAULT_SUMMARY_FILE = '__pysys_performance/@OUTDIR@_@HOSTNAME@/perf_@DATE@_@TIME@.csv'
+	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}_${outDirName}.csv'
 	"""The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or 
 	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. 
 	"""
@@ -157,7 +157,7 @@ class CSVPerformanceReporter(object):
 	def getRunSummaryFile(self, testobj):
 		"""Return the fully substituted location of the file to which summary performance results will be written.
 
-		This may include the following substitutions: ``@OUTDIR@`` (the basename of the output directory for this run,
+		This may include the following substitutions: ``@OUTDIR@`` (=${outDirName}, the basename of the output directory for this run,
 		e.g. "linux"), ``@HOSTNAME@``, ``@DATE@``, ``@TIME@``, and ``@TESTID@``. The default is given by `DEFAULT_SUMMARY_FILE`. 
 		If the specified file does not exist it will be created; it is possible to use multiple summary files from the same
 		run. The path will be resolved relative to the pysys project root directory unless an absolute path is specified.
@@ -166,6 +166,10 @@ class CSVPerformanceReporter(object):
 
 		"""
 		summaryfile = self.summaryfile or getattr(self.project, 'csvPerformanceReporterSummaryFile', '') or self.DEFAULT_SUMMARY_FILE
+		
+		# properties are already expanded if set in project config, but needs doing explicitly in case default value was used
+		summaryfile = self.runner.project.expandProperties(summaryfile)
+		
 		summaryfile = summaryfile\
 			.replace('@OUTDIR@', os.path.basename(self.testoutdir)) \
 			.replace('@HOSTNAME@', self.hostname) \

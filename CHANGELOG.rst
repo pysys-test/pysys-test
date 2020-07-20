@@ -331,11 +331,16 @@ The changes that everyone should pay attention to are:
          option; this option exists to keep compatibility for old projects. Default was changed to false in PySys 1.6.0.  -->
     <property name="defaultAssertDiffStripWhitespace" value="true"/>
 
-	<!-- Overrides the default name use to form the runner ``self.output`` directory (which may be used for things 
+	<!-- Overrides the default name use to for the runner ``self.output`` directory (which may be used for things 
 		like code coverage reports, temporary files etc). Default was changed to "__pysys_runner" in PySys 1.6.0. 
 	-->
   	<property name="pysysRunnerDirName" value="pysys_runner"/>
-    
+
+	<!-- Overrides the default name use to for the performance summary .csv file. 
+		Default was changed to "__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}_${outDirName}.csv" in PySys 1.6.0. 
+	-->
+  	<property name="csvPerformanceReporterSummaryFile" value="performance_output/${outDirName}_${hostname}/perf_${startDate}_${startTime}.csv"/>
+
     <!-- Set this to true unless you used the "mode" feature before it was redesigned in PySys 1.4.1. -->
     <property name="supportMultipleModesPerRun" value="false"/>
     
@@ -359,11 +364,6 @@ The changes that everyone should pay attention to are:
   The list is ordered with the properties most likely to break existing tests at the top of the list, so you may wish 
   to start with the easier ones at the bottom of the list. 
   
-- The default directory for performance output is now under ``__pysys_performance/`` rather than 
-  ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it. 
-  Alternatively, the path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
-  see `pysys.utils.perfreporter` for details. 
-
 - If you have testcases using the non-standard descriptor names ``.pysystest`` or ``descriptor.xml`` (rather than the 
   usual ``pysystest.xml``) they will not be found by this version of PySys by default, so action is required to have 
   them execute as normal. If you wish to avoid renaming the files, just set the new project 
@@ -405,6 +405,11 @@ Finally there are also some additional fixes and cleanup that could require chan
 classes rather than individual tests) but in most cases will not be noticed. Most users can ignore the following list 
 and consult it only if you get new test failures (or problems running ``pysys make``) after upgrading PySys:
 
+- The default directory for performance output is now under ``__pysys_performance/`` rather than 
+  ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it. 
+  The default filename also includes the ``${outDirName}``.
+  The path can be customized using the new ``csvPerformanceReporterSummaryFile`` project property; 
+  see `pysys.utils.perfreporter` for details. 
 - Properties files referenced in the project properties are now read using UTF-8 encoding if possible, falling back to 
   ISO8859-1 if they contain invalid UTF-8. This follows Java(R) 9+ behaviour and provides for more stable results 
   than the previous PySys behaviour of using whatever the default locale encoding is, which does not conform to any 

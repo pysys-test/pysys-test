@@ -798,8 +798,8 @@ class BaseRunner(ProcessUser):
 		
 		.. versionadded:: 1.6.0
 		
-		:param str path: Absolute path of the file or directory. This should include the ``outDirName`` in the filename 
-			where possible, so that artifacts from multiple test runs/platforms do not clash. 
+		:param str path: Absolute path of the file or directory. Where possible it is often useful to include 
+			the ``outDirName`` in the filename, so that artifacts from multiple test runs/platforms do not clash. 
 		:param str category: A string identifying what kind of artifact this is, e.g. 
 			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
 			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 

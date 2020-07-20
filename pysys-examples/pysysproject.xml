@@ -152,7 +152,7 @@
 			implement this automatically) or manually copied to a file share. 
 		-->
 		<writer classname="pysys.writer.TestOutputArchiveWriter">
-			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
+			<property name="destDir" value="${testRootDir}/__pysys_output_archives.${outDirName}/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
 			<property name="maxArchives" value="50"/>
