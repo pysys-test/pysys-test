@@ -572,7 +572,7 @@ def replaceIllegalXMLCharacters(unicodeString, replaceWith=u'?'):
 	return re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]', replaceWith, unicodeString)
 
 class XMLResultsWriter(BaseRecordResultsWriter):
-	"""Class to log results to logfile in XML format.
+	"""Class to log results to logfile in a single XML file.
 	
 	The class creates a DOM document to represent the test output results and writes the DOM to the 
 	logfile using toprettyxml(). The outputDir, stylesheet, useFileURL attributes of the class can 
@@ -739,6 +739,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	If you need to integrate with any CI provider that doesn't have built-in support (e.g. Jenkins) this standard 
 	output format will usually be the easiest way to do it. 
 	
+	The output directory is published as with category name "JUnitXMLResultsDir". 
+	
 	"""
 	outputDir = None
 	"""
@@ -821,6 +823,9 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 	def _serializeXMLDocumentToBytes(self, document):
 		return replaceIllegalXMLCharacters(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep).decode('utf-8')).encode('utf-8')
+
+	def cleanup(self, **kwargs):
+		self.runner.publishArtifact(self.outputDir, 'JUnitXMLResultsDir')
 
 
 
