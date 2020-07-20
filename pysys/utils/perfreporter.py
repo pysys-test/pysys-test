@@ -101,7 +101,7 @@ class CSVPerformanceReporter(object):
 	:param kwargs: Pass any additional keyword arguments through to the super class. 
 	"""
 
-	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}_${outDirName}.csv'
+	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv'
 	"""The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or 
 	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. 
 	"""
