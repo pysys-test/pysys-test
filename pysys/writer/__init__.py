@@ -1212,7 +1212,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		:return: (str path, filehandle) The path will include an appropriate extension for this archive type. 
 		  The filehandle must have the same API as Python's ZipFile class. 
 		"""
-		path = self.destDir+os.sep+id+'.zip'
+		path = self.destDir+os.sep+('%s_%s.zip'%(id, self.runner.project.properties['outDirName']))
 		return path, zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
 
 	def _archiveTestOutputDir(self, id, outputDir, **kwargs):
