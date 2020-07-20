@@ -191,7 +191,7 @@ class BaseRunner(ProcessUser):
 		self.setKeywordArgs(xargs)
 
 		if len(descriptors)==1: self.threads = 1
-		log.info('Running {numDescriptors:,} tests with {threads} threads using PySys {pysysVersion} in Python {pythonVersion}'.format(
+		log.info('Running {numDescriptors:,} tests with {threads} threads using PySys {pysysVersion} in Python {pythonVersion}\n'.format(
 			numDescriptors=len(self.descriptors), threads=self.threads, pysysVersion=pysys.__version__, pythonVersion='%s.%s.%s'%
 			sys.version_info[0:3]))
 		self.writers = []
