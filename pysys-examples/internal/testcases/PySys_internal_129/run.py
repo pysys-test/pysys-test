@@ -26,7 +26,8 @@ class PySysTest(BaseTest):
 		], workingDir='testroot', expectedExitStatus='!=0')
 						
 	def validate(self):
-		self.assertGrep('pysys.out', expr=r'(Traceback .*| WARN .*writer)', contains=False)
+		if self.assertGrep('pysys.out', expr=r'(Traceback .*| WARN .*writer)', contains=False):
+			self.logFileContents('pysys.out', tail=True)
 
 		self.log.info('')
 
@@ -38,7 +39,7 @@ class PySysTest(BaseTest):
 
 		self.assertThat('archiveName == expected', 
 			archiveName=os.path.basename(sorted(glob.glob(archivedir+'/PySys_NestedTestcaseFails.cycle*.zip'))[0]), 
-			expected='PySys_NestedTestcaseFails.cycle001_test_output.zip') # includes the cycle and the outputdirname
+			expected='PySys_NestedTestcaseFails.cycle001.test_output.zip') # includes the cycle and the outputdirname
 		
 		self.assertThat("all('PySys_NestedTestcaseFails' in z and z.endswith('.zip') for z in zips if not z.endswith(('.txt', '.foo')))",
 			zips=sorted(os.listdir(archivedir)))
@@ -61,7 +62,7 @@ class PySysTest(BaseTest):
 		self.log.info('')
 
 		##########
-		archivedir = self.output+'/testroot/__pysys_output_archives'
+		archivedir = self.output+'/testroot/__pysys_output_archives.test_output' # contains the output dir name
 		self.log.info('--- Checking %s (defaults)', os.path.basename(archivedir))
 		self.assertThat("len([f for f in files if f.endswith('.zip')])==10", files=sorted(os.listdir(archivedir)))
 		self.assertThat("all('PySys_NestedTestcaseFails' in z and z.endswith('.zip') for z in zips)",

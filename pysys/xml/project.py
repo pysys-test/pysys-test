@@ -557,10 +557,28 @@ class Project(object):
 		if self.__frozen: raise Exception('Project cannot be modified after it has been loaded (use the runner to store global state if needed)')
 		object.__setattr__(self, name, value)
 
+	def expandProperties(self, value):
+		"""
+		Expand any ${...} project properties in the specified string. 
+		
+		An exception is thrown if any property is missing. This method is only for expanding project properties so 
+		``${env.*}`` syntax is not permitted (if you need to expand an environment variable, use a project property). 
+		
+		.. versionadded:: 1.6.0
+		
+		:param str value: The string in which any properties will be expanded. ${$} can be used for escaping a literal $ if needed. 
+		:return str: The value with properties expanded, or None if value=None. 
+		"""
+		if not value: return value
+		return re.sub(r'[$][{]([^}]+)[}]', 
+			lambda m: '$' if m.group(1)=='$' else self.properties[m.group(1)], value)
+
 	def getProperty(self, key, default):
 		"""
 		Get the specified project property value, or a default if it is not defined, with type conversion from string 
 		to int/float/bool (matching the default's type). 
+
+		.. versionadded:: 1.6.0
 		
 		:param str key: The name of the property.
 		:param bool/int/float/str default: The default value to return if the property is not set or is an empty string. 

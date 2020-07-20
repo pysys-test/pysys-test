@@ -1073,7 +1073,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	The following properties can be set in the project configuration for this writer:		
 	"""
 
-	destDir = '__pysys_output_archives/'
+	destDir = '__pysys_output_archives.${outDirName}/'
 	"""
 	The directory to write the archives to, as an absolute path, or relative to the testRootDir. 
 
@@ -1138,9 +1138,11 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		self.runner = runner
 		if not self.destDir: raise Exception('Cannot set destDir to ""')
-		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.project.root, self.destDir\
-				.replace('@OUTDIR@', os.path.basename(runner.outsubdir)) \
-				)))
+		
+		# avoid double-expanding (which could mess up ${$} escapes), but if using default value we need to expand it
+		if self.destDir == TestOutputArchiveWriter.destDir: self.destDir = runner.project.expandProperties(self.destDir)
+		
+		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.project.root, self.destDir)))
 		if os.path.exists(self.destDir) and all(f.endswith(('.txt', '.zip')) for f in os.listdir(self.destDir)):
 			deletedir(self.destDir) # remove any existing archives (but not if this dir seems to have other stuff in it!)
 
@@ -1212,7 +1214,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		:return: (str path, filehandle) The path will include an appropriate extension for this archive type. 
 		  The filehandle must have the same API as Python's ZipFile class. 
 		"""
-		path = self.destDir+os.sep+('%s_%s.zip'%(id, self.runner.project.properties['outDirName']))
+		path = self.destDir+os.sep+('%s.%s.zip'%(id, self.runner.project.properties['outDirName']))
 		return path, zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
 
 	def _archiveTestOutputDir(self, id, outputDir, **kwargs):
