@@ -811,7 +811,6 @@ class BaseRunner(ProcessUser):
 		assert category, 'A category must be specified when publishing artifacts (%s)'%path
 
 		badchars = re.sub('[\\w_]+','', category) 
-		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
 		assert not badchars, 'Unsupported characters "%s" found in category "%s"; please use alphanumeric characters and underscore only'%(badchars, category)
 	
 		catfilter = self.project.properties.get('publishArtifactCategoryIncludeRegex','')
