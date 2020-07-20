@@ -1787,7 +1787,7 @@ class ProcessUser(object):
 			with self.disableLogging():
 				self.startProcess(...)
 		
-		Note that this method will do nothing if the log level if pysys ir run with ``-vDEBUG`` or ``-vdisabledLogging=DEBUG``. 
+		Note that this method will do nothing if the log level if pysys is run with ``-vDEBUG`` or ``-vdisabledLogging=DEBUG``. 
 			
 		.. versionadded:: 1.6.0
 		

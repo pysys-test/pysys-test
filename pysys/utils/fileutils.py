@@ -171,11 +171,12 @@ def loadProperties(path, encoding='utf-8-sig'):
 	is stripped. If you need handling of ``\\`` escapes and/or expansion of ``${...}`` placeholders this should be 
 	performed manually on the returned values. 
 	
-	:param str path: The path to the properties file. 
+	:param str path: The absolute path to the properties file. 
 	:param str encoding: The encoding to use (unless running under Python 2 in which case byte strings are always returned). 
 		The default is UTF-8 (with optional Byte Order Mark). 
 	:return dict[str:str]: An ordered dictionary containing the keys and values from the file. 
 	"""
+	assert os.path.isabs(path), 'Cannot use relative path: "%s"'%path
 	result = collections.OrderedDict()
 	with openfile(path, mode='r', encoding=None if PY2 else encoding, errors='strict') as fp:
 		for line in fp:
@@ -194,10 +195,11 @@ def loadJSON(path, **kwargs):
 	
 	This is a small wrapper around Python's ``json.load()`` function. 
 	
-	:param str path: The path to the JSON file, which must be encoded using UTF-8 (with optional Byte Order Mark). 
+	:param str path: The absolute path to the JSON file, which must be encoded using UTF-8 (with optional Byte Order Mark). 
 	:param kwargs: Keyword arguments will be passed to ``json.load()``.
 	:return obj: A dict, list, or other Python object representing the contents of the JSON file. 
 	"""
+	assert os.path.isabs(path), 'Cannot use relative path: "%s"'%path
 	with openfile(path, mode='r', encoding='utf-8-sig', errors='strict') as fp:
 		return json.load(fp, **kwargs)
 		

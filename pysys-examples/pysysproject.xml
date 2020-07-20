@@ -186,8 +186,8 @@
 			file URL. 
 
 			The filename template is processed through time.strftime so that time information can 
-			be set into the filename, e.g. a filename template of 'testsummary-%Y%m%d%H%M%S.xml' will result 
-			in a file created with a name of  testsummary-20081025213308.xml etc.
+			be set into the filename, e.g. a filename template of 'testsummary.%Y-%m-%d_%H.%M.%S' will result 
+			in a file created with a name of  testsummary_2008-10-25_21.33.08.xml etc.
 
 			<property name="outputDir" value="${testRootDir}"/>
 			<property name="stylesheet" value="./pysys-log.xsl"/>

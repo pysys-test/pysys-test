@@ -879,12 +879,12 @@ class BaseTest(ProcessUser):
 		This method is implemented using `getExprFromFile` and `assertThat`, so see those methods for more detailed 
 		information on the parameters. 
 
-		.. versionadded:: 1.6.0.
+		.. versionadded:: 1.6.0
 
 		:param file: The name or relative/absolute path of the file to be searched.
 		
 		:param str grepRegex: The regular expression to check for in the file (or a string literal if literal=True), 
-			for example ``" ERROR .*"``. See `assertGrep` for more tips on using and escape expressions. 
+			for example ``" ERROR .*"``. See `assertGrep` for more tips on using and escaping regular expressions. 
 		
 		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` 
 			to validate that "value" is correct. For example ``value == expected``.
