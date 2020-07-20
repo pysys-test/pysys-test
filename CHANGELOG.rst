@@ -382,6 +382,10 @@ The changes that everyone should pay attention to are:
   default value if a static field of that name already exists on the runner class (which brings BaseRunner into line 
   with the behaviour that BaseTest has had since 1.5.0). This applies to the attributes set on  the object, but 
   not to the contents of the xargs dictionary. 
+  
+  The same type conversion applies to any custom `pysys.writer` classes - if you have a static variable providing a 
+  default value, then in this version the variable will be set to the type of that bool.int/float rather than to 
+  string. 
 
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 

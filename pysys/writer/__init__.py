@@ -353,20 +353,19 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		"""
 		assert not kwargs, kwargs.keys()
 
-		if showDuration is None: showDuration = (str(self.showDuration).lower() == 'true') and self.numTests>1
-		if showOutcomeStats is None: showOutcomeStats = (str(self.showOutcomeStats).lower() == 'true') and self.numTests>1
-		if showTestIdList is None: showTestIdList = (str(self.showTestIdList).lower() == 'true') and self.numTests>1
-		if showRunDetails is None: showRunDetails = (str(self.showRunDetails).lower() == 'true') and self.numTests>1
-
-		# details from showFailureSummary:
-		showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
-		showOutputDir = str(self.showOutputDir).lower() == 'true'
-		showTestDir = str(self.showTestDir).lower() == 'true'
-		showTestTitle = str(self.showTestTitle).lower() == 'true'
-
+		if showDuration is None: showDuration = self.showDuration and self.numTests>1
+		if showOutcomeStats is None: showOutcomeStats = self.showOutcomeStats and self.numTests>1
+		if showTestIdList is None: showTestIdList = self.showTestIdList and self.numTests>1
+		if showRunDetails is None: showRunDetails = self.showRunDetails and self.numTests>1
 		
-		showInspectSummary = str(self.showInspectSummary).lower() == 'true'
-		showNotVerifiedSummary = str(self.showNotVerifiedSummary).lower() == 'true'
+		# details from showFailureSummary:
+		showOutcomeReason = self.showOutcomeReason
+		showOutputDir = self.showOutputDir
+		showTestDir = self.showTestDir
+		showTestTitle = self.showTestTitle
+
+		showInspectSummary = self.showInspectSummary
+		showNotVerifiedSummary = self.showNotVerifiedSummary
 
 		if showDuration:
 			log(  "Completed test run at:  %s", time.strftime('%A %Y-%m-%d %H:%M:%S %Z', time.localtime(time.time())), extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
@@ -1151,14 +1150,9 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		if os.path.exists(self.destDir) and all(f.endswith(('.txt', '.zip')) for f in os.listdir(self.destDir)):
 			deletedir(self.destDir) # remove any existing archives (but not if this dir seems to have other stuff in it!)
 
-		self.archiveAtEndOfRun = str(self.archiveAtEndOfRun).lower()=='true'
-
 		self.fileExcludesRegex = re.compile(self.fileExcludesRegex) if self.fileExcludesRegex else None
 		self.fileIncludesRegex = re.compile(self.fileIncludesRegex) if self.fileIncludesRegex else None
 
-		self.maxArchiveSizeMB = float(self.maxArchiveSizeMB)
-		self.maxArchives = int(self.maxArchives)
-		
 		self.__totalBytesRemaining = int(float(self.maxTotalSizeMB)*1024*1024)
 
 		if self.archiveAtEndOfRun:
