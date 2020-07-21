@@ -1124,26 +1124,28 @@ class TestContainer(object):
 			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)
 			
 			# print summary and close file handles
-			try:
-				self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
-				log.info("")
-				log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
-				log.info("Test final outcome:  %s", str(self.testObj.getOutcome()), extra=BaseLogFormatter.tag(str(self.testObj.getOutcome()).lower(), 0))
-				if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
-					log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
-				log.info("")
-				
-				pysysLogHandler.flush()
-				if self.testFileHandlerRunLog: self.testFileHandlerRunLog.stream.close()
-			except Exception as ex: # really should never happen so if it does make sure we know why
-				sys.stderr.write('Error in callback for %s: %s\n'%(self.descriptor.id, ex))
-				traceback.print_exc()
-				self.runner.runnerErrors.append('Error in callback for %s: %s'%(self.descriptor.id, ex))
+			self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
+			log.info("")
+			log.info("Test duration: %s", ('%.2f secs'%self.testTime), extra=BaseLogFormatter.tag(LOG_DEBUG, 0))
+			log.info("Test final outcome:  %s", str(self.testObj.getOutcome()), extra=BaseLogFormatter.tag(str(self.testObj.getOutcome()).lower(), 0))
+			if self.testObj.getOutcomeReason() and self.testObj.getOutcome() != PASSED:
+				log.info("Test outcome reason: %s", self.testObj.getOutcomeReason(), extra=BaseLogFormatter.tag(LOG_TEST_OUTCOMES, 0))
+			log.info("")
 			
-			# return a reference to self
-			return self
+			pysysLogHandler.flush()
+			if self.testFileHandlerRunLog: self.testFileHandlerRunLog.stream.close()
+			
+		except Exception as ex: # should never happen; serious enough to merit recording in both stderr and log
+			log.exception('Internal error while executing %s: '%(self.descriptor.id))
+			sys.stderr.write('Internal error while executing %s: %s\n'%(self.descriptor.id, ex))
+			traceback.print_exc()
+			self.runner.runnerErrors.append('Error executing test %s: %s'%(self.descriptor.id, ex))
+
 		finally:
 			pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread)
+
+		# return a reference to self
+		return self
 	
 	def detectCore(self, dir):
 		"""Detect any core files in a directory (unix systems only), returning C{True} if a core is present.
