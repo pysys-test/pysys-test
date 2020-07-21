@@ -1116,7 +1116,10 @@ class TestContainer(object):
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
-			
+			except Exception as ex:
+				log.warn("caught %s while cleaning up test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
+
 			# in case these got overwritten by a naughty test, restore before printing the final summary
 			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)
 			
