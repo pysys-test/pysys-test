@@ -54,10 +54,13 @@ of many/all testcases, such as starting the application you're testing, or check
 
 The recommended way to do that in PySys is to create one or more "plugins". There are currently two kinds of plugin: 
 
-    - **test plugins**; instances of test plugins are created every time a `BaseTest` is instantiated, which allows them 
+    - **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
       to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
       would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
       class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. 
+      As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
+      your `__init__()` constructor (for example, in `BaseTest.setup()`). 
+
     - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
       before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
       all tests. 
@@ -65,12 +68,15 @@ The recommended way to do that in PySys is to create one or more "plugins". Ther
       class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
 
 A test plugin could look like this::
-  
+
         class MyTestPlugin(object):
+			myPluginProperty = 'foo bar'
+			
             def __init__(self, testobj, pluginProperties):
                 self.owner = self.testobj = testobj
                 self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
                 self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
+                pysys.utils.misc.setInstanceVariablesFromDict(self, pluginProperties, errorOnMissingVariables=True)
 
                 testobj.addCleanupFunction(self.__myPluginCleanup)
             

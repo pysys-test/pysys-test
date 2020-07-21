@@ -4,10 +4,13 @@ import logging
 import pysys
 
 class MyTestPlugin(object):
+	myPluginProperty = 'foo bar'
+
 	def __init__(self, testobj, pluginProperties):
 		self.owner = self.testobj = testobj
 		self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
 		self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
+		pysys.utils.misc.setInstanceVariablesFromDict(self, pluginProperties, errorOnMissingVariables=True)
 
 		testobj.addCleanupFunction(self.__myPluginCleanup)
 	

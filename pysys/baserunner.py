@@ -1056,13 +1056,25 @@ class TestContainer(object):
 					outsubdir = self.outsubdir
 					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, outsubdir, self.runner)
 					del runpy_namespace
+					
+					self.testObj.testPlugins = []
+					for pluginClass, pluginAlias, pluginProperties in self.runner.project.testPlugins:
+						plugin = pluginClass(self.testObj, pluginProperties)
+						self.testObj.testPlugins.append(plugin)
+						if not pluginAlias: continue
+						if hasattr(self.testObj, pluginAlias): raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on this test object; please select a different name'%(pluginAlias))
+						setattr(self.testObj, pluginAlias, plugin)
+
 		
 				except KeyboardInterrupt:
 					self.kbrdInt = True
 				
 				except Exception:
 					exc_info.append(sys.exc_info())
+					# We need a BaseTest object, so if the real one failed, we assume/hope there should be no exception 
+					# from the PySys BaseTest class and we can use it to hold the error for reporting purposes
 					self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner)
+					
 				# can't set this in constructor without breaking compatibility, but set it asap after construction
 				del BaseTest._currentTestCycle
 

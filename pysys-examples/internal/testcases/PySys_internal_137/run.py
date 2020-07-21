@@ -20,8 +20,8 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='Created MyRunnerPlugin instance')
 		self.assertGrep('pysys.out', expr='Created MyTestPlugin instance')
 
-		self.assertGrep('pysys.out', expr="Created MyTestPlugin instance with pluginProperties=[{]'prop1': 'val1'[}]")
-		self.assertGrep('pysys.out', expr="Created MyTestPlugin instance with pluginProperties=[{]'prop2': 'val2'[}]")
+		self.assertGrep('pysys.out', expr="Created MyTestPlugin instance with pluginProperties=[{]'myPluginProperty': 'val1'[}]")
+		self.assertGrep('pysys.out', expr="Created MyTestPlugin instance with pluginProperties=[{]'myPluginProperty': 'val2'[}]")
 		
 		self.assertLineCount('pysys.out', expr='Cleaning up MyTestPlugin instance', condition='==4') # 2 instances * 2 tests
 		self.assertLineCount('pysys.out', expr='Cleaning up MyRunnerPlugin instance', condition='==1')

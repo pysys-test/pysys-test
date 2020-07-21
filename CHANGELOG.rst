@@ -198,10 +198,12 @@ d) none of this really lends itself well to third parties implementing and distr
 So, in this release we introduce the concept of "plugins" which use *composition* rather than *inheritance* to 
 provide a simpler way to share functionality across tests. There are currently two kinds of plugin: 
 
-- **test plugins**; instances of test plugins are created every time a `BaseTest` is instantiated, which allows them 
+- **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
   to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
   would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
   class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. 
+  As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
+  your `__init__()` constructor (for example, in `BaseTest.setup()`). 
 - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
   before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
   all tests. 
