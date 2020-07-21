@@ -89,7 +89,7 @@ class XMLProjectParser(object):
 			requirespython = requirespython[0].firstChild.nodeValue
 			if requirespython:
 				if list(sys.version_info) < list(map(int, requirespython.split('.'))):
-					raise Exception('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join([str(x) for x in sys.version_info[:3]]), sys.executable))
+					raise UserError('This test project requires Python version %s or greater, but this is version %s (from %s)'%(requirespython, '.'.join([str(x) for x in sys.version_info[:3]]), sys.executable))
 
 		requirespysys = self.root.getElementsByTagName('requires-pysys')
 		if requirespysys and requirespysys[0].firstChild: 
@@ -97,7 +97,7 @@ class XMLProjectParser(object):
 			if requirespysys:
 				thisversion = __version__
 				if compareVersions(requirespysys, thisversion) > 0:
-					raise Exception('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
+					raise UserError('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
 
 
 	def unlink(self):
@@ -207,14 +207,11 @@ class XMLProjectParser(object):
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, default)
 
 	def getRunnerDetails(self):
-		try:
-			node = self.root.getElementsByTagName('runner')[0]
-		except Exception:
-			return DEFAULT_RUNNER
-		else:
-			classname, propertiesdict = self._parseClassAndConfigDict(node, None, returnClassAsName=True)
-			assert not propertiesdict, 'Properties are not supported under <runner>'
-			return classname
+		nodes = self.root.getElementsByTagName('runner')
+		if not nodes: return DEFAULT_RUNNER
+		classname, propertiesdict = self._parseClassAndConfigDict(nodes[0], None, returnClassAsName=True)
+		assert not propertiesdict, 'Properties are not supported under <runner>'
+		return classname
 
 	def getCollectTestOutputDetails(self):
 		r = []
@@ -238,7 +235,7 @@ class XMLProjectParser(object):
 			
 		summaryfile = optionsDict.pop('summaryfile', '')
 		summaryfile = self.expandProperties(summaryfile, default=None, name='performance-reporter summaryfile')
-		if optionsDict: raise Exception('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
+		if optionsDict: raise UserError('Unexpected performancereporter attribute(s): '+', '.join(list(optionsDict.keys())))
 		
 		return cls, summaryfile
 
@@ -254,7 +251,7 @@ class XMLProjectParser(object):
 		nodeList = self.root.getElementsByTagName('descriptor-loader')
 		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.xml.descriptor.DescriptorLoader')
 		
-		if optionsDict: raise Exception('Unexpected descriptor-loader attribute(s): '+', '.join(list(optionsDict.keys())))
+		if optionsDict: raise UserError('Unexpected descriptor-loader attribute(s): '+', '.join(list(optionsDict.keys())))
 		
 		return cls
 
@@ -275,14 +272,11 @@ class XMLProjectParser(object):
 		return plugins
 
 	def getMakerDetails(self):
-		try:
-			node = self.root.getElementsByTagName('maker')[0]
-		except Exception:
-			return DEFAULT_MAKER
-		else:
-			classname, propertiesdict = self._parseClassAndConfigDict(node, None, returnClassAsName=True)
-			assert not propertiesdict, 'Properties are not supported under <maker>'
-			return classname
+		nodes = self.root.getElementsByTagName('maker')
+		if not nodes: return DEFAULT_MAKER
+		classname, propertiesdict = self._parseClassAndConfigDict(nodes[0], None, returnClassAsName=True)
+		assert not propertiesdict, 'Properties are not supported under <maker>'
+		return classname
 	
 	def createFormatters(self):
 		stdout = runlog = None
@@ -294,7 +288,7 @@ class XMLProjectParser(object):
 			for formatterNode in formattersNodeList:
 				fname = formatterNode.getAttribute('name')
 				if fname not in ['stdout', 'runlog']:
-					raise Exception('Formatter "%s" is invalid - must be stdout or runlog'%fname)
+					raise UserError('Formatter "%s" is invalid - must be stdout or runlog'%fname)
 
 				if fname == 'stdout':
 					cls, options = self._parseClassAndConfigDict(formatterNode, 'pysys.utils.logutils.ColorLogFormatter')
@@ -311,7 +305,7 @@ class XMLProjectParser(object):
 		for n in self.root.getElementsByTagName('default-file-encoding'):
 			pattern = (n.getAttribute('pattern') or '').strip().replace('\\','/')
 			encoding = (n.getAttribute('encoding') or '').strip()
-			if not pattern: raise Exception('<default-file-encoding> element must include both a pattern= attribute')
+			if not pattern: raise UserError('<default-file-encoding> element must include both a pattern= attribute')
 			if encoding: 
 				codecs.lookup(encoding) # give an exception if an invalid encoding is specified
 			else:
@@ -497,7 +491,7 @@ class Project(object):
 			self.projectFile = None
 		else:
 			if not os.path.exists(os.path.join(root, projectFile)):
-				raise Exception("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
+				raise UserError("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
 			from pysys.xml.project import XMLProjectParser
 			try:
 				parser = XMLProjectParser(root, projectFile, outdir=outdir)
