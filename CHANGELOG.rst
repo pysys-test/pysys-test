@@ -497,6 +497,10 @@ and consult it only if you get new test failures after upgrading PySys:
   (e.g. "properties" or "root") will no longer override those fields - which would most likely not work correctly 
   anyway. If you need to get a property whose name clashes with a built-in member, use 
   `pysys.xml.project.Project.properties`.
+- PySys now checks that its working directory (``os.chdir()``) and environment (``os.environ``) have not been modified 
+  during execution of tests. Sometimes test authors do this by mistake and it's extremely dangerous as it causes 
+  behaviour changes (and potentially file system race conditions) in subsequent tests that can be very hard to debug. 
+  The environment and working directory should only be modified for child processes not for PySys itself. 
 - Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
   `pysys.constants.Outcome` rather than an integer. It is unlikely this change will affect existing code (unless you 
   have created any custom outcome types, which is not documented). The use of objects to represent outcomes allows for 

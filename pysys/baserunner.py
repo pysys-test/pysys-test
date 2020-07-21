@@ -498,7 +498,11 @@ class BaseRunner(ProcessUser):
 		
 		self.setup()
 
+		# Now that setup() is done, no-one should be messing with global immutable state (better to not do it at all, but 
+		# definitely not after this point)
 		self.runDetails = makeReadOnlyDict(self.runDetails)
+		self._initialEnviron = os.environ.copy()
+		self._initialCwd = os.getcwd()
 
 		# call the hook to setup the test output writers
 		self.__remainingTests = self.cycle * len(self.descriptors)
@@ -627,6 +631,11 @@ class BaseRunner(ProcessUser):
 
 		fatalerrors = self.runnerErrors+fatalerrors
 		
+		if self._initialEnviron != os.environ:
+			fatalerrors.append('Some test has changed the global os.environ of this PySys process; this is extremely unsafe while tests are running')
+		if self._initialCwd != os.getcwd():
+			fatalerrors.append('Some test has changed the working directory of this PySys process (e.g. with os.chdir()); this is extremely unsafe while tests are running')
+
 		if fatalerrors:
 			# these are so serious we need to make sure the user notices by returning a failure exit code
 			raise UserError('Test runner encountered fatal problems: %s'%'\n\t'.join(fatalerrors))
@@ -1123,6 +1132,11 @@ class TestContainer(object):
 			# in case these got overwritten by a naughty test, restore before printing the final summary
 			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)
 			
+			if self.runner._initialEnviron != os.environ:
+				self.testObj.addOutcome(BLOCKED, 'The global os.environ of this PySys process has changed while this test was running; this is extremely unsafe', override=True)
+			if self.runner._initialCwd != os.getcwd():
+				self.testObj.addOutcome(BLOCKED, 'The working directory of this PySys process has changed while this test was running (os.chdir()); this is extremely unsafe', override=True)
+		
 			# print summary and close file handles
 			self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
 			log.info("")
