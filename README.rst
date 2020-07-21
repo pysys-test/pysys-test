@@ -20,7 +20,7 @@ Key features include:
   starting, orchestration, and cleanup, for both Windows and Unix-based 
   systems. Includes common operations such as:
 
-   * dynamic port allocation, 
+   * dynamically picking a free TCP/IP port, 
    * waiting until a server is running on a specified port,
    * waiting until a file contains a specified message, 
    * powerful primitives for pre-processing text files (e.g. configuration input files, or output logs)
@@ -28,6 +28,8 @@ Key features include:
 
 - Support for executing tests in parallel to significantly speed up execution 
   time, with a flexible mechanism for controlling execution order.
+- Ability to cycle a test many times (and in parallel) to reproduce rare race 
+  conditions. 
 - Support for executing the same test in several modes during your test 
   run (for example against different web browsers, databases, etc). 
 - A process memory monitoring framework to check for memory leaks when soak 
@@ -69,8 +71,8 @@ Project Links
 Installation
 ============
 
-PySys can be installed into Python 3.8 (recommended), 3.7/3.6/3.5 or Python 2.7 
-(though note that Python 2.7 will soon be out of support from the Python team). 
+PySys can be installed into Python 3.8 (recommended), 3.5/3.6/3.7 or Python 2.7 
+(though note that Python 2.7 itself is out of support from the Python team so is not recommended). 
 
 The best way to install PySys is using the standard ``pip`` installer which 
 downloads and install the binary package for the current PySys 
