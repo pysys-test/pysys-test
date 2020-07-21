@@ -1,16 +1,15 @@
 Welcome to PySys!
 =================
 
-PySys is a powerful cross-platform framework for easily writing great system/integration tests, 
-in a unified framework that can also run your unit and manual tests. 
+PySys is a powerful cross-platform framework for writing great system/integration tests. 
 
-It provides a comprehensive package of methods to make all the common 
-system/integration testing operations a breeze, as well as the flexibility to 
-add whatever test execution and validation logic you need using the full power 
-of the Python language. 
+It provides a comprehensive package of methods to make all the common system/integration testing operations a breeze, 
+with all the flexibility and power of the Python language at your fingertips. PySys is a framework that gives you a 
+single unified way to control the selection, ordering and reporting of every type of test including system 
+correctness, performance, soak/robustness testing, unit testing and manual testing.
 
-Whatever language the application you're testing is written in, and whatever 
-platforms it needs to run on, PySys can help!
+Whatever language the application you're testing is written in, and whatever platforms it needs to run on, 
+PySys can help!
 
 Key features include:
 
