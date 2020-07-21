@@ -69,7 +69,7 @@ breaking writer implementations already in existence.
 __all__ = [
 	"BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "ArtifactPublisher", "TestOutcomeSummaryGenerator", 
 	"TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", 
-	"ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter",  "TestOutputArchiveWriter"]
+	"ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter", "ConsoleFailureAnnotationsWriter", "TestOutputArchiveWriter"]
 
 import time, stat, logging, sys, io
 import zipfile
@@ -79,9 +79,10 @@ else:
 	from urllib.parse import urlunparse
 
 from pysys.constants import *
-from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes
+from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import PY2
+from pysys.exceptions import UserError
 
 from xml.dom.minidom import getDOMImplementation
 
@@ -241,6 +242,10 @@ class ArtifactPublisher(object):
 	
 	To publish an artifact to all registered writers, call `pysys.baserunner.BaseRunner.publishArtifact()`. 
 	
+	It is possible to restrict artifact publishing to just the categories you care about by setting the 
+	project property ``publishArtifactCategoryIncludeRegex`` which (if specified) must match the category name 
+	in order for writers to be notified. 
+	
 	.. versionadded:: 1.6.0
 	"""
 
@@ -284,6 +289,18 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 	
 	showDuration = False
 	"""Configures whether the summary includes the total duration of all tests."""
+
+	showRunDetails = False
+	"""Configures whether the summary includes the ``runDetails`` from the `pysys.baserunner.BaseRunner`, 
+	such as ``outDirName`` and ``hostname``."""
+
+	showInspectSummary = True
+	"""Configures whether the summary includes a summary of INSPECT outcomes (if any). 	
+	"""
+	
+	showNotVerifiedSummary = True
+	"""Configures whether the summary includes a summary of NOTVERIFIED outcomes (if any). 	
+	"""
 	
 	showTestIdList = False
 	"""Configures whether the summary includes a short list of the failing test ids in a form that's easy to paste onto the 
@@ -291,6 +308,8 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 
 	
 	def setup(self, cycles=0, threads=0, **kwargs):
+		super(TestOutcomeSummaryGenerator, self).setup(cycles=cycles, threads=threads, **kwargs)
+
 		self.results = {}
 		self.startTime = time.time()
 		self.duration = 0.0
@@ -299,6 +318,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			for outcome in OUTCOMES: self.results[cycle][outcome] = []
 		self.threads = threads
 		self.outcomes = {o: 0 for o in OUTCOMES}
+		self.numTests = kwargs['numTests']
 
 	def processResult(self, testObj, cycle=-1, testTime=-1, testStart=-1, **kwargs):
 		self.results[cycle][testObj.getOutcome()].append( (testObj.descriptor.id, testObj.getOutcomeReason(), testObj.descriptor.title, testObj.descriptor.testDir, testObj.output))
@@ -320,7 +340,7 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		self.logSummary(log=log, **kwargs)
 		return '\n'.join(result)
 
-	def logSummary(self, log, showDuration=None, showOutcomeStats=None, showTestIdList=None, showFailureSummary=True, **kwargs):
+	def logSummary(self, log, showDuration=None, showOutcomeStats=None, showTestIdList=None, showFailureSummary=True, showRunDetails=None, **kwargs):
 		"""
 		Writes a textual summary using the specified log function, with colored output if enabled.
 		
@@ -333,15 +353,19 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 		"""
 		assert not kwargs, kwargs.keys()
 
-		if showDuration is None: showDuration = str(self.showDuration).lower() == 'true'
-		if showOutcomeStats is None: showOutcomeStats = str(self.showOutcomeStats).lower() == 'true'
-		if showTestIdList is None: showTestIdList = str(self.showTestIdList).lower() == 'true' # relies on showFailureSummary=True
-
+		if showDuration is None: showDuration = self.showDuration and self.numTests>1
+		if showOutcomeStats is None: showOutcomeStats = self.showOutcomeStats and self.numTests>1
+		if showTestIdList is None: showTestIdList = self.showTestIdList and self.numTests>1
+		if showRunDetails is None: showRunDetails = self.showRunDetails and self.numTests>1
+		
 		# details from showFailureSummary:
-		showOutcomeReason = str(self.showOutcomeReason).lower() == 'true'
-		showOutputDir = str(self.showOutputDir).lower() == 'true'
-		showTestDir = str(self.showTestDir).lower() == 'true'
-		showTestTitle = str(self.showTestTitle).lower() == 'true'
+		showOutcomeReason = self.showOutcomeReason
+		showOutputDir = self.showOutputDir
+		showTestDir = self.showTestDir
+		showTestTitle = self.showTestTitle
+
+		showInspectSummary = self.showInspectSummary
+		showNotVerifiedSummary = self.showNotVerifiedSummary
 
 		if showDuration:
 			log(  "Completed test run at:  %s", time.strftime('%A %Y-%m-%d %H:%M:%S %Z', time.localtime(time.time())), extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
@@ -352,6 +376,12 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 				log("Total test duration:    %s", "%.2f secs"%(time.time() - self.startTime), extra=ColorLogFormatter.tag(LOG_DEBUG, 0))
 			log('')		
 
+		if showRunDetails:
+			log("Run details:")
+			for k, v in self.runner.runDetails.items():
+				log(" %23s%s", k+': ', v, extra=ColorLogFormatter.tag(LOG_TEST_DETAILS, 1))
+			log("")
+
 		if showOutcomeStats:
 			executed = sum(self.outcomes.values())
 			failednumber = sum([self.outcomes[o] for o in OUTCOMES if o.isFailure()])
@@ -359,6 +389,41 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			failed = ', '.join(['%d %s'%(self.outcomes[o], o) for o in OUTCOMES if o.isFailure() and self.outcomes[o]>0])
 			if failed: log('Failure outcomes: %s (%0.1f%%)', failed, 100.0 * (failednumber) / executed, extra=ColorLogFormatter.tag(str(FAILED).lower(), [0]))
 			if passed: log('Success outcomes: %s', passed, extra=ColorLogFormatter.tag(str(PASSED).lower(), [0]))
+			log('')
+
+		def logForOutcome(decider):
+			for cycle in self.results:
+				cyclestr = ''
+				if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
+				for outcome in OUTCOMES:
+					if not decider(outcome): continue
+					
+					# sort similar outcomes together to make the results easier to read; by reason then testDir
+					self.results[cycle][outcome].sort(key=lambda test: [test[1], test[3]])
+					
+					for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
+						log("  %s%s: %s ", cyclestr, outcome, id, extra=ColorLogFormatter.tag(str(outcome).lower()))
+						if showTestTitle and testTitle:
+							log("      (title: %s)", testTitle, extra=ColorLogFormatter.tag(LOG_DEBUG))
+						if showOutcomeReason and reason:
+							log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
+							
+						outputdir = os.path.normpath(os.path.relpath(outputdir))+os.sep
+						testDir = os.path.normpath(os.path.relpath(testDir))+os.sep
+						if showTestDir and not (showOutputDir and outputdir.startswith(testDir)):
+							# don't confuse things by showing the testDir unless its information is not present in the outputDir (due to --outdir)
+							log("      %s", testDir)
+						if showOutputDir:
+							log("      %s", outputdir)
+
+		if showNotVerifiedSummary and self.outcomes[NOTVERIFIED] > 0:
+			log("Summary of not verified outcomes:")
+			logForOutcome(lambda outcome: outcome == NOTVERIFIED)
+			log('')
+
+		if showInspectSummary and self.outcomes[INSPECT] > 0:
+			log("Summary of inspect outcomes: ")
+			logForOutcome(lambda outcome: outcome == INSPECT)
 			log('')
 
 		if showFailureSummary:
@@ -370,37 +435,29 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 			if fails == 0:
 				log("	THERE WERE NO FAILURES", extra=ColorLogFormatter.tag(LOG_PASSES))
 			else:
-				failedids = set()
-				for cycle in self.results:
-					cyclestr = ''
-					if len(self.results) > 1: cyclestr = '[CYCLE %d] '%(cycle+1)
-					for outcome in OUTCOMES:
-						if not outcome.isFailure(): continue
-						for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
-							failedids.add(id)
-							log("  %s%s: %s ", cyclestr, outcome, id, extra=ColorLogFormatter.tag(str(outcome).lower()))
-							if showTestTitle and testTitle:
-								log("      (title: %s)", testTitle, extra=ColorLogFormatter.tag(LOG_DEBUG))
-							if showOutcomeReason and reason:
-								log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
-								
-							outputdir = os.path.normpath(os.path.relpath(outputdir))+os.sep
-							testDir = os.path.normpath(os.path.relpath(testDir))+os.sep
-							if showTestDir and not (showOutputDir and outputdir.startswith(testDir)):
-								# don't confuse things by showing the testDir unless its information is not present in the outputDir (due to --outdir)
-								log("      %s", testDir)
-							if showOutputDir:
-								log("      %s", outputdir)
-		
-				if showTestIdList and len(failedids) > 1:
-					# display just the ids, in a way that's easy to copy and paste into a command line
-					failedids = list(failedids)
-					failedids.sort()
-					if len(failedids) > 20: # this feature is only useful for small test runs
-						failedids = failedids[:20]+['...']
-					log('')
-					log('List of failed test ids:')
-					log('%s', ' '.join(failedids))
+				logForOutcome(lambda outcome: outcome.isFailure())
+			log('')
+
+		if showTestIdList:
+			failedids = []
+			failedidsAlreadyDone = set()
+			for cycle in self.results:
+				for outcome in OUTCOMES:
+					if not outcome.isFailure(): continue
+					
+					for (id, reason, testTitle, testDir, outputdir) in self.results[cycle][outcome]: 
+						if id in failedidsAlreadyDone: continue
+						failedidsAlreadyDone.add(id)
+						failedids.append(id)
+
+			if len(failedids) > 1:
+				# display just the ids, in a way that's easy to copy and paste into a command line; 
+				# for maximum usability, use the sort order given above
+				failedids = failedids
+				if len(failedids) > 100: # this feature is only useful for small test runs
+					failedids = failedids[:100]+['...']
+				log('List of failed test ids:')
+				log('%s', ' '.join(failedids))
 
 class flushfile(): 
 	"""Utility class to flush on each write operation - for internal use only.  
@@ -468,6 +525,10 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
 		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
+		self.fp.write('\n')
+		for k, v in kwargs['runner'].runDetails.items():
+			if k in {'startTime', 'hostname'}: continue # don't duplicate the above
+			self.fp.write("%-12s%s\n"%(k+': ', v))
 
 	def cleanup(self, **kwargs):
 		# Flushes and closes the file handle to the logfile.  
@@ -510,11 +571,11 @@ def replaceIllegalXMLCharacters(unicodeString, replaceWith=u'?'):
 	return re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]', replaceWith, unicodeString)
 
 class XMLResultsWriter(BaseRecordResultsWriter):
-	"""Class to log results to logfile in XML format.
+	"""Class to log results to logfile in a single XML file.
 	
 	The class creates a DOM document to represent the test output results and writes the DOM to the 
 	logfile using toprettyxml(). The outputDir, stylesheet, useFileURL attributes of the class can 
-	be over-ridden in the PySys project file using the nested <property> tag on the <writer> tag.
+	be overridden in the PySys project file using the nested <property> tag on the <writer> tag.
 	 
 	:ivar str ~.outputDir: Path to output directory to write the test summary files
 	:ivar str ~.stylesheet: Path to the XSL stylesheet
@@ -677,6 +738,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	If you need to integrate with any CI provider that doesn't have built-in support (e.g. Jenkins) this standard 
 	output format will usually be the easiest way to do it. 
 	
+	The output directory is published as with category name "JUnitXMLResultsDir". 
+	
 	"""
 	outputDir = None
 	"""
@@ -760,6 +823,9 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 	def _serializeXMLDocumentToBytes(self, document):
 		return replaceIllegalXMLCharacters(document.toprettyxml(indent='	', encoding='utf-8', newl=os.linesep).decode('utf-8')).encode('utf-8')
 
+	def cleanup(self, **kwargs):
+		self.runner.publishArtifact(self.outputDir, 'JUnitXMLResultsDir')
+
 
 
 class CSVResultsWriter(BaseRecordResultsWriter):
@@ -820,6 +886,7 @@ class ConsoleSummaryResultsWriter(BaseSummaryResultsWriter, TestOutcomeSummaryGe
 	showOutputDir = True
 	showDuration = True
 	showTestIdList = True
+	showRunDetails = True
 	
 	def cleanup(self, **kwargs):
 		log = logging.getLogger('pysys.resultssummary')
@@ -834,6 +901,7 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 		self.recentFailures = 5  # configurable
 
 	def setup(self, cycles=-1, numTests=-1, threads=-1, **kwargs):
+		super(ConsoleProgressResultsWriter, self).setup(cycles=cycles, numTests=numTests, threads=threads, **kwargs)
 		self.cycles = cycles
 		self.numTests = numTests
 		self.startTime = time.time()
@@ -890,6 +958,109 @@ class ConsoleProgressResultsWriter(BaseProgressResultsWriter):
 			log.info('Currently executing: %s', ', '.join(sorted(inprogress)), extra=ColorLogFormatter.tag(LOG_TEST_PROGRESS))
 		log.info('')
 
+
+class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
+	"""Writer that prints a single annotation line to stdout for each test failure, for IDEs 
+	and CI providers that can highlight failures found by regular expression stdout parsing.
+	
+	An instance of this writer is automatically added to every project, and enables itself only 
+	if the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set. 
+	
+	This class is designed for simple cases. If you need to output in a format that requires escaping of special 
+	characters it is best to create a custom writer class. 
+	"""
+	
+	format = ""
+	"""
+	The format that will be written to stdout. If not specified, the environment 
+	variable ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` will be used as the format. 
+	
+	The format can include the following placeholders:
+	
+		- ``@testFile@``: the absolute path to the test file (e.g. run.py), using platform-specific slashes.
+		- ``@testFile/@``: the absolute path to the test file, using forward slashes on all OSes.
+		- ``@testFileLine@``: the line number in the test file (if available, else 0).
+		- ``@runLogFile@``: the absolute path to the run log (e.g. run.log), using platform-specific slashes.
+		- ``@runLogFile/@``: the absolute path to the run log (e.g. run.log), using forward slashes on all OSes.
+		- ``@category@``: either ``error`` or if it's a non-failure outcome, ``warning``. 
+		- ``@outcome@``: the outcome e.g. ``FAILED``.
+		- ``@outcomeReason@``: the string containing the reason for the failure; this string can 
+		  contain any characters (other than newline).
+		- ``@testIdAndCycle@``: the test identifier, with a cycle suffix if this is a multi-cycle test.
+	
+	The default format if the environment variable is empty and format is not provided is `DEFAULT_FORMAT`. 
+	"""
+	
+	DEFAULT_FORMAT = "@testFile@:@testFileLine@: @category@: @outcome@ - @outcomeReason@ (@testIdAndCycle@)"
+	"""
+	This is the default format if the environment variable is empty and ``format`` is not provided. 
+
+	The output looks like this::
+	
+		c:\\myproject\\tests\\MyTest_001\\run.py:4: error: TIMED OUT - This test timed out (MyTest_001 [CYCLE 03])
+	
+	which is similar to output from "make" and so should be parseable by many tools and IDEs. 
+	
+	"""
+
+	includeNonFailureOutcomes = 'NOT VERIFIED'
+	"""
+	In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be reported 
+	(with a ``@category@`` of ``warning`` rather than ``error``). 
+	"""
+	
+	enableIfEnvironmentVariable = "PYSYS_CONSOLE_FAILURE_ANNOTATIONS"
+	"""
+	The environment variable used to control whether it is enabled. 
+	
+	This writer will be enabled if the specified environment variable is set (either to any empty string or to any 
+	value other than "false"). 
+	
+	Set enableIfEnvironmentVariable to "" to ignore the environment and instead enable when running with ``--record``. 
+	"""
+
+	def setup(self, cycles=-1, **kwargs):
+		super(ConsoleFailureAnnotationsWriter, self).setup(cycles=cycles, **kwargs)
+		self.cycles=cycles
+		self.format = self.format or os.getenv('PYSYS_CONSOLE_FAILURE_ANNOTATIONS','') or self.DEFAULT_FORMAT
+		self.includeNonFailureOutcomes = [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
+		for o in self.includeNonFailureOutcomes:
+			if not any(o == str(outcome) for outcome in OUTCOMES):
+				raise UserError('Unknown outcome display name "%s" in includeNonFailureOutcomes'%o)
+
+	def isEnabled(self, record=False, **kwargs): 
+		if not self.enableIfEnvironmentVariable: return record
+		
+		env = os.getenv(self.enableIfEnvironmentVariable, None)
+		if env is None or env.lower()=='false': return False
+		return True
+
+	def processResult(self, testObj, cycle=-1, **kwargs):
+		outcome = testObj.getOutcome()
+		if outcome.isFailure():
+			category = 'error'
+		elif str(outcome) in self.includeNonFailureOutcomes:
+			category = 'warning'
+		else:
+			return
+		
+		loc = testObj.getOutcomeLocation()
+		if not loc[0]: loc = (os.path.normpath(testObj.output+'/run.log'), 0) # this is a reasonable fallback
+		stdoutPrint(self.format\
+			.replace('@testFile@', self.escape(loc[0]))
+			.replace('@testFile/@', self.escape((loc[0]).replace(os.sep,'/')))
+			.replace('@testFileLine@', loc[1] or '0')
+			.replace('@runLogFile@', self.escape(testObj.output+'/run.log'))
+			.replace('@runLogFile/@', self.escape((testObj.output+'/run.log').replace(os.sep,'/')))
+			.replace('@category@', category)
+			.replace('@outcome@', str(testObj.getOutcome()))
+			.replace('@outcomeReason@', self.escape(testObj.getOutcomeReason() or '(no outcome reason)'))
+			.replace('@testIdAndCycle@', self.escape(testObj.descriptor.id+(' [CYCLE %02d]'%(cycle+1) if self.cycles>1 else '')))
+			)
+	
+	def escape(self, str):
+		return str.replace('\r','').replace('\n', '; ')
+
 class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	"""Writer that creates zip archives of each failed test's output directory, 
 	producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
@@ -906,7 +1077,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	The following properties can be set in the project configuration for this writer:		
 	"""
 
-	destDir = '__pysys_output_archives/'
+	destDir = '__pysys_output_archives.${outDirName}/'
 	"""
 	The directory to write the archives to, as an absolute path, or relative to the testRootDir. 
 
@@ -940,7 +1111,13 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	Alternatively you can this property to false if you wish to create archives during the test run as each failure 
 	occurs. 
 	"""
-	
+
+
+	includeNonFailureOutcomes = 'REQUIRES INSPECTION'
+	"""
+	In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be archived. 
+	"""
+
 	fileExcludesRegex = u''
 	"""
 	A regular expression indicating test output paths that will be excluded from archiving, for example large 
@@ -965,20 +1142,17 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		self.runner = runner
 		if not self.destDir: raise Exception('Cannot set destDir to ""')
-		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.project.root, self.destDir\
-				.replace('@OUTDIR@', os.path.basename(runner.outsubdir)) \
-				)))
+		
+		# avoid double-expanding (which could mess up ${$} escapes), but if using default value we need to expand it
+		if self.destDir == TestOutputArchiveWriter.destDir: self.destDir = runner.project.expandProperties(self.destDir)
+		
+		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.project.root, self.destDir)))
 		if os.path.exists(self.destDir) and all(f.endswith(('.txt', '.zip')) for f in os.listdir(self.destDir)):
 			deletedir(self.destDir) # remove any existing archives (but not if this dir seems to have other stuff in it!)
-
-		self.archiveAtEndOfRun = str(self.archiveAtEndOfRun).lower()=='true'
 
 		self.fileExcludesRegex = re.compile(self.fileExcludesRegex) if self.fileExcludesRegex else None
 		self.fileIncludesRegex = re.compile(self.fileIncludesRegex) if self.fileIncludesRegex else None
 
-		self.maxArchiveSizeMB = float(self.maxArchiveSizeMB)
-		self.maxArchives = int(self.maxArchives)
-		
 		self.__totalBytesRemaining = int(float(self.maxTotalSizeMB)*1024*1024)
 
 		if self.archiveAtEndOfRun:
@@ -986,6 +1160,11 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 		self.skippedTests = []
 		self.archivesCreated = 0
+		
+		self.includeNonFailureOutcomes = [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
+		for o in self.includeNonFailureOutcomes:
+			if not any(o == str(outcome) for outcome in OUTCOMES):
+				raise UserError('Unknown outcome display name "%s" in includeNonFailureOutcomes'%o)
 
 	def cleanup(self, **kwargs):
 		if self.archiveAtEndOfRun:
@@ -1008,13 +1187,14 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		"""
 		Decides whether this test is eligible for archiving of its output. 
 		
-		The default implementation archives only tests that have a failure outcome, 
-		but this can be customized if needed by subclasses. 
+		The default implementation archives only tests that have a failure outcome, or are listed in 
+		``includeNonFailureOutcomes``, but this can be customized if needed by subclasses. 
 		
 		:param pysys.basetest.BaseTest testObj: The test object under consideration.
 		:return bool: True if this test's output can be archived. 
 		"""
-		return testObj.getOutcome().isFailure()
+		return testObj.getOutcome().isFailure() or str(testObj.getOutcome()) in self.includeNonFailureOutcomes
+
 
 	def processResult(self, testObj, cycle=0, testTime=0, testStart=0, runLogOutput=u'', **kwargs):
 		if not self.shouldArchive(testObj): return 
@@ -1033,7 +1213,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		:return: (str path, filehandle) The path will include an appropriate extension for this archive type. 
 		  The filehandle must have the same API as Python's ZipFile class. 
 		"""
-		path = self.destDir+os.sep+id+'.zip'
+		path = self.destDir+os.sep+('%s.%s.zip'%(id, self.runner.project.properties['outDirName']))
 		return path, zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
 
 	def _archiveTestOutputDir(self, id, outputDir, **kwargs):
@@ -1099,29 +1279,35 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 							skippedFiles.append(fn)
 							continue
 						
-						if fileSize > bytesRemaining:
-							if triedTmpZipFile: # to save effort, don't keep trying once we're close - from now on only attempt small files
-								skippedFiles.append(fn)
-								continue
-							triedTmpZipFile = True
-							
-							# Only way to know if it'll fit is to try compressing it
-							log.debug('File size of %s might push the archive above the limit; creating a temp zip to check', fn)
-							tmpname, tmpzip = self._newArchive(id+'.tmp')
-							try:
-								with tmpzip:
-									tmpzip.write(fn, 'tmp')
-									compressedSize = tmpzip.getinfo('tmp').compress_size
-									if compressedSize > bytesRemaining:
-										log.debug('Skipping file as compressed size of %s bytes exceeds remaining limit of %s bytes: %s', 
-											compressedSize, bytesRemaining, fn)
-										skippedFiles.append(fn)
-										continue
-							finally:
-								os.remove(tmpname)
-						
-						memberName = fn[rootlen:].replace('\\','/')
-						myzip.write(fn, memberName)
+						try:
+							if fileSize > bytesRemaining:
+								if triedTmpZipFile: # to save effort, don't keep trying once we're close - from now on only attempt small files
+									skippedFiles.append(fn)
+									continue
+								triedTmpZipFile = True
+								
+								# Only way to know if it'll fit is to try compressing it
+								log.debug('File size of %s might push the archive above the limit; creating a temp zip to check', fn)
+								tmpname, tmpzip = self._newArchive(id+'.tmp')
+								try:
+									with tmpzip:
+										tmpzip.write(fn, 'tmp')
+										compressedSize = tmpzip.getinfo('tmp').compress_size
+										if compressedSize > bytesRemaining:
+											log.debug('Skipping file as compressed size of %s bytes exceeds remaining limit of %s bytes: %s', 
+												compressedSize, bytesRemaining, fn)
+											skippedFiles.append(fn)
+											continue
+								finally:
+									os.remove(tmpname)
+									
+							# Here's where we actually add it to the real archive
+							memberName = fn[rootlen:].replace('\\','/')
+							myzip.write(fn, memberName)
+						except Exception as ex: # might happen due to file locking or similar
+							log.warning('Failed to add output file "%s" to archive: %s', fn, ex)
+							skippedFiles.append(fn)
+							continue
 						filesInZip += 1
 						bytesRemaining -= myzip.getinfo(memberName).compress_size
 				
@@ -1141,5 +1327,4 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		except Exception:
 			self.skippedTests.append(outputDir)
 			raise
-		
 		

@@ -25,6 +25,10 @@ from __future__ import print_function
 import os.path, stat, math, logging, textwrap, sys, locale, io, shutil, traceback
 import fnmatch
 import re
+import collections
+import platform
+import shlex
+import warnings
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -33,6 +37,7 @@ else:
 	from io import StringIO
 	import queue
 
+import pysys
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
@@ -67,21 +72,24 @@ class BaseRunner(ProcessUser):
 	This class is the default runner implementation, and it can be subclassed 
 	if customizations are needed, for example:
 	
-		- override `setup` and `cleanup` if you need to provision and tear down resources 
+		- override `setup()` if you need to provision resources 
 		  (e.g. virtual machines, servers, user accounts, populating a database, etc) that must be shared by many 
-		  testcases.
-		- override `setup` if you want to customize the order or contents of the ``self.descriptors`` list of tests to 
+		  testcases. The corresponding teardown should be implemented by calling `addCleanupFunction()`. 
+		- override `setup()` if you want to customize the order or contents of the ``self.descriptors`` list of tests to 
 		  be run.
-		- override `testComplete` to customize how test output directories are cleaned up at the end of a test's 
+		- override `testComplete()` to customize how test output directories are cleaned up at the end of a test's 
 		  execution.
-		- override `processCoverageData` to provide support for producing a code coverage report at the end of 
+		- override `processCoverageData()` to provide support for producing a code coverage report at the end of 
 		  executing all tests. 
+    
+    However where possible it is recommended to create one or more runner plugins rather than subclassing BaseRunner. 
 		
 	Do not override the ``__init__`` constructor when creating a runner subclass; instead, add any initialization logic 
 	to your `setup()` method. 
 	
 	:ivar str ~.outsubdir: The ``--outdir`` for this test run, which gives the directory to be used for the output of 
-		each testcase. Typically a relative path, but can also be an absolute path. 
+		each testcase. Typically a relative path, but can also be an absolute path. The basename of this (outDirName) 
+		is often used as an identifier for the current test run. 
 
 	:ivar str ~.output: The full path of the output directory that this runner can use for storing any persistent state, 
 		e.g. logs for any servers started in the runner `setup` method. The runner output directory is formed based 
@@ -89,6 +97,15 @@ class BaseRunner(ProcessUser):
 	
 	:ivar logging.Logger ~.log: The Python ``Logger`` instance that should be used to record progress and status 
 		information. 
+	
+	:ivar dict[str,str] ~.runDetails: A dictionary of metadata about this test run that is included in performance
+		summary reports and by some writers. 
+		
+		The default contains a few standard values (currently these include ``outDirName``, ``hostname`` 
+		and ``startTime``), and additional items can be added by runner subclasses 
+		in the `setup` method - for example the build number of the application under test. 
+		
+		Note that it is not permitted to try to change this dictionary after setup has completed. 
 	
 	:ivar pysys.xml.project.Project ~.project: A reference to the singleton project instance containing the 
 		configuration of this PySys test project as defined by ``pysysproject.xml``. 
@@ -111,16 +128,28 @@ class BaseRunner(ProcessUser):
 	:ivar list[pysys.xml.descriptor.TestDescriptor] ~.descriptors: A list of all the `pysys.xml.descriptor.TestDescriptor` test 
 		descriptors that are selected for execution by the runner. 
 
-	:ivar dict(str,str) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
-		set as data attributes on the class.
+	:ivar dict(str,str|bool) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
+		set as data attributes on the class (but with automatic conversion to match the default value's bool/int/float 
+		type if a static variable of the same name exists on the class).
 
 	:ivar bool ~.validateOnly: True if the user has requested that instead of cleaning output directories and running 
 		each test, the validation for each test should be re-run on the previous output. 
 
 	:ivar float ~.startTime: The time when the test run started (in seconds since the epoch).
+	
+	:ivar list[object] ~.runnerPlugins: A list of any plugin instances configured for this runner. This allows plugins 
+		to access the functionality of other plugins if needed (for example looking them up by type in this list). 
 
 	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
 
+	There is also a field for each runner plugin listed in the project configuration. Plugins provide additional 
+	functionality such as methods for starting and working with a particular language or tool. A runner plugin is 
+	just a class whose constructor has the signature ``__init__(self, runner, pluginProperties)`` and provides methods and 
+	fields to be shared across all tests. Each runner plugin listed in the the project configuration 
+	with ``<runner-plugin classname="..." alias="..."/>`` is instantiated once by the runner, and can be accessed using 
+	``self.<alias>`` on the runner object if an alias is provided. If you are using a third party PySys runner 
+	plugin, consult the documentation for the third party test plugin class to find out what methods and fields are 
+	available using ``runner.<alias>.*``. 
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
@@ -134,10 +163,11 @@ class BaseRunner(ProcessUser):
 		# Set a sensible default output dir for the runner. Many projects do not actually write 
 		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
 		# runner subclasses to do so if required. 
+		runnerBaseName = self.project.getProperty('pysysRunnerDirName', self.project.expandProperties('__pysys_runner.${outDirName}'))
 		if os.path.isabs(outsubdir):
-			self.output = os.path.join(outsubdir, '__pysys_runner')
+			self.output = os.path.join(outsubdir, runnerBaseName)
 		else:
-			self.output = os.path.join(self.project.root, '__pysys_runner_%s'%outsubdir)
+			self.output = os.path.join(self.project.root, runnerBaseName)
 
 		self.record = record
 		self.purge = purge
@@ -152,6 +182,7 @@ class BaseRunner(ProcessUser):
 			self.mode = mode
 
 		self.__resultWritingLock = threading.Lock() 
+		self.runnerErrors = [] # list of strings
 
 		self.startTime = self.project.startTimestamp
 		
@@ -160,8 +191,9 @@ class BaseRunner(ProcessUser):
 		self.setKeywordArgs(xargs)
 
 		if len(descriptors)==1: self.threads = 1
-		if self.threads > 1: log.info('Running tests with %d threads', self.threads)
-	
+		log.info('Running {numDescriptors:,} tests with {threads} threads using PySys {pysysVersion} in Python {pythonVersion}\n'.format(
+			numDescriptors=len(self.descriptors), threads=self.threads, pysysVersion=pysys.__version__, pythonVersion='%s.%s.%s'%
+			sys.version_info[0:3]))
 		self.writers = []
 		summarywriters = []
 		progresswriters = []
@@ -170,7 +202,7 @@ class BaseRunner(ProcessUser):
 		for writerclass, writerprops in self.project.writers:
 			writer = writerclass(logfile=writerprops.pop('file', None)) # invoke writer's constructor
 			writer.runner = self
-			for key, value in writerprops.items(): setattr(writer, key, value)
+			pysys.utils.stringutils.setInstanceVariablesFromDict(writer, writerprops)
 			
 			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
 			
@@ -184,6 +216,12 @@ class BaseRunner(ProcessUser):
 				# the above isEnabled() check
 				if hasattr(writer, 'isEnabled') or self.record: 
 					self.writers.append(writer)
+		
+		# special-case this as for maximum usability we want it to run whenever the env var is set regardless of 
+		# whether someone thought to add it to their project or not
+		annotationsWriter = pysys.writer.ConsoleFailureAnnotationsWriter()
+		if annotationsWriter.isEnabled(record=self.record):
+			self.writers.append(annotationsWriter)
 		
 		if extraOptions.get('progressWritersEnabled', False):
 			if progresswriters: 
@@ -219,9 +257,45 @@ class BaseRunner(ProcessUser):
 		
 		self.performanceReporters = [] # gets assigned to real value by start(), once runner constructors have all completed
 		
+		self.__pythonWarnings = 0
+		self._configurePythonWarningsHandler()
+		
 		# (initially) undocumented hook for customizing which jobs the threadpool takes 
 		# off the queue and when. Standard implementation is a simple blocking queue. 
 		self._testScheduler = queue.Queue()
+
+		# Only do wrapping if we're outputting to console (to avoid making life difficult for tools parsing the output 
+		# and because it's not very useful); remove 16chars which is how wide a typical 
+		self._testHeaderWrap = 0 if not (sys.stdout) or (not sys.stdout.isatty()) else ( 
+			max(40, ((shutil.get_terminal_size()[0] if hasattr(shutil, 'get_terminal_size') else 80) - len('22:34:09 WARN  ')-1)))
+
+		self.runDetails = collections.OrderedDict()
+		for p in ['outDirName', 'hostname']:
+			self.runDetails[p] = self.project.properties[p]
+		if threads>1: self.runDetails['testThreads'] = str(threads)
+		self.runDetails['os'] = platform.platform().replace('-',' ')
+		
+		commitCmd = shlex.split(self.project.properties.get('versionControlGetCommitCommand',''))
+		import subprocess
+		if commitCmd:
+			try:
+				vcsProcess = subprocess.Popen(commitCmd, cwd=self.project.testRootDir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				(stdoutdata, stderrdata) = vcsProcess.communicate()
+				stdoutdata = stdoutdata.decode(locale.getpreferredencoding(), errors='replace')
+				stderrdata = stderrdata.decode(locale.getpreferredencoding(), errors='replace')
+				if vcsProcess.returncode != 0:
+					raise Exception('Process failed with %d: %s'%(vcsProcess.returncode, stderrdata.strip() or stdoutdata.strip() or '<no output>'))
+				
+				commit = stdoutdata.strip().split('\n')
+				if commit and commit[0]:
+					self.runDetails['vcsCommit'] = commit[0]
+				else:
+					raise Exception('No stdout output')
+
+			except Exception as ex:
+				log.info('Failed to get VCS commit using %s: %s', commitCmd, ex)
+
+		self.runDetails['startTime'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.startTime))
 		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this runner object containing the runner class, 
@@ -229,21 +303,6 @@ class BaseRunner(ProcessUser):
 		The format of this string may change without notice. 
 		"""
 		return self.__class__.__name__ # there's usually only one base runner so class name is sufficient
-
-	def setKeywordArgs(self, xargs):
-		"""Set the xargs as data attributes of the class.
-				
-		Values in the xargs dictionary are set as data attributes using the builtin C{setattr()} method. 
-		Thus an xargs dictionary of the form C{{'foo': 'bar'}} will result in a data attribute of the 
-		form C{self.foo} with C{value bar}. 
-		
-		:param xargs: A dictionary of the user defined extra arguments
-		
-		"""
-		# in the next major release we'll delete this method and have baserunner inherit the same logic that 
-		# basetest uses
-		for key in list(xargs.keys()):
-			setattr(self, key, xargs[key])
 
 	# methods to allow customer actions to be performed before a test run, after a test, after 
 	# a cycle of all tests, and after all cycles
@@ -376,7 +435,7 @@ class BaseRunner(ProcessUser):
 	def start(self, printSummary=True):
 		"""Starts the execution of a set of testcases.
 		
-		Do not override this method - instead, override ``setup`` and/or ``cleanup`` to customize the behaviour 
+		Do not override this method - instead, override ``setup`` and/or call ``addCleanupFunction`` to customize the behaviour 
 		of this runner. 
 		
 		The start method is the main method for executing the set of requested testcases. The set of testcases 
@@ -406,21 +465,40 @@ class BaseRunner(ProcessUser):
 				self.encoding = sys.stdout.encoding
 				self.log = logging.getLogger('pysys.stdout')
 				self.logWarning = True
+				self.__origStdout = sys.stdout
 			def flush(self): pass
 			def write(self, s): 
 				if self.logWarning is True:
 					self.logWarning = False
-					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) instead of print() within PySys tests')
+					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) instead of print() within PySys tests: \n%s', ''.join(traceback.format_stack()))
 				# heuristic for coping with \n happening in a separate write to the message - ignore first newline after a non-newline
 				if s!='\n' or self.last=='\n': 
 					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
+			def __getattr__(self, name): return getattr(self.__origStdout, name)
 		if self.project.getProperty('redirectPrintToLogger', True):
 			sys.stdout = PySysPrintRedirector()
+
+		# before we setup the runner plugins, this is a good time to sanity-check aliases for the test plugins, since we don't want to start testing if this is wrong
+		testPluginAliases = set()
+		for pluginClass, pluginAlias, pluginProperties in self.project.testPlugins:
+			if not pluginAlias: continue
+			if hasattr(BaseTest, pluginAlias) or pluginAlias in testPluginAliases: raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on BaseTest; please select a different name'%(pluginAlias))
+			testPluginAliases.add(pluginAlias)
+
+		# call the hook to setup prior to running tests... but setup plugins first. 
+		self.runnerPlugins = []
+		for pluginClass, pluginAlias, pluginProperties in self.project.runnerPlugins:
+			plugin = pluginClass(self, pluginProperties) # if this throws, its a fatal error and we shouldn't run any tests
+			self.runnerPlugins.append(plugin)
+			if not pluginAlias: continue
+			if hasattr(self, pluginAlias): raise UserError('Alias "%s" for runner-plugin conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
+			setattr(self, pluginAlias, plugin)
 		
-		# call the hook to setup prior to running tests
 		self.setup()
+
+		self.runDetails = makeReadOnlyDict(self.runDetails)
 
 		# call the hook to setup the test output writers
 		self.__remainingTests = self.cycle * len(self.descriptors)
@@ -530,7 +608,12 @@ class BaseRunner(ProcessUser):
 						fatalerrors.append('Failed to cleanup writer %s: %s'%(repr(writer), ex))
 				del self.writers[:]
 		
-			self.processCoverageData()
+			try:
+				self.processCoverageData()
+			except Exception as ex: 
+				log.warn("caught %s processing coverage data %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+				fatalerrors.append('Failed to process coverage data: %s'%ex)
+
 		finally:
 			# call the hook to cleanup after running tests
 			try:
@@ -539,29 +622,37 @@ class BaseRunner(ProcessUser):
 				log.warn("caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
+		if self.__pythonWarnings:
+			log.warn('Python reported %d warnings during execution of tests; is is recommended to do a test run with -Werror and fix them if possible, or filter them out if not (see Python\'s warnings module for details)', self.__pythonWarnings)
+
+		fatalerrors = self.runnerErrors+fatalerrors
 		
 		if fatalerrors:
-			# these are so serious we need to make sure the user notices
-			raise Exception('Test runner encountered fatal problems: %s'%'; '.join(fatalerrors))
+			# these are so serious we need to make sure the user notices by returning a failure exit code
+			raise UserError('Test runner encountered fatal problems: %s'%'\n\t'.join(fatalerrors))
 
 		# return the results dictionary
 		return self.results
 
 	def processCoverageData(self):
-		""" Called after execution of all tests has completed to allow 
+		""" Called during cleanup after execution of all tests has completed to allow 
 		processing of coverage data (if enabled), for example generating 
 		reports etc. 
 		
 		The default implementation collates Python coverage data from 
-		coverage.py and produces an HTML report. It assumes a project property 
+		coverage.py and produces an HTML report. Python coverage is collected only if a project property 
 		`pythonCoverageDir` is set to the directory coverage files are 
-		collected into, and that PySys was run with `-X pythonCoverage=true`. 
+		collected into, and that PySys was run with `-XpythonCoverage`. 
 		If a property named pythonCoverageArgs exists then its value will be 
 		added to the arguments passed to the run and html report coverage 
 		commands. 
 		
+		If coverage is generated, the directory containing all coverage files is published 
+		as an artifact named "PythonCoverageDir". 
+		 
 		Custom runner subclasses may replace or add to this by processing 
-		coverage data from other languages, e.g. Java. 		
+		coverage data from other languages. Alternatively you could use `addCleanupFunction()` to schedule 
+		your own coverage processing function to be executed after tests have completed. 
 		"""
 		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
 		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir:
@@ -588,13 +679,15 @@ class BaseRunner(ProcessUser):
 				self.startPython(['-m', 'coverage', 'html']+args, abortOnError=False, 
 					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
 					disableCoverage=True)
-				
+
 				# to avoid confusion, remove any zero byte out/err files from the above
 				for p in os.listdir(pythonCoverageDir):
 					p = os.path.join(pythonCoverageDir, p)
 					if p.endswith(('.out', '.err')) and os.path.getsize(p)==0:
 						os.remove(p)
-	
+				
+				self.publishArtifact(pythonCoverageDir, 'PythonCoverageDir')
+
 
 	def containerCallback(self, thread, container):
 		"""Callback method on completion of running a test.
@@ -695,7 +788,7 @@ class BaseRunner(ProcessUser):
 			self.results[cycle][testObj.getOutcome()].append(descriptor.id)
 			
 			if errors:
-				raise Exception('Failed to process results from %s: %s'%(descriptor.id, '; '.join(errors)))
+				self.runnerErrors.append('Failed to process results from %s: %s'%(descriptor.id, '; '.join(errors)))
 
 
 	def publishArtifact(self, path, category):
@@ -706,12 +799,26 @@ class BaseRunner(ProcessUser):
 		
 		.. versionadded:: 1.6.0
 		
-		:param str path: Absolute path of the file or directory. 
+		:param str path: Absolute path of the file or directory. Where possible it is often useful to include 
+			the ``outDirName`` in the filename, so that artifacts from multiple test runs/platforms do not clash. 
 		:param str category: A string identifying what kind of artifact this is, e.g. 
 			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
 			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
+			Use alphanumeric characters and underscores only. 
 		"""
+		log.debug('publishArtifact was called with category=%s, path=%s', category, path)
+		
+		assert category, 'A category must be specified when publishing artifacts (%s)'%path
+
+		badchars = re.sub('[\\w_]+','', category) 
+		assert not badchars, 'Unsupported characters "%s" found in category "%s"; please use alphanumeric characters and underscore only'%(badchars, category)
+	
+		catfilter = self.project.properties.get('publishArtifactCategoryIncludeRegex','')
+		if catfilter and not re.match(catfilter, category):
+			log.debug('Not publishing artifact as category %s is filtered out by publishArtifactCategoryIncludeRegex'%category)
+			return
+
 		path = fromLongPathSafe(path).replace('\\','/')
 		for a in self.__artifactWriters:
 			a.publishArtifact(path, category)
@@ -725,6 +832,7 @@ class BaseRunner(ProcessUser):
 		 
 		"""
 		log.warn("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+		self.runnerErrors.append("caught %s from executing test container: %s"%(exc_info[0], exc_info[1]))
 
 
 	def handleKbrdInt(self, prompt=True): # pragma: no cover (can't auto-test keyboard interrupt handling)
@@ -771,23 +879,43 @@ class BaseRunner(ProcessUser):
 		written to the run.log and console or how it is formatted. 
 		"""
 		assert not kwargs, 'reserved for future use'
-		log.info(62*"=")
-		title = textwrap.wrap(descriptor.title.replace('\n','').strip(), 56)
-		log.info("Id   : %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		
+		wrap = self._testHeaderWrap - len('Title: ')
+		
+		# No need to make these fill the entire available width
+		log.info("="*62)
+		
+		log.info("Id:    %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 
-		badchars = re.sub('[\\w_.-]+','', descriptor.id) 
+		badchars = re.sub('[\\w_.-~]+','', descriptor.id) 
 		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
 		if badchars: log.warn('Unsupported characters "%s" found in test id "%s"; please use alphanumeric characters and underscore for test ids', badchars, descriptor.id)
 
-		if len(title)>0:
-			log.info("Title: %s", str(title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+		title = descriptor.title.replace('\n','').strip()
+		if title:
+			title = textwrap.wrap(title, wrap) if wrap>0 else [title]
+			log.info("Title: %s", (title[0]), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
+			for l in title[1:]:
+				log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		
-		for l in title[1:]:
-			log.info("       %s", str(l), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		if self.cycle > 1: # only log if this runner is doing multiple cycles
 			log.info("Cycle: %s", str(cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		log.debug('Execution order hint: %s', descriptor.executionOrderHint)
 		log.info(62*"=")
+	
+	def _configurePythonWarningsHandler(self):
+		# By default python prints warnings to stderr which is very unhelpful for us
+		warningLogger = logging.getLogger('pysys.pythonwarnings')
+		def handlePythonWarning(message, category, filename, lineno, file=None, line=None, **kwargs):
+			self.__pythonWarnings += 1
+			msg = warnings.formatwarning(message, category, filename, lineno, line=None, **kwargs)
+			# add a stack trace as otherwise it's not easy to see where in run.py the problem originated, as the 
+			# warning is usually logged from as shared base class
+			msg = '%s\n%s'%(msg.strip(), ''.join(traceback.format_stack()))
+			warningLogger.warn('Python reported a warning: %s', msg)
+			
+		warnings.showwarning = handlePythonWarning
+		
 
 class TestContainer(object):
 	"""Internal class added to the work queue and used for co-ordinating the execution of a single test case.
@@ -900,6 +1028,8 @@ class TestContainer(object):
 			except Exception:
 				exc_info.append(sys.exc_info())
 				
+			logHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
+				
 			# import the test class
 			with global_lock:
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
@@ -965,7 +1095,7 @@ class TestContainer(object):
 					except AbortExecution as e:
 						del self.testObj.outcome[:]
 						self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
-						log.warn('Aborted test due to abortOnError set to true')
+						log.warn('Aborted test due to %s outcome'%e.outcome) # nb: this could be due to SKIPPED
 
 					if self.detectCore(self.outsubdir):
 						self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory', abortOnError=False)
@@ -986,7 +1116,10 @@ class TestContainer(object):
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
-				
+			
+			# in case these got overwritten by a naughty test, restore before printing the final summary
+			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)
+			
 			# print summary and close file handles
 			try:
 				self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
@@ -1002,6 +1135,7 @@ class TestContainer(object):
 			except Exception as ex: # really should never happen so if it does make sure we know why
 				sys.stderr.write('Error in callback for %s: %s\n'%(self.descriptor.id, ex))
 				traceback.print_exc()
+				self.runner.runnerErrors.append('Error in callback for %s: %s'%(self.descriptor.id, ex))
 			
 			# return a reference to self
 			return self
@@ -1025,3 +1159,4 @@ class TestContainer(object):
 		except OSError as ex:
 			log.warning("Caught OSError in detectCore():")
 			log.warning(ex)
+			

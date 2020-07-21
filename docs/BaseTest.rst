@@ -24,11 +24,6 @@ Sometimes you may also need to provide `setup` and/or `cleanup` functionality:
 	validate
 	addCleanupFunction
 
-You may wish to override the `setup` method if it is necessary to do some extra setup before beginning the test's 
-execution (for example, starting a server or provisioning a virtual machine). However, typically this would be 
-worth doing only if you're implementing a custom `BaseTest` subclass to make the functionality available to multiple 
-individual test classes. 
-
 Taken together, the PySys ``setup() -> execute() -> validate()`` methods correspond to the common 
 'Arrange, Act, Assert' testing paradigm. 
 
@@ -87,6 +82,9 @@ can be accessed via instance attributes on ``self``:
   The project can be used to access information such as the project properties which are shared across all tests 
   (e.g. for hosts and credentials). 
 
+- ``self.testPlugins`` *(list[object])*: A list of any configured test plugin instances. This allows plugins 
+  to access the functionality of other plugins if needed (for example looking them up by type in this list). 
+
 - ``self.disableCoverage`` *(bool)*: Set this to True to request that no code coverage is generated for this test 
   (even when code coverage has been enabled for the PySys run), for example because this is a time-sensitive 
   or performance-measuring test. Typically this would be set in an individual testcase, or in the `setup` method of 
@@ -94,12 +92,28 @@ can be accessed via instance attributes on ``self``:
 
 Additional variables that affect only the behaviour of a single method are documented in the associated method. 
 
+There is also a field for each test plugin listed in the project configuration. Plugins provide additional 
+functionality such as methods for starting and working with a particular language or tool. A test plugin is 
+just a class whose constructor has the signature ``__init__(self, testobj, pluginProperties)`` and provides methods and 
+fields for use by tests. Each test plugin listed in the the project configuration 
+with ``<test-plugin classname="..." alias="..."/>`` is instantiated for each 
+`BaseTest` instance, and can be accessed using ``self.<alias>`` on the test object. If you are using a third party PySys test 
+plugin, consult the documentation for the third party test plugin class to find out what methods and fields are 
+available using ``self.<alias>.*``. 
+
+If you wish to support test parameters that can be overridden on the command line using ``-Xkey=value``, just add a 
+static variable just after the ```class MyClass(BaseTest):`` line containing the default value, and access it using 
+``self.key``. If a new value for that key is specified with ``-Xkey=value``, that value will be set as an attribute by 
+the BaseTest constructor, with automatic conversion from string to the correct type if the default value is a 
+bool/int/float.
+
 .. _assertions-and-outcomes:
 
 Assertions and outcomes
 =======================
 
 .. autosummary::
+	assertThatGrep
 	assertGrep
 	assertLineCount
 	assertDiff
@@ -112,6 +126,7 @@ Assertions and outcomes
 	addOutcome
 	getOutcome
 	getOutcomeReason
+	getOutcomeLocation
 	reportPerformanceResult
 
 PySys has a library of assertion methods that are great for typical system testing validation tasks such as 
@@ -123,8 +138,12 @@ even if some early ones fail.
 For example::
 
 	def validate(self):
-		self.assertGrep('myserver.log', expr='Successfully authenticated user ".*"')
-		self.assertThat('actualNumberOfLogFiles == expected', actualNumberOfLogFiles=len(glob.glob(self.output+'/myserver*.log')), expected=3)
+		self.assertGrep('myserver.log', expr=' (ERROR|FATAL|WARN) .*', contains=False)
+		
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)"', 
+			"value == expected", expected='myuser')
+
+		self.assertThat('actualNumberOfLogFiles == expected', actualNumberOfLogFiles__eval="len(glob.glob(self.output+'/myserver*.log'))", expected=3)
 
 The available test outcomes are listed in `pysys.constants.OUTCOMES`. 
 
@@ -191,12 +210,13 @@ Miscellaneous
 =============
 .. autosummary::
 	compareVersions
-	getBoolProperty
+	disableLogging
 	startBackgroundThread
 	pythonDocTest
 	startManualTester
 	stopManualTester
 	waitManualTester
+	getBoolProperty
 
 
 .. currentmodule:: pysys.basetest

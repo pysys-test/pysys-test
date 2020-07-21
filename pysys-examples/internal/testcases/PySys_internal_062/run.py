@@ -15,4 +15,4 @@ class PySysTest(BaseTest):
 	def validate(self):
 		filecopy(os.path.join(self.output, 'run.log'), os.path.join(self.output, 'run.log.proc'))
 		del self.outcome[:]
-		self.assertGrep('run.log.proc', expr='Wait.*timed out.*\[run.py:11\]')
+		self.assertGrep('run.log.proc', expr='Wait.*timed out.*\[.+run.py:11\]')

@@ -7,8 +7,11 @@
 	<property name="verboseWaitForSignal" value="true"/>
 	<property name="defaultAbortOnError" value="true"/>
 
+	<property name="versionControlGetCommitCommand" value="git show -s --format=%h"/>
+
 	<pythonpath value="${root}/test/extrapath"/>
 
+	<property name="publishArtifactCategoryIncludeRegex" value="(CSVPerformanceReport|TestOutputArchive.*|.*JUnit.*)$"/>
 
 	<formatters>
 		<formatter classname="ColorLogFormatter" module="pysys.utils.logutils"
@@ -19,8 +22,6 @@
 	
 	<writers>
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
-		</writer>
-		<writer classname="ArtifactPrinter" module="mypkg">
 		</writer>
 
 		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
@@ -50,6 +51,9 @@
 
 		<writer classname="ConsoleSummaryResultsWriter" module="pysys.writer">
 			<property name="showTestTitle" value="true"/>
+		</writer>
+
+		<writer classname="ArtifactPrinter" module="mypkg">
 		</writer>
 		
 	</writers>		

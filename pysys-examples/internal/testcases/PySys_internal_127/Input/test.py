@@ -1,6 +1,6 @@
 import sys, time
 sys.stdout.write('Process stdout output\nUmmmmm\nis here')
-sys.stderr.write('Process stderr output\nis here')
+sys.stderr.write('Process stderr output\nERROR: bad thing happened')
 if sys.argv[-1] == 'block':
 	sys.stdout.write('\nBlocking now')
 	sys.stdout.flush()

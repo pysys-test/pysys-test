@@ -55,7 +55,7 @@ class XMLProjectParser(object):
 		self.properties = {
 			'testRootDir':self.dirname,
 			
-			'outDirName':outdir,
+			'outDirName':os.path.basename(outdir),
 			
 			'startDate':time.strftime('%Y-%m-%d', time.localtime(self.startTimestamp)),
 			'startTime':time.strftime('%H.%M.%S', time.localtime(self.startTimestamp)),
@@ -129,6 +129,8 @@ class XMLProjectParser(object):
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
 				value = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name=name)
+				if name in self.properties:
+					raise UserError('Cannot set project property "%s" as it is already set'%name)
 				self.properties[name] = value
 				log.debug('Setting project property %s="%s"', name, value)
 
@@ -161,6 +163,12 @@ class XMLProjectParser(object):
 		for name, value in props.items():
 			# when loading properties files it's not so helpful to give errors (and there's nowhere else to put an empty value) so default to empty string
 			value = self.expandProperties(value, default='', name=name)	
+			
+			if name in self.properties and value != self.properties[name]:
+				# Whereas we want a hard error for duplicate <property name=".../> entries, for properties files 
+				# there's a good case to allow overwriting of properties, but it log it at INFO
+				log.info('Overwriting previous value of project property "%s" with new value "%s" from "%s"'%(name, value, os.path.basename(file)))
+
 			self.properties[name] = value
 			log.debug('Setting project property %s="%s" (from %s)', name, self.properties[name], file)
 
@@ -249,6 +257,22 @@ class XMLProjectParser(object):
 		if optionsDict: raise Exception('Unexpected descriptor-loader attribute(s): '+', '.join(list(optionsDict.keys())))
 		
 		return cls
+
+	def getTestPlugins(self):
+		plugins = []
+		for node in self.root.getElementsByTagName('test-plugin'):
+			cls, optionsDict = self._parseClassAndConfigDict(node, None)
+			alias = optionsDict.pop('alias', None)
+			plugins.append( (cls, alias, optionsDict) )
+		return plugins
+		
+	def getRunnerPlugins(self):
+		plugins = []
+		for node in self.root.getElementsByTagName('runner-plugin'):
+			cls, optionsDict = self._parseClassAndConfigDict(node, None)
+			alias = optionsDict.pop('alias', None)
+			plugins.append( (cls, alias, optionsDict) )
+		return plugins
 
 	def getMakerDetails(self):
 		try:
@@ -466,6 +490,8 @@ class Project(object):
 			self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
 			self.collectTestOutput = []
 			self.projectHelp = None
+			self.testPlugins = []
+			self.runnerPlugins = []
 			self.properties = {'outDirName':os.path.basename(outdir)}
 			stdoutformatter, runlogformatter = None, None
 			self.projectFile = None
@@ -503,8 +529,9 @@ class Project(object):
 				# get the maker if specified
 				self.makerClassname = parser.getMakerDetails()
 
-				# get the loggers to use
 				self.writers = parser.getWriterDetails()
+				self.testPlugins = parser.getTestPlugins()
+				self.runnerPlugins = parser.getRunnerPlugins()
 
 				self.perfReporterConfig = parser.getPerformanceReporterDetails()
 				
@@ -538,10 +565,28 @@ class Project(object):
 		if self.__frozen: raise Exception('Project cannot be modified after it has been loaded (use the runner to store global state if needed)')
 		object.__setattr__(self, name, value)
 
+	def expandProperties(self, value):
+		"""
+		Expand any ${...} project properties in the specified string. 
+		
+		An exception is thrown if any property is missing. This method is only for expanding project properties so 
+		``${env.*}`` syntax is not permitted (if you need to expand an environment variable, use a project property). 
+		
+		.. versionadded:: 1.6.0
+		
+		:param str value: The string in which any properties will be expanded. ${$} can be used for escaping a literal $ if needed. 
+		:return str: The value with properties expanded, or None if value=None. 
+		"""
+		if not value: return value
+		return re.sub(r'[$][{]([^}]+)[}]', 
+			lambda m: '$' if m.group(1)=='$' else self.properties[m.group(1)], value)
+
 	def getProperty(self, key, default):
 		"""
 		Get the specified project property value, or a default if it is not defined, with type conversion from string 
 		to int/float/bool (matching the default's type). 
+
+		.. versionadded:: 1.6.0
 		
 		:param str key: The name of the property.
 		:param bool/int/float/str default: The default value to return if the property is not set or is an empty string. 

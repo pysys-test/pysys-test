@@ -19,7 +19,7 @@ class PySysTest(BaseTest):
 		reasonFailedEvalAssert = self.getOutcomeReason()
 		self.addOutcome(PASSED, override=True)
 
-		self.assertThat('actual == expected', actual="prefix foo bar suffix", expected='foobar')
+		self.assertThat('actual == expected', actual="prefix f\oo bar suffix", expected=r'f\oobar')
 		reasonFailedAssert = self.getOutcomeReason()
 		self.addOutcome(PASSED, override=True)
 
@@ -80,6 +80,17 @@ class PySysTest(BaseTest):
 		self.assertThat('float(startupTime) < 60.0', 
 			startupTime__eval="self.getExprFromFile('myprocess-2.log', 'Server started in ([0-9.]+) seconds')")
 
+		self.assertThat('serverStartInfo == expected', expected={
+			'startupTime':'20.3',
+			'user':None,
+			},
+			serverStartInfo__eval="self.getExprFromFile('myprocess-2.log', 'Server started in (?P<startupTime>[0-9.]+) seconds(?P<user> as user .*)?')")
+		self.assertThat('serverStartInfo == expected', expected=[{
+			'startupTime':'20.3',
+			'user':None,
+			}],
+			serverStartInfo__eval="self.getExprFromFile('myprocess-2.log', 'Server started in (?P<startupTime>[0-9.]+) seconds(?P<user> as user .*)?', returnAll=True)")
+			
 		user = 'myuser'
 		self.assertThat('actualUser == expected', expected='myuser', actualUser=user)
 

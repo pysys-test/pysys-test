@@ -54,7 +54,7 @@ def replace(input, output, dict={}, marker='', encoding=None):
 	
 	"""
 	if not os.path.exists(input):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(input)))
+		raise FileNotFoundException("unable to find file %s" % (input))
 	else:
 		with openfile(input, 'r', encoding=encoding) as fi, openfile(output, 'w', encoding=encoding) as fo:
 			for line in fi.readlines():

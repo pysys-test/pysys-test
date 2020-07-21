@@ -25,6 +25,7 @@ import json
 import shlex
 import multiprocessing
 
+import pysys
 from pysys import log
 from pysys import __version__
 from pysys.constants import *
@@ -109,7 +110,8 @@ Execution options
        --ci                    set optimal options for automated/non-interactive test execution in a CI job: 
                                  --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
-                   CAT=LEVEL   set the verbosity for a specific category e.g. -vassertions=, -vprocess=
+                   CAT=LEVEL   set the verbosity for a specific PySys logging category e.g. -vassertions=, -vprocess=
+                               (or to set the verbosity for a non-PySys Python logger category use "python:CAT=LEVEL")
    -y, --validateOnly          test the validate() method without re-running execute()
    -h, --help                  print this message
  
@@ -238,7 +240,13 @@ e.g.
 				if '=' in verbosity:
 					loggername, verbosity = value.split('=')
 					assert not loggername.startswith('pysys.'), 'The "pysys." prefix is assumed and should not be explicitly specified'
-					loggername = 'pysys.'+loggername
+					if loggername.startswith('python:'):
+						loggername = loggername[len('python:'):]
+						assert not loggername.startswith('pysys'), 'Cannot use python: with pysys.*' # would produce a duplicate log handler
+						# in the interests of performance and simplicity we normally only add the pysys.* category 
+						logging.getLogger(loggername).addHandler(pysys.internal.initlogging.pysysLogHandler)
+					else:
+						loggername = 'pysys.'+loggername
 				else:
 					loggername = None
 				
@@ -318,10 +326,21 @@ e.g.
 					sys.exit(1)
 
 			elif option in ["-X"]:
-				if EXPR1.search(value) is not None:
-				  self.userOptions[value.split('=', 1)[0]] = value.split('=', 1)[1]
-				if EXPR2.search(value) is not None:
-					self.userOptions[value] = True
+				if '=' in value:
+					key, value = value.split('=', 1)
+				else:
+					key, value = value, 'true'
+				
+				# best not to risk unintended consequences with matching of other types, but for boolean 
+				# it's worth it to resolve the inconsistent behaviour of -Xkey=true and -Xkey that existed until 1.6.0, 
+				# and because getting a bool where you expected a string is a bit more likely to give an exception 
+				# and be noticed that getting a string where you expected a boolean (e.g. the danger of if "false":)
+				if value.lower() == 'true':
+					value = True
+				elif value.lower() == 'false':
+					value = False
+				
+				self.userOptions[key] = value
 			
 			elif option in ("-y", "--validateOnly"):
 				self.userOptions['validateOnly'] = True
@@ -332,6 +351,9 @@ e.g.
 			else:
 				print("Unknown option: %s"%option)
 				sys.exit(1)
+
+		# log this once we've got the log levels setup
+		log.debug('PySys is installed at: %s; python from %s', os.path.dirname(pysys.__file__), sys.executable)
 
 		# retained for compatibility, but PYSYS_DEFAULT_ARGS is a better way to achieve the same thing
 		if os.getenv('PYSYS_PROGRESS','').lower()=='true': self.progress = True

@@ -7,7 +7,7 @@ class PySysTest(BaseTest):
 
 	def validate(self):
 		self.assertOrderedGrep(file='file.txt', filedir=self.input, exprList=['moon shines bright'])
-		self.assertOrderedGrep(file='file.txt', filedir=self.input, exprList=['moon shines right'])
+		self.assertOrderedGrep(file='file.txt', filedir=self.input, exprList=['The moorcock springs', 'moon shines right'])
 		self.checkForFailedOutcome()
 		self.assertOrderedGrep(file='file.txt', filedir=self.input, exprList=['moon shines right'], contains=False)
 		self.assertOrderedGrep(file='file.txt', filedir=self.input, exprList=['(?P<tag>moon) shines bright'])
@@ -27,6 +27,7 @@ class PySysTest(BaseTest):
 		self.assertOrderedGrep(file='file.txt', filedir=self.input, exprList=exprList)
 		self.checkForFailedOutcome()
 		
+		self.assertGrep('run.log', expr='failed on expression "#2: moon shines right"')
 		
 	def checkForFailedOutcome(self):
 		outcome = self.outcome.pop()

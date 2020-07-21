@@ -22,7 +22,11 @@ class PySysTest(BaseTest):
 		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
-		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], workingDir='test', ignoreExitStatus=True)
+		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], 
+			workingDir='test', ignoreExitStatus=True, environs={
+				# this is a good test in which to test the default behaviour works when enabled
+				'PYSYS_CONSOLE_FAILURE_ANNOTATIONS':'',
+			})
 		self.logFileContents('pysys.out', maxLines=0)
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
 			
@@ -103,13 +107,29 @@ class PySysTest(BaseTest):
 			 '.*myoutdir.NestedFail.cycle1.',
 		])
 
-		
+
+		self.assertOrderedGrep('pysys.out', exprList=[
+			r'Run details:',
+			r'      *outDirName: [^/\\]*myoutdir',
+			r'      *hostname: .+',
+			])
+
 		# check the option works to disable this
 		self.assertGrep('pysys.out', expr='List of failure test ids:', contains=False)
 		
-		self.assertPathExists('__pysys_output_archives/NestedFail.cycle001.zip')
+		self.assertPathExists('__pysys_output_archives.myoutdir/NestedFail.cycle001.myoutdir.zip')
 		
-		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchive: .+/NestedFail.cycle002.zip')
-		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchiveDir: .+/__pysys_output_archives')
+		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchive: .+/NestedFail.cycle002.myoutdir.zip')
+		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchiveDir: .+/__pysys_output_archives.myoutdir')
 		self.assertGrep('pysys.out', expr='Published artifact CSVPerformanceReport: .+/perf_.*.csv')
+		self.assertGrep('pysys.out', expr='Published artifact JUnitXMLResultsDir: .+/pysys-reports')
+		self.assertGrep('pysys.out', expr='Published artifact MyCustomCategory', contains=False) # due to publishArtifactCategoryIncludeRegex
 		
+		self.assertThat('len(vcsCommit) > 4', vcsCommit__eval="self.runner.runDetails['vcsCommit']")
+		
+		# check PYSYS_CONSOLE_FAILURE_ANNOTATIONS did its thing
+		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*error: .*NestedTimedout .* 02.*', encoding=locale.getpreferredencoding()), 
+			expected=u'NestedTimedout%srun.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness - %s (NestedTimedout [CYCLE 02])'%(os.sep, TEST_STR))
+
+		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*warning: .*NestedNotVerified .* 02.*'), 
+			expected='2%srun.log:0: warning: NOT VERIFIED - (no outcome reason) (NestedNotVerified [CYCLE 02])'%os.sep)

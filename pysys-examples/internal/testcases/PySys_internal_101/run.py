@@ -32,7 +32,7 @@ class PySysTest(BaseTest):
 			for o, r in outcomes:
 				f.write(u'%s: "%s"\n'%(LOOKUP[o], r))
 	def validate(self):
-		self.addOutcome(NOTVERIFIED, 'reset', override=True)
+		self.addOutcome(PASSED, 'reset', override=True)
 		self.logFileContents('outcomes.txt')
 		self.assertDiff('outcomes.txt', 'ref_outcomes.txt')
 		

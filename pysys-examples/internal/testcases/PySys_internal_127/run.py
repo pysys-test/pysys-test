@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 		try:
 			return self.startPython([self.input+'/test.py']+kwargs.pop('arguments',[]), disableCoverage=True, displayName='python<%s>'%kwargs['stdouterr'], **kwargs)
 		except Exception as ex: # test abort
-			self.log.info('Suppressing exception: %s', ex)
+			self.log.info('Got expected exception: %s', ex)
 	
 	def execute(self):
 		self.logFileContentsDefaultExcludes=['Umm.*']
@@ -19,8 +19,11 @@ class PySysTest(BaseTest):
 		self.write_text('logfile.log', 'This is a log file')
 		self.startTestProcess(stdouterr='onError=logfile', onError=lambda process: self.logFileContents('logfile.log'))
 		self.startTestProcess(stdouterr='onError=stdout', onError=lambda process: self.logFileContents(process.stdout, tail=True))
-		
-		# this example is the documentation
+
+		# these example are in the documentation
+		self.startTestProcess(stdouterr='onError=doc_example_suffix', 
+			onError=lambda process: self.logFileContents(process.stderr) and self.getExprFromFile(process.stderr, 'ERROR: (.+)'))
+
 		self.startTestProcess(stdouterr='onError=doc_example', 
 			onError=lambda process: self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True))
 
@@ -36,7 +39,6 @@ class PySysTest(BaseTest):
 		self.addOutcome(PASSED, override=True)
 		def m(line):
 			if 'Contents of default_timeout.err' in line: return None # race condition whether this gets created in time
-			if 'Suppressing' in line: return None
 			if 'Executed' in line:	return '\n'+line[line.find('<'):]
 			if 'timed out' in line: return '\nTimed out process\n'
 			if 'Contents' in line: return line[line.find('Contents'):]

@@ -1,3 +1,4 @@
+import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 
@@ -50,8 +51,23 @@ class PySysTest(BaseTest):
 		self.assertThat('grepResult==expected', expected=('westlin winds',),
 			grepResult=self.assertGrep(file='file.txt', filedir=self.input, expr='(Now eastlin|westlin winds)').groups(),
 		)
-		
+
+		# check new and old positional arguments
+		self.assertGrep('file.txt', 'moon.*bright', filedir=self.input) # new, expr as 2nd arg
+		self.assertGrep('file.txt', self.input, 'moon.*bright', True) # old
+		self.assertGrep(self.input+'/file.txt', None, 'moon.*bright', True) #old
+		self.assertGrep('file.txt', self.input, expr='moon.*bright') # old
+
+
 		self.write_text('myserver.log', u'Successfully authenticated user "myuser" in 0.6 seconds.')
+
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in ([^ ]+) seconds', "value == expected", expected='myuser')
+
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in ([^ ]+) seconds', "value == expected", expected='myuser')
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "(?P<value>[^"]*)"', "value == expected", expected='myuser')
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<authSecs>[^ ]+) seconds', "0.0 <= float(value) <= 60.0")
+		self.assertThatGrep('myserver.log', r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds', "value['username'] == expected", expected='myuser')
+
 		MAX_AUTH_TIME = 60
 		
 		self.assertThat('username == expected', expected='myuser',
@@ -80,6 +96,16 @@ class PySysTest(BaseTest):
 
 		self.assertThat('result is None', 
 			result=self.assertGrep('myserver.log', expr='NO MATCH "([^"]*)"', contains=False))
+
+		# example from doc:
+		self.write_text('example.log', 'Foo\nBar\nError message FAILURE - stack trace is:\n   MyClass.class\n\nNow have Bar')
+		
+		self.assertGrep('example.log', expr=r'MyClass', mappers=[
+				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
+			])
+		self.assertGrep('example.log', expr=r'Bar', contains=False, mappers=[
+				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
+			])
 
 		
 	def checkForFailedOutcome(self):

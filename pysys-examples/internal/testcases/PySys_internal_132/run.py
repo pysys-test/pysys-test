@@ -18,4 +18,4 @@ class PySysTest(BaseTest):
 
 		self.waitForBackgroundProcesses(checkExitStatus=False, timeout=60)
 	def validate(self):
-		pass
+		self.assertTrue(True, assertMessage='verification is above')

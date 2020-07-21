@@ -37,6 +37,9 @@ from pysys.utils.pycompat import *
 from pysys.utils.fileutils import pathexists
 import pysys.internal.safe_eval
 
+# be sure to import all utility modules that we want to be available to tests that do an "import pysys" (e.g. pysys.mappers.XXX)
+import pysys.mappers
+
 class BaseTest(ProcessUser):
 	"""BaseTest is the base class of every individual PySys test class, and contains the methods needed to execute your 
 	test logic and then to validate the results against the expected behaviour. 
@@ -64,6 +67,15 @@ class BaseTest(ProcessUser):
 		self.manualTester = None
 		self.resources = []
 		self.testCycle = getattr(BaseTest, '_currentTestCycle', None) # set when constructed by runner
+		
+		self.testPlugins = []
+		for pluginClass, pluginAlias, pluginProperties in self.project.testPlugins:
+			plugin = pluginClass(self, pluginProperties)
+			self.testPlugins.append(plugin)
+			if not pluginAlias: continue
+			if hasattr(self, pluginAlias): raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on this test object; please select a different name'%(pluginAlias))
+			setattr(self, pluginAlias, plugin)
+
 	
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
@@ -81,8 +93,12 @@ class BaseTest(ProcessUser):
 		Contains setup actions to be executed before the test is executed. 
 		
 		The ``setup`` method may be overridden by individual test classes, or (more commonly) in a custom `BaseTest` 
-		subclass that provides common functionality for multiple individual tests. If you override this method, be 
-		sure to call ``super(BASETEST_CLASS_HERE, self).setup()`` to allow the setup commands from the base test to run. 
+		subclass that provides common functionality for multiple individual tests. However before implementing a custom 
+		BaseTest subclass with its own setup() method, consider whether the PySys concept of test plugins would meet 
+		your needs. 
+		
+		If you do override this method, be sure to call ``super(BASETEST_CLASS_HERE, self).setup()`` to allow the 
+		setup commands from the base test to run. 
 		
 		If ``setup`` throws an exception, the `cleanup` method will still be called, to allow for clean up resources 
 		that were already allocated.
@@ -528,8 +544,8 @@ class BaseTest(ProcessUser):
 			#     expected: 'baz'
 			#                 ^
 		
-		As shown above, when (at least) two named parameters are provided and the condition string is a simple equality 
-		comparison (``==``, ``is``, ``>=``, ``<=``) using exactly two of the parameters, additional lines are logged if the 
+		As shown above, when (at least) two named parameters are provided and the condition string is a simple 
+		comparison using exactly two of the parameters, additional lines are logged if the 
 		assertion fails, showing at what point the two arguments differ (based on finding the longest common substring). 
 		So it's a good idea to include both the actual and expected value as named parameters rather than as literals 
 		inside the condition string. 
@@ -565,7 +581,9 @@ class BaseTest(ProcessUser):
 
 		:param assertMessage='': Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. We do not recommend using this as the automatically 
-			generated assertion message is usually clearer. 
+			generated assertion message is usually clearer. If you want to add some additional information to 
+			that message (e.g. which file/server it pertains to etc), just add the info as a string with an extra 
+			keyword argument. 
 		
 		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). 
 		"""
@@ -593,8 +611,9 @@ class BaseTest(ProcessUser):
 				
 			if '__' in k: raise Exception('Please do not use __ in any for keywords, this is reserved for future use')
 
-			# use repr if it's a string so we get escaping, other data structures are best using normal str()
-			displayvalues[-1]+= ((u'=%r'%v) if isstring(v) else (u'=%s'%v))
+			# use quotestring which uses repr() for escaping only if we need it; other data structures are best using normal str()
+			
+			displayvalues[-1]+= (u'=%s'%quotestring(v) if isstring(v) else (u'=%s'%(v,)))
 			namedvalues[k] = v
 
 		if positional_arguments: # yucky old-style mechanism
@@ -625,18 +644,24 @@ class BaseTest(ProcessUser):
 			# namesInUse impl is a bit rough-and-ready, but does a good enough job at identifying when it makes 
 			# sense to compare two of the parameters passed in
 			namesInUse = [x for x in namedvalues.keys() if x in conditionstring]
-			if re.match(r'^ *\w+ *(==|is|>=|<=) *\w+ *$', conditionstring) and len(namesInUse)==2: 
+			if (re.match(r'^ *\w+ *(==|is|>=|<=) *\w+ *$', conditionstring) or 
+				re.match(r'^ *\w+[.](startswith|endswith)[(] *\w+ *[)] *$', conditionstring)) and len(namesInUse)==2: 
 				# if we're checking a==b we can help the user see why they didn't match; 
 				# this kind of highlighting might be misleading for other conditionstrings, and certainly less useful
 				pad = max(len(key) for key in namesInUse)+1
 
 				# use %s for most objects, but repr for strings (so we see the escaping) and objects where str() would make them look the same
-				v1 = u'%s'%(namedvalues[namesInUse[0]])
-				v2 = u'%s'%(namedvalues[namesInUse[1]])
+				v1 = u'%s'%(namedvalues[namesInUse[0]],)
+				v2 = u'%s'%(namedvalues[namesInUse[1]],)
 
-				if isstring(namedvalues[namesInUse[0]]) or v1==v2:
-					v1 = u'%r'%(namedvalues[namesInUse[0]])
-					v2 = u'%r'%(namedvalues[namesInUse[1]])
+				if isstring(namedvalues[namesInUse[0]]) and ( # for strings do minimal escaping, but only if we can do it consistently for both strings
+						('\\' in repr(namedvalues[namesInUse[0]]).replace('\\\\','')) == 
+						('\\' in repr(namedvalues[namesInUse[1]]).replace('\\\\','')) ):
+					v1 = quotestring(namedvalues[namesInUse[0]])
+					v2 = quotestring(namedvalues[namesInUse[1]])
+				elif v1==v2 or isstring(namedvalues[namesInUse[0]]):
+					v1 = u'%r'%(namedvalues[namesInUse[0]],)
+					v2 = u'%r'%(namedvalues[namesInUse[1]],)
 				
 				seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
 				i, j, k = seq.find_longest_match(0, len(v1), 0, len(v2))
@@ -717,11 +742,11 @@ class BaseTest(ProcessUser):
 		sort their constituent lines, replace matches to regular 
 		expressions in a line with an alternate value, or to only include particular lines. 
 		However, it is often easier to instead use 
-		L{copy} to perform the transformations (e.g. stripping out timestamps, finding lines of interest etc)
+		`copy` to perform the transformations (e.g. stripping out timestamps, finding lines of interest etc)
 		and then separately call assertDiff on the file generated by copy. This makes it easier to generate a suitable 
 		reference file and to diagnose test failures. For example::
 		
-			self.assertDiff(self.copy('myfile.txt', 'myfile-preprocessed.txt', ...), 'myfile-reference.txt')
+			self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')])))
 		
 		Should the files after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, 
 		otherwise a C{FAILED} outcome is added.
@@ -836,11 +861,94 @@ class BaseTest(ProcessUser):
 		path = os.path.normpath(path)
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
-	def assertGrep(self, file, filedir=None, expr='', contains=True, ignores=None, literal=False, encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0):
+	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
+		"""Perform a validation by using a regular expression to extract a "value" from a text file and then check 
+		the extracted value using an `assertThat` conditionstring.
+
+		For example::
+		
+			# This is the typical case - "value" is assigned to the first (...) regex group, and keyword parameters 
+			# (e.g. "expected=") are used to validate that the "value" is correct
+			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)"', 
+				"value == expected", expected='myuser')
+			
+			# In cases where you need multiple regex groups for matching purpose, name the one containing the value using (?P<value>...)
+			self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', 
+				"0.0 <= float(value) <= 60.0")
+
+		This method is implemented using `getExprFromFile` and `assertThat`, so see those methods for more detailed 
+		information on the parameters. 
+
+		.. versionadded:: 1.6.0
+
+		:param file: The name or relative/absolute path of the file to be searched.
+		
+		:param str grepRegex: The regular expression to check for in the file (or a string literal if literal=True), 
+			for example ``" ERROR .*"``. See `assertGrep` for more tips on using and escaping regular expressions. 
+		
+		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` 
+			to validate that "value" is correct. For example ``value == expected``.
+			
+			It's best to put expected values into a separate named parameter (rather than using literals inside the 
+			conditionstring), since this will produce more informative messages if there is a failure. 
+			
+			Do not be tempted to use a Python f-string here, as that would deprive PySys of the 
+			opportunity to provide a self-describing message and outcome reason. 
+
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+		:param str encoding: The encoding to use to open the file. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
+		
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time.
+
+		:param abortOnError=False: Set to True to make the test immediately abort if the
+			assertion fails. By default this method produces a BLOCKED output 
+			but does not throw if the eval(...) cannot be executed. 
+
+		:param assertMessage='': Overrides the string used to describe this 
+			assertion in log messages and the outcome reason. We do not recommend using this as the automatically 
+			generated assertion message is usually clearer. If you want to add some additional information to 
+			that message (e.g. which file/server it pertains to etc), just add the info as a string with an extra 
+			keyword argument. 
+			
+		:param \**kwargs: All additional keyword arguments are treated as values which will be made available 
+			when evaluating the condition string. Any keyword ending in the special suffix ``__eval`` will be treated 
+			as a Python expression string (rather than a string literal) and will be be evaluated in a namespace 
+			containing the local variables of the calling code and (on Python 3.6+) any preceding named parameters.  
+		
+		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). 
+
+		"""
+		def getExprFromFile(file, expr):
+			e = self.getExprFromFile(file, expr, encoding=encoding, reFlags=reFlags, mappers=mappers)
+			# in case it has named parameters
+			if isinstance(e, dict) and len(e)==1: return next(iter(e.values()))
+			return e
+		return self.assertThat(conditionstring, value__eval='getExprFromFile(%r, %r)'%(file, grepRegex), 
+			**kwargsForAssertThat)
+
+	def assertGrep(self, file, _expr=None, _unused=None, contains=True, ignores=None, literal=False, encoding=None, 
+			abortOnError=False, assertMessage=None, reFlags=0, mappers=[], expr='', filedir=None):
 		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
-		This method searches through the specified text file until it finds a line matching the regular expression. 
+		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
+		use `assertThatGrep` instead of this function, as assertThatGrep can produce better message on failure, and 
+		also allows for more powerful matching using a full Python expression 
+		(e.g. numeric range checks, pre-processing strings to normalize case, etc). 
+
+		The assertGrep method is good for checking in a log to confirm that something happened, or to check that 
+		there are no error messages. 
 		When contains=True it adds a `PASSED <pysys.constants.PASSED>` outcome if found or a 
 		`FAILED <pysys.constants.FAILED>` outcome if not found (except when where are named groups in the expression 
 		in which case `BLOCKED <pysys.constants.BLOCKED>` is used to indicate that the return value is not valid).
@@ -858,18 +966,11 @@ class BaseTest(ProcessUser):
 			# addition to regex escaping. Square brackets are often the clearest way to escape regular expression 
 			# characters such as \ . and ()
 			self.assertGrep('myserver.log', expr=r'c:[\]Foo[\]bar[.]txt')
-		
-		You can get more descriptive failure messages, and also do more sophisticated checking of results, by 
-		using one or more ``(?P<groupName>...)`` named groups in the expression to extract information. A common 
-		pattern is to unpack the resulting dict using ``**kwargs`` syntax and pass to `BaseTest.assertThat`. For 
-		example, the grep shown above for checking that a log message contains the correct username could be rewritten 
-		as::
-		
-			self.assertThat('username == expected', expected='myuser',
-				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)"'))
-
-			self.assertThat('0 <= float(authSecs) < max', max=MAX_AUTH_TIME,
-				**self.assertGrep('myserver.log', expr=r'Successfully authenticated user "[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+			
+			# The IncludeLinesBetween mapper is very useful if you want to grep within a subset of the lines:
+			self.assertGrep('myserver.log', expr=r'MyClass', mappers=[
+				pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$'),
+			])
 		
 		The behaviour of the regular expression can be controlled using ``reFlags=``. For example, to perform 
 		case-insensitive matching and to use Python's verbose regular expression syntax which permits whitespace 
@@ -907,11 +1008,22 @@ class BaseTest(ProcessUser):
 			For contains=False matches, you should end the expr with `.*` if you wish to include just the 
 			matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
 			then the entire matching line will be included in the outcome failure reason. 
+			
+			This can be 
 		
 		:param bool contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
 		:param list[str] ignores: Optional list of regular expressions that will be 
 			ignored when reading the file. 
+		
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+			Added in PySys 1.6.0.
 		
 		:param bool literal: By default expr is treated as a regex, but set this to True to pass in 
 			a string literal instead.
@@ -934,6 +1046,7 @@ class BaseTest(ProcessUser):
 			
 			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
 			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+			
 
 		:return: The ``re.Match`` object, or None if there was no match (note the return value is not affected by 
 			the contains=True/False parameter). 
@@ -944,6 +1057,13 @@ class BaseTest(ProcessUser):
 			unpacked using the ``**`` operator; see example above). 
 		
 		"""
+		# support the natural pattern of passing expr as 2nd positional parameter whilst retaining pre-1.6.0 compatibility support for
+		# assertGrep(file, filedir, expr, True), assertGrep(file, filedir, expr='foo')
+		if not _unused and not expr: # modern usage: expr as positional and filedir not positional
+			expr = _expr
+		elif _expr or _unused: # older usage - either or both may be set via positional
+			filedir, expr = filedir or _expr, expr or _unused
+		
 		assert expr, 'expr= argument must be specified'
 		
 		if filedir is None: filedir = self.output
@@ -969,7 +1089,7 @@ class BaseTest(ProcessUser):
 		try:
 			compiled = re.compile(expr, flags=reFlags)
 			namedGroupsMode = compiled.groupindex
-			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
+			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
@@ -989,6 +1109,7 @@ class BaseTest(ProcessUser):
 					msg = assertMessage
 				elif contains:
 					msg = 'Grep on %s contains %s'%(file, quotestring(expr))
+					if mappers: msg += ', using mappers %s'%mappers
 				else:
 					msg = 'Grep on %s does not contain %s failed with: %s'%(file, 
 						quotestring(expr),
@@ -1008,9 +1129,13 @@ class BaseTest(ProcessUser):
 		
 		return result
 
-	def assertLastGrep(self, file, filedir=None, expr='', contains=True, ignores=[], includes=[], encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0):
+	def assertLastGrep(self, file, _expr='', _unused=None, contains=True, ignores=[], includes=[], encoding=None, 
+			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None):
 		"""Perform a validation assert on a regular expression occurring in the last line of a text file.
+		
+		Rather than using this method, use `getExprFromFile` with `assertThat` for better error messages and more 
+		maintainable tests, e.g. you can extract the last line of a file easily 
+		with ``self.getExprFromFile(file, '.', returnAll=True)[0]``.
 		
 		When the C{contains} input argument is set to true, this method will add a C{PASSED} outcome 
 		to the test outcome list if the supplied regular expression is seen in the file; otherwise a 
@@ -1047,8 +1172,13 @@ class BaseTest(ProcessUser):
 			which allows the result to be passed to `assertThat` for further checking (typically 
 			unpacked using the ``**`` operator; see `assertGrep` for a similar example). 
 		"""
+		if not _unused and not expr: # modern usage: expr as positional and filedir not positional
+			expr = _expr
+		elif _expr or _unused: # older usage - either or both may be set via positional
+			filedir, expr = filedir or _expr, expr or _unused
+
 		assert expr, 'expr= argument must be specified'
-		
+
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
 
@@ -1077,8 +1207,8 @@ class BaseTest(ProcessUser):
 		return match
 
 
-	def assertOrderedGrep(self, file, filedir=None, exprList=[], contains=True, encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0):   
+	def assertOrderedGrep(self, file, _exprList=[], _unused=None, contains=True, encoding=None, 
+			abortOnError=False, assertMessage=None, reFlags=0, exprList=[], filedir=None):   
 		"""Perform a validation assert on a list of regular expressions occurring in specified order in a text file.
 		
 		When the C{contains} input argument is set to true, this method will append a C{PASSED} outcome 
@@ -1087,13 +1217,18 @@ class BaseTest(ProcessUser):
 		to false, a C{PASSED} outcome will only be added should the regular expressions not be seen in the file in 
 		the order they appear in the list.
 		
-		While this assertion method can be very convenient for checking the order of a small number of expressions, 
+		Warning: while this assertion method can be very convenient for checking the order of a small number of expressions, 
 		it becomes unwieldy when the number of expressions grows beyond a handful, and this is definitely not the 
 		best tool for the job if what you're doing is really about checking that a subset of data from an output file 
 		matches expectations. For that use case, it's better to do a filtered `copy()` of the file to remove 
 		prefixes (e.g. timestamps) and lines that are not important, and then use `assertDiff` to check the extracted 
 		text matches expectations. This approach makes it easier to write tests, and crucially makes it much easier 
 		to figure out what went wrong if they fail. 
+		
+		Similarly, if you need to check that an expression appears between two other lines (e.g. for a start/end of 
+		section) this method will not give you a reliable way to do that if there's a chance the section markers 
+		could appear more than once in the file, so instead use the filtered `copy()` approach described above, or use 
+		`assertGrep` with a `pysys.mappers.IncludeLinesBetween` mapper. 
 		
 		:param file: The basename of the file used in the ordered grep
 		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
@@ -1118,7 +1253,12 @@ class BaseTest(ProcessUser):
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 
 		"""
-		assert exprList, 'expr= argument must be specified'
+		if not _unused and not exprList: # modern usage: expr as positional and filedir not positional
+			exprList = _exprList
+		elif _exprList or _unused: # older usage - either or both may be set via positional
+			filedir, exprList = filedir or _exprList, exprList or _unused
+
+		assert exprList, 'exprList= argument must be specified'
 		
 		if filedir is None: filedir = self.output
 		f = os.path.join(filedir, file)
@@ -1149,8 +1289,8 @@ class BaseTest(ProcessUser):
 		return False
 
 	
-	def assertLineCount(self, file, filedir=None, expr='', condition=">=1", ignores=None, encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0):
+	def assertLineCount(self, file, _expr='', _unused=None, condition=">=1", ignores=None, encoding=None, 
+			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None):
 		"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -1180,6 +1320,11 @@ class BaseTest(ProcessUser):
 
 		:return: True if the assertion succeeds, False if a failure outcome was appended. 
 		"""	
+		if not _unused and not expr: # modern usage: expr as positional and filedir not positional
+			expr = _expr
+		elif _expr or _unused: # older usage - either or both may be set via positional
+			filedir, expr = filedir or _expr, expr or _unused
+
 		assert expr, 'expr= argument must be specified'
 		
 		if filedir is None: filedir = self.output

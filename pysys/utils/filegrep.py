@@ -31,7 +31,7 @@ from pysys.utils.fileutils import pathexists
 
 log = logging.getLogger('pysys.assertions')
 
-def getmatches(file, regexpr, ignores=None, encoding=None, flags=0):
+def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[]):
 	"""Look for matches on a regular expression in an input file, return a sequence of the matches.
 	
 	:param file: The full path to the input file
@@ -50,12 +50,20 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0):
 
 	ignores = [re.compile(i, flags=flags) for i in (ignores or [])]
 
+	if None in mappers: mappers = [m for m in mappers if m]
 
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
 			for l in f:
+				# pre-process
+				for mapper in mappers:
+					l = mapper(l)
+					if l is None: break
+				if l is None: continue
+
+			
 				match = rexp.search(l)
 				if match is not None: 
 					shouldignore = False
@@ -70,7 +78,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0):
 		return matches
 
 
-def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0):
+def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0, mappers=[]):
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
 	
 	:param file: The full path to the input file
@@ -78,6 +86,7 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 	:param ignores: Optional list of regular expression strings to ignore when searching file. 
 	:param returnMatch: return the regex match object instead of a simple boolean
 	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
+	:param mappers: Mappers to pre-process the file. 
 
 	:return: success (True / False), unless returnMatch=True in which case it returns the regex match 
 		object (or None if not matched)
@@ -86,10 +95,9 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 	
 	"""
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
-		f = openfile(file, 'r', encoding=encoding)
-		try:
+		with openfile(file, 'r', encoding=encoding) as f:
 			if log.isEnabledFor(logging.DEBUG):
 				contents = f.readlines()
 				logContents("Contents of %s;" % os.path.basename(file), contents)
@@ -99,7 +107,16 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 			ignores = [re.compile(i, flags=flags) for i in (ignores or [])]
 			
 			regexpr = re.compile(expr, flags=flags)
+			
+			if None in mappers: mappers = [m for m in mappers if m]
+
 			for line in contents:
+				# pre-process
+				for mapper in mappers:
+					line = mapper(line)
+					if line is None: break
+				if line is None: continue
+
 				m = regexpr.search(line)
 				if m is not None: 
 					if not any([i.search(line) for i in ignores]): 
@@ -107,8 +124,6 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 						return True
 			if returnMatch: return None
 			return False
-		finally:
-			f.close()
 
 
 def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False, flags=0):
@@ -126,7 +141,7 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False
 	
 	"""
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
 			contents = f.readlines()
@@ -143,9 +158,10 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False
 
 
 def orderedgrep(file, exprList, encoding=None, flags=0):
-	"""Seach for ordered matches to a set of regular expressions in an input file, returning true if the matches occur in the correct order.
-	
-	The ordered grep method will only return true if matches to the set of regular expression in the expression 
+	"""Seach for ordered matches to a set of regular expressions in an input file, returning None 
+	on success, and a string indicating the missing expression something is missing.
+		
+	The ordered grep method will only pass if matches to the set of regular expression in the expression 
 	list occur in the input file in the order they appear in the expression list. Matches to the regular expressions 
 	do not have to be across sequential lines in the input file, only in the correct order. For example, for a file 
 	with contents ::
@@ -162,7 +178,7 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	:param exprList: A list of regular expressions (uncompiled) to search for in the input file
 	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	
-	:return: None on success, or on failure the string expression that was not found. 
+	:return: None on success, or on failure the string expression that was not found (with an indicator of its index in the array). 
 	:rtype: string
 	:raises FileNotFoundException: Raised if the input file does not exist
 		
@@ -170,11 +186,12 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	list = copy.deepcopy(exprList)
 	list.reverse()
 	
-	expr = list.pop()
+	expr, exprIndex = list.pop(), 1
 	regexpr = re.compile(expr, flags=flags)
 
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file %s" % (os.path.basename(file)))
+		raise FileNotFoundException('unable to find file "%s"' % (file))
+	
 	
 	with openfile(file, 'r', encoding=encoding) as f:
 		for line in f:
@@ -182,10 +199,10 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 				if len(list) == 0:
 					return None # success - found them all
 				
-				expr = list.pop()
+				expr, exprIndex = list.pop(), exprIndex+1
 				regexpr = re.compile(expr, flags=flags)
 
-	return expr # the expression we were trying to match
+	return '#%d: %s'%(exprIndex, expr) # the expression we were trying to match
 
 
 def logContents(message, list):

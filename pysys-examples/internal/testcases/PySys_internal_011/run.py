@@ -1,6 +1,7 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.process.helper import ProcessWrapper
+import pysys
 
 class PySysTest(BaseTest):
 	id1 = -1
@@ -53,7 +54,18 @@ class PySysTest(BaseTest):
 			self.log.info('Got expected abort %s', sys.exc_info()[0], exc_info=1)
 			aborted = True
 		if not aborted: self.abort(FAILED, 'test should have aborted')
-		
+
+		# test with mappers
+		matches = self.waitForGrep("testscript.out", expr=".*unique id.*", condition=">0", mappers=[
+			pysys.mappers.IncludeLinesBetween('The second unique id'),
+			])[0].group()
+		self.assertThat('actual == expected', actual=matches, expected='The second unique id is 098765', testing='waitForGrep with mappers')
+
+		# this is a convenient place to test the same functionality in getExprFromFile
+		matches = self.getExprFromFile("testscript.out", expr=".*unique id.*",  mappers=[
+			pysys.mappers.IncludeLinesBetween('The second unique id'),
+			])
+		self.assertThat('actual == expected', actual=matches, expected='The second unique id is 098765', testing='getExprFromFile with mappers')
 
 				
 	def validate(self):

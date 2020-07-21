@@ -13,8 +13,8 @@
 	<!-- Custom test framework extensions, if needed -->
 	<!--
 	<pythonpath value="./pysys-extensions" />
-	<runner classname="my.organization.MyRunner"/>
-	<maker classname="my.organization.MyTestMaker"/>
+	<runner classname="myorg.MyRunner"/>
+	<maker classname="myorg.MyTestMaker"/>
 	-->
 
 	<writers>

@@ -24,6 +24,7 @@ from pysys.utils.pycompat import *
 
 __all__ = [
 	'compareVersions',
+	'setInstanceVariablesFromDict',
 ]
 
 def compareVersions(v1, v2):
@@ -58,3 +59,26 @@ def compareVersions(v1, v2):
 			if v1[i] > v2[i]: return 1
 			if v1[i] < v2[i]: return -1
 	return 0
+
+def setInstanceVariablesFromDict(obj, d):
+	"""
+	Sets an instance variable for each item in the specified dictionary, with automatic conversion of 
+	bool/int/float values from strings if a default value of that type was provided as a static variable on the object. 
+
+	.. versionadded:: 1.6.0
+
+	:param object obj: Any Python object. 
+	:param dict[str,str] d: The properties to set
+	"""
+	for key, val in d.items():
+		defvalue = getattr(obj, key, None)
+		if defvalue is not None and isstring(val):
+			# attempt type coersion to keep the type the same
+			if defvalue is True or defvalue is False:
+				val = val.lower()=='true'
+			elif isinstance(defvalue, int):
+				val = int(val)
+			elif isinstance(defvalue, float):
+				val = float(val)
+		setattr(obj, key, val)
+	
