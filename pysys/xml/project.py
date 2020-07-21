@@ -271,6 +271,13 @@ class XMLProjectParser(object):
 			plugins.append( (cls, alias, optionsDict) )
 		return plugins
 
+	def getDescriptorLoaderPlugins(self):
+		plugins = []
+		for node in self.root.getElementsByTagName('descriptor-loader-plugin'):
+			cls, optionsDict = self._parseClassAndConfigDict(node, None)
+			plugins.append( (cls, optionsDict) )
+		return plugins
+
 	def getMakerDetails(self):
 		nodes = self.root.getElementsByTagName('maker')
 		if not nodes: return DEFAULT_MAKER
@@ -486,6 +493,7 @@ class Project(object):
 			self.projectHelp = None
 			self.testPlugins = []
 			self.runnerPlugins = []
+			self._descriptorLoaderPlugins = []
 			self.properties = {'outDirName':os.path.basename(outdir)}
 			stdoutformatter, runlogformatter = None, None
 			self.projectFile = None
@@ -526,6 +534,7 @@ class Project(object):
 				self.writers = parser.getWriterDetails()
 				self.testPlugins = parser.getTestPlugins()
 				self.runnerPlugins = parser.getRunnerPlugins()
+				self._descriptorLoaderPlugins = parser.getDescriptorLoaderPlugins()
 
 				self.perfReporterConfig = parser.getPerformanceReporterDetails()
 				

@@ -60,7 +60,7 @@ def compareVersions(v1, v2):
 			if v1[i] < v2[i]: return -1
 	return 0
 
-def setInstanceVariablesFromDict(obj, d):
+def setInstanceVariablesFromDict(obj, d, errorOnMissingVariables=False):
 	"""
 	Sets an instance variable for each item in the specified dictionary, with automatic conversion of 
 	bool/int/float values from strings if a default value of that type was provided as a static variable on the object. 
@@ -69,8 +69,12 @@ def setInstanceVariablesFromDict(obj, d):
 
 	:param object obj: Any Python object. 
 	:param dict[str,str] d: The properties to set
+	:param bool errorOnMissingVariables: Set this to True if you want an exception to be raised if the dictionary 
+		contains a key for which is there no corresponding variable on obj.
 	"""
 	for key, val in d.items():
+		if errorOnMissingVariables and not hasattr(obj, key):
+			raise KeyError('Cannot set unexpected property "%s" on %s'%(key, type(obj).__name__))
 		defvalue = getattr(obj, key, None)
 		if defvalue is not None and isstring(val):
 			# attempt type coersion to keep the type the same

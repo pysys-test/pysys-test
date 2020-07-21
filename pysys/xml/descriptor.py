@@ -597,6 +597,8 @@ class DescriptorLoader(object):
 		assert project, 'project must be specified'
 		self.project = project
 		
+		self.__descriptorLoaderPlugins = [plugin(project, props) for (plugin, props) in project._descriptorLoaderPlugins]
+		
 	def loadDescriptors(self, dir, **kwargs):
 		"""Find all descriptors located under the specified directory, and 
 		return them as a list.
@@ -737,7 +739,7 @@ class DescriptorLoader(object):
 		
 	def _handleSubDirectory(self, dir, subdirs, files, descriptors, parentDirDefaults, **kwargs):
 		"""Overrides the handling of each sub-directory found while walking 
-		the directory tree during L{loadDescriptors}. 
+		the directory tree during `loadDescriptors`. 
 		
 		Can be used to add test descriptors, and/or add custom logic for 
 		preventing PySys searching a particular part of the directory tree 
@@ -747,25 +749,33 @@ class DescriptorLoader(object):
 		This method is called before directories containing pysysignore 
 		files are stripped out. 
 		
-		:param dir: The full path of the directory to be processed.
+		:param str dir: The full path of the directory to be processed.
 			On Windows, this will be a long-path safe unicode string. 
-		:param subdirs: a list of the subdirectories under dir, which 
-			can be used to detect what kind of directory this is. 
-		:param files: a list of the files under dir, which 
-			can be used to detect what kind of directory this is. 
-		:param descriptors: A list of L{TestDescriptor} items which this method 
+		:param list[str] subdirs: a list of the subdirectories under dir, which 
+			can be used to detect what kind of directory this is, and also can be modified by this method to prevent 
+			other loaders looking at subdirectories. 
+		:param list[str] files: a list of the files under dir, which 
+			can be used to detect what kind of directory this is, and also can be modified by this method to prevent 
+			other loaders looking at them. 
+		:param list[TestDescriptor] descriptors: A list of `TestDescriptor` items which this method 
 			can add to if desired. 
-		:param parentDirDefaults: A L{TestDescriptor} containing defaults 
+		:param TestDescriptor parentDirDefaults: A `TestDescriptor` containing defaults 
 			from the parent directory, or None if there are none. Test loaders may 
 			optionally merge some of this information with test-specific 
 			information when creating test descriptors. 
-		:param kwargs: Reserved for future use. Pass this to the base class 
+		:param dict kwargs: Reserved for future use. Pass this to the base class 
 			implementation when calling it. 
 		:return: If True, this part of the directory tree has been fully 
 			handled and PySys will not search under it any more. False to allow 
 			normal PySys handling of the directory to proceed. 
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
+		
+		# default implementation just delegates to any plugins
+		for p in self.__descriptorLoaderPlugins:
+			if p.addDescriptorsFromDirectory(dir=dir, subdirs=subdirs, files=files, parentDirDefaults=parentDirDefaults, descriptors=descriptors, **kwargs):
+				return True
+		
 		return False
 
 	def _parseTestDescriptor(self, descriptorfile, parentDirDefaults=None, isDirConfig=False, **kwargs):
