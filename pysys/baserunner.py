@@ -202,7 +202,7 @@ class BaseRunner(ProcessUser):
 		for writerclass, writerprops in self.project.writers:
 			writer = writerclass(logfile=writerprops.pop('file', None)) # invoke writer's constructor
 			writer.runner = self
-			pysys.utils.stringutils.setInstanceVariablesFromDict(writer, writerprops)
+			pysys.utils.misc.setInstanceVariablesFromDict(writer, writerprops)
 			
 			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
 			

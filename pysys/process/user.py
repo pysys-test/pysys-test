@@ -36,7 +36,6 @@ from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
-from pysys.utils.stringutils import compareVersions
 import pysys.internal.safe_eval
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
@@ -193,7 +192,7 @@ class ProcessUser(object):
 		:param xargs: A dictionary of the user defined extra arguments
 		
 		"""
-		pysys.utils.stringutils.setInstanceVariablesFromDict(self, xargs)
+		pysys.utils.misc.setInstanceVariablesFromDict(self, xargs)
 	
 	def getBoolProperty(self, propertyName, default=False):
 		"""
@@ -1745,7 +1744,7 @@ class ProcessUser(object):
 			an integer < 0 if v1<v2, 
 			or 0 if they are semantically the same.
 		"""
-		return compareVersions(v1, v2)
+		return pysys.utils.misc.compareVersions(v1, v2)
 
 	def write_text(self, file, text, encoding=None):
 		"""

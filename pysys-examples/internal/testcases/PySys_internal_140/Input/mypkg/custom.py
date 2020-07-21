@@ -16,7 +16,7 @@ class CustomDescriptorLoader(object):
 
 	def __init__(self, project, pluginProperties, **kwargs):
 		self.project = project
-		pysys.utils.stringutils.setInstanceVariablesFromDict(self, pluginProperties, errorOnMissingVariables=True)
+		pysys.utils.misc.setInstanceVariablesFromDict(self, pluginProperties, errorOnMissingVariables=True)
 
 	def addDescriptorsFromDirectory(self, dir, subdirs, files, parentDirDefaults, descriptors, **kwargs):
 		# can merge in defaults from parent dir if desired

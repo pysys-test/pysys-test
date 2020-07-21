@@ -27,11 +27,12 @@ import os.path, logging, xml.dom.minidom, collections, codecs, time
 import platform
 import locale
 
+import pysys
+import pysys.utils.misc
 from pysys.constants import *
 from pysys import __version__
 from pysys.utils.loader import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
-from pysys.utils.stringutils import compareVersions
 from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.exceptions import UserError
@@ -96,7 +97,7 @@ class XMLProjectParser(object):
 			requirespysys = requirespysys[0].firstChild.nodeValue
 			if requirespysys:
 				thisversion = __version__
-				if compareVersions(requirespysys, thisversion) > 0:
+				if pysys.utils.misc.compareVersions(requirespysys, thisversion) > 0:
 					raise UserError('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
 
 
