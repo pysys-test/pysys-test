@@ -181,10 +181,12 @@ Simpler process handling
 
 New Plugin API
 --------------
-This release introduces a new concept: test and runner "plugins". Existing users will be familiar with 
-the pattern of creating one or more BaseTest framework subclasses to provide a convenient place for functionality 
-needed by many tests, such as launching the applications you're testing, or starting compilation or 
-deployment tools. This traditional approach of using *inheritance* to share functionality does 
+This release introduces a new concept: test and runner "plugins" which provide shared functionality available for 
+use in testcases. 
+
+Existing users will be familiar with the pattern of creating one or more BaseTest framework subclasses to provide a 
+convenient place for functionality needed by many tests, such as launching the applications you're testing, or 
+starting compilation or deployment tools. This traditional approach of using *inheritance* to share functionality does 
 have some merits, but in many projects it can lead to unhelpful complexity because:
 
 a) it's not always clear what functionality is provided by your custom subclasses rather than by PySys itself 
@@ -265,9 +267,11 @@ pysys.py and project configuration improvements
   directories and files created by PySys (for example, by writers). This helps avoid outputs getting mixed up with 
   testcase directories and also allows for easier ignore rules for version control systems. 
 
-- Added command line option ``-j`` as an alias for ``--threads``  and ``-n`` (to control the number of jobs/threads). 
+- Added command line option ``-j`` as an alias for ``--threads`` (to control the number of jobs/threads). The old 
+  command line option ``-n`` continues to work, but ``-j`` is the main short name that's documented for it. 
   As an alternative to specifying an absolute number of threads, a multiplier of the number of cores in the machine 
-  can be provided e.g. ``-j x1.5``. This could be useful in CI and other automated testing environments. 
+  can be provided e.g. ``-j x1.5``. This could be useful in CI and other automated testing environments.
+  Finally, if only one test is selected it will single-threaded regardless of the ``--threads`` argument.
 
 - Added support for including Python log messages for categories other than pysys.* in the PySys test output, 
   using a "python:" prefix on the category name, e.g.::
@@ -500,9 +504,11 @@ and consult it only if you get new test failures after upgrading PySys:
   anyway. If you need to get a property whose name clashes with a built-in member, use 
   `pysys.xml.project.Project.properties`.
 - PySys now checks that its working directory (``os.chdir()``) and environment (``os.environ``) have not been modified 
-  during execution of tests. Sometimes test authors do this by mistake and it's extremely dangerous as it causes 
-  behaviour changes (and potentially file system race conditions) in subsequent tests that can be very hard to debug. 
-  The environment and working directory should only be modified for child processes not for PySys itself. 
+  during execution of tests (after pysys.baserunner.BaseRunner.setup()'). Sometimes test authors do this by mistake 
+  and it's extremely dangerous as it causes behaviour changes (and potentially file system race conditions) in 
+  subsequent tests that can be very hard to debug. 
+  The environment and working directory should only be modified for child processes not for PySys itself - 
+  `BaseTest.getDefaultEnvirons` is a good way to do this.   
 - Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
   `pysys.constants.Outcome` rather than an integer. It is unlikely this change will affect existing code (unless you 
   have created any custom outcome types, which is not documented). The use of objects to represent outcomes allows for 
