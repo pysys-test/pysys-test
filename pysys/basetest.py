@@ -434,7 +434,7 @@ class BaseTest(ProcessUser):
 			parameters which makes the intention of the assertion harder to 
 			understand from looking at the test output. 
 		
-			The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, and ``locale`` 
+			The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale`` 
 			standard Python modules, as well as the ``pysys`` module and the contents of the `pysys.constants` module, 
 			e.g. ``IS_WINDOWS``, and also the BaseTest's ``self`` variable. 
 	
@@ -510,7 +510,7 @@ class BaseTest(ProcessUser):
 		The condition string is just a Python expression, which will be passed to ``eval()`` and can use any 
 		of the ``keyword=`` argument values passed to this method (but not the caller's local variables).
 		The evaluation is performed in a namespace that also includes the current `BaseTest` instance (``self``), 
-		some standard Python modules (``os.path``, ``math``, ``sys``, ``re``, and ``locale``), the `pysys` module, and 
+		some standard Python modules (``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale``), the `pysys` module, and 
 		the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``. If necessary, symbols for additional modules 
 		can be imported dynamically using ``import_module()``. For example::
 
