@@ -473,6 +473,8 @@ and consult it only if you get new test failures after upgrading PySys:
   now ``startTime`` and ``outdir`` is now ``outDirName``. The keys and values can be changed as needed using 
   the ``runDetails`` field of `pysys.baserunner.BaseRunner`. It is encouraged to use this rather than the previous 
   mechanism of `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()`.
+- Exceptions from cleanup functions will now lead to test failures whereas before they were only logged, so may have 
+  easily gone unnoticed. 
 - Properties files referenced in the project configuration are now read using UTF-8 encoding if possible, falling back 
   to ISO8859-1 if they contain invalid UTF-8. This follows Java(R) 9+ behaviour and provides for more stable results 
   than the previous PySys behaviour of using whatever the default locale encoding is, which does not conform to any 

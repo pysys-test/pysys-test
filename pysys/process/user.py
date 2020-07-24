@@ -1165,6 +1165,7 @@ class ProcessUser(object):
 		Do not override this method, instead use `addCleanupFunction`.
 		
 		"""
+		exceptions = []
 		try:
 			# although we don't yet state this method is thread-safe, make it 
 			# as thread-safe as possible by using swap operations
@@ -1179,17 +1180,21 @@ class ProcessUser(object):
 					fn()
 				except Exception as e:
 					log.exception('Error while running cleanup function: ')
+					exceptions.append('Cleanup function failed: %s (%s)'%(e, type(e).__name__))
 		finally:
 			with self.lock:
 				processes, self.processList = self.processList, []
 			for process in processes:
 				try:
 					if process.running(): process.stop()
-				except Exception:
-					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				except Exception as e: # this is pretty unlikely to fail, but we'd like to know if it does
+					log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					exceptions.append('Failed to stop process %s: %s'%(process, e))
 			self.processCount = {}
 			
 			log.debug('ProcessUser cleanup function done.')
+		if exceptions:
+			raise Exception('Cleanup failed%s: %s'%(' with %d errors'%len(exceptions), '; '.join(exceptions)))
 		
 
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None, override=False):
