@@ -141,7 +141,13 @@ class XMLProjectParser(object):
 							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
 			else:
 				raise UserError('Found <property> with no name= or file=')
-		
+			
+			for att in range(propertyNode.attributes.length):
+				attName = propertyNode.attributes.item(att).name
+				if attName not in {'root', 'osfamily', 'name', 'value', 'environment', 'default', 'file', 'pathMustExist'}: 
+					# not an error, to allow for adding new ones in future pysys versions, but worth warning about
+					log.warn('Unknown <property> attribute "%s" in project configuration'%attName)
+
 		return self.properties
 
 
