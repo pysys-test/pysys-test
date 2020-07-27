@@ -458,9 +458,9 @@ Be sure to remove use of the following deprecated items at your earliest conveni
   redirection module exists, so any code that depends on the old location will still work, but please change references 
   to the new name the old one will be removed in a future release. 
 
-Finally there are also some additional fixes and cleanup that *could* require changes (typically to extension/framework 
-classes rather than individual tests) but in most cases will not be noticed. Most users can ignore the following list 
-and consult it only if you get new test failures after upgrading PySys:
+Finally there are also some fixes, cleanup, and better error checking that *could* require changes (typically to 
+extension/framework classes rather than individual tests) but in most cases will not be noticed. Most users can ignore 
+the following list and consult it only if you get new test failures after upgrading PySys:
 
 - Timestamps in process monitor output, writers, performance reporter and similar places are now in local time instead 
   of UTC. 
@@ -474,7 +474,8 @@ and consult it only if you get new test failures after upgrading PySys:
   the ``runDetails`` field of `pysys.baserunner.BaseRunner`. It is encouraged to use this rather than the previous 
   mechanism of `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()`.
 - Exceptions from cleanup functions will now lead to test failures whereas before they were only logged, so may have 
-  easily gone unnoticed. 
+  easily gone unnoticed. You can disable this using the new "ignoreErrors=True" argument to 
+  `BaseTest.addCleanupFunction` if desired. 
 - Properties files referenced in the project configuration are now read using UTF-8 encoding if possible, falling back 
   to ISO8859-1 if they contain invalid UTF-8. This follows Java(R) 9+ behaviour and provides for more stable results 
   than the previous PySys behaviour of using whatever the default locale encoding is, which does not conform to any 

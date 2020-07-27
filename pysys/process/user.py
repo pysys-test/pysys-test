@@ -105,7 +105,7 @@ class ProcessUser(object):
 
 		self.processList = []
 		self.processCount = {}
-		self.__cleanupFunctions = []
+		self.__cleanupFunctions = [] # (fn, ignoreErrors)
 
 		self.outcome = [] # internal, do NOT use directly
 		self.__outcomeReason = ''
@@ -1141,7 +1141,7 @@ class ProcessUser(object):
 		return matches
 
 
-	def addCleanupFunction(self, fn):
+	def addCleanupFunction(self, fn, ignoreErrors=False):
 		""" Registers a function that will be called as part of the `cleanup` of this object.
 		
 		Cleanup functions should have no arguments, and are invoked in reverse order with the most recently added first (LIFO), and
@@ -1151,10 +1151,14 @@ class ProcessUser(object):
 		
 			self.addCleanupFunction(lambda: self.cleanlyShutdownMyProcess(params))
 		
+		:param Callable[] fn: The cleanup function. 
+		:param bool ignoreErrors: By default, errors from cleanup functions will result in a test failure; set this to 
+			True to log them but not produce a test failure. This parameter was added in 1.6.0. 
+		
 		"""
 		with self.lock:
-			if fn and fn not in self.__cleanupFunctions: 
-				self.__cleanupFunctions.append(fn)
+			if fn and (fn,ignoreErrors) not in self.__cleanupFunctions: 
+				self.__cleanupFunctions.append( (fn, ignoreErrors) )
 
 
 	def cleanup(self):
@@ -1174,13 +1178,14 @@ class ProcessUser(object):
 			if cleanupfunctions:
 				log.info('')
 				log.info('cleanup:')
-			for fn in reversed(cleanupfunctions):
+			for fn, ignoreErrors in reversed(cleanupfunctions):
 				try:
 					log.debug('Running registered cleanup function: %r'%fn)
 					fn()
 				except Exception as e:
-					log.exception('Error while running cleanup function: ')
-					exceptions.append('Cleanup function failed: %s (%s)'%(e, type(e).__name__))
+					(log.warn if ignoreErrors else log.error)('Error while running cleanup function%s: ', ' (ignoreErrors=True)' if ignoreErrors else '', exc_info=True)
+					if not ignoreErrors:
+						exceptions.append('Cleanup function failed: %s (%s)'%(e, type(e).__name__))
 		finally:
 			with self.lock:
 				processes, self.processList = self.processList, []
@@ -1194,7 +1199,7 @@ class ProcessUser(object):
 			
 			log.debug('ProcessUser cleanup function done.')
 		if exceptions:
-			raise Exception('Cleanup failed%s: %s'%(' with %d errors'%len(exceptions), '; '.join(exceptions)))
+			raise UserError('Cleanup failed%s: %s'%(' with %d errors'%len(exceptions), '; '.join(exceptions)))
 		
 
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None, override=False):

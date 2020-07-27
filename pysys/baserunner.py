@@ -1137,6 +1137,8 @@ class TestContainer(object):
 			except KeyboardInterrupt:
 				self.kbrdInt = True
 				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
+			except UserError as ex: # will already have been logged with stack trace
+				self.testObj.addOutcome(BLOCKED, str(ex), abortOnError=False)
 			except Exception as ex:
 				log.warn("caught %s while cleaning up test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
