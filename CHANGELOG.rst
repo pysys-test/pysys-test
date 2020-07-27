@@ -16,175 +16,20 @@ What's new in 1.6.0 (under development)
 
 PySys 1.6.0 is under development. 
 
-PySys 1.6.0 has significant new features including a library of mappers for copy and grep 
-line pre-processing, new test result writers (including a test output archiver and GitHub Actions), 
-a new "plugins" concept, pysys.py and project configuration enhancements, 
-and a host of minor additions to support simpler writing of tests. 
+The significant new features of PySys 1.6.0 are grouped around a few themes:
+    - a new "plugins" concept to encourage a more modular style when sharing functionality between tests, 
+    - validation: the new `BaseTest.assertThatGrep` method which gives nice clear error messages when the assert fails,  
+    - new writers for recording test results, including a test output directory zip archiver and GitHub Actions support, 
+    - a library of line mappers for more powerful copy and grep line pre-processing, 
+    - process starting enhancements such as `BaseTest.waitForBackgroundProcesses` and automatic logging of stderr when 
+      a process fails, 
+    - several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
 
-As this is a major release of PySys there are also some changes in this release that will require changes to your 
+As this is a major release of PySys there are also some changes in this release that may require changes to your 
 project configuration file and/or runner/basetest/writer framework extension classes you've written (though in most 
-cases it won't be necessary to change individual tests). So be sure to look at the upgrade guide below if running an 
-existing project with the new version. 
-
-
-More powerful copy and line mapping
------------------------------------
-- PySys now comes with some predefined mappers for common pre-processing tasks such as selecting multiple lines of 
-  interest between two regular expressions, and stripping out timestamps and other regular expressions. 
-  These can be found in the new `pysys.mappers` module and are particularly useful when using copy to pre-process a 
-  file before calling `BaseTest.assertDiff`. For example::
-    
-     self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[
-          pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
-          pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
-     ]))
-
-- `BaseTest.assertGrep` has a new mappers= argument that can be used to pre-process the file before grepping. The 
-  main use of this is to allow grepping within a range of lines, as defined by 
-  the `pysys.mappers.IncludeLinesBetween` mapper::
-    
-       self.assertGrep('example.log', expr=r'MyClass', mappers=[
-            pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$') ])
-
-  This is more reliable than trying to achieve the same effect with `BaseTest.assertOrderedGrep` (which can give 
-  incorrect results if the section markers appear more than once in the file). There are now few cases where 
-  assertOrderedGrep() is really the best choice; try to use `BaseTest.assertDiff` or `BaseTest.assertGrep`.
-
-- `BaseTest.waitForGrep` and `BaseTest.getExprFromFile` also now support a mappers= argument. 
-
-- When used from `BaseTest.copy` there is also support for line mappers to be notified when starting/finishing a new 
-  file, which allows for complex and stateful transformation of file contents based on file types/path if needed. 
-
-- `BaseTest.copy` can now be used to copy directories in addition to individual files. It is recommended to use 
-  this method instead of ``shutil.copytree`` as it provides a number of benefits including better error safety, 
-  long path support, and the ability to copy over an existing directory.
-
-- `BaseTest.copy` now copies all file attributes including date/time, not just the Unix permissions/mode. 
-
-New and improved result writers
--------------------------------
-- Added `pysys.writer.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
-  producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
-  Properties are provided to allow detailed control of the maximum number and size of archives generated, and the 
-  files to include/exclude. 
-
-- Added `pysys.writer.ArtifactPublisher` interface which can be implemented by writers that support some concept of 
-  artifact publishing, for example CI providers that 'upload' artifacts. Artifacts are published by 
-  various `pysys.utils.perfreporter.CSVPerformanceReporter` and various writers 
-  including `pysys.writer.TestOutputArchiveWriter`. 
-
-- Added `pysys.writer.ci.GitHubActionsCIWriter` which if added to your pysysproject.xml will automatically enable 
-  various features when run from GitHub(R) Actions including annotations summarizing failures, grouping/folding of 
-  detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
-  test output etc) which can be used to upload the artifacts when present. 
-  
-  This uses the new `pysys.writer.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI 
-  writers to get a summary of test outcomes. 
-
-- Added `pysys.writer.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
-  failure, for IDEs and CI providers that can highlight failures found by regular expression stdout parsing. 
-  An instance of this writer is automatically added to every project, and enables itself if 
-  the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set, producing make-style console output::
-  
-    C:\project\test\MyTest_001\run.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness (MyTest_001 [CYCLE 02])
-  
-  The format can be customized using the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable, or alternatively 
-  additional instances can be added to the project writers configuration and configured using the properties 
-  described in the writer class.
-
-- Added a ``runDetails`` dictionary to `pysys.baserunner.BaseRunner`. This is a dictionary of string metadata about 
-  this test run, and is included in performance summary CSV reports and by some writers. The console summary writer 
-  logs the runDetails when executing 2 or more tests. 
-  
-  The default runDetails contains a few standard values (currently these include ``outDirName``, ``hostname``, ``os`` 
-  and ``startTime``). Additional items can be added by runner subclasses in the `pysys.baserunner.BaseRunner.setup()` 
-  method - for example you could add the build number of your application (perhaps read 
-  using `pysys.utils.fileutils.loadProperties()`). 
-  
-  If you had previously created a custom `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()` method it 
-  is recommended to remove it and instead provide the same information in the runner ``runDetails``. 
-
-- Added property property ``versionControlGetCommitCommand`` which if set results in the specified command line 
-  being executed (in the testRootDir) when the test run starts and used to populate the ``vcsCommit`` key in the 
-  runner's ``runDetails`` with a commit/revision number from your version control system. This is a convenient way to 
-  ensure writers and performance reports include the version of the application you're testing with. 
-
-There are also some more minor enhancements to the writers:
-
-- Added `pysys.writer.ConsoleSummaryResultsWriter` property for ``showTestTitle`` (default=False) as sometimes seeing 
-  the titles of tests can be helpful when triaging results. There is also a new ``showTestDir`` which allows the 
-  testDir to be displayed in addition to the output dir in cases where the output dir is not located underneath 
-  the test dir (due to --outdir). Also changed the defaults for some other properties to 
-  showOutcomeReason=True and showOutputDir=True, which are recommended for better visibility into why tests failed. 
-  They can be disabled if desired in the project configuration. 
-
-- Added a summary of INSPECT and NOTVERIFIED outcomes at the end of test execution (similar to the existing failures 
-  summary), since often these outcomes do require human attention. This can be disabled using the properties on 
-  `pysys.writer.ConsoleSummaryResultsWriter` if desired. 
-
-- Added `pysys.utils.logutils.stripANSIEscapeCodes()` which can be used to remove ANSI escape codes such as console 
-  color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.BaseResultsWriter`), 
-  since usually you wouldn't want these if writing the output to a file. 
-
-Assertion improvements
-----------------------
-
-- Added `BaseTest.assertThatGrep` which makes it easier to do the common operation of extracting a value using grep 
-  and then performing a validation on it using `BaseTest.assertThat`. 
-  
-  This is essentially a simplified wrapper around the functionality added in 1.5.1, but avoids the need for slightly 
-  complex syntax and hopefully will encourage people to use the extract-then-assert paradigm rather than trying to do 
-  them both at the same time with a single `BaseTest.assertGrep` which is less powerful and produces much less 
-  informative messages when there's a failure. 
-  
-  The new method is very easy to use::
-
-        self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)"', 
-            "value == expected", expected='myuser')
-        
-        # In cases where you need multiple regex groups for matching purpose, name the one containing the value using (?P<value>...)
-        self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', 
-            "0.0 <= float(value) <= 60.0")
-
-
-- All assertion methods that have the (deprecated and unnecessary) ``filedir`` as their second positional (non-keyword) 
-  argument now support the more natural pattern of giving the expr/exprList as the second positional argument, 
-  so instead of doing ``self.assertGrep('file', expr='Foo.*')`` you can also now use the more 
-  natural ``self.assertGrep('file', 'Foo.*')``. For compatibility with existing testcases, the old signature of 
-  ``self.assertGrep('file', 'filedir', [expr=]'expr')`` continues to behave as before, but the recommended usage 
-  in new tests is now to avoid all use of filedir as a positional argument for consistency and readability. (If you 
-  need to set the filedir, you can use the keyword argument or just add it as a prefix to the ``file`` argument).
-
-Simpler process handling
-------------------------
-
-- `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
-  behaviour can be customized with a new ``onError=`` parameter::
-  
-    # Log stdout instead of stderr
-    self.startProcess(..., onError=lambda process: self.logFileContents(process.stdout, tail=True))
-    
-    # Unless stderr is empty, log it and then use it to extract an error message (which will appear in the outcome reason)
-    self.startProcess(..., onError=lambda process: self.logFileContents(process.stderr, tail=True) and self.getExprFromFile(process.stderr, 'Error: (.*)')
-    
-    # Do nothing on error
-    self.startProcess(..., onError=lambda process: None)
-
-- `BaseTest.waitProcess` now has a ``checkExitStatus=`` argument that can be used to check the return code of the 
-  process for success. 
-
-- Added `BaseTest.waitForBackgroundProcesses` which waits for completion of all background processes and optionally 
-  checks for the expected exit status. This is especially useful when you have a test that needs to execute 
-  lots of processes but doesn't care about the order they execute in, since having them all execute concurrently in the 
-  background and then calling waitForBackgroundProcesses() will be a lot quicker than executing them serially in the 
-  foreground. 
-
-- Added a way to set global defaults for environment variables using a properties. For example, to set the #
-  ``_JAVA_OPTIONS`` environment variable that Java(R) uses for default JVM arguments::
-  
-    <property name="defaultEnvirons._JAVA_OPTIONS" value="-Xmx512M"/>
-  
-  This is simpler than providing a custom override of `BaseTest.getDefaultEnvirons()`. 
+cases it won't be necessary to change individual tests). These breaking changes are either to reduce the chance of 
+errors going undetected, or to support bug fixes and impementation simplification. So be sure to look at the upgrade 
+guide below if you want to switch an existing project to use the new version. 
 
 New Plugin API
 --------------
@@ -260,6 +105,175 @@ particular project configuration.
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
 its constructor, see the sample ``pysysproject.xml`` file. 
 
+New and improved result writers
+-------------------------------
+- Added `pysys.writer.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
+  producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
+  Properties are provided to allow detailed control of the maximum number and size of archives generated, and the 
+  files to include/exclude. 
+
+- Added `pysys.writer.ci.GitHubActionsCIWriter` which if added to your pysysproject.xml will automatically enable 
+  various features when run from GitHub(R) Actions including annotations summarizing failures, grouping/folding of 
+  detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
+  test output etc) which can be used to upload the artifacts when present. 
+  
+  This uses the new `pysys.writer.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI 
+  writers to get a summary of test outcomes. 
+
+- Added `pysys.writer.ArtifactPublisher` interface which can be implemented by writers that support some concept of 
+  artifact publishing, for example CI providers that 'upload' artifacts. Artifacts are published by 
+  various `pysys.utils.perfreporter.CSVPerformanceReporter` and various writers 
+  including `pysys.writer.TestOutputArchiveWriter`. 
+
+- Added `pysys.writer.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
+  failure, for the benefit of IDEs and CI providers that can highlight failures found by regular expression stdout 
+  parsing. An instance of this writer is automatically added to every project, and enables itself if 
+  the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set, producing make-style console output::
+  
+    C:\project\test\MyTest_001\run.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness (MyTest_001 [CYCLE 02])
+  
+  The format can be customized using the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable, or alternatively 
+  additional instances can be added to the project writers configuration and configured using the properties 
+  described in the writer class.
+
+- Added a ``runDetails`` dictionary to `pysys.baserunner.BaseRunner`. This is a dictionary of string metadata about 
+  this test run, and is included in performance summary CSV reports and by some writers. The console summary writer 
+  logs the runDetails when executing 2 or more tests. 
+  
+  The default runDetails contains a few standard values (currently these include ``outDirName``, ``hostname``, ``os`` 
+  and ``startTime``). Additional items can be added by runner subclasses in the `pysys.baserunner.BaseRunner.setup()` 
+  method - for example you could add the build number of your application (perhaps read 
+  using `pysys.utils.fileutils.loadProperties()`). 
+  
+  If you had previously created a custom `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()` method it 
+  is recommended to remove it and instead provide the same information in the runner ``runDetails``. 
+
+- Added property ``versionControlGetCommitCommand`` which if set results in the specified command line 
+  being executed (in the testRootDir) when the test run starts and used to populate the ``vcsCommit`` key in the 
+  runner's ``runDetails`` with a commit/revision number from your version control system. This is a convenient way to 
+  ensure writers and performance reports include the version of the application you're testing with. 
+
+There are also some more minor enhancements to the writers:
+
+- Added `pysys.writer.ConsoleSummaryResultsWriter` property for ``showTestTitle`` (default=False) as sometimes seeing 
+  the titles of tests can be helpful when triaging results. There is also a new ``showTestDir`` which allows the 
+  testDir to be displayed in addition to the output dir in cases where the output dir is not located underneath 
+  the test dir (due to --outdir). Also changed the defaults for some other properties to 
+  showOutcomeReason=True and showOutputDir=True, which are recommended for better visibility into why tests failed. 
+  They can be disabled if desired in the project configuration. 
+
+- Added a summary of INSPECT and NOTVERIFIED outcomes at the end of test execution (similar to the existing failures 
+  summary), since often these outcomes do require human attention. This can be disabled using the properties on 
+  `pysys.writer.ConsoleSummaryResultsWriter` if desired. 
+
+- Added `pysys.utils.logutils.stripANSIEscapeCodes()` which can be used to remove ANSI escape codes such as console 
+  color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.BaseResultsWriter`), 
+  since usually you wouldn't want these if writing the output to a file. 
+
+More powerful copy and line mapping
+-----------------------------------
+Manipulating the contents of text files is a very common task in system tests, and this version of PySys has 
+several improvements that make this easier: 
+
+- PySys now comes with some predefined mappers for common pre-processing tasks such as selecting multiple lines of 
+  interest between two regular expressions, and stripping out timestamps and other regular expressions. 
+  
+  These can be found in the new `pysys.mappers` module and are particularly useful when using `BaseTest.copy()` to 
+  pre-process a file before calling `BaseTest.assertDiff` to compare it to a reference file. For example::
+    
+     self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[
+              pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
+              pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
+         ]), 
+         'reference-myfile-processed.txt')
+     
+  (Note that for convenience we use the fact that copy() returns the destination path to allow passing it directly 
+  as the first file for assertDiff to work on). 
+
+- `BaseTest.assertGrep` has a new mappers= argument that can be used to pre-process the lines of a file before 
+  grepping using any mapper function. The main use of this is to allow grepping within a range of lines, as defined by 
+  the `pysys.mappers.IncludeLinesBetween` mapper::
+    
+       self.assertGrep('example.log', expr=r'MyClass', mappers=[
+            pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$') ])
+
+  This is more reliable than trying to achieve the same effect with `BaseTest.assertOrderedGrep` (which can give 
+  incorrect results if the section markers appear more than once in the file). Therefore, in most cases it's best to 
+  avoid assertOrderedGrep() and instead try to use `BaseTest.assertDiff` or `BaseTest.assertGrep`.
+
+- `BaseTest.waitForGrep` and `BaseTest.getExprFromFile` also now support a mappers= argument. 
+
+- When used from `BaseTest.copy` there is also support for line mappers to be notified when starting/finishing a new 
+  file, which allows for complex and stateful transformation of file contents based on file types/path if needed. 
+
+- `BaseTest.copy` can now be used to copy directories in addition to individual files. It is recommended to use 
+  this method instead of ``shutil.copytree`` as it provides a number of benefits including better error safety, 
+  long path support, and the ability to copy over an existing directory.
+
+- `BaseTest.copy` now copies all file attributes including date/time, not just the Unix permissions/mode. 
+
+Assertion improvements
+----------------------
+
+- Added `BaseTest.assertThatGrep` which makes it easier to do the common operation of extracting a value using grep 
+  and then performing a validation on it using `BaseTest.assertThat`. 
+  
+  This is essentially a simplified wrapper around the functionality added in 1.5.1, but avoids the need for slightly 
+  complex syntax and hopefully will encourage people to use the extract-then-assert paradigm rather than trying to do 
+  them both at the same time with a single `BaseTest.assertGrep` which is less powerful and produces much less 
+  informative messages when there's a failure. 
+  
+  The new method is very easy to use::
+
+        self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)"', 
+            "value == expected", expected='myuser')
+        
+        # In cases where you need multiple regex groups for matching purpose, name the one containing the value using (?P<value>...)
+        self.assertThatGrep('myserver.log', r'Successfully authenticated user "([^"]*)" in (?P<value>[^ ]+) seconds', 
+            "0.0 <= float(value) <= 60.0")
+
+
+- All assertion methods that have the (deprecated and unnecessary) ``filedir`` as their second positional (non-keyword) 
+  argument now support the more natural pattern of giving the expr/exprList as the second positional argument, 
+  so instead of doing ``self.assertGrep('file', expr='Foo.*')`` you can also now use the more 
+  natural ``self.assertGrep('file', 'Foo.*')``. For compatibility with existing testcases, the old signature of 
+  ``self.assertGrep('file', 'filedir', [expr=]'expr')`` continues to behave as before, but the recommended usage 
+  in new tests is now to avoid all use of filedir as a positional argument for consistency and readability. (If you 
+  need to set the filedir, you can use the keyword argument or just add it as a prefix to the ``file`` argument).
+
+Simpler process handling
+------------------------
+
+- `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
+  behaviour can be customized with a new ``onError=`` parameter::
+  
+    # Log stdout instead of stderr
+    self.startProcess(..., onError=lambda process: self.logFileContents(process.stdout, tail=True))
+    
+    # Unless stderr is empty, log it and then use it to extract an error message (which will appear in the outcome reason)
+    self.startProcess(..., onError=lambda process: self.logFileContents(process.stderr, tail=True) and self.getExprFromFile(process.stderr, 'Error: (.*)')
+    
+    # Do nothing on error
+    self.startProcess(..., onError=lambda process: None)
+
+- `BaseTest.waitProcess` now has a ``checkExitStatus=`` argument that can be used to check the return code of the 
+  process for success. 
+
+- Added `BaseTest.waitForBackgroundProcesses` which waits for completion of all background processes and optionally 
+  checks for the expected exit status. This is especially useful when you have a test that needs to execute 
+  lots of processes but doesn't care about the order they execute in, since having them all execute concurrently in the 
+  background and then calling waitForBackgroundProcesses() will be a lot quicker than executing them serially in the 
+  foreground. 
+
+- Added a way to set global defaults for environment variables that will be used by `BaseTest.startProcess()`, using 
+  project properties. For example, to set the ``_JAVA_OPTIONS`` environment variable that Java(R) uses for JVM 
+  arguments::
+  
+    <property name="defaultEnvirons._JAVA_OPTIONS" value="-Xmx512M"/>
+  
+  When you want to set environment variables globally to affect all processes in all tests, this is simpler than 
+  providing a custom override of `BaseTest.getDefaultEnvirons()`. 
+
 pysys.py and project configuration improvements
 -----------------------------------------------
 
@@ -318,6 +332,11 @@ pysys.py and project configuration improvements
 - The ``-XpythonCoverage`` option now produces an XML ``coverage.xml`` report in addition to the ``.coverage`` file 
   and HTML report. This is useful for some code coverage UI/aggregation services. 
 
+- The prefix "__" is now used for many files and directories PySys creates, to make it easier to spot which are 
+  generated artifacts rather than checked in files. You may want to add ``__pysys_*`` and possibly ``__coverage_*`` 
+  to your version control system's ignore patterns so that paths created by the PySys runner and performance/writer 
+  log files don't show up in your local changes. 
+
 Miscellaneous test API improvements
 -----------------------------------
 
@@ -343,7 +362,6 @@ Miscellaneous test API improvements
 
 - Added `BaseTest.getOutcomeLocation()` which can be used from custom writers to record the file and line number 
   corresponding to the outcome, if known. 
-
 
 Bug fixes
 ---------
@@ -430,7 +448,7 @@ The changes that everyone should pay attention to are:
   property ``pysysTestDescriptorFileNames`` to a comma-separated list of the names you want to use, 
   e.g. "pysystest.xml, .pysystest, descriptor.xml".
 
-- If you use the non-standard filename ``.pysysproject`` rather than ``pysysproject.xml`` for your project 
+  If you use the non-standard filename ``.pysysproject`` rather than ``pysysproject.xml`` for your project 
   configuration file you will need to rename it. 
 
 - If your BaseTest or BaseRunner makes use of ``-Xkey[=value]`` command line overrides with int/float/bool types, you 
@@ -440,7 +458,7 @@ The changes that everyone should pay attention to are:
   (previously -Xkey=true would produce a string ``"true"`` whereas -Xkey would produce a boolean ``True``) and 
   b) -X attributes set on BaseRunner now undergo conversion from string to match the bool/int/float type of the 
   default value if a static field of that name already exists on the runner class (which brings BaseRunner into line 
-  with the behaviour that BaseTest has had since 1.5.0). This applies to the attributes set on  the object, but 
+  with the behaviour that BaseTest has had since 1.5.0). This applies to the attributes set on the object, but 
   not to the contents of the xargs dictionary. 
   
   The same type conversion applies to any custom `pysys.writer` classes, so if you have a static variable providing a 
@@ -453,9 +471,6 @@ The changes that everyone should pay attention to are:
 - Since `BaseTest.startProcess` now logs stderr/out automatically before aborting, if you previously wrote extensions 
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
-
-- You may want to add ``__pysys_*`` and possibly ``__coverage_*`` to your version control system's ignore patterns 
-  so that paths created by the PySys runner and performance/writer log files don't show up in your local changes. 
 
 Be sure to remove use of the following deprecated items at your earliest convenience:
 
