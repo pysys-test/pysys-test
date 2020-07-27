@@ -276,7 +276,7 @@ pysys.py and project configuration improvements
 - Added support for including Python log messages for categories other than pysys.* in the PySys test output, 
   using a "python:" prefix on the category name, e.g.::
   
-    pysys run -vpython:myorg.mycategory=debug
+    pysys run -v python:myorg.mycategory=debug
 
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
   to make it easier to run in CI jobs. See ``pysys run --help`` for more information. 
@@ -293,6 +293,12 @@ pysys.py and project configuration improvements
 - The standard project property ``testRootDir`` is now defined automatically without the need to 
   add the boilerplate ``<property root="testRootDir"/>`` to your project configuration. The old property name ``root`` 
   continues to be defined for compatibility with older projects. 
+
+- When importing a properties file using ``<property file=... />" there are some new attributes available for 
+  controlling how the properties are imported: ``includes=`` and ``excludes=`` allow a regular expression to be 
+  specified to control which properties keys in the file will be imported, and ``prefix=`` allows a string prefix to 
+  be added onto every imported property, which provides namespacing so you know where each property came from and a 
+  way to ensure there is no clash with other properties. 
 
 - Added a handler for notifications from Python's ''warnings'' module so that any warnings are logged to run.log with 
   a stack trace (rather than just in stderr which is hard to track down). There is also a summary WARN log message at 
@@ -484,6 +490,7 @@ the following list and consult it only if you get new test failures after upgrad
   ``\`` are treated as literals not escape sequences. See `pysys.utils.fileutils.loadProperties()` for details. 
 - Duplicate ``<property name="..." .../>`` project properties now produce an error to avoid unintentional mistakes. 
   However it is still permitted to overwrite project properties from a .properties file. 
+  You can also use the new ``includes``/``excludes`` attributes when importing a .properties file to avoid clashes. 
 - PySys used to silently ignore project and writer properties that use a missing (or typo'd) property or environment 
   variable, setting it to "" (or the default value if specified). To ensure errors are noticed up-front, it is now a 
   fatal error if a property's value value cannot be resolved - unless a ``default=`` value is provided in which case 

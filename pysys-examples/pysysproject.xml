@@ -54,7 +54,7 @@
 	<!-- <property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/> -->
 
 	<!-- 
-	Import project properties from a file. 
+	Import project properties from a file, using the specified prefix for namespacing. 
 	
 	If pathMustExist=true, the project will fail to load if the specified file does not 
 	exist. If pathMustExist=false the project will silently ignore a missing properties file, 
@@ -64,8 +64,11 @@
 	Each imported property line is handled just the same as a standard "property" element, 
 	so for example other project properties can be referenced withint the values 
 	using ${...} syntax. 
+	
+	The set of property keys that are imported can be filtered with a regular expression using 
+	the includes="regex" and excludes="regex" optional attributes. 
 	 -->
-	<property file="${os}.properties" pathMustExist="false"/>
+	<property file="${os}.properties" pathMustExist="false" prefix="os_"/>
 
 
 	<!-- 

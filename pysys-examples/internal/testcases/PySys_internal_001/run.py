@@ -46,3 +46,4 @@ class PySysTest(BaseTest):
 		self.assertThat('prop != ""', prop__eval='self.project.startTime')
 		self.assertThat('prop != ""', prop__eval='self.project.hostname')
 		
+		self.assertGrep('pysys.out', expr='WARN .*', contains=False)

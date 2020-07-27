@@ -109,7 +109,7 @@ class XMLProjectParser(object):
 		propertyNodeList = [element for element in self.root.getElementsByTagName('property') if element.parentNode == self.root]
 
 		for propertyNode in propertyNodeList:
-
+			permittedAttributes = None
 			# use of these options for customizing the property names of env/root/osfamily is no longer encouraged; just kept for compat
 			if propertyNode.hasAttribute("environment"):
 				self.environment = propertyNode.getAttribute("environment")
@@ -125,8 +125,13 @@ class XMLProjectParser(object):
 			elif propertyNode.hasAttribute("file"): 
 				file = self.expandProperties(propertyNode.getAttribute("file"), default=propertyNode, name='properties file reading')
 				self.getPropertiesFromFile(os.path.normpath(os.path.join(self.dirname, file)) if file else '', 
-					pathMustExist=(propertyNode.getAttribute("pathMustExist") or '').lower()=='true')
-			
+					pathMustExist=(propertyNode.getAttribute("pathMustExist") or '').lower()=='true',
+					includes=propertyNode.getAttribute("includes"),
+					excludes=propertyNode.getAttribute("excludes"),
+					prefix=propertyNode.getAttribute("prefix") or '',
+					)
+				permittedAttributes = {'name', 'file', 'default', 'pathMustExist', 'includes', 'excludes', 'prefix'}
+
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
 				value = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name=name)
@@ -139,20 +144,22 @@ class XMLProjectParser(object):
 					if not (value and os.path.exists(os.path.join(self.dirname, value))):
 						raise UserError('Cannot find path referenced in project property "%s": "%s"'%(
 							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
+				permittedAttributes = {'name', 'value', 'default', 'pathMustExist'}
 			else:
 				raise UserError('Found <property> with no name= or file=')
 			
-			for att in range(propertyNode.attributes.length):
-				attName = propertyNode.attributes.item(att).name
-				if attName not in {'root', 'osfamily', 'name', 'value', 'environment', 'default', 'file', 'pathMustExist'}: 
-					# not an error, to allow for adding new ones in future pysys versions, but worth warning about
-					log.warn('Unknown <property> attribute "%s" in project configuration'%attName)
+			if permittedAttributes is not None:
+				for att in range(propertyNode.attributes.length):
+					attName = propertyNode.attributes.item(att).name
+					if attName not in permittedAttributes: 
+						# not an error, to allow for adding new ones in future pysys versions, but worth warning about
+						log.warn('Unknown <property> attribute "%s" in project configuration'%attName)
 
 		return self.properties
 
 
 
-	def getPropertiesFromFile(self, file, pathMustExist=False):
+	def getPropertiesFromFile(self, file, pathMustExist=False, includes=None, excludes=None, prefix=''):
 		if not os.path.isfile(file):
 			if pathMustExist:
 				raise UserError('Cannot find properties file referenced in %s: "%s"'%(
@@ -162,11 +169,17 @@ class XMLProjectParser(object):
 			return
 
 		try:
-			props = loadProperties(file) # since PySys 1.6.0 this is UTF-8 by default
+			rawProps = loadProperties(file) # since PySys 1.6.0 this is UTF-8 by default
 		except UnicodeDecodeError:
 			# fall back to ISO8859-1 if not valid UTF-8 (matching Java 9+ behaviour)
-			props = loadProperties(file, encoding='iso8859-1')
+			rawProps = loadProperties(file, encoding='iso8859-1')
 		
+		props = collections.OrderedDict()
+		for name, value in rawProps.items():
+			if includes and not re.match(includes, name): continue
+			if excludes and re.match(excludes, name): continue
+			props[prefix+name] = value
+				
 		for name, value in props.items():
 			# when loading properties files it's not so helpful to give errors (and there's nowhere else to put an empty value) so default to empty string
 			value = self.expandProperties(value, default='', name=name)	
