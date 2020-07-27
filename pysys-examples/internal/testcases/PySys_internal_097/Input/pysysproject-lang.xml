@@ -6,5 +6,6 @@
 
 	<property name="defaultEnvironsDefaultLang" value="my-lang"/>
 
+	<property name="defaultEnvirons._JAVA_OPTIONS" value="-Xmx512M"/>
 	
 </pysysproject>

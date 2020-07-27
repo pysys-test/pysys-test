@@ -54,6 +54,14 @@
 	<!-- <property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/> -->
 
 	<!-- 
+	The defaultEnvirons. prefix can be used to provide a default environment variable for use by 
+	all processes that PySys starts. For example, to set Java(R)'s _JAVA_OPTIONS environment variable:
+	-->
+	<!--
+	<property name="defaultEnvirons._JAVA_OPTIONS" value="-Xmx512M"/>
+	-->
+
+	<!-- 
 	Import project properties from a file, using the specified prefix for namespacing. 
 	
 	If pathMustExist=true, the project will fail to load if the specified file does not 

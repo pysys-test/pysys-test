@@ -486,6 +486,12 @@ class ProcessUser(object):
 		Some features of this method can be configured by setting project 
 		properties:
 		
+		  - ``defaultEnvirons.ENV_KEY``: if any properties with this prefix are 
+		    defined, an environment variable with the ENV_KEY is set by this method 
+		    (unless the property value is empty). For example, to set a default 
+		    JVM heap size for all processes with the ``_JAVA_OPTIONS`` environment 
+		    variable you could set ``defaultEnvirons._JAVA_OPTIONS = -Xmx512M``. 
+		
 		  - ``defaultEnvironsDefaultLang``: if set to a value such as ``en_US.UTF-8`` 
 		    the specified value is set for the LANG= variable on Unix; otherwise, 
 		    the LANG variable is not set (which might result in use of the 
@@ -531,6 +537,10 @@ class ProcessUser(object):
 				return {}
 
 		e = {}
+
+		for k, v in self.project.properties.items():
+			if k.startswith('defaultEnvirons.') and v:
+				e[k[k.find('.'):]] = v
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location; set to blank to do nothing
 		if self.project.getProperty('defaultEnvironsTempDir',''):

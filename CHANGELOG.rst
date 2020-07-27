@@ -179,6 +179,13 @@ Simpler process handling
   background and then calling waitForBackgroundProcesses() will be a lot quicker than executing them serially in the 
   foreground. 
 
+- Added a way to set global defaults for environment variables using a properties. For example, to set the #
+  ``_JAVA_OPTIONS`` environment variable that Java(R) uses for default JVM arguments::
+  
+    <property name="defaultEnvirons._JAVA_OPTIONS" value="-Xmx512M"/>
+  
+  This is simpler than providing a custom override of `BaseTest.getDefaultEnvirons()`. 
+
 New Plugin API
 --------------
 This release introduces a new concept: test and runner "plugins" which provide shared functionality available for 
