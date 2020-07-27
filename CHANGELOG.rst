@@ -211,6 +211,9 @@ several improvements that make this easier:
   It is recommended to use this method instead of ``shutil.copytree`` as it provides a number of benefits including 
   better error safety, long path support, and the ability to copy over an existing directory.
 
+- `BaseTest.copy` now permits the source and destination to be the same (except for directory copies) which allows it 
+  to be used for in-place transformations. 
+
 - `BaseTest.copy` now copies all file attributes including date/time, not just the Unix permissions/mode. 
 
 Assertion improvements

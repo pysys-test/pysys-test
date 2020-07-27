@@ -1892,6 +1892,8 @@ class ProcessUser(object):
 			a path relative to the `self.output` directory. Destination file(s) are overwritten if the 
 			dest already exists. 
 			
+			The dest and src can be the same for file copies (but not directory copies). 
+			
 			As a convenience to avoid repeating the same text in the src and destination, 
 			if the dest ends with a slash, or the src is a file and the dest is an existing directory, 
 			the dest is taken as a parent directory into which the src will be copied in retaining its current name. 
@@ -1937,7 +1939,13 @@ class ProcessUser(object):
 	
 		dest = toLongPathSafe(os.path.join(self.output, dest)).rstrip('/\\')
 		if origdest.endswith((os.sep, '/', '\\')) or (not srcIsDir and os.path.isdir(dest)): dest = toLongPathSafe(dest+os.sep+os.path.basename(src))
-		assert src != dest, 'Source and destination file cannot be the same'
+	
+		if src == dest and not srcIsDir:
+			dest = src+'__pysys_copy.tmp'
+			renameDestAtEnd = True
+		else:
+			renameDestAtEnd = False
+		assert src != dest, 'Source and destination directory cannot be the same'
 
 		if overwrite is None: overwrite = not srcIsDir
 
@@ -1998,5 +2006,8 @@ class ProcessUser(object):
 						if fn: fn(src, dest, srcf, destf)
 
 		shutil.copystat(src, dest)
+		if renameDestAtEnd:
+			os.remove(src)
+			os.rename(dest, src)
 		return dest
 		

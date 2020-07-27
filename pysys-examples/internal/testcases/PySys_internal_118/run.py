@@ -15,6 +15,7 @@ class PySysTest(pysys.basetest.BaseTest):
 			])
 
 		self.write_text('output-i18n.txt', self.utf8teststring, encoding='utf-8')
+		self.copy('output-i18n.txt', 'output-i18n.txt') # src=dest should work for files
 		self.copy('output-i18n.txt', 'output-i18n-binary.txt')
 		self.copy('output-i18n.txt', 'output-i18n-binary.txt') # check overwrite works by default for files
 		self.copy('output-i18n.txt', 'output-i18n-processed.txt', encoding='utf-8', 
