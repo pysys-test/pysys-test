@@ -206,9 +206,10 @@ several improvements that make this easier:
 - When used from `BaseTest.copy` there is also support for line mappers to be notified when starting/finishing a new 
   file, which allows for complex and stateful transformation of file contents based on file types/path if needed. 
 
-- `BaseTest.copy` can now be used to copy directories in addition to individual files. It is recommended to use 
-  this method instead of ``shutil.copytree`` as it provides a number of benefits including better error safety, 
-  long path support, and the ability to copy over an existing directory.
+- `BaseTest.copy` can now be used to copy directories in addition to individual files. 
+
+  It is recommended to use this method instead of ``shutil.copytree`` as it provides a number of benefits including 
+  better error safety, long path support, and the ability to copy over an existing directory.
 
 - `BaseTest.copy` now copies all file attributes including date/time, not just the Unix permissions/mode. 
 

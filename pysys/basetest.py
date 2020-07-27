@@ -739,6 +739,11 @@ class BaseTest(ProcessUser):
 		
 			self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')])))
 		
+		The above example shows a very compact form of assertDiff, which uses the fact that copy() returns 
+		the path of the destination file, and that there is no need to specify assertDiff's file2 (reference) 
+		parameter if it's the same basename as the first argument (just located in a different directory). In practice 
+		it's very convenient to use the same basename for both the reference file and the output file it's compared to. 
+		
 		Should the files after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, 
 		otherwise a C{FAILED} outcome is added.
 		
@@ -763,7 +768,7 @@ class BaseTest(ProcessUser):
 		
 		:param str file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. 
 		:param str file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.
-			The default is for file2 to be the same basename as file1. 
+			The default is for file2 to be the same basename as file1 (but located in the Reference/ directory). 
 		:param str filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
 		:param str filedir2: The dirname of the second file (defaults to the testcase reference directory)
 		:param list[str] ignores: A list of regular expressions used to denote lines in the files which should be ignored
