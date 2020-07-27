@@ -286,7 +286,8 @@ class XMLDescriptorParser(object):
 	
 	'''
 
-	def __init__(self, xmlfile, istest=True, parentDirDefaults=None):
+	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None):
+		assert project
 		self.file = xmlfile
 		self.dirname = os.path.dirname(xmlfile)
 		self.istest = istest
@@ -294,6 +295,7 @@ class XMLDescriptorParser(object):
 		roottag = 'pysystest' if istest else 'pysysdirconfig'
 		if not os.path.exists(xmlfile):
 			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
+		self.project = project
 		
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
@@ -306,7 +308,7 @@ class XMLDescriptorParser(object):
 				self.root = self.doc.getElementsByTagName(roottag)[0]
 
 	@staticmethod
-	def parse(xmlfile, istest=True, parentDirDefaults=None):
+	def parse(xmlfile, istest=True, parentDirDefaults=None, project=None):
 		"""
 		Parses the test/dir descriptor in the specified path and returns the 
 		TestDescriptor object. 
@@ -317,7 +319,7 @@ class XMLDescriptorParser(object):
 			specifying default values to be filtered in from the parent 
 			directory.
 		"""
-		p = XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults)
+		p = XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults, project=project)
 		try:
 			return p.getContainer()
 		finally:
@@ -346,8 +348,8 @@ class XMLDescriptorParser(object):
 		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
 										self.getGroups(), self.getModes(),
-										self.getClassDetails()[0],
-										self.getClassDetails()[1],
+										self.project.expandProperties(self.getClassDetails()[0]),
+										self.project.expandProperties(self.getClassDetails()[1]),
 										self.getTestInput(),
 										self.getTestOutput(),
 										self.getTestReference(),
@@ -794,7 +796,7 @@ class DescriptorLoader(object):
 			The exception message must contain the path of the descriptorfile.
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
-		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig)
+		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project)
 
 if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
 
