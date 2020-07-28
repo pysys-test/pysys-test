@@ -1040,6 +1040,7 @@ class TestContainer(object):
 			logHandlers = pysysLogHandler.getLogHandlersForCurrentThread()
 				
 			# import the test class
+			
 			with global_lock:
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 				try:
@@ -1067,6 +1068,8 @@ class TestContainer(object):
 				
 				except Exception:
 					exc_info.append(sys.exc_info())
+				
+				if self.testObj is None:
 					# We need a BaseTest object, so if the real one failed, we assume/hope there should be no exception 
 					# from the PySys BaseTest class and we can use it to hold the error for reporting purposes
 					self.testObj = BaseTest(self.descriptor, self.outsubdir, self.runner)
