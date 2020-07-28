@@ -948,7 +948,7 @@ class TestContainer(object):
 		self.outsubdir = ""
 		self.testObj = None
 		self.testStart = None
-		self.testTime = None
+		self.testTime = 0.0
 		self.testBuffer = []
 		self.testFileHandlerRunLog = None
 		self.testFileHandlerStdout = None
@@ -1126,7 +1126,7 @@ class TestContainer(object):
 
 			except Exception:
 				log.warn("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-				self.testObj.addOutcome(BLOCKED, '%s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
+				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
 		
 			# call the cleanup method to tear down the test
 			try:
