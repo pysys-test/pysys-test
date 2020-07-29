@@ -4,7 +4,7 @@
 	<!--
 	Specify a minimum required pysys version to run these tests
 	-->
-	<requires-pysys>1.5.1</requires-pysys>
+	<requires-pysys>1.6.0</requires-pysys>
 
 
 	<!--
