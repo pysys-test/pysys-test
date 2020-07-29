@@ -10,13 +10,17 @@
 	<!-- Property identifying the home directory of the application build being tested. -->
 	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
 
-	<!-- Custom test framework extensions, if needed -->
+	<!-- Custom test framework plugins, if needed -->
 	<!--
 	<pythonpath value="./pysys-extensions" />
-	<runner classname="myorg.MyRunner"/>
-	<maker classname="myorg.MyTestMaker"/>
+	<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myorg">
+		<property name="myProp" value="..."/>
+	</test-plugin>
+	<runner-plugin classname="myorg.runnerplugin.MyRunnerPlugin" alias="myorg">
+		<property name="myProp" value="..."/>
+	</runner-plugin>
 	-->
-
+	
 	<writers>
 		<writer classname="pysys.writer.TestOutputArchiveWriter">
 			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
