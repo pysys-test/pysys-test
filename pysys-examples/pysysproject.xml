@@ -26,21 +26,23 @@
 		In addition, within this file ${env.VARNAME} syntax can be used to access environment variables. 
 	-->
 	
+	<!-- Property identifying the home directory of the application build being tested. 
 	
-	<!-- 
-	Example of setting a project property. 
+	Binaries and configuration files can be specified relative to this directory 
+	to avoid having to hardcode locations inside each individual testcase. 
+	
+	A different directory can be used temporarily by setting environment variable PYSYS_APP_HOME. 
 	
 	Project properties can be used as substitution variables within the project file, and 
-	are set as attributes on the Project class for use by tests. In the example below, "user" 
-	would be available to tests as "self.project.user".
+	are set as attributes on the Project class for use by tests. In the example below, "appHome" 
+	would be available to tests as "self.project.appHome".
 
 	If a property value contains any properties or environment variables that do not exist, 
 	the "default" is used instead (or "" if a default is not explicitly specified). If the default 
 	also contains undefined properties the project will fail to load. 
-	
-	-->
-	<property name="user" value="${env.USERNAME}" default="guest"/>	
 
+	-->
+	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
 
 	<!-- If provided, the specified command line will be executed (in testRootDir) to populate the vcsCommit field 
 		in runner.runDetails with the current commit number from your version control system. -->

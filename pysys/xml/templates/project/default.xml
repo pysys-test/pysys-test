@@ -6,10 +6,10 @@
 	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${startDate}, ${startTime}, ${hostname}. -->
 	
 	<!-- User-defined properties -->
-	<!--
-	<property name="myProperty" value="myValue"/>	
-	-->
 	
+	<!-- Property identifying the home directory of the application build being tested. -->
+	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
+
 	<!-- Custom test framework extensions, if needed -->
 	<!--
 	<pythonpath value="./pysys-extensions" />
