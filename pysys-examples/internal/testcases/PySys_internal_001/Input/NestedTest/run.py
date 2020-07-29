@@ -10,6 +10,7 @@ class PySysTest(BaseTest):
 	testStringProperty = '12345'
 	testNoneProperty = None
 	testFloatUserData = 0.0
+	testListProperty = []
 
 	def execute(self):
 		self.write_text(self.project.sample_path+'.txt', 'xxx') # check these don't contain any non-file system characters
@@ -41,11 +42,13 @@ class PySysTest(BaseTest):
 		self.assertThat('testStringProperty == "123456"', testStringProperty=self.testStringProperty)
 		self.assertThat('testNoneProperty == "Hello"', testNoneProperty=self.testNoneProperty)
 		self.assertThat('testStringUserData == expected', testStringUserData=self.testStringUserData, expected='Hello ${non-existent}')
+		self.assertThat('testListProperty == expected', testListProperty=self.testListProperty, expected=['abc','def','g'])
 
 		# check coersion based on default value supplied
 		self.assertThat('projectbool is True', projectbool__eval="self.project.getProperty('projectbool', False)")
 		self.assertThat('projectint == 1234', projectint__eval="self.project.getProperty('projectint', -1)")
 		self.assertThat('projectfloat == 456.78', projectfloat__eval="self.project.getProperty('projectfloat', 0.0)")
+		self.assertThat('projectlist == expected', projectlist__eval="self.project.getProperty('projectlist', [])", expected=['abc','def','g'])
 		self.assertThat('user_lastname == "Smith"', user_lastname__eval="self.project.getProperty('user_lastname', 'xxx')")
 		
 		self.assertThat('actual == expected', actual=[k for k in self.project.properties if k.startswith('prefix')], 

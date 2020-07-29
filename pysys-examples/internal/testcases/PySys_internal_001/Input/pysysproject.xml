@@ -17,6 +17,7 @@
 
 	<property name="projectint" value="1234"/>
 	<property name="projectfloat" value="456.78"/>
+	<property name="projectlist" value=" abc  , def,,g"/>
 	
 	<property file="myprops.properties" includes="a.*" excludes=".b.*" prefix="prefix_" pathMustExist="true"/>
 

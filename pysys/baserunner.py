@@ -129,7 +129,7 @@ class BaseRunner(ProcessUser):
 		descriptors that are selected for execution by the runner. 
 
 	:ivar dict(str,str|bool) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
-		set as data attributes on the class (but with automatic conversion to match the default value's bool/int/float 
+		set as data attributes on the class (but with automatic conversion to match the default value's bool/int/float/list[str]  
 		type if a static variable of the same name exists on the class).
 
 	:ivar bool ~.validateOnly: True if the user has requested that instead of cleaning output directories and running 

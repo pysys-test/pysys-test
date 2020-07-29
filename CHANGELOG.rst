@@ -357,7 +357,7 @@ Miscellaneous test API improvements
   cluttering the run log.  
 
 - Added `pysys.xml.project.Project.getProperty()` which is a convenient and safe way to get a project property 
-  of bool/int/float type. 
+  of bool/int/float/list type. 
 
 - `BaseTest.getExprFromFile` now supports ``(?P<groupName>...)`` named regular expression groups, and will return 
   a dictionary containing the matched groups if any are present in the regular expression. For example::
@@ -455,18 +455,18 @@ The changes that everyone should pay attention to are:
   If you use the non-standard filename ``.pysysproject`` rather than ``pysysproject.xml`` for your project 
   configuration file you will need to rename it. 
 
-- If your BaseTest or BaseRunner makes use of ``-Xkey[=value]`` command line overrides with int/float/bool types, you 
-  should review your code and/or test thoroughly as there are now automatic conversions from string to int/float/bool 
+- If your BaseTest or BaseRunner makes use of ``-Xkey[=value]`` command line overrides with int/float/bool/list types, you 
+  should review your code and/or test thoroughly as there are now automatic conversions from string to int/float/bool/list[str] 
   in some cases where previously the string type would have been retained. 
   a) -Xkey and -Xkey=true/false now consistently produce a boolean True/False 
   (previously -Xkey=true would produce a string ``"true"`` whereas -Xkey would produce a boolean ``True``) and 
-  b) -X attributes set on BaseRunner now undergo conversion from string to match the bool/int/float type of the 
+  b) -X attributes set on BaseRunner now undergo conversion from string to match the bool/int/float/list type of the 
   default value if a static field of that name already exists on the runner class (which brings BaseRunner into line 
-  with the behaviour that BaseTest has had since 1.5.0). This applies to the attributes set on the object, but 
-  not to the contents of the xargs dictionary. 
+  with the behaviour that BaseTest has had since 1.5.0, and also adds support for the ``list`` type). This applies to 
+  the attributes set on the object, but not to the contents of the xargs dictionary. 
   
   The same type conversion applies to any custom `pysys.writer` classes, so if you have a static variable providing a 
-  default value, then in this version the variable will be set to the type of that bool/int/float rather than to 
+  default value, then in this version the variable will be set to the type of that bool/int/float/list rather than to 
   string. 
   
   So, as well as checking your tests still pass you should test that the configuration of your writers 

@@ -63,8 +63,9 @@ def compareVersions(v1, v2):
 def setInstanceVariablesFromDict(obj, d, errorOnMissingVariables=False):
 	"""
 	Sets an instance variable for each item in the specified dictionary, with automatic conversion of 
-	bool/int/float values from strings if a default value of that type was provided as a static variable on the object. 
-
+	bool/int/float/list[str] values from strings if a default value of that type was provided as a static variable on 
+	the object. 
+	
 	.. versionadded:: 1.6.0
 
 	:param object obj: Any Python object. 
@@ -79,10 +80,13 @@ def setInstanceVariablesFromDict(obj, d, errorOnMissingVariables=False):
 		if defvalue is not None and isstring(val):
 			# attempt type coersion to keep the type the same
 			if defvalue is True or defvalue is False:
-				val = val.lower()=='true'
+				if val.lower()=='true': return True
+				if val.lower()=='false' or val=='': return False
 			elif isinstance(defvalue, int):
 				val = int(val)
 			elif isinstance(defvalue, float):
 				val = float(val)
+			elif isinstance(defvalue, list):
+				val = [val.strip() for val in val.split(',') if val.strip()]
 		setattr(obj, key, val)
 	
