@@ -13,12 +13,8 @@
 	<!-- Custom test framework plugins, if needed -->
 	<!--
 	<pythonpath value="./pysys-extensions" />
-	<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myorg">
-		<property name="myProp" value="..."/>
-	</test-plugin>
-	<runner-plugin classname="myorg.runnerplugin.MyRunnerPlugin" alias="myorg">
-		<property name="myProp" value="..."/>
-	</runner-plugin>
+	<test-plugin classname="myorg.plugins.MyTestPlugin" alias="myorg"/>
+	<runner-plugin classname="myorg.plugins.MyRunnerPlugin" alias="myorg"/>
 	-->
 	
 	<writers>
