@@ -103,7 +103,7 @@
 	with other plugins or fields that PySys sets on the BaseTest; usually a brief lowercase name 
 	identifying your organization or the purpose of the plugin is best. -->
 	<!--
-		<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myorg">
+		<test-plugin classname="myorg.plugins.MyTestPlugin" alias="myorg">
 			<property name="myProp" value="..."/>
 		</test-plugin>
 	-->
@@ -123,7 +123,7 @@
 	conflict with other plugins or fields that PySys sets on the BaseRunner; usually a brief lowercase name 
 	identifying your organization or the purpose of the plugin is best. -->
 	<!--
-		<runner-plugin classname="myorg.runnerplugin.MyRunnerPlugin" alias="myorg">
+		<runner-plugin classname="myorg.plugins.MyRunnerPlugin" alias="myorg">
 			<property name="myProp" value="..."/>
 		</runner-plugin>
 	-->
