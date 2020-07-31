@@ -18,7 +18,8 @@
 			${testRootDir} - Path of the root directory containing the pysysproject.xml file
 			${outDirName}  - The basename (with parent dirs removed) from the outdir for this test run. 
 			                 This may be the name of the current OS or a unique user-specified name for the test run.
-			${os}          - The operating system name e.g. 'windows', 'linux', 'darwin'
+			${os}          - The operating system name e.g. 'windows', 'linux', 'darwin'.
+			${osfamily}    - The operating system family - 'windows' or `unix`.
 			${startDate}   - The date that this test run was started, in a form that can be used in filenames. 
 			${startTime}   - The (local) time that this test run was started, in a form that can be used in filenames. 
 			${hostname}    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
@@ -78,7 +79,7 @@
 	The set of property keys that are imported can be filtered with a regular expression using 
 	the includes="regex" and excludes="regex" optional attributes. 
 	 -->
-	<property file="${os}.properties" pathMustExist="false" prefix="os_"/>
+	<property file="${osfamily}.properties" pathMustExist="false" prefix="os_"/>
 
 
 	<!-- 

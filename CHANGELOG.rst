@@ -18,8 +18,8 @@ PySys 1.6.0 is under development.
 
 The significant new features of PySys 1.6.0 are grouped around a few themes:
     - a new "plugins" concept to encourage a more modular style when sharing functionality between tests, 
-    - validation: the new `BaseTest.assertThatGrep` method which gives nice clear error messages when the assert fails,  
-    - new writers for recording test results, including a test output directory zip archiver and GitHub Actions support, 
+    - validation: the new `BaseTest.assertThatGrep` method, which gives nice clear error messages when the assert fails,  
+    - new writers for recording test results, including GitHub Actions support and a test output directory zip archiver, 
     - a library of line mappers for more powerful copy and grep line pre-processing, 
     - process starting enhancements such as `BaseTest.waitForBackgroundProcesses` and automatic logging of stderr when 
       a process fails, 
@@ -306,9 +306,10 @@ pysys.py and project configuration improvements
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
   to make it easier to run in CI jobs. See ``pysys run --help`` for more information. 
 
-- Added a standard property ``${os}`` to the project file as a more modern alternative to ``${osfamily}``. The 
-  new  ``${os}`` property gets its value from Python's ``platform.system().lower()``, and has values such 
-  as ``windows``, ``linux``, etc. 
+- Added a standard property ``${os}`` to the project file for finer-grained control of platform-specific properties. 
+  The new  ``${os}`` property gets its value from Python's ``platform.system().lower()``, and has values such 
+  as ``windows``, ``linux``, ``darwin``, etc. For comparison the existing ``${osfamily}`` is always either 
+  ``windows`` or ``unix``. 
 
 - Added a standard property ``${outDirName}`` to the project file which is the basename from the ``-outdir``, giving 
   a user-customizable "name" for the current test run that can be used in project property paths to keep test 
