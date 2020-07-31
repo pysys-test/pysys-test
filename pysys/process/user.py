@@ -1441,9 +1441,10 @@ class ProcessUser(object):
 
 			allAuthList = self.getExprFromFile('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.', returnAll=True))
 
-		See also `pysys.basetest.BaseTest.assertGrep` which should be used when instead of just finding out what's 
+		See also `pysys.basetest.BaseTest.assertThatGrep` which should be used when instead of just finding out what's 
 		in the file you want to assert that a specific expression is matched. The documentation for assertGrep also 
-		provides some helpful examples of regular expressions that could also be applied to this method. 
+		provides some helpful examples of regular expressions that could also be applied to this method, and tips for 
+		dealing with escaping in regular expressions. 
 
 		.. versionchanged:: 1.6.0
 			Support for named groups was added in 1.6.0.
@@ -1455,12 +1456,6 @@ class ProcessUser(object):
 			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
 			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
 			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
-
-			If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
-			substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
-			through re.escape::
-			
-				expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)')
 
 		:param List[int] groups: which numeric regex group numbers (as indicated by brackets in the regex) should be returned; 
 			default is ``[1]`` meaning the first group. 
