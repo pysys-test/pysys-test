@@ -879,8 +879,9 @@ class BaseTest(ProcessUser):
 
 		:param file: The name or relative/absolute path of the file to be searched.
 		
-		:param str grepRegex: The regular expression to check for in the file (or a string literal if literal=True), 
-			for example ``" ERROR .*"``. See `assertGrep` for more tips on using and escaping regular expressions. 
+		:param str grepRegex: The regular expression to use for extracting the value of interest from the file. 
+			Typically this will use a ``(...)`` regular expression group to identify the part of the expression 
+			containing the value; alternatively a single ``(?P<value>...)`` named group may be used. 
 		
 		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` 
 			to validate that "value" is correct. For example ``value == expected``.
