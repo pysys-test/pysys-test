@@ -64,10 +64,10 @@ class XMLProjectParser(object):
 
 			'hostname':HOSTNAME.lower().split('.')[0],
 			'os':platform.system().lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
+			'osfamily':OSFAMILY, # windows or unix
 
 			# old names
 			'root':self.dirname, # old name for testRootDir
-			'osfamily':OSFAMILY, 
 		}
 		
 		if not os.path.exists(self.xmlfile):
@@ -482,7 +482,7 @@ class Project(object):
 	`pysys.basetest.BaseTest.project` 
 	(or `pysys.process.user.ProcessUser.project`) field. 
 	
-	All project properties are strings. If you need to get a project property value that's a a bool/int/float it is 
+	All project properties are strings. If you need to get a project property value that's a a bool/int/float/list it is 
 	recommended to use `getProperty()` which will automatically perform the conversion. For string properties 
 	you can just use ``project.propName`` or ``project.properties['propName']``. 
 	
@@ -607,12 +607,12 @@ class Project(object):
 	def getProperty(self, key, default):
 		"""
 		Get the specified project property value, or a default if it is not defined, with type conversion from string 
-		to int/float/bool (matching the default's type). 
+		to int/float/bool/list[str] (matching the default's type; for list[str], comma-separated input is assumed). 
 
 		.. versionadded:: 1.6.0
 		
 		:param str key: The name of the property.
-		:param bool/int/float/str default: The default value to return if the property is not set or is an empty string. 
+		:param bool/int/float/str/list[str] default: The default value to return if the property is not set or is an empty string. 
 			The type of the default parameter will be used to convert the property value from a string if it is 
 			provided. An exception will be raised if the value is non-empty but cannot be converted to the indicated type. 
 		"""
@@ -620,12 +620,14 @@ class Project(object):
 		val = self.properties[key]
 		if default is True or default is False:
 			if val.lower()=='true': return True
-			if val.lower()=='false': return False
+			if val.lower()=='false' or val=='': return False
 			raise Exception('Unexpected value for boolean project property %s=%s'%(key, val))
 		elif isinstance(default, int):
 			return int(val)
 		elif isinstance(default, float):
 			return float(val)
+		elif isinstance(default, list):
+			return [val.strip() for val in val.split(',') if val.strip()]
 		elif isinstance(default, str):
 			return val # nothing to do
 		else:
