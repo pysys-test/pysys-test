@@ -425,7 +425,7 @@ class ProcessUser(object):
 				logmethod = log.info if correctExitStatus else log.warn
 				if quiet: logmethod = log.debug
 				logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
-																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
+					", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 10 else "")
 				
 				if not ignoreExitStatus and not correctExitStatus:
 					if not stderr and not quiet: log.warn('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
