@@ -477,6 +477,11 @@ The changes that everyone should pay attention to are:
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
 
+- The default directory for performance output is now under ``__pysys_performance/`` rather than 
+  ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it, or set the 
+  ``csvPerformanceReporterSummaryFile`` project property described above. The default filename also includes 
+  the ``${outDirName}``. See `pysys.utils.perfreporter`. 
+
 Be sure to remove use of the following deprecated items at your earliest convenience:
 
 - Deprecated the ``ThreadFilter`` class. Usually it is not recommended 
@@ -498,10 +503,6 @@ the following list and consult it only if you get new test failures after upgrad
 - Timestamps in process monitor output, writers, performance reporter and similar places are now in local time instead 
   of UTC. 
   This means these timestamps will match up with the times in run.log output which have always been local time. 
-- The default directory for performance output is now under ``__pysys_performance/`` rather than 
-  ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it, or set the 
-  ``csvPerformanceReporterSummaryFile`` project property described above. The default filename also includes 
-  the ``${outDirName}``. See `pysys.utils.perfreporter`. 
 - Performance CSV files contain some details about the test run. A couple of these have been renamed: ``time`` is 
   now ``startTime`` and ``outdir`` is now ``outDirName``. The keys and values can be changed as needed using 
   the ``runDetails`` field of `pysys.baserunner.BaseRunner`. It is encouraged to use this rather than the previous 
