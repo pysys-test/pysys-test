@@ -68,6 +68,10 @@ class BaseTest(ProcessUser):
 		self.resources = []
 		self.testCycle = getattr(BaseTest, '_currentTestCycle', None) # set when constructed by runner
 		
+		if 'disableCoverage' in descriptor.groups: 
+			self.disableCoverage = True
+			self.log.debug('Disabling coverage for this test due to disableCoverage group')
+		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
 		and a suffix indicating the cycle number if this is a multi-cycle test run. 

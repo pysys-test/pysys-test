@@ -71,11 +71,9 @@ class ProcessUser(object):
 		The project can be used to access information such as the project properties which are shared across all tests 
 		(e.g. for hosts and credentials). 
 	:ivar bool ~.disableCoverage: Set to True to disable all code coverage collection for processes 
-		started from this instance. For example, to disable coverage in tests tagged with the 
-		'performance' group you could use a line like this in your BaseTest::
-		
-			if 'performance' in self.descriptor.groups: self.disableCoverage = True
-		
+		started from this instance. This is automatically set for any tests marked with the "disableCoverage" group 
+		in their pysystest.xml file. 
+			
 		The built-in Python code coverage functionality in L{startPython} checks this 
 		flag. It is recommended that any other languages supporting code coverage 
 		also check the self.disableCoverage flag. 

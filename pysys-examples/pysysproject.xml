@@ -166,7 +166,7 @@
 			implement this automatically) or manually copied to a file share. 
 		-->
 		<writer classname="pysys.writer.TestOutputArchiveWriter">
-			<property name="destDir" value="${testRootDir}/__pysys_output_archives.${outDirName}/"/>
+			<property name="destDir" value="__pysys_output_archives.${outDirName}/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
 			<property name="maxArchives" value="50"/>
@@ -185,7 +185,7 @@
 		produce one file per test into this output directory). 
 		-->
 		<writer classname="pysys.writer.JUnitXMLResultsWriter">
-			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
+			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
 
 		<writer classname="pysys.writer.XMLResultsWriter" file="__pysys_testsummary_${outDirName}_%Y-%m-%d_%H.%M.%S.xml">
@@ -317,7 +317,7 @@
 	
 	<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/internal/utilities/python_coveragerc"/>
 
-	<property name="pythonCoverageDir" value="${testRootDir}/__coverage_python.${outDirName}"/>
+	<property name="pythonCoverageDir" value="__coverage_python.${outDirName}"/>
 	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 	
 	<project-help>

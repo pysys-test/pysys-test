@@ -69,21 +69,18 @@ class BaseRunner(ProcessUser):
 	if ``purge`` is enabled, or else just files that are empty), detects any core files produced by the test, and 
 	invokes any applicable `writers <pysys.writer>` to record the results of each test.
 
-	This class is the default runner implementation, and it can be subclassed 
-	if customizations are needed, for example:
+
+	Where possible it is recommended to create runner plugins rather than subclassing BaseRunner 
+	(see the user guide for more information about plugins). However if needed class this can be subclassed, for example:
 	
 		- override `setup()` if you need to provision resources 
 		  (e.g. virtual machines, servers, user accounts, populating a database, etc) that must be shared by many 
 		  testcases. The corresponding teardown should be implemented by calling `addCleanupFunction()`. 
-		- override `setup()` if you want to customize the order or contents of the ``self.descriptors`` list of tests to 
+		- also override `setup()` if you want to customize the order or contents of the ``self.descriptors`` list of tests to 
 		  be run.
 		- override `testComplete()` to customize how test output directories are cleaned up at the end of a test's 
 		  execution.
-		- override `processCoverageData()` to provide support for producing a code coverage report at the end of 
-		  executing all tests. 
-    
-    However where possible it is recommended to create one or more runner plugins rather than subclassing BaseRunner. 
-		
+	
 	Do not override the ``__init__`` constructor when creating a runner subclass; instead, add any initialization logic 
 	to your `setup()` method. 
 	
@@ -91,9 +88,19 @@ class BaseRunner(ProcessUser):
 		each testcase. Typically a relative path, but can also be an absolute path. The basename of this (outDirName) 
 		is often used as an identifier for the current test run. 
 
-	:ivar str ~.output: The full path of the output directory that this runner can use for storing any persistent state, 
-		e.g. logs for any servers started in the runner `setup` method. The runner output directory is formed based 
-		on the ``outsubdir``. 
+	:ivar str ~.output: The full path of the output directory that this runner can use for storing global logs, 
+		persistent state for servers started in the runner `setup` method, and other data. 
+		
+		By default the runner output directory is named based on the ``outsubdir`` and located either as a subdirectory 
+		of the testRootDir, or if under outsubdir (if it's an absolute path); it can also be overridden using the 
+		``pysysRunnerDirName`` project property. 
+		
+		Writers and runner plugins (e.g. for code coverage reports) can either put their output under this ``output`` 
+		directory, or for increased prominence, add ``/..`` to put their output directly under the testDirRoot 
+		(or the ``--outdir`` if an absolute ``--outdir`` path is specified).
+		
+		Unlike test directories, the runner output directory is not automatically created or cleaned between runs, so 
+		if this is required the runner should do it be calling `deleteDir()` and `mkdir()`. 
 	
 	:ivar logging.Logger ~.log: The Python ``Logger`` instance that should be used to record progress and status 
 		information. 
@@ -242,7 +249,7 @@ class BaseRunner(ProcessUser):
 		for c in self.project.collectTestOutput:
 			c = dict(c)
 			assert c['outputDir'], 'collect-test-output outputDir cannot be empty'
-			c['outputDir'] = os.path.join(self.project.root, c['outputDir']\
+			c['outputDir'] = os.path.join(self.output+'/..', c['outputDir']\
 				.replace('@OUTDIR@', os.path.basename(self.outsubdir)) \
 				)
 			assert os.path.normpath(c['outputDir']) != os.path.normpath(self.project.root), 'Must set outputDir to a new subdirectory'
@@ -648,6 +655,9 @@ class BaseRunner(ProcessUser):
 		processing of coverage data (if enabled), for example generating 
 		reports etc. 
 		
+		:deprecated: Instead of overriding this method, create a runner plugin which can add a 
+			`cleanup function <addCleanupFunction>` to generate a coverage report at the end of the test run. 
+		
 		The default implementation collates Python coverage data from 
 		coverage.py and produces an HTML report. Python coverage is collected only if a project property 
 		`pythonCoverageDir` is set to the directory coverage files are 
@@ -664,8 +674,9 @@ class BaseRunner(ProcessUser):
 		your own coverage processing function to be executed after tests have completed. 
 		"""
 		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
+		assert pythonCoverageDir != '.', pythonCoverageDir
 		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir:
-			pythonCoverageDir = os.path.join(self.project.root, pythonCoverageDir
+			pythonCoverageDir = os.path.join(self.output+'/..', pythonCoverageDir
 				.replace('@OUTDIR@', os.path.basename(self.outsubdir))) # matches collect-test-output logic
 			if not pathexists(pythonCoverageDir):
 				self.log.info('No Python coverage files were generated.')

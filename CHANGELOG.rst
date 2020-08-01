@@ -60,7 +60,8 @@ provide a simpler way to share functionality across tests. There are currently t
   your `__init__()` constructor (for example, in `BaseTest.setup()`). 
 - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
   before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
-  all tests. 
+  all tests. These can be used to starts servers/VMs that are shared across tests, or to generate code coverage 
+  reports during cleanup after all tests have executed.
   Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
   class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
 
@@ -334,6 +335,10 @@ pysys.py and project configuration improvements
 - Colored output is disabled if the ``NO_COLOR`` environment variable is set; this is a cross-product standard 
   (https://no-color.org/). The ``PYSYS_COLOR`` variable take precedence if set. 
 
+- Code coverage can now be disabled automatically for tests where it is not wanted (e.g. performance tests) by adding 
+  the ``disableCoverage`` group to the ``pysystest.xml`` descriptor, or the ``pysysdirconfig.xml`` for a whole 
+  directory. This is equivalent to setting the ``self.disableCoverage`` attribute on the base test. 
+
 - The ``-XpythonCoverage`` option now produces an XML ``coverage.xml`` report in addition to the ``.coverage`` file 
   and HTML report. This is useful for some code coverage UI/aggregation services. 
 
@@ -416,6 +421,8 @@ The changes that everyone should pay attention to are:
     <!-- Overrides the default name use to for the runner's ``self.output`` directory (which may be used for things 
         like code coverage reports, temporary files etc). 
         The default was changed to "__pysys_runner.${outDirName}" in PySys 1.6.0. 
+        If a relative path is specified, it is relative to the testRootDir, or if an absolute --outdir was specified, 
+        relative to that directory. 
     -->
     <property name="pysysRunnerDirName" value="pysys_runner_${outDirName}"/>
 
@@ -527,6 +534,8 @@ the following list and consult it only if you get new test failures after upgrad
   may have to remove them. The new behaviour only applies to ``<property name="..." value="..." [default="..."]/>`` 
   elements, it does not apply to properties read from .properties files, which still default to "" if unresolved. 
   Run your tests with ``-vDEBUG`` logging if you need help debugging properties problems. 
+- Writer, performance and code coverage logs now go under ``--outdir`` if an absolute ``--outdir`` path is specified 
+  on the command line rather than the usual location under ``testDirRoot/``. 
 - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 
   There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you 
   prefer a different output directory on your machine you could customize it by setting environment variable 

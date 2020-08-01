@@ -14,6 +14,9 @@ the time taken to calculate fibonacci numbers.
     <groups inherit="true">
       <group>examples</group>
       <group>performance</group>
+      
+      <!-- Always disable coverage reporting for performance tests -->
+      <group>disableCoverage</group>
     </groups>
      <modes inherit="true">
         <mode>FibonacciMode1</mode>

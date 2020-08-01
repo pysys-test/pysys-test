@@ -103,7 +103,8 @@ class CSVPerformanceReporter(object):
 
 	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv'
 	"""The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or 
-	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. 
+	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. This is relative to the runner output+'/..' directory 
+	(typically testRootDir, unless ``--outdir`` is overridden).
 	"""
 
 	def __init__(self, project, summaryfile, testoutdir, runner, **kwargs):
@@ -178,7 +179,7 @@ class CSVPerformanceReporter(object):
 			.replace('@TESTID@', testobj.descriptor.id)
 		
 		assert summaryfile, repr(getRunSummaryFile) # must not be empty
-		summaryfile = os.path.join(self.project.root, summaryfile)
+		summaryfile = os.path.join(self.runner.output+'/..', summaryfile)
 		return summaryfile
 
 	def getRunHeader(self):

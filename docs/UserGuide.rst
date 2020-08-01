@@ -56,16 +56,27 @@ The recommended way to do that in PySys is to create one or more "plugins". Ther
 
     - **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
       to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
-      would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
-      class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. 
+      would. 
+      
+      Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
+      class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. The alias 
+      provides a way for test classes to access the functionality provided by each test plugin, for example creating 
+      configuration files and starting processes. 
+      
       As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
-      your `__init__()` constructor (for example, in `BaseTest.setup()`). 
+      your test's `__init__()` constructor (for example, from `BaseTest.setup()`). 
 
     - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
       before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
-      all tests. 
+      all tests. Runner plugins could be used to start servers/VMs etc for use by multiple tests, or for adding cleanup 
+      functions to run at the end of test execution such as generation of a code coverage report. 
+      
       Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
       class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
+      
+      Runner plugins that generate output files/directories should by default put that output under either the 
+      `runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
+      directory (which is typically ``testRootDir`` unless an absolute ``--outdir`` path was provided). 
 
 A test plugin could look like this::
 
@@ -113,6 +124,14 @@ In addition to the alias-based lookup, plugins can get a list of the other plugi
 using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `pysys.baserunner.BaseRunner`), which 
 provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
 particular project configuration.  
+
+When creating a runner plugin 
+Writers that generate output files/directories should by default put that output under either the 
+`runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
+directory (which is typically ``testRootDir`` unless an absolute ``--outdir`` path was provided) . 
+A prefix of double underscore ``__pysys`` is recommended to distinguish dynamically created directories 
+(ignored by version control) from the testcase directories (checked into version control). 
+
 
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
 its constructor, see the sample Project Configuration file. 
@@ -215,7 +234,7 @@ as Java), this is easy to achieve by following the same pattern:
   `-m coverage run` to the command line of Python programs 
   started using the `BaseTest.startPython` method (and setting ``COVERAGE_FILE`` to a 
   unique filename in the test output directory), when the ``pythonCoverage`` 
-  property is set to true (typically by ``pysys.py run -X pythonCoverage=true``). The 
+  property is set to true (typically by ``pysys.py run -XpythonCoverage``). The 
   ``pythonCoverageArgs`` project property can be set to provide customized 
   arguments to the coverage tool, such as which files to include/exclude, or 
   a ``--rcfile=`` specifying a coverage configuration file. 
@@ -248,22 +267,16 @@ as Java), this is easy to achieve by following the same pattern:
       with any other collected output file from another test. The ``@UNIQUE@`` 
       substitution variable is mandatory. 
     
-- Add a custom runner class, and provide a `pysys.baserunner.BaseRunner.processCoverageData()` 
-  implementation that combines the coverage files from the directory 
+- Add a runner plugin class, which calls `pysys.baserunner.BaseRunner.addCleanupFunction()` to register a 
+  function that will be called after tests have finished executing to combine the coverage files from the directory 
   where they were collected and generates any required reports. The default 
   implementation already does this for Python programs. Note that when reading 
-  the property value specifying the output directory any ``${...}`` 
-  property values will be substituted automatically, but any ``@...@`` values 
-  such as ``@OUTDIR@`` must be replaced manually (since the value of 
-  ``runner.outsubdir`` is not available when the project properties are 
-  resolved). 
+  the project property value specifying the output directory any ``${...}`` 
+  property values will be substituted automatically. 
   
-- Add a custom `BaseTest` class to be inherited by all your tests and from 
-  `BaseTest.setup` method set ``self.disableCoverage=True`` for test groups that should not use coverage, 
-  such as performance tests. For example::
-  
-  	 if 'performance' in self.descriptor.groups: self.disableCoverage = True
-  
+- Add the ``disableCoverage`` group to any tests (or test directories) that should not use coverage, 
+  such as performance tests. 
+   
 - If using a continuous integration system or centralized code coverage 
   database, you could optionally upload the coverage data there from the 
   directory PySys collected it into, so there is a permanent record of 
@@ -277,13 +290,7 @@ as a web test that needs to pass against multiple supported web browsers,
 or a set of tests that should be run against various different database but 
 can also be run against a mocked database for quick local development. 
 
-Using modes is fairly straightforward. First make sure your project 
-configuration includes::
-
-   <property name="supportMultipleModesPerRun" value="true"/>
-   
-If you created your project using PySys 1.4.1 or later this will already be 
-present. Next you should edit the ``pysystest.xml`` files for tests that 
+Using modes is fairly straightforward. First edit the ``pysystest.xml`` files for tests that 
 need to run in multiple modes, and add a list of the supported modes::
 
    <classification>

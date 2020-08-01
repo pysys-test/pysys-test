@@ -16,7 +16,7 @@ class PySysTest(BaseTest):
 		self.logFileContents('pysys.out', maxLines=0)
 		
 		with io.open(self.output+'/collected_files.txt', 'w', encoding='utf-8') as f:
-			for c in sorted(os.listdir(self.output+'/test/mydir-pysys-output')):
+			for c in sorted(os.listdir(self.output+'/pysys-output/mydir-pysys-output')):
 				f.write(os.path.basename(c)+u'\n')
 
 	def validate(self):

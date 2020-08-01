@@ -64,6 +64,12 @@ constructors of all configured test writers, and then the setup (prior to execut
 is used for variable argument passing in the interface methods to allow modification of the PySys framework without
 breaking writer implementations already in existence.
 
+Writers that generate output files/directories should by default put that output under either the 
+`runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
+directory (which is typically ``testRootDir`` unless an absolute ``--outdir`` path was provided) . 
+A prefix of double underscore ``__pysys`` is recommended to distinguish dynamically created directories 
+(ignored by version control) from the testcase directories (checked into version control). 
+
 """
 
 __all__ = [
@@ -519,7 +525,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		# Creates the file handle to the logfile and logs initial details of the date, 
 		# platform and test host. 
 
-		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
+		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
 
 		self.fp = flushfile(open(self.logfile, "w"))
 		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
@@ -597,7 +603,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		# Creates the DOM for the test output summary and writes to logfile. 
 						
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
-		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
+		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
 		
 		try:
 			self.fp = io.open(self.logfile, "wb")
@@ -753,8 +759,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 	def setup(self, **kwargs):	
 		# Creates the output directory for the writing of the test summary files.  
-
-		self.outputDir = os.path.join(kwargs['runner'].project.root, 'target','pysys-reports') if not self.outputDir else self.outputDir
+		self.outputDir = (os.path.join(kwargs['runner'].project.root, 'target','pysys-reports') if not self.outputDir else 
+			os.path.join(kwargs['runner'].output+'/..', self.outputDir))
 		deletedir(self.outputDir)
 		mkdir(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
@@ -848,7 +854,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		# Creates the file handle to the logfile and logs initial details of the date,
 		# platform and test host.
 
-		self.logfile = os.path.join(self.outputDir, self.logfile) if self.outputDir is not None else self.logfile
+		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
 
 		self.fp = flushfile(open(self.logfile, "w"))
 		self.fp.write('id, title, cycle, startTime, duration, outcome\n')
@@ -1079,7 +1085,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 	destDir = '__pysys_output_archives.${outDirName}/'
 	"""
-	The directory to write the archives to, as an absolute path, or relative to the testRootDir. 
+	The directory to write the archives to, as an absolute path, or relative to the testRootDir (or --outdir if specified) . 
 
 	This directory will be deleted at the start of the run if it already exists. 
 	
@@ -1145,8 +1151,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		
 		# avoid double-expanding (which could mess up ${$} escapes), but if using default value we need to expand it
 		if self.destDir == TestOutputArchiveWriter.destDir: self.destDir = runner.project.expandProperties(self.destDir)
-		
-		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.project.root, self.destDir)))
+		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.output+'/..', self.destDir)))
 		if os.path.exists(self.destDir) and all(f.endswith(('.txt', '.zip')) for f in os.listdir(self.destDir)):
 			deletedir(self.destDir) # remove any existing archives (but not if this dir seems to have other stuff in it!)
 

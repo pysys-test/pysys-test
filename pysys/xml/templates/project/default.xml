@@ -19,7 +19,7 @@
 	
 	<writers>
 		<writer classname="pysys.writer.TestOutputArchiveWriter">
-			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
+			<property name="destDir" value="__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
 			<property name="maxArchives" value="50"/>
@@ -29,7 +29,7 @@
 		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
 
 		<writer classname="pysys.writer.JUnitXMLResultsWriter">
-			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
+			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
 		
 		<writer classname="pysys.writer.ConsoleSummaryResultsWriter">

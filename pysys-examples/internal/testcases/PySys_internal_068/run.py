@@ -117,7 +117,7 @@ class PySysTest(BaseTest):
 		# check the option works to disable this
 		self.assertGrep('pysys.out', expr='List of failure test ids:', contains=False)
 		
-		self.assertPathExists('__pysys_output_archives.myoutdir/NestedFail.cycle001.myoutdir.zip')
+		self.assertPathExists('myoutdir/__pysys_output_archives.myoutdir/NestedFail.cycle001.myoutdir.zip')
 		
 		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchive: .+/NestedFail.cycle002.myoutdir.zip')
 		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchiveDir: .+/__pysys_output_archives.myoutdir')
