@@ -79,7 +79,7 @@
 	The set of property keys that are imported can be filtered with a regular expression using 
 	the includes="regex" and excludes="regex" optional attributes. 
 	 -->
-	<property file="${osfamily}.properties" pathMustExist="false" prefix="os_"/>
+	<property file="pysys-${osfamily}.properties" pathMustExist="false" prefix="os_"/>
 
 
 	<!-- 
