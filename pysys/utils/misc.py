@@ -80,8 +80,10 @@ def setInstanceVariablesFromDict(obj, d, errorOnMissingVariables=False):
 		if defvalue is not None and isstring(val):
 			# attempt type coersion to keep the type the same
 			if defvalue is True or defvalue is False:
-				if val.lower()=='true': return True
-				if val.lower()=='false' or val=='': return False
+				if val.lower()=='true': val = True
+				elif val.lower()=='false' or val == '': val = False
+				else:
+					raise Exception('Unexpected value for boolean %s: %s'%(key, repr(val)))
 			elif isinstance(defvalue, int):
 				val = int(val)
 			elif isinstance(defvalue, float):
