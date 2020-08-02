@@ -26,8 +26,9 @@ class PySysTest(BaseTest):
 		], workingDir='testroot', expectedExitStatus='!=0')
 						
 	def validate(self):
-		if self.assertGrep('pysys.out', expr=r'(Traceback .*| WARN .*writer)', contains=False):
+		if self.assertGrep('pysys.out', expr=r'(Traceback .*| WARN .*[Ww]riter)', contains=False):
 			self.logFileContents('pysys.out', tail=True, maxLines=0)
+			return
 
 		self.log.info('')
 

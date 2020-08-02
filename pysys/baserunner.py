@@ -1000,6 +1000,7 @@ class TestContainer(object):
 				pysysLogHandler.setLogHandlersForCurrentThread(defaultLogHandlersForCurrentThread+[self.testFileHandlerStdout])
 
 				# set the output subdirectory and purge contents; must be unique per mode (but not per cycle)
+
 				if os.path.isabs(self.runner.outsubdir):
 					self.outsubdir = os.path.join(self.runner.outsubdir, self.descriptor.id)
 					# don't need to add mode to this path as it's already in the id
@@ -1007,6 +1008,9 @@ class TestContainer(object):
 					self.outsubdir = os.path.join(self.descriptor.testDir, self.descriptor.output, self.runner.outsubdir)
 					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
 						self.outsubdir += '~'+self.descriptor.mode
+				
+				# In python2, ensure self.output is a byte string not a unicode string even when --outdir abspath is specified
+				if PY2 and isinstance(self.outsubdir, unicode): self.outsubdir = self.outsubdir.encode()
 
 				try:
 					if not self.runner.validateOnly: 

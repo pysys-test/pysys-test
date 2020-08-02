@@ -79,6 +79,7 @@ __all__ = [
 
 import time, stat, logging, sys, io
 import zipfile
+import locale
 if sys.version_info[0] == 2:
 	from urlparse import urlunparse
 else:
@@ -1243,6 +1244,8 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 		try:
 			outputDir = toLongPathSafe(outputDir)
+			if PY2: # it's simpler if we always deal with unicode strings (which would happen on windows anyway due to the longpathsafe stuff)
+				if isinstance(outputDir, str): outputDir = unicode(outputDir, locale.getpreferredencoding())
 			skippedFiles = []
 			
 			# this is performance-critical so worth caching these
@@ -1318,9 +1321,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 				
 				if skippedFiles and fileIncludesRegex is None: # keep the archive clean if there's an explicit include
 					skippedFilesStr = os.linesep.join([fromLongPathSafe(f) for f in skippedFiles])
-					# in Python 2 this could be a non-unicode string depending on platform
-					if (not PY2) or not isinstance(skippedFilesStr, str):
-						skippedFilesStr = skippedFilesStr.encode('utf-8')
+					skippedFilesStr = skippedFilesStr.encode('utf-8')
 					myzip.writestr('__pysys_skipped_archive_files.txt', skippedFilesStr)
 	
 			if filesInZip == 0:
