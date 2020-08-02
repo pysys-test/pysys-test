@@ -612,26 +612,11 @@ class Project(object):
 		.. versionadded:: 1.6.0
 		
 		:param str key: The name of the property.
-		:param bool/int/float/str/list[str] default: The default value to return if the property is not set or is an empty string. 
+		:param bool/int/float/str/list[str] default: The default value to return if the property is not set. 
 			The type of the default parameter will be used to convert the property value from a string if it is 
 			provided. An exception will be raised if the value is non-empty but cannot be converted to the indicated type. 
 		"""
-		if not self.properties.get(key): return default
-		val = self.properties[key]
-		if default is True or default is False:
-			if val.lower()=='true': return True
-			if val.lower()=='false' or val=='': return False
-			raise Exception('Unexpected value for boolean project property %s=%s'%(key, val))
-		elif isinstance(default, int):
-			return int(val)
-		elif isinstance(default, float):
-			return float(val)
-		elif isinstance(default, list):
-			return [val.strip() for val in val.split(',') if val.strip()]
-		elif isinstance(default, str):
-			return val # nothing to do
-		else:
-			raise Exception('Unsupported type for "%s" property default: %s'%(key, type(default).__name__))
+		return pysys.utils.misc.getTypedValueOrDefault(key, self.properties.get(key, None), default)
 
 	@staticmethod
 	def getInstance():

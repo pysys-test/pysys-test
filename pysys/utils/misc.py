@@ -19,6 +19,7 @@
 Miscellanous utilities such as `pysys.utils.misc.compareVersions` and `pysys.utils.misc.setInstanceVariablesFromDict`.
 """
 
+import logging
 from pysys.constants import *
 from pysys.utils.pycompat import *
 
@@ -60,6 +61,46 @@ def compareVersions(v1, v2):
 			if v1[i] < v2[i]: return -1
 	return 0
 
+def getTypedValueOrDefault(key, value, default):
+	"""
+	Convert a string value to the required type matching the specified default value, or return the default if value is None. 
+
+	
+	.. versionadded:: 1.6.0
+	
+	:param str key: The name of the property for use in error messages.
+	
+	:param str value: The value that will be converted to the type of default. 
+	
+		If this is None, the default will be returned instead. 
+		
+		If this is an empty string then depending on the type of default, a boolean False, empty list[] or empty string will be returned; 
+		if instead you wish empty string to result in the default being returned, pass ``value or default`` instead of ``value``. 
+		
+	:param bool/int/float/str/list[str] default: The default value to return if the property is not set or is an empty string. 
+		The type of the default parameter will be used to convert the property value from a string if it is 
+		provided. An exception will be raised if the value is non-empty but cannot be converted to the indicated type. 
+		
+	:return: A value of the same type as ``default``.
+	:raises Exception: If the value cannot be converted to default.
+	"""
+	if value is None: return default
+	if default is True or default is False:
+		if value.lower()=='true': return True
+		if value.lower()=='false' or value=='': return False
+		raise Exception('Unexpected value for boolean value %s=%s'%(key, value))
+	elif isinstance(default, int):
+		return int(value)
+	elif isinstance(default, float):
+		return float(value)
+	elif isinstance(default, list):
+		return [v.strip() for v in value.split(',') if v.strip()]
+	elif isinstance(default, str):
+		return value # nothing to do. allow it to be empty string
+	else:
+		raise Exception('Unsupported type for "%s" value default: %s'%(key, type(default).__name__))
+
+
 def setInstanceVariablesFromDict(obj, d, errorOnMissingVariables=False):
 	"""
 	Sets an instance variable for each item in the specified dictionary, with automatic conversion of 
@@ -79,16 +120,6 @@ def setInstanceVariablesFromDict(obj, d, errorOnMissingVariables=False):
 		defvalue = getattr(obj, key, None)
 		if defvalue is not None and isstring(val):
 			# attempt type coersion to keep the type the same
-			if defvalue is True or defvalue is False:
-				if val.lower()=='true': val = True
-				elif val.lower()=='false' or val == '': val = False
-				else:
-					raise Exception('Unexpected value for boolean %s: %s'%(key, repr(val)))
-			elif isinstance(defvalue, int):
-				val = int(val)
-			elif isinstance(defvalue, float):
-				val = float(val)
-			elif isinstance(defvalue, list):
-				val = [val.strip() for val in val.split(',') if val.strip()]
+			val = getTypedValueOrDefault(key, val, defvalue)
 		setattr(obj, key, val)
 	
