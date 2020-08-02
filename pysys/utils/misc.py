@@ -85,6 +85,7 @@ def getTypedValueOrDefault(key, value, default):
 	:raises Exception: If the value cannot be converted to default.
 	"""
 	if value is None: return default
+	if not isstring(value): return value
 	if default is True or default is False:
 		if value.lower()=='true': return True
 		if value.lower()=='false' or value=='': return False
@@ -95,7 +96,7 @@ def getTypedValueOrDefault(key, value, default):
 		return float(value)
 	elif isinstance(default, list):
 		return [v.strip() for v in value.split(',') if v.strip()]
-	elif isinstance(default, str):
+	elif isstring(default):
 		return value # nothing to do. allow it to be empty string
 	else:
 		raise Exception('Unsupported type for "%s" value default: %s'%(key, type(default).__name__))
