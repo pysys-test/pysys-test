@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
 from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
-from pysys.utils.fileutils import mkdir
+from pysys.utils.fileutils import mkdir, toLongPathSafe
 from pysys.utils.pycompat import *
 
 class PerformanceUnit(object):
@@ -74,7 +74,7 @@ class CSVPerformanceReporter(object):
 	element, for example to write data to an XML or JSON file instead of CSV. 
 	Performance reporter implementations are required to be thread-safe. 
 	
-	The standard CSV performance reporter implementation writes to a file of 
+	The standard CSV performance reporter implementation writes to a UTF-8 file of 
 	comma-separated values that is both machine and human readable and 
 	easy to view and use in any spreadsheet program, and after the columns containing 
 	the information for each result, contains comma-separated metadata containing 
@@ -292,18 +292,19 @@ class CSVPerformanceReporter(object):
 		"""
 		# generate a file in the test output directory for convenience/triaging, plus add to the global summary
 		path = testobj.output+'/performance_results.csv'
+		encoding = None if PY2 else 'utf-8'
 		if not os.path.exists(path):
-			with open(path, 'w') as f:
+			with openfile(path, 'w', encoding=encoding) as f:
 				f.write(self.getRunHeader())
-		with open(path, 'a') as f:
+		with openfile(path, 'a', encoding=encoding) as f:
 			f.write(formatted)
 		
 		# now the global one
 		path = self.getRunSummaryFile(testobj)
 		mkdir(os.path.dirname(path))
 		with self._lock:
-			alreadyexists = os.path.exists(path)
-			with open(path, 'a') as f:
+			alreadyexists = os.path.exists(toLongPathSafe(path))
+			with openfile(path, 'a', encoding=encoding) as f:
 				if not alreadyexists: 
 					testobj.log.info('Creating performance summary log file at: %s', os.path.normpath(path))
 					f.write(self.getRunHeader())
@@ -530,7 +531,7 @@ cycles.
 		raise Exception('No .csv files found')
 	files = []
 	for p in paths:
-		with open(p) as f:
+		with openfile(p, encoding='utf-8') as f:
 			files.append(CSVPerformanceFile(f.read()))
 	
 	if cmd == 'aggregate':

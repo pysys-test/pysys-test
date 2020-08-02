@@ -1057,7 +1057,7 @@ class TestContainer(object):
 				try:
 					if not self.descriptor.module.endswith('.py'): self.descriptor.module += '.py'
 					runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module)
-					with open(runpypath, 'rb') as runpyfile:
+					with open(toLongPathSafe(runpypath), 'rb') as runpyfile:
 						runpycode = compile(runpyfile.read(), runpypath, 'exec')
 					runpy_namespace = {}
 					exec(runpycode, runpy_namespace)

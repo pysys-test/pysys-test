@@ -30,6 +30,8 @@ from pysys.launcher import createDescriptors
 from pysys.xml.project import Project
 from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
+from pysys.utils.pycompat import openfile, PY2
+from pysys.utils.fileutils import toLongPathSafe
 
 class ConsoleMakeTestHelper(object):
 	"""
@@ -170,11 +172,11 @@ class %s(%s):
 			log.info("Created directory %s " % os.path.join(self.testdir, self.testId, output))
 			os.makedirs(os.path.join(self.testdir, self.testId, reference))
 			log.info("Created directory %s " % os.path.join(self.testdir, self.testId, reference))
-			descriptor_fp = open(os.path.join(self.testdir, self.testId, descriptor), "w")
+			descriptor_fp = openfile(os.path.join(self.testdir, self.testId, descriptor), "w", encoding=None if PY2 else 'utf-8')
 			descriptor_fp.write(self.DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
 			descriptor_fp.close()
 			log.info("Created descriptor %s " % os.path.join(self.testdir, self.testId, descriptor))
-			testclass_fp = open(os.path.join(self.testdir, self.testId, "%s.py" % module), "w")
+			testclass_fp = openfile(os.path.join(self.testdir, self.testId, "%s.py" % module), "w")
 			if teststring == None:
 				testclass_fp.write(self.TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
 			else:

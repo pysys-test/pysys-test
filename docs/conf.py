@@ -27,7 +27,7 @@ copyright = f'2006-{date.today().year} M.B. Grieve; documentation last updated o
 author = 'M.B. Grieve and Ben Spiller'
 
 # The full version, including alpha/beta/rc tags
-with open(PYSYS_ROOT_DIR+'/VERSION') as versionfile:
+with open(PYSYS_ROOT_DIR+'/VERSION', encoding='ascii') as versionfile:
 	pysys_release = versionfile.read().strip()
 
 project = f'PySys v{pysys_release}'

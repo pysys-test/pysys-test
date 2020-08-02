@@ -87,7 +87,7 @@ else:
 from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe
-from pysys.utils.pycompat import PY2
+from pysys.utils.pycompat import PY2, openfile
 from pysys.exceptions import UserError
 
 from xml.dom.minidom import getDOMImplementation
@@ -527,7 +527,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 
 		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
 
-		self.fp = flushfile(open(self.logfile, "w"))
+		self.fp = flushfile(openfile(self.logfile, "w", encoding=None if PY2 else 'utf-8'))
 		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
 		self.fp.write('PLATFORM:   %s\n' % (PLATFORM))
 		self.fp.write('TEST HOST:  %s\n' % (HOSTNAME))
@@ -606,7 +606,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
 		
 		try:
-			self.fp = io.open(self.logfile, "wb")
+			self.fp = io.open(toLongPathSafe(self.logfile), "wb")
 		
 			impl = getDOMImplementation()
 			self.document = impl.createDocument(None, "pysyslog", None)
@@ -856,7 +856,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 
 		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
 
-		self.fp = flushfile(open(self.logfile, "w"))
+		self.fp = flushfile(openfile(self.logfile, "w", encoding=None if PY2 else 'utf-8'))
 		self.fp.write('id, title, cycle, startTime, duration, outcome\n')
 
 	def cleanup(self, **kwargs):
@@ -1179,7 +1179,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		if self.skippedTests:
 			# if we hit a limit, at least record the names of the tests we missed
 			mkdir(self.destDir)
-			with io.open(self.destDir+os.sep+'skipped_artifacts.txt', 'w', encoding='utf-8') as f:
+			with openfile(self.destDir+os.sep+'skipped_artifacts.txt', 'w', encoding=None if PY2 else 'utf-8') as f:
 				f.write('\n'.join(os.path.normpath(t) for t in self.skippedTests))
 		
 		(log.info if self.archivesCreated else log.debug)('%s created %d test output archive artifacts in: %s', 

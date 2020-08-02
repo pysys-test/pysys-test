@@ -27,7 +27,7 @@ class PySysTest(BaseTest):
 						
 	def validate(self):
 		if self.assertGrep('pysys.out', expr=r'(Traceback .*| WARN .*writer)', contains=False):
-			self.logFileContents('pysys.out', tail=True)
+			self.logFileContents('pysys.out', tail=True, maxLines=0)
 
 		self.log.info('')
 

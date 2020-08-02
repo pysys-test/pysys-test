@@ -30,7 +30,7 @@ import locale
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2, isstring
+from pysys.utils.pycompat import PY2, isstring, openfile
 
 log = logging.getLogger('pysys.xml.descriptor')
 
@@ -258,7 +258,7 @@ class XMLDescriptorCreator(object):
 	
 	def writeXML(self):
 		'''Write a test descriptor template to file.'''
-		fp = open(self.file, 'w')
+		fp = openfile(self.file, 'w')
 		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.group, self.testclass, self.module))
 		fp.close
 		

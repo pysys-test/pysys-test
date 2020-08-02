@@ -22,7 +22,7 @@ File copy function.
 """
 
 
-from __future__ import print_function
+import shutil
 import sys, os
 from pysys.exceptions import *
 from pysys.utils.fileutils import toLongPathSafe, pathexists
@@ -53,17 +53,7 @@ def filecopy(src, dst):
 	if not pathexists(src):
 		raise FileNotFoundException("unable to find file %s" % (os.path.basename(src)))
 	
-	fsrc = None
-	fdst = None
-	try:
-		fsrc = open(toLongPathSafe(src), 'rb')
-		fdst = open(toLongPathSafe(dst), 'wb')
-		copyfileobj(fsrc, fdst)
-	finally:
-		if fdst:
-			fdst.close()
-		if fsrc:
-			fsrc.close()
+	shutil.copyfile(toLongPathSafe(src), toLongPathSafe(dst))
 
 
 # entry point for running the script as an executable
