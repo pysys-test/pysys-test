@@ -1317,7 +1317,11 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 						bytesRemaining -= myzip.getinfo(memberName).compress_size
 				
 				if skippedFiles and fileIncludesRegex is None: # keep the archive clean if there's an explicit include
-					myzip.writestr('__pysys_skipped_archive_files.txt', os.linesep.join([fromLongPathSafe(f) for f in skippedFiles]).encode('utf-8'))
+					skippedFilesStr = os.linesep.join([fromLongPathSafe(f) for f in skippedFiles])
+					# in Python 2 this could be a non-unicode string depending on platform
+					if (not PY2) or not isinstance(skippedFilesStr, str):
+						skippedFilesStr = skippedFilesStr.encode('utf-8')
+					myzip.writestr('__pysys_skipped_archive_files.txt', skippedFilesStr)
 	
 			if filesInZip == 0:
 				# don't leave empty zips around
