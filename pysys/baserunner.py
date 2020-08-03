@@ -95,8 +95,8 @@ class BaseRunner(ProcessUser):
 		``pysysRunnerDirName`` project property. 
 		
 		Writers and runner plugins (e.g. for code coverage reports) can either put their output under this ``output`` 
-		directory, or for increased prominence, add ``/..`` to put their output directly under the testDirRoot 
-		(or the ``--outdir`` if an absolute ``--outdir`` path is specified).
+		directory, or for increased prominence, add ``/..`` which will put their output directly under the testDirRoot 
+		(unless an absolute ``--outdir`` path is specified in which case it will go there instead).
 		
 		Unlike test directories, the runner output directory is not automatically created or cleaned between runs, so 
 		if this is required the runner should do it be calling `deleteDir()` and `mkdir()`. 
