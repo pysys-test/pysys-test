@@ -241,7 +241,7 @@ class TestDescriptor(object):
 	
 	def __repr__(self): return str(self)
 
-class XMLDescriptorCreator(object):
+class _XMLDescriptorCreator(object):
 	'''Helper class to create a test descriptor template. DEPRECATED. 
 	
 	:meta private: If we want an API for this, having a writeToFile method on TestDescriptor would be a better way 
@@ -269,7 +269,7 @@ exists for compatibility reasons only.
 :meta private:
 """
 
-class XMLDescriptorParser(object):
+class _XMLDescriptorParser(object):
 	'''DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. 
 	
 	:meta private:
@@ -319,7 +319,7 @@ class XMLDescriptorParser(object):
 			specifying default values to be filtered in from the parent 
 			directory.
 		"""
-		p = XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults, project=project)
+		p = _XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults, project=project)
 		try:
 			return p.getContainer()
 		finally:
@@ -796,24 +796,4 @@ class DescriptorLoader(object):
 			The exception message must contain the path of the descriptorfile.
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
-		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project)
-
-if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
-
-	if ( len(sys.argv) < 2 ) or ( sys.argv[1] not in ("create", "parse", "validate") ):
-		print("Usage: %s (create | parse ) filename" % os.path.basename(sys.argv[0]))
-		sys.exit()
-	
-	if sys.argv[1] == "parse":
-		parser = XMLDescriptorParser(sys.argv[2])
-		print(parser.getContainer())
-		parser.unlink()
-
-	elif sys.argv[1] == "create":
-		creator = XMLDescriptorCreator(sys.argv[2])
-		creator.writeXML()
-		
-	elif sys.argv[1] == "validate":
-		from xml.parsers.xmlproc.xmlval import XMLValidator
-		XMLValidator().parse_resource(sys.argv[2])
-		
+		return _XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project)

@@ -39,7 +39,7 @@ from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.project')
 
-class XMLProjectParser(object):
+class _XMLProjectParser(object):
 	"""
 	:meta private: Not public API. 
 	"""
@@ -520,9 +520,8 @@ class Project(object):
 		else:
 			if not os.path.exists(os.path.join(root, projectFile)):
 				raise UserError("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
-			from pysys.xml.project import XMLProjectParser
 			try:
-				parser = XMLProjectParser(root, projectFile, outdir=outdir)
+				parser = _XMLProjectParser(root, projectFile, outdir=outdir)
 			except UserError:
 				raise
 			except Exception as e: 
