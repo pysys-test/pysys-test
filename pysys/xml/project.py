@@ -378,11 +378,11 @@ class _XMLProjectParser(object):
 		return result, secondaryModesHintDelta
 
 	def getWriterDetails(self):
-		writersNodeList = self.root.getElementsByTagName('writers')
-		if writersNodeList == []: return []
-		
+		# writers can optionally be under a 'writers' parent node but this is now optional, to facilitate 
+		# a third party plugin vendor providing a snippet of a few consecutive lines to paste into the project config 
+		# to enable new functionality
 		writers = []
-		writerNodeList = writersNodeList[0].getElementsByTagName('writer')
+		writerNodeList = self.root.getElementsByTagName('writer')
 		if not writerNodeList: return []
 		for writerNode in writerNodeList:
 			pythonclassconstructor, propertiesdict = self._parseClassAndConfigDict(writerNode, None)
