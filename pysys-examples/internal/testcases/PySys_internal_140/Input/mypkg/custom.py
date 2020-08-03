@@ -13,10 +13,12 @@ class MyTestClass(BaseTest):
 class CustomDescriptorLoader(object):
 
 	myJSONFilename = 'foo.json'
+	"""
+	Sample plugin property. 
+	"""
 
-	def __init__(self, project, pluginProperties, **kwargs):
-		self.project = project
-		pysys.utils.misc.setInstanceVariablesFromDict(self, pluginProperties, errorOnMissingVariables=True)
+	def setup(self, project, **kwargs):
+		assert self.myJSONFilename != 'foo.json', 'ensure plugin property has been set'
 
 	def addDescriptorsFromDirectory(self, dir, subdirs, files, parentDirDefaults, descriptors, **kwargs):
 		# can merge in defaults from parent dir if desired

@@ -27,6 +27,7 @@ import collections
 import copy
 import locale
 
+import pysys
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
@@ -599,8 +600,14 @@ class DescriptorLoader(object):
 		assert project, 'project must be specified'
 		self.project = project
 		
-		self.__descriptorLoaderPlugins = [plugin(project, props) for (plugin, props) in project._descriptorLoaderPlugins]
-		
+		self.__descriptorLoaderPlugins = []
+		for (pluginCls, pluginProperties) in project._descriptorLoaderPlugins:
+			plugin = pluginCls()
+			plugin.project = project
+			pysys.utils.misc.setInstanceVariablesFromDict(plugin, pluginProperties, errorOnMissingVariables=True)
+			plugin.setup(project)
+			self.__descriptorLoaderPlugins.append(plugin)
+
 	def loadDescriptors(self, dir, **kwargs):
 		"""Find all descriptors located under the specified directory, and 
 		return them as a list.

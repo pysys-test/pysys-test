@@ -55,26 +55,33 @@ provide a simpler way to share functionality across tests. There are currently t
 - **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
   to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
   would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. 
+  class provided it has a method ``setup(self, testobj)`` (and no constructor arguments). 
   As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
-  your `__init__()` constructor (for example, in `BaseTest.setup()`). 
+  your test's `__init__()` constructor (for example, in `BaseTest.setup()`). 
+
 - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
-  before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
-  all tests. These can be used to starts servers/VMs that are shared across tests, or to generate code coverage 
-  reports during cleanup after all tests have executed.
+  before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
+  shared across all tests. These can be used to starts servers/VMs that are shared across tests, or to generate code 
+  coverage reports during cleanup after all tests have executed.
   Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
+  class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
 
 A test plugin could look like this::
 
 	class MyTestPlugin(object):
-		def __init__(self, testobj, pluginProperties):
-			self.owner = self.testobj = testobj
-			self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
-			self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
+		myPluginProperty = 'default value'
+		"""
+		Example of a plugin configuration property. The value for this plugin instance can be overridden using ``<property .../>``.
+		Types such as boolean/list[str]/int/float will be automatically converted from string. 
+		"""
 
-			testobj.addCleanupFunction(self.__myPluginCleanup)
-		
+		def setup(self, testObj):
+			self.owner = self.testObj = testObj
+			self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
+			self.log.info('Created MyTestPlugin instance with myPluginProperty=%s', self.myPluginProperty)
+
+			testObj.addCleanupFunction(self.__myPluginCleanup)
+
 		def __myPluginCleanup(self):
 			self.log.info('Cleaning up MyTestPlugin instance')
 
@@ -90,10 +97,6 @@ With configuration like this::
 	</pysysproject>
 
 ... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
-
-Alternatively, you can create a trivial `BaseTest` subclass that instantiates plugins in code (rather than XML) 
-which would allow code completion (if your editor of choice supports this) but still provide the benefits of 
-the modular composition approach. 
 
 You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific 
 to your application, and third party PySys plugins supporting standard tools and languages. 

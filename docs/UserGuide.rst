@@ -54,61 +54,67 @@ of many/all testcases, such as starting the application you're testing, or check
 
 The recommended way to do that in PySys is to create one or more "plugins". There are currently two kinds of plugin: 
 
-    - **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
-      to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
-      would. 
-      
-      Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
-      class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. The alias 
-      provides a way for test classes to access the functionality provided by each test plugin, for example creating 
-      configuration files and starting processes. 
-      
-      As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
-      your test's `__init__()` constructor (for example, from `BaseTest.setup()`). 
+- **test plugins**; an instances of each test plugin is created for each test (`BaseTest`) that is instantiated, so they 
+  operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
+  would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
+  class provided it has a method ``setup(self, testobj)`` (and no constructor arguments). 
+  As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
+  your test's `__init__()` constructor (for example, in `BaseTest.setup()`). 
 
-    - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
-      before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
-      all tests. Runner plugins could be used to start servers/VMs etc for use by multiple tests, or for adding cleanup 
-      functions to run at the end of test execution such as generation of a code coverage report. 
-      
-      Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
-      class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
-      
-      Runner plugins that generate output files/directories should by default put that output under either the 
-      `runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
-      directory (which is typically ``testRootDir`` unless an absolute ``--outdir`` path was provided). 
+- **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
+  before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
+  shared across all tests. These can be used to starts servers/VMs that are shared across tests, or to generate code 
+  coverage reports during cleanup after all tests have executed.
+  Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
+  class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
+  
+  Runner plugins that generate output files/directories should by default put that output under either the 
+  `runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
+  directory (which is typically ``testRootDir`` unless an absolute ``--outdir`` path was provided). 
+
+Plugin classes should have a static field for any plugin configuration property, which defines the default value 
+and (implicitly) the type. After construction of each plugin, a plugin.XXX attribute is assigned with the actual value 
+of each plugin property (before the plugin's setup method is called). In addition to plugin properties, 
+``pysys run -Xkey=value`` command line options for the plugin (if needed) can be accessed using the runner's 
+`pysys.baserunner.BaseRunner.getXArg()` method. 
 
 A test plugin could look like this::
 
-        class MyTestPlugin(object):
-			myPluginProperty = 'foo bar'
-			
-            def __init__(self, testobj, pluginProperties):
-                self.owner = self.testobj = testobj
-                self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
-                self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
-                pysys.utils.misc.setInstanceVariablesFromDict(self, pluginProperties, errorOnMissingVariables=True)
+	class MyTestPlugin(object):
+		myPluginProperty = 'default value'
+		"""
+		Example of a plugin configuration property. The value for this plugin instance can be overridden using ``<property .../>``.
+		Types such as boolean/list[str]/int/float will be automatically converted from string. 
+		"""
 
-                testobj.addCleanupFunction(self.__myPluginCleanup)
-            
-            def __myPluginCleanup(self):
-                self.log.info('Cleaning up MyTestPlugin instance')
+		def setup(self, testObj):
+			self.owner = self.testObj = testObj
+			self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
+			self.log.info('Created MyTestPlugin instance with myPluginProperty=%s', self.myPluginProperty)
 
-            # An example of providing a method that can be accessed from each test
-            def getPythonVersion(self):
-                self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
-                return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
-               
-            # A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
-            # That approach allows you to later customize the logic by changing just one single place, and also to omit 
-            # it for specific tests where it is not wanted. 
-            def checkLogsForErrors(self):
-		        self.assertGrep('myapp.log', ' ERROR .*', contains=False)
+			# there is no standard cleanup() method, so do this if you need to execute something on cleanup:
+			testObj.addCleanupFunction(self.__myPluginCleanup)  
+
+		def __myPluginCleanup(self):
+			self.log.info('Cleaning up MyTestPlugin instance')
+
+		# An example of providing a method that can be accessed from each test
+		def getPythonVersion(self):
+			self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
+			return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
+
+		# A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
+		# That approach allows you to later customize the logic by changing just one single place, and also to omit 
+		# it for specific tests where it is not wanted. 
+		def checkLogsForErrors(self):
+			self.assertGrep('myapp.log', ' ERROR .*', contains=False)
 
 With configuration like this::
 
     <pysysproject>
-	    <test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias"/>
+	    <test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias">
+			<property name="myPluginProperty" value="my value"/>
+	    </test-plugin>
     </pysysproject>
 
 ... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 

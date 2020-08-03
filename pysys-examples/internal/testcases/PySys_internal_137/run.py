@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		if pysys.utils.pycompat.PY2: self.skipTest('this sample does not work well on PY2 as it uses stderr not stdout for printing the version')
-		runPySys(self, self.output+'/pysys', ['run', '-o', self.output+'/pysys_output'], workingDir=self.input)
+		runPySys(self, self.output+'/pysys', ['run', '-o', self.output+'/pysys_output', '-XmyCmdLineOption=12345'], workingDir=self.input)
 
 	def validate(self):
 		self.logFileContents('pysys.out')
@@ -20,8 +20,8 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='Created MyRunnerPlugin instance')
 		self.assertGrep('pysys.out', expr='Created MyTestPlugin instance')
 
-		self.assertGrep('pysys.out', expr="Created MyTestPlugin instance with pluginProperties=[{]'myPluginProperty': 'val1'[}]")
-		self.assertGrep('pysys.out', expr="Created MyTestPlugin instance with pluginProperties=[{]'myPluginProperty': 'val2'[}]")
+		self.assertGrep('pysys.out', expr="Created MyTestPlugin instance with myPluginProperty=val1")
+		self.assertGrep('pysys.out', expr="Created MyTestPlugin instance with myPluginProperty=val2")
 		
 		self.assertLineCount('pysys.out', expr='Cleaning up MyTestPlugin instance', condition='==4') # 2 instances * 2 tests
 		self.assertLineCount('pysys.out', expr='Cleaning up MyRunnerPlugin instance', condition='==1')

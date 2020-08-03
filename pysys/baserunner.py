@@ -69,8 +69,33 @@ class BaseRunner(ProcessUser):
 	if ``purge`` is enabled, or else just files that are empty), detects any core files produced by the test, and 
 	invokes any applicable `writers <pysys.writer>` to record the results of each test.
 
-	In most cases it is recommended to create runner plugins rather than subclassing BaseRunner
-	(see the user guide for more information about plugins). However if needed BaseRunner itself can be subclassed, for example:
+	In most cases the best way to provide runner (i.e. cross-test) shared functionality by creating one or more runner 
+	plugins rather than subclassing BaseRunner. 
+	Runner plugins provide functionality such as starting of servers and virtual machines to be shared by 
+	all tests (not created per-test, for which you'd use a test plugin instead), or to execute extra logic when the 
+	runner is setup, and when it is cleaned up after all tests have completed. 
+	
+	At minimum, a runner plugin is just a class with a setup method::
+	
+		def setup(self, runner):
+			...  
+			self.addCleanupFunction(...) # do this if you need to execute code after tests have completed
+	
+	... and no constructor (or at least no constructor arguments). 
+	Optionally it can have public methods and fields for use by testcases using 
+	``self.runner.<plugin alias>.XXX``, and for configuration it may have static fields for any plugin configuration 
+	properties. Static fields provides the default value (and hence the type) for each property, and then plugin.XXX is 
+	assigned the actual value before the plugin's setup method is called. In addition to plugin properties, 
+	``pysys run -Xkey=value`` command line overrides can be accessed using the runner's `getXArg()` method. 
+	
+	Each runner plugin listed in the the project configuration 
+	with ``<runner-plugin classname="..." alias="..."/>`` is instantiated once by the runner, and can be accessed using 
+	``self.<alias>`` on the runner object (if an alias is provided). If you are using a third party PySys runner 
+	plugin, consult the documentation for the third party test plugin class to find out what methods and fields are 
+	available using ``runner.<alias>.*``. 
+
+	Although plugins are the recommended way to extend the runner, if needed BaseRunner itself can be subclassed, 
+	for example:
 	
 		- override `setup()` if you need to provision resources 
 		  (e.g. virtual machines, servers, user accounts, populating a database, etc) that must be shared by many 
@@ -149,14 +174,8 @@ class BaseRunner(ProcessUser):
 
 	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
 
-	There is also a field for each runner plugin listed in the project configuration. Plugins provide additional 
-	functionality such as methods for starting and working with a particular language or tool. A runner plugin is 
-	just a class whose constructor has the signature ``__init__(self, runner, pluginProperties)`` and provides methods and 
-	fields to be shared across all tests. Each runner plugin listed in the the project configuration 
-	with ``<runner-plugin classname="..." alias="..."/>`` is instantiated once by the runner, and can be accessed using 
-	``self.<alias>`` on the runner object if an alias is provided. If you are using a third party PySys runner 
-	plugin, consult the documentation for the third party test plugin class to find out what methods and fields are 
-	available using ``runner.<alias>.*``. 
+	There is also a field for any runner plugins that were configured with an "alias" (see above). 
+	
 	"""
 	
 	def __init__(self, record, purge, cycle, mode, threads, outsubdir, descriptors, xargs):
@@ -518,7 +537,12 @@ class BaseRunner(ProcessUser):
 		# call the hook to setup prior to running tests... but setup plugins first. 
 		self.runnerPlugins = []
 		for pluginClass, pluginAlias, pluginProperties in self.project.runnerPlugins:
-			plugin = pluginClass(self, pluginProperties) # if this throws, its a fatal error and we shouldn't run any tests
+			plugin = pluginClass() # if this throws, its a fatal error and we shouldn't run any tests
+			plugin.runner = self
+			plugin.pluginProperties = pluginProperties
+			pysys.utils.misc.setInstanceVariablesFromDict(plugin, pluginProperties, errorOnMissingVariables=True)
+			plugin.setup(self)
+			
 			self.runnerPlugins.append(plugin)
 			if not pluginAlias: continue
 			if hasattr(self, pluginAlias): raise UserError('Alias "%s" for runner-plugin conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
@@ -1092,8 +1116,14 @@ class TestContainer(object):
 					
 					self.testObj.testPlugins = []
 					for pluginClass, pluginAlias, pluginProperties in self.runner.project.testPlugins:
-						plugin = pluginClass(self.testObj, pluginProperties)
+						plugin = pluginClass()
+						plugin.runner = self
+						plugin.pluginProperties = pluginProperties
+						pysys.utils.misc.setInstanceVariablesFromDict(plugin, pluginProperties, errorOnMissingVariables=True)
+						plugin.setup(self.testObj)
+
 						self.testObj.testPlugins.append(plugin)
+
 						if not pluginAlias: continue
 						if hasattr(self.testObj, pluginAlias): raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on this test object; please select a different name'%(pluginAlias))
 						setattr(self.testObj, pluginAlias, plugin)

@@ -4,14 +4,18 @@ import logging
 import pysys
 
 class MyTestPlugin(object):
-	myPluginProperty = 'foo bar'
+	myPluginProperty = 'default value'
+	"""
+	Example of a plugin configuration property. The value for this plugin instance can be overridden using ``<property .../>``.
+	Types such as boolean/list[str]/int/float will be automatically converted from string. 
+	"""
 
-	def __init__(self, testObj, pluginProperties):
+	def setup(self, testObj):
 		self.owner = self.testObj = testObj
-		self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
-		self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
-		pysys.utils.misc.setInstanceVariablesFromDict(self, pluginProperties, errorOnMissingVariables=True)
+		self.log = logging.getLogger('pysys.myorg.MyTestPlugin')
+		self.log.info('Created MyTestPlugin instance with myPluginProperty=%s', self.myPluginProperty)
 
+		# there is no standard cleanup() method, so do this if you need to execute something on cleanup:
 		testObj.addCleanupFunction(self.__myPluginCleanup)
 	
 	def __myPluginCleanup(self):
