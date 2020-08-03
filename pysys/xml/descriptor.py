@@ -644,7 +644,7 @@ class DescriptorLoader(object):
 		
 		descriptorSet = set([s.strip() for s in project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')])
 		
-		projectfound = project.projectFile != None
+		assert project.projectFile != None
 		log = logging.getLogger('pysys.launcher')
 
 		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
@@ -731,12 +731,6 @@ class DescriptorLoader(object):
 				# only add to dict if we're continuing to process children
 				dirconfigs[root] = parentconfig 
 
-			if not projectfound:
-				for p in DEFAULT_PROJECTFILE:
-					if p in files:
-						projectfound = True
-						sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
-		
 		return descriptors
 		
 	def _handleSubDirectory(self, dir, subdirs, files, descriptors, parentDirDefaults, **kwargs):

@@ -534,6 +534,8 @@ the following list and consult it only if you get new test failures after upgrad
   may have to remove them. The new behaviour only applies to ``<property name="..." value="..." [default="..."]/>`` 
   elements, it does not apply to properties read from .properties files, which still default to "" if unresolved. 
   Run your tests with ``-vDEBUG`` logging if you need help debugging properties problems. 
+- The ``PYSYS_PERMIT_NO_PROJECTFILE`` option is no longer supported - you must now have a pysysproject.xml file for 
+  all projects. 
 - Writer, performance and code coverage logs now go under ``--outdir`` if an absolute ``--outdir`` path is specified 
   on the command line rather than the usual location under ``testDirRoot/``. 
 - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 

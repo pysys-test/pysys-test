@@ -499,80 +499,65 @@ class Project(object):
 	__frozen = False
 	
 	def __init__(self, root, projectFile, outdir=None):
+		assert projectFile
 		self.root = root
 		if not outdir: outdir = DEFAULT_OUTDIR
 
-		if projectFile is None: # very old legacy behaviour
-			self.startTimestamp = time.time()
-			self.runnerClassname = DEFAULT_RUNNER
-			self.makerClassname = DEFAULT_MAKER
-			self.writers = []
-			self.perfReporterConfig = None
-			self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
-			self.collectTestOutput = []
-			self.projectHelp = None
-			self.testPlugins = []
-			self.runnerPlugins = []
-			self._descriptorLoaderPlugins = []
-			self.properties = {'outDirName':os.path.basename(outdir)}
-			stdoutformatter, runlogformatter = None, None
-			self.projectFile = None
-		else:
-			if not os.path.exists(os.path.join(root, projectFile)):
-				raise UserError("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
-			try:
-				parser = _XMLProjectParser(root, projectFile, outdir=outdir)
-			except UserError:
-				raise
-			except Exception as e: 
-				raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
-			else:
-				parser.checkVersions()
-				self.projectFile = os.path.join(root, projectFile)
-				
-				self.startTimestamp = parser.startTimestamp
-				
-				# get the properties
-				properties = parser.getProperties()
-				keys = list(properties.keys())
-				keys.sort()
-				for key in keys: 
-					if not hasattr(self, key): # don't overwrite existing props; people will have to use .getProperty() to access them
-						setattr(self, key, properties[key])
-				self.properties = dict(properties)
-				
-				# add to the python path
-				parser.addToPath()
+		if not os.path.exists(os.path.join(root, projectFile)):
+			raise UserError("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
+		try:
+			parser = _XMLProjectParser(root, projectFile, outdir=outdir)
+		except UserError:
+			raise
+		except Exception as e: 
+			raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
+
+		parser.checkVersions()
+		self.projectFile = os.path.join(root, projectFile)
 		
-				# get the runner if specified
-				self.runnerClassname = parser.getRunnerDetails()
+		self.startTimestamp = parser.startTimestamp
 		
-				# get the maker if specified
-				self.makerClassname = parser.getMakerDetails()
+		# get the properties
+		properties = parser.getProperties()
+		keys = list(properties.keys())
+		keys.sort()
+		for key in keys: 
+			if not hasattr(self, key): # don't overwrite existing props; people will have to use .getProperty() to access them
+				setattr(self, key, properties[key])
+		self.properties = dict(properties)
+		
+		# add to the python path
+		parser.addToPath()
 
-				self.writers = parser.getWriterDetails()
-				self.testPlugins = parser.getTestPlugins()
-				self.runnerPlugins = parser.getRunnerPlugins()
-				self._descriptorLoaderPlugins = parser.getDescriptorLoaderPlugins()
+		# get the runner if specified
+		self.runnerClassname = parser.getRunnerDetails()
 
-				self.perfReporterConfig = parser.getPerformanceReporterDetails()
-				
-				self.descriptorLoaderClass = parser.getDescriptorLoaderClass()
+		# get the maker if specified
+		self.makerClassname = parser.getMakerDetails()
 
-				# get the stdout and runlog formatters
-				stdoutformatter, runlogformatter = parser.createFormatters()
-				
-				self.defaultFileEncodings = parser.getDefaultFileEncodings()
-				
-				self.executionOrderHints, self.executionOrderSecondaryModesHintDelta = parser.getExecutionOrderHints()
-				
-				self.collectTestOutput = parser.getCollectTestOutputDetails()
-				
-				self.projectHelp = parser.getProjectHelp()
-				self.projectHelp = parser.expandProperties(self.projectHelp, default=None, name='project-help')
-				
-				# set the data attributes
-				parser.unlink()
+		self.writers = parser.getWriterDetails()
+		self.testPlugins = parser.getTestPlugins()
+		self.runnerPlugins = parser.getRunnerPlugins()
+		self._descriptorLoaderPlugins = parser.getDescriptorLoaderPlugins()
+
+		self.perfReporterConfig = parser.getPerformanceReporterDetails()
+		
+		self.descriptorLoaderClass = parser.getDescriptorLoaderClass()
+
+		# get the stdout and runlog formatters
+		stdoutformatter, runlogformatter = parser.createFormatters()
+		
+		self.defaultFileEncodings = parser.getDefaultFileEncodings()
+		
+		self.executionOrderHints, self.executionOrderSecondaryModesHintDelta = parser.getExecutionOrderHints()
+		
+		self.collectTestOutput = parser.getCollectTestOutputDetails()
+		
+		self.projectHelp = parser.getProjectHelp()
+		self.projectHelp = parser.expandProperties(self.projectHelp, default=None, name='project-help')
+		
+		# set the data attributes
+		parser.unlink()
 		
 		if not stdoutformatter: stdoutformatter = ColorLogFormatter({'__formatterName':'stdout'})
 		if not runlogformatter: runlogformatter = BaseLogFormatter({'__formatterName':'runlog'})
@@ -669,18 +654,17 @@ class Project(object):
 					search, drop = os.path.split(search)
 					if not drop: search = drive
 		
-			if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))): # pragma: no cover
+			if not projectFile or not os.path.exists(os.path.join(search, projectFile)): # pragma: no cover
 				if os.getenv('PYSYS_PERMIT_NO_PROJECTFILE','').lower()=='true':
-					sys.stderr.write("WARNING: No project file found; using default settings and taking project root to be '%s' \n" % (search or '.'))
+					sys.stderr.write('FATAL ERROR: The PYSYS_PERMIT_NO_PROJECTFILE environment variable is no longer supported - you must create a pysysproject.xml file for your project')
+					sys.exit(1)
 				else:
 					sys.stderr.write('\n'.join([
 						#                                                                               |
 						"WARNING: No PySys test project file exists in this directory (or its parents):",
 						"  - If you wish to start a new project, begin by running 'pysys makeproject'.",
 						"  - If you are trying to use an existing project, change directory to a ",
-						"    location under the root test directory that contains your project file.",
-						"  - If you wish to use an existing project that has no configuration file, ",
-						"    set the PYSYS_PERMIT_NO_PROJECTFILE=true environment variable.",
+						"    location under the directory that contains your project file.",
 						""
 					]))
 					sys.exit(1)
