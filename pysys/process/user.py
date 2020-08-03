@@ -194,9 +194,11 @@ class ProcessUser(object):
 	
 	def getBoolProperty(self, propertyName, default=False):
 		"""
-		Get a True/False indicating whether the specified property is set 
+		Get a True/False indicating whether the specified attribute is set 
 		on this object (typically as a result of specifying -X on the command 
 		line), or else from the project configuration. 
+		
+		See also `pysys.baserunner.getXArg()` and `pysys.xml.project.Project.getProperty()`. 
 		
 		:param propertyName: The name of a property set on the command line 
 			or project configuration.
