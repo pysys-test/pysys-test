@@ -363,7 +363,8 @@ Miscellaneous test API improvements
   cluttering the run log.  
 
 - Added `pysys.xml.project.Project.getProperty()` which is a convenient and safe way to get a project property 
-  of bool/int/float/list type. 
+  of bool/int/float/list[str] type. Also added `pysys.baserunner.BaseRunner.getXArg()` which does the same thing for 
+  ``-Xkey=value`` arguments.
 
 - `BaseTest.getExprFromFile` now supports ``(?P<groupName>...)`` named regular expression groups, and will return 
   a dictionary containing the matched groups if any are present in the regular expression. For example::

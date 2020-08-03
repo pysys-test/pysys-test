@@ -69,9 +69,8 @@ class BaseRunner(ProcessUser):
 	if ``purge`` is enabled, or else just files that are empty), detects any core files produced by the test, and 
 	invokes any applicable `writers <pysys.writer>` to record the results of each test.
 
-
-	Where possible it is recommended to create runner plugins rather than subclassing BaseRunner 
-	(see the user guide for more information about plugins). However if needed class this can be subclassed, for example:
+	In most cases it is recommended to create runner plugins rather than subclassing BaseRunner
+	(see the user guide for more information about plugins). However if needed BaseRunner itself can be subclassed, for example:
 	
 		- override `setup()` if you need to provision resources 
 		  (e.g. virtual machines, servers, user accounts, populating a database, etc) that must be shared by many 
@@ -137,7 +136,8 @@ class BaseRunner(ProcessUser):
 
 	:ivar dict(str,str|bool) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 
 		set as data attributes on the class (but with automatic conversion to match the default value's bool/int/float/list[str]  
-		type if a static variable of the same name exists on the class).
+		type if a static variable of the same name exists on the class), and for the benefit of other classes 
+		such as runner plugins and writers that might want to define their own -X options, see the `getXArg()` method. 
 
 	:ivar bool ~.validateOnly: True if the user has requested that instead of cleaning output directories and running 
 		each test, the validation for each test should be re-run on the previous output. 
@@ -311,10 +311,31 @@ class BaseRunner(ProcessUser):
 		"""
 		return self.__class__.__name__ # there's usually only one base runner so class name is sufficient
 
+	def getXArg(self, key, default):
+		"""
+		Get the value of a ``pysys run -Xkey=value`` argument, with conversion of the value to the required
+		int/float/bool/list[str] type as needed (to match the type of the specified default value). The default value 
+		returned if no -X argument was provided for this key. 
+		
+		This method is useful for reading the -X arguments defined by runner plugins or writers. 
+		
+		.. versionadded:: 1.6.0
+		
+		:param str key: The name of the -X argument.
+		:param bool/int/float/list[str]/str default: The default value to return if the argument was not set on the 
+			command line. 
+			The type of the default parameter will be used to convert the property value from a string if it is 
+			provided (for list[str], comma-separated input is assumed). 
+			An exception will be raised if the value is non-empty but cannot be converted to the indicated type. 
+		"""
+		return pysys.utils.misc.getTypedValueOrDefault(key, self.xargs.get(key, None), default)
+
 	# methods to allow customer actions to be performed before a test run, after a test, after 
 	# a cycle of all tests, and after all cycles
 	def setup(self):
 		"""Setup method which may optionally be overridden to perform custom setup operations prior to execution of a set of testcases.
+		
+		All runner plugins will be setup and instantiated before this method is executed. 
 		
 		Always ensure you call the super implementation of setup() before adding any custom logic, using
 		``super(MY_RUNNER_CLASS_HERE, self).setup()``. 

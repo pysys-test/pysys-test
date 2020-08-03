@@ -10,6 +10,10 @@ class MyRunnerPlugin(object):
 		
 		self.log.info('Created MyRunnerPlugin instance with pluginProperties=%s', pluginProperties)
 		
+		pysys.utils.misc.setInstanceVariablesFromDict(self, pluginProperties, errorOnMissingVariables=True)
+		self.myCmdLineOption = runner.getXArg('myorgCmdLineOption', default=True)
+		if not self.myCmdLineOption: return
+
 		# If needed, we can schedule a method to be called during cleanup from here
 		runner.addCleanupFunction(self.__myPluginCleanup)
 
