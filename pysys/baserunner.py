@@ -216,7 +216,7 @@ class BaseRunner(ProcessUser):
 		
 		self.setKeywordArgs(xargs)
 
-		if len(descriptors)==1: self.threads = 1
+		if len(descriptors)*cycle == 1: self.threads = 1
 		log.info('Running {numDescriptors:,} tests with {threads} threads using PySys {pysysVersion} in Python {pythonVersion} and encoding {encoding}\n'.format(
 			numDescriptors=len(self.descriptors), threads=self.threads, pysysVersion=pysys.__version__, pythonVersion='%s.%s.%s'%
 			sys.version_info[0:3], encoding=locale.getpreferredencoding()))
