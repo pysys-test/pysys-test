@@ -2,7 +2,7 @@
 <pysystest type="auto" state="runnable">
     
   <description> 
-    <title>Python warnings control</title>    
+    <title>ProcessUser - addCleanupFunction ignore errors</title>    
     <purpose><![CDATA[
 
 ]]>
