@@ -7,5 +7,21 @@
 	<property name="myDir" value="mydir-@OUTDIR@"/>
 	<collect-test-output pattern="*foo*" outputDir="${myDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 	<collect-test-output pattern="*foo*" outputDir="${testRootDir}/../mydir2/${startDate}_${startTime}" outputPattern="@UNIQUE@.myfile"/>
+	
+	<writer classname="pysys.writer.CollectTestOutputWriter" alias="myCollectWriter">
+		<property name="fileIncludesRegex" value=".*/.*foo.*"/>
+		<property name="fileExcludesRegex" value=""/>
+		<property name="destDir" value="mywriter_defaultpattern"/>
+		<!-- use default output pattern -->
+	</writer>
+
+	<writer classname="pysys.writer.CollectTestOutputWriter">
+		<property name="fileIncludesRegex" value=".*/.*foo.*"/>
+		<property name="fileExcludesRegex" value=".*b"/>
+		<property name="destDir" value="mywriter-${outDirName}"/>
+		<property name="destArchive" value="myArchive.zip"/>
+		<property name="outputPattern" value="mydir/@TESTID@.@FILENAME@.@UNIQUE@.@FILENAME_EXT@"/>
+		<property name="publishArtifactCategory" value="MyFooArchive"/>
+	</writer>
 
 </pysysproject>

@@ -1,7 +1,7 @@
-a-foo_NestedTest.cycle001_1
-a-foo_NestedTest.cycle001_2
-a-foo_NestedTest.cycle002_1
-a-foo_NestedTest.cycle002_2
+a-foo.myext_NestedTest.cycle001_1
+a-foo.myext_NestedTest.cycle001_2
+a-foo.myext_NestedTest.cycle002_1
+a-foo.myext_NestedTest.cycle002_2
 foo-b_NestedTest.cycle001_1
 foo-b_NestedTest.cycle001_2
 foo-b_NestedTest.cycle002_1

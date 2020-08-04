@@ -52,10 +52,10 @@ Sharing logic across tests using plugins
 Often you will have some standard logic that needs to be used in the execute or validation 
 of many/all testcases, such as starting the application you're testing, or checking log files for errors. 
 
-The recommended way to do that in PySys is to create one or more "plugins". There are currently two kinds of plugin: 
+The recommended way to do that in PySys is to create one or more "plugins". There are currently several kinds of plugin: 
 
-- **test plugins**; an instances of each test plugin is created for each test (`BaseTest`) that is instantiated, so they 
-  operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
+- **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
+  to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
   would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
   class provided it has a method ``setup(self, testobj)`` (and no constructor arguments). 
   As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
@@ -63,20 +63,26 @@ The recommended way to do that in PySys is to create one or more "plugins". Ther
 
 - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
   before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
-  shared across all tests. These can be used to starts servers/VMs that are shared across tests, or to generate code 
-  coverage reports during cleanup after all tests have executed.
+  shared across all tests. These can be used to start servers/VMs that are shared across tests.
   Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
   class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
-  
+
   Runner plugins that generate output files/directories should by default put that output under either the 
   `runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
   directory (which is typically ``testRootDir`` unless an absolute ``--outdir`` path was provided). 
 
-Plugin classes should have a static field for any plugin configuration property, which defines the default value 
-and (implicitly) the type. After construction of each plugin, a plugin.XXX attribute is assigned with the actual value 
-of each plugin property (before the plugin's setup method is called). In addition to plugin properties, 
-``pysys run -Xkey=value`` command line options for the plugin (if needed) can be accessed using the runner's 
-`pysys.baserunner.BaseRunner.getXArg()` method. 
+- **writer plugins**: this kind of plugin has existed in PySys for many releases and are effectively a special kind of 
+  runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of 
+  destinations. Writers must implement a similar but different interface to other runner plugins; see `pysys.writer` 
+  for details. They can be used for everything from writing test outcome to an XML file, to archiving output files, to 
+  collecting files from each test output and using them to generate a code coverage report during cleanup at the end 
+  of the run. 
+
+To make your plugin configurable, add a static field for each plugin property, which defines the default value 
+and (implicitly) the type. After construction of each plugin, an attribute is assigned with the actual value 
+of each plugin property so each property can be accessed using ``self.propname`` (by the time the plugin's setup method 
+is called). In addition to plugin properties, ``pysys run -Xkey=value`` command line options for the plugin 
+(if needed) can be accessed using the runner's `pysys.baserunner.BaseRunner.getXArg()` method. 
 
 A test plugin could look like this::
 

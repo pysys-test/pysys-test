@@ -20,6 +20,7 @@ The significant new features of PySys 1.6.0 are grouped around a few themes:
     - a new "plugins" concept to encourage a more modular style when sharing functionality between tests, 
     - validation: the new `BaseTest.assertThatGrep` method, which gives nice clear error messages when the assert fails,  
     - new writers for recording test results, including GitHub Actions support and a test output directory zip archiver, 
+      and new APIs to allow writers to publish artifacts, and visit each of the test's output files,
     - a library of line mappers for more powerful copy and grep line pre-processing, 
     - process starting enhancements such as `BaseTest.waitForBackgroundProcesses` and automatic logging of stderr when 
       a process fails, 
@@ -50,7 +51,7 @@ d) none of this really lends itself well to third parties implementing and distr
    capabilities to support additional tools/languages etc
 
 So, in this release we introduce the concept of "plugins" which use *composition* rather than *inheritance* to 
-provide a simpler way to share functionality across tests. There are currently two kinds of plugin: 
+provide a simpler way to share functionality across tests. There are currently 3 kinds of plugin: 
 
 - **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
   to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
@@ -61,11 +62,17 @@ provide a simpler way to share functionality across tests. There are currently t
 
 - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
   before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
-  shared across all tests. These can be used to starts servers/VMs that are shared across tests, or to generate code 
-  coverage reports during cleanup after all tests have executed.
+  shared across all tests. These can be used to start servers/VMs that are shared across tests.
   Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
   class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
 
+- **writer plugins**: this kind of plugin has existed in PySys for many releases and are effectively a special kind of 
+  runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of 
+  destinations. Writers must implement a similar but different interface to other runner plugins; see `pysys.writer` 
+  for details. They can be used for everything from writing test outcome to an XML file, to archiving output files, to 
+  collecting files from each test output and using them to generate a code coverage report during cleanup at the end 
+  of the run. 
+  
 A test plugin could look like this::
 
 	class MyTestPlugin(object):
@@ -128,6 +135,16 @@ New and improved result writers
   artifact publishing, for example CI providers that 'upload' artifacts. Artifacts are published by 
   various `pysys.utils.perfreporter.CSVPerformanceReporter` and various writers 
   including `pysys.writer.TestOutputArchiveWriter`. 
+
+- Added `pysys.writer.CollectTestOutputWriter` which supercedes the ``collect-test-output`` feature, providing a 
+  more powerful way to collect files of interest (e.g. performance graphs, code coverage files, etc) from all 
+  tests and collate them into a single directory or archive. This uses the new `pysys.writer.TestOutputVisitor` writer 
+  interface which can be implemented by writers that wish to visit each (non-zero) file in the test output directory 
+  after each test. 
+  
+  The CollectTestOutputWriter can be used standalone, or as a base class for writers that collect a particular kind 
+  of file (e.g. code coverage) and then do something with it during the runner cleanup phase when all tests have 
+  completed.  
 
 - Added `pysys.writer.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
   failure, for the benefit of IDEs and CI providers that can highlight failures found by regular expression stdout 

@@ -228,6 +228,13 @@ class BaseRunner(ProcessUser):
 		for writerclass, writerprops in self.project.writers:
 			writer = writerclass(logfile=writerprops.pop('file', None)) # invoke writer's constructor
 			writer.runner = self
+			pluginAlias = writerprops.pop('alias', None)
+
+			if pluginAlias: 
+				if hasattr(self, pluginAlias): raise UserError('Alias "%s" for writer conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
+				setattr(self, pluginAlias, writer)
+			
+			writer.pluginProperties = writerprops
 			pysys.utils.misc.setInstanceVariablesFromDict(writer, writerprops)
 			
 			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
@@ -262,19 +269,20 @@ class BaseRunner(ProcessUser):
 		else:
 			self.writers.append(ConsoleSummaryResultsWriter())
 		
-		self.__artifactWriters = [w for w in self.writers if isinstance(w, ArtifactPublisher)]
-		
-		self.__collectTestOutput = []
 		for c in self.project.collectTestOutput:
-			c = dict(c)
-			assert c['outputDir'], 'collect-test-output outputDir cannot be empty'
-			c['outputDir'] = os.path.join(self.output+'/..', c['outputDir']\
-				.replace('@OUTDIR@', os.path.basename(self.outsubdir)) \
-				)
-			assert os.path.normpath(c['outputDir']) != os.path.normpath(self.project.root), 'Must set outputDir to a new subdirectory'
-			self.__collectTestOutput.append(c)
-			deletedir(c['outputDir']) # clean output dir between runs
-		
+			writer = pysys.writer.CollectTestOutputWriter()
+			writer.pluginProperties = {}
+			pysys.utils.misc.setInstanceVariablesFromDict(writer, {
+				'runner':self,
+				'destDir':c['outputDir'].replace('@OUTDIR@', self.project.outDirName),
+				'fileIncludesRegex':r'.*[/\\]'+fnmatch.translate(c['pattern']), # convert fnmatch into a regex that can be used with .search()
+				'outputPattern': c['outputPattern'].replace('@FILENAME@', '@FILENAME@.@FILENAME_EXT@').replace('@OUTDIR@', self.project.outDirName).replace('\\','_').replace('/','_')
+			})
+			self.writers.append(writer)
+
+		self.__artifactWriters = [w for w in self.writers if isinstance(w, ArtifactPublisher)]
+		self.__testOutputVisitorWriters = [w for w in self.writers if isinstance(w, pysys.writer.TestOutputVisitor)]
+
 		# duration and results used to be used for printing summary info, now (in 1.3.0) replaced by 
 		# more extensible ConsoleSummaryResultsWriter implementation. Keeping these around for 
 		# a bit to allow overlap before removal
@@ -395,25 +403,25 @@ class BaseRunner(ProcessUser):
 			removeNonZero = False
 
 		try:
-			for (dirpath, dirnames, filenames) in os.walk(toLongPathSafe(dir), topdown=False):
+			for (dirpath, dirnames, filenames) in os.walk(toLongPathSafe(os.path.normpath(dir)), topdown=False):
 				deleted = 0
 				for file in filenames:
 					path = os.path.join(dirpath, file)
-					for collect in self.__collectTestOutput:
-						if fnmatch.fnmatch(os.path.basename(file), collect['pattern']):
-							collectdest = os.path.join(mkdir(collect['outputDir']), (collect['outputPattern']
-								.replace('@TESTID@', str(testObj))
-								.replace('@FILENAME@', os.path.basename(file))
-								.replace('\\','_').replace('/','_')
-								))
-							i = 1
-							while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
-								i += 1
-							collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
-							shutil.copyfile(toLongPathSafe(path), toLongPathSafe(collectdest))
-							
+
 					size = os.path.getsize(path)
+					try:
+						if size > 0: # for efficiency, ignore zero byte files
+							for visitor in self.__testOutputVisitorWriters:
+								if visitor.visitTestOutputFile(testObj, path) is True: break # don't invoke remaining visitors if this one dealt with it
+						
+					except Exception as ex:
+						log.warn("Failed to collect test output file %s: ", path, exc_info=1)
+						if not hasattr(self, '_collectErrorAlreadyReported'):
+							self.runnerErrors.append('Failed to collect test output from test %s (and maybe others): %s'%(testObj, ex))
+							self._collectErrorAlreadyReported = True
 					
+					# Now proceed with cleaning files
+			
 					if (size == 0) or (removeNonZero and 'run.log' not in file and self.isPurgableFile(path)):
 						count = 0
 						while count < 3:
@@ -548,6 +556,8 @@ class BaseRunner(ProcessUser):
 			if hasattr(self, pluginAlias): raise UserError('Alias "%s" for runner-plugin conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
 			setattr(self, pluginAlias, plugin)
 		
+		# see also constructor where we do the same aliasing for writers
+		
 		self.setup()
 
 		# Now that setup() is done, no-one should be messing with global immutable state (better to not do it at all, but 
@@ -641,10 +651,6 @@ class BaseRunner(ProcessUser):
 					self.handleKbrdInt(prompt=False)
 				else:
 					threadPool.dismissWorkers(self.threads, True)
-
-			for collect in self.__collectTestOutput:
-				if pathexists(collect['outputDir']):
-					self.log.info('Collected test output to directory: %s', os.path.normpath(collect['outputDir']))
 
 			# perform clean on the performance reporters - before the writers, in case the writers want to do something 
 			# with the perf output

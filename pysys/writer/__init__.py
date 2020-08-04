@@ -24,13 +24,14 @@ This module contains the `BaseResultsWriter` abstract class which defines the wr
 sample implementations.
 
 Output writers are responsible for summarising test results as each test completes, or at the end when all 
-tests has completed. There are currently three distinct types of writers, namely 'Record', 'Progress', and
-'Summary', each of which generates output at different stages of a run:
+tests has completed. The most common type of writer is the standard 'Record' writer, but there are also 'Progress', and
+'Summary' writers which do their things at different stages of the test run:
 
-   - `BaseRecordResultsWriter`: **Record writers** output the outcome of a specific test after completion of that test, to allow
+   - `BaseRecordResultsWriter`: **Record writers** record the outcome or output of tests, allowing 
      runtime auditing of the test output, e.g. into text file, a database, or to the console in a format that 
-     can be read by your Continuous Integration (CI) tooling. Several record
-     writers are distributed with the PySys framework, such as the `JUnitXMLResultsWriter` and `ci.TravisCIWriter`.
+     can be read by your Continuous Integration (CI) tooling, or collection/archiving of test output files. 
+     
+     Several record writers are distributed with the PySys framework, such as the `JUnitXMLResultsWriter` and `ci.GitHubActionsCIWriter`.
      By default, record writers are enabled only when the ``--record`` flag is given to the PySys launcher, 
      though some writers may enable/disable themselves under different conditions, by overriding the 
      L{BaseResultsWriter.isEnabled} method.
@@ -51,9 +52,9 @@ tests has completed. There are currently three distinct types of writers, namely
 
 Project configuration of the writers is through the PySys project XML file using the ``<writer>`` tag. Multiple
 writers may be configured and their individual properties set through the nested ``<property>`` tag. Writer
-properties are set as attributes to the class through the ``setattr()`` function. Custom (site specific) modules
-can be created and configured by users of the PySys framework (e.g. to output test results into a relational
-database etc), though they must adhere to the interface demonstrated by the implementations demonstrated here.
+properties are set as attributes to the writer instance just before setup is called, with automatic conversion of 
+type to match the default value if specified as a static attribute on the class. 
+
 If no progress writers are explicitly configured in the PySys project XML file, an instance of
 L{ConsoleProgressResultsWriter} is used. If no summary writer is explicitly configured in the PySys project
 XML file, an instance of L{ConsoleSummaryResultsWriter} is used.
@@ -61,8 +62,8 @@ XML file, an instance of L{ConsoleSummaryResultsWriter} is used.
 The writers are instantiated and invoked by the L{pysys.baserunner.BaseRunner} class instance. This calls the class
 constructors of all configured test writers, and then the setup (prior to executing the set of tests), processResult
 (process a test result), and cleanup (upon completion of the execution of all tests). The ``**kwargs`` method parameter
-is used for variable argument passing in the interface methods to allow modification of the PySys framework without
-breaking writer implementations already in existence.
+should always be included in the signature of each method, to allow for future additions to PySys without
+breaking existing writer implementations.
 
 Writers that generate output files/directories should by default put that output under either the 
 `runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
@@ -73,13 +74,15 @@ A prefix of double underscore ``__pysys`` is recommended to distinguish dynamica
 """
 
 __all__ = [
-	"BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", "ArtifactPublisher", "TestOutcomeSummaryGenerator", 
+	"BaseResultsWriter", "BaseRecordResultsWriter", "BaseSummaryResultsWriter", "BaseProgressResultsWriter", 
+	"ArtifactPublisher", "TestOutputVisitor","TestOutcomeSummaryGenerator", 
 	"TextResultsWriter", "XMLResultsWriter", "CSVResultsWriter", "JUnitXMLResultsWriter", 
 	"ConsoleSummaryResultsWriter", "ConsoleProgressResultsWriter", "ConsoleFailureAnnotationsWriter", "TestOutputArchiveWriter"]
 
 import time, stat, logging, sys, io
 import zipfile
 import locale
+import shutil
 if sys.version_info[0] == 2:
 	from urlparse import urlunparse
 else:
@@ -87,7 +90,7 @@ else:
 
 from pysys.constants import *
 from pysys.utils.logutils import ColorLogFormatter, stripANSIEscapeCodes, stdoutPrint
-from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe
+from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.utils.pycompat import PY2, openfile
 from pysys.exceptions import UserError
 
@@ -99,7 +102,8 @@ class BaseResultsWriter(object):
 	"""Base class for all writers that get notified as and when test results are available.
 	
 	Writer can additionally subclass `ArtifactPublisher` to be notified of artifacts produced by other writers 
-	that they wish to publish. If you are implementing a writer that needs a textual summary of the test outcomes, 
+	that they wish to publish, or `TestOutputVisitor` to be notified of each file in the test output directory. If you 
+	are implementing a writer that needs a textual summary of the test outcomes, 
 	you can add `TestOutcomeSummaryGenerator` as a superclass to get this functionality. 
 
 	:param str logfile: Optional configuration property specifying a file to store output in. 
@@ -265,6 +269,29 @@ class ArtifactPublisher(object):
 			"TestOutputArchive" and "TestOutputArchiveDir" (from `pysys.writer.TestOutputArchiveWriter`) or 
 			"CSVPerformanceReport" (from `pysys.utils.perfreporter.CSVPerformanceReporter`). 
 			If you create your own category, be sure to add an org/company name prefix to avoid clashes.
+		"""
+		pass
+
+
+class TestOutputVisitor(object):
+	"""Interface implemented by writers that wish to be notified of each file in the test output directory. 
+	
+	Implementing this interface is a lot more efficient than explicitly walking the directory tree. 
+	Note that in the interests of performance empty (zero byte) files are ignored. 
+	
+	.. versionadded:: 1.6.0
+	"""
+
+	def visitTestOutputFile(self, testObj, path, **kwargs):
+		"""
+		Called after execution of each test (and before purging of files) for each file found in the output 
+		directory. 
+		
+		:param pysys.basetest.BaseTest testObj: The test object, which can be used to find the outcome etc. 
+		:param str: The absolute path to the output file. 
+		:return bool: Return True if this visitor has handled this file fully (e.g. by deleting it) and it should not be 
+			passed on to any other registered visitors. 
+		
 		"""
 		pass
 
@@ -1027,6 +1054,9 @@ class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
 	"""
 
 	def setup(self, cycles=-1, **kwargs):
+		for k in self.pluginProperties: 
+			if not hasattr(type(self), k): raise UserError('Unknown property "%s" for %s'%(k, self))
+
 		super(ConsoleFailureAnnotationsWriter, self).setup(cycles=cycles, **kwargs)
 		self.cycles=cycles
 		self.format = self.format or os.getenv('PYSYS_CONSOLE_FAILURE_ANNOTATIONS','') or self.DEFAULT_FORMAT
@@ -1086,12 +1116,11 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 	destDir = '__pysys_output_archives.${outDirName}/'
 	"""
-	The directory to write the archives to, as an absolute path, or relative to the testRootDir (or --outdir if specified) . 
+	The directory to write the archives to, as an absolute path, or relative to the testRootDir (or --outdir if specified). 
 
 	This directory will be deleted at the start of the run if it already exists. 
 	
-	Project ``${...}`` properties can be used in the path, and additionally the string ``@OUTDIR@`` is replaced by 
-	the basename of the output directory for this test run. 
+	Project ``${...}`` properties can be used in the path. 
 	"""
 	
 	maxTotalSizeMB = 1024.0
@@ -1138,7 +1167,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	
 	fileIncludesRegex = u'' # executed against the path relative to the test root dir e.g. (pattern1|pattern2)
 	"""
-	A regular expression indicating test output paths that will be included from archiving. This can be used to 
+	A regular expression indicating test output paths that will be included in the archive. This can be used to 
 	archive just some particular files. Note that for use cases such as collecting graphs and code coverage files 
 	generated by a test run, the collect-test-output feature is usually a better fit than using this writer. 
 	
@@ -1147,6 +1176,9 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 	"""
 	
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
+		for k in self.pluginProperties: 
+			if not hasattr(type(self), k): raise UserError('Unknown property "%s" for %s'%(k, self))
+
 		self.runner = runner
 		if not self.destDir: raise Exception('Cannot set destDir to ""')
 		
@@ -1163,6 +1195,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 
 		if self.archiveAtEndOfRun:
 			self.queuedInstructions = []
+
 
 		self.skippedTests = []
 		self.archivesCreated = 0
@@ -1338,3 +1371,155 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 			self.skippedTests.append(outputDir)
 			raise
 		
+class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
+	"""Writer that collects files matching a specified pattern from the output directory after each test, and puts 
+	them in a single directory or archive - for example code coverage files or performance graphs. 
+	
+	This writer can be used as-is or as a base class for writers that need to collect files during test execution 
+	then do something with them during cleanup, for example generate a code coverage report. 
+	
+	Empty files are ignored. 
+	
+	This writer is always enabled. 
+
+	.. versionadded:: 1.6.0
+
+	The following properties can be set in the project configuration for this writer:		
+	"""
+
+	destDir = ''
+	"""
+	The directory in which the files will be collected, as an absolute path, or relative to the testRootDir (or --outdir if specified). 
+
+	This directory will be deleted at the start of the run if it already exists. 
+	
+	Project ``${...}`` properties can be used in the path. 
+	"""
+
+	destArchive = ''
+	"""
+	Optional filename of a .zip archive to generate with the contents of the destDir. 
+	
+	If an absolute path is specified it is evaluated relative to the destDir. 
+	
+	Project ``${...}`` properties can be used in the path. 
+	"""
+	
+	fileIncludesRegex = u'' # executed against the path relative to the test root dir e.g. (pattern1|pattern2)
+	"""
+	A regular expression indicating the test output paths that will be collected. This can be used to 
+	archive just some particular files. This is required. 
+	
+	The expression is matched against the path of each output file relative to the test root dir, 
+	using forward slashes as the path separator. Multiple paths can be specified using "(path1|path2)" syntax. 
+	"""
+
+	fileExcludesRegex = u''
+	"""
+	A regular expression indicating test output paths that will be excluded from collection. 
+	
+	For example ``".*/MyTest_001/.*/mybigfile.*[.]tmp"``.
+	
+	The expression is matched against the path of each output file relative to the test root dir, 
+	using forward slashes as the path separator. Multiple paths can be specified using "(path1|path2)" syntax. 
+	"""
+
+	outputPattern = u'@TESTID@.@FILENAME@.@UNIQUE@.@FILENAME_EXT@' 
+	"""
+	A string indicating the file (and optionally subdirectory name) to use when writing each collected file to 
+	the destDir. 
+	
+	In addition to any standard ``${...}`` property variables from the project 
+	configuration, the output pattern can contain these ``@...@`` 
+	substitutions:
+
+		- ``@FILENAME@`` is the original base filename with directory and extension removed, to which you 
+		  can add prefixes or suffixes as desired. 
+
+		- ``.@FILENAME_EXT@`` is the filename extension, such that the original filename 
+		  is ``@FILENAME@.@FILENAME_EXT@`` (note the dot prefix is mandatory here, and will be replaced with 
+		  empty string is there is no extension). 
+
+		- ``@TESTID@`` is replaced by the identifier of the test that generated the 
+		  output file (including mode suffix if present), which may be useful for tracking where each one came from. 
+
+		- ``@UNIQUE@`` is replaced by a number that ensures the file does not clash 
+		  with any other collected output file from another test. The ``@UNIQUE@`` 
+		  substitution variable is mandatory. 
+	"""
+	
+	publishArtifactCategory = u'' 
+	"""
+	If specified, the output directory will be published as an artifact using the specified category name, 
+	e.g. ``MyCodeCoverageDir``. If a ``destArchive`` was specified then the archive is published under this 
+	category instead of the destDir. 
+	"""
+
+	def isEnabled(self, record=False, **kwargs): 
+		return True
+
+	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
+		for k in self.pluginProperties: 
+			if not hasattr(type(self), k): raise UserError('Unknown property "%s" for %s'%(k, self))
+		
+		self.runner = runner
+		if not self.destDir: raise Exception('Cannot set destDir to ""')
+		if not self.fileIncludesRegex: raise Exception('fileIncludesRegex must be specified for %s'%type(self).__name__)
+
+		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.output+'/..', self.destDir)))
+		if os.path.exists(self.destDir+os.sep+'pysysproject.xml'): raise Exception('Cannot set destDir to testRootDir')
+		
+		# the code below assumes (for long path safe logic) this includes correct slashes (if any)
+		self.outputPattern = self.outputPattern.replace('/',os.sep).replace('\\', os.sep)
+		
+		if self.destArchive: self.destArchive = toLongPathSafe(os.path.join(self.destDir, self.destArchive))
+		
+		if os.path.exists(self.destDir):
+			deletedir(self.destDir) # remove any existing archives (but not if this dir seems to have other stuff in it!)
+
+		self.fileExcludesRegex = re.compile(self.fileExcludesRegex) if self.fileExcludesRegex else None
+		self.fileIncludesRegex = re.compile(self.fileIncludesRegex)
+		self.collectedFileCount = 0
+
+	def visitTestOutputFile(self, testObj, path, **kwargs):
+		path = path.replace('\\','/')
+		if not self.fileIncludesRegex.search(path): return False
+		
+		fileExcludesRegex = self.fileExcludesRegex
+		if fileExcludesRegex is not None and fileExcludesRegex.search(path): return False
+		self.collectPath(testObj, path, **kwargs)
+
+	def collectPath(self, testObj, path, **kwargs):
+		name, ext = os.path.splitext(os.path.basename(path))
+		collectdest = os.path.join(self.destDir, (self.outputPattern
+			.replace('@TESTID@', str(testObj))
+			.replace('@FILENAME@', name)
+			.replace('.@FILENAME_EXT@', ext)
+			))
+		i = 1
+		while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
+			i += 1
+		collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
+		mkdir(os.path.dirname(collectdest))
+		shutil.copyfile(toLongPathSafe(path.replace('/',os.sep)), toLongPathSafe(collectdest))
+		self.collectedFileCount += 1
+	
+	def cleanup(self, **kwargs):
+		if not pathexists(self.destDir): 
+			log.debug('No matching output files were found for collection directory: %s', os.path.normpath(self.destDir))
+			return
+
+		log.info('Collected %s test output files to directory: %s', '{:}'.format(self.collectedFileCount), os.path.normpath(fromLongPathSafe(self.destDir)))
+		
+		if self.destArchive:
+			mkdir(os.path.dirname(toLongPathSafe(self.destArchive)))
+			with zipfile.ZipFile(toLongPathSafe(self.destArchive), 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as archive:
+				rootlen = len(self.destDir)
+				for base, dirs, files in os.walk(self.destDir):
+					for f in files:
+						if os.path.normpath(os.path.join(base, f))==os.path.normpath(self.destArchive): continue
+						fn = os.path.join(base, f)
+						archive.write(fn, fn[rootlen:].replace('\\','/'))
+
+		if self.publishArtifactCategory:
+			self.runner.publishArtifact(self.destArchive or self.destDir, self.publishArtifactCategory)
