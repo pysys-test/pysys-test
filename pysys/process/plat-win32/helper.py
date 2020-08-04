@@ -93,8 +93,8 @@ class ProcessWrapper(CommonProcessWrapper):
 		self.__lock = threading.Lock() # to protect access to the fields that get updated
 		
 		# on Python 2, convert byte strings to unicode strings
-		self.stdout = u'nul' if (not self.stdout) else _stringToUnicode(stdout)
-		self.stderr = u'nul' if (not self.stderr) else _stringToUnicode(stderr)
+		self.stdout = u'nul' if (not self.stdout) else _stringToUnicode(stdout.replace('/',os.sep))
+		self.stderr = u'nul' if (not self.stderr) else _stringToUnicode(stderr.replace('/',os.sep))
 
 		# these different field names are just retained for compatibility in case anyone is using them
 		self.fStdout = self.stdout
