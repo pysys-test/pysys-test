@@ -138,14 +138,18 @@ New and improved result writers
 
 - Added `pysys.writer.CollectTestOutputWriter` which supercedes the ``collect-test-output`` feature, providing a 
   more powerful way to collect files of interest (e.g. performance graphs, code coverage files, etc) from all 
-  tests and collate them into a single directory or archive. This uses the new `pysys.writer.TestOutputVisitor` writer 
-  interface which can be implemented by writers that wish to visit each (non-zero) file in the test output directory 
-  after each test. 
+  tests and collate them into a single directory and optionally a .zip archive. 
+  This uses the new `pysys.writer.TestOutputVisitor` writer interface which can be implemented by writers that wish to 
+  visit each (non-zero) file in the test output directory after each test. 
   
   The CollectTestOutputWriter can be used standalone, or as a base class for writers that collect a particular kind 
   of file (e.g. code coverage) and then do something with it during the runner cleanup phase when all tests have 
   completed.  
 
+- Moved Python code coverage generation out to `pysys.writer.PythonCoverageWriter` as an example of how to plugin 
+  code coverage support without subclassing the runner. Existing projects use this behind the scenes, but new projects 
+  should add the writer to their configuration explicitly if they need it (see sample project). 
+  
 - Added `pysys.writer.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
   failure, for the benefit of IDEs and CI providers that can highlight failures found by regular expression stdout 
   parsing. An instance of this writer is automatically added to every project, and enables itself if 
@@ -326,6 +330,9 @@ pysys.py and project configuration improvements
 
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
   to make it easier to run in CI jobs. See ``pysys run --help`` for more information. 
+
+- Added convention of having a ``-XcodeCoverage`` command line option that enables coverage for all supported 
+  languages. You may wish to add support for this is you have a plugin providing support for a different language. 
 
 - Added a standard property ``${os}`` to the project file for finer-grained control of platform-specific properties. 
   The new  ``${os}`` property gets its value from Python's ``platform.system().lower()``, and has values such 

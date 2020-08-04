@@ -108,7 +108,7 @@ Execution options
                                specify either an absolute number, or a multiplier on the number of CPUs e.g. "x1.5"; 
                    auto | 0    equivalent to x1.0 (or the PYSYS_DEFAULT_THREADS env var if set)
        --ci                    set optimal options for automated/non-interactive test execution in a CI job: 
-                                 --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES
+                                 --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES -XcodeCoverage
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
                    CAT=LEVEL   set the verbosity for a specific PySys logging category e.g. -vassertions=, -vprocess=
                                (or to set the verbosity for a non-PySys Python logger category use "python:CAT=LEVEL")
@@ -197,7 +197,7 @@ e.g.
 			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
 			# by CI writers and/or the command line; note that setting --mode=ALL would be incorrect if 
 			# supportMultipleModesPerRun=false but that's a legacy options so we raise an exception later if this happened)
-			args = ['--purge', '--record', '-j0', '--type=auto', '--mode=ALL']+args
+			args = ['--purge', '--record', '-j0', '--type=auto', '--mode=ALL',  '-XcodeCoverage']+args
 			printLogsDefault = PrintLogs.FAILURES
 
 		try:

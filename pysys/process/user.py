@@ -215,7 +215,7 @@ class ProcessUser(object):
 		
 		Uses the same Python process the tests are running under. 
 		
-		If PySys was run with the arguments ``-X pythonCoverage=true`` then 
+		If PySys was run with the argument ``-XcodeCoverage`` or ``-XpythonCoverage`` then 
 		`startPython` will add the necessary arguments to enable generation of 
 		code coverage. Note that this requried the coverage.py library to be 
 		installed. If a project property called `pythonCoverageArgs` exists 
@@ -238,10 +238,10 @@ class ProcessUser(object):
 			environs = kwargs['environs']
 		else:
 			environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
-		if self.getBoolProperty('pythonCoverage') and not disableCoverage and not self.disableCoverage:
-			if hasattr(self.project, 'pythonCoverageArgs'):
-				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
-			args = ['-m', 'coverage', 'run']+args
+			
+		coverageWriter = [writer for writer in getattr(self, 'runner', self).writers if isinstance(writer, pysys.writer.PythonCoverageWriter)]
+		if coverageWriter and not disableCoverage and not self.disableCoverage:
+			args = ['-m', 'coverage', 'run']+coverageWriter[0].getCoverageArgsList()+args
 			if 'COVERAGE_FILE' not in environs:
 				kwargs['environs'] = dict(environs)
 				with self.lock:

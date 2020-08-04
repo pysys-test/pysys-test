@@ -83,6 +83,7 @@ import time, stat, logging, sys, io
 import zipfile
 import locale
 import shutil
+import shlex
 if sys.version_info[0] == 2:
 	from urlparse import urlunparse
 else:
@@ -1448,11 +1449,15 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 		  substitution variable is mandatory. 
 	"""
 	
-	publishArtifactCategory = u'' 
+	publishArtifactDirCategory = u'' 
 	"""
 	If specified, the output directory will be published as an artifact using the specified category name, 
-	e.g. ``MyCodeCoverageDir``. If a ``destArchive`` was specified then the archive is published under this 
-	category instead of the destDir. 
+	e.g. ``MyCodeCoverageDir``. 
+	"""
+
+	publishArtifactArchiveCategory = u'' 
+	"""
+	If specified the ``destArchive`` file (if any) will be published as an artifact using the specified category name.
 	"""
 
 	def isEnabled(self, record=False, **kwargs): 
@@ -1466,13 +1471,13 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 		if not self.destDir: raise Exception('Cannot set destDir to ""')
 		if not self.fileIncludesRegex: raise Exception('fileIncludesRegex must be specified for %s'%type(self).__name__)
 
-		self.destDir = toLongPathSafe(os.path.normpath(os.path.join(runner.output+'/..', self.destDir)))
-		if os.path.exists(self.destDir+os.sep+'pysysproject.xml'): raise Exception('Cannot set destDir to testRootDir')
+		self.destDir = os.path.normpath(os.path.join(runner.output+'/..', self.destDir))
+		if pathexists(self.destDir+os.sep+'pysysproject.xml'): raise Exception('Cannot set destDir to testRootDir')
 		
 		# the code below assumes (for long path safe logic) this includes correct slashes (if any)
 		self.outputPattern = self.outputPattern.replace('/',os.sep).replace('\\', os.sep)
 		
-		if self.destArchive: self.destArchive = toLongPathSafe(os.path.join(self.destDir, self.destArchive))
+		if self.destArchive: self.destArchive = os.path.join(self.destDir, self.destArchive)
 		
 		if os.path.exists(self.destDir):
 			deletedir(self.destDir) # remove any existing archives (but not if this dir seems to have other stuff in it!)
@@ -1491,26 +1496,25 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 
 	def collectPath(self, testObj, path, **kwargs):
 		name, ext = os.path.splitext(os.path.basename(path))
-		collectdest = os.path.join(self.destDir, (self.outputPattern
+		collectdest = toLongPathSafe(os.path.join(self.destDir, (self.outputPattern
 			.replace('@TESTID@', str(testObj))
 			.replace('@FILENAME@', name)
 			.replace('.@FILENAME_EXT@', ext)
-			))
+			)))
 		i = 1
 		while pathexists(collectdest.replace('@UNIQUE@', '%d'%(i))):
 			i += 1
 		collectdest = collectdest.replace('@UNIQUE@', '%d'%(i))
 		mkdir(os.path.dirname(collectdest))
-		shutil.copyfile(toLongPathSafe(path.replace('/',os.sep)), toLongPathSafe(collectdest))
+		shutil.copyfile(toLongPathSafe(path.replace('/',os.sep)), collectdest)
 		self.collectedFileCount += 1
 	
-	def cleanup(self, **kwargs):
-		if not pathexists(self.destDir): 
-			log.debug('No matching output files were found for collection directory: %s', os.path.normpath(self.destDir))
-			return
-
-		log.info('Collected %s test output files to directory: %s', '{:}'.format(self.collectedFileCount), os.path.normpath(fromLongPathSafe(self.destDir)))
+	def archiveAndPublish(self):
+		"""
+		Generate an archive of the destDir (if configured) and publish artifacts (if configured). 
 		
+		Called by default as part of `cleanup()`.
+		"""
 		if self.destArchive:
 			mkdir(os.path.dirname(toLongPathSafe(self.destArchive)))
 			with zipfile.ZipFile(toLongPathSafe(self.destArchive), 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as archive:
@@ -1521,5 +1525,92 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 						fn = os.path.join(base, f)
 						archive.write(fn, fn[rootlen:].replace('\\','/'))
 
-		if self.publishArtifactCategory:
-			self.runner.publishArtifact(self.destArchive or self.destDir, self.publishArtifactCategory)
+		if self.publishArtifactDirCategory:
+			self.runner.publishArtifact(self.destDir, self.publishArtifactDirCategory)
+		if self.publishArtifactArchiveCategory and self.destArchive:
+			self.runner.publishArtifact(self.destArchive, self.publishArtifactArchiveCategory)
+
+	def cleanup(self, **kwargs):
+		if not pathexists(self.destDir): 
+			log.debug('No matching output files were found for collection directory: %s', os.path.normpath(self.destDir))
+			return
+
+		log.info('Collected %s test output files to directory: %s', '{:}'.format(self.collectedFileCount), os.path.normpath(fromLongPathSafe(self.destDir)))
+		self.archiveAndPublish()
+		
+
+class PythonCoverageWriter(CollectTestOutputWriter):
+	"""Writer that collects Python code coverage files in a single directory and writes a coverage report during 
+	runner cleanup. 
+	
+	To enable this, run with ``-XpythonCoverage`` or ``-XcodeCoverage`` and configure the ``destDir`` plugin property 
+	(e.g. to ``__coverage_python.${outDirName}``). 
+
+
+	If coverage is generated, the directory containing all coverage files is published as an artifact named 
+	"PythonCoverageDir". Optionally an archive of this directory can be generated by setting the 
+	``destArchive`` property (see `CollectTestOutputWriter`). 
+
+	Note that to maintain compatibility with pre-1.6.0 projects, a PythonCoverageWriter instance will be automatically 
+	added if none is explicitly configured and the ``pythonCoverageDir`` project property is set. 
+
+	.. versionadded:: 1.6.0
+
+	The following property can be set in the project configuration for this writer (and see also 
+	`CollectTestOutputWriter` for inherited properties such as ``destArchive``):		
+	"""
+
+	# override CollectTestOutputWriter property values
+	destDir = '__coverage_python.${outDirName}'
+	fileIncludesRegex = u'.*/[.]coverage[.]python.*' # executed against the path relative to the test root dir e.g. (pattern1|pattern2)
+	outputPattern = u'.coverage.python.@TESTID@_@FILENAME@.@FILENAME_EXT@.@UNIQUE@' 
+	publishArtifactDirCategory = u'PythonCoverageDir'
+	publishArtifactArchiveCategory = u'PythonCoverageArchive'
+
+	pythonCoverageArgs = u''
+	"""
+	A string of command line arguments used to customize the ``coverage run`` and ``coverage html`` commands. 
+	Use "..." double quotes around any arguments that contain spaces. 
+	
+	For example::
+	
+		<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
+	"""
+
+	def isEnabled(self, record=False, **kwargs): 
+		return self.runner.getBoolProperty('pythonCoverage', default=self.runner.getBoolProperty('codeCoverage')) and self.destDir
+
+	def getCoverageArgsList(self): # also used by startPython()
+		return shlex.split(self.pythonCoverageArgs.replace(u'\\',u'\\\\')) # need to escape windows \ else it gets removed
+
+	def cleanup(self, **kwargs):
+		pythonCoverageDir = self.destDir
+		assert os.path.isabs(pythonCoverageDir)
+		if not pathexists(pythonCoverageDir):
+			log.info('No Python coverage files were generated.')
+			return
+			
+		log.info('Preparing Python coverage report in: %s', os.path.normpath(pythonCoverageDir))
+
+		self.runner.startPython(['-m', 'coverage', 'combine'], abortOnError=True, 
+			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
+			disableCoverage=True, onError=lambda process: 
+				'Failed to combine Python code coverage data: %s'%self.runner.getExprFromFile(process.stdout, '.+'))
+
+		# produces coverage.xml in a standard format that is useful to code coverage tools
+		self.runner.startPython(['-m', 'coverage', 'xml'], abortOnError=False, 
+			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-xml', 
+			disableCoverage=True)
+			
+	
+		self.runner.startPython(['-m', 'coverage', 'html']+self.getCoverageArgsList(), abortOnError=False, 
+			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
+			disableCoverage=True)
+
+		# to avoid confusion, remove any zero byte out/err files from the above
+		for p in os.listdir(pythonCoverageDir):
+			p = os.path.join(pythonCoverageDir, p)
+			if p.endswith(('.out', '.err')) and os.path.getsize(p)==0:
+				os.remove(p)
+			
+		self.archiveAndPublish()

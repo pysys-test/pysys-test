@@ -21,7 +21,8 @@
 		<property name="destDir" value="mywriter-${outDirName}"/>
 		<property name="destArchive" value="myArchive.zip"/>
 		<property name="outputPattern" value="mydir/@TESTID@.@FILENAME@.@UNIQUE@.@FILENAME_EXT@"/>
-		<property name="publishArtifactCategory" value="MyFooArchive"/>
+		<property name="publishArtifactDirCategory" value="MyFooDir"/>
+		<property name="publishArtifactArchiveCategory" value="MyFooArchive"/>
 	</writer>
 
 </pysysproject>

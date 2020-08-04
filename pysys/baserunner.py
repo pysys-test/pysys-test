@@ -225,18 +225,26 @@ class BaseRunner(ProcessUser):
 		progresswriters = []
 		self.printLogs = extraOptions['printLogs'] # None if not explicitly set; may be changed by writer.setup()
 		self.__printLogsDefault = extraOptions['printLogsDefault']
-		for writerclass, writerprops in self.project.writers:
-			writer = writerclass(logfile=writerprops.pop('file', None)) # invoke writer's constructor
+		
+		
+		def initWriter(writerclass, writerprops, kwargs={}):
+			writer = writerclass(**kwargs) # invoke writer's constructor
 			writer.runner = self
 			pluginAlias = writerprops.pop('alias', None)
 
 			writer.pluginProperties = writerprops
 			pysys.utils.misc.setInstanceVariablesFromDict(writer, writerprops)
 			
-			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
+			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): return None
 			if pluginAlias: # only set alias if enabled (tests could use the existence of the alias to check if it's enabled e.g. for code cov)
 				if hasattr(self, pluginAlias): raise UserError('Alias "%s" for writer conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
 				setattr(self, pluginAlias, writer)
+			return writer
+			
+
+		for writerclass, writerprops in self.project.writers:
+			writer = initWriter(writerclass, writerprops, kwargs={'logfile':writerprops.pop('file', None)})
+			if writer is None: continue
 			
 			if isinstance(writer, BaseSummaryResultsWriter):
 				summarywriters.append(writer)
@@ -251,15 +259,15 @@ class BaseRunner(ProcessUser):
 		
 		# special-case this as for maximum usability we want it to run whenever the env var is set regardless of 
 		# whether someone thought to add it to their project or not
-		annotationsWriter = pysys.writer.ConsoleFailureAnnotationsWriter()
-		if annotationsWriter.isEnabled(record=self.record):
+		annotationsWriter = initWriter(pysys.writer.ConsoleFailureAnnotationsWriter, {})
+		if annotationsWriter is not None:
 			self.writers.append(annotationsWriter)
 		
 		if extraOptions.get('progressWritersEnabled', False):
 			if progresswriters: 
 				self.writers.extend(progresswriters)
 			else:
-				self.writers.append(ConsoleProgressResultsWriter())
+				self.writers.append(initWriter(ConsoleProgressResultsWriter, {}))
 
 		# summary writers are always enabled regardless of record mode. They are executed last. 
 		# allow user to provide their own summary writer in the config, or if not, supply our own
@@ -269,15 +277,23 @@ class BaseRunner(ProcessUser):
 			self.writers.append(ConsoleSummaryResultsWriter())
 		
 		for c in self.project.collectTestOutput:
-			writer = pysys.writer.CollectTestOutputWriter()
-			writer.pluginProperties = {}
-			pysys.utils.misc.setInstanceVariablesFromDict(writer, {
-				'runner':self,
+			if c['outputDir'] == self.project.getProperty('pythonCoverageDir', ''): continue # avoid creating a duplicate collector for this given it'll now be collected by the PythonCoverageWriter
+			writer = initWriter(pysys.writer.CollectTestOutputWriter, {
 				'destDir':c['outputDir'].replace('@OUTDIR@', self.project.outDirName),
 				'fileIncludesRegex':r'.*[/\\]'+fnmatch.translate(c['pattern']), # convert fnmatch into a regex that can be used with .search()
 				'outputPattern': c['outputPattern'].replace('@FILENAME@', '@FILENAME@.@FILENAME_EXT@').replace('@OUTDIR@', self.project.outDirName).replace('\\','_').replace('/','_')
 			})
-			self.writers.append(writer)
+			if writer is not None: self.writers.append(writer)
+
+		# also special-case setting this up using just project properties, since prior to 1.6.0 there was no separate writer
+		# but only if pythonCoverageDir was explicitly configured in the project
+		if not any(isinstance(writer, pysys.writer.PythonCoverageWriter) for writer in self.writers):
+			if self.project.getProperty('pythonCoverageDir', ''):
+				writer = initWriter(pysys.writer.PythonCoverageWriter, {
+					'destDir': self.project.pythonCoverageDir.replace('@OUTDIR@', self.project.outDirName),
+					'pythonCoverageArgs':self.project.getProperty('pythonCoverageArgs', u''),
+				})
+				if writer is not None: self.writers.append(writer)
 
 		self.__artifactWriters = [w for w in self.writers if isinstance(w, ArtifactPublisher)]
 		self.__testOutputVisitorWriters = [w for w in self.writers if isinstance(w, pysys.writer.TestOutputVisitor)]
@@ -705,59 +721,11 @@ class BaseRunner(ProcessUser):
 		processing of coverage data (if enabled), for example generating 
 		reports etc. 
 		
-		:deprecated: Instead of overriding this method, create a runner plugin which can add a 
-			`cleanup function <addCleanupFunction>` to generate a coverage report at the end of the test run. 
+		:deprecated: Instead of overriding this method, create a `pysys.writer.CollectTestOutputWriter` subclass, 
+			and generate a coverage report in its cleanup method. 
 		
-		The default implementation collates Python coverage data from 
-		coverage.py and produces an HTML report. Python coverage is collected only if a project property 
-		`pythonCoverageDir` is set to the directory coverage files are 
-		collected into, and that PySys was run with `-XpythonCoverage`. 
-		If a property named pythonCoverageArgs exists then its value will be 
-		added to the arguments passed to the run and html report coverage 
-		commands. 
-		
-		If coverage is generated, the directory containing all coverage files is published 
-		as an artifact named "PythonCoverageDir". 
-		 
-		Custom runner subclasses may replace or add to this by processing 
-		coverage data from other languages. Alternatively you could use `addCleanupFunction()` to schedule 
-		your own coverage processing function to be executed after tests have completed. 
 		"""
-		pythonCoverageDir = getattr(self.project, 'pythonCoverageDir', None)
-		assert pythonCoverageDir != '.', pythonCoverageDir
-		if self.getBoolProperty('pythonCoverage') and pythonCoverageDir:
-			pythonCoverageDir = os.path.join(self.output+'/..', pythonCoverageDir
-				.replace('@OUTDIR@', os.path.basename(self.outsubdir))) # matches collect-test-output logic
-			if not pathexists(pythonCoverageDir):
-				self.log.info('No Python coverage files were generated.')
-			else:
-				self.log.info('Preparing Python coverage report in: %s', os.path.normpath(pythonCoverageDir))
-
-				if self.startPython(['-m', 'coverage', 'combine'], abortOnError=False, 
-					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
-					disableCoverage=True).exitStatus != 0: return
-
-				# produces coverage.xml in a standard format that is useful to code coverage tools
-				self.startPython(['-m', 'coverage', 'xml'], abortOnError=False, 
-					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-xml', 
-					disableCoverage=True)
-					
-				args = []
-				if hasattr(self.project, 'pythonCoverageArgs'):
-					args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]
-			
-				self.startPython(['-m', 'coverage', 'html']+args, abortOnError=False, 
-					workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
-					disableCoverage=True)
-
-				# to avoid confusion, remove any zero byte out/err files from the above
-				for p in os.listdir(pythonCoverageDir):
-					p = os.path.join(pythonCoverageDir, p)
-					if p.endswith(('.out', '.err')) and os.path.getsize(p)==0:
-						os.remove(p)
-				
-				self.publishArtifact(pythonCoverageDir, 'PythonCoverageDir')
-
+		pass
 
 	def containerCallback(self, thread, container):
 		"""Callback method on completion of running a test.
