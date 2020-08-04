@@ -230,14 +230,13 @@ class BaseRunner(ProcessUser):
 			writer.runner = self
 			pluginAlias = writerprops.pop('alias', None)
 
-			if pluginAlias: 
-				if hasattr(self, pluginAlias): raise UserError('Alias "%s" for writer conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
-				setattr(self, pluginAlias, writer)
-			
 			writer.pluginProperties = writerprops
 			pysys.utils.misc.setInstanceVariablesFromDict(writer, writerprops)
 			
 			if hasattr(writer, 'isEnabled') and not writer.isEnabled(record=self.record): continue
+			if pluginAlias: # only set alias if enabled (tests could use the existence of the alias to check if it's enabled e.g. for code cov)
+				if hasattr(self, pluginAlias): raise UserError('Alias "%s" for writer conflicts with a field that already exists on this runner; please select a different name'%(pluginAlias))
+				setattr(self, pluginAlias, writer)
 			
 			if isinstance(writer, BaseSummaryResultsWriter):
 				summarywriters.append(writer)
