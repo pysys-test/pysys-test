@@ -5,7 +5,8 @@
 	
 	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${osfamily}, ${startDate}, ${startTime}, ${hostname}. -->
 	
-	<!-- User-defined properties -->
+	<!-- User-defined properties (use lowerCamelCase for property names) -->
+
 	
 	<!-- Property identifying the home directory of the application build being tested. -->
 	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
@@ -13,7 +14,7 @@
 	<!-- Custom test framework plugins, if needed -->
 	<!--
 	<pythonpath value="./pysys-extensions" />
-	<test-plugin classname="myorg.plugins.MyTestPlugin" alias="myorg"/>
+	<test-plugin   classname="myorg.plugins.MyTestPlugin" alias="myorg"/>
 	<runner-plugin classname="myorg.plugins.MyRunnerPlugin" alias="myorg"/>
 	-->
 	
@@ -44,7 +45,7 @@
 		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
 	</default-file-encodings>	
 	
+	<!-- Add project-specific text to be appended to the "pysys run -h". -->
 	<project-help>
-		<!-- Add project-specific text to be appended to the "pysys run -h". -->
 	</project-help>
 </pysysproject>
