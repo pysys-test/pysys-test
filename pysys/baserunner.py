@@ -933,7 +933,7 @@ class BaseRunner(ProcessUser):
 			log.warn('Unsupported characters "%s" found in test id "%s" - please use alphanumeric characters, dot and underscore for test ids', 
 				''.join(set(c for c in badchars)), descriptor.idWithoutMode)
 		else:
-			badchars = re.sub('[-\\w_.~]+','', descriptor.mode or '')
+			badchars = re.sub('[-\\w_.~]+','', getattr(descriptor, 'mode', None) or '')
 			if badchars: log.warn('Unsupported characters "%s" found in test mode "%s" - please use just alphanumeric characters, dot and underscore for modes', 
 				''.join(set(c for c in badchars)), descriptor.mode)
 
