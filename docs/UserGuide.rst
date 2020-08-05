@@ -231,72 +231,53 @@ Property properties will always be of string type.
 
 Producing code coverage reports
 -------------------------------
-PySys can be extended to produce code coverage reports for any language. 
+PySys can be extended to produce code coverage reports for any language, by creating a writer plugin. 
 
-Built-in support is provided for producing coverage reports for programs 
-written in Python, using the ``coverage.py`` library. To enable this, 
-set the ``pythonCoverageDir`` and ``collect-test-output`` project options (see below), 
-make sure you're using `BaseTest.startPython` to execute Python from within your tests, 
-and run PySys with ``-XpythonCoverage=true``. 
+There is an existing writer that produces coverage reports for programs written in Python called 
+`pysys.writer.testoutput.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
+``<writer>`` to your project (see the sample ``pysysproject.xml`` for an example) and make sure you're starting 
+your Python processes with coverage support enabled, by using `BaseTest.startPython`. 
 
-If you wish to produce coverage reports using any other tool or language (such 
-as Java), this is easy to achieve by following the same pattern:
 
-- When your tests start the program(s) whose coverage is to be measured, 
-  add the required arguments or environment variables to enable coverage 
-  using the coverage tool of your choice. 
+The usual way to enable code coverage (for all supported languages) is to set ``-XcodeCoverage`` when running your 
+tests (or to run with ``--ci`` which does this automatically). Individual writers may additionally provide their own 
+properties to allow fine-grained control e.g. ``-XpythonCoverage=true/false``. 
+
+Be sure to add the ``disableCoverage`` group to any tests (or test directories) that should not use coverage, 
+such as performance tests. 
+
+If you wish to produce coverage reports using any other language, this is easy to achieve by following the same pattern:
+
+- When your tests start the program(s) whose coverage is to be measured, add the required arguments or environment 
+  variables to enable coverage using the coverage tool of your choice. The most convenient place to put helper methods 
+  for starting your application is in a custom test plugin class. 
   
-  For example, for Python programs PySys does this by adding 
-  `-m coverage run` to the command line of Python programs 
-  started using the `BaseTest.startPython` method (and setting ``COVERAGE_FILE`` to a 
-  unique filename in the test output directory), when the ``pythonCoverage`` 
-  property is set to true (typically by ``pysys.py run -XpythonCoverage``). The 
-  ``pythonCoverageArgs`` project property can be set to provide customized 
-  arguments to the coverage tool, such as which files to include/exclude, or 
-  a ``--rcfile=`` specifying a coverage configuration file. 
-
-- Configure your ``pysysproject.xml`` to collect the coverage files generated in 
-  your testcase output directories and put them into a single directory. Add a 
-  project property to specify the directory location so it can be located 
-  by the code that will generate the report. For Python programs, you'd 
-  configure PySys to do it like this::
+  When starting your process, you can detect whether to enable code coverage like this:
   
-  	<property name="pythonCoverageDir" value="__pysys_coverage_python_@OUTDIR@"/>
-	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
+    if self.runner.getBoolProperty('mylanguageCoverage', default=self.runner.getBoolProperty('codeCoverage')) and not self.disableCoverage:
+	  ...
 
-  Note that ``collect-test-output`` will delete the specified outputDir each 
-  time PySys runs some tests. If you wish to preserve output from previous 
-  runs, you could add a property such as ``${startDate}_${startTime}`` to the 
-  directory name to make it unique each time. 
+  Often you will need to set an environment variable to indicate the filename that coverage should be generated under. 
+  Make sure to use a unique filename so that multiple processes started by the same test do not clash. Often you 
+  will need to ensure that your application is shutdown cleanly (rather than being automatically killed at the end of 
+  the test) so that it has a chance to write the code coverage information. 
+
+- Create a custom writer class which collects coverage files (matching a specific regex pattern) from the output 
+  directory. The usual way to do this would be to subclass `pysys.writer.testoutput.CollectTestOutputWriter`. Configure 
+  default values for main configuration properties (by defining them as static variables in your class). Then implement 
+  `pysys.writer.api.BaseResultsWriter.isEnabled()` to define when coverage reporting will happen, and run the 
+  required processes to combine coverage files and generate a report in the destDir in 
+  `pysys.writer.api.BaseResultsWriter.cleanup()`, which will execute after all tests have completed. 
   
-  In addition to any standard ``${...}`` property variables from the project 
-  configuration, the output pattern can contain these three ``@...@`` 
-  substitutions which are specific to the collect-test-output ``outputPattern``:
-  
-    - ``@FILENAME@`` is the original base filename, to which you 
-      can add prefixes or suffixes as desired. 
-
-    - ``@TESTID@`` is replaced by the identifier of the test that generated the 
-      output file, which may be useful for tracking where each one came from. 
-
-    - ``@UNIQUE@`` is replaced by a number that ensures the file does not clash 
-      with any other collected output file from another test. The ``@UNIQUE@`` 
-      substitution variable is mandatory. 
-    
-- Add a runner plugin class, which calls `pysys.baserunner.BaseRunner.addCleanupFunction()` to register a 
-  function that will be called after tests have finished executing to combine the coverage files from the directory 
-  where they were collected and generates any required reports. The default 
-  implementation already does this for Python programs. Note that when reading 
-  the project property value specifying the output directory any ``${...}`` 
-  property values will be substituted automatically. 
+  Finally, add the new writer class to your ``pysysproject.xml`` file. 
   
 - Add the ``disableCoverage`` group to any tests (or test directories) that should not use coverage, 
   such as performance tests. 
    
-- If using a continuous integration system or centralized code coverage 
-  database, you could optionally upload the coverage data there from the 
-  directory PySys collected it into, so there is a permanent record of 
-  any changes in coverage over time. 
+- If using a continuous integration system or centralized code coverage database, you could optionally upload the 
+  coverage data there from the directory PySys collected it into, so there is a permanent record of 
+  any changes in coverage over time. The artifact publishing capability of 
+  `pysys.writer.testoutput.CollectTestOutputWriter` will help with that. 
 
 Running tests in multiple modes
 -------------------------------

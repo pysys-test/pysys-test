@@ -18,7 +18,7 @@
 	-->
 	
 	<writers>
-		<writer classname="pysys.writer.TestOutputArchiveWriter">
+		<writer classname="pysys.writer.testoutput.TestOutputArchiveWriter">
 			<property name="destDir" value="__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
@@ -28,11 +28,11 @@
 		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
 		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
 
-		<writer classname="pysys.writer.JUnitXMLResultsWriter">
+		<writer classname="pysys.writer.outcomes.JUnitXMLResultsWriter">
 			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
 		
-		<writer classname="pysys.writer.ConsoleSummaryResultsWriter">
+		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter">
 		</writer>
 	</writers>
 

@@ -721,7 +721,7 @@ class BaseRunner(ProcessUser):
 		processing of coverage data (if enabled), for example generating 
 		reports etc. 
 		
-		:deprecated: Instead of overriding this method, create a `pysys.writer.CollectTestOutputWriter` subclass, 
+		:deprecated: Instead of overriding this method, create a `pysys.writer.testoutput.CollectTestOutputWriter` subclass, 
 			and generate a coverage report in its cleanup method. 
 		
 		"""
@@ -831,7 +831,7 @@ class BaseRunner(ProcessUser):
 
 	def publishArtifact(self, path, category):
 		"""
-		Notifies any interested `pysys.writer.ArtifactPublisher` writers about an artifact that they may wish to publish.  
+		Notifies any interested `pysys.writer.api.ArtifactPublisher` writers about an artifact that they may wish to publish.  
 
 		Called when a file or directory artifact is published (e.g. by another writer).
 		

@@ -165,7 +165,7 @@
 			directories. The destDir could then be uploaded to a CI system (some CI writers 
 			implement this automatically) or manually copied to a file share. 
 		-->
-		<writer classname="pysys.writer.TestOutputArchiveWriter">
+		<writer classname="pysys.writer.testoutput.TestOutputArchiveWriter">
 			<property name="destDir" value="__pysys_output_archives.${outDirName}/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
@@ -184,11 +184,11 @@
 		Use the outputDir property to define the output directory for the JUnit test summary files (the writer will 
 		produce one file per test into this output directory). 
 		-->
-		<writer classname="pysys.writer.JUnitXMLResultsWriter">
+		<writer classname="pysys.writer.outcomes.JUnitXMLResultsWriter">
 			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
 
-		<writer classname="pysys.writer.XMLResultsWriter" file="__pysys_testsummary_${outDirName}_%Y-%m-%d_%H.%M.%S.xml">
+		<writer classname="pysys.writer.outcomes.XMLResultsWriter" file="__pysys_testsummary_${outDirName}_%Y-%m-%d_%H.%M.%S.xml">
 			<!--
 			Set properties on the XML test output writer class. The available properties that 
 			can be set are the stylesheet location, whether to use file URLs in all references 
@@ -212,7 +212,7 @@
 		<!--
 		Add in the test results writer if output to a text file is required 
 		
-		<writer classname="pysys.writer.TextResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log">
+		<writer classname="pysys.writer.outcomes.TextResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.log">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->
@@ -221,16 +221,22 @@
 		Add in the CSV results writer if CSV text output is required. This outputs the test results
 		in a column separated list, with headings id, title, cycle, startTime, duration, outcome
 
-		<writer classname="pysys.writer.CSVResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
+		<writer classname="pysys.writer.outcomes.CSVResultsWriter" file="__pysys_testsummary_%Y-%m-%d_%H.%M.%S.csv">
 			<property name="outputDir" value="${testRootDir}"/>
 		</writer>
 		-->		
+		
+		<!-- Code coverage for .py files-->
+		<writer classname="pysys.writer.testoutput.PythonCoverageWriter">
+			<property name="destDir" value="__coverage_python.${outDirName}"/>
+			<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/internal/utilities/python_coveragerc"/>
+		</writer>
 
 		<!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run, 
 			optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
 			list if no other "summary" writer is explicitly configured.
 		-->		
-		<writer classname="pysys.writer.ConsoleSummaryResultsWriter">
+		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter">
 			<property name="showTestTitle" value="false"/>
 		</writer>
 	</writers>
@@ -314,11 +320,6 @@
 		<formatter classname="pysys.utils.logutils.BaseLogFormatter" 
 				name="runlog" messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 	</formatters>
-	
-	<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/internal/utilities/python_coveragerc"/>
-
-	<property name="pythonCoverageDir" value="__coverage_python.${outDirName}"/>
-	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
 	
 	<project-help>
 		<!-- Add project-specific text to be appended to the "pysys run -h". 

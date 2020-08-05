@@ -84,7 +84,7 @@ class CSVPerformanceReporter(object):
 	differs from row to row.
 
 	After tests have run, the summary file is published with category "CSVPerformanceReport" 
-	using the `pysys.writer.ArtifactPublisher` interface. 
+	using the `pysys.writer.api.ArtifactPublisher` interface. 
 
 	:param project: The project configuration instance.
 	:param str summaryfile: The filename pattern used for the summary file(s). 

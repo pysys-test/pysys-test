@@ -17,6 +17,7 @@ What's new in 1.6.0 (under development)
 PySys 1.6.0 is under development. 
 
 The significant new features of PySys 1.6.0 are grouped around a few themes:
+
     - a new "plugins" concept to encourage a more modular style when sharing functionality between tests, 
     - validation: the new `BaseTest.assertThatGrep` method, which gives nice clear error messages when the assert fails,  
     - new writers for recording test results, including GitHub Actions support and a test output directory zip archiver, 
@@ -118,7 +119,7 @@ its constructor, see the sample ``pysysproject.xml`` file.
 
 New and improved result writers
 -------------------------------
-- Added `pysys.writer.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
+- Added `pysys.writer.testoutput.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
   producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
   Properties are provided to allow detailed control of the maximum number and size of archives generated, and the 
   files to include/exclude. 
@@ -128,29 +129,29 @@ New and improved result writers
   detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
   test output etc) which can be used to upload the artifacts when present. 
   
-  This uses the new `pysys.writer.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI 
+  This uses the new `pysys.writer.api.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI 
   writers to get a summary of test outcomes. 
 
-- Added `pysys.writer.ArtifactPublisher` interface which can be implemented by writers that support some concept of 
+- Added `pysys.writer.api.ArtifactPublisher` interface which can be implemented by writers that support some concept of 
   artifact publishing, for example CI providers that 'upload' artifacts. Artifacts are published by 
   various `pysys.utils.perfreporter.CSVPerformanceReporter` and various writers 
-  including `pysys.writer.TestOutputArchiveWriter`. 
+  including `pysys.writer.testoutput.TestOutputArchiveWriter`. 
 
-- Added `pysys.writer.CollectTestOutputWriter` which supercedes the ``collect-test-output`` feature, providing a 
-  more powerful way to collect files of interest (e.g. performance graphs, code coverage files, etc) from all 
-  tests and collate them into a single directory and optionally a .zip archive. 
-  This uses the new `pysys.writer.TestOutputVisitor` writer interface which can be implemented by writers that wish to 
-  visit each (non-zero) file in the test output directory after each test. 
+- Added `pysys.writer.testoutput.CollectTestOutputWriter` which supercedes the ``collect-test-output`` feature, 
+  providing a more powerful way to collect files of interest (e.g. performance graphs, code coverage files, etc) from 
+  all tests and collate them into a single directory and optionally a .zip archive. 
+  This uses the new `pysys.writer.api.TestOutputVisitor` writer interface which can be implemented by writers that wish 
+  to visit each (non-zero) file in the test output directory after each test. 
   
   The CollectTestOutputWriter can be used standalone, or as a base class for writers that collect a particular kind 
   of file (e.g. code coverage) and then do something with it during the runner cleanup phase when all tests have 
   completed.  
 
-- Moved Python code coverage generation out to `pysys.writer.PythonCoverageWriter` as an example of how to plugin 
+- Moved Python code coverage generation out to `pysys.writer.testoutput.PythonCoverageWriter` as an example of how to plugin 
   code coverage support without subclassing the runner. Existing projects use this behind the scenes, but new projects 
   should add the writer to their configuration explicitly if they need it (see sample project). 
   
-- Added `pysys.writer.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
+- Added `pysys.writer.console.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
   failure, for the benefit of IDEs and CI providers that can highlight failures found by regular expression stdout 
   parsing. An instance of this writer is automatically added to every project, and enables itself if 
   the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set, producing make-style console output::
@@ -180,7 +181,10 @@ New and improved result writers
 
 There are also some more minor enhancements to the writers:
 
-- Added `pysys.writer.ConsoleSummaryResultsWriter` property for ``showTestTitle`` (default=False) as sometimes seeing 
+- The `pysys.writer` module has been split up into separate submodules. However the writers module imports all symbols 
+  from the new submodules, so no change is required in your code or projects that reference pysys.writer.XXX classes. 
+
+- Added `pysys.writer.console.ConsoleSummaryResultsWriter` property for ``showTestTitle`` (default=False) as sometimes seeing 
   the titles of tests can be helpful when triaging results. There is also a new ``showTestDir`` which allows the 
   testDir to be displayed in addition to the output dir in cases where the output dir is not located underneath 
   the test dir (due to --outdir). Also changed the defaults for some other properties to 
@@ -189,10 +193,10 @@ There are also some more minor enhancements to the writers:
 
 - Added a summary of INSPECT and NOTVERIFIED outcomes at the end of test execution (similar to the existing failures 
   summary), since often these outcomes do require human attention. This can be disabled using the properties on 
-  `pysys.writer.ConsoleSummaryResultsWriter` if desired. 
+  `pysys.writer.console.ConsoleSummaryResultsWriter` if desired. 
 
 - Added `pysys.utils.logutils.stripANSIEscapeCodes()` which can be used to remove ANSI escape codes such as console 
-  color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.BaseResultsWriter`), 
+  color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.api.BaseResultsWriter`), 
   since usually you wouldn't want these if writing the output to a file. 
 
 More powerful copy and line mapping
@@ -531,6 +535,19 @@ Be sure to remove use of the following deprecated items at your earliest conveni
   redirection module exists, so any code that depends on the old location will still work, but please change references 
   to the new name the old one will be removed in a future release. 
 
+- If you need code coverage of a Python application, instead of the built-in python coverage support e.g.::
+
+        <property name="pythonCoverageDir" value="__coverage_python.${outDirName}"/>
+        <property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
+        <collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
+
+  change to using the new writer, e.g.::
+  
+        <writer classname="pysys.writer.testoutput.PythonCoverageWriter">
+            <property name="destDir" value="__coverage_python.${outDirName}"/>
+            <property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
+        </writer>
+
 Finally there are also some fixes, cleanup, and better error checking that *could* require changes (typically to 
 extension/framework classes rather than individual tests) but in most cases will not be noticed. Most users can ignore 
 the following list and consult it only if you get new test failures after upgrading PySys:
@@ -600,7 +617,7 @@ the following list and consult it only if you get new test failures after upgrad
   really need them, but this is unlikely and they are not part of the public PySys API). 
 - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
 - Removed deprecated method ``purgeDirectory()`` from `pysys.baserunner.BaseRunner` 
-  and `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
+  and `pysys.writer.outcomes.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
 - Removed deprecated classes ``ThreadedStreamHandler`` and ``ThreadedFileHandler`` from the 
   ``pysys.`` module as there is no reason for PySys to provide these. These are trivial to implement using the 
   Python logging API if anyone does need similar functionality. 
@@ -1114,7 +1131,7 @@ Improvements to the ``pysys.py`` command line tool:
 
 - Added a concise summary of the test ids for any non-passes in a format that's 
   easy to copy and paste into a new command, such as for re-running the failed 
-  tests. This can be disabled using the `pysys.writer.ConsoleSummaryResultsWriter` property 
+  tests. This can be disabled using the `pysys.writer.console.ConsoleSummaryResultsWriter` property 
   ``showTestIdList`` if desired. 
 
 - Added an environment variable ``PYSYS_DEFAULT_THREADS`` which can be used to set 
