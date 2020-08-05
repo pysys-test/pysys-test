@@ -962,7 +962,7 @@ class ProcessUser(object):
 		return self.waitForGrep(file, expr=expr, filedir=filedir, **waitForGrepArgs)
 			
 	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
-			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None, detailMessage='', filedir=None, 
+			ignores=[], process=None, errorExpr=[], errorIf=None, abortOnError=None, encoding=None, detailMessage='', filedir=None, 
 			reFlags=0, mappers=[]):
 		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
 		directory (waitForGrep was formerly known as `waitForSignal`).
@@ -972,24 +972,25 @@ class ProcessUser(object):
 		
 		  - ``process=`` to abort if success becomes impossible due to premature termination of the process that's 
 		    generating the output
-		  - ``errorExpr=`` to abort if an error message/expression is written to the file
+		  - ``errorExpr=`` to abort if an error message/expression is written to the file being grepped
+		  - ``errorIf=`` to abort if the specified lambda function returns an error string (which can be used if the 
+		    error messages go to a different file than that being grepped
 		
 		This will generate much clearer outcome reasons, which makes test failures easy to triage, 
 		and also avoids wasting time waiting for something that will never happen.
 		
 		Example::
 		
-			self.waitForGrep('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
-				errorExpr=[' ERROR ', ' FATAL ', 'Failed to start'], encoding='utf-8')
-				
+			self.waitForGrep('myprocess.log', expr='INFO .*Started successfully', encoding='utf-8',
+				process=myprocess, errorExpr=[' (ERROR|FATAL) ', 'Failed to start'])
+			
+			self.waitForGrep('myoutput.txt', expr='My message', encoding='utf-8',
+				process=myprocess, errorIf=lambda: self.getExprFromFile('myprocess.log', ' ERROR .*', returnNoneIfMissing=True))
+			
 		Note that waitForGrep fails the test if the expression is not found (unless abortOnError was set to False, 
 		which isn't recommended), so there is no need to add duplication with an 
 		`assertGrep <pysys.basetest.BaseTest.assertGrep>` to check for the same expression in your validation logic. 
 
-		The message(s) logged when there is a successful wait can be controlled with the project 
-		property ``verboseWaitForGrep=true/false`` (or equivalently, ``verboseWaitForSignal``); for best visibility 
-		into what is happening set this property to true in your ``pysysproject.xml``. 
-		
 		You can extract information from the matched expression, optionally perform assertions on it, by 
 		using one or more ``(?P<groupName>...)`` named groups in the expression. A common 
 		pattern is to unpack the resulting dict using ``**kwargs`` syntax and pass to `BaseTest.assertThat`. For 
@@ -1019,6 +1020,13 @@ class ProcessUser(object):
 			for the main expression to be aborted with a `pysys.constants.BLOCKED` outcome. This is useful to avoid waiting 
 			a long time for the expected expression when an ERROR is logged that means it will never happen, and 
 			also provides much clearer test failure messages in this case. 
+
+		:param callable->str errorIf: A zero-arg function that returns False/None when there is no error, or a non-empty 
+			string if an error is detected which should cause us to abort looking for the grep expression. 
+			This function will be executed frequently (every ``poll`` seconds) so avoid 
+			doing anything time-consuming here unless you set a large polling interval. 
+			
+			Added in PySys 1.6.0. 
 
 		:param list[str] ignores: A list of regular expressions used to identify lines in the files which should be ignored 
 			when matching both `expr` and `errorExpr`. 
@@ -1133,6 +1141,16 @@ class ProcessUser(object):
 					log.warn(msg, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 				break
 			
+			if errorIf is not None:
+				errmsg = errorIf()
+				if errmsg:
+					msg = "%s aborted due to errorIf=%s"%(msg, errmsg)
+					if abortOnError:
+						self.abort(BLOCKED, msg, self.__callRecord())
+					else:
+						log.warn(msg)
+					break
+				
 			if process and not process.running():
 				msg = "%s aborted due to process %s termination"%(msg, process)
 				if abortOnError:

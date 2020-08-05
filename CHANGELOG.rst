@@ -19,12 +19,12 @@ PySys 1.6.0 is under development.
 The significant new features of PySys 1.6.0 are grouped around a few themes:
 
     - a new "plugins" concept to encourage a more modular style when sharing functionality between tests, 
-    - validation: the new `BaseTest.assertThatGrep` method, which gives nice clear error messages when the assert fails,  
+    - validation: the new `BaseTest.assertThatGrep()` method, which gives nice clear error messages when the assert fails,  
     - new writers for recording test results, including GitHub Actions support and a test output directory zip archiver, 
       and new APIs to allow writers to publish artifacts, and visit each of the test's output files,
     - a library of line mappers for more powerful copy and grep line pre-processing, 
-    - process starting enhancements such as `BaseTest.waitForBackgroundProcesses` and automatic logging of stderr when 
-      a process fails, 
+    - process starting enhancements such as `BaseTest.waitForBackgroundProcesses()`, automatic logging of stderr when 
+      a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file,
     - several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
 
 As this is a major release of PySys there are also some changes in this release that may require changes to your 
@@ -248,7 +248,7 @@ several improvements that make this easier:
 Assertion improvements
 ----------------------
 
-- Added `BaseTest.assertThatGrep` which makes it easier to do the common operation of extracting a value using grep 
+- Added `BaseTest.assertThatGrep()` which makes it easier to do the common operation of extracting a value using grep 
   and then performing a validation on it using `BaseTest.assertThat`. 
   
   This is essentially a simplified wrapper around the functionality added in 1.5.1, but avoids the need for slightly 
@@ -277,7 +277,7 @@ Assertion improvements
 Simpler process handling
 ------------------------
 
-- `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
+- `BaseTest.startProcess()` now logs the last few lines of stderr before aborting the test when a process fails. This 
   behaviour can be customized with a new ``onError=`` parameter::
   
     # Log stdout instead of stderr
@@ -289,10 +289,16 @@ Simpler process handling
     # Do nothing on error
     self.startProcess(..., onError=lambda process: None)
 
-- `BaseTest.waitProcess` now has a ``checkExitStatus=`` argument that can be used to check the return code of the 
+- `BaseTest.waitForGrep` has a new optional ``errorIf=`` parameter that accepts a function which can trigger an abort 
+  if it detects an error condition (not only in the file being waited on, as ``errorExpr=`` does). For example::
+  
+    self.waitForGrep('myoutput.txt', expr='My message', encoding='utf-8',
+      process=myprocess, errorIf=lambda: self.getExprFromFile('myprocess.log', ' ERROR .*', returnNoneIfMissing=True))
+
+- `BaseTest.waitProcess()` now has a ``checkExitStatus=`` argument that can be used to check the return code of the 
   process for success. 
 
-- Added `BaseTest.waitForBackgroundProcesses` which waits for completion of all background processes and optionally 
+- Added `BaseTest.waitForBackgroundProcesses()` which waits for completion of all background processes and optionally 
   checks for the expected exit status. This is especially useful when you have a test that needs to execute 
   lots of processes but doesn't care about the order they execute in, since having them all execute concurrently in the 
   background and then calling waitForBackgroundProcesses() will be a lot quicker than executing them serially in the 
