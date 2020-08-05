@@ -133,8 +133,8 @@ class BaseRunner(ProcessUser):
 		summary reports and by some writers. 
 		
 		The default contains a few standard values (currently these include ``outDirName``, ``hostname`` 
-		and ``startTime``), and additional items can be added by runner subclasses 
-		in the `setup` method - for example the build number of the application under test. 
+		and ``startTime``), and additional items can be added by runner plugins - for example the build number of the 
+		application under test. 
 		
 		Note that it is not permitted to try to change this dictionary after setup has completed. 
 	
@@ -344,6 +344,7 @@ class BaseRunner(ProcessUser):
 
 			except Exception as ex:
 				log.info('Failed to get VCS commit using %s: %s', commitCmd, ex)
+		if self.xargs: self.runDetails['xargs'] = ', '.join('%s=%s'%(k,v) for k,v in self.xargs.items())
 
 		self.runDetails['startTime'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.startTime))
 		
