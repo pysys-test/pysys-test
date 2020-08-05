@@ -324,7 +324,8 @@ class BaseRunner(ProcessUser):
 		if threads>1: self.runDetails['testThreads'] = str(threads)
 		self.runDetails['os'] = platform.platform().replace('-',' ')
 		
-		commitCmd = shlex.split(self.project.properties.get('versionControlGetCommitCommand',''))
+		# escape windows \ chars (which does limit the expressive power, but is likely to be more helpful than not)
+		commitCmd = shlex.split(self.project.properties.get('versionControlGetCommitCommand','').replace('\\', '\\\\'))
 		import subprocess
 		if commitCmd:
 			try:

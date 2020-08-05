@@ -525,7 +525,7 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 		return self.runner.getBoolProperty('pythonCoverage', default=self.runner.getBoolProperty('codeCoverage')) and self.destDir
 
 	def getCoverageArgsList(self): # also used by startPython()
-		return shlex.split(self.pythonCoverageArgs.replace(u'\\',u'\\\\')) # need to escape windows \ else it gets removed
+		return shlex.split(self.pythonCoverageArgs.replace(u'\\',u'\\\\')) # need to escape windows \ else it gets removed; do this the same on all platforms for consistency
 
 	def cleanup(self, **kwargs):
 		pythonCoverageDir = self.destDir

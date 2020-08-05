@@ -185,10 +185,11 @@ e.g.
 		sys.exit()
 
 	def parseArgs(self, args, printXOptions=None):
-		# add any default args first; shlex.split does a great job of providing consistent parsing from str->list
+		# add any default args first; shlex.split does a great job of providing consistent parsing from str->list, 
+		# but need to avoid mangling \'s on windows; since this env var will be different for each OS no need for consistent win+unix behaviour
 		if os.getenv('PYSYS_DEFAULT_ARGS',''):
 			log.info('Using PYSYS_DEFAULT_ARGS = %s'%os.environ['PYSYS_DEFAULT_ARGS'])
-			args = shlex.split(os.environ['PYSYS_DEFAULT_ARGS']) + args
+			args = shlex.split(os.environ['PYSYS_DEFAULT_ARGS'].replace(os.sep, os.sep*2 if os.sep=='\\' else os.sep)) + args
 		
 
 		printLogsDefault = PrintLogs.ALL
