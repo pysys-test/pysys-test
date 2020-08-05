@@ -31,6 +31,7 @@ from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.utils.loader import import_module
+from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
 from pysys.exceptions import UserError
 from pysys.xml.project import Project
 
@@ -297,6 +298,8 @@ e.g.
 					sys.exit(1)
 
 			elif option in ("-o", "--outdir"):
+				value = os.path.normpath(value)
+				if os.path.isabs(value) and not value.startswith('\\\\?\\'): value = fromLongPathSafe(toLongPathSafe(value))
 				self.outsubdir = value
 					
 			elif option in ("-m", "--mode", "--modeinclude"):
