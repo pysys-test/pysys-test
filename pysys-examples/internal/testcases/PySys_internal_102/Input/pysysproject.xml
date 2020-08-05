@@ -9,14 +9,14 @@
 	<collect-test-output pattern="*foo*" outputDir="${testRootDir}/../mydir2/${startDate}_${startTime}" outputPattern="@UNIQUE@.myfile"/>
 	
 	<writer classname="pysys.writer.CollectTestOutputWriter" alias="myCollectWriter">
-		<property name="fileIncludesRegex" value=".*/.*foo.*"/>
+		<property name="fileIncludesRegex" value=".*/.*foo[^/]*"/>
 		<property name="fileExcludesRegex" value=""/>
 		<property name="destDir" value="mywriter_defaultpattern"/>
 		<!-- use default output pattern -->
 	</writer>
 
 	<writer classname="pysys.writer.CollectTestOutputWriter">
-		<property name="fileIncludesRegex" value=".*/.*foo.*"/>
+		<property name="fileIncludesRegex" value=".*/.*foo[^/]*"/>
 		<property name="fileExcludesRegex" value=".*b"/>
 		<property name="destDir" value="mywriter-${outDirName}"/>
 		<property name="destArchive" value="myArchive.zip"/>

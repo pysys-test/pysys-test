@@ -355,8 +355,8 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 	A regular expression indicating the test output paths that will be collected. This can be used to 
 	archive just some particular files. This is required. 
 	
-	The expression is matched against the path of each output file relative to the test root dir, 
-	using forward slashes as the path separator. Multiple paths can be specified using "(path1|path2)" syntax. 
+	The expression is matched against the final characters of each output file's path (with the test root dir stripped 
+	off), using forward slashes as the path separator. Multiple paths can be specified using "(path1|path2)" syntax. 
 	"""
 
 	fileExcludesRegex = u''
@@ -365,8 +365,7 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 	
 	For example ``".*/MyTest_001/.*/mybigfile.*[.]tmp"``.
 	
-	The expression is matched against the path of each output file relative to the test root dir, 
-	using forward slashes as the path separator. Multiple paths can be specified using "(path1|path2)" syntax. 
+	The expression is matched against the path as described for fileIncludesRegex.
 	"""
 
 	outputPattern = u'@TESTID@.@FILENAME@.@UNIQUE@.@FILENAME_EXT@' 
@@ -425,17 +424,32 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 		
 		if os.path.exists(self.destDir):
 			deletedir(self.destDir) # remove any existing archives (but not if this dir seems to have other stuff in it!)
+		
+		def prepRegex(exp):
+			if not exp: return None
+			if not exp.endswith('$'): exp = exp+'$' # by default require regex to match up to the end to avoid common mistakes
+			return re.compile(exp)
 
-		self.fileExcludesRegex = re.compile(self.fileExcludesRegex) if self.fileExcludesRegex else None
-		self.fileIncludesRegex = re.compile(self.fileIncludesRegex)
+		self.fileExcludesRegex = prepRegex(self.fileExcludesRegex)
+		self.fileIncludesRegex = prepRegex(self.fileIncludesRegex)
+		
 		self.collectedFileCount = 0
 
 	def visitTestOutputFile(self, testObj, path, **kwargs):
-		path = path.replace('\\','/')
-		if not self.fileIncludesRegex.search(path): return False
+		# strip off test root dir prefix for the regex comparison
+		cmppath = fromLongPathSafe(path)
+		if cmppath.startswith(self.runner.project.testRootDir):
+			cmppath = cmppath[len(self.runner.project.testRootDir)+1:]
+		cmppath = cmppath.replace('\\','/')
+
+		if not self.fileIncludesRegex.search(cmppath): 
+			#log.debug('skipping file due to fileIncludesRegex: %s', cmppath)
+			return False
 		
 		fileExcludesRegex = self.fileExcludesRegex
-		if fileExcludesRegex is not None and fileExcludesRegex.search(path): return False
+		if fileExcludesRegex is not None and fileExcludesRegex.search(cmppath): 
+			#log.debug('skipping file due to fileExcludesRegex: %s', cmppath)
+			return False
 		self.collectPath(testObj, path, **kwargs)
 
 	def collectPath(self, testObj, path, **kwargs):

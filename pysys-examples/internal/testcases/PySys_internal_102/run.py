@@ -9,6 +9,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
+		self.log.info('output=%r', self.output)
 		self.copy(self.input, self.output+'/test')
 		runPySys(self, 'pysys', ['run', '-o', self.output+'/pysys-output', '--purge'], workingDir='test', 
 			onError=lambda process: [self.logFileContents(process.stdout), self.logFileContents(process.stderr)] )

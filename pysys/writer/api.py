@@ -287,7 +287,7 @@ class TestOutputVisitor(object):
 		directory. 
 		
 		:param pysys.basetest.BaseTest testObj: The test object, which can be used to find the outcome etc. 
-		:param str: The absolute path to the output file. 
+		:param str: The absolute, normalize path to the output file (will be a \\?\ long path safe path on windows). 
 		:return bool: Return True if this visitor has handled this file fully (e.g. by deleting it) and it should not be 
 			passed on to any other registered visitors. 
 		

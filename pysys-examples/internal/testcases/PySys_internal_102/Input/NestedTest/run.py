@@ -6,6 +6,7 @@ from pysys.basetest import BaseTest
 
 class PySysTest(BaseTest):
 	def execute(self):	
+		self.log.info('outdir=%r', self.output)
 		self.log.info('myCollectWriter=%s', self.runner.myCollectWriter) # check the writer aliases work
 		
 		for base in [u'.', u'dir2']:
