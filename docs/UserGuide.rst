@@ -196,7 +196,7 @@ be a string.
 If instead of setting a default for just one test you wish to set the default 
 for many tests from your custom `BaseTest` subclass, then you would do the same thing in the 
 definition of that `BaseTest` subclass. If you don't have a custom BaseTest class, you can use 
-`self.runner.getXArg()<pysys.runner.BaseRunner.getXArg>` to get the value or default, with the same 
+`self.runner.getXArg()<pysys.runner.BaseRunner.getXArg>` from any plugin to get the value or default, with the same 
 type conversion described above. 
 
 The other mechanism that PySys supports for configurable test options is 
@@ -219,7 +219,7 @@ Java-style ``.properties`` file. You can use properties to specify which file is
 loaded, so it would be possible to customize using environment variables::
 
 	<property name="myProjectPropertiesFile" value="${env.MYCOMPANY_CUSTOM_PROJECT_PROPERTIES}" default="${testRootDir}/default-config.properties"/>
-	<property file="${myProjectPropertiesFile}"/>
+	<property file="${myProjectPropertiesFile}" pathMustExist="true"/>
 
 To use projects properties in your testcase, just access the attributes on 
 `self.project <pysys.xml.project.Project>` from either a test instance or a runner::
@@ -237,7 +237,6 @@ There is an existing writer that produces coverage reports for programs written 
 `pysys.writer.testoutput.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
 ``<writer>`` to your project (see the sample ``pysysproject.xml`` for an example) and make sure you're starting 
 your Python processes with coverage support enabled, by using `BaseTest.startPython`. 
-
 
 The usual way to enable code coverage (for all supported languages) is to set ``-XcodeCoverage`` when running your 
 tests (or to run with ``--ci`` which does this automatically). Individual writers may additionally provide their own 
@@ -322,16 +321,13 @@ or runtime information such as the current operating system.
 You can find the mode that this test is running in using `self.mode <BaseTest>`.
 To ensure typos and inconsistencies in individual test descriptor modes do 
 no go unnoticed, it is best to provide constants for the possible mode values 
-and/or do validation and unpacking of modes in the `BaseTest.setup` method of 
-a custom BaseTest class like this::
+and/or do validation and unpacking of modes in a test plugin like this::
 
-	class MyBaseTest(BaseTest):
-		def setup(self):
-			super(MyBaseTest, self).setup()
-			
+	class MyTestPlugin(object):
+		def setup(self, testObj):
 			# Unpack and validate mode
-			self.databaseMode, self.browserMode = self.mode.split('_')
-			assert self.browserMode in ['Chrome', 'Firefox'], self.browserMode
+			testObj.databaseMode, testObj.browserMode = testObj.mode.split('_')
+			assert testObj.browserMode in ['Chrome', 'Firefox'], testObj.browserMode
 			
 			# This is a convenient pattern for specifying the method or class 
 			# constructor to call for each mode, and to get an exception if an 
@@ -339,10 +335,10 @@ a custom BaseTest class like this::
 			dbHelperFactory = {
 				'MockDatabase': MockDB,
 				'MyDatabase2.0': lambda: self.startMyDatabase('2.0')
-			}[self.databaseMode]
+			}[testObj.databaseMode]
 			...
 			# Call the supplied method to start/configure the database
-			self.db = dbHelperFactory() 
+			testObj.db = dbHelperFactory() 
 
 Finally, PySys provides a rich variety of ``pysys run`` arguments to control 
 which modes your tests will run with. By default it will run every test in its 
@@ -442,6 +438,7 @@ file containing::
 		<groups inherit="true">
 		  <group>subsystem1</group>
 		  <group>performance</group>
+		  <group>disableCoverage</group>
 		</groups>
 
 		<modes inherit="true">
@@ -465,6 +462,9 @@ This serves several useful purposes:
 
 - It adds groups that make it possible to run all your performance tests, or 
   all your tests for a particular part of the application, in a single command. 
+
+- It disables code coverage instrumentation which could adversely affect your 
+  performance results. 
 
 - It specifies that the performance tests will be run with a lower priority, 
   so they execute after more urgent (and quicker) tests such as unit tests. 
