@@ -51,8 +51,8 @@ class PySysTest(BaseTest):
 		self.assertThat('projectlist == expected', projectlist__eval="self.project.getProperty('projectlist', [])", expected=['abc','def','g'])
 		self.assertThat('user_lastname == "Smith"', user_lastname__eval="self.project.getProperty('user_lastname', 'xxx')")
 		
-		self.assertThat('actual == expected', actual=[k for k in self.project.properties if k.startswith('prefix')], 
-			expected=['prefix_a', 'prefix_a5'])
+		self.assertThat('actual == expected', actual=sorted([k for k in self.project.properties if k.startswith('prefix')]), 
+			expected=sorted(['prefix_a', 'prefix_a5']))
 
 		#self.assertThat('throws1', testStringProperty__eval="self.project.getProperty('projectfloat', -1)")
 		#self.assertThat('throws2', testStringProperty__eval="self.project.getProperty('projectfloat', None)")
