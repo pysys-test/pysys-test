@@ -137,13 +137,13 @@ using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `py
 provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
 particular project configuration.  
 
-When creating a runner plugin 
-Writers that generate output files/directories should by default put that output under either the 
-`runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
-directory (which is typically ``testRootDir`` unless an absolute ``--outdir`` path was provided) . 
-A prefix of double underscore ``__pysys`` is recommended to distinguish dynamically created directories 
-(ignored by version control) from the testcase directories (checked into version control). 
-
+When creating a runner plugin you may need somewhere to put output files, logs etc. Plugins that generate output 
+files/directories should by default put that output in a dedicated directory either the 
+`runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence if it's something users will 
+look at a lot) a directory one level up e.g. ``runner.output+'/../myplugin'`` (which is typically under ``testRootDir`` 
+unless an absolute ``--outdir`` path was provided) . 
+A prefix of double underscore ``__pysys`` is recommended under testRootDir to distinguish dynamically created 
+directories (ignored by version control) from the testcase directories (checked into version control). 
 
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
 its constructor, see the sample Project Configuration file. 
@@ -156,7 +156,7 @@ override when running tests:
 
 - *Testcase attributes*, which are just variables on the Python testcase 
   instance (or a `BaseTest` subclass shared by many tests). 
-  Attributes can be overridden on the command line when executing ``pysys run``. 
+  Attributes can be overridden on the command line using ``pysys run -Xattr=value``. 
   
   Attributes are useful for settings specific to an individual testcase such as 
   the number of iterations or time duration to use for a performance test. 
@@ -173,9 +173,7 @@ override when running tests:
   customizations in your shell so that you don't need to keep specifying them 
   every time you invoke ``pysys run``. 
 
-To use a testcase attribute, set the default value on your 
-test or basetest before ``BaseTest.__init__()`` is called. The easiest way to do 
-this in an individual testcase is usually to use a static attribute on the test 
+To use a testcase attribute, set the default value on your test or basetest as a static attribute on the test 
 class, for example::
 
 	class PySysTest(BaseTest):
@@ -186,18 +184,20 @@ class, for example::
 			self.log.info('Using iterations=%d', self.myIterationCount)
 			...
 
-If instead of setting a default for just one test you wish to set the default 
-for many tests from your custom `BaseTest` subclass, then you would do the same thing in the 
-definition of your `BaseTest` subclass. 
-
 Once the default value is defined with a static attribute, you can override the value 
 when you run your test using the ``-X`` option::
 
 	pysys run -XmyIterationCount=10
 
-If the attribute was defined with a default value of int, float or bool then 
+If the attribute was defined with a default value of int, float, bool or list then 
 the ``-X`` value will be automatically converted to that type; otherwise, it will 
 be a string. 
+
+If instead of setting a default for just one test you wish to set the default 
+for many tests from your custom `BaseTest` subclass, then you would do the same thing in the 
+definition of that `BaseTest` subclass. If you don't have a custom BaseTest class, you can use 
+`self.runner.getXArg()<pysys.runner.BaseRunner.getXArg>` to get the value or default, with the same 
+type conversion described above. 
 
 The other mechanism that PySys supports for configurable test options is 
 project properties. 
@@ -208,7 +208,11 @@ add a ``property`` element to your ``pysysproject.xml`` file::
 	<property name="myCredentials" value="${env.MYCOMPANY_CREDENTIALS}" default="testuser:testpassword"/>
 
 This property can will take the value of the specified environment variable, 
-or else the default if not set. 
+or else the default if any undefined properties/env vars are included in value. Note that if the value contains 
+unresolved variables and there is no valid default, the project will fail to load. 
+
+You may want to set the attribute ``pathMustExist="true"`` when defining properties that refer to a path such as a 
+build output directory that should always be present. 
 
 Another way to specify default project property values is to put them into a 
 Java-style ``.properties`` file. You can use properties to specify which file is 
