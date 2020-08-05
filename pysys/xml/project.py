@@ -422,7 +422,7 @@ class _XMLProjectParser(object):
 		the optionsDict, as will <property name=""></property> child elements.
 
 		:param node: The node, may be None
-		:param defaultClass: a string specifying the default fully-qualified class
+		:param defaultClass: a string specifying the name of the default fully-qualified class, if any
 		:return: a tuple of (pythonclassconstructor, propertiesdict), or if returnClassAsName (classname, propertiesDict)
 		"""
 		optionsDict = {}
@@ -434,6 +434,7 @@ class _XMLProjectParser(object):
 				assert tag.getAttribute('name')
 				optionsDict[tag.getAttribute('name')] = self.expandProperties(tag.getAttribute("value"), default=tag, name=tag.getAttribute('name'))
 		classname = optionsDict.pop('classname', defaultClass)
+		if not classname: raise UserError('Missing require attribute "classname=" for <%s>'%node.tagName)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
 		classname = classname.split('.')[-1]
 
