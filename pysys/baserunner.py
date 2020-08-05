@@ -674,15 +674,16 @@ class BaseRunner(ProcessUser):
 			for perfreporter in self.performanceReporters:
 					try: perfreporter.cleanup()
 					except Exception as ex: 
-						log.warn("Caught %s performing performance writer cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+						log.warn("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
 			with self.__resultWritingLock:
 				for writer in self.writers:
-					try: writer.cleanup()
+					try: 
+						writer.cleanup()
 					except Exception as ex: 
-						log.warn("Writer %s failed during cleanup: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+						log.warn("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						# might stop results being completely displayed to user
 						fatalerrors.append('Writer %s failed during cleanup: %s'%(repr(writer), ex))
 				del self.writers[:]
