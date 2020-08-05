@@ -129,6 +129,7 @@ Advanced:
                                console; options are: all|none|failures (default is all).
    -b, --abort     STRING      set the default abort on error property (true|false, overrides 
                                that specified in the project properties)
+   -XcodeCoverage              enable collecting and reporting on code coverage with all coverage writers in the project
    -XautoUpdateAssertDiffReferences 
                                this is a special command for automatically updating the reference files when an 
                                assertDiff fails
