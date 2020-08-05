@@ -110,8 +110,8 @@ class Process(object):
 		self.stderr = stderr
 
 		# catch these common mistakes
-		assert os.path.isdir(os.path.dirname(self.workingDir)), 'Working directory for %s does not exist: %s'%(self.displayName, self.stdout)
-		if self.stdout: assert os.path.isdir(os.path.dirname(self.stdout)), 'Parent directory for stdout does not exist: %s'%self.stdout
+		assert os.path.isdir(self.workingDir), 'Working directory for %s does not exist: %s'%(self.displayName, self.stdout)
+		if self.stdout: assert os.path.dirname(self.stdout)==self.workingDir or os.path.isdir(os.path.dirname(self.stdout)), 'Parent directory for stdout does not exist: %s'%self.stdout
 
 		# print process debug information
 		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
