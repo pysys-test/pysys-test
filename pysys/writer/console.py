@@ -18,7 +18,7 @@
 
 
 """
-Writers that record outcomes on the console (stdout) when running PySys. 
+Writers that record test outcomes on the console (stdout) when running PySys. 
 
 If no progress writers are explicitly configured in the PySys project XML file, an instance of
 `ConsoleProgressResultsWriter` is used. If no summary writer is explicitly configured in the PySys project
