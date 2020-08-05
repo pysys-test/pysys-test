@@ -429,10 +429,13 @@ class _XMLProjectParser(object):
 		if node:
 			for att in range(node.attributes.length):
 				name = node.attributes.item(att).name.strip()
+				if name in optionsDict: raise UserError('Duplicate property "%s" in <%s> configuration'%(name, node.tagName))
 				optionsDict[name] = self.expandProperties(node.attributes.item(att).value, default=None, name=name)
 			for tag in node.getElementsByTagName('property'):
-				assert tag.getAttribute('name')
-				optionsDict[tag.getAttribute('name')] = self.expandProperties(tag.getAttribute("value"), default=tag, name=tag.getAttribute('name'))
+				name = tag.getAttribute('name')
+				assert name
+				if name in optionsDict: raise UserError('Duplicate property "%s" in <%s> configuration'%(name, node.tagName))
+				optionsDict[name] = self.expandProperties(tag.getAttribute("value"), default=tag, name=name)
 		classname = optionsDict.pop('classname', defaultClass)
 		if not classname: raise UserError('Missing require attribute "classname=" for <%s>'%node.tagName)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
