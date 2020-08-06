@@ -221,8 +221,8 @@ class _XMLProjectParser(object):
 				raise UserError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file"'%m)
 		try:
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, value)
-		except UserError:
-			if default is None: raise
+		except UserError as ex:
+			if default is None: raise UserError('%s; if this is intended to be an optional property please add a default="..." value'%ex)
 			log.debug('Failed to resolve value "%s" of property "%s", so falling back to default value', value, name or '<unknown>')
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, default)
 
