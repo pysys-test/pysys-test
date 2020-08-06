@@ -12,6 +12,7 @@
     <groups>
       <group>test-loading</group>
       <group>performance</group>
+      <group>disableCoverage</group>
     </groups>
   </classification>
 

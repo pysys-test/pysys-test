@@ -24,7 +24,7 @@ import os.path, glob, gzip, shutil, re
 
 from pysys.constants import *
 from pysys.exceptions import *
-
+from pysys.utils.fileutils import toLongPathSafe
 
 def unzipall(path, binary=False):
 	"""Unzip all .gz files in a given directory.
@@ -82,20 +82,18 @@ def unzip(zfilename, replace=False, binary=False):
 	# must read and write in binary in all cases, since we don't know for 
 	# certain what encoding it's in and want to avoid corrupting 
 	# non-newline characters
-	zfile = gzip.GzipFile(zfilename, 'rb', 9)
-	uzfile = open(uzfilename, 'wb')
-	if binary: 
-		# do an efficient block-by-block copy, in case it's large
-		shutil.copyfileobj(zfile, uzfile)
-	else:
-		# non-binary means fix newlines.
-		# for compatibility with pre-1.3 PySys this is currently 
-		# implemented for basic cases and only on windows. 
-		buffer = zfile.read()
-		if PLATFORM=='win32': buffer = buffer.replace(b'\n', b'\r\n')
-		uzfile.write(buffer)
-	zfile.close()	 
-	uzfile.close()
+	with gzip.GzipFile(toLongPathSafe(zfilename), 'rb', 9) as zfile:
+		with open(toLongPathSafe(uzfilename), 'wb') as uzfile:
+			if binary: 
+				# do an efficient block-by-block copy, in case it's large
+				shutil.copyfileobj(zfile, uzfile)
+			else:
+				# non-binary means fix newlines.
+				# for compatibility with pre-1.3 PySys this is currently 
+				# implemented for basic cases and only on windows. 
+				buffer = zfile.read()
+				if PLATFORM=='win32': buffer = buffer.replace(b'\n', b'\r\n')
+				uzfile.write(buffer)
 
 	if replace:
 		try:

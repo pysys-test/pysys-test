@@ -31,6 +31,7 @@ from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.utils.loader import import_module
+from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
 from pysys.exceptions import UserError
 from pysys.xml.project import Project
 
@@ -108,7 +109,7 @@ Execution options
                                specify either an absolute number, or a multiplier on the number of CPUs e.g. "x1.5"; 
                    auto | 0    equivalent to x1.0 (or the PYSYS_DEFAULT_THREADS env var if set)
        --ci                    set optimal options for automated/non-interactive test execution in a CI job: 
-                                 --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES
+                                 --purge --record -j0 --type=auto --mode=ALL --printLogs=FAILURES -XcodeCoverage
    -v, --verbosity LEVEL       set the verbosity for most pysys logging (CRIT, WARN, INFO, DEBUG)
                    CAT=LEVEL   set the verbosity for a specific PySys logging category e.g. -vassertions=, -vprocess=
                                (or to set the verbosity for a non-PySys Python logger category use "python:CAT=LEVEL")
@@ -128,6 +129,7 @@ Advanced:
                                console; options are: all|none|failures (default is all).
    -b, --abort     STRING      set the default abort on error property (true|false, overrides 
                                that specified in the project properties)
+   -XcodeCoverage              enable collecting and reporting on code coverage with all coverage writers in the project
    -XautoUpdateAssertDiffReferences 
                                this is a special command for automatically updating the reference files when an 
                                assertDiff fails
@@ -185,10 +187,11 @@ e.g.
 		sys.exit()
 
 	def parseArgs(self, args, printXOptions=None):
-		# add any default args first; shlex.split does a great job of providing consistent parsing from str->list
+		# add any default args first; shlex.split does a great job of providing consistent parsing from str->list, 
+		# but need to avoid mangling \'s on windows; since this env var will be different for each OS no need for consistent win+unix behaviour
 		if os.getenv('PYSYS_DEFAULT_ARGS',''):
 			log.info('Using PYSYS_DEFAULT_ARGS = %s'%os.environ['PYSYS_DEFAULT_ARGS'])
-			args = shlex.split(os.environ['PYSYS_DEFAULT_ARGS']) + args
+			args = shlex.split(os.environ['PYSYS_DEFAULT_ARGS'].replace(os.sep, os.sep*2 if os.sep=='\\' else os.sep)) + args
 		
 
 		printLogsDefault = PrintLogs.ALL
@@ -197,7 +200,7 @@ e.g.
 			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
 			# by CI writers and/or the command line; note that setting --mode=ALL would be incorrect if 
 			# supportMultipleModesPerRun=false but that's a legacy options so we raise an exception later if this happened)
-			args = ['--purge', '--record', '-j0', '--type=auto', '--mode=ALL']+args
+			args = ['--purge', '--record', '-j0', '--type=auto', '--mode=ALL',  '-XcodeCoverage']+args
 			printLogsDefault = PrintLogs.FAILURES
 
 		try:
@@ -296,6 +299,8 @@ e.g.
 					sys.exit(1)
 
 			elif option in ("-o", "--outdir"):
+				value = os.path.normpath(value)
+				if os.path.isabs(value) and not value.startswith('\\\\?\\'): value = fromLongPathSafe(toLongPathSafe(value))
 				self.outsubdir = value
 					
 			elif option in ("-m", "--mode", "--modeinclude"):

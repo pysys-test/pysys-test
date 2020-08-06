@@ -20,6 +20,7 @@ class PySysTest(BaseTest):
 				'-XtestIntProperty=1234',
 				'-XtestFloatProperty=456.78',
 				'-XtestStringProperty=123456',
+				'-XtestListProperty= abc  , def,,g',
 				'-XtestNoneProperty=Hello',
 				'-vDEBUG',
 				], workingDir='test', environs={
@@ -46,3 +47,4 @@ class PySysTest(BaseTest):
 		self.assertThat('prop != ""', prop__eval='self.project.startTime')
 		self.assertThat('prop != ""', prop__eval='self.project.hostname')
 		
+		self.assertGrep('pysys.out', expr='WARN .*', contains=False)

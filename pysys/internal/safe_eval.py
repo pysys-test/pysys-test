@@ -25,6 +25,7 @@
 import os.path, time, threading, logging, sys
 import re
 import math
+import json
 
 from pysys import log
 from pysys.constants import *
@@ -43,7 +44,7 @@ def safe_eval(expr, extraNamespace={}):
 	ensure we do not break compatibility between PySys versions, and that a sensible set of PySys constants and 
 	modules are available. 
 	
-	The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, and ``locale`` 
+	The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale`` 
 	standard Python modules, as well as the ``pysys`` module and the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``. 
 	
 	If necessary, symbols for additional modules can be imported dynamically using ``import_module``, e.g. 

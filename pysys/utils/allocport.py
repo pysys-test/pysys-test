@@ -29,6 +29,7 @@ import time
 import platform
 from pysys import process_lock
 from pysys.constants import *
+from pysys.utils.fileutils import openfile
 
 # LRU queue of server TCP ports for allocation to tests which need to
 # start TCP servers. Initialized to None since it might not actually be used.
@@ -60,7 +61,7 @@ def getEphemeralTCPPortRange():
 			ephemeral_low, ephemeral_high = 49152, 65535
 			_log.warning('PySys cannot determine the local/ephemeral port range on this OS (%s) as "%s" is missing; falling back to default IANA range %d-%d. Consider using the PYSYS_PORTS=minport-maxport environment variable to explicitly configure the range of non-ephemeral/server ports for PySys to use.', platform.platform(), port_file, ephemeral_low, ephemeral_high)
 		else:
-			with open(port_file) as f:
+			with openfile(port_file) as f:
 				s = f.readline().split()
 				ephemeral_low  = int(s[0])
 				ephemeral_high = int(s[1])

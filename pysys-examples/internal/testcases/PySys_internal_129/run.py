@@ -21,13 +21,14 @@ class PySysTest(BaseTest):
 		# this should NOT stop us deleting this output dir
 		self.write_text(self.mkdir('testroot/__pysys_output_archives_lowTotalLimit/test_output')+'/myfile.txt', 'xxx')
 		
-		runPySys(self, 'pysys', ['run', '-o', self.output+'/test_output',
+		runPySys(self, 'pysys', ['run', '-o', 'test_output',
 			'--record', '--threads', '6', '-c', '10'
 		], workingDir='testroot', expectedExitStatus='!=0')
 						
 	def validate(self):
-		if self.assertGrep('pysys.out', expr=r'(Traceback .*| WARN .*writer)', contains=False):
-			self.logFileContents('pysys.out', tail=True)
+		if self.assertGrep('pysys.out', expr=r'(Traceback .*| WARN .*[Ww]riter)', contains=False):
+			self.logFileContents('pysys.out', tail=True, maxLines=0)
+			return
 
 		self.log.info('')
 

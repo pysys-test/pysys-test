@@ -36,7 +36,6 @@ from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
-from pysys.utils.stringutils import compareVersions
 import pysys.internal.safe_eval
 
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
@@ -72,11 +71,9 @@ class ProcessUser(object):
 		The project can be used to access information such as the project properties which are shared across all tests 
 		(e.g. for hosts and credentials). 
 	:ivar bool ~.disableCoverage: Set to True to disable all code coverage collection for processes 
-		started from this instance. For example, to disable coverage in tests tagged with the 
-		'performance' group you could use a line like this in your BaseTest::
-		
-			if 'performance' in self.descriptor.groups: self.disableCoverage = True
-		
+		started from this instance. This is automatically set for any tests marked with the "disableCoverage" group 
+		in their pysystest.xml file. 
+			
 		The built-in Python code coverage functionality in L{startPython} checks this 
 		flag. It is recommended that any other languages supporting code coverage 
 		also check the self.disableCoverage flag. 
@@ -106,7 +103,7 @@ class ProcessUser(object):
 
 		self.processList = []
 		self.processCount = {}
-		self.__cleanupFunctions = []
+		self.__cleanupFunctions = [] # (fn, ignoreErrors)
 
 		self.outcome = [] # internal, do NOT use directly
 		self.__outcomeReason = ''
@@ -193,13 +190,15 @@ class ProcessUser(object):
 		:param xargs: A dictionary of the user defined extra arguments
 		
 		"""
-		pysys.utils.stringutils.setInstanceVariablesFromDict(self, xargs)
+		pysys.utils.misc.setInstanceVariablesFromDict(self, xargs)
 	
 	def getBoolProperty(self, propertyName, default=False):
 		"""
-		Get a True/False indicating whether the specified property is set 
+		Get a True/False indicating whether the specified attribute is set 
 		on this object (typically as a result of specifying -X on the command 
 		line), or else from the project configuration. 
+		
+		See also `pysys.baserunner.getXArg()` and `pysys.xml.project.Project.getProperty()`. 
 		
 		:param propertyName: The name of a property set on the command line 
 			or project configuration.
@@ -216,7 +215,7 @@ class ProcessUser(object):
 		
 		Uses the same Python process the tests are running under. 
 		
-		If PySys was run with the arguments ``-X pythonCoverage=true`` then 
+		If PySys was run with the argument ``-XcodeCoverage`` or ``-XpythonCoverage`` then 
 		`startPython` will add the necessary arguments to enable generation of 
 		code coverage. Note that this requried the coverage.py library to be 
 		installed. If a project property called `pythonCoverageArgs` exists 
@@ -239,10 +238,10 @@ class ProcessUser(object):
 			environs = kwargs['environs']
 		else:
 			environs = kwargs.setdefault('environs', self.getDefaultEnvirons(command=sys.executable))
-		if self.getBoolProperty('pythonCoverage') and not disableCoverage and not self.disableCoverage:
-			if hasattr(self.project, 'pythonCoverageArgs'):
-				args = [a for a in self.project.pythonCoverageArgs.split(' ') if a]+args
-			args = ['-m', 'coverage', 'run']+args
+			
+		coverageWriter = [writer for writer in getattr(self, 'runner', self).writers if isinstance(writer, pysys.writer.PythonCoverageWriter)]
+		if coverageWriter and not disableCoverage and not self.disableCoverage:
+			args = ['-m', 'coverage', 'run']+coverageWriter[0].getCoverageArgsList()+args
 			if 'COVERAGE_FILE' not in environs:
 				kwargs['environs'] = dict(environs)
 				with self.lock:
@@ -344,13 +343,9 @@ class ProcessUser(object):
 			if the process times out or returns an unexpected exit status (unless ignoreExitStatus=True), before 
 			any abort exception is raised. This provides a convenient place to add logging of 
 			diagnostic information (perhaps using the stdout/err of the process) and/or extracting and returning an 
-			error message from the output, for example::
-			
-				onError=lambda process: self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
+			error message from the output, for example: ``onError=lambda process: self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)``.
 
-			If a string value is returned from it will be added to the failure reason, e.g.::
-
-				onError=lambda process: self.logFileContents(process.stderr, tail=True) and self.getExprFromFile(process.stderr, 'Error: (.*)')
+			If a string value is returned from it will be added to the failure reason, e.g. ``onError=lambda process: self.logFileContents(process.stderr, tail=True) and self.getExprFromFile(process.stderr, 'Error: (.*)')``.
 			
 			If no onError function is specified, the default is to log the last few lines of stderr (or if empty, stdout) 
 			when a process fails and abortOnError=True. 
@@ -426,7 +421,7 @@ class ProcessUser(object):
 				logmethod = log.info if correctExitStatus else log.warn
 				if quiet: logmethod = log.debug
 				logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
-																	", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 0 else "")
+					", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 10 else "")
 				
 				if not ignoreExitStatus and not correctExitStatus:
 					if not stderr and not quiet: log.warn('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
@@ -487,6 +482,12 @@ class ProcessUser(object):
 		Some features of this method can be configured by setting project 
 		properties:
 		
+		  - ``defaultEnvirons.ENV_KEY``: if any properties with this prefix are 
+		    defined, an environment variable with the ENV_KEY is set by this method 
+		    (unless the property value is empty). For example, to set a default 
+		    JVM heap size for all processes with the ``_JAVA_OPTIONS`` environment 
+		    variable you could set ``defaultEnvirons._JAVA_OPTIONS = -Xmx512M``. 
+		
 		  - ``defaultEnvironsDefaultLang``: if set to a value such as ``en_US.UTF-8`` 
 		    the specified value is set for the LANG= variable on Unix; otherwise, 
 		    the LANG variable is not set (which might result in use of the 
@@ -532,6 +533,10 @@ class ProcessUser(object):
 				return {}
 
 		e = {}
+
+		for k, v in self.project.properties.items():
+			if k.startswith('defaultEnvirons.') and v:
+				e[k[k.find('.'):]] = v
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location; set to blank to do nothing
 		if self.project.getProperty('defaultEnvironsTempDir',''):
@@ -957,7 +962,7 @@ class ProcessUser(object):
 		return self.waitForGrep(file, expr=expr, filedir=filedir, **waitForGrepArgs)
 			
 	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
-			ignores=[], process=None, errorExpr=[], abortOnError=None, encoding=None, detailMessage='', filedir=None, 
+			ignores=[], process=None, errorExpr=[], errorIf=None, abortOnError=None, encoding=None, detailMessage='', filedir=None, 
 			reFlags=0, mappers=[]):
 		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
 		directory (waitForGrep was formerly known as `waitForSignal`).
@@ -967,24 +972,25 @@ class ProcessUser(object):
 		
 		  - ``process=`` to abort if success becomes impossible due to premature termination of the process that's 
 		    generating the output
-		  - ``errorExpr=`` to abort if an error message/expression is written to the file
+		  - ``errorExpr=`` to abort if an error message/expression is written to the file being grepped
+		  - ``errorIf=`` to abort if the specified lambda function returns an error string (which can be used if the 
+		    error messages go to a different file than that being grepped
 		
 		This will generate much clearer outcome reasons, which makes test failures easy to triage, 
 		and also avoids wasting time waiting for something that will never happen.
 		
 		Example::
 		
-			self.waitForGrep('myprocess.log', expr='INFO .*Started successfully', process=myprocess, 
-				errorExpr=[' ERROR ', ' FATAL ', 'Failed to start'], encoding='utf-8')
-				
+			self.waitForGrep('myprocess.log', expr='INFO .*Started successfully', encoding='utf-8',
+				process=myprocess, errorExpr=[' (ERROR|FATAL) ', 'Failed to start'])
+			
+			self.waitForGrep('myoutput.txt', expr='My message', encoding='utf-8',
+				process=myprocess, errorIf=lambda: self.getExprFromFile('myprocess.log', ' ERROR .*', returnNoneIfMissing=True))
+			
 		Note that waitForGrep fails the test if the expression is not found (unless abortOnError was set to False, 
 		which isn't recommended), so there is no need to add duplication with an 
 		`assertGrep <pysys.basetest.BaseTest.assertGrep>` to check for the same expression in your validation logic. 
 
-		The message(s) logged when there is a successful wait can be controlled with the project 
-		property ``verboseWaitForGrep=true/false`` (or equivalently, ``verboseWaitForSignal``); for best visibility 
-		into what is happening set this property to true in your ``pysysproject.xml``. 
-		
 		You can extract information from the matched expression, optionally perform assertions on it, by 
 		using one or more ``(?P<groupName>...)`` named groups in the expression. A common 
 		pattern is to unpack the resulting dict using ``**kwargs`` syntax and pass to `BaseTest.assertThat`. For 
@@ -1014,6 +1020,13 @@ class ProcessUser(object):
 			for the main expression to be aborted with a `pysys.constants.BLOCKED` outcome. This is useful to avoid waiting 
 			a long time for the expected expression when an ERROR is logged that means it will never happen, and 
 			also provides much clearer test failure messages in this case. 
+
+		:param callable->str errorIf: A zero-arg function that returns False/None when there is no error, or a non-empty 
+			string if an error is detected which should cause us to abort looking for the grep expression. 
+			This function will be executed frequently (every ``poll`` seconds) so avoid 
+			doing anything time-consuming here unless you set a large polling interval. 
+			
+			Added in PySys 1.6.0. 
 
 		:param list[str] ignores: A list of regular expressions used to identify lines in the files which should be ignored 
 			when matching both `expr` and `errorExpr`. 
@@ -1128,6 +1141,16 @@ class ProcessUser(object):
 					log.warn(msg, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 				break
 			
+			if errorIf is not None:
+				errmsg = errorIf()
+				if errmsg:
+					msg = "%s aborted due to errorIf=%s"%(msg, errmsg)
+					if abortOnError:
+						self.abort(BLOCKED, msg, self.__callRecord())
+					else:
+						log.warn(msg)
+					break
+				
 			if process and not process.running():
 				msg = "%s aborted due to process %s termination"%(msg, process)
 				if abortOnError:
@@ -1142,7 +1165,7 @@ class ProcessUser(object):
 		return matches
 
 
-	def addCleanupFunction(self, fn):
+	def addCleanupFunction(self, fn, ignoreErrors=False):
 		""" Registers a function that will be called as part of the `cleanup` of this object.
 		
 		Cleanup functions should have no arguments, and are invoked in reverse order with the most recently added first (LIFO), and
@@ -1152,10 +1175,14 @@ class ProcessUser(object):
 		
 			self.addCleanupFunction(lambda: self.cleanlyShutdownMyProcess(params))
 		
+		:param Callable[] fn: The cleanup function. 
+		:param bool ignoreErrors: By default, errors from cleanup functions will result in a test failure; set this to 
+			True to log them but not produce a test failure. This parameter was added in 1.6.0. 
+		
 		"""
 		with self.lock:
-			if fn and fn not in self.__cleanupFunctions: 
-				self.__cleanupFunctions.append(fn)
+			if fn and (fn,ignoreErrors) not in self.__cleanupFunctions: 
+				self.__cleanupFunctions.append( (fn, ignoreErrors) )
 
 
 	def cleanup(self):
@@ -1166,6 +1193,7 @@ class ProcessUser(object):
 		Do not override this method, instead use `addCleanupFunction`.
 		
 		"""
+		exceptions = []
 		try:
 			# although we don't yet state this method is thread-safe, make it 
 			# as thread-safe as possible by using swap operations
@@ -1174,23 +1202,28 @@ class ProcessUser(object):
 			if cleanupfunctions:
 				log.info('')
 				log.info('cleanup:')
-			for fn in reversed(cleanupfunctions):
+			for fn, ignoreErrors in reversed(cleanupfunctions):
 				try:
 					log.debug('Running registered cleanup function: %r'%fn)
 					fn()
 				except Exception as e:
-					log.exception('Error while running cleanup function: ')
+					(log.warn if ignoreErrors else log.error)('Error while running cleanup function%s: ', ' (ignoreErrors=True)' if ignoreErrors else '', exc_info=True)
+					if not ignoreErrors:
+						exceptions.append('Cleanup function failed: %s (%s)'%(e, type(e).__name__))
 		finally:
 			with self.lock:
 				processes, self.processList = self.processList, []
 			for process in processes:
 				try:
 					if process.running(): process.stop()
-				except Exception:
-					log.info("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				except Exception as e: # this is pretty unlikely to fail, but we'd like to know if it does
+					log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					exceptions.append('Failed to stop process %s: %s'%(process, e))
 			self.processCount = {}
 			
 			log.debug('ProcessUser cleanup function done.')
+		if exceptions:
+			raise UserError('Cleanup failed%s: %s'%(' with %d errors'%len(exceptions), '; '.join(exceptions)))
 		
 
 	def addOutcome(self, outcome, outcomeReason='', printReason=True, abortOnError=False, callRecord=None, override=False):
@@ -1422,9 +1455,10 @@ class ProcessUser(object):
 
 			allAuthList = self.getExprFromFile('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.', returnAll=True))
 
-		See also `pysys.basetest.BaseTest.assertGrep` which should be used when instead of just finding out what's 
+		See also `pysys.basetest.BaseTest.assertThatGrep` which should be used when instead of just finding out what's 
 		in the file you want to assert that a specific expression is matched. The documentation for assertGrep also 
-		provides some helpful examples of regular expressions that could also be applied to this method. 
+		provides some helpful examples of regular expressions that could also be applied to this method, and tips for 
+		dealing with escaping in regular expressions. 
 
 		.. versionchanged:: 1.6.0
 			Support for named groups was added in 1.6.0.
@@ -1436,12 +1470,6 @@ class ProcessUser(object):
 			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
 			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
 			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
-
-			If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
-			substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
-			through re.escape::
-			
-				expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)')
 
 		:param List[int] groups: which numeric regex group numbers (as indicated by brackets in the regex) should be returned; 
 			default is ``[1]`` meaning the first group. 
@@ -1745,7 +1773,7 @@ class ProcessUser(object):
 			an integer < 0 if v1<v2, 
 			or 0 if they are semantically the same.
 		"""
-		return compareVersions(v1, v2)
+		return pysys.utils.misc.compareVersions(v1, v2)
 
 	def write_text(self, file, text, encoding=None):
 		"""
@@ -1873,6 +1901,8 @@ class ProcessUser(object):
 			a path relative to the `self.output` directory. Destination file(s) are overwritten if the 
 			dest already exists. 
 			
+			The dest and src can be the same for file copies (but not directory copies). 
+			
 			As a convenience to avoid repeating the same text in the src and destination, 
 			if the dest ends with a slash, or the src is a file and the dest is an existing directory, 
 			the dest is taken as a parent directory into which the src will be copied in retaining its current name. 
@@ -1918,7 +1948,13 @@ class ProcessUser(object):
 	
 		dest = toLongPathSafe(os.path.join(self.output, dest)).rstrip('/\\')
 		if origdest.endswith((os.sep, '/', '\\')) or (not srcIsDir and os.path.isdir(dest)): dest = toLongPathSafe(dest+os.sep+os.path.basename(src))
-		assert src != dest, 'Source and destination file cannot be the same'
+	
+		if src == dest and not srcIsDir:
+			dest = src+'__pysys_copy.tmp'
+			renameDestAtEnd = True
+		else:
+			renameDestAtEnd = False
+		assert src != dest, 'Source and destination directory cannot be the same'
 
 		if overwrite is None: overwrite = not srcIsDir
 
@@ -1979,5 +2015,8 @@ class ProcessUser(object):
 						if fn: fn(src, dest, srcf, destf)
 
 		shutil.copystat(src, dest)
+		if renameDestAtEnd:
+			os.remove(src)
+			os.rename(dest, src)
 		return dest
 		

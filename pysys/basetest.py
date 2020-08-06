@@ -68,15 +68,10 @@ class BaseTest(ProcessUser):
 		self.resources = []
 		self.testCycle = getattr(BaseTest, '_currentTestCycle', None) # set when constructed by runner
 		
-		self.testPlugins = []
-		for pluginClass, pluginAlias, pluginProperties in self.project.testPlugins:
-			plugin = pluginClass(self, pluginProperties)
-			self.testPlugins.append(plugin)
-			if not pluginAlias: continue
-			if hasattr(self, pluginAlias): raise UserError('Alias "%s" for test-plugin conflicts with a field that already exists on this test object; please select a different name'%(pluginAlias))
-			setattr(self, pluginAlias, plugin)
-
-	
+		if 'disableCoverage' in descriptor.groups: 
+			self.disableCoverage = True
+			self.log.debug('Disabling coverage for this test due to disableCoverage group')
+		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
 		and a suffix indicating the cycle number if this is a multi-cycle test run. 
@@ -443,7 +438,7 @@ class BaseTest(ProcessUser):
 			parameters which makes the intention of the assertion harder to 
 			understand from looking at the test output. 
 		
-			The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, and ``locale`` 
+			The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale`` 
 			standard Python modules, as well as the ``pysys`` module and the contents of the `pysys.constants` module, 
 			e.g. ``IS_WINDOWS``, and also the BaseTest's ``self`` variable. 
 	
@@ -519,7 +514,7 @@ class BaseTest(ProcessUser):
 		The condition string is just a Python expression, which will be passed to ``eval()`` and can use any 
 		of the ``keyword=`` argument values passed to this method (but not the caller's local variables).
 		The evaluation is performed in a namespace that also includes the current `BaseTest` instance (``self``), 
-		some standard Python modules (``os.path``, ``math``, ``sys``, ``re``, and ``locale``), the `pysys` module, and 
+		some standard Python modules (``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale``), the `pysys` module, and 
 		the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``. If necessary, symbols for additional modules 
 		can be imported dynamically using ``import_module()``. For example::
 
@@ -748,6 +743,11 @@ class BaseTest(ProcessUser):
 		
 			self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[RegexReplace(RegexReplace.DATETIME_REGEX, '<timestamp>')])))
 		
+		The above example shows a very compact form of assertDiff, which uses the fact that copy() returns 
+		the path of the destination file, and that there is no need to specify assertDiff's file2 (reference) 
+		parameter if it's the same basename as the first argument (just located in a different directory). In practice 
+		it's very convenient to use the same basename for both the reference file and the output file it's compared to. 
+		
 		Should the files after pre-processing be equivalent a C{PASSED} outcome is added to the test outcome list, 
 		otherwise a C{FAILED} outcome is added.
 		
@@ -772,7 +772,7 @@ class BaseTest(ProcessUser):
 		
 		:param str file1: The actual (or first) file to be compared; can be an absolute path or relative to the test output directory. 
 		:param str file2: The expected/reference (or second) file to be compared; can be an absolute path or relative to the Reference directory.
-			The default is for file2 to be the same basename as file1. 
+			The default is for file2 to be the same basename as file1 (but located in the Reference/ directory). 
 		:param str filedir1: The dirname of the first file (defaults to the testcase output subdirectory)
 		:param str filedir2: The dirname of the second file (defaults to the testcase reference directory)
 		:param list[str] ignores: A list of regular expressions used to denote lines in the files which should be ignored
@@ -883,8 +883,9 @@ class BaseTest(ProcessUser):
 
 		:param file: The name or relative/absolute path of the file to be searched.
 		
-		:param str grepRegex: The regular expression to check for in the file (or a string literal if literal=True), 
-			for example ``" ERROR .*"``. See `assertGrep` for more tips on using and escaping regular expressions. 
+		:param str grepRegex: The regular expression to use for extracting the value of interest from the file. 
+			Typically this will use a ``(...)`` regular expression group to identify the part of the expression 
+			containing the value; alternatively a single ``(?P<value>...)`` named group may be used. 
 		
 		:param str conditionstring: A string containing Python code that will be evaluated using ``eval()`` 
 			to validate that "value" is correct. For example ``value == expected``.
@@ -983,7 +984,17 @@ class BaseTest(ProcessUser):
 				\d *  # some fractional digits
 				\ seconds\. # in verbose regex mode we escape spaces with a slash
 				\""")
+
+		Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+		be treated as literal values. If you have a string with a lot of backslashes, it's best to use a 'raw' 
+		Python string so that you don't need to double-escape them, e.g. ``self.assertGrep(..., expr=r'c:\\Foo\\filename\.txt')``.
 		
+		If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
+		substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
+		through re.escape::
+		
+			elf.assertGrep('myserver.log', expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)'))
+
 		.. versionchanged:: 1.5.1
 			The return value and reFlags were added in 1.5.1.
 
@@ -993,14 +1004,7 @@ class BaseTest(ProcessUser):
 			for example ``" ERROR .*"``. 
 			
 			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
-			be treated as literal values. If you have a string with a lot of backslashes, it's best to use a 'raw' 
-			Python string so that you don't need to double-escape them, e.g. ``self.assertGrep(..., expr=r'c:\\Foo\\filename\.txt')``.
-			
-			If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
-			substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
-			through re.escape::
-			
-				expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)')
+			be treated as literal values. 
 			
 			If you wish to do something with the text inside the match you can use the ``re`` named 
 			group syntax ``(?P<groupName>...)`` to specify a name for parts of the regular expression.
@@ -1008,8 +1012,6 @@ class BaseTest(ProcessUser):
 			For contains=False matches, you should end the expr with `.*` if you wish to include just the 
 			matching text in the outcome failure reason. If contains=False and expr does not end with a `*` 
 			then the entire matching line will be included in the outcome failure reason. 
-			
-			This can be 
 		
 		:param bool contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		

@@ -22,6 +22,7 @@ lock
 deletedir
 cleanup
 pythonCoverage
+codeCoverage
 waitForSignal
 logFileContentsDefaultExcludes
 		""".strip().split('\n')

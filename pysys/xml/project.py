@@ -27,18 +27,19 @@ import os.path, logging, xml.dom.minidom, collections, codecs, time
 import platform
 import locale
 
+import pysys
+import pysys.utils.misc
 from pysys.constants import *
 from pysys import __version__
 from pysys.utils.loader import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
-from pysys.utils.stringutils import compareVersions
 from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.exceptions import UserError
 
 log = logging.getLogger('pysys.xml.project')
 
-class XMLProjectParser(object):
+class _XMLProjectParser(object):
 	"""
 	:meta private: Not public API. 
 	"""
@@ -63,10 +64,10 @@ class XMLProjectParser(object):
 
 			'hostname':HOSTNAME.lower().split('.')[0],
 			'os':platform.system().lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
+			'osfamily':OSFAMILY, # windows or unix
 
 			# old names
 			'root':self.dirname, # old name for testRootDir
-			'osfamily':OSFAMILY, 
 		}
 		
 		if not os.path.exists(self.xmlfile):
@@ -96,7 +97,7 @@ class XMLProjectParser(object):
 			requirespysys = requirespysys[0].firstChild.nodeValue
 			if requirespysys:
 				thisversion = __version__
-				if compareVersions(requirespysys, thisversion) > 0:
+				if pysys.utils.misc.compareVersions(requirespysys, thisversion) > 0:
 					raise UserError('This test project requires PySys version %s or greater, but this is version %s'%(requirespysys, thisversion))
 
 
@@ -108,7 +109,7 @@ class XMLProjectParser(object):
 		propertyNodeList = [element for element in self.root.getElementsByTagName('property') if element.parentNode == self.root]
 
 		for propertyNode in propertyNodeList:
-
+			permittedAttributes = None
 			# use of these options for customizing the property names of env/root/osfamily is no longer encouraged; just kept for compat
 			if propertyNode.hasAttribute("environment"):
 				self.environment = propertyNode.getAttribute("environment")
@@ -124,8 +125,13 @@ class XMLProjectParser(object):
 			elif propertyNode.hasAttribute("file"): 
 				file = self.expandProperties(propertyNode.getAttribute("file"), default=propertyNode, name='properties file reading')
 				self.getPropertiesFromFile(os.path.normpath(os.path.join(self.dirname, file)) if file else '', 
-					pathMustExist=(propertyNode.getAttribute("pathMustExist") or '').lower()=='true')
-			
+					pathMustExist=(propertyNode.getAttribute("pathMustExist") or '').lower()=='true',
+					includes=propertyNode.getAttribute("includes"),
+					excludes=propertyNode.getAttribute("excludes"),
+					prefix=propertyNode.getAttribute("prefix") or '',
+					)
+				permittedAttributes = {'name', 'file', 'default', 'pathMustExist', 'includes', 'excludes', 'prefix'}
+
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
 				value = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name=name)
@@ -138,14 +144,22 @@ class XMLProjectParser(object):
 					if not (value and os.path.exists(os.path.join(self.dirname, value))):
 						raise UserError('Cannot find path referenced in project property "%s": "%s"'%(
 							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
+				permittedAttributes = {'name', 'value', 'default', 'pathMustExist'}
 			else:
 				raise UserError('Found <property> with no name= or file=')
-		
+			
+			if permittedAttributes is not None:
+				for att in range(propertyNode.attributes.length):
+					attName = propertyNode.attributes.item(att).name
+					if attName not in permittedAttributes: 
+						# not an error, to allow for adding new ones in future pysys versions, but worth warning about
+						log.warn('Unknown <property> attribute "%s" in project configuration'%attName)
+
 		return self.properties
 
 
 
-	def getPropertiesFromFile(self, file, pathMustExist=False):
+	def getPropertiesFromFile(self, file, pathMustExist=False, includes=None, excludes=None, prefix=''):
 		if not os.path.isfile(file):
 			if pathMustExist:
 				raise UserError('Cannot find properties file referenced in %s: "%s"'%(
@@ -155,11 +169,17 @@ class XMLProjectParser(object):
 			return
 
 		try:
-			props = loadProperties(file) # since PySys 1.6.0 this is UTF-8 by default
+			rawProps = loadProperties(file) # since PySys 1.6.0 this is UTF-8 by default
 		except UnicodeDecodeError:
 			# fall back to ISO8859-1 if not valid UTF-8 (matching Java 9+ behaviour)
-			props = loadProperties(file, encoding='iso8859-1')
+			rawProps = loadProperties(file, encoding='iso8859-1')
 		
+		props = collections.OrderedDict()
+		for name, value in rawProps.items():
+			if includes and not re.match(includes, name): continue
+			if excludes and re.match(excludes, name): continue
+			props[prefix+name] = value
+				
 		for name, value in props.items():
 			# when loading properties files it's not so helpful to give errors (and there's nowhere else to put an empty value) so default to empty string
 			value = self.expandProperties(value, default='', name=name)	
@@ -201,8 +221,8 @@ class XMLProjectParser(object):
 				raise UserError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file"'%m)
 		try:
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, value)
-		except UserError:
-			if default is None: raise
+		except UserError as ex:
+			if default is None: raise UserError('%s; if this is intended to be an optional property please add a default="..." value'%ex)
 			log.debug('Failed to resolve value "%s" of property "%s", so falling back to default value', value, name or '<unknown>')
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, default)
 
@@ -269,6 +289,13 @@ class XMLProjectParser(object):
 			cls, optionsDict = self._parseClassAndConfigDict(node, None)
 			alias = optionsDict.pop('alias', None)
 			plugins.append( (cls, alias, optionsDict) )
+		return plugins
+
+	def getDescriptorLoaderPlugins(self):
+		plugins = []
+		for node in self.root.getElementsByTagName('descriptor-loader-plugin'):
+			cls, optionsDict = self._parseClassAndConfigDict(node, None)
+			plugins.append( (cls, optionsDict) )
 		return plugins
 
 	def getMakerDetails(self):
@@ -351,11 +378,11 @@ class XMLProjectParser(object):
 		return result, secondaryModesHintDelta
 
 	def getWriterDetails(self):
-		writersNodeList = self.root.getElementsByTagName('writers')
-		if writersNodeList == []: return []
-		
+		# writers can optionally be under a 'writers' parent node but this is now optional, to facilitate 
+		# a third party plugin vendor providing a snippet of a few consecutive lines to paste into the project config 
+		# to enable new functionality
 		writers = []
-		writerNodeList = writersNodeList[0].getElementsByTagName('writer')
+		writerNodeList = self.root.getElementsByTagName('writer')
 		if not writerNodeList: return []
 		for writerNode in writerNodeList:
 			pythonclassconstructor, propertiesdict = self._parseClassAndConfigDict(writerNode, None)
@@ -395,18 +422,22 @@ class XMLProjectParser(object):
 		the optionsDict, as will <property name=""></property> child elements.
 
 		:param node: The node, may be None
-		:param defaultClass: a string specifying the default fully-qualified class
+		:param defaultClass: a string specifying the name of the default fully-qualified class, if any
 		:return: a tuple of (pythonclassconstructor, propertiesdict), or if returnClassAsName (classname, propertiesDict)
 		"""
 		optionsDict = {}
 		if node:
 			for att in range(node.attributes.length):
 				name = node.attributes.item(att).name.strip()
+				if name in optionsDict: raise UserError('Duplicate property "%s" in <%s> configuration'%(name, node.tagName))
 				optionsDict[name] = self.expandProperties(node.attributes.item(att).value, default=None, name=name)
 			for tag in node.getElementsByTagName('property'):
-				assert tag.getAttribute('name')
-				optionsDict[tag.getAttribute('name')] = self.expandProperties(tag.getAttribute("value"), default=tag, name=tag.getAttribute('name'))
+				name = tag.getAttribute('name')
+				assert name
+				if name in optionsDict: raise UserError('Duplicate property "%s" in <%s> configuration'%(name, node.tagName))
+				optionsDict[name] = self.expandProperties(tag.getAttribute("value"), default=tag, name=name)
 		classname = optionsDict.pop('classname', defaultClass)
+		if not classname: raise UserError('Missing require attribute "classname=" for <%s>'%node.tagName)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
 		classname = classname.split('.')[-1]
 
@@ -455,7 +486,7 @@ class Project(object):
 	`pysys.basetest.BaseTest.project` 
 	(or `pysys.process.user.ProcessUser.project`) field. 
 	
-	All project properties are strings. If you need to get a project property value that's a a bool/int/float it is 
+	All project properties are strings. If you need to get a project property value that's a a bool/int/float/list it is 
 	recommended to use `getProperty()` which will automatically perform the conversion. For string properties 
 	you can just use ``project.propName`` or ``project.properties['propName']``. 
 	
@@ -472,79 +503,65 @@ class Project(object):
 	__frozen = False
 	
 	def __init__(self, root, projectFile, outdir=None):
+		assert projectFile
 		self.root = root
 		if not outdir: outdir = DEFAULT_OUTDIR
 
-		if projectFile is None: # very old legacy behaviour
-			self.startTimestamp = time.time()
-			self.runnerClassname = DEFAULT_RUNNER
-			self.makerClassname = DEFAULT_MAKER
-			self.writers = []
-			self.perfReporterConfig = None
-			self.defaultFileEncodings = [] # ordered list where each item is a dictionary with pattern and encoding; first matching item wins
-			self.collectTestOutput = []
-			self.projectHelp = None
-			self.testPlugins = []
-			self.runnerPlugins = []
-			self.properties = {'outDirName':os.path.basename(outdir)}
-			stdoutformatter, runlogformatter = None, None
-			self.projectFile = None
-		else:
-			if not os.path.exists(os.path.join(root, projectFile)):
-				raise UserError("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
-			from pysys.xml.project import XMLProjectParser
-			try:
-				parser = XMLProjectParser(root, projectFile, outdir=outdir)
-			except UserError:
-				raise
-			except Exception as e: 
-				raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
-			else:
-				parser.checkVersions()
-				self.projectFile = os.path.join(root, projectFile)
-				
-				self.startTimestamp = parser.startTimestamp
-				
-				# get the properties
-				properties = parser.getProperties()
-				keys = list(properties.keys())
-				keys.sort()
-				for key in keys: 
-					if not hasattr(self, key): # don't overwrite existing props; people will have to use .getProperty() to access them
-						setattr(self, key, properties[key])
-				self.properties = dict(properties)
-				
-				# add to the python path
-				parser.addToPath()
+		if not os.path.exists(os.path.join(root, projectFile)):
+			raise UserError("Project file not found: %s" % os.path.normpath(os.path.join(root, projectFile)))
+		try:
+			parser = _XMLProjectParser(root, projectFile, outdir=outdir)
+		except UserError:
+			raise
+		except Exception as e: 
+			raise Exception("Error parsing project file \"%s\": %s" % (os.path.join(root, projectFile),sys.exc_info()[1]))
+
+		parser.checkVersions()
+		self.projectFile = os.path.join(root, projectFile)
 		
-				# get the runner if specified
-				self.runnerClassname = parser.getRunnerDetails()
+		self.startTimestamp = parser.startTimestamp
 		
-				# get the maker if specified
-				self.makerClassname = parser.getMakerDetails()
+		# get the properties
+		properties = parser.getProperties()
+		keys = list(properties.keys())
+		keys.sort()
+		for key in keys: 
+			if not hasattr(self, key): # don't overwrite existing props; people will have to use .getProperty() to access them
+				setattr(self, key, properties[key])
+		self.properties = dict(properties)
+		
+		# add to the python path
+		parser.addToPath()
 
-				self.writers = parser.getWriterDetails()
-				self.testPlugins = parser.getTestPlugins()
-				self.runnerPlugins = parser.getRunnerPlugins()
+		# get the runner if specified
+		self.runnerClassname = parser.getRunnerDetails()
 
-				self.perfReporterConfig = parser.getPerformanceReporterDetails()
-				
-				self.descriptorLoaderClass = parser.getDescriptorLoaderClass()
+		# get the maker if specified
+		self.makerClassname = parser.getMakerDetails()
 
-				# get the stdout and runlog formatters
-				stdoutformatter, runlogformatter = parser.createFormatters()
-				
-				self.defaultFileEncodings = parser.getDefaultFileEncodings()
-				
-				self.executionOrderHints, self.executionOrderSecondaryModesHintDelta = parser.getExecutionOrderHints()
-				
-				self.collectTestOutput = parser.getCollectTestOutputDetails()
-				
-				self.projectHelp = parser.getProjectHelp()
-				self.projectHelp = parser.expandProperties(self.projectHelp, default=None, name='project-help')
-				
-				# set the data attributes
-				parser.unlink()
+		self.writers = parser.getWriterDetails()
+		self.testPlugins = parser.getTestPlugins()
+		self.runnerPlugins = parser.getRunnerPlugins()
+		self._descriptorLoaderPlugins = parser.getDescriptorLoaderPlugins()
+
+		self.perfReporterConfig = parser.getPerformanceReporterDetails()
+		
+		self.descriptorLoaderClass = parser.getDescriptorLoaderClass()
+
+		# get the stdout and runlog formatters
+		stdoutformatter, runlogformatter = parser.createFormatters()
+		
+		self.defaultFileEncodings = parser.getDefaultFileEncodings()
+		
+		self.executionOrderHints, self.executionOrderSecondaryModesHintDelta = parser.getExecutionOrderHints()
+		
+		self.collectTestOutput = parser.getCollectTestOutputDetails()
+		
+		self.projectHelp = parser.getProjectHelp()
+		self.projectHelp = parser.expandProperties(self.projectHelp, default=None, name='project-help')
+		
+		# set the data attributes
+		parser.unlink()
 		
 		if not stdoutformatter: stdoutformatter = ColorLogFormatter({'__formatterName':'stdout'})
 		if not runlogformatter: runlogformatter = BaseLogFormatter({'__formatterName':'runlog'})
@@ -578,29 +595,16 @@ class Project(object):
 	def getProperty(self, key, default):
 		"""
 		Get the specified project property value, or a default if it is not defined, with type conversion from string 
-		to int/float/bool (matching the default's type). 
+		to int/float/bool/list[str] (matching the default's type; for list[str], comma-separated input is assumed). 
 
 		.. versionadded:: 1.6.0
 		
 		:param str key: The name of the property.
-		:param bool/int/float/str default: The default value to return if the property is not set or is an empty string. 
+		:param bool/int/float/str/list[str] default: The default value to return if the property is not set. 
 			The type of the default parameter will be used to convert the property value from a string if it is 
 			provided. An exception will be raised if the value is non-empty but cannot be converted to the indicated type. 
 		"""
-		if not self.properties.get(key): return default
-		val = self.properties[key]
-		if default is True or default is False:
-			if val.lower()=='true': return True
-			if val.lower()=='false': return False
-			raise Exception('Unexpected value for boolean project property %s=%s'%(key, val))
-		elif isinstance(default, int):
-			return int(val)
-		elif isinstance(default, float):
-			return float(val)
-		elif isinstance(default, str):
-			return val # nothing to do
-		else:
-			raise Exception('Unsupported type for "%s" property default: %s'%(key, type(default).__name__))
+		return pysys.utils.misc.getTypedValueOrDefault(key, self.properties.get(key, None), default)
 
 	@staticmethod
 	def getInstance():
@@ -654,18 +658,17 @@ class Project(object):
 					search, drop = os.path.split(search)
 					if not drop: search = drive
 		
-			if not (projectFile is not None and os.path.exists(os.path.join(search, projectFile))): # pragma: no cover
+			if not projectFile or not os.path.exists(os.path.join(search, projectFile)): # pragma: no cover
 				if os.getenv('PYSYS_PERMIT_NO_PROJECTFILE','').lower()=='true':
-					sys.stderr.write("WARNING: No project file found; using default settings and taking project root to be '%s' \n" % (search or '.'))
+					sys.stderr.write('FATAL ERROR: The PYSYS_PERMIT_NO_PROJECTFILE environment variable is no longer supported - you must create a pysysproject.xml file for your project')
+					sys.exit(1)
 				else:
 					sys.stderr.write('\n'.join([
 						#                                                                               |
 						"WARNING: No PySys test project file exists in this directory (or its parents):",
 						"  - If you wish to start a new project, begin by running 'pysys makeproject'.",
 						"  - If you are trying to use an existing project, change directory to a ",
-						"    location under the root test directory that contains your project file.",
-						"  - If you wish to use an existing project that has no configuration file, ",
-						"    set the PYSYS_PERMIT_NO_PROJECTFILE=true environment variable.",
+						"    location under the directory that contains your project file.",
 						""
 					]))
 					sys.exit(1)

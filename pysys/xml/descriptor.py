@@ -27,10 +27,11 @@ import collections
 import copy
 import locale
 
+import pysys
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2, isstring
+from pysys.utils.pycompat import PY2, isstring, openfile
 
 log = logging.getLogger('pysys.xml.descriptor')
 
@@ -241,7 +242,7 @@ class TestDescriptor(object):
 	
 	def __repr__(self): return str(self)
 
-class XMLDescriptorCreator(object):
+class _XMLDescriptorCreator(object):
 	'''Helper class to create a test descriptor template. DEPRECATED. 
 	
 	:meta private: If we want an API for this, having a writeToFile method on TestDescriptor would be a better way 
@@ -258,7 +259,7 @@ class XMLDescriptorCreator(object):
 	
 	def writeXML(self):
 		'''Write a test descriptor template to file.'''
-		fp = open(self.file, 'w')
+		fp = openfile(self.file, 'w')
 		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.group, self.testclass, self.module))
 		fp.close
 		
@@ -269,7 +270,7 @@ exists for compatibility reasons only.
 :meta private:
 """
 
-class XMLDescriptorParser(object):
+class _XMLDescriptorParser(object):
 	'''DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. 
 	
 	:meta private:
@@ -286,7 +287,8 @@ class XMLDescriptorParser(object):
 	
 	'''
 
-	def __init__(self, xmlfile, istest=True, parentDirDefaults=None):
+	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None):
+		assert project
 		self.file = xmlfile
 		self.dirname = os.path.dirname(xmlfile)
 		self.istest = istest
@@ -294,6 +296,7 @@ class XMLDescriptorParser(object):
 		roottag = 'pysystest' if istest else 'pysysdirconfig'
 		if not os.path.exists(xmlfile):
 			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
+		self.project = project
 		
 		try:
 			self.doc = xml.dom.minidom.parse(xmlfile)
@@ -306,7 +309,7 @@ class XMLDescriptorParser(object):
 				self.root = self.doc.getElementsByTagName(roottag)[0]
 
 	@staticmethod
-	def parse(xmlfile, istest=True, parentDirDefaults=None):
+	def parse(xmlfile, istest=True, parentDirDefaults=None, project=None):
 		"""
 		Parses the test/dir descriptor in the specified path and returns the 
 		TestDescriptor object. 
@@ -317,7 +320,7 @@ class XMLDescriptorParser(object):
 			specifying default values to be filtered in from the parent 
 			directory.
 		"""
-		p = XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults)
+		p = _XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults, project=project)
 		try:
 			return p.getContainer()
 		finally:
@@ -346,8 +349,8 @@ class XMLDescriptorParser(object):
 		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
 										self.getGroups(), self.getModes(),
-										self.getClassDetails()[0],
-										self.getClassDetails()[1],
+										self.project.expandProperties(self.getClassDetails()[0]),
+										self.project.expandProperties(self.getClassDetails()[1]),
 										self.getTestInput(),
 										self.getTestOutput(),
 										self.getTestReference(),
@@ -597,6 +600,14 @@ class DescriptorLoader(object):
 		assert project, 'project must be specified'
 		self.project = project
 		
+		self.__descriptorLoaderPlugins = []
+		for (pluginCls, pluginProperties) in project._descriptorLoaderPlugins:
+			plugin = pluginCls()
+			plugin.project = project
+			pysys.utils.misc.setInstanceVariablesFromDict(plugin, pluginProperties, errorOnMissingVariables=True)
+			plugin.setup(project)
+			self.__descriptorLoaderPlugins.append(plugin)
+
 	def loadDescriptors(self, dir, **kwargs):
 		"""Find all descriptors located under the specified directory, and 
 		return them as a list.
@@ -640,7 +651,7 @@ class DescriptorLoader(object):
 		
 		descriptorSet = set([s.strip() for s in project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')])
 		
-		projectfound = project.projectFile != None
+		assert project.projectFile != None
 		log = logging.getLogger('pysys.launcher')
 
 		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
@@ -727,17 +738,11 @@ class DescriptorLoader(object):
 				# only add to dict if we're continuing to process children
 				dirconfigs[root] = parentconfig 
 
-			if not projectfound:
-				for p in DEFAULT_PROJECTFILE:
-					if p in files:
-						projectfound = True
-						sys.stderr.write('WARNING: PySys project file was not found in directory the script was run from but does exist at "%s" (consider running pysys from that directory instead)\n'%os.path.join(root, p))
-		
 		return descriptors
 		
 	def _handleSubDirectory(self, dir, subdirs, files, descriptors, parentDirDefaults, **kwargs):
 		"""Overrides the handling of each sub-directory found while walking 
-		the directory tree during L{loadDescriptors}. 
+		the directory tree during `loadDescriptors`. 
 		
 		Can be used to add test descriptors, and/or add custom logic for 
 		preventing PySys searching a particular part of the directory tree 
@@ -747,25 +752,33 @@ class DescriptorLoader(object):
 		This method is called before directories containing pysysignore 
 		files are stripped out. 
 		
-		:param dir: The full path of the directory to be processed.
+		:param str dir: The full path of the directory to be processed.
 			On Windows, this will be a long-path safe unicode string. 
-		:param subdirs: a list of the subdirectories under dir, which 
-			can be used to detect what kind of directory this is. 
-		:param files: a list of the files under dir, which 
-			can be used to detect what kind of directory this is. 
-		:param descriptors: A list of L{TestDescriptor} items which this method 
+		:param list[str] subdirs: a list of the subdirectories under dir, which 
+			can be used to detect what kind of directory this is, and also can be modified by this method to prevent 
+			other loaders looking at subdirectories. 
+		:param list[str] files: a list of the files under dir, which 
+			can be used to detect what kind of directory this is, and also can be modified by this method to prevent 
+			other loaders looking at them. 
+		:param list[TestDescriptor] descriptors: A list of `TestDescriptor` items which this method 
 			can add to if desired. 
-		:param parentDirDefaults: A L{TestDescriptor} containing defaults 
+		:param TestDescriptor parentDirDefaults: A `TestDescriptor` containing defaults 
 			from the parent directory, or None if there are none. Test loaders may 
 			optionally merge some of this information with test-specific 
 			information when creating test descriptors. 
-		:param kwargs: Reserved for future use. Pass this to the base class 
+		:param dict kwargs: Reserved for future use. Pass this to the base class 
 			implementation when calling it. 
 		:return: If True, this part of the directory tree has been fully 
 			handled and PySys will not search under it any more. False to allow 
 			normal PySys handling of the directory to proceed. 
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
+		
+		# default implementation just delegates to any plugins
+		for p in self.__descriptorLoaderPlugins:
+			if p.addDescriptorsFromDirectory(dir=dir, subdirs=subdirs, files=files, parentDirDefaults=parentDirDefaults, descriptors=descriptors, **kwargs):
+				return True
+		
 		return False
 
 	def _parseTestDescriptor(self, descriptorfile, parentDirDefaults=None, isDirConfig=False, **kwargs):
@@ -784,24 +797,4 @@ class DescriptorLoader(object):
 			The exception message must contain the path of the descriptorfile.
 		"""
 		assert not kwargs, 'reserved for future use: %s'%kwargs.keys()
-		return XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig)
-
-if __name__ == "__main__":  # pragma: no cover (undocumented, little used executable entry point)
-
-	if ( len(sys.argv) < 2 ) or ( sys.argv[1] not in ("create", "parse", "validate") ):
-		print("Usage: %s (create | parse ) filename" % os.path.basename(sys.argv[0]))
-		sys.exit()
-	
-	if sys.argv[1] == "parse":
-		parser = XMLDescriptorParser(sys.argv[2])
-		print(parser.getContainer())
-		parser.unlink()
-
-	elif sys.argv[1] == "create":
-		creator = XMLDescriptorCreator(sys.argv[2])
-		creator.writeXML()
-		
-	elif sys.argv[1] == "validate":
-		from xml.parsers.xmlproc.xmlval import XMLValidator
-		XMLValidator().parse_resource(sys.argv[2])
-		
+		return _XMLDescriptorParser.parse(descriptorfile, parentDirDefaults=parentDirDefaults, istest=not isDirConfig, project=self.project)

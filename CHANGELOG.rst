@@ -16,74 +16,144 @@ What's new in 1.6.0 (under development)
 
 PySys 1.6.0 is under development. 
 
-PySys 1.6.0 has significant new features including a library of mappers for copy and grep 
-line pre-processing, new test result writers (including a test output archiver and GitHub Actions), 
-a new "plugins" concept, pysys.py and project configuration enhancements, 
-and a host of minor additions to support simpler writing of tests. 
+The significant new features of PySys 1.6.0 are grouped around a few themes:
 
-As this is a major release of PySys there are also some changes in this release that will require changes to your 
+    - a new "plugins" concept to encourage a more modular style when sharing functionality between tests, 
+    - validation: the new `BaseTest.assertThatGrep()` method, which gives nice clear error messages when the assert fails,  
+    - new writers for recording test results, including GitHub Actions support and a test output directory zip archiver, 
+      and new APIs to allow writers to publish artifacts, and visit each of the test's output files,
+    - a library of line mappers for more powerful copy and grep line pre-processing, 
+    - process starting enhancements such as `BaseTest.waitForBackgroundProcesses()`, automatic logging of stderr when 
+      a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file,
+    - several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
+
+As this is a major release of PySys there are also some changes in this release that may require changes to your 
 project configuration file and/or runner/basetest/writer framework extension classes you've written (though in most 
-cases it won't be necessary to change individual tests). So be sure to look at the upgrade guide below if running an 
-existing project with the new version. 
+cases it won't be necessary to change individual tests). These breaking changes are either to reduce the chance of 
+errors going undetected, or to support bug fixes and impementation simplification. So be sure to look at the upgrade 
+guide below if you want to switch an existing project to use the new version. 
 
+New Plugin API
+--------------
+This release introduces a new concept: test and runner "plugins" which provide shared functionality available for 
+use in testcases. 
 
-More powerful copy and line mapping
------------------------------------
-- PySys now comes with some predefined mappers for common pre-processing tasks such as selecting multiple lines of 
-  interest between two regular expressions, and stripping out timestamps and other regular expressions. 
-  These can be found in the new `pysys.mappers` module and are particularly useful when using copy to pre-process a 
-  file before calling `BaseTest.assertDiff`. For example::
-    
-     self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[
-          pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
-          pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
-     ]))
+Existing users will be familiar with the pattern of creating one or more BaseTest framework subclasses to provide a 
+convenient place for functionality needed by many tests, such as launching the applications you're testing, or 
+starting compilation or deployment tools. This traditional approach of using *inheritance* to share functionality does 
+have some merits, but in many projects it can lead to unhelpful complexity because:
 
-- `BaseTest.assertGrep` has a new mappers= argument that can be used to pre-process the file before grepping. The 
-  main use of this is to allow grepping within a range of lines, as defined by 
-  the `pysys.mappers.IncludeLinesBetween` mapper::
-    
-       self.assertGrep('example.log', expr=r'MyClass', mappers=[
-            pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$') ])
+a) it's not always clear what functionality is provided by your custom subclasses rather than by PySys itself 
+   (which makes it hard to know which documentation to look at)
+b) there is no automatic namespacing to prevent custom functionality clashing with methods PySys may add in future
+c) sometimes a test needs functionality from more than one base class, and it's easy to get multiple inheritance 
+   wrong
+d) none of this really lends itself well to third parties implementing and distributing additional PySys 
+   capabilities to support additional tools/languages etc
 
-  This is more reliable than trying to achieve the same effect with `BaseTest.assertOrderedGrep` (which can give 
-  incorrect results if the section markers appear more than once in the file). There are now few cases where 
-  assertOrderedGrep() is really the best choice; try to use `BaseTest.assertDiff` or `BaseTest.assertGrep`.
+So, in this release we introduce the concept of "plugins" which use *composition* rather than *inheritance* to 
+provide a simpler way to share functionality across tests. There are currently 3 kinds of plugin: 
 
-- `BaseTest.waitForGrep` and `BaseTest.getExprFromFile` also now support a mappers= argument. 
+- **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
+  to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
+  would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
+  class provided it has a method ``setup(self, testobj)`` (and no constructor arguments). 
+  As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
+  your test's `__init__()` constructor (for example, in `BaseTest.setup()`). 
 
-- When used from `BaseTest.copy` there is also support for line mappers to be notified when starting/finishing a new 
-  file, which allows for complex and stateful transformation of file contents based on file types/path if needed. 
+- **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
+  before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
+  shared across all tests. These can be used to start servers/VMs that are shared across tests.
+  Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
+  class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
 
-- `BaseTest.copy` can now be used to copy directories in addition to individual files. It is recommended to use 
-  this method instead of ``shutil.copytree`` as it provides a number of benefits including better error safety, 
-  long path support, and the ability to copy over an existing directory.
+- **writer plugins**: this kind of plugin has existed in PySys for many releases and are effectively a special kind of 
+  runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of 
+  destinations. Writers must implement a similar but different interface to other runner plugins; see `pysys.writer` 
+  for details. They can be used for everything from writing test outcome to an XML file, to archiving output files, to 
+  collecting files from each test output and using them to generate a code coverage report during cleanup at the end 
+  of the run. 
+  
+A test plugin could look like this::
 
-- `BaseTest.copy` now copies all file attributes including date/time, not just the Unix permissions/mode. 
+	class MyTestPlugin(object):
+		myPluginProperty = 'default value'
+		"""
+		Example of a plugin configuration property. The value for this plugin instance can be overridden using ``<property .../>``.
+		Types such as boolean/list[str]/int/float will be automatically converted from string. 
+		"""
+
+		def setup(self, testObj):
+			self.owner = self.testObj = testObj
+			self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
+			self.log.info('Created MyTestPlugin instance with myPluginProperty=%s', self.myPluginProperty)
+
+			testObj.addCleanupFunction(self.__myPluginCleanup)
+
+		def __myPluginCleanup(self):
+			self.log.info('Cleaning up MyTestPlugin instance')
+
+		# An example of providing a method that can be accessed from each test
+		def getPythonVersion(self):
+			self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
+			return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
+
+With configuration like this::
+
+	<pysysproject>
+		<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias"/>
+	</pysysproject>
+
+... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
+
+You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific 
+to your application, and third party PySys plugins supporting standard tools and languages. 
+
+In addition to the alias-based lookup, plugins can get a list of the other plugin instances added through the XML 
+using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `pysys.baserunner.BaseRunner`), which 
+provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
+particular project configuration.  
+
+For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
+its constructor, see the sample ``pysysproject.xml`` file. 
 
 New and improved result writers
 -------------------------------
-- Added `pysys.writer.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
+- Added `pysys.writer.testoutput.TestOutputArchiveWriter` that creates zip archives of each failed test's output directory, 
   producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. 
   Properties are provided to allow detailed control of the maximum number and size of archives generated, and the 
   files to include/exclude. 
-
-- Added `pysys.writer.ArtifactPublisher` interface which can be implemented by writers that support some concept of 
-  artifact publishing, for example CI providers that 'upload' artifacts. Artifacts are published by 
-  various `pysys.utils.perfreporter.CSVPerformanceReporter` and various writers 
-  including `pysys.writer.TestOutputArchiveWriter`. 
 
 - Added `pysys.writer.ci.GitHubActionsCIWriter` which if added to your pysysproject.xml will automatically enable 
   various features when run from GitHub(R) Actions including annotations summarizing failures, grouping/folding of 
   detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
   test output etc) which can be used to upload the artifacts when present. 
   
-  This uses the new `pysys.writer.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI 
+  This uses the new `pysys.writer.api.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI 
   writers to get a summary of test outcomes. 
 
-- Added `pysys.writer.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
-  failure, for IDEs and CI providers that can highlight failures found by regular expression stdout parsing. 
-  An instance of this writer is automatically added to every project, and enables itself if 
+- Added `pysys.writer.api.ArtifactPublisher` interface which can be implemented by writers that support some concept of 
+  artifact publishing, for example CI providers that 'upload' artifacts. Artifacts are published by 
+  various `pysys.utils.perfreporter.CSVPerformanceReporter` and various writers 
+  including `pysys.writer.testoutput.TestOutputArchiveWriter`. 
+
+- Added `pysys.writer.testoutput.CollectTestOutputWriter` which supercedes the ``collect-test-output`` feature, 
+  providing a more powerful way to collect files of interest (e.g. performance graphs, code coverage files, etc) from 
+  all tests and collate them into a single directory and optionally a .zip archive. 
+  This uses the new `pysys.writer.api.TestOutputVisitor` writer interface which can be implemented by writers that wish 
+  to visit each (non-zero) file in the test output directory after each test. 
+  
+  The CollectTestOutputWriter can be used standalone, or as a base class for writers that collect a particular kind 
+  of file (e.g. code coverage) and then do something with it during the runner cleanup phase when all tests have 
+  completed.  
+
+- Moved Python code coverage generation out to `pysys.writer.testoutput.PythonCoverageWriter` as an example of how to plugin 
+  code coverage support without subclassing the runner. Existing projects use this behind the scenes, but new projects 
+  should add the writer to their configuration explicitly if they need it (see sample project). 
+  
+- Added `pysys.writer.console.ConsoleFailureAnnotationsWriter` that prints a single annotation line to stdout for each test 
+  failure, for the benefit of IDEs and CI providers that can highlight failures found by regular expression stdout 
+  parsing. An instance of this writer is automatically added to every project, and enables itself if 
   the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set, producing make-style console output::
   
     C:\project\test\MyTest_001\run.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness (MyTest_001 [CYCLE 02])
@@ -104,14 +174,17 @@ New and improved result writers
   If you had previously created a custom `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()` method it 
   is recommended to remove it and instead provide the same information in the runner ``runDetails``. 
 
-- Added property property ``versionControlGetCommitCommand`` which if set results in the specified command line 
+- Added property ``versionControlGetCommitCommand`` which if set results in the specified command line 
   being executed (in the testRootDir) when the test run starts and used to populate the ``vcsCommit`` key in the 
   runner's ``runDetails`` with a commit/revision number from your version control system. This is a convenient way to 
   ensure writers and performance reports include the version of the application you're testing with. 
 
 There are also some more minor enhancements to the writers:
 
-- Added `pysys.writer.ConsoleSummaryResultsWriter` property for ``showTestTitle`` (default=False) as sometimes seeing 
+- The `pysys.writer` module has been split up into separate submodules. However the writers module imports all symbols 
+  from the new submodules, so no change is required in your code or projects that reference pysys.writer.XXX classes. 
+
+- Added `pysys.writer.console.ConsoleSummaryResultsWriter` property for ``showTestTitle`` (default=False) as sometimes seeing 
   the titles of tests can be helpful when triaging results. There is also a new ``showTestDir`` which allows the 
   testDir to be displayed in addition to the output dir in cases where the output dir is not located underneath 
   the test dir (due to --outdir). Also changed the defaults for some other properties to 
@@ -120,16 +193,62 @@ There are also some more minor enhancements to the writers:
 
 - Added a summary of INSPECT and NOTVERIFIED outcomes at the end of test execution (similar to the existing failures 
   summary), since often these outcomes do require human attention. This can be disabled using the properties on 
-  `pysys.writer.ConsoleSummaryResultsWriter` if desired. 
+  `pysys.writer.console.ConsoleSummaryResultsWriter` if desired. 
 
 - Added `pysys.utils.logutils.stripANSIEscapeCodes()` which can be used to remove ANSI escape codes such as console 
-  color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.BaseResultsWriter`), 
+  color instructions from the ``runLogOutput=`` parameter of a custom writer (`pysys.writer.api.BaseResultsWriter`), 
   since usually you wouldn't want these if writing the output to a file. 
+
+More powerful copy and line mapping
+-----------------------------------
+Manipulating the contents of text files is a very common task in system tests, and this version of PySys has 
+several improvements that make this easier: 
+
+- PySys now comes with some predefined mappers for common pre-processing tasks such as selecting multiple lines of 
+  interest between two regular expressions, and stripping out timestamps and other regular expressions. 
+  
+  These can be found in the new `pysys.mappers` module and are particularly useful when using `BaseTest.copy()` to 
+  pre-process a file before calling `BaseTest.assertDiff` to compare it to a reference file. For example::
+    
+     self.assertDiff(self.copy('myfile.txt', 'myfile-processed.txt', mappers=[
+              pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
+              pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
+         ]), 
+         'reference-myfile-processed.txt')
+     
+  (Note that for convenience we use the fact that copy() returns the destination path to allow passing it directly 
+  as the first file for assertDiff to work on). 
+
+- `BaseTest.assertGrep` has a new mappers= argument that can be used to pre-process the lines of a file before 
+  grepping using any mapper function. The main use of this is to allow grepping within a range of lines, as defined by 
+  the `pysys.mappers.IncludeLinesBetween` mapper::
+    
+       self.assertGrep('example.log', expr=r'MyClass', mappers=[
+            pysys.mappers.IncludeLinesBetween('Error message.* - stack trace is:', stopBefore='^$') ])
+
+  This is more reliable than trying to achieve the same effect with `BaseTest.assertOrderedGrep` (which can give 
+  incorrect results if the section markers appear more than once in the file). Therefore, in most cases it's best to 
+  avoid assertOrderedGrep() and instead try to use `BaseTest.assertDiff` or `BaseTest.assertGrep`.
+
+- `BaseTest.waitForGrep` and `BaseTest.getExprFromFile` also now support a mappers= argument. 
+
+- When used from `BaseTest.copy` there is also support for line mappers to be notified when starting/finishing a new 
+  file, which allows for complex and stateful transformation of file contents based on file types/path if needed. 
+
+- `BaseTest.copy` can now be used to copy directories in addition to individual files. 
+
+  It is recommended to use this method instead of ``shutil.copytree`` as it provides a number of benefits including 
+  better error safety, long path support, and the ability to copy over an existing directory.
+
+- `BaseTest.copy` now permits the source and destination to be the same (except for directory copies) which allows it 
+  to be used for in-place transformations. 
+
+- `BaseTest.copy` now copies all file attributes including date/time, not just the Unix permissions/mode. 
 
 Assertion improvements
 ----------------------
 
-- Added `BaseTest.assertThatGrep` which makes it easier to do the common operation of extracting a value using grep 
+- Added `BaseTest.assertThatGrep()` which makes it easier to do the common operation of extracting a value using grep 
   and then performing a validation on it using `BaseTest.assertThat`. 
   
   This is essentially a simplified wrapper around the functionality added in 1.5.1, but avoids the need for slightly 
@@ -158,7 +277,7 @@ Assertion improvements
 Simpler process handling
 ------------------------
 
-- `BaseTest.startProcess` now logs the last few lines of stderr before aborting the test when a process fails. This 
+- `BaseTest.startProcess()` now logs the last few lines of stderr before aborting the test when a process fails. This 
   behaviour can be customized with a new ``onError=`` parameter::
   
     # Log stdout instead of stderr
@@ -170,84 +289,29 @@ Simpler process handling
     # Do nothing on error
     self.startProcess(..., onError=lambda process: None)
 
-- `BaseTest.waitProcess` now has a ``checkExitStatus=`` argument that can be used to check the return code of the 
+- `BaseTest.waitForGrep` has a new optional ``errorIf=`` parameter that accepts a function which can trigger an abort 
+  if it detects an error condition (not only in the file being waited on, as ``errorExpr=`` does). For example::
+  
+    self.waitForGrep('myoutput.txt', expr='My message', encoding='utf-8',
+      process=myprocess, errorIf=lambda: self.getExprFromFile('myprocess.log', ' ERROR .*', returnNoneIfMissing=True))
+
+- `BaseTest.waitProcess()` now has a ``checkExitStatus=`` argument that can be used to check the return code of the 
   process for success. 
 
-- Added `BaseTest.waitForBackgroundProcesses` which waits for completion of all background processes and optionally 
+- Added `BaseTest.waitForBackgroundProcesses()` which waits for completion of all background processes and optionally 
   checks for the expected exit status. This is especially useful when you have a test that needs to execute 
   lots of processes but doesn't care about the order they execute in, since having them all execute concurrently in the 
   background and then calling waitForBackgroundProcesses() will be a lot quicker than executing them serially in the 
   foreground. 
 
-New Plugin API
---------------
-This release introduces a new concept: test and runner "plugins". Existing users will be familiar with 
-the pattern of creating one or more BaseTest framework subclasses to provide a convenient place for functionality 
-needed by many tests, such as launching the applications you're testing, or starting compilation or 
-deployment tools. This traditional approach of using *inheritance* to share functionality does 
-have some merits, but in many projects it can lead to unhelpful complexity because:
-
-a) it's not always clear what functionality is provided by your custom subclasses rather than by PySys itself 
-   (which makes it hard to know which documentation to look at)
-b) there is no automatic namespacing to prevent custom functionality clashing with methods PySys may add in future
-c) sometimes a test needs functionality from more than one base class, and it's easy to get multiple inheritance 
-   wrong
-d) none of this really lends itself well to third parties implementing and distributing additional PySys 
-   capabilities to support additional tools/languages etc
-
-So, in this release we introduce the concept of "plugins" which use *composition* rather than *inheritance* to 
-provide a simpler way to share functionality across tests. There are currently two kinds of plugin: 
-
-- **test plugins**; instances of test plugins are created every time a `BaseTest` is instantiated, which allows them 
-  to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
-  would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. 
-- **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
-  before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
-  all tests. 
-  Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
-
-A test plugin could look like this::
-
-	class MyTestPlugin(object):
-		def __init__(self, testobj, pluginProperties):
-			self.owner = self.testobj = testobj
-			self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
-			self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
-
-			testobj.addCleanupFunction(self.__myPluginCleanup)
-		
-		def __myPluginCleanup(self):
-			self.log.info('Cleaning up MyTestPlugin instance')
-
-		# An example of providing a method that can be accessed from each test
-		def getPythonVersion(self):
-			self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
-			return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
-
-With configuration like this::
-
-	<pysysproject>
-		<test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias"/>
-	</pysysproject>
-
-... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
-
-Alternatively, you can create a trivial `BaseTest` subclass that instantiates plugins in code (rather than XML) 
-which would allow code completion (if your editor of choice supports this) but still provide the benefits of 
-the modular composition approach. 
-
-You can add any number of test and/or runner plugins to your project, perhaps a mixture of custom plugins specific 
-to your application, and third party PySys plugins supporting standard tools and languages. 
-
-In addition to the alias-based lookup, plugins can get a list of the other plugin instances added through the XML 
-using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `pysys.baserunner.BaseRunner`), which 
-provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
-particular project configuration.  
-
-For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
-its constructor, see the sample ``pysysproject.xml`` file. 
+- Added a way to set global defaults for environment variables that will be used by `BaseTest.startProcess()`, using 
+  project properties. For example, to set the ``_JAVA_OPTIONS`` environment variable that Java(R) uses for JVM 
+  arguments::
+  
+    <property name="defaultEnvirons._JAVA_OPTIONS" value="-Xmx512M"/>
+  
+  When you want to set environment variables globally to affect all processes in all tests, this is simpler than 
+  providing a custom override of `BaseTest.getDefaultEnvirons()`. 
 
 pysys.py and project configuration improvements
 -----------------------------------------------
@@ -263,21 +327,27 @@ pysys.py and project configuration improvements
   directories and files created by PySys (for example, by writers). This helps avoid outputs getting mixed up with 
   testcase directories and also allows for easier ignore rules for version control systems. 
 
-- Added command line option ``-j`` as an alias for ``--threads``  and ``-n`` (to control the number of jobs/threads). 
+- Added command line option ``-j`` as an alias for ``--threads`` (to control the number of jobs/threads). The old 
+  command line option ``-n`` continues to work, but ``-j`` is the main short name that's documented for it. 
   As an alternative to specifying an absolute number of threads, a multiplier of the number of cores in the machine 
-  can be provided e.g. ``-j x1.5``. This could be useful in CI and other automated testing environments. 
+  can be provided e.g. ``-j x1.5``. This could be useful in CI and other automated testing environments.
+  Finally, if only one test is selected it will single-threaded regardless of the ``--threads`` argument.
 
 - Added support for including Python log messages for categories other than pysys.* in the PySys test output, 
   using a "python:" prefix on the category name, e.g.::
   
-    pysys run -vpython:myorg.mycategory=debug
+    pysys run -v python:myorg.mycategory=debug
 
 - Added ``pysys run --ci`` option which automatically sets the best defaults for non-interactive execution of PySys 
   to make it easier to run in CI jobs. See ``pysys run --help`` for more information. 
 
-- Added a standard property ``${os}`` to the project file as a more modern alternative to ``${osfamily}``. The 
-  new  ``${os}`` property gets its value from Python's ``platform.system().lower()``, and has values such 
-  as ``windows``, ``linux``, etc. 
+- Added convention of having a ``-XcodeCoverage`` command line option that enables coverage for all supported 
+  languages. You may wish to add support for this is you have a plugin providing support for a different language. 
+
+- Added a standard property ``${os}`` to the project file for finer-grained control of platform-specific properties. 
+  The new  ``${os}`` property gets its value from Python's ``platform.system().lower()``, and has values such 
+  as ``windows``, ``linux``, ``darwin``, etc. For comparison the existing ``${osfamily}`` is always either 
+  ``windows`` or ``unix``. 
 
 - Added a standard property ``${outDirName}`` to the project file which is the basename from the ``-outdir``, giving 
   a user-customizable "name" for the current test run that can be used in project property paths to keep test 
@@ -288,6 +358,12 @@ pysys.py and project configuration improvements
   add the boilerplate ``<property root="testRootDir"/>`` to your project configuration. The old property name ``root`` 
   continues to be defined for compatibility with older projects. 
 
+- When importing a properties file using ``<property file=... />" there are some new attributes available for 
+  controlling how the properties are imported: ``includes=`` and ``excludes=`` allow a regular expression to be 
+  specified to control which properties keys in the file will be imported, and ``prefix=`` allows a string prefix to 
+  be added onto every imported property, which provides namespacing so you know where each property came from and a 
+  way to ensure there is no clash with other properties. 
+
 - Added a handler for notifications from Python's ''warnings'' module so that any warnings are logged to run.log with 
   a stack trace (rather than just in stderr which is hard to track down). There is also a summary WARN log message at 
   the end of the test run if any Python warnings were encountered. There is however no error so users can choose when 
@@ -296,8 +372,17 @@ pysys.py and project configuration improvements
 - Colored output is disabled if the ``NO_COLOR`` environment variable is set; this is a cross-product standard 
   (https://no-color.org/). The ``PYSYS_COLOR`` variable take precedence if set. 
 
+- Code coverage can now be disabled automatically for tests where it is not wanted (e.g. performance tests) by adding 
+  the ``disableCoverage`` group to the ``pysystest.xml`` descriptor, or the ``pysysdirconfig.xml`` for a whole 
+  directory. This is equivalent to setting the ``self.disableCoverage`` attribute on the base test. 
+
 - The ``-XpythonCoverage`` option now produces an XML ``coverage.xml`` report in addition to the ``.coverage`` file 
   and HTML report. This is useful for some code coverage UI/aggregation services. 
+
+- The prefix "__" is now used for many files and directories PySys creates, to make it easier to spot which are 
+  generated artifacts rather than checked in files. You may want to add ``__pysys_*`` and possibly ``__coverage_*`` 
+  to your version control system's ignore patterns so that paths created by the PySys runner and performance/writer 
+  log files don't show up in your local changes. 
 
 Miscellaneous test API improvements
 -----------------------------------
@@ -315,7 +400,8 @@ Miscellaneous test API improvements
   cluttering the run log.  
 
 - Added `pysys.xml.project.Project.getProperty()` which is a convenient and safe way to get a project property 
-  of bool/int/float type. 
+  of bool/int/float/list[str] type. Also added `pysys.baserunner.BaseRunner.getXArg()` which does the same thing for 
+  ``-Xkey=value`` arguments.
 
 - `BaseTest.getExprFromFile` now supports ``(?P<groupName>...)`` named regular expression groups, and will return 
   a dictionary containing the matched groups if any are present in the regular expression. For example::
@@ -324,7 +410,6 @@ Miscellaneous test API improvements
 
 - Added `BaseTest.getOutcomeLocation()` which can be used from custom writers to record the file and line number 
   corresponding to the outcome, if known. 
-
 
 Bug fixes
 ---------
@@ -374,6 +459,8 @@ The changes that everyone should pay attention to are:
     <!-- Overrides the default name use to for the runner's ``self.output`` directory (which may be used for things 
         like code coverage reports, temporary files etc). 
         The default was changed to "__pysys_runner.${outDirName}" in PySys 1.6.0. 
+        If a relative path is specified, it is relative to the testRootDir, or if an absolute --outdir was specified, 
+        relative to that directory. 
     -->
     <property name="pysysRunnerDirName" value="pysys_runner_${outDirName}"/>
 
@@ -411,21 +498,21 @@ The changes that everyone should pay attention to are:
   property ``pysysTestDescriptorFileNames`` to a comma-separated list of the names you want to use, 
   e.g. "pysystest.xml, .pysystest, descriptor.xml".
 
-- If you use the non-standard filename ``.pysysproject`` rather than ``pysysproject.xml`` for your project 
+  If you use the non-standard filename ``.pysysproject`` rather than ``pysysproject.xml`` for your project 
   configuration file you will need to rename it. 
 
-- If your BaseTest or BaseRunner makes use of ``-Xkey[=value]`` command line overrides with int/float/bool types, you 
-  should review your code and/or test thoroughly as there are now automatic conversions from string to int/float/bool 
+- If your BaseTest or BaseRunner makes use of ``-Xkey[=value]`` command line overrides with int/float/bool/list types, you 
+  should review your code and/or test thoroughly as there are now automatic conversions from string to int/float/bool/list[str] 
   in some cases where previously the string type would have been retained. 
   a) -Xkey and -Xkey=true/false now consistently produce a boolean True/False 
   (previously -Xkey=true would produce a string ``"true"`` whereas -Xkey would produce a boolean ``True``) and 
-  b) -X attributes set on BaseRunner now undergo conversion from string to match the bool/int/float type of the 
+  b) -X attributes set on BaseRunner now undergo conversion from string to match the bool/int/float/list type of the 
   default value if a static field of that name already exists on the runner class (which brings BaseRunner into line 
-  with the behaviour that BaseTest has had since 1.5.0). This applies to the attributes set on  the object, but 
-  not to the contents of the xargs dictionary. 
+  with the behaviour that BaseTest has had since 1.5.0, and also adds support for the ``list`` type). This applies to 
+  the attributes set on the object, but not to the contents of the xargs dictionary. 
   
   The same type conversion applies to any custom `pysys.writer` classes, so if you have a static variable providing a 
-  default value, then in this version the variable will be set to the type of that bool/int/float rather than to 
+  default value, then in this version the variable will be set to the type of that bool/int/float/list rather than to 
   string. 
   
   So, as well as checking your tests still pass you should test that the configuration of your writers 
@@ -435,8 +522,10 @@ The changes that everyone should pay attention to are:
   that manually log stderr/out after process failures (in a try...except/finally block), you may wish to remove them 
   to avoid duplication, or change them to use the new ``onError=`` mechanism. 
 
-- You may want to add ``__pysys_*`` and possibly ``__coverage_*`` to your version control system's ignore patterns 
-  so that paths created by the PySys runner and performance/writer log files don't show up in your local changes. 
+- The default directory for performance output is now under ``__pysys_performance/`` rather than 
+  ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it, or set the 
+  ``csvPerformanceReporterSummaryFile`` project property described above. The default filename also includes 
+  the ``${outDirName}``. See `pysys.utils.perfreporter`. 
 
 Be sure to remove use of the following deprecated items at your earliest convenience:
 
@@ -452,21 +541,33 @@ Be sure to remove use of the following deprecated items at your earliest conveni
   redirection module exists, so any code that depends on the old location will still work, but please change references 
   to the new name the old one will be removed in a future release. 
 
-Finally there are also some additional fixes and cleanup that *could* require changes (typically to extension/framework 
-classes rather than individual tests) but in most cases will not be noticed. Most users can ignore the following list 
-and consult it only if you get new test failures after upgrading PySys:
+- If you need code coverage of a Python application, instead of the built-in python coverage support e.g.::
+
+        <property name="pythonCoverageDir" value="__coverage_python.${outDirName}"/>
+        <property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
+        <collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
+
+  change to using the new writer, e.g.::
+  
+        <writer classname="pysys.writer.testoutput.PythonCoverageWriter">
+            <property name="destDir" value="__coverage_python.${outDirName}"/>
+            <property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
+        </writer>
+
+Finally there are also some fixes, cleanup, and better error checking that *could* require changes (typically to 
+extension/framework classes rather than individual tests) but in most cases will not be noticed. Most users can ignore 
+the following list and consult it only if you get new test failures after upgrading PySys:
 
 - Timestamps in process monitor output, writers, performance reporter and similar places are now in local time instead 
   of UTC. 
   This means these timestamps will match up with the times in run.log output which have always been local time. 
-- The default directory for performance output is now under ``__pysys_performance/`` rather than 
-  ``performance_output/``, so if you have any tooling that picks up these files you will need to redirect it, or set the 
-  ``csvPerformanceReporterSummaryFile`` project property described above. The default filename also includes 
-  the ``${outDirName}``. See `pysys.utils.perfreporter`. 
 - Performance CSV files contain some details about the test run. A couple of these have been renamed: ``time`` is 
   now ``startTime`` and ``outdir`` is now ``outDirName``. The keys and values can be changed as needed using 
   the ``runDetails`` field of `pysys.baserunner.BaseRunner`. It is encouraged to use this rather than the previous 
   mechanism of `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails()`.
+- Exceptions from cleanup functions will now lead to test failures whereas before they were only logged, so may have 
+  easily gone unnoticed. You can disable this using the new "ignoreErrors=True" argument to 
+  `BaseTest.addCleanupFunction` if desired. 
 - Properties files referenced in the project configuration are now read using UTF-8 encoding if possible, falling back 
   to ISO8859-1 if they contain invalid UTF-8. This follows Java(R) 9+ behaviour and provides for more stable results 
   than the previous PySys behaviour of using whatever the default locale encoding is, which does not conform to any 
@@ -475,6 +576,7 @@ and consult it only if you get new test failures after upgrading PySys:
   ``\`` are treated as literals not escape sequences. See `pysys.utils.fileutils.loadProperties()` for details. 
 - Duplicate ``<property name="..." .../>`` project properties now produce an error to avoid unintentional mistakes. 
   However it is still permitted to overwrite project properties from a .properties file. 
+  You can also use the new ``includes``/``excludes`` attributes when importing a .properties file to avoid clashes. 
 - PySys used to silently ignore project and writer properties that use a missing (or typo'd) property or environment 
   variable, setting it to "" (or the default value if specified). To ensure errors are noticed up-front, it is now a 
   fatal error if a property's value value cannot be resolved - unless a ``default=`` value is provided in which case 
@@ -483,6 +585,10 @@ and consult it only if you get new test failures after upgrading PySys:
   may have to remove them. The new behaviour only applies to ``<property name="..." value="..." [default="..."]/>`` 
   elements, it does not apply to properties read from .properties files, which still default to "" if unresolved. 
   Run your tests with ``-vDEBUG`` logging if you need help debugging properties problems. 
+- The ``PYSYS_PERMIT_NO_PROJECTFILE`` option is no longer supported - you must now have a pysysproject.xml file for 
+  all projects. 
+- Writer, performance and code coverage logs now go under ``--outdir`` if an absolute ``--outdir`` path is specified 
+  on the command line rather than the usual location under ``testDirRoot/``. 
 - On Windows the default output directory is now ``win`` rather than the (somewhat misleading) ``win32``. 
   There is no change to the value of PySys constants such as PLATFORM, just the default output directory. If you 
   prefer a different output directory on your machine you could customize it by setting environment variable 
@@ -497,6 +603,12 @@ and consult it only if you get new test failures after upgrading PySys:
   (e.g. "properties" or "root") will no longer override those fields - which would most likely not work correctly 
   anyway. If you need to get a property whose name clashes with a built-in member, use 
   `pysys.xml.project.Project.properties`.
+- PySys now checks that its working directory (``os.chdir()``) and environment (``os.environ``) have not been modified 
+  during execution of tests (after pysys.baserunner.BaseRunner.setup()'). Sometimes test authors do this by mistake 
+  and it's extremely dangerous as it causes behaviour changes (and potentially file system race conditions) in 
+  subsequent tests that can be very hard to debug. 
+  The environment and working directory should only be modified for child processes not for PySys itself - 
+  `BaseTest.getDefaultEnvirons` is a good way to do this.   
 - Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
   `pysys.constants.Outcome` rather than an integer. It is unlikely this change will affect existing code (unless you 
   have created any custom outcome types, which is not documented). The use of objects to represent outcomes allows for 
@@ -511,7 +623,7 @@ and consult it only if you get new test failures after upgrading PySys:
   really need them, but this is unlikely and they are not part of the public PySys API). 
 - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
 - Removed deprecated method ``purgeDirectory()`` from `pysys.baserunner.BaseRunner` 
-  and `pysys.writer.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
+  and `pysys.writer.outcomes.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
 - Removed deprecated classes ``ThreadedStreamHandler`` and ``ThreadedFileHandler`` from the 
   ``pysys.`` module as there is no reason for PySys to provide these. These are trivial to implement using the 
   Python logging API if anyone does need similar functionality. 
@@ -1025,7 +1137,7 @@ Improvements to the ``pysys.py`` command line tool:
 
 - Added a concise summary of the test ids for any non-passes in a format that's 
   easy to copy and paste into a new command, such as for re-running the failed 
-  tests. This can be disabled using the `pysys.writer.ConsoleSummaryResultsWriter` property 
+  tests. This can be disabled using the `pysys.writer.console.ConsoleSummaryResultsWriter` property 
   ``showTestIdList`` if desired. 
 
 - Added an environment variable ``PYSYS_DEFAULT_THREADS`` which can be used to set 

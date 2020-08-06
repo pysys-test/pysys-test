@@ -3,23 +3,24 @@
 	<requires-pysys>@PYSYS_VERSION@</requires-pysys>
 	<requires-python>@PYTHON_VERSION@</requires-python>
 	
-	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${startDate}, ${startTime}, ${hostname}. -->
+	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${osfamily}, ${startDate}, ${startTime}, ${hostname}. -->
 	
-	<!-- User-defined properties -->
-	<!--
-	<property name="myProperty" value="myValue"/>	
-	-->
+	<!-- User-defined properties (use lowerCamelCase for property names) -->
+
 	
-	<!-- Custom test framework extensions, if needed -->
+	<!-- Property identifying the home directory of the application build being tested. -->
+	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
+
+	<!-- Custom test framework plugins, if needed -->
 	<!--
 	<pythonpath value="./pysys-extensions" />
-	<runner classname="myorg.MyRunner"/>
-	<maker classname="myorg.MyTestMaker"/>
+	<test-plugin   classname="myorg.plugins.MyTestPlugin" alias="myorg"/>
+	<runner-plugin classname="myorg.plugins.MyRunnerPlugin" alias="myorg"/>
 	-->
-
+	
 	<writers>
-		<writer classname="pysys.writer.TestOutputArchiveWriter">
-			<property name="destDir" value="${testRootDir}/__pysys_output_archives/"/>
+		<writer classname="pysys.writer.testoutput.TestOutputArchiveWriter">
+			<property name="destDir" value="__pysys_output_archives/"/>
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
 			<property name="maxArchives" value="50"/>
@@ -28,11 +29,11 @@
 		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
 		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
 
-		<writer classname="pysys.writer.JUnitXMLResultsWriter">
-			<property name="outputDir" value="${testRootDir}/__pysys_junit_xml"/>
+		<writer classname="pysys.writer.outcomes.JUnitXMLResultsWriter">
+			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
 		
-		<writer classname="pysys.writer.ConsoleSummaryResultsWriter">
+		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter">
 		</writer>
 	</writers>
 
@@ -44,7 +45,7 @@
 		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
 	</default-file-encodings>	
 	
+	<!-- Add project-specific text to be appended to the "pysys run -h". -->
 	<project-help>
-		<!-- Add project-specific text to be appended to the "pysys run -h". -->
 	</project-help>
 </pysysproject>

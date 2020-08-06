@@ -1,5 +1,12 @@
 # -*- coding: latin-1 -*-
 
+# Part of this test: for pre-1.6.0 compatibility check this works for classes defined in subpackages
+from pysys.writer import *
+assert PythonCoverageWriter
+assert replaceIllegalXMLCharacters
+assert stripANSIEscapeCodes
+
+
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
@@ -15,7 +22,6 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		
 		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
 		self.copy(self.input, self.output+'/test')
@@ -117,7 +123,7 @@ class PySysTest(BaseTest):
 		# check the option works to disable this
 		self.assertGrep('pysys.out', expr='List of failure test ids:', contains=False)
 		
-		self.assertPathExists('__pysys_output_archives.myoutdir/NestedFail.cycle001.myoutdir.zip')
+		self.assertPathExists('myoutdir/__pysys_output_archives.myoutdir/NestedFail.cycle001.myoutdir.zip')
 		
 		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchive: .+/NestedFail.cycle002.myoutdir.zip')
 		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchiveDir: .+/__pysys_output_archives.myoutdir')

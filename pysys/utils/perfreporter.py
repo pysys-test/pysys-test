@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
 from pysys.constants import *
 from pysys.utils.logutils import BaseLogFormatter
-from pysys.utils.fileutils import mkdir
+from pysys.utils.fileutils import mkdir, toLongPathSafe
 from pysys.utils.pycompat import *
 
 class PerformanceUnit(object):
@@ -74,7 +74,7 @@ class CSVPerformanceReporter(object):
 	element, for example to write data to an XML or JSON file instead of CSV. 
 	Performance reporter implementations are required to be thread-safe. 
 	
-	The standard CSV performance reporter implementation writes to a file of 
+	The standard CSV performance reporter implementation writes to a UTF-8 file of 
 	comma-separated values that is both machine and human readable and 
 	easy to view and use in any spreadsheet program, and after the columns containing 
 	the information for each result, contains comma-separated metadata containing 
@@ -84,7 +84,7 @@ class CSVPerformanceReporter(object):
 	differs from row to row.
 
 	After tests have run, the summary file is published with category "CSVPerformanceReport" 
-	using the `pysys.writer.ArtifactPublisher` interface. 
+	using the `pysys.writer.api.ArtifactPublisher` interface. 
 
 	:param project: The project configuration instance.
 	:param str summaryfile: The filename pattern used for the summary file(s). 
@@ -103,7 +103,8 @@ class CSVPerformanceReporter(object):
 
 	DEFAULT_SUMMARY_FILE = '__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv'
 	"""The default summary file if not overridden by the ``csvPerformanceReporterSummaryFile`` project property, or 
-	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. 
+	the ``summaryfile=`` attribute. See `getRunSummaryFile()`. This is relative to the runner output+'/..' directory 
+	(typically testRootDir, unless ``--outdir`` is overridden).
 	"""
 
 	def __init__(self, project, summaryfile, testoutdir, runner, **kwargs):
@@ -178,7 +179,7 @@ class CSVPerformanceReporter(object):
 			.replace('@TESTID@', testobj.descriptor.id)
 		
 		assert summaryfile, repr(getRunSummaryFile) # must not be empty
-		summaryfile = os.path.join(self.project.root, summaryfile)
+		summaryfile = os.path.join(self.runner.output+'/..', summaryfile)
 		return summaryfile
 
 	def getRunHeader(self):
@@ -291,18 +292,19 @@ class CSVPerformanceReporter(object):
 		"""
 		# generate a file in the test output directory for convenience/triaging, plus add to the global summary
 		path = testobj.output+'/performance_results.csv'
+		encoding = None if PY2 else 'utf-8'
 		if not os.path.exists(path):
-			with open(path, 'w') as f:
+			with openfile(path, 'w', encoding=encoding) as f:
 				f.write(self.getRunHeader())
-		with open(path, 'a') as f:
+		with openfile(path, 'a', encoding=encoding) as f:
 			f.write(formatted)
 		
 		# now the global one
 		path = self.getRunSummaryFile(testobj)
 		mkdir(os.path.dirname(path))
 		with self._lock:
-			alreadyexists = os.path.exists(path)
-			with open(path, 'a') as f:
+			alreadyexists = os.path.exists(toLongPathSafe(path))
+			with openfile(path, 'a', encoding=encoding) as f:
 				if not alreadyexists: 
 					testobj.log.info('Creating performance summary log file at: %s', os.path.normpath(path))
 					f.write(self.getRunHeader())
@@ -529,7 +531,7 @@ cycles.
 		raise Exception('No .csv files found')
 	files = []
 	for p in paths:
-		with open(p) as f:
+		with openfile(p, encoding='utf-8') as f:
 			files.append(CSVPerformanceFile(f.read()))
 	
 	if cmd == 'aggregate':

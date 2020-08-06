@@ -16,69 +16,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-String manipulation utilities (currently just `pysys.utils.stringutils.compareVersions`). 
-"""
+:meta private:
 
-from pysys.constants import *
-from pysys.utils.pycompat import *
+Changed this to an undocumented stub in PySys 1.6.0 and moved compareVersions to the misc package. 
+"""
 
 __all__ = [
 	'compareVersions',
-	'setInstanceVariablesFromDict',
 ]
 
-def compareVersions(v1, v2):
-	""" Compares two alphanumeric dotted version strings to see which is more recent. 
-	
-	See L{pysys.process.user.ProcessUser.compareVersions} for more details. 
-	"""
-	
-	def normversion(v):
-		# convert from bytes to strings if necessary
-		if isinstance(v, binary_type): v = v.decode('utf-8')
-		
-		# normalize versions into a list of components, with integers for the numeric bits
-		v = [int(x) if x.isdigit() else x for x in re.split(u'([0-9]+|[.])', v.lower().replace('-','.').replace('_','.')) if (x and x != u'.') ]
-		
-		return v
-	
-	v1 = normversion(v1)
-	v2 = normversion(v2)
-	
-	# make them the same length
-	while len(v1)<len(v2): v1.append(0)
-	while len(v1)>len(v2): v2.append(0)
+from pysys.utils.misc import compareVersions
 
-	for i in range(len(v1)):
-		if type(v1[i]) != type(v2[i]): # can't use > on different types
-			if type(v2[i])==int: # define string>int
-				return +1
-			else:
-				return -1
-		else:
-			if v1[i] > v2[i]: return 1
-			if v1[i] < v2[i]: return -1
-	return 0
-
-def setInstanceVariablesFromDict(obj, d):
-	"""
-	Sets an instance variable for each item in the specified dictionary, with automatic conversion of 
-	bool/int/float values from strings if a default value of that type was provided as a static variable on the object. 
-
-	.. versionadded:: 1.6.0
-
-	:param object obj: Any Python object. 
-	:param dict[str,str] d: The properties to set
-	"""
-	for key, val in d.items():
-		defvalue = getattr(obj, key, None)
-		if defvalue is not None and isstring(val):
-			# attempt type coersion to keep the type the same
-			if defvalue is True or defvalue is False:
-				val = val.lower()=='true'
-			elif isinstance(defvalue, int):
-				val = int(val)
-			elif isinstance(defvalue, float):
-				val = float(val)
-		setattr(obj, key, val)
-	

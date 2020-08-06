@@ -52,46 +52,75 @@ Sharing logic across tests using plugins
 Often you will have some standard logic that needs to be used in the execute or validation 
 of many/all testcases, such as starting the application you're testing, or checking log files for errors. 
 
-The recommended way to do that in PySys is to create one or more "plugins". There are currently two kinds of plugin: 
+The recommended way to do that in PySys is to create one or more "plugins". There are currently several kinds of plugin: 
 
-    - **test plugins**; instances of test plugins are created every time a `BaseTest` is instantiated, which allows them 
-      to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
-      would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
-      class provided it has the constructor signature ``__init__(self, testobj, pluginProperties)``. 
-    - **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
-      before `pysys.baserunner.BaseRunner.setup()` is called. Any processes or state they maintain are shared across 
-      all tests. 
-      Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
-      class provided it has the constructor signature ``__init__(self, runner, pluginProperties)``. 
+- **test plugins**; instances of test plugins are created for each `BaseTest` that is instantiated, which allows them 
+  to operate independently of other tests, starting and stopping processes just like code in the `BaseTest` class 
+  would. Test plugins are configured with ``<test-plugin classname="..." alias="..."/>`` and can be any Python 
+  class provided it has a method ``setup(self, testobj)`` (and no constructor arguments). 
+  As the plugins are instantiated just after the `BaseTest` subclass, you can use them any time after (but not within) 
+  your test's `__init__()` constructor (for example, in `BaseTest.setup()`). 
+
+- **runner plugins**; these are instantiated just once per invocation of PySys, by the BaseRunner, 
+  before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
+  shared across all tests. These can be used to start servers/VMs that are shared across tests.
+  Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
+  class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
+
+  Runner plugins that generate output files/directories should by default put that output under either the 
+  `runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
+  directory (which is typically ``testRootDir`` unless an absolute ``--outdir`` path was provided). 
+
+- **writer plugins**: this kind of plugin has existed in PySys for many releases and are effectively a special kind of 
+  runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of 
+  destinations. Writers must implement a similar but different interface to other runner plugins; see `pysys.writer` 
+  for details. They can be used for everything from writing test outcome to an XML file, to archiving output files, to 
+  collecting files from each test output and using them to generate a code coverage report during cleanup at the end 
+  of the run. 
+
+To make your plugin configurable, add a static field for each plugin property, which defines the default value 
+and (implicitly) the type. After construction of each plugin, an attribute is assigned with the actual value 
+of each plugin property so each property can be accessed using ``self.propname`` (by the time the plugin's setup method 
+is called). In addition to plugin properties, ``pysys run -Xkey=value`` command line options for the plugin 
+(if needed) can be accessed using the runner's `pysys.baserunner.BaseRunner.getXArg()` method. 
 
 A test plugin could look like this::
-  
-        class MyTestPlugin(object):
-            def __init__(self, testobj, pluginProperties):
-                self.owner = self.testobj = testobj
-                self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
-                self.log.info('Created MyTestPlugin instance with pluginProperties=%s', pluginProperties)
 
-                testobj.addCleanupFunction(self.__myPluginCleanup)
-            
-            def __myPluginCleanup(self):
-                self.log.info('Cleaning up MyTestPlugin instance')
+	class MyTestPlugin(object):
+		myPluginProperty = 'default value'
+		"""
+		Example of a plugin configuration property. The value for this plugin instance can be overridden using ``<property .../>``.
+		Types such as boolean/list[str]/int/float will be automatically converted from string. 
+		"""
 
-            # An example of providing a method that can be accessed from each test
-            def getPythonVersion(self):
-                self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
-                return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
-               
-            # A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
-            # That approach allows you to later customize the logic by changing just one single place, and also to omit 
-            # it for specific tests where it is not wanted. 
-            def checkLogsForErrors(self):
-		        self.assertGrep('myapp.log', ' ERROR .*', contains=False)
+		def setup(self, testObj):
+			self.owner = self.testObj = testObj
+			self.log = logging.getLogger('pysys.myorg.MyRunnerPlugin')
+			self.log.info('Created MyTestPlugin instance with myPluginProperty=%s', self.myPluginProperty)
+
+			# there is no standard cleanup() method, so do this if you need to execute something on cleanup:
+			testObj.addCleanupFunction(self.__myPluginCleanup)  
+
+		def __myPluginCleanup(self):
+			self.log.info('Cleaning up MyTestPlugin instance')
+
+		# An example of providing a method that can be accessed from each test
+		def getPythonVersion(self):
+			self.owner.startProcess(sys.executable, arguments=['--version'], stdouterr='MyTestPlugin.pythonVersion')
+			return self.owner.waitForGrep('MyTestPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
+
+		# A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
+		# That approach allows you to later customize the logic by changing just one single place, and also to omit 
+		# it for specific tests where it is not wanted. 
+		def checkLogsForErrors(self):
+			self.assertGrep('myapp.log', ' ERROR .*', contains=False)
 
 With configuration like this::
 
     <pysysproject>
-	    <test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias"/>
+	    <test-plugin classname="myorg.testplugin.MyTestPlugin" alias="myalias">
+			<property name="myPluginProperty" value="my value"/>
+	    </test-plugin>
     </pysysproject>
 
 ... you can now access methods defined by the plugin from your tests using ``self.myalias.getPythonVersion()``. 
@@ -108,6 +137,14 @@ using ``self.testPlugins`` (from `BaseTest`) or ``self.runnerPlugins`` (from `py
 provides a way for plugins to reference each other without depending on the aliases that may be in use in a 
 particular project configuration.  
 
+When creating a runner plugin you may need somewhere to put output files, logs etc. Plugins that generate output 
+files/directories should by default put that output in a dedicated directory either the 
+`runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence if it's something users will 
+look at a lot) a directory one level up e.g. ``runner.output+'/../myplugin'`` (which is typically under ``testRootDir`` 
+unless an absolute ``--outdir`` path was provided) . 
+A prefix of double underscore ``__pysys`` is recommended under testRootDir to distinguish dynamically created 
+directories (ignored by version control) from the testcase directories (checked into version control). 
+
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
 its constructor, see the sample Project Configuration file. 
 
@@ -119,7 +156,7 @@ override when running tests:
 
 - *Testcase attributes*, which are just variables on the Python testcase 
   instance (or a `BaseTest` subclass shared by many tests). 
-  Attributes can be overridden on the command line when executing ``pysys run``. 
+  Attributes can be overridden on the command line using ``pysys run -Xattr=value``. 
   
   Attributes are useful for settings specific to an individual testcase such as 
   the number of iterations or time duration to use for a performance test. 
@@ -136,9 +173,7 @@ override when running tests:
   customizations in your shell so that you don't need to keep specifying them 
   every time you invoke ``pysys run``. 
 
-To use a testcase attribute, set the default value on your 
-test or basetest before ``BaseTest.__init__()`` is called. The easiest way to do 
-this in an individual testcase is usually to use a static attribute on the test 
+To use a testcase attribute, set the default value on your test or basetest as a static attribute on the test 
 class, for example::
 
 	class PySysTest(BaseTest):
@@ -149,18 +184,20 @@ class, for example::
 			self.log.info('Using iterations=%d', self.myIterationCount)
 			...
 
-If instead of setting a default for just one test you wish to set the default 
-for many tests from your custom `BaseTest` subclass, then you would do the same thing in the 
-definition of your `BaseTest` subclass. 
-
 Once the default value is defined with a static attribute, you can override the value 
 when you run your test using the ``-X`` option::
 
 	pysys run -XmyIterationCount=10
 
-If the attribute was defined with a default value of int, float or bool then 
+If the attribute was defined with a default value of int, float, bool or list then 
 the ``-X`` value will be automatically converted to that type; otherwise, it will 
 be a string. 
+
+If instead of setting a default for just one test you wish to set the default 
+for many tests from your custom `BaseTest` subclass, then you would do the same thing in the 
+definition of that `BaseTest` subclass. If you don't have a custom BaseTest class, you can use 
+`self.runner.getXArg()<pysys.runner.BaseRunner.getXArg>` from any plugin to get the value or default, with the same 
+type conversion described above. 
 
 The other mechanism that PySys supports for configurable test options is 
 project properties. 
@@ -171,14 +208,18 @@ add a ``property`` element to your ``pysysproject.xml`` file::
 	<property name="myCredentials" value="${env.MYCOMPANY_CREDENTIALS}" default="testuser:testpassword"/>
 
 This property can will take the value of the specified environment variable, 
-or else the default if not set. 
+or else the default if any undefined properties/env vars are included in value. Note that if the value contains 
+unresolved variables and there is no valid default, the project will fail to load. 
+
+You may want to set the attribute ``pathMustExist="true"`` when defining properties that refer to a path such as a 
+build output directory that should always be present. 
 
 Another way to specify default project property values is to put them into a 
 Java-style ``.properties`` file. You can use properties to specify which file is 
 loaded, so it would be possible to customize using environment variables::
 
 	<property name="myProjectPropertiesFile" value="${env.MYCOMPANY_CUSTOM_PROJECT_PROPERTIES}" default="${testRootDir}/default-config.properties"/>
-	<property file="${myProjectPropertiesFile}"/>
+	<property file="${myProjectPropertiesFile}" pathMustExist="true"/>
 
 To use projects properties in your testcase, just access the attributes on 
 `self.project <pysys.xml.project.Project>` from either a test instance or a runner::
@@ -190,78 +231,52 @@ Property properties will always be of string type.
 
 Producing code coverage reports
 -------------------------------
-PySys can be extended to produce code coverage reports for any language. 
+PySys can be extended to produce code coverage reports for any language, by creating a writer plugin. 
 
-Built-in support is provided for producing coverage reports for programs 
-written in Python, using the ``coverage.py`` library. To enable this, 
-set the ``pythonCoverageDir`` and ``collect-test-output`` project options (see below), 
-make sure you're using `BaseTest.startPython` to execute Python from within your tests, 
-and run PySys with ``-XpythonCoverage=true``. 
+There is an existing writer that produces coverage reports for programs written in Python called 
+`pysys.writer.testoutput.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
+``<writer>`` to your project (see the sample ``pysysproject.xml`` for an example) and make sure you're starting 
+your Python processes with coverage support enabled, by using `BaseTest.startPython`. 
 
-If you wish to produce coverage reports using any other tool or language (such 
-as Java), this is easy to achieve by following the same pattern:
+The usual way to enable code coverage (for all supported languages) is to set ``-XcodeCoverage`` when running your 
+tests (or to run with ``--ci`` which does this automatically). Individual writers may additionally provide their own 
+properties to allow fine-grained control e.g. ``-XpythonCoverage=true/false``. 
 
-- When your tests start the program(s) whose coverage is to be measured, 
-  add the required arguments or environment variables to enable coverage 
-  using the coverage tool of your choice. 
-  
-  For example, for Python programs PySys does this by adding 
-  `-m coverage run` to the command line of Python programs 
-  started using the `BaseTest.startPython` method (and setting ``COVERAGE_FILE`` to a 
-  unique filename in the test output directory), when the ``pythonCoverage`` 
-  property is set to true (typically by ``pysys.py run -X pythonCoverage=true``). The 
-  ``pythonCoverageArgs`` project property can be set to provide customized 
-  arguments to the coverage tool, such as which files to include/exclude, or 
-  a ``--rcfile=`` specifying a coverage configuration file. 
+Be sure to add the ``disableCoverage`` group to any tests (or test directories) that should not use coverage, 
+such as performance tests. 
 
-- Configure your ``pysysproject.xml`` to collect the coverage files generated in 
-  your testcase output directories and put them into a single directory. Add a 
-  project property to specify the directory location so it can be located 
-  by the code that will generate the report. For Python programs, you'd 
-  configure PySys to do it like this::
-  
-  	<property name="pythonCoverageDir" value="__pysys_coverage_python_@OUTDIR@"/>
-	<collect-test-output pattern=".coverage*" outputDir="${pythonCoverageDir}" outputPattern="@FILENAME@_@TESTID@_@UNIQUE@"/>
+If you wish to produce coverage reports using any other language, this is easy to achieve by following the same pattern:
 
-  Note that ``collect-test-output`` will delete the specified outputDir each 
-  time PySys runs some tests. If you wish to preserve output from previous 
-  runs, you could add a property such as ``${startDate}_${startTime}`` to the 
-  directory name to make it unique each time. 
+- When your tests start the program(s) whose coverage is to be measured, add the required arguments or environment 
+  variables to enable coverage using the coverage tool of your choice. The most convenient place to put helper methods 
+  for starting your application is in a custom test plugin class. 
   
-  In addition to any standard ``${...}`` property variables from the project 
-  configuration, the output pattern can contain these three ``@...@`` 
-  substitutions which are specific to the collect-test-output ``outputPattern``:
+  When starting your process, you can detect whether to enable code coverage like this:
   
-    - ``@FILENAME@`` is the original base filename, to which you 
-      can add prefixes or suffixes as desired. 
+    if self.runner.getBoolProperty('mylanguageCoverage', default=self.runner.getBoolProperty('codeCoverage')) and not self.disableCoverage:
+	  ...
 
-    - ``@TESTID@`` is replaced by the identifier of the test that generated the 
-      output file, which may be useful for tracking where each one came from. 
+  Often you will need to set an environment variable to indicate the filename that coverage should be generated under. 
+  Make sure to use a unique filename so that multiple processes started by the same test do not clash. Often you 
+  will need to ensure that your application is shutdown cleanly (rather than being automatically killed at the end of 
+  the test) so that it has a chance to write the code coverage information. 
 
-    - ``@UNIQUE@`` is replaced by a number that ensures the file does not clash 
-      with any other collected output file from another test. The ``@UNIQUE@`` 
-      substitution variable is mandatory. 
-    
-- Add a custom runner class, and provide a `pysys.baserunner.BaseRunner.processCoverageData()` 
-  implementation that combines the coverage files from the directory 
-  where they were collected and generates any required reports. The default 
-  implementation already does this for Python programs. Note that when reading 
-  the property value specifying the output directory any ``${...}`` 
-  property values will be substituted automatically, but any ``@...@`` values 
-  such as ``@OUTDIR@`` must be replaced manually (since the value of 
-  ``runner.outsubdir`` is not available when the project properties are 
-  resolved). 
+- Create a custom writer class which collects coverage files (matching a specific regex pattern) from the output 
+  directory. The usual way to do this would be to subclass `pysys.writer.testoutput.CollectTestOutputWriter`. Configure 
+  default values for main configuration properties (by defining them as static variables in your class). Then implement 
+  `pysys.writer.api.BaseResultsWriter.isEnabled()` to define when coverage reporting will happen, and run the 
+  required processes to combine coverage files and generate a report in the destDir in 
+  `pysys.writer.api.BaseResultsWriter.cleanup()`, which will execute after all tests have completed. 
   
-- Add a custom `BaseTest` class to be inherited by all your tests and from 
-  `BaseTest.setup` method set ``self.disableCoverage=True`` for test groups that should not use coverage, 
-  such as performance tests. For example::
+  Finally, add the new writer class to your ``pysysproject.xml`` file. 
   
-  	 if 'performance' in self.descriptor.groups: self.disableCoverage = True
-  
-- If using a continuous integration system or centralized code coverage 
-  database, you could optionally upload the coverage data there from the 
-  directory PySys collected it into, so there is a permanent record of 
-  any changes in coverage over time. 
+- Add the ``disableCoverage`` group to any tests (or test directories) that should not use coverage, 
+  such as performance tests. 
+   
+- If using a continuous integration system or centralized code coverage database, you could optionally upload the 
+  coverage data there from the directory PySys collected it into, so there is a permanent record of 
+  any changes in coverage over time. The artifact publishing capability of 
+  `pysys.writer.testoutput.CollectTestOutputWriter` will help with that. 
 
 Running tests in multiple modes
 -------------------------------
@@ -271,13 +286,7 @@ as a web test that needs to pass against multiple supported web browsers,
 or a set of tests that should be run against various different database but 
 can also be run against a mocked database for quick local development. 
 
-Using modes is fairly straightforward. First make sure your project 
-configuration includes::
-
-   <property name="supportMultipleModesPerRun" value="true"/>
-   
-If you created your project using PySys 1.4.1 or later this will already be 
-present. Next you should edit the ``pysystest.xml`` files for tests that 
+Using modes is fairly straightforward. First edit the ``pysystest.xml`` files for tests that 
 need to run in multiple modes, and add a list of the supported modes::
 
    <classification>
@@ -312,16 +321,13 @@ or runtime information such as the current operating system.
 You can find the mode that this test is running in using `self.mode <BaseTest>`.
 To ensure typos and inconsistencies in individual test descriptor modes do 
 no go unnoticed, it is best to provide constants for the possible mode values 
-and/or do validation and unpacking of modes in the `BaseTest.setup` method of 
-a custom BaseTest class like this::
+and/or do validation and unpacking of modes in a test plugin like this::
 
-	class MyBaseTest(BaseTest):
-		def setup(self):
-			super(MyBaseTest, self).setup()
-			
+	class MyTestPlugin(object):
+		def setup(self, testObj):
 			# Unpack and validate mode
-			self.databaseMode, self.browserMode = self.mode.split('_')
-			assert self.browserMode in ['Chrome', 'Firefox'], self.browserMode
+			testObj.databaseMode, testObj.browserMode = testObj.mode.split('_')
+			assert testObj.browserMode in ['Chrome', 'Firefox'], testObj.browserMode
 			
 			# This is a convenient pattern for specifying the method or class 
 			# constructor to call for each mode, and to get an exception if an 
@@ -329,10 +335,10 @@ a custom BaseTest class like this::
 			dbHelperFactory = {
 				'MockDatabase': MockDB,
 				'MyDatabase2.0': lambda: self.startMyDatabase('2.0')
-			}[self.databaseMode]
+			}[testObj.databaseMode]
 			...
 			# Call the supplied method to start/configure the database
-			self.db = dbHelperFactory() 
+			testObj.db = dbHelperFactory() 
 
 Finally, PySys provides a rich variety of ``pysys run`` arguments to control 
 which modes your tests will run with. By default it will run every test in its 
@@ -432,6 +438,7 @@ file containing::
 		<groups inherit="true">
 		  <group>subsystem1</group>
 		  <group>performance</group>
+		  <group>disableCoverage</group>
 		</groups>
 
 		<modes inherit="true">
@@ -455,6 +462,9 @@ This serves several useful purposes:
 
 - It adds groups that make it possible to run all your performance tests, or 
   all your tests for a particular part of the application, in a single command. 
+
+- It disables code coverage instrumentation which could adversely affect your 
+  performance results. 
 
 - It specifies that the performance tests will be run with a lower priority, 
   so they execute after more urgent (and quicker) tests such as unit tests. 
