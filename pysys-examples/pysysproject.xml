@@ -58,10 +58,10 @@
 
 	<!-- 
 	The defaultEnvirons. prefix can be used to provide a default environment variable for use by 
-	all processes that PySys starts. For example, to set Java(R)'s _JAVA_OPTIONS environment variable:
+	all processes that PySys starts. For example, to set Java(R)'s JAVA_TOOL_OPTIONS environment variable:
 	-->
 	<!--
-	<property name="defaultEnvirons._JAVA_OPTIONS" value="-Xmx512M"/>
+	<property name="defaultEnvirons.JAVA_TOOL_OPTIONS" value="-Xmx512M"/>
 	-->
 
 	<!-- 

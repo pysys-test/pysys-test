@@ -61,4 +61,4 @@ class PySysTest(BaseTest):
 			self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='LANG', contains=False)
 		else:
 			self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='LANG=my-lang')
-		self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='_JAVA_OPTIONS=-Xmx512M')
+		self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='JAVA_TOOL_OPTIONS=-Xmx512M')

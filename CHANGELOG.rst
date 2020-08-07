@@ -305,10 +305,10 @@ Simpler process handling
   foreground. 
 
 - Added a way to set global defaults for environment variables that will be used by `BaseTest.startProcess()`, using 
-  project properties. For example, to set the ``_JAVA_OPTIONS`` environment variable that Java(R) uses for JVM 
+  project properties. For example, to set the ``JAVA_TOOL_OPTIONS`` environment variable that Java(R) uses for JVM 
   arguments::
   
-    <property name="defaultEnvirons._JAVA_OPTIONS" value="-Xmx512M"/>
+    <property name="defaultEnvirons.JAVA_TOOL_OPTIONS" value="-Xmx512M"/>
   
   When you want to set environment variables globally to affect all processes in all tests, this is simpler than 
   providing a custom override of `BaseTest.getDefaultEnvirons()`. 

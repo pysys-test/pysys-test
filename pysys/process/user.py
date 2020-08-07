@@ -485,8 +485,8 @@ class ProcessUser(object):
 		  - ``defaultEnvirons.ENV_KEY``: if any properties with this prefix are 
 		    defined, an environment variable with the ENV_KEY is set by this method 
 		    (unless the property value is empty). For example, to set a default 
-		    JVM heap size for all processes with the ``_JAVA_OPTIONS`` environment 
-		    variable you could set ``defaultEnvirons._JAVA_OPTIONS = -Xmx512M``. 
+		    JVM heap size for all processes with the ``JAVA_TOOL_OPTIONS`` environment 
+		    variable you could set ``defaultEnvirons.JAVA_TOOL_OPTIONS = -Xmx512M``. 
 		
 		  - ``defaultEnvironsDefaultLang``: if set to a value such as ``en_US.UTF-8`` 
 		    the specified value is set for the LANG= variable on Unix; otherwise, 
