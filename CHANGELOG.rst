@@ -18,13 +18,18 @@ PySys 1.6.0 is under development.
 
 The significant new features of PySys 1.6.0 are grouped around a few themes:
 
-    - a new "plugins" concept to encourage a more modular style when sharing functionality between tests, 
-    - validation: the new `BaseTest.assertThatGrep()` method, which gives nice clear error messages when the assert fails,  
-    - new writers for recording test results, including GitHub Actions support and a test output directory zip archiver, 
-      and new APIs to allow writers to publish artifacts, and visit each of the test's output files,
-    - a library of line mappers for more powerful copy and grep line pre-processing, 
+    - a new "plugins" concept to encourage a more modular style when sharing functionality between tests; 
+    - easier validation with the new `BaseTest.assertThatGrep()` method, which extracts a value using a grep 
+      expression and then checks its value is as expected. For extract-and-assert use cases this approach gives much 
+      clearer messages when the assert fails than using assertGrep; 
+    - validation: the new `BaseTest.assertThatGrep()` method, which gives nice clear error messages when the assert 
+      fails;
+    - new writers for recording test results, including GitHub(R) Actions support and a writer that produces .zip 
+      archives of test output directories, plus new APIs to allow writers to publish artifacts, and to visit each of 
+      the test's output files; 
+    - a library of line mappers for more powerful copy and grep line pre-processing; 
     - process starting enhancements such as `BaseTest.waitForBackgroundProcesses()`, automatic logging of stderr when 
-      a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file,
+      a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file; 
     - several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
 
 As this is a major release of PySys there are also some changes in this release that may require changes to your 
@@ -376,8 +381,8 @@ pysys.py and project configuration improvements
   the ``disableCoverage`` group to the ``pysystest.xml`` descriptor, or the ``pysysdirconfig.xml`` for a whole 
   directory. This is equivalent to setting the ``self.disableCoverage`` attribute on the base test. 
 
-- The ``-XpythonCoverage`` option now produces an XML ``coverage.xml`` report in addition to the ``.coverage`` file 
-  and HTML report. This is useful for some code coverage UI/aggregation services. 
+- `Python code coverage <pysys.writer.testoutput.PythonCoverageWriter>` now produces an XML ``coverage.xml`` report 
+  in addition to the ``.coverage`` file and HTML report. This is useful for some code coverage UI/aggregation services. 
 
 - The prefix "__" is now used for many files and directories PySys creates, to make it easier to spot which are 
   generated artifacts rather than checked in files. You may want to add ``__pysys_*`` and possibly ``__coverage_*`` 
