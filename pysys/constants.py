@@ -102,6 +102,11 @@ ENVSEPERATOR = os.pathsep
 IS_WINDOWS = OSFAMILY=='windows'
 """ True if this is Windows, False for other operating systems such as Unix. """
 
+PYTHON_EXE = sys.executable # alias to increase readability
+"""
+The path to the current Python executable (=``sys.executable``). 
+"""
+
 # constants used in testing
 TRUE=True 
 """ Deprecated. 
