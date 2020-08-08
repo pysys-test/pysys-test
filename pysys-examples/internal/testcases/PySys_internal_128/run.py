@@ -12,7 +12,11 @@ class PySysTest(BaseTest):
 	
 	def execute(self):
 		self.logFileContentsDefaultExcludes=['Umm.*']
-	
+
+		block = self.startTestProcess(stdouterr='timeout', arguments=['block'], background=True)
+		self.waitForBackgroundProcesses(excludes=[block])
+		block.stop()
+
 		self.startTestProcess(stdouterr='failure1', background=True)
 		self.waitForBackgroundProcesses(checkExitStatus=True, abortOnError=False)  # should fail
 
@@ -47,7 +51,7 @@ class PySysTest(BaseTest):
 			
 			return None
 		self.copy('run.log', 'output.txt', mappers=[m])
-		
+
 
 	def validate(self):
 		self.assertDiff('output.txt')

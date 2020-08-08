@@ -769,13 +769,20 @@ class ProcessUser(object):
 
 		return process.exitStatus
 
-	def waitForBackgroundProcesses(self, timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
-		"""Wait for any running background processes to terminate and check for the expected exit status.
+	def waitForBackgroundProcesses(self, excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
+		"""Wait for any running background processes to terminate, then check that all background processes 
+		completed with the expected exit status.
+		
+		This can be useful for speeding up a test that needs to run many processes, by executing all its subprocesses 
+		in parallel in the background (and then waiting for completion) rather than one-by-one in the foreground. 
 
 		Timeouts will result in a TIMEDOUT outcome and an exception unless the project property ``defaultAbortOnError==False`` 
 		is set. 
 
+		:param list[pysys.process.Process] excludes: A list of processes which are not expected to have terminated yet 
+		
 		:param int timeout: The total time in seconds to wait for all processes to have completed, for example ``timeout=TIMEOUTS['WaitForProcess']``.
+		
 		:param bool abortOnError: If True aborts the test with an exception on any error, if False appends an outcome but does not 
 			raise an exception. 
 		:param bool checkExitStatus: By default this method not only waits for completion but also checks the exit status, but set this argument to False 
@@ -786,7 +793,7 @@ class ProcessUser(object):
 
 		assert timeout>0, 'timeout must be specified'
 		starttime = time.time()
-		running = [p for p in self.processList if p.state==BACKGROUND and p.running()]
+		running = [p for p in self.processList if p.state==BACKGROUND and p.running() and p not in excludes]
 		self.log.info('Waiting up to %d secs for %d background process(es) to complete', timeout, len(running))
 		for p in running:
 			try:
@@ -806,11 +813,11 @@ class ProcessUser(object):
 		if checkExitStatus:
 			failures = []
 			for process in self.processList:
-				if process.state!=BACKGROUND: continue
-				if not pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
+				if process.state!=BACKGROUND or process in excludes: continue
+				if not pysys.internal.safe_eval.safe_eval('%s %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
 					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
 
-					failures.append('%s returned exit status %d (expected %s)'%(process, process.exitStatus, process.expectedExitStatus))
+					failures.append('%s returned exit status %s (expected %s)'%(process, process.exitStatus, process.expectedExitStatus))
 			if failures:
 				self.addOutcome(BLOCKED, ('%d processes failed: '%len(failures) if len(failures)>1 else 'Process ')+'; '.join(failures), abortOnError=abortOnError)
 		(self.log.info if (time.time()-starttime>10) else self.log.debug)('All processes completed, after waiting %d secs'%(time.time()-starttime))
