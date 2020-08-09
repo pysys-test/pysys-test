@@ -395,11 +395,11 @@ class _XMLProjectParser(object):
 
 			for pathNode in pathNodeList:
 					value = self.expandProperties(pathNode.getAttribute("value"), default=None, name='pythonpath')
-					relative = pathNode.getAttribute("relative")
 					if not value: 
 						raise UserError('Cannot add directory to the pythonpath: "%s"'%value)
 
-					if relative == "true": value = os.path.join(self.dirname, value)
+					# we ignore the "relative" option and always make it relative to the testrootdir if not already absolute
+					value = os.path.join(self.dirname, value)
 					value = os.path.normpath(value)
 					if not os.path.isdir(value): 
 						raise UserError('Cannot add non-existent directory to the python <path>: "%s"'%value)
