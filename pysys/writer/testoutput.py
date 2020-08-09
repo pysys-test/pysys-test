@@ -536,7 +536,17 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 	"""
 
 	def isEnabled(self, record=False, **kwargs): 
-		return self.runner.getBoolProperty('pythonCoverage', default=self.runner.getBoolProperty('codeCoverage')) and self.destDir
+		if not (self.runner.getBoolProperty('pythonCoverage', default=self.runner.getBoolProperty('codeCoverage')) and self.destDir):
+			return False
+		try:
+			import coverage
+		except ImportError:
+			# don't log higher than debug because this user may just be doing a --ci run with -XcodeCoverage for some 
+			# other reason and may not even be intending to run with Python coverage
+			log.debug('Not enabling Python coverage because the coverage.py package is not installed')
+			return False
+		else:
+			return True
 
 	def getCoverageArgsList(self): # also used by startPython()
 		return shlex.split(self.pythonCoverageArgs.replace(u'\\',u'\\\\')) # need to escape windows \ else it gets removed; do this the same on all platforms for consistency
