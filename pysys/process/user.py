@@ -252,7 +252,7 @@ class ProcessUser(object):
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=None, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
 			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, onError=None, quiet=False, stdouterr=None, 
-			background=False):
+			background=False, info={}):
 		"""Start a process running in the foreground or background, and return 
 		the `pysys.process.Process` object.
 		
@@ -283,6 +283,7 @@ class ProcessUser(object):
 
 		.. versionchanged:: 1.6.0
 			Added onError parameter and default behaviour of logging stderr/out when there's a failure.
+			Added info parameter. 
 
 		:param str command: The path to the executable to be launched (should include the full path)
 		:param list[str] arguments: A list of arguments to pass to the command
@@ -359,6 +360,10 @@ class ProcessUser(object):
 			command check for completion of some operation until it succeeds; in such cases 
 			you should usually set ignoreExitStatus=True as well since both success and 
 			failure exit statuses are valid. 
+		
+		:param dict[str,obj] info: A dictionary of user-defined information about this process that will be set as 
+			a field on the returned Process instance. This is useful for keeping track of things like server port 
+			numbers and log file paths. 
 
 		:return: The process wrapper object.
 		:rtype: pysys.process.Process
@@ -399,7 +404,7 @@ class ProcessUser(object):
 		
 		startTime = time.time()
 		process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, 
-			displayName=displayName, expectedExitStatus=expectedExitStatus)
+			displayName=displayName, expectedExitStatus=expectedExitStatus, info=info)
 		
 		def handleErrorAndGetOutcomeSuffix(process):
 			if onError: 

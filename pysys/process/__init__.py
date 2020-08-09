@@ -86,12 +86,15 @@ class Process(object):
 	:ivar int ~.pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.
 	:ivar int ~.exitStatus: The process exit status for a completed process (for many processes 0 represents success), 
 		or None if it has not yet completed. 
+	:ivar dict[str,obj] ~.info: A mutable dictionary of user-supplied information that was passed into startProcess, 
+		for example port numbers, log file paths etc. 
 	"""
 
 	def __init__(self, command, arguments, environs, workingDir, state, timeout, stdout=None, stderr=None, displayName=None, 
-		expectedExitStatus=None):
+		expectedExitStatus=None, info={}):
 		
 		self.displayName = displayName if displayName else os.path.basename(command)
+		self.info = info
 		self.command = command
 		self.arguments = arguments
 		self.environs = {}
@@ -123,6 +126,7 @@ class Process(object):
 		keys=list(self.environs.keys())
 		keys.sort()
 		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])
+		if info: log.debug("  info         : %s", info)
 
 		# private
 		self._outQueue = None

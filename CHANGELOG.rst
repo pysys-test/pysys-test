@@ -318,6 +318,9 @@ Simpler process handling
   When you want to set environment variables globally to affect all processes in all tests, this is simpler than 
   providing a custom override of `BaseTest.getDefaultEnvirons()`. 
 
+- `BaseTest.startProcess()` now accepts an ``info={}`` argument which can hold a dictionary of user-defined metadata 
+  about the process such as port numbers, log file paths etc. 
+
 pysys.py and project configuration improvements
 -----------------------------------------------
 
