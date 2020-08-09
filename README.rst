@@ -152,7 +152,9 @@ To run your testcases, simply execute::
 	> pysys.py run
 
 To give a flavour for what's possible, here's a system test for a fictitious server "MyServer" which shows of the most 
-common PySys methods::
+common PySys methods:
+
+.. code-block:: python
   
   class PySysTest(pysys.basetest.BaseTest):
     """ This is a system test for a server process called MyServer. It checks that the server can be started and 
