@@ -10,11 +10,9 @@ Change Log
   request in the PySys test framework. For how-tos and advice, 
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
----------------------------------------
-What's new in 1.6.0 (under development)
----------------------------------------
-
-PySys 1.6.0 is under development. 
+-------------------
+What's new in 1.6.0
+-------------------
 
 The significant new features of PySys 1.6.0 are grouped around a few themes:
 
