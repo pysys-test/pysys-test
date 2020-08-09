@@ -61,6 +61,10 @@ class %s(%s):
 ]]>
 	</purpose>
   </description>
+
+  <!-- uncomment this to skip the test:  
+  <skipped reason=""/> 
+  -->
   
   <classification>
 	<groups inherit="true">
@@ -69,8 +73,6 @@ class %s(%s):
 	<modes inherit="true">
 	</modes>
   </classification>
-
-  <!-- <skipped reason=""/> -->
 
   <data>
 	<class name="%s" module="%s"/>
