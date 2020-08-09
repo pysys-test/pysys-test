@@ -151,8 +151,8 @@ To run your testcases, simply execute::
 
 	> pysys.py run
 
-To give a flavour for what's possible, here's a system test for a fictitious server "MyServer" which shows of the most 
-common PySys methods:
+To give a flavour for what's possible, here's a system test for checking the behaviour of a server application, which 
+shows of the most common PySys methods:
 
 .. code-block:: python
   
@@ -162,17 +162,19 @@ common PySys methods:
     
     def execute(self):
     
-      # Ask PySys to pick a free TCP port to start the server on (this allows running many tests in parallel without clashes)
+      # Ask PySys to allocate a free TCP port to start the server on (this allows running many tests in 
+      # parallel without clashes)
       serverPort = self.getNextAvailableTCPPort()
       
-      # A common system testing task is pre-processing a file, for example to substitute in required testing parameters
+      # A common system testing task is pre-processing a file, for example to substitute in required 
+      # testing parameters
       self.copy(self.input+'/myserverconfig.json', self.output+'/', mappers=[
         lambda line: line.replace('@SERVER_PORT@', str(serverPort)),
       ])
       
       # Start the server application we're testing (as a background process)
-      # self.project provides access to properties in pysysproject.xml, such as appHome which is the location of 
-      # the application we're testing
+      # self.project provides access to properties in pysysproject.xml, such as appHome which is the 
+      # location of the application we're testing
       server = self.startProcess(
         command   = self.project.appHome+'/my_server.%s'%('bat' if IS_WINDOWS else 'sh'), 
         arguments = ['--configfile', self.output+'/myserverconfig.json', ], 
@@ -180,17 +182,18 @@ common PySys methods:
         stdouterr = 'my_server', displayName = 'my_server<port %s>'%serverPort, background = True,
         )
       
-      # Wait for the server to start by polling for a grep regular expression. The errorExpr/process arguments 
-      # ensure we abort with a really informative message if the server fails to start
+      # Wait for the server to start by polling for a grep regular expression. The errorExpr/process 
+      # arguments ensure we abort with a really informative message if the server fails to start
       self.waitForGrep('my_server.out', 'Started MyServer .*on port .*', errorExpr=[' (ERROR|FATAL) '], process=server) 
       
       # Run a test tool (in this case, written in Python) from this test's Input/ directory.
-      self.startPython([self.input+'/httpget.py', f'http://localhost:{serverPort}/data/myfile.json'], stdouterr='httpget_myfile')
+      self.startPython([self.input+'/httpget.py', f'http://localhost:{serverPort}/data/myfile.json'], 
+        stdouterr='httpget_myfile')
     
     def validate(self):
-      # This method is called after execute() to perform validation of the results by checking the contents of files 
-      # in the test's output directory. Note that during test development you can re-run validate() without waiting 
-      # for a full execute() run using the handy "pysys run --validateOnly" option. 
+      # This method is called after execute() to perform validation of the results by checking the 
+      # contents of files in the test's output directory. Note that during test development you can 
+      # re-run validate() without waiting for a full execute() run using "pysys run --validateOnly". 
       
       # It's good practice to check for unexpected errors and warnings so they don't go unnoticed
       self.assertGrep('my_server.out', ' (ERROR|FATAL|WARN) .*', contains=False)
