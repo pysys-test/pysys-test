@@ -12,6 +12,7 @@ class PySysTest(BaseTest):
 	
 	def execute(self):
 		self.logFileContentsDefaultExcludes=['Umm.*']
+
 		block = self.startTestProcess(stdouterr='timeout', arguments=['block'], background=True)
 		self.waitForBackgroundProcesses(excludes=[block])
 		block.stop()
@@ -29,6 +30,8 @@ class PySysTest(BaseTest):
 		
 		self.waitForBackgroundProcesses(checkExitStatus=False) # should succeed
 		self.waitForBackgroundProcesses(abortOnError=False) # should fail
+		
+		
 		
 		self.startTestProcess(stdouterr='timeout1', arguments=['block'], background=True)
 		self.startTestProcess(stdouterr='timeout2', arguments=['block'], background=True)
