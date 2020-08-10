@@ -29,6 +29,9 @@ The significant new features of PySys 1.6.0 are grouped around a few themes:
     - process starting enhancements such as `BaseTest.waitForBackgroundProcesses()`, automatic logging of stderr when 
       a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file; 
     - several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
+    - a new "getting started" `sample <https://github.com/pysys-test/sample-getting-started>_` project which can be 
+      easily forked from GitHub(R) to create new PySys-based projects. The sample also demonstrates common techniques 
+      and best practices for writing tests in PySys.  
 
 As this is a major release of PySys there are also some changes in this release that may require changes to your 
 project configuration file and/or runner/basetest/writer framework extension classes you've written (though in most 
@@ -131,6 +134,9 @@ New and improved result writers
   various features when run from GitHub(R) Actions including annotations summarizing failures, grouping/folding of 
   detailed test output, and setting output variables for published artifacts (e.g. performance .csv files, archived 
   test output etc) which can be used to upload the artifacts when present. 
+  
+  See `https://github.com/pysys-test/sample-getting-started` for an example workflow file you can copy into your 
+  own project. 
   
   This uses the new `pysys.writer.api.TestOutcomeSummaryGenerator` mix-in class that can be used when implementing CI 
   writers to get a summary of test outcomes. 

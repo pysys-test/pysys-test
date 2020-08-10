@@ -64,7 +64,7 @@ Project Links
 - Download releases, including sample testcases: https://github.com/pysys-test/pysys-test/releases
 - Stack Overflow tag for questions: https://stackoverflow.com/questions/ask?tags=pysys
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
-- Source repository: https://github.com/pysys-test/pysys-test
+- Source repository and sample projects: https://github.com/pysys-test
 
 .. inclusion-marker-section-start-installation
 

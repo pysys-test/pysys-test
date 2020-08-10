@@ -85,7 +85,7 @@ setup(
 		'Repository':        'https://github.com/pysys-test/pysys-test',
 		'Tracker':           'https://github.com/pysys-test/pysys-test/issues',
 		'Change Log':        'https://pysys-test.github.io/pysys-test/ChangeLog.html',
-		'Download Samples':  'https://github.com/pysys-test/pysys-test/releases',
+		'Sample':            'https://github.com/pysys-test/sample-getting-started',
 		'Ask a Question':    'https://stackoverflow.com/questions/ask?tags=pysys', 
 	},
 

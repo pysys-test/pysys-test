@@ -60,6 +60,9 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 	Be sure to include a unique run id (e.g. outdir) for each OS/job in the name of any uploaded artifacts so that 
 	they do not overwrite each other when uploaded. 
 	
+	See the PySys sample projects on GitHub(R) for a workflow file you can copy into your own project to enable 
+	running your PySys tests with GitHub(R) Actions. 
+	
 	Only enabled when running under GitHub Actions (specifically, if the ``GITHUB_ACTIONS=true`` environment variable is set).
 	
 	"""
