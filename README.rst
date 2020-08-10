@@ -61,7 +61,6 @@ Project Links
 	:target: https://codecov.io/gh/pysys-test/pysys-test
 
 - Documentation: https://pysys-test.github.io/pysys-test
-- Download releases, including sample testcases: https://github.com/pysys-test/pysys-test/releases
 - Stack Overflow tag for questions: https://stackoverflow.com/questions/ask?tags=pysys
 - Bug/enhancement issue tracker: https://github.com/pysys-test/pysys-test/issues
 - Source repository and sample projects: https://github.com/pysys-test
@@ -134,8 +133,8 @@ To get started, create a new directory to hold your tests. Then run the
 ``makeproject`` command from that directory to add a ``pysysproject.xml`` 
 file which will hold default settings your all your tests::
 
-	> mkdir tests
-	> cd tests
+	> mkdir test
+	> cd test
 	> pysys.py makeproject
 
 Then to create your first test, run::
@@ -219,11 +218,8 @@ methods and further examples in the documentation:
 Now take a look at `pysys.basetest` to begin exploring more of the powerful functionality 
 PySys provides to help you implement your own ``run.py`` system tests. 
 
-You might also want to take a look at our sample testcases. 
-These can be downloaded as a ``.tar.gz`` containing files with Unix 
-line endings, or a ``.zip`` using Windows line endings from 
-https://github.com/pysys-test/pysys-test/releases. The ``fibonacci`` 
-directory is a good place to start. 
+The sample projects under https://github.com/pysys-test are a great starting point for learning more about PySys, and 
+for creating your first project. 
 
 .. inclusion-marker-section-start-license
 
