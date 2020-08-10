@@ -774,7 +774,7 @@ class ProcessUser(object):
 
 		return process.exitStatus
 
-	def waitForBackgroundProcesses(self, excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
+	def waitForBackgroundProcesses(self, includes=[], excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
 		"""Wait for any running background processes to terminate, then check that all background processes 
 		completed with the expected exit status.
 		
@@ -784,21 +784,27 @@ class ProcessUser(object):
 		Timeouts will result in a TIMEDOUT outcome and an exception unless the project property ``defaultAbortOnError==False`` 
 		is set. 
 
+		:param list[pysys.process.Process] includes: A list of processes to wait for, each returned by `startProcess()`. 
+			If none are specified, this method will wait for (and check the exit status of) all background processes. 
 		:param list[pysys.process.Process] excludes: A list of processes which are not expected to have terminated yet 
+			(this is only useful when not setting includes=[]). 
 		
 		:param int timeout: The total time in seconds to wait for all processes to have completed, for example ``timeout=TIMEOUTS['WaitForProcess']``.
 		
 		:param bool abortOnError: If True aborts the test with an exception on any error, if False appends an outcome but does not 
 			raise an exception. 
-		:param bool checkExitStatus: By default this method not only waits for completion but also checks the exit status, but set this argument to False 
-			to disable checking that the exit status of all background processes matches the ``expectedExitStatus`` specified in 
+		:param bool checkExitStatus: By default this method not only waits for completion but also checks the exit status of 
+			all (included) background processes (regardless of when they completed), but set this argument to False 
+			to disable checking that the exit status of the processes matches the ``expectedExitStatus`` specified in 
 			the call to `startProcess` (typically ``==0``). 
 			The last few lines of the stderr (or stdout) will be logged if the exit status is wrong. 
 		"""
 
 		assert timeout>0, 'timeout must be specified'
 		starttime = time.time()
-		running = [p for p in self.processList if p.state==BACKGROUND and p.running() and p not in excludes]
+		includes = includes or self.processList
+		
+		running = [p for p in includes if p.state==BACKGROUND and p.running() and p not in excludes]
 		self.log.info('Waiting up to %d secs for %d background process(es) to complete', timeout, len(running))
 		for p in running:
 			try:
@@ -817,7 +823,7 @@ class ProcessUser(object):
 		# but only after we've confirmed (above) there were no timeouts
 		if checkExitStatus:
 			failures = []
-			for process in self.processList:
+			for process in includes:
 				if process.state!=BACKGROUND or process in excludes: continue
 				if not pysys.internal.safe_eval.safe_eval('%s %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
 					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)

@@ -30,7 +30,7 @@ class PySysTest(BaseTest):
 		
 		self.waitForBackgroundProcesses(checkExitStatus=False) # should succeed
 		self.waitForBackgroundProcesses(abortOnError=False) # should fail
-		
+		self.waitForBackgroundProcesses([p1, p2], abortOnError=False) # should fail
 		
 		
 		self.startTestProcess(stdouterr='timeout1', arguments=['block'], background=True)

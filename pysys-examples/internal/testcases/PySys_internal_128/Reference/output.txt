@@ -7,5 +7,8 @@ INFO  Waiting up to N secs for 0 background process(es) to complete
 Contents of failure1.err (filtered): 
 Contents of failure2.err (filtered): 
 WARN  2 processes failed: python<failure1> returned exit status 1 (expected ==0); python<failure2> returned exit status 1 (expected ==0) ... blocked [run.py:32]
+INFO  Waiting up to N secs for 0 background process(es) to complete
+Contents of failure2.err (filtered): 
+WARN  Process python<failure2> returned exit status 1 (expected ==0) ... blocked [run.py:33]
 INFO  Waiting up to N secs for 2 background process(es) to complete
 WARN  Timed out waiting for 2 processes after N secs: python<timeout1>, python<timeout2> ... timed out [run.py:38]
