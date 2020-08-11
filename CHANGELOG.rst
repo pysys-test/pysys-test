@@ -14,8 +14,14 @@ Change Log
 What's new in 1.6.1
 -------------------
 
-PySys 1.6.0 was released in August 2020 and contains some minor fixes:
+PySys 1.6.0 was released in August 2020 and contains some minor fixes around TCP port allocation:
 
+	- Fixed detection of the server (non-ephemeral/dynamic) port range on Windows(R) which was incorrect 
+	  on recent Windows versions that use the IANA port range (with a minimum ephemeral port of 49152). In some cases 
+	  this would have resulted in no server ports at all in the pool for allocation by 
+	  `BaseTest.getNextAvailableTCPPort()`. PySys now uses the ``netsh int ipv4 show dynamicport tcp`` 
+	  command to accurately detect the ephemeral port range, falling back to old approach if this 
+	  fails. There are also debug messages to explain what is happening. 
 	- Fixed a `BaseTest.waitForSocket()` bug on macOS(R) in which the wait never succeeds when it should. 
 	- Reduced the ``TIMEOUTS['WaitForAvailableTCPPort']`` constant from 20 minutes to 5 minutes since a properly 
 	  configured system should not spend significant amounts of time waiting waiting for ports and it is better to 

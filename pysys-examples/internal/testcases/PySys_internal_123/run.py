@@ -13,7 +13,11 @@ class PySysTest(BaseTest):
 		import pysys.utils.allocport
 		ephrange = pysys.utils.allocport.getEphemeralTCPPortRange()
 		self.log.info('Ephemeral port range is: %d-%d'%ephrange)
-		self.assertEval('{ephemeral_port_range_min} < {ephemeral_port_range_max}', 
+		self.assertThat('ephemeral_port_range_min < ephemeral_port_range_max', 
+			ephemeral_port_range_min=ephrange[0],
+			ephemeral_port_range_max=ephrange[1]
+		)
+		self.assertThat('ephemeral_port_range_max-ephemeral_port_range_min > 100', 
 			ephemeral_port_range_min=ephrange[0],
 			ephemeral_port_range_max=ephrange[1]
 		)

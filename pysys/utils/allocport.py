@@ -40,7 +40,7 @@ _log = logging.getLogger('pysys.allocport')
 
 def getEphemeralTCPPortRange():
 	"""Returns the minimum and maximum TCP ports this operating system uses to allocate
-	ephemeral ports (the client side of the TCP connection). 
+	ephemeral/dynamic ports (the client side of the TCP connection). 
 	
 	This function is used by `getServerTCPPorts()` to ensure that no ephemeral/client-side ports are allocated for 
 	server-side purposes by PySys (this could cause random port clashes). 
@@ -78,18 +78,37 @@ def getEphemeralTCPPortRange():
 		ephemeral_low = runSysctl('net.inet.ip.portrange.first')
 		ephemeral_high = runSysctl('net.inet.ip.portrange.last')
 	elif PLATFORM == 'win32':
-		ephemeral_low = 1025
-		ephemeral_high = 5000 # The default
-		if sys.version_info[0] == 2:
-			import _winreg as winreg
-		else:
-			import winreg
-		with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters') as h:
-			try:
-				ephemeral_high = winreg.QueryValueEx(h, 'MaxUserPort')[0]
-			except Exception:
-				# Accept the default if there isn't a value in the registry
-				pass
+		try:
+			# The port defaults have changed in various windows releases, so executing this command is the most reliable solution
+			# We assume that IPv6 (if used) is configured the same
+			netsh = subprocess.check_output(['netsh', 'int', 'ipv4', 'show', 'dynamicport', 'tcp'])
+			ephemeral_low = int(re.search(b'Start Port *: *([0-9]+)', netsh).group(1))
+			ephemeral_high = int(re.search(b'Number of Ports *: *([0-9]+)', netsh).group(1)) + ephemeral_low
+		except Exception as ex:
+			# This is a fallback just in case the above command doesn't work
+			_log.debug('Failed to get Windows dynamic port range using netsh - %s: %s', type(ex).__name__, ex)
+
+			ephemeral_low = 1025
+			ephemeral_high = 5000 # The default
+			if sys.version_info[0] == 2:
+				import _winreg as winreg
+			else:
+				import winreg
+			with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters') as h:
+				try:
+					ephemeral_high = winreg.QueryValueEx(h, 'MaxUserPort')[0]
+					_log.debug('Read ephemeral_high value from MaxUserPort in registry: %s', ephemeral_high)
+				except Exception:
+					# Accept the default if there isn't a value in the registry
+					pass
+			if ephemeral_high > 65535-100: 
+				# this suggests we're on one of the more recent OSes which use the IANA range rather than the low 1025+ 
+				# part of the range for ephemeral ports (and anyway, we'd end up 
+				# with no non-dynamic ports on which to start servers on if we didn't do this!)
+				ephemeral_low = 49152
+				_log.debug('Forcing ephemeral_low to %s since with ephemeral_high=%s there would be no server ports otherwise', 
+					ephemeral_low, ephemeral_high)
+
 	else:
 		raise Exception("PySys cannot determine the ephemeral port range on platform %s (consider using the PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max or PYSYS_PORTS_FILE= environment variables)" % sys.platform)
 
