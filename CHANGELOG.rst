@@ -633,7 +633,9 @@ the following list and consult it only if you get new test failures after upgrad
   and it's extremely dangerous as it causes behaviour changes (and potentially file system race conditions) in 
   subsequent tests that can be very hard to debug. 
   The environment and working directory should only be modified for child processes not for PySys itself - 
-  `BaseTest.getDefaultEnvirons` is a good way to do this.   
+  calling or overriding `BaseTest.getDefaultEnvirons()` is a good way to do this.   
+- Attempting to write to ``runDetails`` or ``pysys.constants.TIMEOUTS`` after `pysys.baserunner.BaseRunner.setup()` 
+  has completed (e.g. from individual tests) is no longer permitted in the interests of safety. 
 - Changed the implementation of the outcome constants such as `pysys.constants.FAILED` to be an instance of class 
   `pysys.constants.Outcome` rather than an integer. It is unlikely this change will affect existing code (unless you 
   have created any custom outcome types, which is not documented). The use of objects to represent outcomes allows for 

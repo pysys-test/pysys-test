@@ -580,6 +580,7 @@ class BaseRunner(ProcessUser):
 		# Now that setup() is done, no-one should be messing with global immutable state (better to not do it at all, but 
 		# definitely not after this point)
 		self.runDetails = makeReadOnlyDict(self.runDetails)
+		pysys.constants.TIMEOUTS = makeReadOnlyDict(pysys.constants.TIMEOUTS)
 		self._initialEnviron = os.environ.copy()
 		self._initialCwd = os.getcwd()
 
