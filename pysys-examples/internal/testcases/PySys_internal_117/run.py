@@ -21,4 +21,4 @@ class PySysTest(BaseTest):
 			
 	def validate(self):
 		self.assertDiff('pysys-output/NestedTest/got-ports.txt', self.output+'/allocated-ports.txt', sort=True)
-		self.assertGrep('pysys.out', expr='Port allocation failed: Exception - Could not allocate TCP server port; other tests are currently using all the available ports')
+		self.assertGrep('pysys.out', expr='Port allocation failed: .*Timed out trying to allocate a free TCP server port after .+ secs; other tests are currently using all the available ports.*')

@@ -1,10 +1,10 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.exceptions import *
+import pysys
 
 class PySysTest(BaseTest):
 	def execute(self):
-		TIMEOUTS['WaitForAvailableTCPPort'] = 3
 		with open(self.output+'/got-ports.txt', 'w') as f:
 			for i in range(10):
 				try:

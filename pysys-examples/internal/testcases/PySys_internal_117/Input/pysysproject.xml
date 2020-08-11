@@ -4,6 +4,8 @@
 
 	<property osfamily="osfamily"/>
 
+	<pythonpath value="${testRootDir}"/>
+	<runner-plugin classname="runnerplugin.MyRunnerPlugin" />
 	<property name="defaultAbortOnError" value="true"/>
 	
 </pysysproject>
