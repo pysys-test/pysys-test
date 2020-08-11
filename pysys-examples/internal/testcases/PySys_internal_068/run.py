@@ -125,6 +125,11 @@ class PySysTest(BaseTest):
 		
 		self.assertPathExists('myoutdir/__pysys_output_archives.myoutdir/NestedFail.cycle001.myoutdir.zip')
 		
+		# check Python code coverage worked
+		self.assertGrep('pysys.out', expr='Preparing Python coverage report in: .*__coverage_python.myoutdir')
+		self.assertThatGrep('pysys.out', 'Executed .*python-coverage-html.*(exit status .*)', 
+			'value == expected', expected='exit status 0')
+
 		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchive: .+/NestedFail.cycle002.myoutdir.zip')
 		self.assertGrep('pysys.out', expr='Published artifact TestOutputArchiveDir: .+/__pysys_output_archives.myoutdir')
 		self.assertGrep('pysys.out', expr='Published artifact CSVPerformanceReport: .+/perf_.*.csv')
