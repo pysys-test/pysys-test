@@ -231,6 +231,7 @@ def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET,
 	# nb: expose socket type and protocol number here but not higher up the stack just in case someone needs them, but 
 	# not very likely
 	t = time.time()
+	haslogged = False
 	while time.time()-t < TIMEOUTS['WaitForAvailableTCPPort']:
 		
 		# in case we've allocated all the available ports, loop 
@@ -239,6 +240,11 @@ def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET,
 			port = tcpServerPortPool.popleft()
 		except Exception:
 			time.sleep(2)
+			if not haslogged:
+				# Useful to know about this as it shouldn't really happen if the TCP stack is configured in a sane way 
+				# and the tests aren't not leaking ports
+				_log.warning('Unable to allocate a TCP port yet as all are in use by PySys; will wait for up to %0.1fs', TIMEOUTS['WaitForAvailableTCPPort'])
+				haslogged = True
 			continue
 		
 		if any(portIsInUse(port, socketAddressFamily=socketAddressFamily, type=type, proto=proto, host=host) for host in hosts):
@@ -246,6 +252,8 @@ def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET,
 			tcpServerPortPool.append(port)
 			time.sleep(0.5) # avoid spinning
 		else:
+			if haslogged:
+				_log.info('   successfully allocated TCP port %d after %0.1fs', port, time.time()-t)
 			return port
 	raise Exception('Timed out trying to allocate a free TCP server port after %0.1f secs; other tests are currently using all the available ports (hint: check that PySys has correctly detected the range of ephemeral vs server ports by running with -vDEBUG)'%TIMEOUTS['WaitForAvailableTCPPort'])
 
