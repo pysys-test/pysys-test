@@ -139,8 +139,8 @@ class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
 	
 	format = ""
 	"""
-	The format that will be written to stdout. If not specified, the environment 
-	variable ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` will be used as the format. 
+	The format that will be written to stdout. If not specified as a writer property in pysysproject.xml, the 
+	environment variable ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` will be used as the format. 
 	
 	The format can include the following placeholders:
 	
@@ -193,6 +193,8 @@ class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
 		super(ConsoleFailureAnnotationsWriter, self).setup(cycles=cycles, **kwargs)
 		self.cycles=cycles
 		self.format = self.format or os.getenv('PYSYS_CONSOLE_FAILURE_ANNOTATIONS','') or self.DEFAULT_FORMAT
+		if self.format.lower()=='true': self.format = self.DEFAULT_FORMAT
+		
 		self.includeNonFailureOutcomes = [o.strip().upper() for o in self.includeNonFailureOutcomes.split(',') if o.strip()]
 		for o in self.includeNonFailureOutcomes:
 			if not any(o == str(outcome) for outcome in OUTCOMES):
