@@ -568,8 +568,7 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 		# produces coverage.xml in a standard format that is useful to code coverage tools
 		self.runner.startPython(['-m', 'coverage', 'xml'], abortOnError=False, 
 			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-xml', 
-			disableCoverage=True)
-			
+			disableCoverage=True, onError=lambda process: self.runner.getExprFromFile(process.stdout, '.+'))
 	
 		self.runner.startPython(['-m', 'coverage', 'html']+self.getCoverageArgsList(), abortOnError=False, 
 			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
