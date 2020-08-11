@@ -139,7 +139,18 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 		self.artifacts = {} # map of category:[paths]
 
 	def publishArtifact(self, path, category, **kwargs):
-		self.artifacts.setdefault(category, []).append(path)
+		if self.artifacts is not None: 
+			# normally we accumulate all the paths for each category ready to write out during cleanup
+			self.artifacts.setdefault(category, []).append(path)
+		else:
+			# if this writer's cleanup was already called, fallback to separate invocation (probably this will only 
+			# happen for categories that publish just one path, so it'll work out OK)
+			log.debug('GitHubActionsCIWriter got publishArtifact after cleanup(), will publish anyway; category=%s path=%s', category, path)
+			self._publishToGitHub([path], category)
+
+	def _publishToGitHub(self, paths, category):
+		if not os.path.exists(paths[0]): return # auto-skip things that don't exist
+		self.outputGitHubCommand(u'set-output', u','.join(paths), params={u'name':u'artifact_'+category})
 
 	def cleanup(self, **kwargs):
 		super(GitHubActionsCIWriter, self).cleanup(**kwargs)
@@ -151,8 +162,8 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 		# artifact publishing, mostly for use with uploading
 		# currently categories with multiple artifacts can't be used directly with the artifact action, but this may change in future
 		for category, paths in self.artifacts.items():
-			if os.path.exists(paths[0]): # auto-skip things that don't exist
-				self.outputGitHubCommand(u'set-output', u','.join(paths), params={u'name':u'artifact_'+category})
+			self._publishToGitHub(paths, category)
+		self.artifacts = None
 		
 		if sum([self.outcomes[o] for o in OUTCOMES if o.isFailure()]):
 			self.outputGitHubCommand(u'group', u'(GitHub test failure annotations)')

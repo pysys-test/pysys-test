@@ -23,15 +23,14 @@
 			<property name="maxTotalSizeMB" value="1024.0"/>
 		</writer>
 		
-		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
-		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
-
 		<writer classname="pysys.writer.outcomes.JUnitXMLResultsWriter">
 			<property name="outputDir" value="__pysys_junit_xml"/>
 		</writer>
 		
-		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter">
-		</writer>
+		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
+		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
+		
+		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter"></writer>
 	</writers>
 
 	<default-file-encodings>

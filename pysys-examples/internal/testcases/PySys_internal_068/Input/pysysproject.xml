@@ -24,9 +24,6 @@
 		<writer classname="TestOutputArchiveWriter" module="pysys.writer">
 		</writer>
 
-		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
-		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
-
 		<writer classname="XMLResultsWriter" module="pysys.writer" file="testsummary.xml">
 			<property name="outputDir" value="${root}"/>
 			<property name="stylesheet" value="./my-pysys-log.xsl"/>
@@ -57,6 +54,9 @@
 			<property name="destDir" value="__coverage_python.${outDirName}"/>
 			<!-- <property name="pythonCoverageArgs" value="..."/> -->
 		</writer>
+
+		<writer classname="GitHubActionsCIWriter" module="pysys.writer.ci"></writer>
+		<writer classname="TravisCIWriter" module="pysys.writer.ci"></writer>
 
 		<writer classname="ArtifactPrinter" module="mypkg">
 		</writer>

@@ -248,7 +248,10 @@ class ArtifactPublisher(object):
 	"""Interface implemented by writers that implement publishing of file/directory artifacts. 
 	
 	For example, a writer for a CI provider that supports artifact uploading can subclass this interface to 
-	be notified when another writer (or performance reporter) produces an artifact.
+	be notified when another writer (or performance reporter) produces an artifact. If implementing this interface, 
+	remember that the order each writer's cleanup() is called is the same as the order the writers appear in the 
+	project configuration file, so if your writer relies on output published from another's cleanup you may need to 
+	document this, or code your writer such that it doesn't care what order the cleanup() methods are called. 
 	
 	To publish an artifact to all registered writers, call `pysys.baserunner.BaseRunner.publishArtifact()`. 
 	
