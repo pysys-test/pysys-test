@@ -28,7 +28,7 @@ class PySysTest(BaseTest):
 		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
 
-		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record', '--cycle', '2'], 
+		runPySys(self, 'pysys', ['run', '--progress', '-o', self.output+'/myoutdir', '--record', '--cycle', '2', '-XcodeCoverage'], 
 			workingDir='test', ignoreExitStatus=True, environs={
 				# this is a good test in which to test the default behaviour works when enabled
 				'PYSYS_CONSOLE_FAILURE_ANNOTATIONS':'',
@@ -130,6 +130,8 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.out', expr='Published artifact CSVPerformanceReport: .+/perf_.*.csv')
 		self.assertGrep('pysys.out', expr='Published artifact JUnitXMLResultsDir: .+/pysys-reports')
 		self.assertGrep('pysys.out', expr='Published artifact MyCustomCategory', contains=False) # due to publishArtifactCategoryIncludeRegex
+
+		self.assertGrep('pysys.out', expr='Published artifact .*[.][.].*', contains=False)
 		
 		self.assertThat('len(vcsCommit) > 4', vcsCommit__eval="self.runner.runDetails['vcsCommit']")
 		

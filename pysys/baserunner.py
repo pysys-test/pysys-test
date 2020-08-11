@@ -861,7 +861,7 @@ class BaseRunner(ProcessUser):
 			log.debug('Not publishing artifact as category %s is filtered out by publishArtifactCategoryIncludeRegex'%category)
 			return
 
-		path = fromLongPathSafe(path).replace('\\','/')
+		path = os.path.normpath(fromLongPathSafe(path)).replace('\\','/')
 		for a in self.__artifactWriters:
 			a.publishArtifact(path, category)
 
