@@ -35,7 +35,11 @@ class PySysTest(BaseTest):
 			})
 		self.logFileContents('pysys.out', maxLines=0)
 		#self.assertGrep('pysys.out', expr='Test final outcome: .*(PASSED|NOT VERIFIED)', abortOnError=True)
-			
+		
+		# delete code coverage files to avoid confusing parent Python process
+		self.deletedir('myoutdir/__coverage_python.myoutdir')
+		self.deletedir('myoutdir/NestedPass')
+		
 	def validate(self):
 		self.assertGrep('pysys.err', expr='.+', contains=False)
 		self.assertGrep('pysys.out', expr='(Traceback.*|caught .*)', contains=False)
