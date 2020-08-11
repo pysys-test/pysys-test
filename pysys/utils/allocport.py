@@ -247,7 +247,7 @@ def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET,
 			time.sleep(0.5) # avoid spinning
 		else:
 			return port
-	raise Exception('Could not allocate TCP server port; other tests are currently using all the available ports')
+	raise Exception('Timed out trying to allocate a free TCP server port after %0.1f secs; other tests are currently using all the available ports (hint: check that PySys has correctly detected the range of ephemeral vs server ports by running with -vDEBUG)'%TIMEOUTS['WaitForAvailableTCPPort'])
 
 class TCPPortOwner(object):
 	"""
