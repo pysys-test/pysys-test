@@ -16,6 +16,7 @@ What's new in 1.6.1
 
 PySys 1.6.0 was released in August 2020 and contains some minor fixes:
 
+	- Fixed a `BaseTest.waitForSocket()` bug on macOS(R) in which the wait never succeeds when it should. 
 	- Reduced the ``TIMEOUTS['WaitForAvailableTCPPort']`` constant from 20 minutes to 5 minutes since a properly 
 	  configured system should not spend significant amounts of time waiting waiting for ports and it is better to 
 	  know sooner if the port pool is exhausted. 

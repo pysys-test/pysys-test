@@ -1,4 +1,5 @@
 import socket
+import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys import process_lock
@@ -20,8 +21,8 @@ class PySysTest(BaseTest):
 		# this should fail
 		try:
 			self.waitForSocket(port, abortOnError=True, timeout=3)
-		except Exception as e:
-			self.log.info('Got exception as expected: %s', e)
+		except pysys.exceptions.AbortExecution as e:
+			self.log.info('Got exception as expected: %s: %s', type(e).__name__, e)
 			del self.outcome[:]
 		else:
 			self.abort(FAILED, 'waitForSocket returned without error when it should have failed')

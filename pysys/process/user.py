@@ -38,6 +38,11 @@ from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe, 
 from pysys.utils.pycompat import *
 import pysys.internal.safe_eval
 
+if IS_WINDOWS:
+	import win32api, win32con
+else:
+	import fcntl
+
 STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
 """
 Returned by `ProcessUser.allocateUniqueStdOutErr` to hold a pair of ``(stdout,stderr)`` names.
@@ -885,21 +890,22 @@ class ProcessUser(object):
 
 		log.debug("Performing wait for socket creation %s:%s", host, port)
 
-		with process_lock:
-			s = socket.socket(socketAddressFamily, socket.SOCK_STREAM)
-			# the following lines are to prevent handles being inherited by 
-			# other processes started while this test is runing
-			if OSFAMILY =='windows':
-				s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, 0)
-				import win32api, win32con
-				win32api.SetHandleInformation(s.fileno(), win32con.HANDLE_FLAG_INHERIT, 0)
-				s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			else:
-				import fcntl
-				fcntl.fcntl(s.fileno(), fcntl.F_SETFD, 1)
+		s = None
 		try:
 			startTime = time.time()
 			while True:
+				if s is None:
+					with process_lock:
+						s = socket.socket(socketAddressFamily, socket.SOCK_STREAM)
+						# the following lines are to prevent handles being inherited by 
+						# other processes started while this test is runing
+						if IS_WINDOWS:
+							s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, 0)
+							win32api.SetHandleInformation(s.fileno(), win32con.HANDLE_FLAG_INHERIT, 0)
+							s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+						else:
+							fcntl.fcntl(s.fileno(), fcntl.F_SETFD, 1)
+			
 				try:
 					s.connect((host, port))
 					s.shutdown(socket.SHUT_RDWR)
@@ -926,9 +932,13 @@ class ProcessUser(object):
 							else:
 								log.warn('%s', msg)
 							return False
-				time.sleep(0.01)
+				if PLATFORM == 'darwin':
+					# MacOS gives an error if we try to connect to the same socket again after connection refused
+					s.close()
+					s = None
+				time.sleep(0.15)
 		finally:
-			s.close()
+			if s is not None: s.close()
 
 
 	def waitForFile(self, file, filedir=None, timeout=TIMEOUTS['WaitForFile'], abortOnError=None):
