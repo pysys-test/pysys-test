@@ -110,7 +110,7 @@ def getEphemeralTCPPortRange():
 					ephemeral_low, ephemeral_high)
 
 	else:
-		raise Exception("PySys cannot determine the ephemeral port range on platform %s (consider using the PYSYS_EPHEMERAL_TCP_PORT_RANGE=min-max or PYSYS_PORTS_FILE= environment variables)" % sys.platform)
+		raise Exception("PySys cannot determine the ephemeral port range on platform %s (consider using the PYSYS_PORTS=min-max or PYSYS_PORTS_FILE= environment variables)" % sys.platform)
 
 	assert ephemeral_low <= ephemeral_high, [ephemeral_low, ephemeral_high]
 
@@ -122,7 +122,7 @@ def getServerTCPPorts():
 	This function is usually called when `pysys.baserunner.BaseRunner` is constructed to help decide the 
 	pool of available ports that can be allocated by `pysys.basetest.BaseTest.getNextAvailableTCPPort()`. 
 
-	PySys treats all ports from 1024-65536 as server ports except for the client-side ephemeral port range 
+	PySys treats all ports from 1024-65536 as server ports except for the client-side ephemeral/dynamic port range 
 	as determined by `getEphemeralTCPPortRange()`. Alternatively, the set of server ports can be overridden by the 
 	following environment variables:
 	
@@ -146,7 +146,7 @@ def getServerTCPPorts():
 		# The standard implementation: allocate server ports from all non-privileged, non-ephemeral ports
 		ports = list(range(1024, ephemeral_low)) + list(range(ephemeral_high,65536))
 		_log.debug('TCP ephemeral port range is: %d-%d; this leaves a total of %d ports for running servers', ephemeral_low, ephemeral_high, len(ports))
-		assert len(ports)>50, 'Cannot allocate TCP ports on this machine as ephemeral port range %d-%d is too large (considering using PYSYS_PORTS_FILE as a workaround)'%(ephemeral_low, ephemeral_high)
+		assert len(ports)>50, 'Cannot allocate TCP ports on this machine as ephemeral port range %d-%d is too large (considering using PYSYS_PORTS/PYSYS_PORTS_FILE as a workaround)'%(ephemeral_low, ephemeral_high)
 		return ports
 
 	ports = set()
