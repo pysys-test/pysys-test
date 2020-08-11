@@ -11,6 +11,14 @@ Change Log
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
 -------------------
+What's new in 1.6.1
+-------------------
+
+This release contains some minor fixes:
+
+	- TODO
+
+-------------------
 What's new in 1.6.0
 -------------------
 
