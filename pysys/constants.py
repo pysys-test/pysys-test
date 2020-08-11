@@ -223,7 +223,7 @@ TIMEOUTS = {}
 
 Each timeout is given as a floating point number of seconds.
 
-These timeouts can be customized from `pysys.baserunner.BaseRunner.setup()` if needed 
+These timeouts can be customized from a runner plugin (or `pysys.baserunner.BaseRunner.setup()`) if needed 
 (but never change them from within individual testcases). 
  """
 TIMEOUTS['WaitForSocket'] = 60
@@ -231,7 +231,7 @@ TIMEOUTS['WaitForFile'] = 30
 TIMEOUTS['WaitForSignal'] = 60
 TIMEOUTS['WaitForProcessStop'] = 30
 TIMEOUTS['WaitForProcess'] = 60*10
-TIMEOUTS['WaitForAvailableTCPPort'] = 60*20 # in case other tests are using up all ports
+TIMEOUTS['WaitForAvailableTCPPort'] = 60*5 # in case other tests are using up all ports
 TIMEOUTS['ManualTester'] = 1800
 
 # the supported distinct log categories
