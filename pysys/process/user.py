@@ -908,23 +908,23 @@ class ProcessUser(object):
 					if time.time()-startTime>10:
 						log.info("Wait for socket creation completed after %d secs", time.time()-startTime)
 					return True
-				except socket.error:
+				except socket.error as ex:
 					if process and not process.running():
 						msg = "Waiting for socket connection aborted due to unexpected process %s termination"%(process)
 						if abortOnError:
 							self.abort(BLOCKED, msg, self.__callRecord())
 						else:
-							log.warn(msg)
+							log.warn('%s', msg)
 						return False
 
 					if timeout:
 						currentTime = time.time()
 						if currentTime > startTime + timeout:
-							msg = "Timed out waiting for creation of socket after %d secs"%(time.time()-startTime)
+							msg = "Timed out waiting for creation of socket after %d secs: %s"%(time.time()-startTime, ex)
 							if abortOnError:
 								self.abort(TIMEDOUT, msg, self.__callRecord())
 							else:
-								log.warn(msg)
+								log.warn('%s', msg)
 							return False
 				time.sleep(0.01)
 		finally:
