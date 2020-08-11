@@ -93,7 +93,8 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 	def outputGitHubCommand(self, cmd, value=u'', params={}):
 		# syntax is: ::workflow-command parameter1={data},parameter2={data}::{command value}
 		# escaping based on https://github.com/actions/toolkit/blob/master/packages/core/src/command.ts
-		stdoutPrint(u'::%s%s::%s'%(cmd, 
+
+		toprint = u'::%s%s::%s'%(cmd, 
 			(u' '+u','.join(u'%s=%s'%(k,v\
 				.replace('%', '%25')\
 				.replace('\r', '%0D')\
@@ -104,7 +105,11 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 				.replace('%', '%25')\
 				.replace('\r', '%0D')\
 				.replace('\n', '%0A')
-				))
+				)
+		if cmd in [u'set-output']: # since GitHub suppresses the actual commands written, it's useful to log this at debug
+			log.debug('GitHub Actions command %s', toprint)
+
+		stdoutPrint(toprint)
 
 	def setup(self, numTests=0, cycles=1, xargs=None, threads=0, testoutdir=u'', runner=None, **kwargs):
 		super(GitHubActionsCIWriter, self).setup(numTests=numTests, cycles=cycles, xargs=xargs, threads=threads, 
