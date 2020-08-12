@@ -146,7 +146,11 @@ def getServerTCPPorts():
 		# The standard implementation: allocate server ports from all non-privileged, non-ephemeral ports
 		ports = list(range(1024, ephemeral_low)) + list(range(ephemeral_high,65536))
 		_log.debug('TCP ephemeral port range is: %d-%d; this leaves a total of %d ports for running servers', ephemeral_low, ephemeral_high, len(ports))
-		assert len(ports)>50, 'Cannot allocate TCP ports on this machine as ephemeral port range %d-%d is too large (considering using PYSYS_PORTS/PYSYS_PORTS_FILE as a workaround)'%(ephemeral_low, ephemeral_high)
+		
+		if len(ports)<50 or True:
+			fallback_low, fallback_high = (1024, 49152-1)
+			_log.warning('PySys has detected that only %d ports are remaining for starting servers, after removing the %d-%d ephemeral/dynamic port range on this machine (%s). To ensure enough ports are available, PySys is falling back to using the server port range %d-%d, however this may result in clashes between server ports and ephemeral ports so it is recommended to change your TCP configuration on this machine to provide more balance between the number of ephemeral vs server ports. ', len(ports), ephemeral_low, ephemeral_high, platform.platform(), fallback_low, fallback_high)
+			ports = list(range(fallback_low, fallback_high+1))
 		return ports
 
 	ports = set()
