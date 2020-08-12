@@ -196,7 +196,7 @@ be a string.
 If instead of setting a default for just one test you wish to set the default 
 for many tests from your custom `BaseTest` subclass, then you would do the same thing in the 
 definition of that `BaseTest` subclass. If you don't have a custom BaseTest class, you can use 
-`self.runner.getXArg()<pysys.runner.BaseRunner.getXArg>` from any plugin to get the value or default, with the same 
+`self.runner.getXArg() <pysys.baserunner.BaseRunner.getXArg>` from any plugin to get the value or default, with the same 
 type conversion described above. 
 
 The other mechanism that PySys supports for configurable test options is 
