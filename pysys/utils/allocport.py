@@ -147,7 +147,7 @@ def getServerTCPPorts():
 		ports = list(range(1024, ephemeral_low)) + list(range(ephemeral_high,65536))
 		_log.debug('TCP ephemeral port range is: %d-%d; this leaves a total of %d ports for running servers', ephemeral_low, ephemeral_high, len(ports))
 		
-		if len(ports)<50 or True:
+		if len(ports)<50:
 			fallback_low, fallback_high = (1024, 49152-1)
 			_log.warning('PySys has detected that only %d ports are remaining for starting servers, after removing the %d-%d ephemeral/dynamic port range on this machine (%s). To ensure enough ports are available, PySys is falling back to using the server port range %d-%d, however this may result in clashes between server ports and ephemeral ports so it is recommended to change your TCP configuration on this machine to provide more balance between the number of ephemeral vs server ports. ', len(ports), ephemeral_low, ephemeral_high, platform.platform(), fallback_low, fallback_high)
 			ports = list(range(fallback_low, fallback_high+1))
