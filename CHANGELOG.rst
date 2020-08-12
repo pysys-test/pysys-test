@@ -14,17 +14,24 @@ Change Log
 What's new in 1.6.1
 -------------------
 
-PySys 1.6.0 was released in August 2020 and contains some minor fixes around TCP port allocation:
+PySys 1.6.0 was released in August 2020 and contains some minor fixes around allocation of TCP ports for testing 
+(especially on GitHub(R) Actions):
 
 	- Fixed detection of the server (non-ephemeral/dynamic) port range on Windows(R) which was incorrect 
-	  on recent Windows versions that use the IANA port range (with a minimum ephemeral port of 49152). In some cases 
-	  this would have resulted in no server ports at all in the pool for allocation by 
-	  `BaseTest.getNextAvailableTCPPort()`. PySys now uses the ``netsh int ipv4 show dynamicport tcp`` 
-	  command to accurately detect the ephemeral port range, falling back to old approach if this 
-	  fails. There are also debug messages to explain what is happening. 
-	- Fixed a `BaseTest.waitForSocket()` bug on macOS(R) in which the wait never succeeds when it should. 
+	  on recent Windows versions that use the IANA port range (i.e. with a minimum ephemeral port of 49152 not 1024). 
+	  This could result in a wrong port - or no ports - being returned from `BaseTest.getNextAvailableTCPPort()`. PySys 
+	  now uses the ``netsh int ipv4 show dynamicport tcp`` command to accurately detect the ephemeral port range, 
+	  falling back to old approach of reading MaxUserPort from the registry if this fails. There are also debug 
+	  messages to explain what is happening. 
+	- It is now an error to run PySys on a system where all ports are assigned to the ephemeral range leaving none for 
+	  starting server processes. This is not a common configuration (but has been seen on the Windows GitHub Actions 
+	  machine). You can overcome this by reconfiguring your system (e.g. on Windows 
+	  ``netsh int ipv4 set dynamicportrange tcp ...``) or if that's not possible, by setting the ``PYSYS_PORTS`` 
+	  environment variable. 
+	- Fixed a `BaseTest.waitForSocket()` bug on macOS(R) in which the wait never succeeds although the socket is 
+	  listening. 
 	- Reduced the ``TIMEOUTS['WaitForAvailableTCPPort']`` constant from 20 minutes to 5 minutes since a properly 
-	  configured system should not spend significant amounts of time waiting waiting for ports and it is better to 
+	  configured system should not spend significant amounts of time waiting for ports and it is better to 
 	  know sooner if the port pool is exhausted. 
 
 -------------------
