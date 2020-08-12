@@ -573,8 +573,7 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 		p = self.runner.startPython(['-m', 'coverage', 'html']+self.getCoverageArgsList(), abortOnError=False, 
 			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
 			disableCoverage=True, onError=lambda process: self.runner.getExprFromFile(process.stdout, '.+'))
-		self.runner.logFileContents(p.stdout)
-		self.runner.logFileContents(p.stderr)
+		self.runner.logFileContents(p.stderr, maxLines=0) # should usually be empty, but best to show it if not
 
 		# to avoid confusion, remove any zero byte out/err files from the above
 		for p in os.listdir(pythonCoverageDir):
