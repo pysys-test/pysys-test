@@ -554,11 +554,12 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 	def cleanup(self, **kwargs):
 		pythonCoverageDir = self.destDir
 		assert os.path.isabs(pythonCoverageDir)
+		pythonCoverageDir = os.path.normpath(fromLongPathSafe(pythonCoverageDir))
 		if not pathexists(pythonCoverageDir):
 			log.info('No Python coverage files were generated.')
 			return
 			
-		log.info('Preparing Python coverage report in: %s', os.path.normpath(pythonCoverageDir))
+		log.info('Preparing Python coverage report in: %s', pythonCoverageDir)
 
 		self.runner.startPython(['-m', 'coverage', 'combine'], abortOnError=True, 
 			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
