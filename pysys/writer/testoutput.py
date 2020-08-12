@@ -564,17 +564,19 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 		self.runner.startPython(['-m', 'coverage', 'combine'], abortOnError=True, 
 			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-combine', 
 			disableCoverage=True, onError=lambda process: 
-				'Failed to combine Python code coverage data: %s'%self.runner.getExprFromFile(process.stdout, '.+'))
+				'Failed to combine Python code coverage data: %s'%self.runner.getExprFromFile(process.stdout, '.+', returnNoneIfMissing=True) 
+					or self.runner.logFileContents(process.stderr, maxLines=0))
 
 		# produces coverage.xml in a standard format that is useful to code coverage tools
 		self.runner.startPython(['-m', 'coverage', 'xml'], abortOnError=False, 
 			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-xml', 
-			disableCoverage=True, onError=lambda process: self.runner.getExprFromFile(process.stdout, '.+'))
+			disableCoverage=True, onError=lambda process: self.runner.getExprFromFile(process.stdout, '.+', returnNoneIfMissing=True) 
+				or self.runner.logFileContents(process.stderr, maxLines=0))
 	
-		p = self.runner.startPython(['-m', 'coverage', 'html']+self.getCoverageArgsList(), abortOnError=False, 
+		self.runner.startPython(['-m', 'coverage', 'html', '-d', toLongPathSafe(pythonCoverageDir+'/htmlcov')]+self.getCoverageArgsList(), abortOnError=False, 
 			workingDir=pythonCoverageDir, stdouterr=pythonCoverageDir+'/python-coverage-html', 
-			disableCoverage=True, onError=lambda process: self.runner.getExprFromFile(process.stdout, '.+'))
-		self.runner.logFileContents(p.stderr, maxLines=0) # should usually be empty, but best to show it if not
+			disableCoverage=True, onError=lambda process: self.runner.getExprFromFile(process.stdout, '.+', returnNoneIfMissing=True) 
+				or self.runner.logFileContents(process.stderr, maxLines=0))
 
 		# to avoid confusion, remove any zero byte out/err files from the above
 		for p in os.listdir(pythonCoverageDir):
