@@ -31,7 +31,7 @@ class PySysTest(BaseTest):
 			self.assertGrep(subtest+'.out', expr='(Traceback.*|caught .*)', contains=False)
 			self.assertOrderedGrep('%s.out'%subtest, exprList=[
 				# first folding, using the test outdir name
-				'^::group::Logs for failed test run: %s'%subtest,
+				'^::group::Logs for test run: %s'%subtest,
 				'INFO .*Id.*:.*NestedFail',
 				# end folding before summary
 				'^::endgroup::',

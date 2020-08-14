@@ -129,7 +129,7 @@ class GitHubActionsCIWriter(BaseRecordResultsWriter, TestOutcomeSummaryGenerator
 			# and hard to find the logs of interest
 			runner.printLogs = PrintLogs.FAILURES
 		
-		self.outputGitHubCommand(u'group', u'Logs for failed test run: %s' % self.runid)
+		self.outputGitHubCommand(u'group', u'Logs for test run: %s' % self.runid)
 		
 		# enable coloring automatically, since this CI provider supports it
 		runner.project.formatters.stdout.color = True
