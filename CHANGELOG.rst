@@ -655,7 +655,7 @@ the following list and consult it only if you get new test failures after upgrad
 - There is no longer a default writer so if you choose delete the <writers> element from your project you won't 
   have any writers. 
 - Removed undocumented ``TEST_TEMPLATE`` constant from ``pysys.basetest`` and ``DESCRIPTOR_TEMPLATE`` 
-  from `pysys.xml.descriptor`` (they're now constants on `pysys.launcher.console_make.ConsoleMakeTestHelper` if you 
+  from `pysys.xml.descriptor` (they're now constants on `pysys.launcher.console_make.ConsoleMakeTestHelper` if you 
   really need them, but this is unlikely and they are not part of the public PySys API). 
 - Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
 - Removed deprecated method ``purgeDirectory()`` from `pysys.baserunner.BaseRunner` 
