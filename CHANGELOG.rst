@@ -10,6 +10,16 @@ Change Log
   request in the PySys test framework. For how-tos and advice, 
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
+
+-------------------
+What's new in 1.6.2
+-------------------
+
+PySys 1.6.2 is under development. 
+
+	- TODO
+
+
 -------------------
 What's new in 1.6.1
 -------------------
