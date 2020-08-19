@@ -52,8 +52,6 @@ The significant new features of PySys 1.6.0 are grouped around a few themes:
     - easier validation with the new `BaseTest.assertThatGrep()` method, which extracts a value using a grep 
       expression and then checks its value is as expected. For extract-and-assert use cases this approach gives much 
       clearer messages when the assert fails than using assertGrep; 
-    - validation: the new `BaseTest.assertThatGrep()` method, which gives nice clear error messages when the assert 
-      fails;
     - new writers for recording test results, including GitHub(R) Actions support and a writer that produces .zip 
       archives of test output directories, plus new APIs to allow writers to publish artifacts, and to visit each of 
       the test's output files; 
@@ -61,7 +59,7 @@ The significant new features of PySys 1.6.0 are grouped around a few themes:
     - process starting enhancements such as `BaseTest.waitForBackgroundProcesses()`, automatic logging of stderr when 
       a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file; 
     - several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
-    - a new "getting started" `sample <https://github.com/pysys-test/sample-getting-started>_` project which can be 
+    - a new "getting started" `sample <https://github.com/pysys-test/sample-getting-started>`_ project which can be 
       easily forked from GitHub(R) to create new PySys-based projects. The sample also demonstrates common techniques 
       and best practices for writing tests in PySys.  
 
