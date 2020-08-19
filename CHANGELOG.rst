@@ -66,7 +66,7 @@ The significant new features of PySys 1.6.0 are grouped around a few themes:
 As this is a major release of PySys there are also some changes in this release that may require changes to your 
 project configuration file and/or runner/basetest/writer framework extension classes you've written (though in most 
 cases it won't be necessary to change individual tests). These breaking changes are either to reduce the chance of 
-errors going undetected, or to support bug fixes and impementation simplification. So be sure to look at the upgrade 
+errors going undetected, or to support bug fixes and implementation simplification. So be sure to look at the upgrade 
 guide below if you want to switch an existing project to use the new version. 
 
 New Plugin API
