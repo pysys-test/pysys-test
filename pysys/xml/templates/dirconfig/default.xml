@@ -22,10 +22,10 @@
     </modes>
   </classification>
 
-  <!-- Specify as a floating point number the default priority for tests under 
-    this directory, which determines the order in which they're run relative 
-    to other tests/directories with a higher or lower priority. 
-    Empty string means inherit. The default priority is 0.0. 
+  <!-- Specify as a floating point number an indicator of when to run the tests under 
+    this directory, relative to other tests/directories with a higher or lower hint. 
+    Empty string means inherit. The default priority is 0.0 so set the hint to a higher 
+    value to execute tests later. 
   -->
   <execution-order hint=""/>
 
