@@ -1,0 +1,60 @@
+import pysys
+from pysys.constants import *
+from pysys.basetest import BaseTest
+
+if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
+	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
+from pysysinternalhelpers import *
+
+class PySysTest(BaseTest):
+
+	def execute(self):
+		def pysys(name, args, **kwargs):
+			if args[0] == 'run': args = args+['-o', self.output+'/'+name]
+			runPySys(self, name, args, workingDir=self.project.testRootDir+'/../samples/sample-cookbook', 
+				# this is so we can run git
+				environs={'PATH':os.environ['PATH']}, 
+				**kwargs)
+
+		# The command below is copied verbatim from the README.md
+		runcmd = 'run -j0 --record -XcodeCoverage --type=auto'
+		pysys('pysys-run-tests', runcmd.split(' '))
+		
+		pysys('pysys-print', ['print'])
+		pysys('pysys-run-help', ['run', '-h'])
+
+
+	def validate(self):	
+		outdir = self.output+'/pysys-run-tests'
+		
+		# Check we got the expected outcomes and outcome reasons
+		self.write_text('non-passes.txt', '\n'.join(sorted([f"{r['testId']} = {r['outcome']}: {r['outcomeReason']}" for r in
+			pysys.utils.fileutils.loadJSON(outdir+'/__pysys_myresults.pysys-run-tests.json')['results']
+			if r['outcome'] != 'PASSED'])))
+		self.assertDiff('non-passes.txt')
+
+		# Check we generated the expected output files from all our writers, code coverage, etc
+		self.write_text('outdir-contents.txt', '\n'.join(sorted([re.sub('[0-9]', 'N', f) for f in os.listdir(outdir) 
+			if os.path.isfile(f) or f.startswith('_')])))
+		self.assertDiff('outdir-contents.txt')
+
+
+		# Git commit in runDetails
+		self.assertGrep('pysys-run-tests.out', 'vcsCommit: .+')
+
+		# Test plugin
+		self.assertGrep('pysys-run-tests.out', 'MyTestPlugin.setup called; myPluginProperty=999')
+
+		# Runner plugin
+		self.assertGrep('pysys-run-tests.out', 'myPythonVersion: .+')
+		self.assertGrep('pysys-run-tests.out', 'MyRunnerPlugin.setup called; myPluginProperty=True and myArg=123')
+		self.assertGrep('pysys-run-tests.out', 'MyRunnerPlugin cleanup called')
+
+		# Custom runner
+		self.assertGrep('pysys-run-tests.out', 'MyRunner.setup was called; myRunnerArg=12345')
+		self.assertGrep('pysys-run-tests.out', 'MyRunner.cleanup was called')
+
+		self.logFileContents('pysys-run-help.out', tail=True)
+		self.logFileContents('pysys-run-tests.out', tail=False)	
+		self.logFileContents('pysys-run-tests.out', tail=True)
+		self.logFileContents('pysys-print.out', tail=True, maxLines=0)

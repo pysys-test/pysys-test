@@ -1,0 +1,1 @@
+SkipOrAbortTest = SKIPPED: MyFeature is not supported on this operating system

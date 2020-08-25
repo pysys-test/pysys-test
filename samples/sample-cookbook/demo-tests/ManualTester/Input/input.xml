@@ -1,0 +1,38 @@
+<pysysmanualtest>
+
+  <!-- This is a made-up example. A more realistic use case for the manual tester would be prompts to click around in 
+    a web UI and confirm that the visual appearance looks correct to the human running the test. 
+  -->
+
+  <step title="Get a calculator" validate="false">
+    <description><![CDATA[
+Running of this testcase requires access to a calculator
+]]> 
+    </description>  
+  </step>
+  
+  <step title="Start working out the series" validate="true">
+    <description><![CDATA[
+Using your calculator you should work out the first 10 entries of the series, where starting with 0 and 1 (the first and second entries) each new number in the series is simply the sum of the two before it. Hence perform the following;
+
+Entry 0 = 0
+Entry 1 = 1
+Entry 2 = (0+1) = 1
+Entry 3 = (1+1) = 2
+Entry 4 = (1+2) = 3
+
+and continue until you determine the tenth entry. Confirm that the tenth entry is equal to 34.
+]]> 
+    </description>  
+  </step>
+
+  <step title="Congratulate yourself and grab a coffee" validate="false">
+    <description><![CDATA[
+If you managed to calculate the tenth entry correctly and obtained the correct result, go get a coffee and celebrate with a chocolate digestive
+]]> 
+    </description>  
+  </step>
+
+</pysysmanualtest>
+
+
