@@ -23,8 +23,10 @@ class PySysTest(BaseTest):
 		runcmd = 'run -j0 --record -XcodeCoverage --type=auto'
 		pysys('pysys-run-tests', runcmd.split(' '))
 		
-		pysys('pysys-print', ['print'])
-		pysys('pysys-run-help', ['run', '-h'])
+		pysys('pysys-print', ['print'], background=True)
+		pysys('pysys-print-descriptor-samples', ['print', '--full', 'PySysDirConfigSample', 'PySysTestDescriptorSample'], background=True)
+		pysys('pysys-run-help', ['run', '-h'], background=True)
+		self.waitForBackgroundProcesses()
 
 
 	def validate(self):	
@@ -41,7 +43,6 @@ class PySysTest(BaseTest):
 			if os.path.isfile(f) or f.startswith('_')])))
 		self.assertDiff('outdir-contents.txt')
 
-
 		# Git commit in runDetails
 		self.assertGrep('pysys-run-tests.out', 'vcsCommit: .+')
 
@@ -57,6 +58,13 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys-run-tests.out', 'MyRunner.setup was called; myRunnerArg=12345')
 		self.assertGrep('pysys-run-tests.out', 'MyRunner.cleanup was called')
 
+		# Sample descriptors
+		self.assertDiff(self.copy('pysys-print-descriptor-samples.out', 'descriptor-samples.txt', mappers=[
+			lambda line: line if line.startswith(
+				tuple('Test id,Test state,Test skip reason,Test groups,Test modes,Test module,Test input,Test output,Test reference,Test traceability,Test user data'.split(','))
+			) else None,
+			pysys.mappers.RegexReplace(' [^ ]+pysys-extensions', ' <rootdir>/pysys-extensions')]))
+		
 		self.logFileContents('pysys-run-help.out', tail=True)
 		self.logFileContents('pysys-run-tests.out', tail=False)	
 		self.logFileContents('pysys-run-tests.out', tail=True)

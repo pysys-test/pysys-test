@@ -1,1 +1,3 @@
+MyServer.Performance.PySysDirConfigSample~CompressionNone_AuthNone = SKIPPED: These tests are skipped until bug XYZ is fixed
+PySysTestDescriptorSample~CompressionNone_AuthNone = SKIPPED: This test is skipped until bug XYZ is fixed
 SkipOrAbortTest = SKIPPED: MyFeature is not supported on this operating system
