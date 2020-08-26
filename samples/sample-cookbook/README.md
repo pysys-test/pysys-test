@@ -31,6 +31,7 @@ recorded.
 * pysysproject.xml - a comprehensive project configuration file showing how to configure project properties, a variety 
   of custom plugin extensions, and all the standard PySys writer classes.
 * pysys-extensions/myorg/ - a Python package containing some custom extensions using the PySys API. 
-* demo-tests/ - a directory of tests to demonstrate the functionality of the extensions and project configuration.
+* demo-tests/ - a directory of tests to demonstrate the functionality of the extensions and project configuration, 
+  also some testcase types such as PySys manual (human-driven) tests, and PyUnit test execution from PySys. 
 
 For more information on anything you see here, see the [PySys documentation](https://pysys-test.github.io/pysys-test).

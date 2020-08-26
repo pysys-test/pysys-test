@@ -40,6 +40,7 @@ class MyRunnerPlugin(object):
 		self.pythonVersion = self.owner.waitForGrep('MyRunnerPlugin.pythonVersion.out', '(?P<output>.+)')['output'].strip()
 
 		# A runner plugin can contribute additional keys to the runner's runDetails.
+		# For example you could read the build number of the app being tested in here (e.g. with loadProperties()).
 		self.runner.runDetails['myPythonVersion'] = self.pythonVersion
 
 		# A runner plugin's setup method is the one place you can change global constants (e.g. timeouts) that will 
