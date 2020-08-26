@@ -1,6 +1,7 @@
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
+from pysys.utils.pycompat import PY2
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
@@ -9,6 +10,8 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
+		if PY2: self.skipTest('Samples work on Python 3 only')
+	
 		def pysys(name, args, **kwargs):
 			if args[0] == 'run': args = args+['-o', self.output+'/'+name]
 			runPySys(self, name, args, workingDir=self.project.testRootDir+'/../samples/sample-cookbook', 
@@ -28,7 +31,7 @@ class PySysTest(BaseTest):
 		outdir = self.output+'/pysys-run-tests'
 		
 		# Check we got the expected outcomes and outcome reasons
-		self.write_text('non-passes.txt', '\n'.join(sorted([f"{r['testId']} = {r['outcome']}: {r['outcomeReason']}" for r in
+		self.write_text('non-passes.txt', '\n'.join(sorted(["{r[testId]} = {r[outcome]}: {r[outcomeReason]}".format(r=r) for r in
 			pysys.utils.fileutils.loadJSON(outdir+'/__pysys_myresults.pysys-run-tests.json')['results']
 			if r['outcome'] != 'PASSED'])))
 		self.assertDiff('non-passes.txt')
