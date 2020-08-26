@@ -209,6 +209,7 @@
 		<!-- Write a code coverage report for .py files; enabled by -XcodeCoverage. -->
 		<writer classname="pysys.writer.testoutput.PythonCoverageWriter">
 			<property name="destDir" value="__coverage_python.${outDirName}"/>
+			<property name="destArchive" value="coverage_python.${outDirName}.zip"/>
 			<property name="pythonCoverageArgs" value=""/>
 		</writer>
 
