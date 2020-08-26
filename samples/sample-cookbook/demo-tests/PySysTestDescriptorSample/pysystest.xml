@@ -49,19 +49,17 @@
 	-->
 	<execution-order hint="+100.0"/>
 	<data>
-		<!-- By convention the test class uses module="run.py" located in this directory, but 
-			it is possible to use a different name, or to specify an absolute path if you want to use the same 
-			Python class for lots of tests. -->
+		<!-- By convention the test class is in a module called "run.py" in this directory, but 
+		it is possible to use a different name, or to specify an absolute path if you want to use the same 
+		Python class for lots of tests. -->
 		<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
-		
-		<!-- If desired you could customize the directory to which test output is written and/or the 
-			Input/Reference directories. Can be overridden by individual tests. -->
+
+		<!-- You can customize the Input/Output/Reference directory names if you wish. -->
 		<output path="MyOutput"/>
-		<input path="MyInput"/>
+		<input path="${testRootDir}/pysys-extensions/my_shared_input_files"/>
 		<reference path="MyReference"/>
 		
-		<!-- The ability to add user-defined data to the test descriptor is mostly useful when using a 
-			shared Python class for lots of tests.  -->
+		<!-- The ability to add user-defined data to the test descriptor is mostly useful -->
 		<user-data name="myTestDescriptorData" value="foobar"/>
 	</data>
 	

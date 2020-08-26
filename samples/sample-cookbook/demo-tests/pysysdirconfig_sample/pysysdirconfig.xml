@@ -48,7 +48,7 @@
 		<!-- If desired you could customize the directory to which test output is written and/or the 
 			Input/Reference directories. Can be overridden by individual tests. -->
 		<output path="MyOutput"/>
-		<input path="MyInput"/>
+		<input path="${testRootDir}/pysys-extensions/my_shared_input_files"/>
 		<reference path="MyReference"/>
 		
 		<!-- The ability to add user-defined data to the test descriptor is mostly useful when using a 

@@ -4,7 +4,7 @@ Test skip reason:  These tests are skipped until bug XYZ is fixed
 Test groups:       performance, disableCoverage, dirConfigSample
 Test modes:        CompressionNone_AuthNone, CompressionGZip_AuthNone, CompressionNone_AuthBasic
 Test module:       <rootdir>/pysys-extensions/MySharedTestClass.py
-Test input:        MyInput
+Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
 Test reference:    MyReference
 Test traceability: UserRequirement_1a, UserRequirement_2c, Performance, UserStory.XYZ-54321
@@ -15,7 +15,7 @@ Test skip reason:  This test is skipped until bug XYZ is fixed
 Test groups:       performance, disableCoverage
 Test modes:        CompressionNone_AuthNone, CompressionGZip_AuthNone
 Test module:       <rootdir>/pysys-extensions/MySharedTestClass.py
-Test input:        MyInput
+Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
 Test reference:    MyReference
 Test traceability: UserRequirement_1a, UserRequirement_2c, Performance, UserStory.XYZ-54321
