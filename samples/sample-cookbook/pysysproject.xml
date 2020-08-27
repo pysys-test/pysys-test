@@ -81,6 +81,10 @@
 	<property file="pysys-extensions/myproject-${osfamily}.properties" pathMustExist="true" prefix="os_"
 		includes=".*Dir" excludes=""/>
 
+	<!-- This is an example of putting connection credentials into a project property, which can be overridden 
+	using an environment variable if desired. -->
+	<property name="myCredentials" value="${env.MYORG_CREDENTIALS}" default="testuser:testpassword"/>
+
 	<!-- Add a path to the python path to allow importing custom Python plugin modules. -->
 	<pythonpath value="${testRootDir}/pysys-extensions" />
 
@@ -125,16 +129,14 @@
 	-->
 	<runner classname="myorg.myrunner.MyRunner"/>
 
-
 	<!-- 
 	Use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
 	ConsoleMakeTestHelper class in order to create templated run.py scripts e.g. when a test module has
 	a repeatable pattern for running or validating etc. 
 	-->
 	<!--
-	<maker classname="myorg.MyMaker"/>
+	<maker classname="myorg.MyTestMaker"/>
 	-->
-
 
 	<!--
 	Configures the writers that implement reporting of test outcomes, typically to disk, to the console, or 
@@ -156,6 +158,8 @@
 			<property name="maxTotalSizeMB" value="1024.0"/>
 			<property name="maxArchiveSizeMB" value="200.0"/>
 			<property name="maxArchives" value="50"/>
+			<property name="archiveAtEndOfRun" value="true"/>
+			<property name="includeNonFailureOutcomes" value="REQUIRES INSPECTION, NOT VERIFIED"/>
 		</writer>
 
 		<!-- This writer is useful for collecting output files (e.g. logs, graphs, etc) from all tests into a 
@@ -191,7 +195,6 @@
 		</writer>
 
 		<!-- Writes all outcomes to a single XML file; only enabled when the record flag is specified. -->
-
 		<writer classname="pysys.writer.outcomes.XMLResultsWriter">
 			<!--
 			Set properties on the XML test output writer class. 
@@ -232,9 +235,12 @@
 			list if no other "summary" writer is explicitly configured.
 		-->		
 		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter">
-			<property name="showTestTitle" value="false"/>
+			<property name="showTestTitle" value="true"/>
 		</writer>
 
+		<writer classname="pysys.writer.console.ConsoleProgressResultsWriter">
+		</writer>
+		
 		<!-- Example of a custom writer. -->		
 		<writer classname="myorg.mywriter.MyResultsWriter">
 			<property name="outputFile" value="__pysys_myresults.${outDirName}.json"/>
