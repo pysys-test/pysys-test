@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+	<id-prefix></id-prefix>
+
+	<classification>
+		<groups inherit="true">
+			<group>expectedFailure</group>
+		</groups>
+
+	</classification>
+	
+</pysysdirconfig>

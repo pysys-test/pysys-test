@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<svg baseProfile="tiny" height="100%" version="1.2" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs />
+<circle cx="270" cy="270" fill="white" r="135.0" stroke="black" stroke-width="10" />
+<circle cx="270" cy="270" r="25.0" />
+<line stroke="black" stroke-width="10" x1="270" x2="270" y1="270" y2="135.0" />
+<line stroke="black" stroke-width="10" x1="270" x2="405.0" y1="270" y2="347.9423" />
+<line stroke="black" stroke-width="10" x1="270" x2="135.0" y1="270" y2="347.9423" />
+</svg>

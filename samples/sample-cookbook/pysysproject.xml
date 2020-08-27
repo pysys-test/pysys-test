@@ -77,7 +77,7 @@
 	
 	The set of property keys that are imported can be filtered with a regular expression using 
 	the optional includes="regex" and excludes="regex" . 
-	 -->
+	-->
 	<property file="pysys-extensions/myproject-${osfamily}.properties" pathMustExist="true" prefix="os_"
 		includes=".*Dir" excludes=""/>
 
@@ -158,6 +158,20 @@
 			<property name="maxArchives" value="50"/>
 		</writer>
 
+		<!-- This writer is useful for collecting output files (e.g. logs, graphs, etc) from all tests into a 
+			single directory or archive for manual examination at the end of the test run. 
+		-->
+		<writer classname="pysys.writer.testoutput.CollectTestOutputWriter">
+			<property name="destDir" value="__pysys_collect_perf_graphs.${outDirName}/"/>
+			<property name="destArchive" value="perfgraphs.${outDirName}.zip"/>
+
+			<property name="fileIncludesRegex" value=".*[.](svg|pdf)"/>
+			
+			<!-- This causes the archive to be published to any interested writers with the specified category 
+				name (e.g. some CI systems have a mechanism for publishing arifacts) -->
+			<property name="publishArtifactArchiveCategory" value="performanceGraphsArchive"/>
+		</writer>
+		
 		<!-- CI writers automatically enable themselves only if running under 
 			the associated CI environment. 
 		-->

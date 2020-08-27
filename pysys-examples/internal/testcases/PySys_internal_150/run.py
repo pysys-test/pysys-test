@@ -21,7 +21,7 @@ class PySysTest(BaseTest):
 
 		# The command below is copied verbatim from the README.md
 		runcmd = 'run -j0 --record -XcodeCoverage --type=auto'
-		pysys('pysys-run-tests', runcmd.split(' '))
+		pysys('pysys-run-tests', runcmd.split(' '), ignoreExitStatus=True)
 		
 		pysys('pysys-print', ['print'], background=True)
 		pysys('pysys-print-descriptor-samples', ['print', '--full', 'PySysDirConfigSample', 'PySysTestDescriptorSample'], background=True)
@@ -39,7 +39,9 @@ class PySysTest(BaseTest):
 		self.assertDiff('non-passes.txt')
 
 		# Check we generated the expected output files from all our writers, code coverage, etc
-		self.write_text('outdir-contents.txt', '\n'.join(sorted([re.sub('[0-9]', 'N', f) for f in os.listdir(outdir) 
+		self.write_text('outdir-contents.txt', '\n'.join(sorted([re.sub('[0-9]', 'N', f)+(
+				'/' if (os.path.isdir(outdir+os.sep+f) and os.listdir(outdir+os.sep+f)) else '') # make sure we notice if any dirs are empty
+			for f in os.listdir(outdir) 
 			if os.path.isfile(f) or f.startswith('_')])))
 		self.assertDiff('outdir-contents.txt')
 
@@ -67,5 +69,5 @@ class PySysTest(BaseTest):
 		
 		self.logFileContents('pysys-run-help.out', tail=True)
 		self.logFileContents('pysys-run-tests.out', tail=False)	
-		self.logFileContents('pysys-run-tests.out', tail=True)
+		self.logFileContents('pysys-run-tests.out', tail=True, maxLines=50)
 		self.logFileContents('pysys-print.out', tail=True, maxLines=0)
