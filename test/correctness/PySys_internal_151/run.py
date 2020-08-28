@@ -25,24 +25,27 @@ class PySysTest(BaseTest):
 				environs  = os.environ,#self.createEnvirons(addToExePath=os.path.dirname(PYTHON_EXE)),
 				stdouterr = 'my_server1', displayName = 'my_server1<port %s>', background = True,
 				)
-			server2 = self.startProcess(
-				command   = sampledir+'/bin/my_server.%s'%('bat' if IS_WINDOWS else 'sh'), 
-				arguments = ['--port', str(self.getNextAvailableTCPPort())], 
-				environs  = os.environ,#self.createEnvirons(addToExePath=os.path.dirname(PYTHON_EXE)),
-				stdouterr = 'my_server2', displayName = 'my_server2<port %s>', background = True,
-				)
 			# Wait for the server to start by polling for a grep regular expression. The errorExpr/process 
 			# arguments ensure we abort with a really informative message if the server fails to start.
 			try:
 				self.waitForGrep('my_server1.out', '.', errorExpr=[' (ERROR|FATAL) '], process=server1, timeout=8) 
 				self.waitForGrep('my_server1.out', 'Started MyServer .*on port .*', errorExpr=[' (ERROR|FATAL) '], process=server1, timeout=8) 
 			except Exception as ex:
-				self.log.info('Failed to start 1: %s', ex)
+				self.log.info('Failed to start 1: %s; %s', ex, os.listdir(self.output))
 				pass
+
+			server2 = self.startProcess(
+				command   = sampledir+'/bin/my_server.%s'%('bat' if IS_WINDOWS else 'sh'), 
+				arguments = ['--port', str(self.getNextAvailableTCPPort())], 
+				environs  = os.environ,#self.createEnvirons(addToExePath=os.path.dirname(PYTHON_EXE)),
+				stdouterr = 'my_server2', displayName = 'my_server2<port %s>', background = False, timeout=10,
+				)
 			
+
 			self.logFileContents('my_server1.out')
-			self.logFileContents('my_server2.out')
 			self.logFileContents('my_server1.err')
+			
+			self.logFileContents('my_server2.out')
 			self.logFileContents('my_server2.err')
 			server1.stop()
 			server2.stop()
