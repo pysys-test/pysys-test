@@ -42,5 +42,5 @@ class PySysTest(BaseTest):
 		# Server build number in runDetails
 		self.assertGrep('pysys-run-tests.out', 'myServerBuildNumber: .+')
 
-		self.logFileContents('pysys-run-tests.out', tail=True)
+		self.logFileContents('pysys-run-tests.out', tail=True, maxLines=0)
 		self.logFileContents('pysys-print.out', tail=True, maxLines=0)
