@@ -50,3 +50,11 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 			displayName='pysys %s'%stdouterr, 
 			**kwargs)
 	return result
+
+class PySysTestPlugin:
+	def setup(self, testObj):
+		self.testObj = testObj
+	
+	def pysys(self, stdouterr, *args, **kwargs):
+		runPySys(self.testObj, stdouterr, *args, **kwargs)
+	

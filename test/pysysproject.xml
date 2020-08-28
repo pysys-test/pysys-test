@@ -90,7 +90,7 @@
 	BaseTest or BaseRunner classes, or customer test output writers. 
 	-->
 	<pythonpath value="${testRootDir}/pysys-extensions" />
-	
+	<test-plugin classname="pysysinternalhelpers.PySysTestPlugin" alias="pysys"/>
 
 	<!-- Test plugins are additional classes instantiated when each test's BaseTest is instantiated, and accessible 
 	to testcases (using the specified alias) as a field of the BaseTest. They provide a way to expose extra 

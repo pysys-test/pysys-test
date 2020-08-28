@@ -6,10 +6,6 @@ from pysys.utils.pycompat import PY2
 from pysys.utils.fileutils import *
 from pysys.xml.project import createProjectConfig
 
-if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
-	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
-from pysysinternalhelpers import *
-
 class PySysTest(BaseTest):
 
 	def execute(self):
@@ -20,7 +16,7 @@ class PySysTest(BaseTest):
 		self.addCleanupFunction(lambda: self.deletedir(os.path.dirname(longoutputdir)))
 		
 		try:
-			runPySys(self, 'pysys', ['run', '-o', longoutputdir, '--purge'], defaultproject=True)
+			self.pysys.pysys('pysys', ['run', '-o', longoutputdir, '--purge'], defaultproject=True)
 		finally:
 			self.logFileContents('pysys.out', maxLines=0)
 			self.logFileContents('pysys.err', maxLines=0)
