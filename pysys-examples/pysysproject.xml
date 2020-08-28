@@ -49,6 +49,8 @@
 		in runner.runDetails with the current commit number from your version control system. -->
 	<property name="versionControlGetCommitCommand" value="git show -s --format=%h"/>
 
+	<property name="pyunitUtilsDir" value="${testRootDir}/test-tools/pyunit"/>
+
 	<!-- 
 	Set default LANG for child processes on Unix. 
 	Useful for making all machines behave the same. Ensure that the specified 

@@ -15,5 +15,5 @@ class PySysTest(PyUnitTest):
 			self.outcome.append(FAILED)
 
 	def getPythonPath(self):
-		return [os.path.join(self.project.root, 'pyunit', 'utilities')]
+		return [self.project.pyunitUtilsDir]
 

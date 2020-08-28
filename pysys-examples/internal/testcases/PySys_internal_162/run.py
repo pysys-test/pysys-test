@@ -4,4 +4,4 @@ import os
 class PySysTest(PyUnitTest):
 
 	def getPythonPath(self):
-		return [os.path.join(self.project.root, 'pyunit', 'utilities')]
+		return [os.path.join(self.project.pyunitUtilsDir)]
