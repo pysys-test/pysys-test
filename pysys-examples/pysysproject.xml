@@ -88,9 +88,7 @@
 	Add a path to the python path to allow importing custom modules, e.g. extensions to the 
 	BaseTest or BaseRunner classes, or customer test output writers. 
 	-->
-	<!--
 	<pythonpath value="${testRootDir}/pysys-extensions" />
-	-->
 
 	<!-- Test plugins are additional classes instantiated when each test's BaseTest is instantiated, and accessible 
 	to testcases (using the specified alias) as a field of the BaseTest. They provide a way to expose extra 
