@@ -31,10 +31,6 @@ class PySysTest(BaseTest):
 			for d in rootdocs:
 				self.assertPathExists(pysysroot+'/'+d)
 
-		# since our automated testing covers the fibonacci pysysdirconfig, use an 
-		# assert to check that the template included with the distribution itself 
-		# (which currently doen't have independent testing) is the same
-		self.assertDiff(self.project.testRootDir+'/fibonacci/testcases/pysysdirconfig.xml', pysysroot+'/pysys/xml/templates/dirconfig/default.xml')
-		
 	def validate(self):
 		pass
+	
