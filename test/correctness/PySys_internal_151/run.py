@@ -34,6 +34,10 @@ class PySysTest(BaseTest):
 				self.log.info('Failed to start 1: %s; %s', ex, os.listdir(self.output))
 				pass
 
+			self.wait(10)
+			self.logFileContents('my_server1.out')
+			self.logFileContents('my_server1.err')
+
 			server2 = self.startProcess(
 				command   = sampledir+'/bin/my_server.%s'%('bat' if IS_WINDOWS else 'sh'), 
 				arguments = ['--port', str(self.getNextAvailableTCPPort())], 
@@ -41,9 +45,6 @@ class PySysTest(BaseTest):
 				stdouterr = 'my_server2', displayName = 'my_server2<port %s>', background = False, timeout=10,
 				)
 			
-
-			self.logFileContents('my_server1.out')
-			self.logFileContents('my_server1.err')
 			
 			self.logFileContents('my_server2.out')
 			self.logFileContents('my_server2.err')
