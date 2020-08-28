@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest>	
+	<description> 
+		<title>MyServer performance: /sensorValues endpoint (+demo of perf reporting, and -X variable overriding)</title>		 
+		<purpose><![CDATA[
+			To measure the throughout and a sample of the latencies at the sensorValues endpoint. 
+			
+			This also shows how to report performance statistics from a PySys test for throughput and latency. 
+		]]></purpose>
+	</description>
+
+	<!-- <skipped reason=""/> -->
+	
+	<classification>
+		<groups inherit="true">
+			<group></group>
+		</groups>
+		
+		<modes inherit="true">
+			<!-- For now we run this test in just one mode, but could add additional modes if desired. -->
+			<mode>CompressionGZip</mode>
+		</modes>
+	</classification>
+
+	<data>
+		<class name="PySysTest" module="run"/>
+	</data>
+	
+</pysystest>
