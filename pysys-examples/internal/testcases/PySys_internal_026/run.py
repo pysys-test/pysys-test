@@ -4,7 +4,7 @@ from pysys.basetest import BaseTest
 class PySysTest(BaseTest):
 
 	def execute(self):
-		script = "%s/internal/utilities/scripts/counter.py" % self.project.root
+		script = self.project.pythonScriptsDir+"/counter.py"
 
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script, "20", "1"],

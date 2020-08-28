@@ -5,7 +5,7 @@ from pysys.process.helper import ProcessWrapper
 class PySysTest(BaseTest):
 
 	def execute(self):
-		script = "%s/internal/utilities/scripts/reader.py" % self.project.root
+		script = self.project.pythonScriptsDir+"/reader.py"
 	
 		self.hprocess = self.startProcess(command=sys.executable,
 						  arguments = [script, "3"],
