@@ -34,15 +34,15 @@ class PySysTest(BaseTest):
 		for t in ['basic', 'thistest', 'full', 'groups', 'modes']:
 			self.assertGrep(t+'.err', expr='.*', contains=False) # no errors
 
-		self.assertGrep('basic.out', expr='Fibonacci_test_001 *[|] *[^ ]+')
-		self.assertGrep('full.out', expr='Test id *: *Fibonacci_test_001') # just pick one example
-		self.assertGrep('full.out', expr=r'Test directory *: *fibonacci[/\\]testcases[/\\]Fibonacci_test_001')
+		self.assertGrep('basic.out', expr='PySys_internal_001 *[|] *[^ ]+')
+		self.assertGrep('full.out', expr='Test id *: *PySys_internal_001') # just pick one example
+		self.assertGrep('full.out', expr=r'Test directory *: *internal[/\\]testcases[/\\]PySys_internal_001')
 		self.assertGrep('full.out', expr=r"Test user data *: *myUserDataKey='12345', myUserDataKey2='Hello \\\\n world'") # from this test's descriptor
 	
-		self.assertGrep('modes.out', expr='FibonacciMode1') # just pick one example
+		self.assertGrep('modes.out', expr='MyMode') # just pick one example
 		self.assertLineCount('thistest.out', expr='.', condition='==1')
 		
-		self.assertGrep('groups.out', expr='examples') # just pick one example
+		self.assertGrep('groups.out', expr='samples') # just pick one example
 		self.assertGrep('requirements.out', expr='AL1') # just pick one example
 
 		self.assertGrep('emptydir.err', expr='The supplied options did not result in the selection of any tests')

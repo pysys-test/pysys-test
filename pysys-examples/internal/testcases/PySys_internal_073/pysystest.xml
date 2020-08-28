@@ -13,6 +13,9 @@ Ensure that pysys print works without error, and also that it doesn't find any p
     <groups>
       <group>process</group>
     </groups>
+    <modes>
+	  <mode>MyMode</mode>
+    </modes>
   </classification>
 
   <data>
@@ -23,7 +26,7 @@ Ensure that pysys print works without error, and also that it doesn't find any p
   
   <traceability>
     <requirements>
-      <requirement id=""/>     
+      <requirement id="AL1"/>     
     </requirements>
   </traceability>
 </pysystest>
