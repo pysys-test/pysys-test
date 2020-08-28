@@ -25,6 +25,7 @@ class PySysTest(pysys.basetest.BaseTest):
 			environs  = self.createEnvirons(addToExePath=os.path.dirname(PYTHON_EXE)),
 			stdouterr = 'my_server', displayName = 'my_server<port %s>'%serverPort, background = True,
 			)
+		if IS_WINDOWS: self.addCleanupFunction(lambda: self.startProcess('taskkill', ['/PID', str(server.pid), '/T', '/F'], stdouterr='taskkill'))
 		
 		# Wait for the server to start by polling for a grep regular expression. The errorExpr/process 
 		# arguments ensure we abort with a really informative message if the server fails to start.
