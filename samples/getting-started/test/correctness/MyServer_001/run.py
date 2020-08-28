@@ -22,7 +22,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		server = self.startProcess(
 			command   = self.project.appHome+'/my_server.%s'%('bat' if IS_WINDOWS else 'sh'), 
 			arguments = ['--configfile', self.output+'/myserverconfig.json', ], 
-			environs  = self.createEnvirons(addToExePath=os.path.dirname(PYTHON_EXE)),
+			environs  = os.environ,#self.createEnvirons(addToExePath=os.path.dirname(PYTHON_EXE)),
 			stdouterr = 'my_server', displayName = 'my_server<port %s>'%serverPort, background = True,
 			)
 		if IS_WINDOWS: self.addCleanupFunction(lambda: self.startProcess('taskkill', ['/PID', str(server.pid), '/T', '/F'], stdouterr='taskkill'))
