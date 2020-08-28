@@ -127,7 +127,7 @@ install:
 # for running tests and building documentation:
 script:
   - echo ~
-  - cd pysys-examples
+  - cd test
   
   # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
   - $PY -m pip install ../dist/PySys*.whl
@@ -136,7 +136,7 @@ script:
   - $PY -m pip install coverage==4.5.4 codecov
 
   # main test run
-  - $PY -m coverage run --rcfile ./internal/utilities/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
+  - $PY -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
 
   # upload Python code coverage - since we're measuring PySys itself, include both 
   # top-level .coverage file and the files collected by PySys from its PySys subprocesses

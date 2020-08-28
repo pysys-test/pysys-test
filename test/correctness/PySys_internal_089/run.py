@@ -42,7 +42,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('myoutdir/NestedTest/run.log', expr=u'Some i18n characters that only show up in run.log if utf-8: %s'%utf8teststring, encoding='utf-8')
 		
 		self.log.info('')
-		self.log.info('Checking pysys-examples project defaults:')
+		self.log.info('Checking project defaults (which at least for now are the same as the sample project):')
 		self.assertThat('self.getDefaultFileEncoding(%s) == %s', repr("foo.xml"), repr('utf-8'))
 		self.assertThat('self.getDefaultFileEncoding(%s) == %s', repr("foo.XML"), repr('utf-8'))
 		self.assertThat('self.getDefaultFileEncoding(%s) == %s', repr("mydir/foo.yaml"), repr('utf-8'))

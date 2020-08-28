@@ -1395,7 +1395,7 @@ New project options:
   
 	<default-file-encoding pattern="*.yaml" encoding="utf-8"/>. 
 
-  The `pysys-examples/pysysproject.xml` sample project configuration file now 
+  The sample project configuration file now 
   sets utf-8 as the default encoding for XML, json and yaml files, and also 
   for testcase run.log files (though run.log continues to be written in local 
   encoding unless the project file is updated). For more information on this 
@@ -1931,7 +1931,7 @@ Other fixes and new features:
   to provide additional diagnostic information to the run.log to assist
   the triage of test failures.
 - The CSVResultsWriter has been added to the set of test summary writers.
-  See the pysysproject.xml file in pysys-examples for more details.
+  See the sample pysysproject.xml file for more details.
 - It is now possible to specify a regex for matching in the test selection.
   See the run usage for more details (pysys.py run -h).
 
@@ -1941,7 +1941,7 @@ Other fixes and new features:
 - This release introduces optional fail fast semantics at a macro and micro
   level. At a macro level this is either through the "defaultAbortOnError"
   project property, or through the "-b|--abort" option to the pysys launcher
-  run task. See the pysysproject.xml file in pysys-examples, and the run task
+  run task. See the sample pysysproject.xml, and the run task
   help usage respectively for more details. At a micro level, all assert and
   process related methods now take an optional "abortOnError" parameter to
   override any macro setting. When enabled any error will cause the test to
