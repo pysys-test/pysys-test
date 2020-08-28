@@ -167,8 +167,8 @@ script:
   # including these and the text files (with Windows line endings)
   - |
     if [[ -n $PYSYS_DOC_AND_DEPLOY ]]; then (
-       python3 --version
        set -e
+       python3 --version
        echo --- Building PySys documentation
        # must do this after testing to avoid polluting the installed packages while running the tests
        # peg to specific versions to avoid our build breaking when there's an upgrade
