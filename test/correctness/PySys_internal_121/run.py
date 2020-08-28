@@ -25,6 +25,7 @@ pythonCoverage
 codeCoverage
 waitForSignal
 logFileContentsDefaultExcludes
+pysys
 		""".strip().split('\n')
 
 		def filter_member(m):
