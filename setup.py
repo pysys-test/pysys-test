@@ -21,7 +21,7 @@ import pysys
 ROOTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Slightly gross, but in the absence of cross-platform symlink support in git and to avoid duplicating it, create this on the fly
-with codecs.open(ROOTDIR+'/pysys-examples/pysysproject.xml', 'r', 'ascii') as projfile:
+with codecs.open(ROOTDIR+'/samples/cookbook/pysysproject.xml', 'r', 'ascii') as projfile:
 	with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst.tmpl', 'r', 'ascii') as rsttmpl:
 		with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst', 'w', 'ascii') as rstout:
 			rstout.write(rsttmpl.read())
