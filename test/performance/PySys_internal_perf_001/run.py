@@ -22,6 +22,7 @@ class PySysTest(BaseTest):
 			self.logFileContents('pysys.err')
 
 	def validate(self):
+		self.addOutcome(PASSED, '')
 		resultDetails = {'PythonVersion':'%s.%s'%sys.version_info[0:2], 'PySysVersion':pysys.__version__, 'DurationSecs':self.testDurationSecs}
 		
 		self.reportPerformanceResult(
