@@ -15,7 +15,7 @@
   </classification>
 
   <data>
-    <class name="PySysTest" module="${testRootDir}/internal/utilities/resources/test_class.py"/>
+    <class name="PySysTest" module="${pythonScriptsDir}/test_class.py"/>
   </data>
   
   <traceability>
