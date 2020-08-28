@@ -27,8 +27,7 @@ class PySysTest(BaseTest):
 		runPySys(self, 'requirements', ['print', '--requirements'], workingDir=testsdir)
 		runPySys(self, 'nonexistent', ['print', 'non-existent'], workingDir=testsdir, expectedExitStatus='!=0')
 		runPySys(self, 'nonexistent-regex', ['print', 'non-existent.*'], workingDir=testsdir, expectedExitStatus='!=0')
-		runPySys(self, 'emptydir', ['print'], workingDir=self.mkdir('emptydir'), ignoreExitStatus=True, 
-			projectfile=PROJECT.testRootDir+'/pysysproject.xml')
+		runPySys(self, 'emptydir', ['print'], workingDir=self.mkdir('emptydir'), ignoreExitStatus=True, defaultproject=True)
 			
 	def validate(self):
 		for t in ['basic', 'thistest', 'full', 'groups', 'modes']:
