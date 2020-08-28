@@ -35,7 +35,7 @@ class PySysTest(BaseTest):
 
 		self.assertGrep('basic.out', expr='PySys_internal_001 *[|] *[^ ]+')
 		self.assertGrep('full.out', expr='Test id *: *PySys_internal_001') # just pick one example
-		self.assertGrep('full.out', expr=r'Test directory *: *internal[/\\]testcases[/\\]PySys_internal_001')
+		self.assertGrep('full.out', expr=r'Test directory *: *correctness[/\\]PySys_internal_001')
 		self.assertGrep('full.out', expr=r"Test user data *: *myUserDataKey='12345', myUserDataKey2='Hello \\\\n world'") # from this test's descriptor
 	
 		self.assertGrep('modes.out', expr='MyMode') # just pick one example
