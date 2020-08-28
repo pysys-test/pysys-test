@@ -19,7 +19,7 @@ class PySysTest(BaseTest):
 			runPySys(self, name, args, workingDir=sampledir+'/test', 
 				**kwargs)
 
-		runcmd = 'run --ci'
+		runcmd = 'run --ci -vDEBUG'
 		# The main test here is that the tests pass; in case it fails, log the server output
 		self.addCleanupFunction(lambda: self.logFileContents('pysys-run-tests/MyServer_002/my_server1.out'))
 		self.addCleanupFunction(lambda: self.logFileContents('pysys-run-tests/MyServer_002/my_server1.err'))
