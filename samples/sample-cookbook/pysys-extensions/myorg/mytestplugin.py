@@ -48,7 +48,7 @@ class MyTestPlugin(object):
 	# A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
 	# That approach allows you to later customize the logic by changing just one single place, and also to omit 
 	# it for specific tests where it is not wanted. 
-	def checkLog(self, logfile='myapp.log', ignores=[]):
+	def checkLog(self, logfile='my_server.out', ignores=[]):
 		"""
 		Asserts that the specified log file does not contain any errors. 
 		"""
