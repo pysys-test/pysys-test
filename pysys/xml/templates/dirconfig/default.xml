@@ -1,52 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysysdirconfig>
-  <!-- This file provides default configuration for all tests under this directory. -->
+	<!-- This file provides default configuration for all tests under this directory. -->
 
-  <!-- Specify a prefix to be added to the id of all tests under this directory.
-      This is in addition to any defined by individual tests. 
-      Example: <id-prefix>MySubSystem.Performance.</id-prefix> -->
-  <id-prefix></id-prefix>
+	<!-- Specify a prefix to be added to the id of all tests under this directory.
+	This is in addition to any defined by individual tests. 
+	Example: <id-prefix>MySubSystem.Performance.</id-prefix> 
+	-->
+	<id-prefix></id-prefix>
 
-  <classification>
-    <!-- Specify the groups that all tests under this directory will be 
-      tagged with. 
-      This is in addition to any defined by individual tests. -->
-    <groups inherit="true">
-      <group></group>
-    </groups>
+	<classification>
+		<!-- Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 
+		for inclusion/exclusion in test runs. Groups are usually named in camelCase. 
+		These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. -->
+		-->
+		<groups inherit="true">
+			<group></group>
+		</groups>
 
-    <!-- Specify modes supported by all tests under this directory. 
-      This is in addition to any defined by individual tests. -->
-    <modes inherit="true">
-      <mode></mode>
-    </modes>
-  </classification>
+		<!-- Specify modes supported by all tests under this directory. Like test ids, mode names are usually TitleCase.
+		These modes are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. 
+		-->
+		<modes inherit="true">
+			<mode></mode>
+		</modes>
+	</classification>
 
-  <!-- Specify as a floating point number an indicator of when to run the tests under 
-    this directory, relative to other tests/directories with a higher or lower hint. 
-    Empty string means inherit. The default priority is 0.0 so set the hint to a higher 
-    value to execute tests later. 
-  -->
-  <execution-order hint=""/>
+	<!-- Specify as a floating point number an indicator of when to run the tests under 
+	this directory, relative to other tests/directories with a higher or lower hint. 
+	Empty string hint="" means inherit. The default priority is 0.0 so set the hint to a higher 
+	value to execute tests later, or a negative value to execute tests earlier. 
+	-->
+	<execution-order hint=""/>
 
-  <!-- Uncomment this to mark all tests under this directory as skipped 
-    (overrides the state= attribute on individual tests). -->
-  <!-- <skipped reason=""/> -->
+	<!-- Uncomment this to mark all tests under this directory as skipped. -->
+	<!-- <skipped reason=""/> -->
 
-  <data>
-    <!-- Uncomment this to customize the directory to which test output is 
-       written. Can be overridden by individual tests. -->
-    <!-- <output path="Output"/>-->
-    <!-- <user-data name="myThing" value="foobar"/> -->
-  </data>
+	<data>
+	</data>
 
-  <traceability>
-    <requirements>
-      <!-- Specify traceability requirements implemented by the tests 
-        under this directory. 
-        This is in addition to any defined by individual tests. -->
-      <requirement id=""/>     
-    </requirements>
-  </traceability>
-  
+	<traceability>
+		<requirements>
+		</requirements>
+	</traceability>
+	
 </pysysdirconfig>
