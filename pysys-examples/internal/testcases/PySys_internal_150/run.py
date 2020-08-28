@@ -11,16 +11,18 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		if PY2: self.skipTest('Samples work on Python 3 only')
-	
+		
+		sampledir = self.project.testRootDir+'/../samples/sample-cookbook'
 		def pysys(name, args, **kwargs):
 			if args[0] == 'run': args = args+['-o', self.output+'/'+name]
-			runPySys(self, name, args, workingDir=self.project.testRootDir+'/../samples/sample-cookbook', 
+			runPySys(self, name, args, workingDir=sampledir, 
 				# this is so we can run git
 				environs={'PATH':os.environ['PATH']}, 
 				**kwargs)
 
 		# The command below is copied verbatim from the README.md
 		runcmd = 'run -j0 --record -XcodeCoverage --type=auto'
+		self.assertGrep(sampledir+'/README.md', runcmd)
 		pysys('pysys-run-tests', runcmd.split(' '), ignoreExitStatus=True)
 		
 		pysys('pysys-print', ['print'], background=True)

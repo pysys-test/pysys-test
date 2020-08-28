@@ -1,4 +1,4 @@
-# PySys Sample - Configuration and extensions cookbook
+# PySys Sample - Configuration and Extensions Cookbook
 
 This project is a "cookbook" of snippets you can copy into your own project to configure PySys or create classes 
 that extend PySys using its Python API. 

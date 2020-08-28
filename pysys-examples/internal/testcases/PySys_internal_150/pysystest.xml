@@ -11,7 +11,7 @@ Run the sample tests
 
   <classification>
     <groups>
-      <group></group>
+      <group>samples</group>
     </groups>
   </classification>
 
