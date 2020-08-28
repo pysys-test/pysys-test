@@ -12,7 +12,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		if PY2: self.skipTest('Samples work on Python 3 only')
 		
-		sampledir = self.project.testRootDir+'/../samples/sample-cookbook'
+		sampledir = self.project.testRootDir+'/../samples/cookbook'
 		def pysys(name, args, **kwargs):
 			if args[0] == 'run': args = args+['-o', self.output+'/'+name]
 			runPySys(self, name, args, workingDir=sampledir, 

@@ -1,0 +1,4 @@
+# resultKey,testId,value,unit,biggerIsBetter,toleranceStdDevs,samples,stdDev,#runDetails:#,outDirName=win,hostname=sag-f4lblq2,os=Windows 10 10.0.18362 SP0,vcsCommit=04344ce8,startTime=2020-08-27 23:25:08
+MyServer /sensorValues response throughput rate with None,Outcome_PerformanceInspect,20.553672874085898,/s,TRUE,,1,0
+MyServer /sensorValues response latency median with None,Outcome_PerformanceInspect,30261278.15246582,ns,FALSE,,1,0,#resultDetails:#,latencySamples=10
+MyServer /sensorValues response latency max with None,Outcome_PerformanceInspect,75416564.94140625,ns,FALSE,,1,0,#resultDetails:#,latencySamples=10
