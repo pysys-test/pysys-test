@@ -20,7 +20,9 @@ class PySysTest(BaseTest):
 				**kwargs)
 
 		runcmd = 'run --ci'
-		# The main test here is that the tests pass
+		# The main test here is that the tests pass; in case it fails, log the server output
+		self.addCleanupFunction(lambda: self.logFileContents('pysys-run-tests/MyServer_002/my_server1.out'))
+		self.addCleanupFunction(lambda: self.logFileContents('pysys-run-tests/MyServer_002/my_server1.err'))
 		pysys('pysys-run-tests', runcmd.split(' '), ignoreExitStatus=False)
 		
 		pysys('pysys-print', ['print'], background=True)
