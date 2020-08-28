@@ -28,7 +28,11 @@ class PySysTest(pysys.basetest.BaseTest):
 		
 		# Wait for the server to start by polling for a grep regular expression. The errorExpr/process 
 		# arguments ensure we abort with a really informative message if the server fails to start.
-		self.waitForGrep('my_server.out', 'Started MyServer .*on port .*', errorExpr=[' (ERROR|FATAL) '], process=server) 
+		try:
+			self.waitForGrep('my_server.out', 'Started MyServer .*on port .*', errorExpr=[' (ERROR|FATAL) '], process=server) 
+		finally:
+			self.logFileContents('my_server.out')
+			self.logFileContents('my_server.err')
 		
 		# Logging a blank line every now and again can make the test output easier to read
 		self.log.info('')
