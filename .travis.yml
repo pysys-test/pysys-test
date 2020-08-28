@@ -115,10 +115,11 @@ install:
        
        # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
        echo --- Preparing PySys sample zip archives
-       cp README.rst LICENSE.txt pysys-examples/
-       tar -czf dist/PySys-$PYSYS_VERSION-sample-testcases-unix.tar.gz pysys-examples
-       find pysys-examples -type f | xargs todos
-       zip -r --quiet dist/PySys-$PYSYS_VERSION-sample-testcases-win.zip pysys-examples
+       cp -R samples/common-files/* samples/getting-started/
+       cp -R samples/common-files/* samples/cookbook/
+       tar -czf dist/PySys-$PYSYS_VERSION-samples-unix.tar.gz samples/getting-started samples/cookbook
+       find samples -type f | xargs todos
+       zip -r --quiet dist/PySys-$PYSYS_VERSION-samples-win.zip samples/getting-started samples/cookbook
     )
     fi
   - "export TRAVIS_TAG=PySys_$PYSYS_VERSION"

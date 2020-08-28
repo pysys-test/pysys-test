@@ -1,0 +1,84 @@
+# This workflow will run a suite of tests using the PySys system test framework
+
+name: PySys
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    strategy:
+      # Disable fail fast since it's useful to see test results for all platforms even if some failed
+      fail-fast: false
+      
+      matrix:
+        include:
+          - test-run-id: ubuntu
+            os: ubuntu-latest
+            
+          - test-run-id: macos
+            os: macos-latest
+            
+          - test-run-id: win
+            os: windows-latest
+            
+    runs-on: ${{matrix.os}}
+    
+    steps:
+      # Install the desired version of Python and PySys
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install Python dependencies
+        id: deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pysys==1.6.1
+
+          # Use older version of coverage as 5.0 requires an SQLite version that doesn't work on this macos image currently
+          pip install coverage==4.5.4
+
+      - name: Windows TCP configuration
+        # Set the TCP dynamic/ephemeral port range on Windows back to the normal Windows default configuration
+        # (GitHub Actions currently sets *all* ports to be dynamic which leaves none to start test servers on)
+        if: runner.os == 'Windows'
+        run: |
+          netsh int ipv4 show dynamicport tcp
+          netsh int ipv4 set dynamicportrange tcp startport=49152 numberofports=16384
+          netsh int ipv6 set dynamicportrange tcp startport=49152 numberofports=16384
+
+      - name: Test with PySys
+        working-directory: test
+        shell: bash
+        id: pysys
+        run: |
+          python -m pysys run --ci --outdir=${{matrix.test-run-id}}
+        
+      # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
+
+      - name: Upload Python code coverage
+        uses: codecov/codecov-action@v1
+        if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
+        with:
+          file: test/__coverage_python.${{matrix.test-run-id}}/coverage.xml
+      
+      - name: Upload performance CSV artifacts
+        uses: actions/upload-artifact@v2
+        # Only do this if some performance results were generated
+        if: always() && steps.pysys.outputs.artifact_CSVPerformanceReport
+
+        with:
+          name: pysys_performance_${{matrix.test-run-id}}
+          path: ${{ steps.pysys.outputs.artifact_CSVPerformanceReport }}
+
+      - name: Upload archive artifacts for any test failures
+        uses: actions/upload-artifact@v2
+        if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
+
+        with:
+          name: pysys_output_${{matrix.test-run-id}}
+          path: ${{ steps.pysys.outputs.artifact_TestOutputArchiveDir }}
