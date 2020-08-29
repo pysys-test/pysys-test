@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 		
 		pysysVersion = pysys.__version__
 		if 'dev' in pysysVersion: pysysVersion = pysysVersion[:pysysVersion.find('.dev')]
-		pysysVersion = '1.6.1' # temporarily force it to the current released version until
+		#pysysVersion = '1.6.1' # temporarily force it to the current released version
 
 		badfiles = []
 
