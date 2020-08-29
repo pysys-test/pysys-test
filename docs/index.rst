@@ -17,6 +17,7 @@ Documentation contents
    BaseTest.rst
    UserGuide.rst
    ProjectConfig.rst
+   TestDescriptors.rst
    autodocgen/pysys
    license.rst
    ChangeLog.rst

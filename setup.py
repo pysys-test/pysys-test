@@ -25,11 +25,10 @@ def prepareDocBuild():
 	def readtmpl(path):
 		with codecs.open(ROOTDIR+'/'+path, 'r', 'ascii') as f:
 			return f.read()
-	with codecs.open(ROOTDIR+'/docs/TestDescriptor.rst', 'w', 'ascii') as rstout:
-		rstout.write(readtmpl('docs/TestDescriptor.rst.tmpl')\
-			.replace('@PYSYSTESTXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/PySysTestDescriptorSample/pysystest.xml').split('\n')\
-			.replace('@PYSYSDIRCONFIGXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/pysysdirconfig_sample/pysysdirconfig.xml').split('\n')
-		))
+	with codecs.open(ROOTDIR+'/docs/TestDescriptors.rst', 'w', 'ascii') as rstout:
+		rstout.write(readtmpl('docs/TestDescriptors.rst.tmpl')\
+			.replace('@PYSYSTESTXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/PySysTestDescriptorSample/pysystest.xml').split('\n')))\
+			.replace('@PYSYSDIRCONFIGXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/pysysdirconfig_sample/pysysdirconfig.xml').split('\n'))))
 
 	with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst', 'w', 'ascii') as rstout:
 		rstout.write(readtmpl('docs/ProjectConfig.rst.tmpl'))
