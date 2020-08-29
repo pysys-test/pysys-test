@@ -7,8 +7,12 @@
 # binary (whl) and source distributions, as well as packages of the API doc and samples. 
 #
 # Only required setup in Travis is to set the secure environment variable GITHUB_API_KEY to 
-# a personal access token from this GitHub repo (to be found under Developer Settings)
+# a personal access token from this GitHub repo (to be found under Developer Settings).
 #
+# Include #draftrelease in the commit message if you wish to create a draft GitHub release, but if the version is 
+# not .devN be sure to only do it when you want to cut a new release, to avoid overwriting a previously released 
+# version. 
+
 
 matrix:
   include:
@@ -118,6 +122,7 @@ install:
        cd samples
        cp -R common-files/* getting-started/
        cp -R common-files/* cookbook/
+       cp common-files/LICENSE cookbook/LICENSE
        tar -czf ../dist/PySys-$PYSYS_VERSION-samples-unix.tar.gz getting-started cookbook
        
        # don't change the .sh script since we need it to be executable
@@ -204,11 +209,10 @@ deploy:
     skip_cleanup: true
     overwrite: true
     on: 
-       # by default we only create a draft release for commits to release
-       branch: better-samples
-       
-       # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
-       condition: $PYSYS_DOC_AND_DEPLOY = true
+       # best to only publish from one platform to avoid possible race conditions
+       # allow creating drafts from any branch, but only if #draftrelease is in the commit message; this allows 
+       # updating the documentation by commiting the release branch without accidentally overwriting the latest release
+       condition: $PYSYS_DOC_AND_DEPLOY = true AND commit_message =~ /(#draftrelease)/
 
     name: "PySys v$PYSYS_VERSION"
     body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See CHANGELOG.rst for a full list of changes. 
