@@ -20,13 +20,21 @@ import codecs, os, glob, sys, shutil
 import pysys
 ROOTDIR = os.path.abspath(os.path.dirname(__file__))
 
-# Slightly gross, but in the absence of cross-platform symlink support in git and to avoid duplicating it, create this on the fly
-with codecs.open(ROOTDIR+'/samples/cookbook/pysysproject.xml', 'r', 'ascii') as projfile:
-	with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst.tmpl', 'r', 'ascii') as rsttmpl:
-		with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst', 'w', 'ascii') as rstout:
-			rstout.write(rsttmpl.read())
-			rstout.write('\n  '+'\n  '.join(projfile.read().split('\n')))
+# In the absence of cross-platform symlink support in git and to avoid duplicating it, create this on the fly
+def prepareDocBuild():
+	def readtmpl(path):
+		with codecs.open(ROOTDIR+'/'+path, 'r', 'ascii') as f:
+			return f.read()
+	with codecs.open(ROOTDIR+'/docs/TestDescriptor.rst', 'w', 'ascii') as rstout:
+		rstout.write(readtmpl('docs/TestDescriptor.rst.tmpl')\
+			.replace('@PYSYSTESTXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/PySysTestDescriptorSample/pysystest.xml').split('\n')\
+			.replace('@PYSYSDIRCONFIGXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/pysysdirconfig_sample/pysysdirconfig.xml').split('\n')
+		))
 
+	with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst', 'w', 'ascii') as rstout:
+		rstout.write(readtmpl('docs/ProjectConfig.rst.tmpl'))
+		rstout.write('\n  '+'\n  '.join(readtmpl('samples/cookbook/pysysproject.xml').split('\n')))
+prepareDocBuild()
 
 import setuptools
 print('using setuptools v%s'%setuptools.__version__)
