@@ -3,9 +3,10 @@
 This project is a"cookbook" of snippets you can copy into your own project to configure PySys or create classes 
 that extend PySys using its Python API, as well as some testcases that show common best practices and techniques. 
 
-It is structured like a "real" project, but aims to demonstrate most of the available PySys configuration options and 
-plugin/extension points in a form that will be useful for intermediate-level PySys users already familiar with the 
-basics (see the Getting Started sample first if you're just starting to learn PySys).
+The focus is on making useful code snippets accessible rather (not pretending this is anything like a "real" project). 
+This sample demonstrates most of the available PySys configuration options and plugin/extension points in a form that 
+will be useful for intermediate-level PySys users already familiar with the basics (see the 
+https://github.com/pysys-test/sample-getting-started sample first if you're just starting to learn PySys).
 
 # License
 
@@ -24,8 +25,10 @@ the configured writers) and code coverage:
 	pysys.py run -j0 --record -XcodeCoverage --type=auto
 
 Note that this project contains some tests that deliberately fail, so that you can see how failing test results are 
-recorded. This sample is automatically executed by GitHub(R) Actions - see the results here: [![PySys tests](https://github.com/pysys-test/sample-cookbook/workflows/PySys/badge.svg)](https://github.com/pysys-test/sample-cookbook/actions)
+recorded. 
 
+This sample is automatically executed by GitHub(R) Actions - see the results (including the deliberate test failures) 
+here: [![PySys tests](https://github.com/pysys-test/sample-cookbook/workflows/PySys/badge.svg)](https://github.com/pysys-test/sample-cookbook/actions)
 
 # Main features
 
