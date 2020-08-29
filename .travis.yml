@@ -118,9 +118,9 @@ install:
        # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
        echo --- Preparing PySys sample zip archives
        cd samples
-       cp -R common-files/* getting-started/
-       cp -R common-files/* cookbook/
-       cp common-files/LICENSE cookbook/LICENSE
+       # copy everything - use . instead of * to avoid missing the hidden directories such as .github
+       cp -R common-files/. getting-started/
+       cp -R common-files/. cookbook/
        tar -czf ../dist/PySys-$PYSYS_VERSION-samples-unix.tar.gz getting-started cookbook
        
        # don't change the .sh script since we need it to be executable
