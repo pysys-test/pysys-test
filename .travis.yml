@@ -209,6 +209,8 @@ deploy:
     skip_cleanup: true
     overwrite: true
     on: 
+       all_branches: true
+       
        # best to only publish from one platform to avoid possible race conditions
        # allow creating drafts from any branch, but only if #draftrelease is in the commit message; this allows 
        # updating the documentation by commiting the release branch without accidentally overwriting the latest release
