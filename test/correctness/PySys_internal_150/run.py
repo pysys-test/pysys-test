@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 		sampledir = self.project.testRootDir+'/../samples/cookbook'
 		def pysys(name, args, **kwargs):
 			if args[0] == 'run': args = args+['-o', self.output+'/'+name]
-			runPySys(self, name, args, workingDir=sampledir, 
+			runPySys(self, name, args, workingDir=sampledir+'/test', 
 				# this is so we can run git
 				environs={'PATH':os.environ['PATH']}, 
 				**kwargs)
