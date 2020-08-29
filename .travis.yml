@@ -209,8 +209,7 @@ deploy:
     on: 
        # only publish from the release branch since we don't want to accidentally overwrite previous releases during 
        # development
-       branch: better-samples
-       #branch: release
+       branch: release
        
        # best to only publish from one platform to avoid possible race conditions
        condition: $PYSYS_DOC_AND_DEPLOY = true
