@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<pysystest>
-  
-  <description> 
-    <title>MyServer responses: /sensorValues endpoint (+ demo of PySys assertions, and multiple modes)</title>    
-    <purpose><![CDATA[
+<pysystest type="auto">
+	
+	<description> 
+		<title>MyServer responses: /sensorValues endpoint (+ demo of PySys assertions, and multiple modes)</title>		
+		<purpose><![CDATA[
 		To verify that responses from MyServer are correct on the /sensorValues REST endpoint. 
 		
 		This also shows some of the different approaches to validation in PySys, using various styles of assertion. 
 	]]></purpose>
-  </description>
+	</description>
 
-  <!-- <skipped reason=""/> -->
-  
-  <classification>
-    <groups inherit="true">
-      <group>myServerSensorValues</group>
-    </groups>
-    
-    <modes inherit="true">
+	<!-- <skipped reason=""/> -->
+	
+	<classification>
+		<groups inherit="true">
+			<group>myServerSensorValues</group>
+		</groups>
+		
+		<modes inherit="true">
 		<!-- This test will be executed for each of the following modes, in this case controlling the compression 
 			of results from the server and whether authentication is used. The test can use self.mode to find out which 
 			mode it is executing. Keep these strings short but self-describing. 
@@ -26,11 +26,11 @@
 		-->
 		<mode>CompressionNone_AuthNone</mode>
 		<mode>CompressionGZip_AuthNone</mode>
-    </modes>
-  </classification>
+		</modes>
+	</classification>
 
-  <data>
-    <class name="PySysTest" module="run"/>
-  </data>
-  
+	<data>
+		<class name="PySysTest" module="run"/>
+	</data>
+	
 </pysystest>

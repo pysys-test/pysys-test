@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<pysystest>	
+<pysystest type="auto">
 	<description> 
 		<title>MyServer performance: /sensorValues endpoint (+demo of perf reporting, and -X variable overriding)</title>		 
 		<purpose><![CDATA[
