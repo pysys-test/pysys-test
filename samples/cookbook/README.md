@@ -1,6 +1,6 @@
 # PySys Sample - Configuration, Extensions and Testing Techniques Cookbook
 
-This project is a"cookbook" of snippets you can copy into your own project to configure PySys or create classes 
+This project is a "cookbook" of snippets you can copy into your own project to configure PySys or create classes 
 that extend PySys using its Python API, as well as some testcases that show common best practices and techniques. 
 
 The focus is on making useful code snippets accessible (and not pretending this is anything like a "real" project). 
