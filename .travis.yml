@@ -8,10 +8,8 @@
 #
 # Only required setup in Travis is to set the secure environment variable GITHUB_API_KEY to 
 # a personal access token from this GitHub repo (to be found under Developer Settings).
-#
-# Include #draftrelease in the commit message if you wish to create a draft GitHub release, but if the version is 
-# not .devN be sure to only do it when you want to cut a new release, to avoid overwriting a previously released 
-# version. 
+
+# To update the public documentation (without overwriting the previous release), push to a branch named "doc-updates"
 
 
 matrix:
@@ -209,16 +207,16 @@ deploy:
     skip_cleanup: true
     overwrite: true
     on: 
-       all_branches: true
+       # only publish from the release branch since we don't want to accidentally overwrite previous releases during 
+       # development
+       branch: better-samples
+       #branch: release
        
        # best to only publish from one platform to avoid possible race conditions
-       # allow creating drafts from any branch, but only if #draftrelease is in the commit message; this allows 
-       # updating the documentation by commiting the release branch without accidentally overwriting the latest release
-       #condition: $PYSYS_DOC_AND_DEPLOY = true && commit_message =~ draftrelease
-       condition: commit_message =~ draftrelease
+       condition: $PYSYS_DOC_AND_DEPLOY = true
 
     name: "PySys v$PYSYS_VERSION"
-    body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See CHANGELOG.rst for a full list of changes. 
+    body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See https://pysys-test.github.io/pysys-test/ChangeLog.html for a full list of changes. 
   
     # this is a draft release, allows manually editing details in github UI
     draft: true
