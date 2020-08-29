@@ -25,7 +25,8 @@ class PySysTest(pysys.basetest.BaseTest):
 			environs  = self.createEnvirons(addToExePath=os.path.dirname(PYTHON_EXE)),
 			stdouterr = 'my_server', displayName = 'my_server<port %s>'%serverPort, background = True,
 			)
-		# PySys automatically kills the .bat script, but we need to do this to kill the process tree including Python
+		# PySys automatically kills the .bat script during cleanup, but we need to do this to kill the process tree 
+		# including the Python subprocess (this step will become unnecessary in the next PySys release).
 		if IS_WINDOWS: self.addCleanupFunction(lambda: self.startProcess('taskkill', ['/PID', str(server.pid), '/T', '/F'], stdouterr='taskkill'))
 		
 		# Wait for the server to start by polling for a grep regular expression. The errorExpr/process 
