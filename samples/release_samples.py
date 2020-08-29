@@ -3,14 +3,18 @@
 # Script for building the PySys samples into a form that can be committed to the GitHub sample repos, by copying 
 # common files and setting permissions
 
-import shutil, os, subprocess, shlex
+import shutil, os, subprocess, shlex, time
 samplesdir = os.path.dirname(__file__)
 
 os.chdir(samplesdir)
 print(f'Building samples under {os.getcwd()}')
 
 builddir =  '__release_samples'
-if os.path.exists(builddir): shutil.rmtree(builddir)
+if os.path.exists(builddir): 
+	try:
+		shutil.rmtree(builddir)
+	except:
+		os.rename(builddir, builddir+'.%s'%time.time())
 def copyFileOrDir(src, dest):
 	if os.path.basename('src') == '.git': return
 	if os.path.isdir(src):
@@ -49,6 +53,8 @@ for sample in ['getting-started', 'cookbook']:
 	for exe in ['bin/my_server.sh']:
 		if os.path.exists(exe):
 			git(f'add --chmod=+x {exe}')
+	git('status')
+	print('')
 os.chdir(samplesdir)
 print (f'\nRepos have been created under {builddir}. Now commit the changes and push.')
 print ("IMPORTANT: push sample-getting-started after other samples as the most recently updated appears earlier in the project list")
