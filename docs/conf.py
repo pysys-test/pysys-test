@@ -20,6 +20,11 @@ PYSYS_ROOT_DIR = os.path.abspath(DOC_SOURCE_DIR+'/..')
 
 sys.path.append(PYSYS_ROOT_DIR)
 
+# Need to create dynamically generated rst files which we'll be including in the package
+sys.path.append(PYSYS_ROOT_DIR+'/docs')
+import create_templated_rsts
+create_templated_rsts.prepareDocBuild()
+
 # -- Project information -----------------------------------------------------
 
 from datetime import date

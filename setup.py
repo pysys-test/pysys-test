@@ -20,20 +20,10 @@ import codecs, os, glob, sys, shutil
 import pysys
 ROOTDIR = os.path.abspath(os.path.dirname(__file__))
 
-# In the absence of cross-platform symlink support in git and to avoid duplicating it, create this on the fly
-def prepareDocBuild():
-	def readtmpl(path):
-		with codecs.open(ROOTDIR+'/'+path, 'r', 'ascii') as f:
-			return f.read()
-	with codecs.open(ROOTDIR+'/docs/TestDescriptors.rst', 'w', 'ascii') as rstout:
-		rstout.write(readtmpl('docs/TestDescriptors.rst.tmpl')\
-			.replace('@PYSYSTESTXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/PySysTestDescriptorSample/pysystest.xml').split('\n')))\
-			.replace('@PYSYSDIRCONFIGXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/pysysdirconfig_sample/pysysdirconfig.xml').split('\n'))))
-
-	with codecs.open(ROOTDIR+'/docs/ProjectConfiguration.rst', 'w', 'ascii') as rstout:
-		rstout.write(readtmpl('docs/ProjectConfiguration.rst.tmpl'))
-		rstout.write('\n  '+'\n  '.join(readtmpl('samples/cookbook/pysysproject.xml').split('\n')))
-prepareDocBuild()
+# Need to create dynamically generated rst files which we'll be including in the package
+sys.path.append(ROOTDIR+'/docs')
+import create_templated_rsts
+create_templated_rsts.prepareDocBuild()
 
 import setuptools
 print('using setuptools v%s'%setuptools.__version__)
