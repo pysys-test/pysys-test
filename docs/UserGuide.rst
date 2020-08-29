@@ -146,7 +146,7 @@ A prefix of double underscore ``__pysys`` is recommended under testRootDir to di
 directories (ignored by version control) from the testcase directories (checked into version control). 
 
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
-its constructor, see the sample Project Configuration file. 
+its constructor, see :doc:`ProjectConfiguration`. 
 
 Configuring and overriding test options
 ---------------------------------------
@@ -236,7 +236,7 @@ PySys can be extended to produce code coverage reports for any language, by crea
 
 There is an existing writer that produces coverage reports for programs written in Python called 
 `pysys.writer.testoutput.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
-``<writer>`` to your project (see the sample ``pysysproject.xml`` for an example) and make sure you're starting 
+``<writer>`` to your project (see the sample :doc:`ProjectConfiguration` for an example) and make sure you're starting 
 your Python processes with coverage support enabled, by using `BaseTest.startPython`. 
 
 The usual way to enable code coverage (for all supported languages) is to set ``-XcodeCoverage`` when running your 
@@ -480,8 +480,7 @@ make sense in one mode. Alternatively, you could allow the tests to exist
 in all modes but call ``self.skipTest <BaseTest.skipTest>`` at the start of the test `BaseTest.execute` method 
 if the test cannot execute in the current mode. 
 
-See the ``pysysdirconfig.xml`` sample in ``pysys/xml/templates/dirconfig`` 
-for a full example of a directory configuration file. 
+See the :ref:`TestDescriptors:Sample pysysdirconfig.xml` for a full example of a directory configuration file. 
 
 Controlling execution order
 ---------------------------
@@ -517,7 +516,7 @@ following:
     match the mode and/or group of the test. The project configuration 
     is the place to put mode-specific execution order hints, such as putting 
     a particular database or web browser mode earlier/later. See the 
-    sample ``pysysproject.xml`` file for details. 
+    sample :doc:`ProjectConfiguration` file for details. 
   
   - For multi-mode tests, the ``secondaryModesHintDelta`` specified in the project 
     configuration (unless it's set to zero), multiplied by a number indicating 

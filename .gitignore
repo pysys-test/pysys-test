@@ -1,5 +1,6 @@
 # Just for this project
-docs/ProjectConfig.rst
+docs/ProjectConfiguration.rst
+docs/TestDescriptors.rst
 docs/autodocgen
 docs/build_output*
 

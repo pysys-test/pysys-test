@@ -30,8 +30,8 @@ def prepareDocBuild():
 			.replace('@PYSYSTESTXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/PySysTestDescriptorSample/pysystest.xml').split('\n')))\
 			.replace('@PYSYSDIRCONFIGXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/demo-tests/pysysdirconfig_sample/pysysdirconfig.xml').split('\n'))))
 
-	with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst', 'w', 'ascii') as rstout:
-		rstout.write(readtmpl('docs/ProjectConfig.rst.tmpl'))
+	with codecs.open(ROOTDIR+'/docs/ProjectConfiguration.rst', 'w', 'ascii') as rstout:
+		rstout.write(readtmpl('docs/ProjectConfiguration.rst.tmpl'))
 		rstout.write('\n  '+'\n  '.join(readtmpl('samples/cookbook/pysysproject.xml').split('\n')))
 prepareDocBuild()
 
