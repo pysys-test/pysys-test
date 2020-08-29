@@ -64,11 +64,11 @@ jobs:
           PYTHONPATH=../../.. python -m pysys run --ci --outdir=getting-started-${{matrix.test-run-id}}
 
       - name: Test sample-cookbook (expected failures)
-        working-directory: samples/cookbook
+        working-directory: samples/cookbook/test
         shell: bash
         id: pysys
         run: |
-          PYTHONPATH=../.. python -m pysys run --ci --outdir=cookbook-${{matrix.test-run-id}}
+          PYTHONPATH=../../.. python -m pysys run --ci --outdir=cookbook-${{matrix.test-run-id}}
         
       # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
       # Since we expect failures only from the cookbook sample, that's the one we upload artifacts for (using id=pysys)
