@@ -3,7 +3,7 @@
 This project is a"cookbook" of snippets you can copy into your own project to configure PySys or create classes 
 that extend PySys using its Python API, as well as some testcases that show common best practices and techniques. 
 
-The focus is on making useful code snippets accessible rather (not pretending this is anything like a "real" project). 
+The focus is on making useful code snippets accessible (and not pretending this is anything like a "real" project). 
 This sample demonstrates most of the available PySys configuration options and plugin/extension points in a form that 
 will be useful for intermediate-level PySys users already familiar with the basics (see the 
 https://github.com/pysys-test/sample-getting-started sample first if you're just starting to learn PySys).
