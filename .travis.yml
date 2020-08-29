@@ -214,7 +214,8 @@ deploy:
        # best to only publish from one platform to avoid possible race conditions
        # allow creating drafts from any branch, but only if #draftrelease is in the commit message; this allows 
        # updating the documentation by commiting the release branch without accidentally overwriting the latest release
-       condition: $PYSYS_DOC_AND_DEPLOY = true && commit_message =~ /(.*draftrelease.*)/
+       #condition: $PYSYS_DOC_AND_DEPLOY = true && commit_message =~ draftrelease
+       condition: commit_message =~ draftrelease
 
     name: "PySys v$PYSYS_VERSION"
     body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See CHANGELOG.rst for a full list of changes. 
