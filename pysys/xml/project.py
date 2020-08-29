@@ -480,7 +480,7 @@ def createProjectConfig(targetdir, templatepath=None):
 
 class Project(object):
 	"""Contains settings for the entire test project, as defined by the 
-	``pysysproject.xml`` project configuration file.
+	``pysysproject.xml`` project configuration file; see :doc:`../ProjectConfiguration`.
 	
 	To get a reference to the current `Project` instance, use the 
 	`pysys.basetest.BaseTest.project` 
