@@ -6,7 +6,7 @@ name: PySys samples
 
 on:
   push:
-    branches: [ master, better-samples ]
+    branches: [ master ]
   #pull_request:
   #  branches: [ master ]
 
