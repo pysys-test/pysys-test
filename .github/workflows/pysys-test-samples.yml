@@ -57,11 +57,11 @@ jobs:
           netsh int ipv6 set dynamicportrange tcp startport=49152 numberofports=16384
 
       - name: Test sample-getting-started
-        working-directory: samples/getting-started
+        working-directory: samples/getting-started/test
         shell: bash
         id: pysys-getting-started
         run: |
-          PYTHONPATH=../.. python -m pysys run --ci --outdir=getting-started-${{matrix.test-run-id}}
+          PYTHONPATH=../../.. python -m pysys run --ci --outdir=getting-started-${{matrix.test-run-id}}
 
       - name: Test sample-cookbook (expected failures)
         working-directory: samples/cookbook
