@@ -12,6 +12,7 @@ class PySysTest(BaseTest):
 		sampledir = self.project.testRootDir+'/../samples'
 		
 		pythonVersionForCI = "3.8"
+		pythonVersionForMin = "3.6"
 		
 		pysysVersion = pysys.__version__
 		if 'dev' in pysysVersion: pysysVersion = pysysVersion[:pysysVersion.find('.dev')]
@@ -38,7 +39,7 @@ class PySysTest(BaseTest):
 				if f == 'pysystest.xml':
 					self.assertGrep(p, '^<pysystest type="[^"]+">$')
 				if f == 'pysysproject.xml':
-					self.assertThatGrep(p, '<requires-python>(.*)</requires-python>', expected='3.5')	
+					self.assertThatGrep(p, '<requires-python>(.*)</requires-python>', expected=pythonVersionForMin)	
 					self.assertThatGrep(p, '<requires-pysys>(.*)</requires-pysys>', 'value == pysysVersion', pysysVersion=pysysVersion)
 				
 				if f == 'pysys-test.yml': # GitHub Actions workflow
