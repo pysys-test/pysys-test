@@ -8,7 +8,7 @@ class PySysTest(BaseTest):
 	def execute(self):
 		self.copy(self.input, self.output+'/test')
 		try:
-			self.pysys.pysys(self, 'pysys', ['run', '-o', 'myoutdir', 
+			self.pysys.pysys('pysys', ['run', '-o', 'myoutdir', 
 				'-X', 'projectbooloverride=fAlse', 
 				'-X', 'cmdlineoverride=tRue',
 				'-XtestBooleanProperty=tRue',
