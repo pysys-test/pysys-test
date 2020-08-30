@@ -10,7 +10,7 @@
 	<requires-pysys>1.6.2</requires-pysys>
 
 	<!-- Specify a minimum required python version to run these tests. -->
-	<requires-python>3.5</requires-python>
+	<requires-python>3.6</requires-python>
 
 	<!-- 
 		The following standard project properties are always defined and can be accessed through ${prop} syntax:

@@ -6,7 +6,7 @@ from pysys.utils.pycompat import PY2
 class PySysTest(BaseTest):
 
 	def execute(self):
-		if PY2: self.skipTest('Samples work on Python 3 only')
+		if sys.version_info[0:2] < tuple([3,6]): self.skipTest('Samples work on Python 3.6+ only')
 		
 		sampledir = self.project.testRootDir+'/../samples/getting-started'
 

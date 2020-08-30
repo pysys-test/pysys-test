@@ -15,7 +15,7 @@ license they may use.
 
 # Running the tests
 
-To use this project all you need is Python 3, and the latest version of PySys. You can run all the tests like this:
+To use this project all you need is Python 3.6+, and the latest version of PySys. You can run all the tests like this:
 
 	cd test
 	pysys.py run
