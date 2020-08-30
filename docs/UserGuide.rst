@@ -13,7 +13,7 @@ that::
 	self.startProcess('cmd.exe' if IS_WINDOWS else 'bash', ...)
 
 For finer grained platform detection we recommend using the facilities built into Python, for example 
-``platform.uname()`` and ``platform.platform()``.
+``sys.platform``, ``platform.platform()`` or ``platform.uname()``.
 
 Skipping tests
 --------------
@@ -65,7 +65,7 @@ The recommended way to do that in PySys is to create one or more "plugins". Ther
   before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
   shared across all tests. These can be used to start servers/VMs that are shared across tests.
   Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
+  class provided it has a method ``setup(self, runner)`` (and no constructor arguments). 
 
   Runner plugins that generate output files/directories should by default put that output under either the 
   `runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
@@ -112,8 +112,8 @@ A test plugin could look like this::
 		# A common pattern is to create a helper method that you always call from your `BaseTest.validate()`
 		# That approach allows you to later customize the logic by changing just one single place, and also to omit 
 		# it for specific tests where it is not wanted. 
-		def checkLogsForErrors(self):
-			self.assertGrep('myapp.log', ' ERROR .*', contains=False)
+		def checkLogsForErrors(self, logfile="my_server.log"):
+			self.assertGrep(logfile, ' (ERROR|FATAL) .*', contains=False)
 
 With configuration like this::
 
@@ -146,7 +146,7 @@ A prefix of double underscore ``__pysys`` is recommended under testRootDir to di
 directories (ignored by version control) from the testcase directories (checked into version control). 
 
 For examples of the project configuration, including how to set plugin-specific properties that will be passed to 
-its constructor, see the sample Project Configuration file. 
+its constructor, see :doc:`ProjectConfiguration`. 
 
 Configuring and overriding test options
 ---------------------------------------
@@ -205,7 +205,7 @@ project properties.
 To use a project property that can be overridden with an environment variable, 
 add a ``property`` element to your ``pysysproject.xml`` file::
 
-	<property name="myCredentials" value="${env.MYCOMPANY_CREDENTIALS}" default="testuser:testpassword"/>
+	<property name="myCredentials" value="${env.MYORG_CREDENTIALS}" default="testuser:testpassword"/>
 
 This property can will take the value of the specified environment variable, 
 or else the default if any undefined properties/env vars are included in value. Note that if the value contains 
@@ -214,20 +214,21 @@ unresolved variables and there is no valid default, the project will fail to loa
 You may want to set the attribute ``pathMustExist="true"`` when defining properties that refer to a path such as a 
 build output directory that should always be present. 
 
-Another way to specify default project property values is to put them into a 
-Java-style ``.properties`` file. You can use properties to specify which file is 
-loaded, so it would be possible to customize using environment variables::
+Another way to specify default project property values is to put them into a ``.properties`` file. You can use 
+properties to specify which file is loaded, so it would be possible to customize using environment variables::
 
-	<property name="myProjectPropertiesFile" value="${env.MYCOMPANY_CUSTOM_PROJECT_PROPERTIES}" default="${testRootDir}/default-config.properties"/>
+	<property name="myProjectPropertiesFile" value="${env.MYORG_CUSTOM_PROJECT_PROPERTIES}" default="${testRootDir}/default-config.properties"/>
 	<property file="${myProjectPropertiesFile}" pathMustExist="true"/>
 
 To use projects properties in your testcase, just access the attributes on 
 `self.project <pysys.xml.project.Project>` from either a test instance or a runner::
 
 	def execute(self):
-		self.log.info('Using username=%s and password %s' % self.project.myCredentials.split(':'))
+		username, password = self.project.myCredentials.split(':')
+		self.log.info('Using username=%s and password=%s', username, password)
 
-Property properties will always be of string type. 
+Project properties are always be of string type, but `pysys.xml.project.Project.getProperty()` can be used to 
+convert the value to other types when needed. 
 
 Producing code coverage reports
 -------------------------------
@@ -235,7 +236,7 @@ PySys can be extended to produce code coverage reports for any language, by crea
 
 There is an existing writer that produces coverage reports for programs written in Python called 
 `pysys.writer.testoutput.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
-``<writer>`` to your project (see the sample ``pysysproject.xml`` for an example) and make sure you're starting 
+``<writer>`` to your project (see the sample :doc:`ProjectConfiguration` for an example) and make sure you're starting 
 your Python processes with coverage support enabled, by using `BaseTest.startPython`. 
 
 The usual way to enable code coverage (for all supported languages) is to set ``-XcodeCoverage`` when running your 
@@ -251,7 +252,7 @@ If you wish to produce coverage reports using any other language, this is easy t
   variables to enable coverage using the coverage tool of your choice. The most convenient place to put helper methods 
   for starting your application is in a custom test plugin class. 
   
-  When starting your process, you can detect whether to enable code coverage like this:
+  When starting your process, you can detect whether to enable code coverage like this::
   
     if self.runner.getBoolProperty('mylanguageCoverage', default=self.runner.getBoolProperty('codeCoverage')) and not self.disableCoverage:
 	  ...
@@ -479,8 +480,7 @@ make sense in one mode. Alternatively, you could allow the tests to exist
 in all modes but call ``self.skipTest <BaseTest.skipTest>`` at the start of the test `BaseTest.execute` method 
 if the test cannot execute in the current mode. 
 
-See the ``pysysdirconfig.xml`` sample in ``pysys/xml/templates/dirconfig`` 
-for a full example of a directory configuration file. 
+See the :ref:`TestDescriptors:Sample pysysdirconfig.xml` for a full example of a directory configuration file. 
 
 Controlling execution order
 ---------------------------
@@ -516,7 +516,7 @@ following:
     match the mode and/or group of the test. The project configuration 
     is the place to put mode-specific execution order hints, such as putting 
     a particular database or web browser mode earlier/later. See the 
-    sample ``pysysproject.xml`` file for details. 
+    sample :doc:`ProjectConfiguration` file for details. 
   
   - For multi-mode tests, the ``secondaryModesHintDelta`` specified in the project 
     configuration (unless it's set to zero), multiplied by a number indicating 

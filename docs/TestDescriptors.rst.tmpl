@@ -1,0 +1,34 @@
+Test Descriptors
+================
+
+Each PySys test has a descriptor containing metadata about the test such as its title, the modes it can run in, 
+and the test groups it is part of. This information is all stored in a 
+`TestDescriptor <pysys.xml.descriptor.TestDescriptor>` instance, which can be accessed within each test using 
+``self.descriptor``. 
+
+Sample pysystest.xml
+--------------------
+
+The following sample illustrates all the possible configuration options for a test's ``pysystest.xml`` file. 
+
+This is intended as a reference, and to provide somewhere to copy snippets from as needed. Do not copy the whole thing 
+into your own tests as this example contains many fields that are only used for advanced cases. Instead use 
+``pysys make`` to create new tests, including a ``pysystest.xml`` that contains everything you need for most tests. 
+
+.. code-block:: xml
+@PYSYSTESTXML@
+
+See the "cookbook" PySys sample that this XML file comes from to see how these work in practice. 
+
+Sample pysysdirconfig.xml
+-------------------------
+
+You can provide descriptor defaults for an entire subdirectory of tests by adding a ``pysysdirconfig.xml`` file, 
+which avoids the need to copy mode/group/id-prefix information into each individual test, reduces the chance of 
+mistakes, and makes it easier to add new modes and other setting later as your project evolves. 
+
+Most of the directory-level options are the same as ``pysystest.xml`` but there are a few options that don't make 
+sense at the directory level, and also additional options for directories such as ``id-prefix``. 
+
+.. code-block:: xml
+@PYSYSDIRCONFIGXML@

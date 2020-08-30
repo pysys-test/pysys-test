@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysproject>
+	<requires-pysys>1.6.2</requires-pysys>
+	<requires-python>3.6</requires-python>
+	
+	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${osfamily}, ${startDate}, ${startTime}, ${hostname}. -->
+	
+	<!-- Property identifying the home directory of the application build being tested. -->
+	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/../bin" pathMustExist="true"/>
+
+	<!-- User-defined properties (use lowerCamelCase for property names) -->
+	
+	<!-- Custom test framework plugins -->
+	<pythonpath value="./pysys-extensions" />
+	<test-plugin classname="myorg.mytestplugin.MyServerTestPlugin" alias="myserver"/>
+	<runner-plugin classname="myorg.myrunnerplugin.MyServerRunnerPlugin"/>
+	
+	<writers>
+		<writer classname="pysys.writer.testoutput.TestOutputArchiveWriter">
+			<property name="destDir" value="__pysys_output_archives/"/>
+			<property name="maxTotalSizeMB" value="1024.0"/>
+		</writer>
+		
+		<writer classname="pysys.writer.outcomes.JUnitXMLResultsWriter">
+			<property name="outputDir" value="__pysys_junit_xml"/>
+		</writer>
+		
+		<!-- Code coverage for .py files -->
+		<writer classname="pysys.writer.testoutput.PythonCoverageWriter">
+			<property name="destDir" value="__coverage_python.${outDirName}"/>
+			<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/pysys-extensions/python.coveragerc"/>
+		</writer>
+		
+		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
+		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
+		
+		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter"></writer>
+	</writers>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml"  encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
+	</default-file-encodings>	
+	
+	<!-- Add project-specific text to be appended to the "pysys run -h". -->
+	<project-help>
+	</project-help>
+</pysysproject>

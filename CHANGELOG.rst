@@ -17,8 +17,14 @@ What's new in 1.6.2
 
 PySys 1.6.2 is under development. 
 
-	- TODO
-
+	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
+	  PySys.
+	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
+	- Fixed the default library path on macOS(R). Instead of setting ``DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib`` 
+	  (which overrides executables' default libraries), we now use the ``DYLD_FALLBACK_LIBRARY_PATH`` environment 
+	  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 
+	  Additionally, some extra items were added to the value of `pysys.constants.DYLD_LIBRARY_PATH` to match the 
+	  defaults as described in the latest macOS documentation. 
 
 -------------------
 What's new in 1.6.1
@@ -52,8 +58,6 @@ The significant new features of PySys 1.6.0 are grouped around a few themes:
     - easier validation with the new `BaseTest.assertThatGrep()` method, which extracts a value using a grep 
       expression and then checks its value is as expected. For extract-and-assert use cases this approach gives much 
       clearer messages when the assert fails than using assertGrep; 
-    - validation: the new `BaseTest.assertThatGrep()` method, which gives nice clear error messages when the assert 
-      fails;
     - new writers for recording test results, including GitHub(R) Actions support and a writer that produces .zip 
       archives of test output directories, plus new APIs to allow writers to publish artifacts, and to visit each of 
       the test's output files; 
@@ -61,14 +65,14 @@ The significant new features of PySys 1.6.0 are grouped around a few themes:
     - process starting enhancements such as `BaseTest.waitForBackgroundProcesses()`, automatic logging of stderr when 
       a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file; 
     - several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
-    - a new "getting started" `sample <https://github.com/pysys-test/sample-getting-started>_` project which can be 
+    - a new "getting started" `sample <https://github.com/pysys-test/sample-getting-started>`_ project which can be 
       easily forked from GitHub(R) to create new PySys-based projects. The sample also demonstrates common techniques 
       and best practices for writing tests in PySys.  
 
 As this is a major release of PySys there are also some changes in this release that may require changes to your 
 project configuration file and/or runner/basetest/writer framework extension classes you've written (though in most 
 cases it won't be necessary to change individual tests). These breaking changes are either to reduce the chance of 
-errors going undetected, or to support bug fixes and impementation simplification. So be sure to look at the upgrade 
+errors going undetected, or to support bug fixes and implementation simplification. So be sure to look at the upgrade 
 guide below if you want to switch an existing project to use the new version. 
 
 New Plugin API
@@ -1397,7 +1401,7 @@ New project options:
   
 	<default-file-encoding pattern="*.yaml" encoding="utf-8"/>. 
 
-  The `pysys-examples/pysysproject.xml` sample project configuration file now 
+  The sample project configuration file now 
   sets utf-8 as the default encoding for XML, json and yaml files, and also 
   for testcase run.log files (though run.log continues to be written in local 
   encoding unless the project file is updated). For more information on this 
@@ -1933,7 +1937,7 @@ Other fixes and new features:
   to provide additional diagnostic information to the run.log to assist
   the triage of test failures.
 - The CSVResultsWriter has been added to the set of test summary writers.
-  See the pysysproject.xml file in pysys-examples for more details.
+  See the sample pysysproject.xml file for more details.
 - It is now possible to specify a regex for matching in the test selection.
   See the run usage for more details (pysys.py run -h).
 
@@ -1943,7 +1947,7 @@ Other fixes and new features:
 - This release introduces optional fail fast semantics at a macro and micro
   level. At a macro level this is either through the "defaultAbortOnError"
   project property, or through the "-b|--abort" option to the pysys launcher
-  run task. See the pysysproject.xml file in pysys-examples, and the run task
+  run task. See the sample pysysproject.xml, and the run task
   help usage respectively for more details. At a micro level, all assert and
   process related methods now take an optional "abortOnError" parameter to
   override any macro setting. When enabled any error will cause the test to

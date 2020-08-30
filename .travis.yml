@@ -7,8 +7,10 @@
 # binary (whl) and source distributions, as well as packages of the API doc and samples. 
 #
 # Only required setup in Travis is to set the secure environment variable GITHUB_API_KEY to 
-# a personal access token from this GitHub repo (to be found under Developer Settings)
-#
+# a personal access token from this GitHub repo (to be found under Developer Settings).
+
+# To update the public documentation (without overwriting the previous release), push to a branch named "doc-updates"
+
 
 matrix:
   include:
@@ -115,10 +117,16 @@ install:
        
        # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
        echo --- Preparing PySys sample zip archives
-       cp README.rst LICENSE.txt pysys-examples/
-       tar -czf dist/PySys-$PYSYS_VERSION-sample-testcases-unix.tar.gz pysys-examples
-       find pysys-examples -type f | xargs todos
-       zip -r --quiet dist/PySys-$PYSYS_VERSION-sample-testcases-win.zip pysys-examples
+       cd samples
+       # copy everything - use . instead of * to avoid missing the hidden directories such as .github
+       cp -R common-files/. getting-started/
+       cp -R common-files/. cookbook/
+       tar -czf ../dist/PySys-$PYSYS_VERSION-samples-unix.tar.gz getting-started cookbook
+       
+       # don't change the .sh script since we need it to be executable
+       find . -type f -not -name "*.sh" | xargs todos
+       zip -r --quiet ../dist/PySys-$PYSYS_VERSION-samples-win.zip getting-started cookbook
+       cd ..
     )
     fi
   - "export TRAVIS_TAG=PySys_$PYSYS_VERSION"
@@ -126,7 +134,7 @@ install:
 # for running tests and building documentation:
 script:
   - echo ~
-  - cd pysys-examples
+  - cd test
   
   # first check pysys.py was added to path and that we can run all tests against the whl (with coverage enabled)
   - $PY -m pip install ../dist/PySys*.whl
@@ -135,7 +143,7 @@ script:
   - $PY -m pip install coverage==4.5.4 codecov
 
   # main test run
-  - $PY -m coverage run --rcfile ./internal/utilities/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
+  - $PY -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
 
   # upload Python code coverage - since we're measuring PySys itself, include both 
   # top-level .coverage file and the files collected by PySys from its PySys subprocesses
@@ -199,14 +207,15 @@ deploy:
     skip_cleanup: true
     overwrite: true
     on: 
-       # by default we only create a draft release for commits to release
+       # only publish from the release branch since we don't want to accidentally overwrite previous releases during 
+       # development
        branch: release
        
-       # best to only publish from one platform to avoid possible race conditions, use 2.7 as only it has the epydocs
+       # best to only publish from one platform to avoid possible race conditions
        condition: $PYSYS_DOC_AND_DEPLOY = true
 
     name: "PySys v$PYSYS_VERSION"
-    body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See CHANGELOG.rst for a full list of changes. 
+    body: This release adds <TODO>. There are also a number of bug fixes and other improvements. See https://pysys-test.github.io/pysys-test/ChangeLog.html for a full list of changes. 
   
     # this is a draft release, allows manually editing details in github UI
     draft: true

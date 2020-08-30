@@ -20,13 +20,10 @@ import codecs, os, glob, sys, shutil
 import pysys
 ROOTDIR = os.path.abspath(os.path.dirname(__file__))
 
-# Slightly gross, but in the absence of cross-platform symlink support in git and to avoid duplicating it, create this on the fly
-with codecs.open(ROOTDIR+'/pysys-examples/pysysproject.xml', 'r', 'ascii') as projfile:
-	with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst.tmpl', 'r', 'ascii') as rsttmpl:
-		with codecs.open(ROOTDIR+'/docs/ProjectConfig.rst', 'w', 'ascii') as rstout:
-			rstout.write(rsttmpl.read())
-			rstout.write('\n  '+'\n  '.join(projfile.read().split('\n')))
-
+# Need to create dynamically generated rst files which we'll be including in the package
+sys.path.append(ROOTDIR+'/docs')
+import create_templated_rsts
+create_templated_rsts.prepareDocBuild()
 
 import setuptools
 print('using setuptools v%s'%setuptools.__version__)

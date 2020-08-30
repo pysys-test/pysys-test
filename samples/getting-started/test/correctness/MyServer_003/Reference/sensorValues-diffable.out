@@ -1,0 +1,1 @@
+{"sensorId": "ABC1234", "timestamp": "<timestamp>", "collectionHost": "<host removed by test>", "measurements": [123.4, 670, 3.3333333333333335, null, 123.4], "measurementTimeSpanSecs": 2.5, "dataPaths": "c:\\devicedata*\\sensor.json"}

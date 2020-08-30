@@ -1,11 +1,13 @@
 # Just for this project
-docs/ProjectConfig.rst
+docs/ProjectConfiguration.rst
+docs/TestDescriptors.rst
 docs/autodocgen
 docs/build_output*
 
 # PySys outputs
-__pysys_.*
-__coverage_.*
+__pysys_*
+__coverage_*
+test/__*
 Output/
 
 # Byte-compiled / optimized / DLL files

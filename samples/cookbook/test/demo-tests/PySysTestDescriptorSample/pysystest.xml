@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="auto">
+	
+	<description> 
+		<!-- Test titles should be concise but give a clear idea of what is in scope for this testcase. 
+	
+		Good titles make it easy to find the test you need even when you have 100s/1000s of tests. 
+		Tests can be sorted by title so try to use common prefixes to group related tests together. 
+		Titles need to be human readable at-a-glance, so don't put ids (e.g. bug tracking numbers) in the title; 
+		the "purpose" or "requirements" are a better place for those details. 
+		-->
+		<title>My foobar tool - Argument parsing success and error cases</title>
+		<purpose><![CDATA[
+			This is a good place for a fuller description of what is in and 
+			out of scope for this particular testcase. It's also a good place 
+			to mention bug tracking ids etc. 
+		]]></purpose>
+	</description>
+
+	<!-- Comment/uncomment this to mark this test as skipped, which will stop it from executing. -->
+	<skipped reason="This test is skipped until bug XYZ is fixed"/>
+	
+	<classification>
+		<!-- Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 
+		for inclusion/exclusion in test runs. Groups are usually named in camelCase. 
+		These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. 
+		-->
+		<groups inherit="true">
+			<group>performance</group>
+			
+			<!-- The disableCoverage group is used by code coverage writers to ensure coverage tools are disabled for 
+			tests that are performance-critical. 
+			-->
+			<group>disableCoverage</group>
+		</groups>
+
+		<!-- Specify modes supported by all tests under this directory. Like test ids, mode names are usually TitleCase.
+		These modes are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. -->
+		<modes inherit="true">
+			<mode>CompressionNone_AuthNone</mode>
+			<mode>CompressionGZip_AuthNone</mode>
+		</modes>
+	</classification>
+
+	<!-- Specify as a floating point number an indicator of when to run the tests under 
+	this directory, relative to other tests/directories with a higher or lower hint. 
+	Empty string hint="" means inherit. The default priority is 0.0 so set the hint to a higher 
+	value to execute tests later, or a negative value to execute tests earlier. 
+	-->
+	<execution-order hint="+100.0"/>
+	
+	<data>
+		<!-- By convention the test class is in a module called "run.py" in this directory, but 
+		it is possible to use a different name, or to specify an absolute path if you want to use the same 
+		Python class for lots of tests. -->
+		<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
+
+		<!-- You can customize the Input/Output/Reference directory names if you wish. -->
+		<output path="MyOutput"/>
+		<input path="${testRootDir}/pysys-extensions/my_shared_input_files"/>
+		<reference path="MyReference"/>
+		
+		<!-- The ability to add user-defined data to the test descriptor is mostly useful -->
+		<user-data name="myTestDescriptorData" value="foobar"/>
+	</data>
+	
+	<traceability>
+		<requirements>
+			<!-- Specify traceability requirements implemented by this test. 
+			You can use this for whatever makes sense in your project; see examples below. -->
+			<requirement id="UserRequirement_1a"/> 
+			<requirement id="UserRequirement_2c"/> 
+			<requirement id="Performance"/>
+			<requirement id="UserStory.XYZ-54321"/>
+		</requirements>
+	</traceability>
+</pysystest>

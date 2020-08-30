@@ -1,0 +1,32 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>pysys.py - print</title>    
+    <purpose><![CDATA[
+Ensure that pysys print works without error, and also that it doesn't find any problems with the descriptors of the example tests. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>process</group>
+    </groups>
+    <modes>
+	  <mode>MyMode</mode>
+    </modes>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+    <user-data name="myUserDataKey" value="12345"/>
+    <user-data name="myUserDataKey2" value="Hello \n world"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id="AL1"/>     
+    </requirements>
+  </traceability>
+</pysystest>

@@ -1,0 +1,14 @@
+# This is a .coveragerc configuration file for Coverage.py
+
+[run]
+# just the "pysys" module; ignore tests
+source=pysys
+
+omit=
+  */test/*
+  */samples/*
+
+[report]
+
+[html]
+title=PySys coverage

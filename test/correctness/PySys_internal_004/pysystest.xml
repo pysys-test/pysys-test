@@ -1,0 +1,26 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Test loading - load shared test class with hierarchical package structure</title>    
+    <purpose><![CDATA[
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group></group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="${pythonScriptsDir}/test_class.py"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>
+    </requirements>
+  </traceability>
+</pysystest>

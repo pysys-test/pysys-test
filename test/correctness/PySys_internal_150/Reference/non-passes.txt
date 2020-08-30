@@ -1,0 +1,7 @@
+MyServer.Performance.PySysDirConfigSample~CompressionNone_AuthNone = SKIPPED: These tests are skipped until bug XYZ is fixed
+Outcome_BlockedProcess = BLOCKED: "ERROR Cannot bind TCP listening port on one or more of the requested network interfaces" found while Waiting for "Started MyServer .*on port .*" in my_server.out
+Outcome_FailedAssertions = FAILED: Assert that (value == expected) with value (getExprFromFile('sensorValues.out', '"sensorId": "([^"]*)"')) ="ABC123def4", expected="ABC1234" (+7 other failures)
+Outcome_NotVerified = NOT VERIFIED: 
+Outcome_PerformanceInspect~CompressionGZip = REQUIRES INSPECTION: Review the charts for desired performance characteristics: my_performance_graph_n=4.svg, my_performance_graph_n=8.svg
+PySysTestDescriptorSample~CompressionNone_AuthNone = SKIPPED: This test is skipped until bug XYZ is fixed
+SkipOrAbortTest = SKIPPED: MyFeature is not supported on this operating system

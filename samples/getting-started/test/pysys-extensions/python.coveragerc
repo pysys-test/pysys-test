@@ -1,0 +1,11 @@
+# This is a .coveragerc configuration file for the Coverage.py Python code coverage library
+
+[run]
+# Include just the application we're testing, not any test tools
+include=*/bin/*
+omit=*/test/*
+
+[report]
+
+[html]
+title=Python code coverage for MyServer

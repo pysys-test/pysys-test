@@ -1,0 +1,98 @@
+# The samples are primarily tested using Travis CI, but we also run them in a GitHub workflow to check for additional 
+# issues that show up only on these VMs, and to allow manual inspection of the (expected) test failure output from the 
+# cookbook sample
+
+name: PySys samples
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    strategy:
+      # Disable fail fast since it's useful to see test results for all platforms even if some failed
+      fail-fast: false
+      
+      matrix:
+        include:
+          - test-run-id: ubuntu
+            os: ubuntu-latest
+            
+          - test-run-id: macos
+            os: macos-latest
+            
+          - test-run-id: win
+            os: windows-latest
+            
+    runs-on: ${{matrix.os}}
+    
+    steps:
+      # Install the desired version of Python and PySys
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+          # Use older version of coverage as 5.0 requires an SQLite version that doesn't work on this macos image currently
+          pip install coverage==4.5.4
+
+      - name: Install PySys dependencies - Windows
+        if: runner.os == 'Windows'
+        run: |
+          pip install pywin32 colorama
+
+      - name: Windows TCP configuration
+        # Set the TCP dynamic/ephemeral port range on Windows back to the normal Windows default configuration
+        # (GitHub Actions currently sets *all* ports to be dynamic which leaves none to start test servers on)
+        if: runner.os == 'Windows'
+        run: |
+          netsh int ipv4 show dynamicport tcp
+          netsh int ipv4 set dynamicportrange tcp startport=49152 numberofports=16384
+          netsh int ipv6 set dynamicportrange tcp startport=49152 numberofports=16384
+
+      - name: Test sample-getting-started
+        working-directory: samples/getting-started/test
+        shell: bash
+        id: pysys-getting-started
+        run: |
+          PYTHONPATH=../../.. python -m pysys run --ci --outdir=getting-started-${{matrix.test-run-id}}
+
+      - name: Test sample-cookbook (expected failures)
+        working-directory: samples/cookbook/test
+        shell: bash
+        id: pysys
+        run: |
+          PYTHONPATH=../../.. python -m pysys run --ci --outdir=cookbook-${{matrix.test-run-id}}
+        
+      # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
+      # Since we expect failures only from the cookbook sample, that's the one we upload artifacts for (using id=pysys)
+      # The follow lines are a copy from the sample pysys workflow
+
+      - name: Upload Python code coverage
+        uses: codecov/codecov-action@v1
+        if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
+        with:
+          file: test/__coverage_python.${{matrix.test-run-id}}/coverage.xml
+      
+      - name: Upload performance CSV artifacts
+        uses: actions/upload-artifact@v2
+        # Only do this if some performance results were generated
+        if: always() && steps.pysys.outputs.artifact_CSVPerformanceReport
+
+        with:
+          name: pysys_performance_${{matrix.test-run-id}}
+          path: ${{ steps.pysys.outputs.artifact_CSVPerformanceReport }}
+
+      - name: Upload archive artifacts for any test failures
+        uses: actions/upload-artifact@v2
+        if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
+
+        with:
+          name: pysys_output_${{matrix.test-run-id}}
+          path: ${{ steps.pysys.outputs.artifact_TestOutputArchiveDir }}

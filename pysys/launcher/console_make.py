@@ -54,35 +54,35 @@ class %s(%s):
 
 	DESCRIPTOR_TEMPLATE ='''<?xml version="1.0" encoding="utf-8"?>
 <pysystest type="%s">
-  
-  <description> 
-	<title></title>    
-	<purpose><![CDATA[
-]]>
-	</purpose>
-  </description>
+	
+	<description>
+		<title></title>
+		<purpose><![CDATA[
+		
+		]]></purpose>
+	</description>
 
-  <!-- uncomment this to skip the test:  
-  <skipped reason=""/> 
-  -->
-  
-  <classification>
-	<groups inherit="true">
-	  <group>%s</group>
-	</groups>
-	<modes inherit="true">
-	</modes>
-  </classification>
+	<!-- uncomment this to skip the test:
+	<skipped reason=""/> 
+	-->
+	
+	<classification>
+		<groups inherit="true">
+			<group>%s</group>
+		</groups>
+		<modes inherit="true">
+		</modes>
+	</classification>
 
-  <data>
-	<class name="%s" module="%s"/>
-  </data>
-  
-  <traceability>
-	<requirements>
-	  <requirement id=""/>     
-	</requirements>
-  </traceability>
+	<data>
+		<class name="%s" module="%s"/>
+	</data>
+	
+	<traceability>
+		<requirements>
+			<requirement id=""/>		 
+		</requirements>
+	</traceability>
 </pysystest>
 ''' 
 

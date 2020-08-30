@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysproject>
+
+	<!-- It doesn't matter enormously whether this is kept up to date -->
+	<requires-pysys>1.6.1</requires-pysys>
+
+
+	<!-- Unlike the samples, we do need to run these with all PySys versions including 2.7 -->
+	<requires-python>2.7.0</requires-python>
+
+	<!-- 
+		The following standard project properties are always defined and can be accessed through ${prop} syntax:
+		
+			${testRootDir} - Path of the root directory containing the pysysproject.xml file
+			${outDirName}  - The basename (with parent dirs removed) from the outdir for this test run. 
+			                 This may be the name of the current OS or a unique user-specified name for the test run.
+			${os}          - The operating system name e.g. 'windows', 'linux', 'darwin'.
+			${osfamily}    - The operating system family - 'windows' or `unix`.
+			${startDate}   - The date that this test run was started, in a form that can be used in filenames. 
+			${startTime}   - The (local) time that this test run was started, in a form that can be used in filenames. 
+			${hostname}    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
+ 		
+		In addition, within this file ${env.VARNAME} syntax can be used to access environment variables. 
+	-->
+	
+	<!-- Property identifying the home directory of the application build being tested. -->
+	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
+
+	<!-- If provided, the specified command line will be executed (in testRootDir) to populate the vcsCommit field 
+		in runner.runDetails with the current commit number from your version control system. -->
+	<property name="versionControlGetCommitCommand" value="git show -s --format=%h"/>
+
+	<property name="pyunitUtilsDir" value="${testRootDir}/test-tools/pyunit"/>
+
+	<property name="pythonScriptsDir" value="${testRootDir}/test-tools/python-scripts" pathMustExist="false"/>
+
+	<!-- 
+	Add a path to the python path to allow importing custom modules, e.g. extensions to the 
+	BaseTest or BaseRunner classes, or customer test output writers. 
+	-->
+	<pythonpath value="${testRootDir}/pysys-extensions" />
+	<test-plugin classname="pysysinternalhelpers.PySysTestPlugin" alias="pysys"/>
+
+	<writers>
+		<writer classname="pysys.writer.testoutput.TestOutputArchiveWriter">
+			<property name="destDir" value="__pysys_output_archives.${outDirName}/"/>
+			<property name="maxTotalSizeMB" value="1024.0"/>
+		</writer>
+
+		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
+		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
+
+		<!-- We don't actually use any of these for the internal pysys test run, but it's worth having them 
+			enabled just in case we trigger an edge case or bug. 
+		-->
+		<writer classname="pysys.writer.outcomes.JUnitXMLResultsWriter">
+			<property name="outputDir" value="__pysys_junit_xml"/>
+		</writer>
+
+		<writer classname="pysys.writer.outcomes.XMLResultsWriter" file="__pysys_testsummary_${outDirName}_%Y-%m-%d_%H.%M.%S.xml">
+		</writer>
+		
+		<!-- Code coverage for .py files -->
+		<writer classname="pysys.writer.testoutput.PythonCoverageWriter">
+			<property name="destDir" value="__coverage_python.${outDirName}"/>
+			<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/pysys-extensions/python_coveragerc"/>
+		</writer>
+
+		<!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run, 
+			optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
+			list if no other "summary" writer is explicitly configured.
+		-->		
+		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter">
+			<property name="showTestTitle" value="true"/>
+		</writer>
+	</writers>
+
+	<default-file-encodings>
+		<default-file-encoding pattern="run.log" encoding="utf-8"/>
+		
+		<default-file-encoding pattern="*.xml" encoding="utf-8"/>
+		<default-file-encoding pattern="*.json" encoding="utf-8"/>
+		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
+		
+	</default-file-encodings>	
+	
+	<project-help>
+	</project-help>
+</pysysproject>

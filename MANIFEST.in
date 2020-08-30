@@ -14,5 +14,6 @@ include setup.*
 
 recursive-include pysys/xml/templates *
 
-# all testcases
-recursive-include pysys-examples *
+# all testcases and samples
+recursive-include test *
+recursive-include samples *

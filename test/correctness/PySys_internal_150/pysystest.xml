@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto">
+    
+  <description> 
+    <title>Samples - cookbook</title>    
+    <purpose><![CDATA[
+Run the sample tests
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>samples</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

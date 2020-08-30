@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="auto">
+	
+	<description> 
+		<title>Demo of pysysdirconfig.xml</title>		
+		<purpose><![CDATA[
+		]]></purpose>
+	</description>
+
+	<!-- uncomment this to skip the test:	
+	<skipped reason=""/> 
+	-->
+	
+	<classification>
+		<groups inherit="true">
+			<group>dirConfigSample</group>
+		</groups>
+		<modes inherit="true">
+			<mode>CompressionNone_AuthBasic</mode>
+		</modes>
+	</classification>
+
+	<data>
+	</data>
+	
+	<traceability>
+		<requirements>
+			<requirement id=""/>		 
+		</requirements>
+	</traceability>
+</pysystest>

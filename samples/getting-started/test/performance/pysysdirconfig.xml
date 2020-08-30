@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+	<!-- This file provides default configuration for all tests under this directory. -->
+
+	<!-- A prefix to be added to the id of all tests under this directory. -->
+	<id-prefix>Perf.</id-prefix>
+
+	<classification>
+		<!-- Specify the groups that all tests under this directory will be tagged with. -->
+		<groups inherit="true">
+			<group>performance</group>
+			
+			<!-- This special tag disables code coverage, which could disrupt performance results. -->
+			<group>disableCoverage</group>
+		</groups>
+
+	</classification>
+
+	<!-- Set a later execution hint for performance tests since we want to start with correctness testing. -->
+	<execution-order hint="+100.0"/>
+
+</pysysdirconfig>

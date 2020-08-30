@@ -1,0 +1,4 @@
+measurement=123.4000
+measurement=670.0000
+measurement=3.3333
+measurement=123.4000
