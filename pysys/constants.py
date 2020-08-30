@@ -80,8 +80,8 @@ elif re.search('darwin', sys.platform):
 	DEVNULL = '/dev/null'
 	PATH = '/bin:/usr/bin:/usr/sbin:/usr/local/bin'
 	LD_LIBRARY_PATH = ''
-	DYLD_LIBRARY_PATH = '/usr/lib:/usr/local/lib'
-	LIBRARY_PATH_ENV_VAR = 'DYLD_LIBRARY_PATH'
+	DYLD_LIBRARY_PATH = '$(HOME)/lib:/usr/local/lib:/lib:/usr/lib'
+	LIBRARY_PATH_ENV_VAR = 'DYLD_FALLBACK_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 else:  # pragma: no cover
 	# Fall back to assumed UNIX-like platform

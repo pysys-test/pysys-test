@@ -607,12 +607,6 @@ class ProcessUser(object):
 				if newlibpath:
 					e[LIBRARY_PATH_ENV_VAR] = newlibpath
 
-				if 'DYLD_LIBRARY_PATH' in e:
-					# Introduced in PySys 1.6.2 to fix inability to load modules such as urllib in Python 3 on Darwin; 
-					# it's safer setting the "fallback" env var so it doesn't override what the process was linked with
-					# Will probably do this for all processes (not just Python) eventually
-					e['DYLD_FALLBACK_LIBRARY_PATH'] = e.pop('DYLD_LIBRARY_PATH')
-
 				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment, including %s=%s', LIBRARY_PATH_ENV_VAR, os.getenv(LIBRARY_PATH_ENV_VAR,''))
 			else:  
 				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment')

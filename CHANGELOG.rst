@@ -17,8 +17,11 @@ What's new in 1.6.2
 
 PySys 1.6.2 is under development. 
 
-	- TODO
-
+	- Fixed the default library path on macOS(R). Instead of setting ``DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib`` 
+	  (which overrides executables' default libraries), we now use the ``DYLD_FALLBACK_LIBRARY_PATH`` environment 
+	  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 
+	  Additionally, some extra items were added to the value of `pysys.constants.DYLD_LIBRARY_PATH` to match the 
+	  defaults as described in the latest macOS documentation. 
 
 -------------------
 What's new in 1.6.1

@@ -4,6 +4,10 @@ from pysys.exceptions import *
 from pysys.utils.pycompat import openfile
 import tempfile
 
+# This module loads various dynamic libraries so checking it loads is a good way to test we haven't broken the ability 
+# to do things as a result of our env sanitization
+import urllib
+
 class PySysTest(BaseTest):
 	def execute(self):
 	
