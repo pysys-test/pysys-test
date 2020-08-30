@@ -138,8 +138,8 @@ class ProcessWrapper(CommonProcessWrapper):
 				self.pid = os.fork()
 
 				if self.pid == 0: # pragma: no cover
-					 # create a new process group (same id as this pid) containing this new process, which we can use to kill grandchildren
-					 os.setpgrp()
+					# create a new process group (same id as this pid) containing this new process, which we can use to kill grandchildren
+					os.setpgrp()
 				
 					# change working directory of the child process
 					os.chdir(self.workingDir)
