@@ -107,7 +107,7 @@ provide a simpler way to share functionality across tests. There are currently 3
   before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
   shared across all tests. These can be used to start servers/VMs that are shared across tests.
   Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
+  class provided it has a method ``setup(self, runner)`` (and no constructor arguments). 
 
 - **writer plugins**: this kind of plugin has existed in PySys for many releases and are effectively a special kind of 
   runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of 

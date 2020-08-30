@@ -83,13 +83,13 @@ class TestDescriptor(object):
 	
 	:ivar str ~.classname: The Python classname to be executed for this testcase.
 	
-	:ivar str ~.module: The path to the python module containing the testcase class. Relative to testDir, or an absoute path.
+	:ivar str ~.module: The path to the python module containing the testcase class. Relative to testDir, or an absolute path.
 	
-	:ivar str ~.input: The path to the input directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.input: The path to the input directory of the testcase. Relative to testDir, or an absolute path.
 	
-	:ivar str ~.output: The path to the output parent directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.output: The path to the output parent directory of the testcase. Relative to testDir, or an absolute path.
 	
-	:ivar str ~.reference: The path to the reference directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.reference: The path to the reference directory of the testcase. Relative to testDir, or an absolute path.
 	
 	:ivar list ~.traceability: A list of the requirements covered by the testcase.
 	
