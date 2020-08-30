@@ -10,6 +10,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
+		self.addCleanupFunction(lambda: self.logFileContents('pysys.out', maxLines=0))
 		self.log.info('env = %s', '\n'.join('%s=%s'%(k,v) for (k,v) in sorted(os.environ.items())))
 
 		self.copy(self.input, self.output+'/test')
