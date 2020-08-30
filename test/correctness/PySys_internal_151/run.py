@@ -2,6 +2,7 @@ import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.utils.pycompat import PY2
+import urllib.request
 
 class PySysTest(BaseTest):
 
