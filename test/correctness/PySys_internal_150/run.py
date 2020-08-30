@@ -29,6 +29,12 @@ class PySysTest(BaseTest):
 		pysys('pysys-print-descriptor-samples', ['print', '--full', 'PySysDirConfigSample', 'PySysTestDescriptorSample'], background=True)
 		pysys('pysys-run-help', ['run', '-h'], background=True)
 		self.waitForBackgroundProcesses()
+		
+		# delete sample coverage files so we don't pick them up and use them for PySys itself
+		for root, dirs, files in os.walk(self.output):
+			for f in files:
+				if '.coverage' in f:
+					os.remove(root+os.sep+f)
 
 
 	def validate(self):	

@@ -7,7 +7,6 @@ source=pysys
 omit=
   */test/*
   */samples/*
-  samples/*
 
 [report]
 
