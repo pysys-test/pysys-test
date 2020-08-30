@@ -17,6 +17,9 @@ What's new in 1.6.2
 
 PySys 1.6.2 is under development. 
 
+	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
+	  PySys.
+	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
 	- Fixed the default library path on macOS(R). Instead of setting ``DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib`` 
 	  (which overrides executables' default libraries), we now use the ``DYLD_FALLBACK_LIBRARY_PATH`` environment 
 	  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 

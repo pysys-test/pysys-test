@@ -15,13 +15,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-import codecs, os, glob, sys, shutil
+import codecs, os, glob, sys, shutil, re, inspect
 
 import pysys
 ROOT_DIR = os.path.normpath(os.path.dirname(__file__)+'/..')
 
 # In the absence of cross-platform symlink support in git and to avoid duplicating it, create this on the fly
 def prepareDocBuild():
+	print('Creating dynamically-generated PySys .rst files')
 	def readtmpl(path):
 		with codecs.open(ROOT_DIR+'/'+path, 'r', 'ascii') as f:
 			return f.read()
@@ -32,6 +33,58 @@ def prepareDocBuild():
 
 	with codecs.open(ROOT_DIR+'/docs/ProjectConfiguration.rst', 'w', 'ascii') as rstout:
 		rstout.write(readtmpl('docs/ProjectConfiguration.rst.tmpl'))
-		rstout.write('\n  '+'\n  '.join(readtmpl('samples/cookbook/test/pysysproject.xml').split('\n')))
-if __name__ == 'main':
+		
+		inXML = False
+		proj = readtmpl('samples/cookbook/test/pysysproject.xml').replace('\r','')
+
+		#rstout.write('\n  '+'\n  '.join(readtmpl('samples/cookbook/test/pysysproject.xml').split('\n')))
+		
+		for item in re.split(r'^([ \t]*<!--.*?-->[^\n]*\n)', proj, flags=re.MULTILINE | re.DOTALL):
+			if not item.strip(): continue
+		
+			if '<!--' in item and ('~~' in item or '`' in item):
+				item = item.strip()[4:-3]
+				if inXML: rstout.write('\n')
+				inXML = False
+				# insert the comment contents not as quoted XML but as rst source, so links and headings work
+				rstout.write(inspect.cleandoc(item)+'\n')
+				continue
+
+			if not inXML: 
+				rstout.write('\n.. code-block:: xml')
+				if not item.startswith('\n'): rstout.write('\n')
+				rstout.write('\n  ')
+			
+			inXML=True
+			rstout.write('\n  '.join(item.split('\n')))
+			
+				
+	
+		"""
+		while proj:
+			noncomment, sep, comment = proj.partition('<!--')
+			if noncomment:
+				if not inXML: rstout.write('\n\n.. code-block:: xml')
+				inXML=True
+				rstout.write('\n  '+'\n  '.join(noncomment.split('\n')))
+				
+				if not comment: break
+			
+			if comment:
+				comment, sep, proj = comment.partition('-->')
+				if '===' in comment or '`' in comment:
+					if inXML: rstout.write('\n\n')
+					inXML = False
+					# insert the comment contents not as quoted XML but as rst source, so links and headings work
+					rstout.write('XXX%sXXX'%inspect.cleandoc(comment)+'\n')
+				else: # same as above
+					if not inXML: rstout.write('\n\n.. code-block:: xml')
+					inXML=True
+					rstout.write('\n  '+'\n  '.join(('<!--%s-->'%comment).split('\n')))
+
+		"""
+		
+
+
+if __name__ == '__main__':
 	prepareDocBuild()

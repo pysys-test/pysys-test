@@ -13,18 +13,32 @@
 	<requires-python>3.6</requires-python>
 
 	<!-- 
+		Project properties
+		~~~~~~~~~~~~~~~~~~
+		
 		The following standard project properties are always defined and can be accessed through ${prop} syntax:
 		
-			${testRootDir} - Path of the root directory containing the pysysproject.xml file
-			${outDirName}  - The basename (with parent dirs removed) from the outdir for this test run. 
-			                 This may be the name of the current OS or a unique user-specified name for the test run.
-			${os}          - The operating system name e.g. 'windows', 'linux', 'darwin'.
-			${osfamily}    - The operating system family - 'windows' or `unix`.
-			${startDate}   - The date that this test run was started, in a form that can be used in filenames. 
-			${startTime}   - The (local) time that this test run was started, in a form that can be used in filenames. 
-			${hostname}    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
+			* ``${testRootDir}`` - Path of the root directory containing the pysysproject.xml file
+			* ``${outDirName}``  - The basename (with parent dirs removed) from the outdir for this test run. 
+			  This may be the name of the current OS or a unique user-specified name for the test run.
+			* ``${os}``          - The operating system name e.g. ``windows``, ``linux``, ``darwin``.
+			* ``${osfamily}``    - The operating system family, either ``windows`` or ``unix``.
+			* ``${startDate}``   - The date that this test run was started, in a form that can be used in filenames. 
+			* ``${startTime}``   - The (local) time that this test run was started, in a form that can be used in filenames. 
+			* ``${hostname}``    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
  		
-		In addition, within this file ${env.VARNAME} syntax can be used to access environment variables. 
+		In addition, within this file ``${env.VARNAME}`` syntax can be used to access environment variables. 
+
+		Project properties can be used as substitution variables within the project file, and 
+		are set as attributes on the `pysys.xml.project.Project` class for use by tests - so in the example below, 
+		the ``appHome`` property would be available to tests as ``self.project.appHome``
+
+		If a property value contains any properties or environment variables that do not exist, 
+		the ``default`` is used instead (or "" if a default is not explicitly specified). If the default 
+		also contains undefined properties the project will fail to load. 
+		
+		The ``pathMustExist=true`` attribute can be used to stop the project loading if the property value 
+		does not specify a path that exists.
 	-->
 	
 	<!-- Property identifying the home directory of the application build being tested. 
@@ -32,19 +46,37 @@
 	Binaries and configuration files can be specified relative to this directory 
 	to avoid having to hardcode locations inside each individual testcase. 
 	
-	Test can be run against a different directory by setting the environment variable PYSYS_APP_HOME. 
-	
-	Project properties can be used as substitution variables within the project file, and 
-	are set as attributes on the Project class for use by tests - so in the example below, "appHome" 
-	would be available to tests as "self.project.appHome".
-
-	If a property value contains any properties or environment variables that do not exist, 
-	the "default" is used instead (or "" if a default is not explicitly specified). If the default 
-	also contains undefined properties the project will fail to load. 
-
+	Tests can be run against a different directory by setting the environment variable PYSYS_APP_HOME. 
 	-->
 	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
 
+	<!-- This is an example of putting connection credentials into a project property, which can be overridden 
+	using an environment variable if desired. -->
+	<property name="myCredentials" value="${env.MYORG_CREDENTIALS}" default="testuser:testpassword"/>
+
+	<!-- 
+	Import project properties from any file, using the specified prefix for namespacing. 
+	
+	If pathMustExist=true, the project will fail to load if the specified file does not 
+	exist. If pathMustExist=false the project will silently ignore a missing properties file, 
+	which can be useful when using this feature to provide optional user-specific overrides. 
+	
+	The properties file should be of the format name=value (one pair specified per line). 
+	Each imported property line is handled just the same as a standard "property" element, 
+	so for example other project properties can be referenced within the values 
+	using ${...} syntax. 
+	
+	The set of property keys that are imported can be filtered with a regular expression using 
+	the optional includes="regex" and excludes="regex" . 
+	-->
+	<property file="pysys-extensions/myproject-${osfamily}.properties" pathMustExist="true" prefix="os_"
+		includes=".*Dir" excludes=""/>
+		
+	<!-- 
+	Special project properties
+	~~~~~~~~~~~~~~~~~~~~~~~~~~
+	-->
+	
 	<!-- If provided, the specified command line will be executed (in testRootDir) to populate the vcsCommit field 
 	in runner.runDetails with the current commit number from your version control system. 
 	-->
@@ -64,28 +96,16 @@
 	<property name="defaultEnvirons.JAVA_TOOL_OPTIONS" value="-Xmx512M"/>
 
 	<!-- 
-	Import project properties from any file, using the specified prefix for namespacing. 
+	Configuring plugins
+	~~~~~~~~~~~~~~~~~~~
 	
-	If pathMustExist=true, the project will fail to load if the specified file does not 
-	exist. If pathMustExist=false the project will silently ignore a missing properties file, 
-	which can be useful when using this feature to provide optional user-specific overrides. 
-	
-	The properties file should be of the format name=value (one pair specified per line). 
-	Each imported property line is handled just the same as a standard "property" element, 
-	so for example other project properties can be referenced within the values 
-	using ${...} syntax. 
-	
-	The set of property keys that are imported can be filtered with a regular expression using 
-	the optional includes="regex" and excludes="regex" . 
+	See also :ref:`UserGuide:Sharing logic across tests using plugins`.
 	-->
-	<property file="pysys-extensions/myproject-${osfamily}.properties" pathMustExist="true" prefix="os_"
-		includes=".*Dir" excludes=""/>
 
-	<!-- This is an example of putting connection credentials into a project property, which can be overridden 
-	using an environment variable if desired. -->
-	<property name="myCredentials" value="${env.MYORG_CREDENTIALS}" default="testuser:testpassword"/>
-
-	<!-- Add a path to the python path to allow importing custom Python plugin modules. -->
+	<!-- If you want to provide some custom plugins/extensions you need to add them to the PYTHONPATH used by PySys 
+	as shown below. Usually the specified directory should contain a Python module named after your organization and 
+	containing an empty __init__.py file to mark it as a Python package (such as ``pysys-extensions/myorg/__init__.py``). 
+	-->
 	<pythonpath value="${testRootDir}/pysys-extensions" />
 
 	<!-- Test plugins are additional classes instantiated when each test's BaseTest is instantiated, and accessible 
@@ -107,9 +127,9 @@
 	
 	<!-- Runner plugins are classes that are instantiated when the BaseRunner performs its setup() at 
 	the beginning of a test run. They can provide extra functionality both at the beginning of a test 
-	run, and also (by calling addCleanupFunction from setup()) at the end after testing has finished. For example, 
-	a runner plugin could be used to add support for starting a database server or virtual machine to be shared 
-	by all tests, or to collect.
+	run, and also (by calling `addCleanupFunction() <pysys.baserunner.BaseRunner.addCleanupFunction>` from ``setup()``) 
+	at the end after testing has finished. For example, a runner plugin could be used to add support for starting a 
+	database server or virtual machine to be shared by all tests.
 	
 	Each plugin class must provide a ``setup(self, runner)`` method that accepts the owner runner (BaseRunner instance) 
 	as a parameter. Any configuration properties are assigned as attributes before setup is called.
@@ -124,34 +144,38 @@
 	</runner-plugin>
 	
 	<!-- 
-	For advanced cases it is possible to provide a custom BaseRunner subclass. However, consider whether the 
-	composition "runner-plugin" approach would do the job before using runner inheritance. 
+	For advanced cases it is possible to provide a custom `pysys.baserunner.BaseRunner` subclass. However, in most 
+	cases this isn't necessary so always consider whether the composition "runner-plugin" approach would do the job 
+	before using runner inheritance. 
 	-->
 	<runner classname="myorg.myrunner.MyRunner"/>
 
 	<!-- 
 	Use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
-	ConsoleMakeTestHelper class in order to create templated run.py scripts e.g. when a test module has
-	a repeatable pattern for running or validating etc. 
+	`pysys.launcher.console_make.ConsoleMakeTestHelper` class in order to create templated run.py scripts e.g. when a 
+	test module has a repeatable pattern for running or validating etc. 
 	-->
 	<!--
 	<maker classname="myorg.MyTestMaker"/>
 	-->
 
 	<!--
+	Writers
+	~~~~~~~
+	
 	Configures the writers that implement reporting of test outcomes, typically to disk, to the console, or 
 	to a CI system. 
 	
 	For full details of the configuration properties of each writer, and the API for creating custom writers, 
 	see `pysys.writer` in the API reference. 
 	
-	The writer element specifies the module (which should be available on the pythonpath) and writer classname.
+	Each writer element specifies the classname (which should be available on the pythonpath).
 	-->
 	<writers>
 		<!-- This writer is useful for creating zip archives of failed test output directories when 
-			running in record mode on a machine where it is not otherwise easy to access the output 
-			directories. The destDir could then be uploaded to a CI system (some CI writers 
-			implement this automatically) or manually copied to a file share. 
+		running in record mode on a machine where it is not otherwise easy to access the output 
+		directories. The destDir could then be uploaded to a CI system (some CI writers 
+		implement this automatically) or manually copied to a file share. 
 		-->
 		<writer classname="pysys.writer.testoutput.TestOutputArchiveWriter">
 			<property name="destDir" value="__pysys_output_archives.${outDirName}/"/>
@@ -163,7 +187,7 @@
 		</writer>
 
 		<!-- This writer is useful for collecting output files (e.g. logs, graphs, etc) from all tests into a 
-			single directory or archive for manual examination at the end of the test run. 
+		single directory or archive for manual examination at the end of the test run. 
 		-->
 		<writer classname="pysys.writer.testoutput.CollectTestOutputWriter">
 			<property name="destDir" value="__pysys_collect_perf_graphs.${outDirName}/"/>
@@ -177,7 +201,7 @@
 		</writer>
 		
 		<!-- CI writers automatically enable themselves only if running under 
-			the associated CI environment. 
+		the associated CI environment. 
 		-->
 		<writer classname="pysys.writer.ci.GitHubActionsCIWriter"></writer>
 		<writer classname="pysys.writer.ci.TravisCIWriter"></writer>
@@ -231,8 +255,8 @@
 		</writer>
 
 		<!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run, 
-			optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
-			list if no other "summary" writer is explicitly configured.
+		optionally including outcome reason. The ConsoleSummaryResultsWriter is automatically added to the writers 
+		list if no other "summary" writer is explicitly configured.
 		-->		
 		<writer classname="pysys.writer.console.ConsoleSummaryResultsWriter">
 			<property name="showTestTitle" value="true"/>
@@ -246,6 +270,11 @@
 			<property name="outputFile" value="__pysys_myresults.${outDirName}.json"/>
 		</writer>
 	</writers>
+
+	<!-- 
+	Configuration for how tests execute
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	-->
 
 	<default-file-encodings>
 		<!-- 
@@ -287,13 +316,16 @@
 	</execution-order>
 	
 	<!--
-	In most projects there is no reason to provide a <formatters> element, but it can be used if you wish to customize 
-	the log line format (incl date/time format) or console coloring. 
+	PySys run.log and console formatters
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	In most projects there is no reason to customize this, but it can be used if you real want a different 
+	log line format (incl date/time format) or console coloring. 
 	
 	Specify custom formatters for logging to the console or run.log, and/or configure the formatter
 	appropriately through custom properties. Custom formatters should be defined using the classname
-	and module attributes and should extend the pysys.utils.logutils.BaseLogFormatter class. If no
-	classname and module is given the default pysys.utils.logutils.ColorLogFormatter is assumed.
+	and module attributes and should extend the `pysys.utils.logutils.BaseLogFormatter` class. If no
+	classname and module is given the default `pysys.utils.logutils.ColorLogFormatter` is assumed.
 
 	The ColorLogFormatter allows specification of the message and date strings using the messagefmt and
 	datafmt attributes. Enabling color to the console (stdout) formatter can be done using the color
@@ -327,6 +359,10 @@
 			messagefmt="%(asctime)s %(levelname)-5s %(message)s" datefmt=""/>
 	</formatters>
 	
+	<!-- 
+	Project-specific help information
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	-->
 	<project-help>
 		<!-- Add project-specific text to be appended to the "pysys run -h". 
 		
@@ -340,5 +376,7 @@
 		                    during execution of each performance test. 
 		   
 		The application being tested is at "${appHome}"; to override use ${$}{PYSYS_APP_HOME}. 
+		
+		Don't forget to execute the MyProject build before running the tests! 
 	</project-help>
 </pysysproject>
