@@ -598,7 +598,7 @@ class ProcessUser(object):
 			# Do not set PYTHONHOME here, as doesn't work well in virtualenv, and messes up grandchildren 
 			# processes that need a different Python version
 			e['PATH'] = os.path.dirname(sys.executable)+os.pathsep+e['PATH']
-
+			
 			if LIBRARY_PATH_ENV_VAR != 'PATH': # if it's an os with something like LD_LIBRARY_PATH
 				# It's a shame it's necessary to copy parent environment, but there's no sane way to unpick which libraries are 
 				# actually required on Unix. Make sure we don't set this env var to an empty string just in case that 
@@ -606,6 +606,13 @@ class ProcessUser(object):
 				newlibpath = (os.getenv(LIBRARY_PATH_ENV_VAR,'')+os.pathsep+e.get(LIBRARY_PATH_ENV_VAR,'')).strip(os.pathsep)
 				if newlibpath:
 					e[LIBRARY_PATH_ENV_VAR] = newlibpath
+
+				if 'DYLD_LIBRARY_PATH' in e:
+					# Introduced in PySys 1.6.2 to fix inability to load modules such as urllib in Python 3 on Darwin; 
+					# it's safer setting the "fallback" env var so it doesn't override what the process was linked with
+					# Will probably do this for all processes (not just Python) eventually
+					e['DYLD_FALLBACK_LIBRARY_PATH'] = e.pop('DYLD_LIBRARY_PATH')
+
 				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment, including %s=%s', LIBRARY_PATH_ENV_VAR, os.getenv(LIBRARY_PATH_ENV_VAR,''))
 			else:  
 				self.log.debug('getDefaultEnvirons was called with a command matching this Python executable; adding required path environment variables from parent environment')

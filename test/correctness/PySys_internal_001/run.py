@@ -27,7 +27,6 @@ class PySysTest(BaseTest):
 				'-vDEBUG',
 				], workingDir='test', environs={
 				'TEST_USER':"Felicity Kendal",
-				'DYLD_LIBRARY_PATH':None, # TEMP
 			})
 		finally:
 			self.logFileContents('pysys.out', maxLines=0)
