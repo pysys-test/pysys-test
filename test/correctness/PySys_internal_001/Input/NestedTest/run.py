@@ -13,6 +13,9 @@ class PySysTest(BaseTest):
 	testListProperty = []
 
 	def execute(self):
+		self.log.info('env = %s', '\n'.join('%s=%s'%(k,v) for (k,v) in sorted(os.environ.items())))
+		import urllib.request
+		
 		self.write_text(self.project.sample_path+'.txt', 'xxx') # check these don't contain any non-file system characters
 	
 		self.proj = self.project
