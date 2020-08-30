@@ -76,7 +76,7 @@ class PySysTest(BaseTest):
 
 		envvarignores.extend(['^%s='%x.upper() for x in 
 			['ComSpec', 'OS', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'windir', 'NUMBER_OF_PROCESSORS']+[
-				'LD_LIBRARY_PATH', 'PATH']+ignores])
+				'LD_LIBRARY_PATH', LIBRARY_PATH_ENV_VAR, 'PATH']+ignores])
 		if not IS_WINDOWS: envvarignores.append('LANG=en_US.UTF-8') # set in default pysys config file
 		self.assertGrep('environment-default.out', expr='.*=', contains=False, ignores=envvarignores)
 		

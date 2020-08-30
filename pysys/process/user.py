@@ -584,7 +584,7 @@ class ProcessUser(object):
 		if LD_LIBRARY_PATH:
 			e['LD_LIBRARY_PATH'] = LD_LIBRARY_PATH
 		if DYLD_LIBRARY_PATH:
-			e['DYLD_LIBRARY_PATH'] = DYLD_LIBRARY_PATH
+			e['DYLD_FALLBACK_LIBRARY_PATH'] = DYLD_LIBRARY_PATH
 				
 		if not IS_WINDOWS:
 			if getattr(self.project, 'defaultEnvironsDefaultLang',''):

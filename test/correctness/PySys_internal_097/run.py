@@ -24,6 +24,7 @@ class PySysTest(BaseTest):
 			
 	def validate(self):
 		env = self.createEnvirons(addToLibPath='my-lib-path', addToExePath=['my-exe-path1', 'my-exe-path2'])
+		self.log.info('Created environs: %s', env)
 		self.assertThat('"my-exe-path1'+os.pathsep+'my-exe-path2" in %s', repr(env['PATH']))
 		self.assertThat('"my-lib-path" in %s', repr(env[LIBRARY_PATH_ENV_VAR]))
 	
