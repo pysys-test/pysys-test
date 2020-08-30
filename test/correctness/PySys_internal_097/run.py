@@ -51,7 +51,7 @@ class PySysTest(BaseTest):
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='PATH=.+')
 		else:
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='python', contains=False)
-			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='LD_LIBRARY_PATH=.+')
+			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='%s=.+'%LIBRARY_PATH_ENV_VAR)
 			self.logFileContents('pysys-none/PySys_NestedTestcase/env-python.txt')
 		self.assertGrep('pysys-none/PySys_NestedTestcase/python.out', expr='Python executed successfully')
 
