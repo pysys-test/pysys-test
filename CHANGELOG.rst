@@ -20,6 +20,9 @@ PySys 1.6.2 is under development.
 	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
 	  PySys.
 	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
+	- Added automatic killing of child processes of processes PySys has started (using Unix "process groups", and 
+	  Windows "jobs"). This is especially useful when starting a process using a shell script; previously 
+	  only the wrapper script would have been killed, whereas now the process it starts is also terminated. 
 	- Fixed the default library path on macOS(R). Instead of setting ``DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib`` 
 	  (which overrides executables' default libraries), we now use the ``DYLD_FALLBACK_LIBRARY_PATH`` environment 
 	  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 

@@ -20,17 +20,15 @@
 :meta private: No reason to publically document this. 
 """
 
-import string, os.path, time, logging, sys, threading
+import string, os.path, time, logging, sys, threading, platform
 
-if 'epydoc' not in sys.modules:
-	import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes
+import win32api, win32pdh, win32security, win32process, win32file, win32pipe, win32con, pywintypes, win32job
 
 if sys.version_info[0] == 2:
 	import Queue
 else:
 	import queue as Queue
 
-from pysys import log
 from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
@@ -38,8 +36,13 @@ from pysys.process.commonwrapper import CommonProcessWrapper, _stringToUnicode
 
 # check for new lines on end of a string
 EXPR = re.compile(".*\n$")
+log = logging.getLogger('pysys.process')
 
-
+try:
+	IS_PRE_WINDOWS_8 = int(platform.version().split('.')[0]) < 8
+except Exception:
+	IS_PRE_WINDOWS_8 = Fals
+	
 class ProcessWrapper(CommonProcessWrapper):
 	"""Windows Process wrapper for process execution and management. 
 	
@@ -80,8 +83,11 @@ class ProcessWrapper(CommonProcessWrapper):
 		:param displayName: Display name for this process
 
 		"""
+		
 		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
 			state, timeout, stdout, stderr, displayName, **kwargs)
+
+		self.disableKillingChildProcesses = self.info.get('__pysys.disableKillingChildProcesses', False) # currently undocumented, just an emergency escape hatch for now
 
 		assert self.environs, 'Cannot start a process with no environment variables set; use createEnvirons to make a minimal set of env vars'
 
@@ -140,38 +146,90 @@ class ProcessWrapper(CommonProcessWrapper):
 			hStderr = win32file.CreateFile(_stringToUnicode(self.stderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
 			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
 			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
-
-			# set the info structure for the new process.
-			StartupInfo = win32process.STARTUPINFO()
-			StartupInfo.hStdInput  = hStdin_r
-			StartupInfo.hStdOutput = hStdout
-			StartupInfo.hStdError  = hStderr
-			StartupInfo.dwFlags = win32process.STARTF_USESTDHANDLES
-
-			# Create new handles for the thread ends of the pipes. The duplicated handles will
-			# have their inheritence properties set to false so that any children inheriting these
-			# handles will not have non-closeable handles to the pipes
-			pid = win32api.GetCurrentProcess()
-			tmp = win32api.DuplicateHandle(pid, hStdin, pid, 0, 0, win32con.DUPLICATE_SAME_ACCESS)
-			win32file.CloseHandle(hStdin)
-			hStdin = tmp
-
-			# start the process, and close down the copies of the process handles
-			# we have open after the process creation (no longer needed here)
-			old_command = command = self.__quotePath(self.command)
-			for arg in self.arguments: command = '%s %s' % (command, self.__quotePath(arg))
+			  
 			try:
-				self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command, None, None, 1, 0, self.environs, os.path.normpath(self.workingDir), StartupInfo)
-			except pywintypes.error as e:
-				raise ProcessError("Error creating process %s: %s" % (old_command, e))
 
-			win32file.CloseHandle(hStdin_r)
-			win32file.CloseHandle(hStdout)
-			win32file.CloseHandle(hStderr)
+				# set the info structure for the new process.
+				StartupInfo = win32process.STARTUPINFO()
+				StartupInfo.hStdInput  = hStdin_r
+				StartupInfo.hStdOutput = hStdout
+				StartupInfo.hStdError  = hStderr
+				StartupInfo.dwFlags = win32process.STARTF_USESTDHANDLES
+
+				# Create new handles for the thread ends of the pipes. The duplicated handles will
+				# have their inheritence properties set to false so that any children inheriting these
+				# handles will not have non-closeable handles to the pipes
+				pid = win32api.GetCurrentProcess()
+				tmp = win32api.DuplicateHandle(pid, hStdin, pid, 0, 0, win32con.DUPLICATE_SAME_ACCESS)
+				win32file.CloseHandle(hStdin)
+				hStdin = tmp
+
+				# start the process, and close down the copies of the process handles
+				# we have open after the process creation (no longer needed here)
+				old_command = command = self.__quotePath(self.command)
+				for arg in self.arguments: command = '%s %s' % (command, self.__quotePath(arg))
+				
+				# Windows CreateProcess maximum lpCommandLine length is 32,768
+				# http://msdn.microsoft.com/en-us/library/ms682425%28VS.85%29.aspx
+				if len(command)>=32768:
+					raise ValueError("Command line length exceeded 32768 characters: %s..."%command[:1000])
+
+				dwCreationFlags = 0
+				if IS_PRE_WINDOWS_8:
+					# In case PySys is itself running in a job, might need to explicitly breakaway from it so we can give 
+					# it its own, but only for old pre-windows 8/2012, which support nested jobs
+					dwCreationFlags  = dwCreationFlags | win32process.CREATE_BREAKAWAY_FROM_JOB
+				
+				if self.command.lower().endswith(('.bat', '.cmd')):
+					# If we don't start suspended there's a slight race condition but due to some issues with 
+					# initially-suspended processes hanging (seen many years ago), to be safe, only bother to close the 
+					# race condition for shell scripts (which is the main use case for this anyway)
+					dwCreationFlags = dwCreationFlags | win32con.CREATE_SUSPENDED
+
+				self.__job = self._createParentJob()
+
+				try:
+					self.__hProcess, self.__hThread, self.pid, self.__tid = win32process.CreateProcess( None, command, None, None, 1, 
+						dwCreationFlags, self.environs, os.path.normpath(self.workingDir), StartupInfo)
+				except pywintypes.error as e:
+					raise ProcessError("Error creating process %s: %s" % (old_command, e))
+
+				try:
+					if not self.disableKillingChildProcesses:
+						win32job.AssignProcessToJobObject(self.__job, self.__hProcess)
+					else:
+						self.__job = None
+				except Exception as e:
+					# Shouldn't fail unless process already terminated (which can happen since 
+					# if we didn't use SUSPENDED there's an inherent race here)
+					if win32process.GetExitCodeProcess(self.__hProcess)==win32con.STILL_ACTIVE:
+						log.warn('Failed to associate process %s with new job: %s (this may prevent automatic cleanup of child processes)' %(self, e))
+					
+					# force use of TerminateProcess not TerminateJobObject if this failed
+					self.__job = None
+				
+				if (dwCreationFlags & win32con.CREATE_SUSPENDED) != 0:
+					win32process.ResumeThread(self.__hThread)
+			finally:
+				win32file.CloseHandle(hStdin_r)
+				win32file.CloseHandle(hStdout)
+				win32file.CloseHandle(hStderr)
 
 			# set the handle to the stdin of the process 
 			self.__stdin = hStdin
+
+	def _createParentJob(self):
+		# Create a new job that this process will be assigned to.
+		job_name = '' # must be anonymous otherwise we'd get conflicts
+		security_attrs = win32security.SECURITY_ATTRIBUTES()
+		security_attrs.bInheritHandle = 1
+		job = win32job.CreateJobObject(security_attrs, job_name)
+		extended_limits = win32job.QueryInformationJobObject(job, win32job.JobObjectExtendedLimitInformation)
+		extended_limits['BasicLimitInformation']['LimitFlags'] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
 		
+		win32job.SetInformationJobObject(job, win32job.JobObjectExtendedLimitInformation, extended_limits)
+		return job
+
 
 	def setExitStatus(self):
 		"""Method to set the exit status of the process.
@@ -187,7 +245,7 @@ class ProcessWrapper(CommonProcessWrapper):
 					if self.__stdin: win32file.CloseHandle(self.__stdin)
 				except Exception as e:
 					# these failed sometimes with 'handle is invalid', probably due to interference of stdin writer thread
-					log.warning('Could not close process and thread handles for process %s: %s', self.pid, e)
+					log.warn('Could not close process and thread handles for process %s: %s', self.pid, e)
 				self.__stdin = self.__hThread = self.__hProcess = None
 				self._outQueue = None
 				self.exitStatus = exitStatus
@@ -203,10 +261,23 @@ class ProcessWrapper(CommonProcessWrapper):
 		"""
 		try:
 			with self.__lock:
-				if self.exitStatus is not None: return 
-				win32api.TerminateProcess(self.__hProcess,0)
-			
+				if self.exitStatus is not None: return
+				
+				try:
+					if self.__job:
+						win32job.TerminateJobObject(self.__job, 0)
+					else:
+						win32process.TerminateProcess(self.__hProcess, 0)
+
+				except Exception as e:
+					# ignore errors unless the process is still running
+					if win32process.GetExitCodeProcess(self.hProcess)==win32con.STILL_ACTIVE:
+						log.warning('Failed to terminate job object for process %s: %s'%(self, e))
+
+						# try this approach instead
+						win32process.TerminateProcess(self.__hProcess, 0)
+
 			self.wait(timeout=timeout)
-		except Exception:
-			raise ProcessError("Error stopping process")
+		except Exception as ex:
+			raise ProcessError("Error stopping process: %s"%ex)
 		
