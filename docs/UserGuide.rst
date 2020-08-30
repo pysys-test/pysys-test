@@ -13,7 +13,7 @@ that::
 	self.startProcess('cmd.exe' if IS_WINDOWS else 'bash', ...)
 
 For finer grained platform detection we recommend using the facilities built into Python, for example 
-`sys.platform``, ``platform.platform()`` or ``platform.uname()``.
+``sys.platform``, ``platform.platform()`` or ``platform.uname()``.
 
 Skipping tests
 --------------
