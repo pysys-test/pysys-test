@@ -13,6 +13,7 @@ class PySysTest(BaseTest):
 		def pysys(name, args, **kwargs):
 			if args[0] == 'run': args = args+['-o', self.output+'/'+name]
 			self.pysys.pysys(name, args, workingDir=sampledir+'/test', 
+				environs=os.environ, # try to fix MacOS problem
 				onError=lambda process: self.logFileContents(process.stdout, maxLines=0)
 				**kwargs)
 
