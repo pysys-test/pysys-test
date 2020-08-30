@@ -4,7 +4,10 @@
 # just the "pysys" module; ignore tests
 source=pysys
 
-omit=*/test/*,*/samples/*
+omit=
+  */test/*
+  */samples/*
+  samples/*
 
 [report]
 
