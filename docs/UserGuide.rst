@@ -13,7 +13,7 @@ that::
 	self.startProcess('cmd.exe' if IS_WINDOWS else 'bash', ...)
 
 For finer grained platform detection we recommend using the facilities built into Python, for example 
-``platform.uname()`` and ``platform.platform()``.
+`sys.platform``, ``platform.platform()`` or ``platform.uname()``.
 
 Skipping tests
 --------------
@@ -65,7 +65,7 @@ The recommended way to do that in PySys is to create one or more "plugins". Ther
   before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
   shared across all tests. These can be used to start servers/VMs that are shared across tests.
   Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
+  class provided it has a method ``setup(self, runner)`` (and no constructor arguments). 
 
   Runner plugins that generate output files/directories should by default put that output under either the 
   `runner.output <pysys.baserunner.BaseRunner>` directory, or (for increased prominence) the ``runner.output+'/..'`` 
