@@ -122,14 +122,14 @@ class Process(object):
 
 		# print process debug information
 		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
-		log.debug("  command      : %s", self.command)
-		for a in self.arguments: log.debug("  argument     : %s", a)
-		
+
 		if IS_WINDOWS or not hasattr(shlex, 'quote'):
 			quotearg = lambda c: '"%s"'%c if ' ' in c else c
 		else:
 			quotearg = shlex.quote
 		log.debug("  command line : %s", ' '.join(quotearg(c) for c in [self.command]+self.arguments))
+		for i, a in enumerate(self.arguments): log.debug("    arg #%-2d    : %s", i+1, a)
+		
 		log.debug("  working dir  : %s", self.workingDir)
 		log.debug("  stdout       : %s", stdout)
 		log.debug("  stderr       : %s", stderr)
