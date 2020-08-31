@@ -123,7 +123,7 @@ class Process(object):
 		for a in self.arguments: log.debug("  argument     : %s", a)
 		
 		if IS_WINDOWS or not hasattr(shlex, 'quote'):
-			quotearg = lambda c: 'X"%s"'%c if ' ' in c else c
+			quotearg = lambda c: '"%s"'%c if ' ' in c else c
 		else:
 			quotearg = shlex.quote
 		log.debug("  command line : %s", ' '.join(quotearg(c) for c in [self.command]+self.arguments))
