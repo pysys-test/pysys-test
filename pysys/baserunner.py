@@ -172,6 +172,9 @@ class BaseRunner(ProcessUser):
 	:ivar list[object] ~.runnerPlugins: A list of any plugin instances configured for this runner. This allows plugins 
 		to access the functionality of other plugins if needed (for example looking them up by type in this list). 
 
+	:ivar pysys.baserunner.BaseRunner self.runner: Identical to self. Included so that you can write ``self.runner``
+		to get a reference to the runner whether self is a BaseTest object or already a BaseRunner object.
+
 	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
 
 	There is also a field for any runner plugins that were configured with an "alias" (see above). 
@@ -185,6 +188,7 @@ class BaseRunner(ProcessUser):
 		pysys.utils.allocport.initializePortPool()
 
 		ProcessUser.__init__(self)
+		self.runner = self
 
 		# Set a sensible default output dir for the runner. Many projects do not actually write 
 		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
