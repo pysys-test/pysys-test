@@ -26,7 +26,7 @@
 		</writer>
 		
 		<!-- Code coverage for .py files -->
-		<writer classname="pysys.writer.testoutput.PythonCoverageWriter">
+		<writer classname="pysys.writer.coverage.PythonCoverageWriter">
 			<property name="destDir" value="__coverage_python.${outDirName}"/>
 			<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/pysys-extensions/python.coveragerc"/>
 		</writer>

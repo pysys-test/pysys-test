@@ -30,6 +30,9 @@ PySys 1.6.2 is under development.
 	  defaults as described in the latest macOS documentation. 
 	- Added improved debug logging to `BaseTest.startProcess()` including a full command line for manually re-running 
 	  troublesome commands, and expansion of PATH environment variables to show the individual components. 
+	- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
+	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
+	  refer to the old name). 
 
 -------------------
 What's new in 1.6.1
@@ -197,7 +200,8 @@ New and improved result writers
   of file (e.g. code coverage) and then do something with it during the runner cleanup phase when all tests have 
   completed.  
 
-- Moved Python code coverage generation out to `pysys.writer.testoutput.PythonCoverageWriter` as an example of how to plugin 
+- Moved Python code coverage generation out to ``pysys.writer.testoutput.PythonCoverageWriter`` (as of 1.6.2, 
+  it's now in `pysys.writer.coverage.PythonCoverageWriter`) as an example of how to use a plugin to add 
   code coverage support without subclassing the runner. Existing projects use this behind the scenes, but new projects 
   should add the writer to their configuration explicitly if they need it (see sample project). 
   
@@ -429,7 +433,7 @@ pysys.py and project configuration improvements
   the ``disableCoverage`` group to the ``pysystest.xml`` descriptor, or the ``pysysdirconfig.xml`` for a whole 
   directory. This is equivalent to setting the ``self.disableCoverage`` attribute on the base test. 
 
-- `Python code coverage <pysys.writer.testoutput.PythonCoverageWriter>` now produces an XML ``coverage.xml`` report 
+- `Python code coverage <pysys.writer.coverage.PythonCoverageWriter>` now produces an XML ``coverage.xml`` report 
   in addition to the ``.coverage`` file and HTML report. This is useful for some code coverage UI/aggregation services. 
 
 - The prefix "__" is now used for many files and directories PySys creates, to make it easier to spot which are 
@@ -606,6 +610,9 @@ Be sure to remove use of the following deprecated items at your earliest conveni
             <property name="destDir" value="__coverage_python.${outDirName}"/>
             <property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
         </writer>
+   
+  (if using 1.6.2+, use `pysys.writer.coverage.PythonCoverageWriter` instead of 
+  ``pysys.writer.testoutput.PythonCoverageWriter``. 
 
 Finally there are also some fixes, cleanup, and better error checking that *could* require changes (typically to 
 extension/framework classes rather than individual tests) but in most cases will not be noticed. Most users can ignore 

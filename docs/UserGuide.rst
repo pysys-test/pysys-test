@@ -235,7 +235,7 @@ Producing code coverage reports
 PySys can be extended to produce code coverage reports for any language, by creating a writer plugin. 
 
 There is an existing writer that produces coverage reports for programs written in Python called 
-`pysys.writer.testoutput.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
+`pysys.writer.coverage.PythonCoverageWriter`, which uses the ``coverage.py`` library. To use this you need to add the 
 ``<writer>`` to your project (see the sample :doc:`ProjectConfiguration` for an example) and make sure you're starting 
 your Python processes with coverage support enabled, by using `BaseTest.startPython`. 
 
