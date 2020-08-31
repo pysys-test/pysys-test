@@ -41,6 +41,17 @@ class PySysTest(BaseTest):
 		self.assertThat("actual == expected", actual__eval="myDataStructure['item3'][-1].getId()", expected="baz")
 
 		
+		# Finding of common text
+		# This is the most general case
+		self.assertThat('value == expected', value=["c DIFF1 LONG_COMMON_STRING DIFF2 c"], 
+		                                  expected=["c xDIFF1x LONG_COMMON_STRING xDIFF2x c"])
+		self.assertThat('value == expected', value=["c DIFF1 SCS DIFF2 c"], # same but shorter
+		                                  expected=["c xDIFF1x SCS xDIFF2x c"])
+		self.assertThat('value == expected', value=["c DIFFERENCE c"], expected=["c YIKES c"])
+		self.assertThat('value == expected', value="DIFFERENCE c", expected="YIKES c")
+		self.assertThat('value == expected', value="c DIFFERENCE", expected="c YIKES")
+
+		
 		self.addOutcome(PASSED, override=True)
 		
 		

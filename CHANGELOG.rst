@@ -20,16 +20,18 @@ PySys 1.6.2 is under development.
 	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
 	  PySys.
 	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
-	- Added automatic killing of child processes of processes PySys has started (using Unix "process groups", and 
-	  Windows "jobs"). This is especially useful when starting a process using a shell script; previously 
-	  only the wrapper script would have been killed, whereas now the process it starts is also terminated. 
-	- Fixed the default library path on macOS(R). Instead of setting ``DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib`` 
-	  (which overrides executables' default libraries), we now use the ``DYLD_FALLBACK_LIBRARY_PATH`` environment 
-	  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 
-	  Additionally, some extra items were added to the value of `pysys.constants.DYLD_LIBRARY_PATH` to match the 
-	  defaults as described in the latest macOS documentation. 
-	- Added improved debug logging to `BaseTest.startProcess()` including a full command line for manually re-running 
-	  troublesome commands, and expansion of PATH environment variables to show the individual components. 
+	- Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails. 
+	- Process management:
+		- Added automatic killing of child processes of processes PySys has started (using Unix "process groups", and 
+		  Windows "jobs"). This is especially useful when starting a process using a shell script; previously 
+		  only the wrapper script would have been killed, whereas now the process it starts is also terminated. 
+		- Fixed the default library path on macOS(R). Instead of setting ``DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib`` 
+		  (which overrides executables' default libraries), we now use the ``DYLD_FALLBACK_LIBRARY_PATH`` environment 
+		  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 
+		  Additionally, some extra items were added to the value of `pysys.constants.DYLD_LIBRARY_PATH` to match the 
+		  defaults as described in the latest macOS documentation. 
+		- Added improved debug logging to `BaseTest.startProcess()` including a full command line for manually re-running 
+		  troublesome commands, and expansion of PATH environment variables to show the individual components. 
 	- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
 	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
 	  refer to the old name). 

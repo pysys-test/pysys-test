@@ -659,17 +659,44 @@ class BaseTest(ProcessUser):
 					v2 = u'%r'%(namedvalues[namesInUse[1]],)
 				
 				seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
-				i, j, k = seq.find_longest_match(0, len(v1), 0, len(v2))
-				# where v1[i:i+k] == v2[j:j+k]
+				
+				matches = seq.get_matching_blocks()
+				lastmatch = matches[-1] if len(matches)==2 else matches[-2] # may be of zero size
+				
+				# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
+				# Colouring will be red, white(first match, if any), red, white(last match, if any)
+				ijk = []
+				for v in [0,1]:
+					ijk.append([
+						matches[0][v], # i - start of first matching block
+						matches[0][v]+matches[0].size, # j - end of first matching block
+						lastmatch[v] + (0 if lastmatch.size+lastmatch[v] == len([v1,v2][v]) else lastmatch.size) # k - start of final matching block
+					])
+				i1, j1, k1 = ijk[0]
+				i2, j2, k2 = ijk[1]
+				
+				# for some cases such as "XXXyyyXXX", "ZZZyyyZZZ" the above gives only the quotes as matching which is useless, so 
+				# heuristically we'll do better with a longest substring match; compare number of matching chars to decide
+				longestblock = seq.find_longest_match(0, len(v1), 0, len(v2))
+				if (j1-i1) + (len(v1)-k1) < longestblock.size:
+					log.debug('Using longest match %s rather than block matching %s', longestblock, matches)
+					ijk = [
+						# v1 ijk
+						[longestblock.a, longestblock.a+longestblock.size, len(v1)],
+						#v2
+						[longestblock.b, longestblock.b+longestblock.size, len(v2)],
+					]
+					
 
 				for (index, key) in enumerate(namesInUse):
 					value = [v1,v2][index]
-					x = [i, j][index]
-					self.log.info(u'  %{pad}s: %s%s%s'.format(pad=pad), key, 
-						value[:x], value[x:x+k], value[x+k:],
+					i, j, k = ijk[index]
+					#self.log.info(u'  %{pad}s: %s__%s__%s__%s'.format(pad=pad), key, 
+					self.log.info(u'  %{pad}s: %s%s%s%s'.format(pad=pad), key, 
+						value[:i], value[i:j], value[j:k], value[k:], # red - i:white (common prefix) - j:red - k:white (common suffix)
 						extra=BaseLogFormatter.tag(LOG_FAILURES, arg_index=[1,3]))
-				if i == 0 and j == 0 and k > 0: # if there's a common prefix, show where it ends
-					self.log.info(u'  %{pad}s %s ^'.format(pad=pad), '', ' '*k, extra=BaseLogFormatter.tag(LOG_FAILURES))
+				if j1==j2: # if there's a common prefix, show where it ends
+					self.log.info(u'  %{pad}s %s ^'.format(pad=pad), '', ' '*j1, extra=BaseLogFormatter.tag(LOG_FAILURES))
 			return False
 
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
