@@ -1,0 +1,142 @@
+
+pysys.constants
+~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.constants
+
+.. currentmodule:: pysys.constants
+
+
+
+HOSTNAME
+========
+
+.. autodata:: HOSTNAME
+
+
+PLATFORM
+========
+
+.. autodata:: PLATFORM
+
+
+IS\_WINDOWS
+===========
+
+.. autodata:: IS_WINDOWS
+
+
+PYTHON\_EXE
+===========
+
+.. autodata:: PYTHON_EXE
+
+
+BACKGROUND
+==========
+
+.. autodata:: BACKGROUND
+
+
+FOREGROUND
+==========
+
+.. autodata:: FOREGROUND
+
+
+PASSED
+======
+
+.. autodata:: PASSED
+
+
+INSPECT
+=======
+
+.. autodata:: INSPECT
+
+
+NOTVERIFIED
+===========
+
+.. autodata:: NOTVERIFIED
+
+
+FAILED
+======
+
+.. autodata:: FAILED
+
+
+TIMEDOUT
+========
+
+.. autodata:: TIMEDOUT
+
+
+DUMPEDCORE
+==========
+
+.. autodata:: DUMPEDCORE
+
+
+BLOCKED
+=======
+
+.. autodata:: BLOCKED
+
+
+SKIPPED
+=======
+
+.. autodata:: SKIPPED
+
+
+OUTCOMES
+========
+
+.. autodata:: OUTCOMES
+
+
+PRECEDENT
+=========
+
+.. autodata:: PRECEDENT
+
+
+FAILS
+=====
+
+.. autodata:: FAILS
+
+
+LOOKUP
+======
+
+.. autodata:: LOOKUP
+
+
+DEFAULT\_TIMEOUT
+================
+
+.. autodata:: DEFAULT_TIMEOUT
+
+
+TIMEOUTS
+========
+
+.. autodata:: TIMEOUTS
+
+
+Outcome
+=======
+
+.. autoclass:: Outcome
+   :members:
+
+
+PrintLogs
+=========
+
+.. autoclass:: PrintLogs
+   :members:

@@ -1,0 +1,38 @@
+
+pysys.utils.filegrep
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.filegrep
+
+.. currentmodule:: pysys.utils.filegrep
+
+
+
+getmatches
+==========
+
+.. autofunction:: getmatches
+
+
+filegrep
+========
+
+.. autofunction:: filegrep
+
+
+lastgrep
+========
+
+.. autofunction:: lastgrep
+
+
+orderedgrep
+===========
+
+.. autofunction:: orderedgrep
+
+
+logContents
+===========
+
+.. autofunction:: logContents

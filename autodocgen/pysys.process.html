@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.process &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.process.monitor" href="pysys.process.monitor.html" />
+    <link rel="prev" title="pysys.mappers" href="pysys.mappers.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pysys.process</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.monitor.html">pysys.process.monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.monitorimpl.html">pysys.process.monitorimpl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.user.html">pysys.process.user</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process">Process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+      <li>pysys.process</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.process.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.process">
+<span id="pysys-process"></span><h1>pysys.process<a class="headerlink" href="#module-pysys.process" title="Permalink to this headline">¶</a></h1>
+<p>Process execution and monitoring implementations.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.process.monitor.html#module-pysys.process.monitor" title="pysys.process.monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitor</span></code></a></p></td>
+<td><p>Contains the process monitoring API used by <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.process.monitorimpl.html#module-pysys.process.monitorimpl" title="pysys.process.monitorimpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitorimpl</span></code></a></p></td>
+<td><p>Contains implementations of the <a class="reference internal" href="pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor</span></code></a> interface.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.process.user.html#module-pysys.process.user" title="pysys.process.user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user</span></code></a></p></td>
+<td><p>Contains <a class="reference internal" href="pysys.process.user.html#pysys.process.user.ProcessUser" title="pysys.process.user.ProcessUser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser</span></code></a> which supports using processes from PySys, and provides the  shared functionality of subclasses <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a> and <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="process">
+<h2>Process<a class="headerlink" href="#process" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.process.Process">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.process.</code><code class="sig-name descname">Process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">command</span></em>, <em class="sig-param"><span class="n">arguments</span></em>, <em class="sig-param"><span class="n">environs</span></em>, <em class="sig-param"><span class="n">workingDir</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">timeout</span></em>, <em class="sig-param"><span class="n">stdout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stderr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expectedExitStatus</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">info</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a process that PySys has started (or can start).</p>
+<p>Instances of a platform-specific implementation of this interface are returned 
+by <a class="reference internal" href="pysys.process.user.html#pysys.process.user.ProcessUser.startProcess" title="pysys.process.user.ProcessUser.startProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.user.ProcessUser.startProcess</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – The full path to the executable.</p></li>
+<li><p><strong>arguments</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – A list of arguments to the command.</p></li>
+<li><p><strong>environs</strong> (<em>dict</em><em>(</em><em>str</em><em>,</em><em>str</em><em>)</em>) – A dictionary of environment variables (key, value) for the process context execution. 
+Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
+automatically to unicode using utf-8.</p></li>
+<li><p><strong>workingDir</strong> (<em>str</em>) – The working directory for the process</p></li>
+<li><p><strong>state</strong> – The state of the process.</p></li>
+<li><p><strong>timeout</strong> (<em>int</em>) – The time in seconds for a foreground process to complete.</p></li>
+<li><p><strong>stdout</strong> (<em>str</em>) – The full path to the filename to write the stdout of the process, or None for no stderr stream.</p></li>
+<li><p><strong>stderr</strong> (<em>str</em>) – The full path to the filename to write the stderr of the process, or None for no stderr stream.</p></li>
+<li><p><strong>displayName</strong> (<em>str</em>) – Display name for this process (defaults to the basename if not explicitly specified). The 
+display name is returned by calling <code class="docutils literal notranslate"><span class="pre">str()</span></code> on this instance. The display name and pid are returned by 
+<code class="docutils literal notranslate"><span class="pre">repr()</span></code>.</p></li>
+<li><p><strong>expectedExitStatus</strong> (<em>str</em>) – The condition string used to determine whether the exit status/code 
+returned by the process is correct, for example ‘==0’.</p></li>
+<li><p><strong>pid</strong> (<em>int</em>) – The process id for a running or complete process (as set by the OS), or None if it is not yet started.</p></li>
+<li><p><strong>exitStatus</strong> (<em>int</em>) – The process exit status for a completed process (for many processes 0 represents success), 
+or None if it has not yet completed.</p></li>
+<li><p><strong>info</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>obj</em><em>]</em>) – A mutable dictionary of user-supplied information that was passed into startProcess, 
+for example port numbers, log file paths etc.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pysys.process.Process.stop">
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop a running process.</p>
+<p>Does nothing if the process is not running.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pysys.exceptions.html#pysys.exceptions.ProcessError" title="pysys.exceptions.ProcessError"><strong>pysys.exceptions.ProcessError</strong></a> – Raised if an error occurred whilst trying to stop the process.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.Process.signal">
+<code class="sig-name descname">signal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">signal</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process.signal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process.signal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a signal to a running process.</p>
+<p>Typically this uses <code class="docutils literal notranslate"><span class="pre">os.kill</span></code> to send the signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>signal</strong> (<em>int</em>) – The integer signal to send to the process, e.g. <code class="docutils literal notranslate"><span class="pre">process.signal(signal.SIGTERM)</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="pysys.exceptions.html#pysys.exceptions.ProcessError" title="pysys.exceptions.ProcessError"><strong>pysys.exceptions.ProcessError</strong></a> – Raised if an error occurred whilst trying to signal the process</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.Process.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">addNewLine</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write binary data to the stdin of the process.</p>
+<p>Note that when the addNewLine argument is set to true, if a new line does not 
+terminate the input data string, a newline character will be added. If one 
+already exists a new line character will not be added. Should you explicitly 
+require to add data without the method appending a new line charater set 
+addNewLine to false.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – The data to write to the process stdin. 
+As only binary data can be written to a process stdin, 
+if a character string rather than a byte object is passed as the data,
+it will be automatically converted to a bytes object using the encoding 
+given by <code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code>.</p></li>
+<li><p><strong>addNewLine</strong> – True if a new line character is to be added to the end of 
+the data string</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.Process.running">
+<code class="sig-name descname">running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process.running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process.running" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check to see if a process is running.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the process is currently running, False if not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.Process.wait">
+<code class="sig-name descname">wait</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for a process to complete execution, raising an exception on timeout.</p>
+<p>This method provides basic functionality but does not check the exit status or log any messages; 
+see <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.waitProcess" title="pysys.basetest.BaseTest.waitProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.waitProcess</span></code></a> for a wrapper that adds additional functionality.</p>
+<p>Note that this method will not terminate the process if the timeout is exceeded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> – The timeout to wait in seconds, for example <code class="docutils literal notranslate"><span class="pre">timeout=TIMEOUTS['WaitForProcess']</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="pysys.exceptions.html#pysys.exceptions.ProcessTimeout" title="pysys.exceptions.ProcessTimeout"><strong>pysys.exceptions.ProcessTimeout</strong></a> – Raised if the timeout is exceeded.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.Process.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process.html#Process.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.Process.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start a process using the runtime parameters set at instantiation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="pysys.exceptions.html#pysys.exceptions.ProcessError" title="pysys.exceptions.ProcessError"><strong>pysys.exceptions.ProcessError</strong></a> – Raised if there is an error creating the process</p></li>
+<li><p><a class="reference internal" href="pysys.exceptions.html#pysys.exceptions.ProcessTimeout" title="pysys.exceptions.ProcessTimeout"><strong>pysys.exceptions.ProcessTimeout</strong></a> – Raised in the process timed out (foreground process only)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.process.monitor.html" class="btn btn-neutral float-right" title="pysys.process.monitor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.mappers.html" class="btn btn-neutral float-left" title="pysys.mappers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

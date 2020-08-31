@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.filereplace &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.filereplace</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.filereplace</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Replacing tokens in a text file. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span>
+
+<div class="viewcode-block" id="replace"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filereplace.html#pysys.utils.filereplace.replace">[docs]</a><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="nb">dict</span><span class="o">=</span><span class="p">{},</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Read an input file, and write to output tailoring the file to replace set keywords with values.</span>
+
+<span class="sd">	:deprecated: It is recommended to use `pysys.basetest.BaseTest.copy()` instead of this method. </span>
+
+<span class="sd">	The replace method reads in the contents of the input file line by line, checks for matches in </span>
+<span class="sd">	each line to the keys in the dictionary dict parameter, and replaces each match with the value</span>
+<span class="sd">	of the dictionary for that key, writing the line to the output file. The marker parameter is a</span>
+<span class="sd">	character which can be used to denoted keywords in the file to be replaced. For instance, with </span>
+<span class="sd">	dict of the form C{{&#39;CATSEAT&#39;:&#39;mat&#39;, &#39;DOGSEAT&#39;:&#39;hat&#39;}}, marker set to &#39;$&#39;, and an input file::</span>
+<span class="sd">	</span>
+<span class="sd">	  The cat sat on the $CATSEAT$</span>
+<span class="sd">	  The dog sat on the $DOGSEAT$</span>
+<span class="sd">	  </span>
+<span class="sd">	the ouptut file produced would have the contents::</span>
+<span class="sd">	  </span>
+<span class="sd">	  The cat sat on the mat</span>
+<span class="sd">	  The dog sat on the hat</span>
+
+<span class="sd">	:param input: The full path to the input file</span>
+<span class="sd">	:param output: The full path to the output file with the keywords replaced</span>
+<span class="sd">	:param dict: A dictionary of key/value pairs to use in the replacement</span>
+<span class="sd">	:param marker: The character used to mark key words to be replaced (may be the empty string</span>
+<span class="sd">	               if no characters are used)</span>
+<span class="sd">	:param encoding: Specifies the encoding to be used for opening the file, or None for default. </span>
+<span class="sd">	</span>
+<span class="sd">	:raises FileNotFoundException: Raised if the input file does not exist</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">FileNotFoundException</span><span class="p">(</span><span class="s2">&quot;unable to find file </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">input</span><span class="p">))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">,</span> <span class="n">openfile</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">fo</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fi</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+				<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+					<span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">marker</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">marker</span><span class="p">),</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+				<span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div>
+
+	
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+
+pysys.utils.filediff
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.filediff
+
+.. currentmodule:: pysys.utils.filediff
+
+
+
+trimContents
+============
+
+.. autofunction:: trimContents
+
+
+replace
+=======
+
+.. autofunction:: replace
+
+
+logContents
+===========
+
+.. autofunction:: logContents
+
+
+filediff
+========
+
+.. autofunction:: filediff

@@ -1,0 +1,278 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API Reference &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.baserunner" href="pysys.baserunner.html" />
+    <link rel="prev" title="Project Configuration" href="../ProjectConfig.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>API Reference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys">
+<span id="api-reference"></span><h1>API Reference<a class="headerlink" href="#module-pysys" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to the PySys System Test Framework.</p>
+<p><a class="reference internal" href="../BaseTest.html#module-pysys.basetest" title="pysys.basetest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest</span></code></a> contains (or provides links to) pretty much everything you need for the main business of creating 
+testcases using PySys.</p>
+<p>However for more advanced users, it is possible to customize many aspects of PySys behaviour by providing custom 
+implementations of PySys classes described in this API reference:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> to customize orchestration of all the tests in a test run.</p></li>
+<li><p><a class="reference internal" href="pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a> classes to customize how test outcomes are recorded.</p></li>
+<li><p><a class="reference internal" href="pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code></a> to customize how numeric performance results are reported.</p></li>
+<li><p><a class="reference internal" href="pysys.xml.descriptor.html#pysys.xml.descriptor.DescriptorLoader" title="pysys.xml.descriptor.DescriptorLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.xml.descriptor.DescriptorLoader</span></code></a> to customize how PySys find and runs tests (e.g. to support running tests 
+from other frameworks within PySys).</p></li>
+<li><p><a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter" title="pysys.utils.logutils.BaseLogFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.BaseLogFormatter</span></code></a> for advanced customization of log message format.</p></li>
+</ul>
+</div></blockquote>
+<p>There are also many utility functions which could be helpful when creating custom assertion methods. However before 
+using any functions from <a class="reference internal" href="pysys.utils.html#module-pysys.utils" title="pysys.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils</span></code></a>, always check first if there is a more convenient method available to do the 
+job on <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a>/<a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.baserunner.html#module-pysys.baserunner" title="pysys.baserunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner</span></code></a></p></td>
+<td><p>The runner is responsible for orchestrating concurrent execution of the tests, and for setup/cleanup of  any resources that are shared across multiple tests.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.constants.html#module-pysys.constants" title="pysys.constants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.constants</span></code></a></p></td>
+<td><p>Standard constants that are used throughout the PySys framework.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.exceptions.html#module-pysys.exceptions" title="pysys.exceptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.exceptions</span></code></a></p></td>
+<td><p>Exceptions used and raised by PySys methods.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.launcher.html#module-pysys.launcher" title="pysys.launcher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.launcher</span></code></a></p></td>
+<td><p>Implementation of the pysys.py command line launcher.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.mappers.html#module-pysys.mappers" title="pysys.mappers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.mappers</span></code></a></p></td>
+<td><p>Mappers that filter or transform lines of input, for use with methods such as <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.copy" title="pysys.basetest.BaseTest.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.copy</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.process.html#module-pysys.process" title="pysys.process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process</span></code></a></p></td>
+<td><p>Process execution and monitoring implementations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.unit.html#module-pysys.unit" title="pysys.unit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.unit</span></code></a></p></td>
+<td><p>Unit test support (currently just PyUnit).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.html#module-pysys.utils" title="pysys.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils</span></code></a></p></td>
+<td><p>Utility functions and classes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.writer.html#module-pysys.writer" title="pysys.writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer</span></code></a></p></td>
+<td><p>Writers are configurable plugins responsible for summarising test results or processing test output as each test  completes, or at the end when all tests has completed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.xml.html#module-pysys.xml" title="pysys.xml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.xml</span></code></a></p></td>
+<td><p>Test/directory descriptors (<code class="docutils literal notranslate"><span class="pre">pysystest.xml</span></code>/<code class="docutils literal notranslate"><span class="pre">pysysdirconfig.xml</span></code>) and project configuration (<code class="docutils literal notranslate"><span class="pre">pysysproject.xml</span></code>).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.baserunner.html" class="btn btn-neutral float-right" title="pysys.baserunner" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../ProjectConfig.html" class="btn btn-neutral float-left" title="Project Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

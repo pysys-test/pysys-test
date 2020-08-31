@@ -1,0 +1,286 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.utils.allocport" href="pysys.utils.allocport.html" />
+    <link rel="prev" title="pysys.unit.pyunit" href="pysys.unit.pyunit.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pysys.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.allocport.html">pysys.utils.allocport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filediff.html">pysys.utils.filediff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filegrep.html">pysys.utils.filegrep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filereplace.html">pysys.utils.filereplace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.fileunzip.html">pysys.utils.fileunzip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.fileutils.html">pysys.utils.fileutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+      <li>pysys.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.utils">
+<span id="pysys-utils"></span><h1>pysys.utils<a class="headerlink" href="#module-pysys.utils" title="Permalink to this headline">¶</a></h1>
+<p>Utility functions and classes.</p>
+<p>These functions are used by the rest of the PySys framework. In some cases you may wish to use these directly, 
+however always check if there is a wrapper method in <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a> (or <code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner)</span></code> 
+that would do the job first, before resorting to these lower-level functions.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.allocport.html#module-pysys.utils.allocport" title="pysys.utils.allocport"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.allocport</span></code></a></p></td>
+<td><p>Dynamic TCP port allocation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.filediff.html#module-pysys.utils.filediff" title="pysys.utils.filediff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.filediff</span></code></a></p></td>
+<td><p>Comparing (diffing) text file contents.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.filegrep.html#module-pysys.utils.filegrep" title="pysys.utils.filegrep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.filegrep</span></code></a></p></td>
+<td><p>Regular expression grep matching in text files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.filereplace.html#module-pysys.utils.filereplace" title="pysys.utils.filereplace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.filereplace</span></code></a></p></td>
+<td><p>Replacing tokens in a text file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.fileunzip.html#module-pysys.utils.fileunzip" title="pysys.utils.fileunzip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.fileunzip</span></code></a></p></td>
+<td><p>Unpacking one or more compressed files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.fileutils.html#module-pysys.utils.fileutils" title="pysys.utils.fileutils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.fileutils</span></code></a></p></td>
+<td><p>File and directory handling utility functions such as mkdir and deletedir, with enhanced error handling and  support for long paths on Windows.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.linecount.html#module-pysys.utils.linecount" title="pysys.utils.linecount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.linecount</span></code></a></p></td>
+<td><p>Counting the number of lines in a text file matching a specified regular expression.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.logutils.html#module-pysys.utils.logutils" title="pysys.utils.logutils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils</span></code></a></p></td>
+<td><p>Log formatting classes that can be used or customized from the project configuration, including support for colored  output on the console.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.misc.html#module-pysys.utils.misc" title="pysys.utils.misc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc</span></code></a></p></td>
+<td><p>Miscellanous utilities such as <a class="reference internal" href="pysys.utils.misc.html#pysys.utils.misc.compareVersions" title="pysys.utils.misc.compareVersions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.compareVersions</span></code></a> and <a class="reference internal" href="pysys.utils.misc.html#pysys.utils.misc.setInstanceVariablesFromDict" title="pysys.utils.misc.setInstanceVariablesFromDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.misc.setInstanceVariablesFromDict</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.perfreporter.html#module-pysys.utils.perfreporter" title="pysys.utils.perfreporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter</span></code></a></p></td>
+<td><p>Performance number reporting classes, used by <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.reportPerformanceResult" title="pysys.basetest.BaseTest.reportPerformanceResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.reportPerformanceResult</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.pycompat.html#module-pysys.utils.pycompat" title="pysys.utils.pycompat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.pycompat</span></code></a></p></td>
+<td><p>Compatibility utilities to allow PySys to support both Python 2 and 3.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.threadutils.html#module-pysys.utils.threadutils" title="pysys.utils.threadutils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.threadutils</span></code></a></p></td>
+<td><p>Contains the <code class="xref py py-obj docutils literal notranslate"><span class="pre">BackgroundThread</span></code> class.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.utils.allocport.html" class="btn btn-neutral float-right" title="pysys.utils.allocport" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.unit.pyunit.html" class="btn btn-neutral float-left" title="pysys.unit.pyunit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

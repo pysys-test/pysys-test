@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.process.monitorimpl &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.process.user" href="pysys.process.user.html" />
+    <link rel="prev" title="pysys.process.monitor" href="pysys.process.monitor.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.process.html">pysys.process</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.monitor.html">pysys.process.monitor</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.process.monitorimpl</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#default-process-monitor">DEFAULT_PROCESS_MONITOR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#windowsprocessmonitor">WindowsProcessMonitor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unixprocessmonitor">UnixProcessMonitor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.user.html">pysys.process.user</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.html#process">Process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.process.html">pysys.process</a> &raquo;</li>
+        
+      <li>pysys.process.monitorimpl</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.process.monitorimpl.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.process.monitorimpl">
+<span id="pysys-process-monitorimpl"></span><h1>pysys.process.monitorimpl<a class="headerlink" href="#module-pysys.process.monitorimpl" title="Permalink to this headline">¶</a></h1>
+<p>Contains implementations of the <a class="reference internal" href="pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor</span></code></a> interface.</p>
+<div class="section" id="default-process-monitor">
+<h2>DEFAULT_PROCESS_MONITOR<a class="headerlink" href="#default-process-monitor" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.process.monitorimpl.DEFAULT_PROCESS_MONITOR">
+<code class="sig-prename descclassname">pysys.process.monitorimpl.</code><code class="sig-name descname">DEFAULT_PROCESS_MONITOR</code><em class="property"> = &lt;class 'pysys.process.monitorimpl.UnixProcessMonitor'&gt;</em><a class="headerlink" href="#pysys.process.monitorimpl.DEFAULT_PROCESS_MONITOR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies the default <code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseProcessMonitor</span></code> subclass to be used for 
+monitoring OS-level process information on the current platform.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="windowsprocessmonitor">
+<h2>WindowsProcessMonitor<a class="headerlink" href="#windowsprocessmonitor" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.process.monitorimpl.WindowsProcessMonitor">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.process.monitorimpl.</code><code class="sig-name descname">WindowsProcessMonitor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">owner</span></em>, <em class="sig-param"><span class="n">process</span></em>, <em class="sig-param"><span class="n">interval</span></em>, <em class="sig-param"><span class="n">handlers</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">pmargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitorimpl.html#WindowsProcessMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitorimpl.WindowsProcessMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor</span></code></a></p>
+<p>Windows implementation of a process monitor.</p>
+<p>Uses the <code class="xref py py-obj docutils literal notranslate"><span class="pre">GetProcessMemoryInfo</span></code>, and <code class="xref py py-obj docutils literal notranslate"><span class="pre">GetProcessTimes</span></code> APIs. 
+The UserTime and KernelTime are summed together to calculate the CPU 
+utilization for this process.</p>
+<p>Construct an instance of the process monitor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>owner</strong> – The BaseTest owning this monitor.</p></li>
+<li><p><strong>process</strong> – The process wrapper object. A numeric pid can be specified 
+instead but with reduced functionality, so use a process object if you 
+have one.</p></li>
+<li><p><strong>interval</strong> – The interval in seconds between polling for each data 
+sample.</p></li>
+<li><p><strong>pmargs</strong> – Keyword arguments to allow parameterization of the 
+returned data. An exception will be raised for any arguments not 
+expected by this class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pysys.process.monitorimpl.WindowsProcessMonitor._timer_ns">
+<code class="sig-name descname">_timer_ns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitorimpl.html#WindowsProcessMonitor._timer_ns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitorimpl.WindowsProcessMonitor._timer_ns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a monotonically incrementing clock value in nanoseconds (1000**3) that 
+can be used to calculate performance results.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="unixprocessmonitor">
+<h2>UnixProcessMonitor<a class="headerlink" href="#unixprocessmonitor" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.process.monitorimpl.UnixProcessMonitor">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.process.monitorimpl.</code><code class="sig-name descname">UnixProcessMonitor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">owner</span></em>, <em class="sig-param"><span class="n">process</span></em>, <em class="sig-param"><span class="n">interval</span></em>, <em class="sig-param"><span class="n">handlers</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">pmargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitorimpl.html#UnixProcessMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitorimpl.UnixProcessMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.process.monitor.html#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor</span></code></a></p>
+<p>Unix implementation of a process monitor.</p>
+<p>Uses the <code class="xref py py-obj docutils literal notranslate"><span class="pre">ps</span></code> command line tool, reading columns <code class="xref py py-obj docutils literal notranslate"><span class="pre">pcpu</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">rss</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">vsz</span></code>.</p>
+<p>Construct an instance of the process monitor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>owner</strong> – The BaseTest owning this monitor.</p></li>
+<li><p><strong>process</strong> – The process wrapper object. A numeric pid can be specified 
+instead but with reduced functionality, so use a process object if you 
+have one.</p></li>
+<li><p><strong>interval</strong> – The interval in seconds between polling for each data 
+sample.</p></li>
+<li><p><strong>pmargs</strong> – Keyword arguments to allow parameterization of the 
+returned data. An exception will be raised for any arguments not 
+expected by this class.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.process.user.html" class="btn btn-neutral float-right" title="pysys.process.user" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.process.monitor.html" class="btn btn-neutral float-left" title="pysys.process.monitor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+
+pysys.launcher.console\_make
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.launcher.console_make
+
+.. currentmodule:: pysys.launcher.console_make
+
+
+
+ConsoleMakeTestHelper
+=====================
+
+.. autoclass:: ConsoleMakeTestHelper
+   :members:

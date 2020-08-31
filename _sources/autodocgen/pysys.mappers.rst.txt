@@ -1,0 +1,36 @@
+
+pysys.mappers
+~~~~~~~~~~~~~
+
+.. automodule:: pysys.mappers
+
+.. currentmodule:: pysys.mappers
+
+
+
+RegexReplace
+============
+
+.. autoclass:: RegexReplace
+   :members:
+
+
+IncludeLinesBetween
+===================
+
+.. autoclass:: IncludeLinesBetween
+   :members:
+
+
+IncludeLinesMatching
+====================
+
+.. autoclass:: IncludeLinesMatching
+   :members:
+
+
+ExcludeLinesMatching
+====================
+
+.. autoclass:: ExcludeLinesMatching
+   :members:

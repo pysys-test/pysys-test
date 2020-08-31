@@ -1,0 +1,20 @@
+
+pysys.utils.fileunzip
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.fileunzip
+
+.. currentmodule:: pysys.utils.fileunzip
+
+
+
+unzipall
+========
+
+.. autofunction:: unzipall
+
+
+unzip
+=====
+
+.. autofunction:: unzip

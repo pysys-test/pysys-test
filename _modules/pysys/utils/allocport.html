@@ -1,0 +1,485 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.allocport &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.allocport</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.allocport</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dynamic TCP port allocation. </span>
+
+<span class="sd">This is used by the `pysys.process.user.ProcessUser` class (and its subclasses e.g. BaseTest) which should </span>
+<span class="sd">usually be used to access this functionality. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">collections</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">process_lock</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">openfile</span>
+
+<span class="c1"># LRU queue of server TCP ports for allocation to tests which need to</span>
+<span class="c1"># start TCP servers. Initialized to None since it might not actually be used.</span>
+<span class="c1"># Properly initialize only on demand.</span>
+<span class="n">tcpServerPortPool</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="n">_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.allocport&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="getEphemeralTCPPortRange"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.getEphemeralTCPPortRange">[docs]</a><span class="k">def</span> <span class="nf">getEphemeralTCPPortRange</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Returns the minimum and maximum TCP ports this operating system uses to allocate</span>
+<span class="sd">	ephemeral/dynamic ports (the client side of the TCP connection). </span>
+<span class="sd">	</span>
+<span class="sd">	This function is used by `getServerTCPPorts()` to ensure that no ephemeral/client-side ports are allocated for </span>
+<span class="sd">	server-side purposes by PySys (this could cause random port clashes). </span>
+<span class="sd">	</span>
+<span class="sd">	If the available server ports are overridden using the ``PYSYS_PORTS`` or ``PYSYS_PORTS_FILE`` environment </span>
+<span class="sd">	variables, this function is not called. </span>
+<span class="sd">	</span>
+<span class="sd">	:return: A tuple (ephemeral_min: int, ephemeral_max: int) giving the ephemeral port range for this platform. </span>
+<span class="sd">	:raises Exception: If the ephemeral port range cannot be determined, which will prevent PySys from running any tests. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># Find the smallest and largest ephemeral port</span>
+	<span class="k">if</span> <span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span><span class="p">:</span>
+		<span class="n">port_file</span> <span class="o">=</span> <span class="s1">&#39;/proc/sys/net/ipv4/ip_local_port_range&#39;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">port_file</span><span class="p">):</span>
+			<span class="c1"># There&#39;s no perfect default that works for all OSes (and the config may be customized by the OS anyway), </span>
+			<span class="c1"># but it&#39;s useful to avoid an error to help on environments like Windows Subsystem for Linux v1. </span>
+			<span class="c1"># We pick the IANA range as our default</span>
+			<span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span> <span class="o">=</span> <span class="mi">49152</span><span class="p">,</span> <span class="mi">65535</span>
+			<span class="n">_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;PySys cannot determine the local/ephemeral port range on this OS (</span><span class="si">%s</span><span class="s1">) as &quot;</span><span class="si">%s</span><span class="s1">&quot; is missing; falling back to default IANA range </span><span class="si">%d</span><span class="s1">-</span><span class="si">%d</span><span class="s1">. Consider using the PYSYS_PORTS=minport-maxport environment variable to explicitly configure the range of non-ephemeral/server ports for PySys to use.&#39;</span><span class="p">,</span> <span class="n">platform</span><span class="o">.</span><span class="n">platform</span><span class="p">(),</span> <span class="n">port_file</span><span class="p">,</span> <span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">port_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+				<span class="n">s</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+				<span class="n">ephemeral_low</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+				<span class="n">ephemeral_high</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+	<span class="k">elif</span> <span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;sunos&#39;</span><span class="p">:</span>
+		<span class="k">def</span> <span class="nf">runNdd</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">parameter</span><span class="p">):</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;/usr/sbin/ndd&#39;</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">parameter</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+			<span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+		<span class="n">ephemeral_low</span> <span class="o">=</span> <span class="n">runNdd</span><span class="p">(</span><span class="s1">&#39;/dev/tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp_smallest_anon_port&#39;</span><span class="p">)</span>
+		<span class="n">ephemeral_high</span> <span class="o">=</span> <span class="n">runNdd</span><span class="p">(</span><span class="s1">&#39;/dev/tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp_largest_anon_port&#39;</span><span class="p">)</span>
+	<span class="k">elif</span> <span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;darwin&#39;</span><span class="p">:</span>
+		<span class="k">def</span> <span class="nf">runSysctl</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s1">&#39;/usr/sbin/sysctl&#39;</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="n">parameter</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+			<span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+		<span class="n">ephemeral_low</span> <span class="o">=</span> <span class="n">runSysctl</span><span class="p">(</span><span class="s1">&#39;net.inet.ip.portrange.first&#39;</span><span class="p">)</span>
+		<span class="n">ephemeral_high</span> <span class="o">=</span> <span class="n">runSysctl</span><span class="p">(</span><span class="s1">&#39;net.inet.ip.portrange.last&#39;</span><span class="p">)</span>
+	<span class="k">elif</span> <span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="c1"># The port defaults have changed in various windows releases, so executing this command is the most reliable solution</span>
+			<span class="c1"># We assume that IPv6 (if used) is configured the same</span>
+			<span class="n">netsh</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s1">&#39;netsh&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;ipv4&#39;</span><span class="p">,</span> <span class="s1">&#39;show&#39;</span><span class="p">,</span> <span class="s1">&#39;dynamicport&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp&#39;</span><span class="p">])</span>
+			<span class="n">ephemeral_low</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;Start Port *: *([0-9]+)&#39;</span><span class="p">,</span> <span class="n">netsh</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+			<span class="n">ephemeral_high</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;Number of Ports *: *([0-9]+)&#39;</span><span class="p">,</span> <span class="n">netsh</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">ephemeral_low</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="c1"># This is a fallback just in case the above command doesn&#39;t work</span>
+			<span class="n">_log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to get Windows dynamic port range using netsh - </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+
+			<span class="n">ephemeral_low</span> <span class="o">=</span> <span class="mi">1025</span>
+			<span class="n">ephemeral_high</span> <span class="o">=</span> <span class="mi">5000</span> <span class="c1"># The default</span>
+			<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+				<span class="kn">import</span> <span class="nn">_winreg</span> <span class="k">as</span> <span class="nn">winreg</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="kn">import</span> <span class="nn">winreg</span>
+			<span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;SYSTEM\CurrentControlSet\Services\Tcpip\Parameters&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">ephemeral_high</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="s1">&#39;MaxUserPort&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+					<span class="n">_log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Read ephemeral_high value from MaxUserPort in registry: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ephemeral_high</span><span class="p">)</span>
+				<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+					<span class="c1"># Accept the default if there isn&#39;t a value in the registry</span>
+					<span class="k">pass</span>
+			<span class="k">if</span> <span class="n">ephemeral_high</span> <span class="o">&gt;</span> <span class="mi">65535</span><span class="o">-</span><span class="mi">100</span><span class="p">:</span> 
+				<span class="c1"># this suggests we&#39;re on one of the more recent OSes which use the IANA range rather than the low 1025+ </span>
+				<span class="c1"># part of the range for ephemeral ports (and anyway, we&#39;d end up </span>
+				<span class="c1"># with no non-dynamic ports on which to start servers on if we didn&#39;t do this!)</span>
+				<span class="n">ephemeral_low</span> <span class="o">=</span> <span class="mi">49152</span>
+				<span class="n">_log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Forcing ephemeral_low to </span><span class="si">%s</span><span class="s1"> since with ephemeral_high=</span><span class="si">%s</span><span class="s1"> there would be no server ports otherwise&#39;</span><span class="p">,</span> 
+					<span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span><span class="p">)</span>
+
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;PySys cannot determine the ephemeral port range on platform </span><span class="si">%s</span><span class="s2"> (consider using the PYSYS_PORTS=min-max or PYSYS_PORTS_FILE= environment variables)&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">)</span>
+
+	<span class="k">assert</span> <span class="n">ephemeral_low</span> <span class="o">&lt;=</span> <span class="n">ephemeral_high</span><span class="p">,</span> <span class="p">[</span><span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span><span class="p">]</span>
+
+	<span class="k">return</span> <span class="p">(</span><span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getServerTCPPorts"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.getServerTCPPorts">[docs]</a><span class="k">def</span> <span class="nf">getServerTCPPorts</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Returns a list of the TCP ports that PySys tests can use when starting servers that listen on a port. </span>
+<span class="sd">	</span>
+<span class="sd">	This function is usually called when `pysys.baserunner.BaseRunner` is constructed to help decide the </span>
+<span class="sd">	pool of available ports that can be allocated by `pysys.basetest.BaseTest.getNextAvailableTCPPort()`. </span>
+
+<span class="sd">	PySys treats all ports from 1024-65536 as server ports except for the client-side ephemeral/dynamic port range </span>
+<span class="sd">	as determined by `getEphemeralTCPPortRange()`. Alternatively, the set of server ports can be overridden by the </span>
+<span class="sd">	following environment variables:</span>
+<span class="sd">	</span>
+<span class="sd">	  - ``PYSYS_PORTS=minport-maxport,port,...`` PySys will use the specified ports and/or port ranges (inclusive) </span>
+<span class="sd">	    allocating server ports.  </span>
+<span class="sd">	  - ``PYSYS_PORTS_FILE=file_path.txt`` PySys will use ports from the specified ASCII text file, one port per line. </span>
+
+<span class="sd">	If using these variables, be sure to avoid none of the ports reserved for ephemeral use is in the set of server </span>
+<span class="sd">	ports you specify. </span>
+
+<span class="sd">	:return: A list or set of all the server ports that can be used, e.g. [1024, 1025, ...]. </span>
+<span class="sd">	:raises Exception: If the port range cannot be determined, which will prevent PySys from running any tests. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_PORTS&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+		<span class="n">specs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PYSYS_PORTS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+	<span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_PORTS_FILE&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">):</span>
+		<span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PYSYS_PORTS_FILE&#39;</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">specs</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span> 
+		<span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span> <span class="o">=</span> <span class="n">getEphemeralTCPPortRange</span><span class="p">()</span>
+		<span class="c1"># The standard implementation: allocate server ports from all non-privileged, non-ephemeral ports</span>
+		<span class="n">ports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="n">ephemeral_low</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ephemeral_high</span><span class="p">,</span><span class="mi">65536</span><span class="p">))</span>
+		<span class="n">_log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;TCP ephemeral port range is: </span><span class="si">%d</span><span class="s1">-</span><span class="si">%d</span><span class="s1">; this leaves a total of </span><span class="si">%d</span><span class="s1"> ports for running servers&#39;</span><span class="p">,</span> <span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ports</span><span class="p">))</span>
+		
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ports</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">50</span><span class="p">:</span>
+			<span class="n">fallback_low</span><span class="p">,</span> <span class="n">fallback_high</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">49152</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+			<span class="n">_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;PySys has detected that only </span><span class="si">%d</span><span class="s1"> ports are remaining for starting servers, after removing the </span><span class="si">%d</span><span class="s1">-</span><span class="si">%d</span><span class="s1"> ephemeral/dynamic port range on this machine (</span><span class="si">%s</span><span class="s1">). To ensure enough ports are available, PySys is falling back to using the server port range </span><span class="si">%d</span><span class="s1">-</span><span class="si">%d</span><span class="s1">, however this may result in clashes between server ports and ephemeral ports so it is recommended to change your TCP configuration on this machine to provide more balance between the number of ephemeral vs server ports. &#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ports</span><span class="p">),</span> <span class="n">ephemeral_low</span><span class="p">,</span> <span class="n">ephemeral_high</span><span class="p">,</span> <span class="n">platform</span><span class="o">.</span><span class="n">platform</span><span class="p">(),</span> <span class="n">fallback_low</span><span class="p">,</span> <span class="n">fallback_high</span><span class="p">)</span>
+			<span class="n">ports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">fallback_low</span><span class="p">,</span> <span class="n">fallback_high</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">ports</span>
+
+	<span class="n">ports</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+	<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">:</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+		
+		<span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+			<span class="n">envrange</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">envrange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">envrange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+				<span class="n">ports</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">ports</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+	<span class="k">return</span> <span class="n">ports</span></div>
+
+
+<span class="k">def</span> <span class="nf">initializePortPool</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Initialize the pool of ports we can allocate TCP server ports from</span>
+<span class="sd">	i.e. ports that processes can bind to without clashes with other</span>
+<span class="sd">	processes.</span>
+<span class="sd">	</span>
+<span class="sd">	Called from BaseRuner.__init__ (not when this module is imported) so that it&#39;s possible to monkey-patch </span>
+<span class="sd">	getEphemeralTCPPortRange() in user code (e.g. when the custom runner is imported) if required e.g. for a new platform. </span>
+<span class="sd">	</span>
+<span class="sd">	:meta private: Not public API</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">global</span> <span class="n">tcpServerPortPool</span>
+	<span class="k">assert</span> <span class="n">tcpServerPortPool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Cannot call initializePortPool() more than once per process&#39;</span>
+
+	<span class="n">tcpServerPortPool</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">getServerTCPPorts</span><span class="p">())</span>
+
+	<span class="c1"># Randomize the port set to reduce the chance of clashes between</span>
+	<span class="c1"># simultaneous runs on the same machine</span>
+	<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">tcpServerPortPool</span><span class="p">)</span>
+
+	<span class="c1"># Convert to an LRU queue of ports</span>
+	<span class="n">tcpServerPortPool</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">tcpServerPortPool</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">portIsInUse</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="c1"># Try to bind to the post on the specified address to see if anyone else is using it</span>
+	<span class="k">with</span> <span class="n">process_lock</span><span class="p">:</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socketAddressFamily</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
+		<span class="k">try</span><span class="p">:</span>
+		
+			<span class="c1"># Set SO_LINGER since we don&#39;t want any accidentally</span>
+			<span class="c1"># connecting clients to cause the socket to hang</span>
+			<span class="c1"># around</span>
+			<span class="k">if</span> <span class="n">IS_WINDOWS</span><span class="p">:</span>
+				<span class="n">s</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_LINGER</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+			<span class="c1"># Set non-blocking since we want to fail fast rather</span>
+			<span class="c1"># than block</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span> <span class="p">)</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+				<span class="c1"># If we get any exception assume it is because</span>
+				<span class="c1"># the port is in use</span>
+				<span class="k">return</span> <span class="kc">True</span>
+
+			<span class="c1"># Listen may not be necessary, but on unix it seems to</span>
+			<span class="c1"># help do a more complete shutdown if listen is called</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">s</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SHUT_RDWR</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+				<span class="c1"># Do nothing - on windows shutdown sometimes</span>
+				<span class="c1"># fails even after listen</span>
+				<span class="k">pass</span>
+			
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+			<span class="c1"># Don&#39;t expect this but just in case</span>
+			<span class="n">_log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Exception from port allocator portIsInUse check for </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">host</span> <span class="ow">or</span> <span class="s1">&#39;INADDR_ANY&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+			<span class="k">return</span> <span class="kc">True</span>
+		<span class="k">finally</span><span class="p">:</span>
+			<span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span> <span class="nf">allocateTCPPort</span><span class="p">(</span><span class="n">hosts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">],</span> <span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="c1"># nb: expose socket type and protocol number here but not higher up the stack just in case someone needs them, but </span>
+	<span class="c1"># not very likely</span>
+	<span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+	<span class="n">haslogged</span> <span class="o">=</span> <span class="kc">False</span>
+	<span class="k">while</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t</span> <span class="o">&lt;</span> <span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForAvailableTCPPort&#39;</span><span class="p">]:</span>
+		
+		<span class="c1"># in case we&#39;ve allocated all the available ports, loop </span>
+		<span class="c1"># until another test terminates and free up some ports</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">port</span> <span class="o">=</span> <span class="n">tcpServerPortPool</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">haslogged</span><span class="p">:</span>
+				<span class="c1"># Useful to know about this as it shouldn&#39;t really happen if the TCP stack is configured in a sane way </span>
+				<span class="c1"># and the tests aren&#39;t not leaking ports</span>
+				<span class="n">_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to allocate a TCP port yet as all are in use by PySys; will wait for up to </span><span class="si">%0.1f</span><span class="s1">s&#39;</span><span class="p">,</span> <span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForAvailableTCPPort&#39;</span><span class="p">])</span>
+				<span class="n">haslogged</span> <span class="o">=</span> <span class="kc">True</span>
+			<span class="k">continue</span>
+		
+		<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">portIsInUse</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socketAddressFamily</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">)</span> <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="p">):</span>
+			<span class="c1"># Toss the port back at the end of the queue</span>
+			<span class="n">tcpServerPortPool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+			<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="c1"># avoid spinning</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">haslogged</span><span class="p">:</span>
+				<span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;   successfully allocated TCP port </span><span class="si">%d</span><span class="s1"> after </span><span class="si">%0.1f</span><span class="s1">s&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">port</span>
+	<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Timed out trying to allocate a free TCP server port after </span><span class="si">%0.1f</span><span class="s1"> secs; other tests are currently using all the available ports (hint: check that PySys has correctly detected the range of ephemeral vs server ports by running with -vDEBUG)&#39;</span><span class="o">%</span><span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForAvailableTCPPort&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="TCPPortOwner"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.TCPPortOwner">[docs]</a><span class="k">class</span> <span class="nc">TCPPortOwner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Class that allocates a free server port when constructed, </span>
+<span class="sd">	and returns it to the pool of available ports when `cleanup` is called. </span>
+<span class="sd">	</span>
+<span class="sd">	:param list(Str) hosts: A list of the host names or IP addresses to check when establishing that a potential </span>
+<span class="sd">		allocated port isn&#39;t already in use by a process outside the PySys framework. </span>
+<span class="sd">		By default we check ``&quot;&quot;`` (which corresponds to ``INADDR_ANY`` and depending on the OS means </span>
+<span class="sd">		either one or all non-localhost IPv4 addresses) and also ``localhost``. </span>
+<span class="sd">		Many machines have multiple network cards each with its own host IP address, and typically you&#39;ll only be using </span>
+<span class="sd">		one of them in your test, most commonly ``localhost``. If you do know which host/IP you&#39;ll actually be using, </span>
+<span class="sd">		just specify that directly to save time, and avoid needlessly opening remote ports on hosts you&#39;re not using. </span>
+<span class="sd">		A list of available host addresses and corresponding family/type/proto can be found from </span>
+<span class="sd">		``socket.getaddrinfo(&#39;&#39;, None)``.</span>
+<span class="sd">	</span>
+<span class="sd">	:param int socketAddressFamily: The address family to use when checking if the port is in use, e.g. to indicate </span>
+<span class="sd">		IPv4 vs IPv6. See ``socket.socket`` in the Python standard library for more information. </span>
+
+<span class="sd">	:ivar int ~.port: The port allocated and owned by this instance. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hosts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">],</span> <span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">allocateTCPPort</span><span class="p">(</span><span class="n">hosts</span><span class="o">=</span><span class="n">hosts</span><span class="p">,</span> <span class="n">socketAddressFamily</span><span class="o">=</span><span class="n">socketAddressFamily</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TCPPortOwner.cleanup"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.allocport.html#pysys.utils.allocport.TCPPortOwner.cleanup">[docs]</a>	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Must be called when this port is no longer needed to return it to PySys&#39; pool of available ports. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">tcpServerPortPool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

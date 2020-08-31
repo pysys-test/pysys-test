@@ -1,0 +1,32 @@
+
+pysys.utils.pycompat
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.pycompat
+
+.. currentmodule:: pysys.utils.pycompat
+
+
+
+Enum
+====
+
+.. autodata:: Enum
+
+
+isstring
+========
+
+.. autofunction:: isstring
+
+
+quotestring
+===========
+
+.. autofunction:: quotestring
+
+
+openfile
+========
+
+.. autofunction:: openfile

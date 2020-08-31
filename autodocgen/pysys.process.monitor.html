@@ -1,0 +1,598 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.process.monitor &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.process.monitorimpl" href="pysys.process.monitorimpl.html" />
+    <link rel="prev" title="pysys.process" href="pysys.process.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.process.html">pysys.process</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.process.monitor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#processmonitorkey">ProcessMonitorKey</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#baseprocessmonitorhandler">BaseProcessMonitorHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#processmonitortextfilehandler">ProcessMonitorTextFileHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#baseprocessmonitor">BaseProcessMonitor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.monitorimpl.html">pysys.process.monitorimpl</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.user.html">pysys.process.user</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.process.html#process">Process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.process.html">pysys.process</a> &raquo;</li>
+        
+      <li>pysys.process.monitor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.process.monitor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.process.monitor">
+<span id="pysys-process-monitor"></span><h1>pysys.process.monitor<a class="headerlink" href="#module-pysys.process.monitor" title="Permalink to this headline">¶</a></h1>
+<p>Contains the process monitoring API used by <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p>
+<p>The main components are the <a class="reference internal" href="#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitor</span></code></a> class, <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a> constants for identifying 
+columns and the default <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler" title="pysys.process.monitor.ProcessMonitorTextFileHandler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorTextFileHandler</span></code></a> class for writing monitoring information to a file.</p>
+<div class="section" id="processmonitorkey">
+<h2>ProcessMonitorKey<a class="headerlink" href="#processmonitorkey" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.process.monitor.ProcessMonitorKey">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.process.monitor.</code><code class="sig-name descname">ProcessMonitorKey</code><a class="reference internal" href="../_modules/pysys/process/monitor.html#ProcessMonitorKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Contains constants for supported process monitor keys.</p>
+<p>Some of these keys are not currently returned on all platforms.</p>
+<p>These constants provide the display names used for column headings etc.</p>
+<p>Usually <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey.CPU_CORE_UTILIZATION" title="pysys.process.monitor.ProcessMonitorKey.CPU_CORE_UTILIZATION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CPU_CORE_UTILIZATION</span></code></a> is the best key for measuring 
+CPU utilization and <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey.MEMORY_RESIDENT_KB" title="pysys.process.monitor.ProcessMonitorKey.MEMORY_RESIDENT_KB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MEMORY_RESIDENT_KB</span></code></a> is the most useful way to 
+monitor memory usage.</p>
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorKey.CPU_CORE_UTILIZATION">
+<code class="sig-name descname">CPU_CORE_UTILIZATION</code><em class="property"> = 'CPU core %'</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorKey.CPU_CORE_UTILIZATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>CPU utilization % scaled by the number of cores so that 100% indicates 
+full use of one core, 200% indicates full use of two cores, etc.</p>
+<p>The maximum value is 100 multiplied by the number of CPU cores 
+(as given by <code class="xref py py-obj docutils literal notranslate"><span class="pre">multiprocessing.cpu_count()</span></code>).</p>
+<p>The type is <code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorKey.CPU_TOTAL_UTILIZATION">
+<code class="sig-name descname">CPU_TOTAL_UTILIZATION</code><em class="property"> = 'CPU total %'</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorKey.CPU_TOTAL_UTILIZATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total utilization % of all available CPU cores, with a maximum value of 100%.</p>
+<p>If you have 2 cores and one of them is 50% utilized, the value would be 25%.</p>
+<p>The type is <code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorKey.MEMORY_RESIDENT_KB">
+<code class="sig-name descname">MEMORY_RESIDENT_KB</code><em class="property"> = 'Resident memory kB'</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorKey.MEMORY_RESIDENT_KB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resident / working set memory usage.</p>
+<p>This is the non-swapped physical memory, and is usually a good statistic to 
+use for checking for memory leaks and excessive memory usage.</p>
+<p>On Unix it is equivalent to <code class="xref py py-obj docutils literal notranslate"><span class="pre">rss</span></code>/<code class="xref py py-obj docutils literal notranslate"><span class="pre">RES</span></code> and on Windows to the working set 
+memory usage.</p>
+<p>The type is <code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorKey.MEMORY_VIRTUAL_KB">
+<code class="sig-name descname">MEMORY_VIRTUAL_KB</code><em class="property"> = 'Virtual memory kB'</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorKey.MEMORY_VIRTUAL_KB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Virtual memory of the process including memory that is swapped out.</p>
+<p>On Unix it is equivalent to <code class="xref py py-obj docutils literal notranslate"><span class="pre">vsz</span></code>/<code class="xref py py-obj docutils literal notranslate"><span class="pre">VIRT</span></code>, and on Windows to the 
+current page file usage.</p>
+<p>The type is <code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorKey.DATE_TIME">
+<code class="sig-name descname">DATE_TIME</code><em class="property"> = 'Time'</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorKey.DATE_TIME" title="Permalink to this definition">¶</a></dt>
+<dd><p>String representation of the date and local time for this sample 
+in yyyy-mm-dd HH:MM:SS format.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorKey.DATE_TIME_LEGACY">
+<code class="sig-name descname">DATE_TIME_LEGACY</code><em class="property"> = 'Time (legacy)'</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorKey.DATE_TIME_LEGACY" title="Permalink to this definition">¶</a></dt>
+<dd><p>String representation of the date and local time for this sample in 
+a format compatible with v1.3.0 and earlier versions of PySys.</p>
+<p>This is %d/%m/%y %H:%M:%S on Windows and %m/%d/%y %H:%M:%S on Unix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Deprecated</dt>
+<dd class="field-odd"><p>Use <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey.DATE_TIME" title="pysys.process.monitor.ProcessMonitorKey.DATE_TIME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DATE_TIME</span></code></a> if possible.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorKey.SAMPLE">
+<code class="sig-name descname">SAMPLE</code><em class="property"> = 'Sample'</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorKey.SAMPLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>A counter starting from 1 and incrementing with each new set of 
+sample data.</p>
+<p>The type is <code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="baseprocessmonitorhandler">
+<h2>BaseProcessMonitorHandler<a class="headerlink" href="#baseprocessmonitorhandler" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.process.monitor.BaseProcessMonitorHandler">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.process.monitor.</code><code class="sig-name descname">BaseProcessMonitorHandler</code><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitorHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Interface to be implemented to provide a custom handler that records 
+or processes data from a <a class="reference internal" href="#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseProcessMonitor</span></code></a>.</p>
+<dl class="py method">
+<dt id="pysys.process.monitor.BaseProcessMonitorHandler.handleData">
+<code class="sig-name descname">handleData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitorHandler.handleData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitorHandler.handleData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called on a background thread each time a new sample of monitoring 
+data is available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – a dictionary whose keys are from <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a> 
+(or any new keys added by custom process monitor implementations). 
+The dictionary values are of type <code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – Reserved for future use.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.monitor.BaseProcessMonitorHandler.cleanup">
+<code class="sig-name descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitorHandler.cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitorHandler.cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called on a background thread to perform cleanup for this handler, 
+for example closing file handles.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="processmonitortextfilehandler">
+<h2>ProcessMonitorTextFileHandler<a class="headerlink" href="#processmonitortextfilehandler" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.process.monitor.ProcessMonitorTextFileHandler">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.process.monitor.</code><code class="sig-name descname">ProcessMonitorTextFileHandler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">columns</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">writeHeaderLine</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#ProcessMonitorTextFileHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorTextFileHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pysys.process.monitor.BaseProcessMonitorHandler" title="pysys.process.monitor.BaseProcessMonitorHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.process.monitor.BaseProcessMonitorHandler</span></code></a></p>
+<p>Handles process monitor data by writing the data as delimited values to 
+a file, usually with tab separated values (.tsv).</p>
+<p>A new line is written every time the process monitor polls for a new sample 
+of data. By default a header line starting with <code class="xref py py-obj docutils literal notranslate"><span class="pre">#</span></code> is included at the 
+start of the file to indicate the column headings.</p>
+<p>If any value cannot be retrieved or is unavailable on this operating 
+system, a -1 value will be written instead.</p>
+<p>Constructor.</p>
+<p>Uses default values set on the instance unless keyword overrides 
+are provided; see <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults" title="pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDefaults</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – An absolute path string or open file handle to which 
+process monitor data lines will be written.</p></li>
+<li><p><strong>columns</strong> – An ordered list of the columns from <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a> that 
+should be included in the file. If not specified, the columns specified 
+by <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS" title="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_COLUMNS</span></code></a> will be used.</p></li>
+<li><p><strong>delimiter</strong> – The delimiter string used between each column. 
+If not specified, the string specified by <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_DELIMITER" title="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_DELIMITER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_DELIMITER</span></code></a> will be 
+used.</p></li>
+<li><p><strong>writeHeaderLine</strong> – Determines whether a header line prefixed 
+by <code class="xref py py-obj docutils literal notranslate"><span class="pre">#</span></code> will be written at the start of the file. If not overridden, the 
+default is taken from <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_WRITE_HEADER_LINE" title="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_WRITE_HEADER_LINE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_WRITE_HEADER_LINE</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS">
+<code class="sig-name descname">DEFAULT_COLUMNS</code><em class="property"> = ['Time', 'CPU core %', 'Resident memory kB', 'Virtual memory kB']</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default columns to write to the file.</p>
+<p>If using a process monitor that comes with PySys, the values are from 
+<a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a>.</p>
+<p>Additional columns may be added to the end of this list in future 
+releases.</p>
+<p>See <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults" title="pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDefaults</span></code></a> if you wish to change the defaults.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_WRITE_HEADER_LINE">
+<code class="sig-name descname">DEFAULT_WRITE_HEADER_LINE</code><em class="property"> = True</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_WRITE_HEADER_LINE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether a header line prefixed 
+by <code class="xref py py-obj docutils literal notranslate"><span class="pre">#</span></code> will be written at the start of the file.</p>
+<p>See <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults" title="pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDefaults</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_DELIMITER">
+<code class="sig-name descname">DEFAULT_DELIMITER</code><em class="property"> = '\t'</em><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_DELIMITER" title="Permalink to this definition">¶</a></dt>
+<dd><p>The delimiter used between each column. Usually a tab character.</p>
+<p>See <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults" title="pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDefaults</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults">
+<em class="property">static </em><code class="sig-name descname">setDefaults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">columns</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">writeHeaderLine</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#ProcessMonitorTextFileHandler.setDefaults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.setDefaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static helper method for setting the default columns or 
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">writeHeaderLine</span></code> setting for all tests that use the 
+<a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler" title="pysys.process.monitor.ProcessMonitorTextFileHandler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorTextFileHandler</span></code></a>.</p>
+<p>This method could be called from a custom runner’s 
+<a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup</span></code></a> method in order to take effect 
+for all tests.</p>
+<p>Do not call this from within an individual testcase since that 
+could cause unwanted interference between different testcases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>columns</strong> – A list of the colums to be included, using values from
+<a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a>. Since additional columns may be added to the end 
+of <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS" title="pysys.process.monitor.ProcessMonitorTextFileHandler.DEFAULT_COLUMNS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_COLUMNS</span></code></a> in future releases, when calling this method you 
+should specify all the columns you want explicitly including the 
+current defaults rather than writing <code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_COLUMNS+[...]</span></code>.</p></li>
+<li><p><strong>delimiter</strong> – The delimiter string used between each column.</p></li>
+<li><p><strong>writeHeaderLine</strong> – Specifies whether a header line beginning 
+with <code class="xref py py-obj docutils literal notranslate"><span class="pre">#</span></code> should be written at the start of the file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="baseprocessmonitor">
+<h2>BaseProcessMonitor<a class="headerlink" href="#baseprocessmonitor" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.process.monitor.BaseProcessMonitor">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.process.monitor.</code><code class="sig-name descname">BaseProcessMonitor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">owner</span></em>, <em class="sig-param"><span class="n">process</span></em>, <em class="sig-param"><span class="n">interval</span></em>, <em class="sig-param"><span class="n">handlers</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">pmargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Process monitor for gathering statistics such as CPU and memory usage 
+from a running process using a background thread.</p>
+<p>For detail on the statistic keys available from the standard 
+process monitor classes see <a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a>.</p>
+<p>The most convenient way to start the default process monitor for this 
+operating system is to use <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.startProcessMonitor" title="pysys.basetest.BaseTest.startProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.startProcessMonitor</span></code></a>.</p>
+<p>You can create a custom subclass if you need to add support for a new OS 
+or return additional monitoring statistics. For example, you could 
+create a custom process monitor for Java processes that returned 
+heap size and thread count, or you could create a simple process monitor 
+wrapper around a Python library that provides a wider set of monitoring 
+statistics, such as psutil. The fields and methods starting with a 
+single underscore <code class="xref py py-obj docutils literal notranslate"><span class="pre">_</span></code> can be used or overridden by custom subclasses. 
+To start the process monitor from a custom class, simply ensure you have 
+passed the owner basetest to its constructor and then call the <a class="reference internal" href="#pysys.process.monitor.BaseProcessMonitor.start" title="pysys.process.monitor.BaseProcessMonitor.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a> 
+method.</p>
+<p>Monitors are automatically terminated during cleanup at the end 
+of a test, or can be manually stopped before that using the <a class="reference internal" href="#pysys.process.monitor.BaseProcessMonitor.stop" title="pysys.process.monitor.BaseProcessMonitor.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a> method.</p>
+<p>Construct an instance of the process monitor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>owner</strong> – The BaseTest owning this monitor.</p></li>
+<li><p><strong>process</strong> – The process wrapper object. A numeric pid can be specified 
+instead but with reduced functionality, so use a process object if you 
+have one.</p></li>
+<li><p><strong>interval</strong> – The interval in seconds between polling for each data 
+sample.</p></li>
+<li><p><strong>pmargs</strong> – Keyword arguments to allow parameterization of the 
+returned data. An exception will be raised for any arguments not 
+expected by this class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="pysys.process.monitor.BaseProcessMonitor.process">
+<code class="sig-name descname">process</code><em class="property"> = None</em><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>The process object. Can be None if a pid was passed directly.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.BaseProcessMonitor.pid">
+<code class="sig-name descname">pid</code><em class="property"> = None</em><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.pid" title="Permalink to this definition">¶</a></dt>
+<dd><p>The pid to be monitored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.BaseProcessMonitor.owner">
+<code class="sig-name descname">owner</code><em class="property"> = None</em><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.owner" title="Permalink to this definition">¶</a></dt>
+<dd><p>The test object that owns this monitor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.BaseProcessMonitor.handlers">
+<code class="sig-name descname">handlers</code><em class="property"> = None</em><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.handlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of handlers that will be notified each time the process 
+is polled for new data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.process.monitor.BaseProcessMonitor.thread">
+<code class="sig-name descname">thread</code><em class="property"> = None</em><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>The background thread that responsible for monitoring the process.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.monitor.BaseProcessMonitor.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called on the main test thread to start monitoring in the background.</p>
+<p>Performs any required initialization of data structures then 
+starts the background thread.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>This instance.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pysys.process.monitor.BaseProcessMonitor" title="pysys.process.monitor.BaseProcessMonitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseProcessMonitor</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.monitor.BaseProcessMonitor._preprocessData">
+<code class="sig-name descname">_preprocessData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor._preprocessData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor._preprocessData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called in the background thread with the data dictionary from 
+each poll of the process, to allow OS-agnostic pre-processing and 
+addition of derived data keys such as the date and time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – The dictionary of process monitoring data. This method 
+may add or modify the contents of this dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.monitor.BaseProcessMonitor.running">
+<code class="sig-name descname">running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor.running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.running" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the running status of the process monitor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the process monitor background thread is still running.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.monitor.BaseProcessMonitor.stop">
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request the process monitor thread to terminate.</p>
+<p>Does not wait for the termination to complete.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.monitor.BaseProcessMonitor._getData">
+<code class="sig-name descname">_getData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor._getData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor._getData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement gathering of latest monitoring data.</p>
+<p>Called on the background monitoring thread regularly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sample</strong> – An integer starting at 1 and incrementing each time 
+this method is called.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary of (typically numeric) values, keyed by 
+<a class="reference internal" href="#pysys.process.monitor.ProcessMonitorKey" title="pysys.process.monitor.ProcessMonitorKey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessMonitorKey</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.process.monitor.BaseProcessMonitor._cleanup">
+<code class="sig-name descname">_cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/process/monitor.html#BaseProcessMonitor._cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.process.monitor.BaseProcessMonitor._cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform implementation-specific cleanup.</p>
+<p>Called on the background monitoring thread when the monitor is stopping.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.process.monitorimpl.html" class="btn btn-neutral float-right" title="pysys.process.monitorimpl" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.process.html" class="btn btn-neutral float-left" title="pysys.process" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

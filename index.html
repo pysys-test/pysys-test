@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to PySys! &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="Installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Welcome to PySys!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-pysys">
+<h1>Welcome to PySys!<a class="headerlink" href="#welcome-to-pysys" title="Permalink to this headline">¶</a></h1>
+<p>PySys is a powerful cross-platform framework for writing great system/integration tests.</p>
+<p>It provides a comprehensive package of methods to make all the common system/integration testing operations a breeze,
+with all the flexibility and power of the Python language at your fingertips. PySys is a framework that gives you a
+single unified way to control the selection, ordering and reporting of every type of test including system
+correctness, performance, soak/robustness testing, unit testing and manual testing.</p>
+<p>Whatever language the application you’re testing is written in, and whatever platforms it needs to run on,
+PySys can help!</p>
+<p>Key features include:</p>
+<ul>
+<li><p>A comprehensive library of assertion methods appropriate for system-level
+testing, such as checking for error/success messages in log files and
+comparing the contents of output files.</p></li>
+<li><p>A comprehensive library of methods to automate platform-independent process
+starting, orchestration, and cleanup, for both Windows and Unix-based
+systems. Includes common operations such as:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>dynamically picking a free TCP/IP port,</p></li>
+<li><p>waiting until a server is running on a specified port,</p></li>
+<li><p>waiting until a file contains a specified message,</p></li>
+<li><p>powerful primitives for pre-processing text files (e.g. configuration input files, or output logs)</p></li>
+<li><p>aborting early with a clear failure messages if an error is detected in a log file</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Support for executing tests in parallel to significantly speed up execution
+time, with a flexible mechanism for controlling execution order.</p></li>
+<li><p>Ability to cycle a test many times (and in parallel) to reproduce rare race
+conditions.</p></li>
+<li><p>Support for executing the same test in several modes during your test
+run (for example against different web browsers, databases, etc).</p></li>
+<li><p>A process memory monitoring framework to check for memory leaks when soak
+testing your application.</p></li>
+<li><p>A performance monitoring framework for recording and aggregating latency,
+throughput and other performance metrics.</p></li>
+<li><p>A pluggable “writers” framework for recording test outcomes in any format,
+including a standard JUnit-compatible XML results writer and output archiver
+in the box, and support for running tests under CI providers such as
+GitHub(R) Actions and Travis CI(R).</p></li>
+<li><p>Integrated support for running PyUnit tests and doctests, in case your
+application is also written in Python.</p></li>
+<li><p>Integrated support for executing manual/interactively driven test cases.</p></li>
+<li><p>Test categorization and selective include/exclude execution, using per-test
+classification groups.</p></li>
+<li><p>Support for Windows, Linux, macOS and Solaris.</p></li>
+</ul>
+<p>PySys was created by Moray Grieve. The current maintainer is Ben Spiller.
+This is a community project so we welcome your contributions, whether
+enhancement issues or GitHub pull requests!</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Use the <a class="reference external" href="https://github.com/pysys-test/pysys-test/issues">issue tracker</a> if you want to report a bug or feature
+request in the PySys test framework. For how-tos and advice,
+<a class="reference external" href="https://stackoverflow.com/questions/ask?tags=pysys">ask a question</a>.</p>
+</div>
+<div class="section" id="documentation-contents">
+<h2>Documentation contents<a class="headerlink" href="#documentation-contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Installation.html#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Installation.html#unix">Unix</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BaseTest.html">The BaseTest Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#implementing-your-test-class">Implementing your test class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#test-configuration">Test configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#assertions-and-outcomes">Assertions and outcomes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#processes">Processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#waiting">Waiting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#files">Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#miscellaneous">Miscellaneous</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BaseTest.html#all-basetest-members">All BaseTest members</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="UserGuide.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#platform-detection">Platform detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#skipping-tests">Skipping tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#checking-for-error-messages-in-log-files">Checking for error messages in log files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#sharing-logic-across-tests-using-plugins">Sharing logic across tests using plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#configuring-and-overriding-test-options">Configuring and overriding test options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#producing-code-coverage-reports">Producing code coverage reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#running-tests-in-multiple-modes">Running tests in multiple modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#test-ids-and-structuring-large-projects">Test ids and structuring large projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UserGuide.html#controlling-execution-order">Controlling execution order</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autodocgen/pysys.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodocgen/pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChangeLog.html">Change Log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-1-6-1">What’s new in 1.6.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#what-s-new-in-1-6-0">What’s new in 1.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ChangeLog.html#release-history">Release History</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

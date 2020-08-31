@@ -1,0 +1,432 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.filegrep &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.filegrep</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.filegrep</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Regular expression grep matching in text files. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.filediff</span> <span class="kn">import</span> <span class="n">trimContents</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">pathexists</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.assertions&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="getmatches"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filegrep.html#pysys.utils.filegrep.getmatches">[docs]</a><span class="k">def</span> <span class="nf">getmatches</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">regexpr</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[]):</span>
+	<span class="sd">&quot;&quot;&quot;Look for matches on a regular expression in an input file, return a sequence of the matches.</span>
+<span class="sd">	</span>
+<span class="sd">	:param file: The full path to the input file</span>
+<span class="sd">	:param regexpr: The regular expression used to search for matches</span>
+<span class="sd">	:param ignores: A list of regexes which will cause matches to be discarded</span>
+<span class="sd">	:param encoding: Specifies the encoding to be used for opening the file, or None for default. </span>
+<span class="sd">	:return: A list of the match objects </span>
+<span class="sd">	:rtype: list</span>
+<span class="sd">	:raises FileNotFoundException: Raised if the input file does not exist</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="n">rexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regexpr</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+	
+	<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Looking for expression </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> in input file </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">regexpr</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+
+	<span class="n">ignores</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ignores</span> <span class="ow">or</span> <span class="p">[])]</span>
+
+	<span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">mappers</span><span class="p">:</span> <span class="n">mappers</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mappers</span> <span class="k">if</span> <span class="n">m</span><span class="p">]</span>
+
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">FileNotFoundException</span><span class="p">(</span><span class="s2">&quot;unable to find file </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file</span><span class="p">))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+				<span class="c1"># pre-process</span>
+				<span class="k">for</span> <span class="n">mapper</span> <span class="ow">in</span> <span class="n">mappers</span><span class="p">:</span>
+					<span class="n">l</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+					<span class="k">if</span> <span class="n">l</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">break</span>
+				<span class="k">if</span> <span class="n">l</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">continue</span>
+
+			
+				<span class="n">match</span> <span class="o">=</span> <span class="n">rexp</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+					<span class="n">shouldignore</span> <span class="o">=</span> <span class="kc">False</span>
+					<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ignores</span><span class="p">:</span>
+						<span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+							<span class="n">shouldignore</span> <span class="o">=</span> <span class="kc">True</span>
+							<span class="k">break</span>
+					<span class="k">if</span> <span class="n">shouldignore</span><span class="p">:</span> <span class="k">continue</span>
+					
+					<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">((</span><span class="s2">&quot;Found match for line: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">l</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+					<span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">matches</span></div>
+
+
+<div class="viewcode-block" id="filegrep"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filegrep.html#pysys.utils.filegrep.filegrep">[docs]</a><span class="k">def</span> <span class="nf">filegrep</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">ignores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">returnMatch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mappers</span><span class="o">=</span><span class="p">[]):</span>
+	<span class="sd">&quot;&quot;&quot;Search for matches to a regular expression in an input file, returning true if a match occurs.</span>
+<span class="sd">	</span>
+<span class="sd">	:param file: The full path to the input file</span>
+<span class="sd">	:param expr: The regular expression (uncompiled) to search for in the input file</span>
+<span class="sd">	:param ignores: Optional list of regular expression strings to ignore when searching file. </span>
+<span class="sd">	:param returnMatch: return the regex match object instead of a simple boolean</span>
+<span class="sd">	:param encoding: Specifies the encoding to be used for opening the file, or None for default. </span>
+<span class="sd">	:param mappers: Mappers to pre-process the file. </span>
+
+<span class="sd">	:return: success (True / False), unless returnMatch=True in which case it returns the regex match </span>
+<span class="sd">		object (or None if not matched)</span>
+<span class="sd">	:rtype: integer</span>
+<span class="sd">	:raises FileNotFoundException: Raised if the input file does not exist</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">FileNotFoundException</span><span class="p">(</span><span class="s2">&quot;unable to find file </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file</span><span class="p">))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">log</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+				<span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+				<span class="n">logContents</span><span class="p">(</span><span class="s2">&quot;Contents of </span><span class="si">%s</span><span class="s2">;&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">),</span> <span class="n">contents</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">contents</span> <span class="o">=</span> <span class="n">f</span>
+			
+			<span class="n">ignores</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ignores</span> <span class="ow">or</span> <span class="p">[])]</span>
+			
+			<span class="n">regexpr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+			
+			<span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">mappers</span><span class="p">:</span> <span class="n">mappers</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mappers</span> <span class="k">if</span> <span class="n">m</span><span class="p">]</span>
+
+			<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
+				<span class="c1"># pre-process</span>
+				<span class="k">for</span> <span class="n">mapper</span> <span class="ow">in</span> <span class="n">mappers</span><span class="p">:</span>
+					<span class="n">line</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+					<span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">break</span>
+				<span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">continue</span>
+
+				<span class="n">m</span> <span class="o">=</span> <span class="n">regexpr</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+					<span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ignores</span><span class="p">]):</span> 
+						<span class="k">if</span> <span class="n">returnMatch</span><span class="p">:</span> <span class="k">return</span> <span class="n">m</span>
+						<span class="k">return</span> <span class="kc">True</span>
+			<span class="k">if</span> <span class="n">returnMatch</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+			<span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="lastgrep"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filegrep.html#pysys.utils.filegrep.lastgrep">[docs]</a><span class="k">def</span> <span class="nf">lastgrep</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[],</span> <span class="n">include</span><span class="o">=</span><span class="p">[],</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">returnMatch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Search for matches to a regular expression in the last line of an input file, returning true if a match occurs.</span>
+<span class="sd">	</span>
+<span class="sd">	:param file: The full path to the input file</span>
+<span class="sd">	:param expr: The regular expression (uncompiled) to search for in the last line of the input file</span>
+<span class="sd">	:return: success (True / False)</span>
+<span class="sd">	:param ignore: A list of regular expressions which remove entries in the input file contents before making the grep</span>
+<span class="sd">	:param include: A list of regular expressions used to select lines from the input file contents to use in the grep </span>
+<span class="sd">	:param encoding: Specifies the encoding to be used for opening the file, or None for default. </span>
+<span class="sd">	</span>
+<span class="sd">	:rtype: integer</span>
+<span class="sd">	:raises FileNotFoundException: Raised if the input file does not exist</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">FileNotFoundException</span><span class="p">(</span><span class="s2">&quot;unable to find file </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file</span><span class="p">))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+		<span class="n">contents</span> <span class="o">=</span> <span class="n">trimContents</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">ignore</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		<span class="n">contents</span> <span class="o">=</span> <span class="n">trimContents</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">include</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		
+		<span class="n">logContents</span><span class="p">(</span><span class="s2">&quot;Contents of </span><span class="si">%s</span><span class="s2"> after pre-processing;&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">),</span> <span class="n">contents</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">line</span> <span class="o">=</span> <span class="n">contents</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+			<span class="n">regexpr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+			<span class="n">result</span> <span class="o">=</span> <span class="n">regexpr</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="n">result</span> <span class="k">if</span> <span class="n">returnMatch</span> <span class="k">else</span> <span class="kc">True</span>
+		<span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">returnMatch</span> <span class="k">else</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="orderedgrep"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filegrep.html#pysys.utils.filegrep.orderedgrep">[docs]</a><span class="k">def</span> <span class="nf">orderedgrep</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">exprList</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Seach for ordered matches to a set of regular expressions in an input file, returning None </span>
+<span class="sd">	on success, and a string indicating the missing expression something is missing.</span>
+<span class="sd">		</span>
+<span class="sd">	The ordered grep method will only pass if matches to the set of regular expression in the expression </span>
+<span class="sd">	list occur in the input file in the order they appear in the expression list. Matches to the regular expressions </span>
+<span class="sd">	do not have to be across sequential lines in the input file, only in the correct order. For example, for a file </span>
+<span class="sd">	with contents ::</span>
+<span class="sd">	  </span>
+<span class="sd">	    A is for apple </span>
+<span class="sd">	    B is for book</span>
+<span class="sd">	    C is for cat</span>
+<span class="sd">	    D is for dog</span>
+<span class="sd">	</span>
+<span class="sd">	an expression list of [&quot;^A.*$&quot;, &quot;^C.*$&quot;, &quot;^D.*$&quot;] will return true, whilst an expression list of </span>
+<span class="sd">	[&quot;^A.*$&quot;, &quot;^C.$&quot;, &quot;^B.$&quot;] will return false.</span>
+<span class="sd">	</span>
+<span class="sd">	:param file: The full path to the input file</span>
+<span class="sd">	:param exprList: A list of regular expressions (uncompiled) to search for in the input file</span>
+<span class="sd">	:param encoding: Specifies the encoding to be used for opening the file, or None for default. </span>
+<span class="sd">	</span>
+<span class="sd">	:return: None on success, or on failure the string expression that was not found (with an indicator of its index in the array). </span>
+<span class="sd">	:rtype: string</span>
+<span class="sd">	:raises FileNotFoundException: Raised if the input file does not exist</span>
+<span class="sd">		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="nb">list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">exprList</span><span class="p">)</span>
+	<span class="nb">list</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+	
+	<span class="n">expr</span><span class="p">,</span> <span class="n">exprIndex</span> <span class="o">=</span> <span class="nb">list</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="mi">1</span>
+	<span class="n">regexpr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">FileNotFoundException</span><span class="p">(</span><span class="s1">&#39;unable to find file &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file</span><span class="p">))</span>
+	
+	
+	<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+		<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">regexpr</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+					<span class="k">return</span> <span class="kc">None</span> <span class="c1"># success - found them all</span>
+				
+				<span class="n">expr</span><span class="p">,</span> <span class="n">exprIndex</span> <span class="o">=</span> <span class="nb">list</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="n">exprIndex</span><span class="o">+</span><span class="mi">1</span>
+				<span class="n">regexpr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="s1">&#39;#</span><span class="si">%d</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">exprIndex</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span> <span class="c1"># the expression we were trying to match</span></div>
+
+
+<div class="viewcode-block" id="logContents"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filegrep.html#pysys.utils.filegrep.logContents">[docs]</a><span class="k">def</span> <span class="nf">logContents</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Log a list of strings, prepending the line number to each line in the log output.</span>
+<span class="sd">	</span>
+<span class="sd">	:param list: The list of strings to log</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span> <span class="k">return</span>
+	<span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">:</span>
+		<span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">((</span><span class="s2">&quot;  Line </span><span class="si">%-5d</span><span class="s2">:  </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span></div>
+
+		
+
+<span class="c1"># entry point for running the script as an executable</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma: no cover (undocumented, little used executable entry point)</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Usage: filegrep.py &lt;file&gt; &lt;regexpr&gt;&quot;</span><span class="p">)</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">status</span> <span class="o">=</span> <span class="n">filegrep</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+		<span class="k">except</span> <span class="n">FileNotFoundException</span> <span class="k">as</span> <span class="n">value</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="p">))</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;unable to perform grep... exiting&quot;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Matches found&quot;</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No matches found&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

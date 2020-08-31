@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.fileutils &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.utils.linecount" href="pysys.utils.linecount.html" />
+    <link rel="prev" title="pysys.utils.fileunzip" href="pysys.utils.fileunzip.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.utils.html">pysys.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.allocport.html">pysys.utils.allocport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filediff.html">pysys.utils.filediff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filegrep.html">pysys.utils.filegrep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filereplace.html">pysys.utils.filereplace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.fileunzip.html">pysys.utils.fileunzip</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.fileutils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tolongpathsafe">toLongPathSafe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fromlongpathsafe">fromLongPathSafe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pathexists">pathexists</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mkdir">mkdir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deletedir">deletedir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#loadproperties">loadProperties</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#loadjson">loadJSON</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.utils.html">pysys.utils</a> &raquo;</li>
+        
+      <li>pysys.utils.fileutils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.utils.fileutils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.utils.fileutils">
+<span id="pysys-utils-fileutils"></span><h1>pysys.utils.fileutils<a class="headerlink" href="#module-pysys.utils.fileutils" title="Permalink to this headline">¶</a></h1>
+<p>File and directory handling utility functions such as mkdir and deletedir, with enhanced error handling and 
+support for long paths on Windows. Also some simple utilities for loading properties and JSON files.</p>
+<div class="section" id="tolongpathsafe">
+<h2>toLongPathSafe<a class="headerlink" href="#tolongpathsafe" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.toLongPathSafe">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">toLongPathSafe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">onlyIfNeeded</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#toLongPathSafe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.toLongPathSafe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the specified path string to a form suitable for passing to API 
+calls if it exceeds the maximum path length on this OS.</p>
+<p>Currently, this is necessary only on Windows, where a unicode string 
+starting with ?must be used to get correct behaviour for long paths. 
+On Windows this function also normalizes the capitalization of drive 
+letters so they are always upper case regardless of OS version and current 
+working directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – A path. Must not be a relative path. Can be None/empty. Can 
+contain “..” sequences. If possible, use a unicode character string. 
+On Python 2, byte strings are permitted and converted using 
+<code class="docutils literal notranslate"><span class="pre">locale.getpreferredencoding()</span></code>.</p></li>
+<li><p><strong>onlyIfNeeded</strong> – Set to True to only adds the long path support if this 
+path exceeds the maximum length on this OS (e.g. 256 chars). You must keep 
+this at False if you will be adding extra characters on to the end of the 
+returned string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The passed-in path, possibly with a <code class="docutils literal notranslate"><span class="pre">\?\</span></code> prefix added, 
+forward slashes converted to backslashes on Windows, and converted to 
+a unicode string. Trailing slashes may be removed. 
+Note that the conversion to unicode requires a lot of care on Python 2 
+where byte strings are more common, since it is not possible to combine 
+unicode and byte strings (if they have non-ascii characters), for example 
+for a log statement.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="fromlongpathsafe">
+<h2>fromLongPathSafe<a class="headerlink" href="#fromlongpathsafe" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.fromLongPathSafe">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">fromLongPathSafe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#fromLongPathSafe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.fromLongPathSafe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Strip off <code class="docutils literal notranslate"><span class="pre">\?\</span></code> prefixes added by <a class="reference internal" href="#pysys.utils.fileutils.toLongPathSafe" title="pysys.utils.fileutils.toLongPathSafe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toLongPathSafe</span></code></a>.</p>
+<p>Note that this function does not convert unicode strings back to byte 
+strings, so if you want a complete reversal of toLongPathSafe you will 
+additionally have to call <code class="xref py py-obj docutils literal notranslate"><span class="pre">result.encode(locale.getpreferredencoding())</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="pathexists">
+<h2>pathexists<a class="headerlink" href="#pathexists" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.pathexists">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">pathexists</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#pathexists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.pathexists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the specified path is an existing file or directory, 
+as returned by <code class="xref py py-obj docutils literal notranslate"><span class="pre">os.path.exists</span></code>.</p>
+<p>This method is safe to call on paths that may be over the Windows 256 
+character limit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – If None or empty, returns True. Only Python 2, can be a 
+unicode or byte string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="mkdir">
+<h2>mkdir<a class="headerlink" href="#mkdir" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.mkdir">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">mkdir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#mkdir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.mkdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a directory, with recursive creation of any parent directories.</p>
+<p>This function is a no-op (does not throw) if the directory already exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Returns the path passed in.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="deletedir">
+<h2>deletedir<a class="headerlink" href="#deletedir" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.deletedir">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">deletedir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">retries</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ignore_errors</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">onerror</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#deletedir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.deletedir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively delete the specified directory, with optional retries.</p>
+<p>Does nothing if it does not exist. Raises an exception if the deletion fails (unless <code class="docutils literal notranslate"><span class="pre">onerror=</span></code> is specified), 
+but deletes as many files as possible before doing so.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>retries</strong> – The number of retries to attempt. This can be useful to 
+work around temporary failures causes by Windows file locking.</p></li>
+<li><p><strong>ignore_errors</strong> – If True, an exception is raised if the path exists but cannot be deleted.</p></li>
+<li><p><strong>onerror</strong> – A callable that with arguments (function, path, excinfo), called when an error occurs while 
+deleting. See the documentation for <code class="docutils literal notranslate"><span class="pre">shutil.rmtree</span></code> for more information.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="loadproperties">
+<h2>loadProperties<a class="headerlink" href="#loadproperties" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.loadProperties">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">loadProperties</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">'utf-8-sig'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#loadProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.loadProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads keys and values from the specified <code class="docutils literal notranslate"><span class="pre">.properties</span></code> file.</p>
+<p>Support <code class="docutils literal notranslate"><span class="pre">#</span></code> and <code class="docutils literal notranslate"><span class="pre">!</span></code> comments but does not perform any special handling of backslash <code class="docutils literal notranslate"><span class="pre">\</span></code> characters 
+(either for escaping or for line continuation). Leading and trailing whitespace around keys and values 
+is stripped. If you need handling of <code class="docutils literal notranslate"><span class="pre">\</span></code> escapes and/or expansion of <code class="docutils literal notranslate"><span class="pre">${...}</span></code> placeholders this should be 
+performed manually on the returned values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The absolute path to the properties file.</p></li>
+<li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use (unless running under Python 2 in which case byte strings are always returned). 
+The default is UTF-8 (with optional Byte Order Mark).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return dict[str:str]</dt>
+<dd class="field-even"><p>An ordered dictionary containing the keys and values from the file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="loadjson">
+<h2>loadJSON<a class="headerlink" href="#loadjson" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileutils.loadJSON">
+<code class="sig-prename descclassname">pysys.utils.fileutils.</code><code class="sig-name descname">loadJSON</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileutils.html#loadJSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileutils.loadJSON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads JSON from the specified path.</p>
+<p>This is a small wrapper around Python’s <code class="docutils literal notranslate"><span class="pre">json.load()</span></code> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The absolute path to the JSON file, which must be encoded using UTF-8 (with optional Byte Order Mark).</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments will be passed to <code class="docutils literal notranslate"><span class="pre">json.load()</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return obj</dt>
+<dd class="field-even"><p>A dict, list, or other Python object representing the contents of the JSON file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.utils.linecount.html" class="btn btn-neutral float-right" title="pysys.utils.linecount" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.utils.fileunzip.html" class="btn btn-neutral float-left" title="pysys.utils.fileunzip" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

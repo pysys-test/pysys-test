@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.fileunzip &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.fileunzip</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.fileunzip</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Unpacking one or more compressed files. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">gzip</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">toLongPathSafe</span>
+
+<div class="viewcode-block" id="unzipall"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileunzip.html#pysys.utils.fileunzip.unzipall">[docs]</a><span class="k">def</span> <span class="nf">unzipall</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Unzip all .gz files in a given directory.</span>
+<span class="sd">	</span>
+<span class="sd">	Archive files are automatically deleted after unzipping. </span>
+<span class="sd">	</span>
+<span class="sd">	:param path: The full path to the directory containing the archive files.</span>
+<span class="sd">	:param binary: Boolean flag to indicate if the unzipped files should be written as binary. </span>
+<span class="sd">		The default value of False indicates that on some platforms newline characters will be </span>
+<span class="sd">		converted to the operating system default. </span>
+<span class="sd">	</span>
+<span class="sd">	:raises FileNotFoundException: Raised if the directory path does not exist.</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">FileNotFoundException</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> path does not exist&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)))</span>
+
+	<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/*.gz&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+		<span class="n">unzip</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">binary</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="unzip"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.fileunzip.html#pysys.utils.fileunzip.unzip">[docs]</a><span class="k">def</span> <span class="nf">unzip</span><span class="p">(</span><span class="n">zfilename</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Unzip a .gz archive and write the contents to disk.</span>
+<span class="sd">	</span>
+<span class="sd">	The method will unpack a file of the form C{file.data.gz} to C{file.data}, removing the </span>
+<span class="sd">	archive file in the process if the C{replace} input parameter is set to true. </span>
+<span class="sd">	</span>
+<span class="sd">	By default the unpacked archive is treated as non-binary data, </span>
+<span class="sd">	unless the binary input parameter is set to true.</span>
+<span class="sd">	</span>
+<span class="sd">	:param zfilename: The full path to the archive file.</span>
+<span class="sd">	:param replace: Boolean flag to indicate if the archive file should be removed after unpacking.</span>
+<span class="sd">	:param binary: Boolean flag to indicate if the unzipped file should be written as binary.</span>
+<span class="sd">		The default value of False indicates that on some platforms newline characters will be </span>
+<span class="sd">		converted to the operating system default. </span>
+<span class="sd">	</span>
+<span class="sd">	:raises pysys.exceptions.FileNotFoundException: Raised if the archive file does not exist.</span>
+<span class="sd">	:raises pysys.exceptions.IncorrectFileTypeEception: Raised if the archive file does not have a .gz extension.</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">zfilename</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">FileNotFoundException</span><span class="p">(</span><span class="s2">&quot;unable to find file </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">zfilename</span><span class="p">)))</span>
+
+	<span class="n">tokens</span>	<span class="o">=</span> <span class="n">zfilename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">tokens</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;gz&#39;</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="n">IncorrectFileTypeException</span><span class="p">(</span><span class="s2">&quot;file does not have a .gz extension&quot;</span><span class="p">)</span>
+	
+	<span class="n">uzfilename</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+		<span class="n">uzfilename</span> <span class="o">=</span> <span class="n">uzfilename</span> <span class="o">+</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+			<span class="n">uzfilename</span> <span class="o">=</span> <span class="n">uzfilename</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+
+	<span class="c1"># must read and write in binary in all cases, since we don&#39;t know for </span>
+	<span class="c1"># certain what encoding it&#39;s in and want to avoid corrupting </span>
+	<span class="c1"># non-newline characters</span>
+	<span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">zfilename</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span> <span class="k">as</span> <span class="n">zfile</span><span class="p">:</span>
+		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">uzfilename</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">uzfile</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">binary</span><span class="p">:</span> 
+				<span class="c1"># do an efficient block-by-block copy, in case it&#39;s large</span>
+				<span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">zfile</span><span class="p">,</span> <span class="n">uzfile</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="c1"># non-binary means fix newlines.</span>
+				<span class="c1"># for compatibility with pre-1.3 PySys this is currently </span>
+				<span class="c1"># implemented for basic cases and only on windows. </span>
+				<span class="n">buffer</span> <span class="o">=</span> <span class="n">zfile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+				<span class="k">if</span> <span class="n">PLATFORM</span><span class="o">==</span><span class="s1">&#39;win32&#39;</span><span class="p">:</span> <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span>
+				<span class="n">uzfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="n">replace</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">zfilename</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+			<span class="k">pass</span>   </div>
+
+
+<span class="c1"># entry point for running the script as an executable</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma: no cover (undocumented, little used executable entry point)</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Usage: fileunzip &lt;unzip&gt; &lt;file&gt; or&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;					&lt;unzipall&gt; &lt;path&gt;&quot;</span><span class="p">)</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;unzip&#39;</span><span class="p">:</span>
+				<span class="n">status</span> <span class="o">=</span> <span class="n">unzip</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;unzipall&#39;</span><span class="p">:</span>
+				<span class="n">status</span> <span class="o">=</span> <span class="n">unzipall</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;unable to perform unzip operation&quot;</span><span class="p">)</span> 
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

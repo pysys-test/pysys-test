@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.threadutils &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.threadutils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.threadutils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2018 M.B.Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the L{BackgroundThread} class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.internal.initlogging</span> <span class="kn">import</span> <span class="n">pysysLogHandler</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BackgroundThread&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="BackgroundThread"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.threadutils.html#pysys.utils.threadutils.BackgroundThread">[docs]</a><span class="k">class</span> <span class="nc">BackgroundThread</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	PySys wrapper for a background thread that can receive requests to </span>
+<span class="sd">	stop, and can send log output to the same place as the test&#39;s logging. </span>
+
+<span class="sd">	To create a background thread in your test, use `pysys.basetest.BaseTest.startBackgroundThread`.</span>
+
+<span class="sd">	:ivar str ~.name: The name specified for this thread when it was created. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar int ~.joinTimeoutSecs: The default timeout that will be used for joining </span>
+<span class="sd">		this thread. If not explicitly set this will be L{TIMEOUTS}C{[&#39;WaitForProcessStop&#39;]}.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar Exception ~.exception: The exception object raised by the thread if it has </span>
+<span class="sd">		terminated with an error, or None if not. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">kwargsForTarget</span><span class="p">):</span>
+		<span class="k">assert</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;Thread name must always be specified&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.thread.</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">name</span><span class="p">)</span> <span class="c1"># name without the owner prefix</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">owner</span> <span class="c1"># a BaseTest</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__parentLogHandlers</span> <span class="o">=</span> <span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">getLogHandlersForCurrentThread</span><span class="p">()</span>
+		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parentLogHandlers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parentLogHandlers</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__target</span> <span class="o">=</span> <span class="n">target</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">stopping</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">joinTimeoutSecs</span> <span class="o">=</span> <span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForProcessStop&#39;</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargsForTarget</span><span class="p">)</span> <span class="k">if</span> <span class="n">kwargsForTarget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+		<span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stopping&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping</span>
+		<span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;log&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">owner</span><span class="p">),</span> <span class="n">name</span><span class="p">),</span> <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__run</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+		
+		<span class="c1"># add an undocumented alias matching threading.Thread&#39;s</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">is_alive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isAlive</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">__outcomeReported</span> <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__kbdrInterrupt</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Starting background thread </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="p">)</span>
+	
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;BackgroundThread[</span><span class="si">%s</span><span class="s1">]&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">name</span>
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="c1"># without owner identifier</span>
+	
+<div class="viewcode-block" id="BackgroundThread.isAlive"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.threadutils.html#pysys.utils.threadutils.BackgroundThread.isAlive">[docs]</a>	<span class="k">def</span> <span class="nf">isAlive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		:return: True if this thread is still running. </span>
+<span class="sd">		:rtype: bool</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">()</span></div>
+	
+	<span class="k">def</span> <span class="nf">__run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="c1"># inherit log handlers from parent, whatever they are</span>
+			<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parentLogHandlers</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> starting&#39;</span><span class="o">%</span><span class="bp">self</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__target</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> completed successfully&#39;</span><span class="o">%</span><span class="bp">self</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Background thread </span><span class="si">%s</span><span class="s1"> raised an exception while being stopped (ignoring) - </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ex</span><span class="p">))</span>
+				<span class="k">return</span>
+			<span class="c1"># this is probably the only place we can really get and show the stack trace</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;Background thread </span><span class="si">%s</span><span class="s1"> failed - &#39;</span><span class="o">%</span><span class="bp">self</span><span class="p">)</span>
+			
+			<span class="c1"># set this so we can report the BLOCKED outcome</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="n">ex</span>
+		<span class="k">finally</span><span class="p">:</span>
+			<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+			<span class="n">pysysLogHandler</span><span class="o">.</span><span class="n">setLogHandlersForCurrentThread</span><span class="p">([])</span>
+
+<div class="viewcode-block" id="BackgroundThread.stop"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.threadutils.html#pysys.utils.threadutils.BackgroundThread.stop">[docs]</a>	<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Requests the thread to stop by setting the `stopping` event which </span>
+<span class="sd">		the thread ought to be checking regularly. </span>
+<span class="sd">		</span>
+<span class="sd">		This method returns immediately; if you wish to wait for the </span>
+<span class="sd">		thread to terminate, call L{join} afterwards. Calling this repeatedly </span>
+<span class="sd">		has no effect. </span>
+<span class="sd">		</span>
+<span class="sd">		:return: This instance, in case you wish to do fluent method chaining.  </span>
+<span class="sd">		:rtype: L{BackgroundThread}</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Stop() requested for background thread </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">stopping</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+		
+<div class="viewcode-block" id="BackgroundThread.join"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.threadutils.html#pysys.utils.threadutils.BackgroundThread.join">[docs]</a>	<span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Wait until this thread terminates, and adds a TIMEDOUT or BLOCKED </span>
+<span class="sd">		outcome to the owner test if it times out or raises an exception.</span>
+<span class="sd">		</span>
+<span class="sd">		If you wish to request the thread to terminate rather than waiting for </span>
+<span class="sd">		it to reach the end of its target function on its own, call L{stop} </span>
+<span class="sd">		before joining the thread. </span>
+<span class="sd">		</span>
+<span class="sd">		If a join times out, the thread is automatically requested to stop </span>
+<span class="sd">		as soon as possible. </span>
+<span class="sd">		</span>
+<span class="sd">		Note that if the thread raises an Exception after it was requested to </span>
+<span class="sd">		stop this is logged but does not result in a failure outcome, </span>
+<span class="sd">		since failures during cleanup are usually to be expected. </span>
+<span class="sd">		</span>
+<span class="sd">		:param timeout: The time in seconds to wait. Usually this should be </span>
+<span class="sd">			left at the default value of None which uses a default timeout </span>
+<span class="sd">			of L{constants.TIMEOUTS}C{[&#39;WaitForProcessStop&#39;]}. </span>
+<span class="sd">			Note that unlike Python&#39;s `Thread.join` method, infinite timeouts </span>
+<span class="sd">			are not supported. </span>
+<span class="sd">		</span>
+<span class="sd">		:param abortOnError: Set to True if you wish this method to </span>
+<span class="sd">			immediately abort with an exception if the background thread times out </span>
+<span class="sd">			or raises an Exception. The default is False, which adds the failure </span>
+<span class="sd">			outcome but does not raise an exception. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">outcomereported</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__outcomeReported</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__outcomeReported</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># only do this once</span>
+		
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">timeout</span><span class="p">:</span> <span class="n">timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joinTimeoutSecs</span>
+		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">joinTimeoutSecs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">joinTimeoutSecs</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">outcomereported</span><span class="p">):</span>
+			<span class="c1"># only log it the first time</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Joining background thread </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="p">)</span>
+		<span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		
+		<span class="c1"># don&#39;t call thread.join for the entire time, since on windows that </span>
+		<span class="c1"># leaves no opportunity to detect keyboard interrupts</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__kbdrInterrupt</span><span class="p">:</span> <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">__kbdrInterrupt</span> <span class="c1"># avoid repeatedly joining same thread</span>
+		<span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">()</span> <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span> <span class="o">&lt;</span> <span class="n">timeout</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">KeyboardInterrupt</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># progra: no cover</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">__kbdrInterrupt</span> <span class="o">=</span> <span class="n">ex</span>
+				<span class="k">raise</span>
+		
+		<span class="n">timetaken</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">starttime</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">():</span>
+		
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">outcomereported</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">TIMEDOUT</span><span class="p">,</span> <span class="s1">&#39;Background thread </span><span class="si">%s</span><span class="s1"> is still running after waiting for allocated timeout period (</span><span class="si">%d</span><span class="s1"> secs)&#39;</span><span class="o">%</span><span class="p">(</span>
+					<span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Stack of hanging thread </span><span class="si">%s</span><span class="s1">: </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> 
+						<span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_stack</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">_current_frames</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">ident</span><span class="p">])))</span>
+				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to get stack of hanging thread: </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span> <span class="c1"># ensure it stops as quickly as possible</span>
+
+		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">outcomereported</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">BLOCKED</span><span class="p">,</span> <span class="s1">&#39;Background thread </span><span class="si">%s</span><span class="s1"> failed with </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span>
+					<span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception</span><span class="p">),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="n">abortOnError</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">timetaken</span> <span class="o">&gt;</span><span class="mi">10</span><span class="p">:</span> <span class="c1"># alert user only if it took a long time</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Joined background thread </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%0.1f</span><span class="s1"> seconds&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">timetaken</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

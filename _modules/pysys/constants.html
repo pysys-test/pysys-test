@@ -1,0 +1,472 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.constants &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.constants</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.constants</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standard constants that are used throughout the PySys framework. </span>
+
+<span class="sd">The convention is to import all contents of the module so that the constants can </span>
+<span class="sd">be referenced directly. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">traceback</span>
+
+<span class="c1"># if set is not available (&gt;python 2.6) fall back to the sets module</span>
+<span class="k">try</span><span class="p">:</span>  
+	<span class="nb">set</span>  
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>  
+	<span class="kn">import</span> <span class="nn">sets</span>
+	<span class="kn">from</span> <span class="nn">sets</span> <span class="kn">import</span> <span class="n">Set</span> <span class="k">as</span> <span class="nb">set</span>
+
+<span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">stdoutHandler</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<span class="c1"># set the platform and platform related constants</span>
+<span class="n">HOSTNAME</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">getfqdn</span><span class="p">()</span>
+<span class="sd">&quot;&quot;&quot; The fully qualified name of this host. &quot;&quot;&quot;</span>
+
+<span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;win32&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">):</span>
+	<span class="n">PLATFORM</span><span class="o">=</span><span class="s1">&#39;win32&#39;</span>
+	<span class="sd">&quot;&quot;&quot;OS platform - current values are: `linux`, `win32` (Windows), `sunos` (Solaris), `darwin` (Mac). </span>
+<span class="sd">	It is recommended to use standard Python functions such as ``sys.platform`` rather than this constant. &quot;&quot;&quot;</span>
+	<span class="n">OSFAMILY</span><span class="o">=</span><span class="s1">&#39;windows&#39;</span>
+	<span class="n">DEVNULL</span> <span class="o">=</span> <span class="s1">&#39;nul&#39;</span>
+	<span class="n">WINDIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;windir&#39;</span><span class="p">,</span> <span class="s1">&#39;c:\WINDOWS&#39;</span><span class="p">)</span>
+	<span class="n">PATH</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">;</span><span class="si">%s</span><span class="s1">\system32;</span><span class="si">%s</span><span class="s1">\System32\Wbem&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">WINDIR</span><span class="p">,</span> <span class="n">WINDIR</span><span class="p">,</span> <span class="n">WINDIR</span><span class="p">)</span>
+	<span class="n">LD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;PATH&#39;</span>
+	<span class="n">SITE_PACKAGES_DIR</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;Lib&quot;</span><span class="p">,</span> <span class="s2">&quot;site-packages&quot;</span><span class="p">)</span>
+	
+<span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;sunos&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
+	<span class="n">PLATFORM</span><span class="o">=</span><span class="s1">&#39;sunos&#39;</span>
+	<span class="n">OSFAMILY</span><span class="o">=</span><span class="s1">&#39;unix&#39;</span>
+	<span class="n">DEVNULL</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
+	<span class="n">PATH</span> <span class="o">=</span> <span class="s1">&#39;/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/openwin/bin:/opt/SUNWspro/bin&#39;</span>
+	<span class="n">LD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;/usr/local/lib&#39;</span> 
+	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;LD_LIBRARY_PATH&#39;</span>
+	<span class="n">SITE_PACKAGES_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;python</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;site-packages&quot;</span><span class="p">)</span>
+
+<span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;linux&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">):</span>
+	<span class="n">PLATFORM</span><span class="o">=</span><span class="s1">&#39;linux&#39;</span>
+	<span class="n">OSFAMILY</span><span class="o">=</span><span class="s1">&#39;unix&#39;</span>
+	<span class="n">DEVNULL</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
+	<span class="n">PATH</span> <span class="o">=</span> <span class="s1">&#39;/bin:/usr/bin:/usr/sbin:/usr/local/bin&#39;</span>
+	<span class="n">LD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;/usr/lib&#39;</span>
+	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;LD_LIBRARY_PATH&#39;</span>
+	<span class="n">SITE_PACKAGES_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;python</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;site-packages&quot;</span><span class="p">)</span>
+
+<span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;darwin&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">):</span>
+	<span class="n">PLATFORM</span><span class="o">=</span><span class="s1">&#39;darwin&#39;</span>
+	<span class="n">OSFAMILY</span><span class="o">=</span><span class="s1">&#39;unix&#39;</span>
+	<span class="n">DEVNULL</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
+	<span class="n">PATH</span> <span class="o">=</span> <span class="s1">&#39;/bin:/usr/bin:/usr/sbin:/usr/local/bin&#39;</span>
+	<span class="n">LD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;/usr/lib:/usr/local/lib&#39;</span>
+	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;DYLD_LIBRARY_PATH&#39;</span>
+	<span class="n">SITE_PACKAGES_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;python</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;site-packages&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+	<span class="c1"># Fall back to assumed UNIX-like platform</span>
+	<span class="n">PLATFORM</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span>
+	<span class="n">OSFAMILY</span><span class="o">=</span><span class="s1">&#39;unix&#39;</span>
+	<span class="n">DEVNULL</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
+	<span class="n">PATH</span> <span class="o">=</span> <span class="s1">&#39;/bin:/usr/bin:/usr/sbin:/usr/local/bin&#39;</span>
+	<span class="n">LD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;/usr/lib&#39;</span>
+	<span class="n">DYLD_LIBRARY_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="n">LIBRARY_PATH_ENV_VAR</span> <span class="o">=</span> <span class="s1">&#39;LD_LIBRARY_PATH&#39;</span>
+	<span class="n">SITE_PACKAGES_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;python</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;site-packages&quot;</span><span class="p">)</span>
+
+
+<span class="n">ENVSEPERATOR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">pathsep</span>
+<span class="sd">&quot;&quot;&quot; Deprecated. </span>
+<span class="sd">:meta private: Use ``os.pathsep`` instead. &quot;&quot;&quot;</span>
+
+<span class="n">IS_WINDOWS</span> <span class="o">=</span> <span class="n">OSFAMILY</span><span class="o">==</span><span class="s1">&#39;windows&#39;</span>
+<span class="sd">&quot;&quot;&quot; True if this is Windows, False for other operating systems such as Unix. &quot;&quot;&quot;</span>
+
+<span class="n">PYTHON_EXE</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span> <span class="c1"># alias to increase readability</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The path to the current Python executable (=``sys.executable``). </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># constants used in testing</span>
+<span class="n">TRUE</span><span class="o">=</span><span class="kc">True</span> 
+<span class="sd">&quot;&quot;&quot; Deprecated. </span>
+<span class="sd">:meta private: use True instead. &quot;&quot;&quot;</span>
+<span class="n">FALSE</span><span class="o">=</span><span class="kc">False</span>
+<span class="sd">&quot;&quot;&quot; Deprecated. </span>
+<span class="sd">:meta private: use False instead. &quot;&quot;&quot;</span>
+<span class="n">BACKGROUND</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="sd">&quot;&quot;&quot;Constant indicating a process is to be started asynchronously in the background. &quot;&quot;&quot;</span>
+<span class="n">FOREGROUND</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="sd">&quot;&quot;&quot;Constant indicating a process is to be run synchronously in the foreground. &quot;&quot;&quot;</span>
+
+<span class="c1"># outcomes</span>
+<div class="viewcode-block" id="Outcome"><a class="viewcode-back" href="../../autodocgen/pysys.constants.html#pysys.constants.Outcome">[docs]</a><span class="k">class</span> <span class="nc">Outcome</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Represents a PySys test outcome that can be reported using `pysys.basetest.BaseTest.addOutcome()`. </span>
+<span class="sd">	</span>
+<span class="sd">	The possible outcomes are listed in `OUTCOMES`. </span>
+<span class="sd">	</span>
+<span class="sd">	Use ``str()`` or ``%s`` to get the display name for an outcome (e.g. &quot;TIMED OUT&quot;), and `isFailure()` to check </span>
+<span class="sd">	if it&#39;s a failure outcome. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">__alreadyInstantiated</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">isFailure</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="n">displayName</span> <span class="o">=</span> <span class="p">(</span><span class="n">displayName</span> <span class="ow">or</span> <span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+		<span class="k">assert</span> <span class="n">displayName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Outcome</span><span class="o">.</span><span class="n">__alreadyInstantiated</span> <span class="c1"># avoid duplicate instances, since we use reference equality to compare these</span>
+		<span class="n">Outcome</span><span class="o">.</span><span class="n">__alreadyInstantiated</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">displayName</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__isFailure</span> <span class="o">=</span> <span class="nb">id</span><span class="p">,</span> <span class="n">displayName</span><span class="p">,</span> <span class="n">isFailure</span>
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__id</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__isFailure</span> <span class="k">else</span> <span class="s1">&#39;(non-failure)&#39;</span><span class="p">))</span> <span class="c1"># use the constant id for this __repr__ string that shows in the doc</span>
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>
+<div class="viewcode-block" id="Outcome.isFailure"><a class="viewcode-back" href="../../autodocgen/pysys.constants.html#pysys.constants.Outcome.isFailure">[docs]</a>	<span class="k">def</span> <span class="nf">isFailure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot;:return bool: True if this outcome is classed as failure, or False if not (e.g. `SKIPPED` and `NOTVERIFIED` are not failures).&quot;&quot;&quot;</span> 
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__isFailure</span></div></div>
+
+<span class="n">PASSED</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;PASSED&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Non-failure test `Outcome` indicating successful validation steps. &quot;&quot;&quot;</span>
+<span class="n">INSPECT</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;INSPECT&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="s1">&#39;REQUIRES INSPECTION&#39;</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Non-failure test `Outcome` indicating that manual inspection of the test output is required (in addition to any automated checks). &quot;&quot;&quot;</span>
+<span class="n">NOTVERIFIED</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;NOTVERIFIED&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="s1">&#39;NOT VERIFIED&#39;</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Non-failure test `Outcome` indicating that it was not possible to positively validate correct operation. This is not treated as a failure outcome. &quot;&quot;&quot;</span>
+<span class="n">FAILED</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;FAILED&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Failure test `Outcome` indicating validation steps with a negative outcome. &quot;&quot;&quot;</span>
+<span class="n">TIMEDOUT</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;TIMEDOUT&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="s1">&#39;TIMED OUT&#39;</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Failure test `Outcome` indicating that the test timed out while performing execution or validation operations. &quot;&quot;&quot;</span>
+<span class="n">DUMPEDCORE</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;DUMPEDCORE&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="s1">&#39;DUMPED CORE&#39;</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Failure test `Outcome` indicating that a crash occurred, and a `core` file was generated (UNIX only). &quot;&quot;&quot;</span>
+<span class="n">BLOCKED</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;BLOCKED&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Failure test `Outcome` indicating that something went wrong, for example an exception was raised by the testcase or a required file could not be found. &quot;&quot;&quot;</span>
+<span class="n">SKIPPED</span> <span class="o">=</span> <span class="n">Outcome</span><span class="p">(</span><span class="s1">&#39;SKIPPED&#39;</span><span class="p">,</span> <span class="n">isFailure</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; Non-failure test `Outcome` indicating that the test was ignored as it is not currently required to run on this platform/mode. </span>
+<span class="sd">	See `pysys.basetest.BaseTest.skipTest`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1"># set the precedent for the test outcomes</span>
+<span class="n">OUTCOMES</span> <span class="o">=</span> <span class="p">(</span><span class="n">SKIPPED</span><span class="p">,</span> <span class="n">BLOCKED</span><span class="p">,</span> <span class="n">DUMPEDCORE</span><span class="p">,</span> <span class="n">TIMEDOUT</span><span class="p">,</span> <span class="n">FAILED</span><span class="p">,</span> <span class="n">NOTVERIFIED</span><span class="p">,</span> <span class="n">INSPECT</span><span class="p">,</span> <span class="n">PASSED</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Lists all possible test outcomes, in descending order of precedence. </span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">	SKIPPED</span>
+<span class="sd">	BLOCKED</span>
+<span class="sd">	DUMPEDCORE</span>
+<span class="sd">	TIMEDOUT</span>
+<span class="sd">	FAILED</span>
+<span class="sd">	NOTVERIFIED</span>
+<span class="sd">	INSPECT</span>
+<span class="sd">	PASSED</span>
+
+<span class="sd">If a test adds multiple outcomes, the outcome with highest precedence is used as the final test outcome </span>
+<span class="sd">(i.e. SKIPPED rather than FAILED, FAILED rather than PASSED etc). </span>
+
+<span class="sd">Each item is an instance of `Outcome`. Use `Outcome.isFailure()` to check whether a given outcome is classed as a failure for reporting purposes. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">PRECEDENT</span> <span class="o">=</span> <span class="n">OUTCOMES</span>
+<span class="sd">&quot;&quot;&quot;:deprecated: The old name for `OUTCOMES`.  &quot;&quot;&quot;</span>
+<span class="n">FAILS</span> <span class="o">=</span> <span class="p">[</span><span class="n">__outcome</span> <span class="k">for</span> <span class="n">__outcome</span> <span class="ow">in</span> <span class="n">OUTCOMES</span> <span class="k">if</span> <span class="n">__outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;:deprecated: To test whether a specific outcome from OUTCOMES is a failure, use `Outcome.isFailure()`. &quot;&quot;&quot;</span>
+
+
+<span class="n">LOOKUP</span> <span class="o">=</span> <span class="p">{</span><span class="n">__outcome</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">__outcome</span><span class="p">)</span> <span class="k">for</span> <span class="n">__outcome</span> <span class="ow">in</span> <span class="n">OUTCOMES</span><span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;Lookup dictionary providing the string representation of test outcomes.</span>
+<span class="sd">:deprecated: Use ``str(outcome)`` on the `Outcome` to convert to the display name. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">LOOKUP</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TRUE&quot;</span>
+<span class="n">LOOKUP</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;FALSE&quot;</span>
+<span class="n">LOOKUP</span><span class="p">[</span><span class="n">TRUE</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TRUE&quot;</span>
+<span class="n">LOOKUP</span><span class="p">[</span><span class="n">FALSE</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;FALSE&quot;</span>
+
+<span class="c1"># set the default descriptor filename, input, output and reference directory names</span>
+<span class="n">DEFAULT_PROJECTFILE</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pysysproject.xml&#39;</span><span class="p">]</span>
+<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pysystest.xml&#39;</span><span class="p">]</span> <span class="c1"># can be customized with the pysysTestDescriptorFileNames project property</span>
+<span class="n">DEFAULT_MODULE</span> <span class="o">=</span> <span class="s1">&#39;run&#39;</span>
+<span class="n">DEFAULT_GROUP</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">DEFAULT_TESTCLASS</span> <span class="o">=</span> <span class="s1">&#39;PySysTest&#39;</span>
+<span class="n">DEFAULT_INPUT</span> <span class="o">=</span> <span class="s1">&#39;Input&#39;</span>
+<span class="n">DEFAULT_OUTPUT</span> <span class="o">=</span> <span class="s1">&#39;Output&#39;</span>
+<span class="n">DEFAULT_REFERENCE</span> <span class="o">=</span> <span class="s1">&#39;Reference&#39;</span>
+<span class="n">DEFAULT_RUNNER</span> <span class="o">=</span> <span class="s1">&#39;pysys.baserunner.BaseRunner&#39;</span>
+<span class="n">DEFAULT_MAKER</span> <span class="o">=</span> <span class="s1">&#39;pysys.launcher.console.ConsoleMakeTestHelper&#39;</span>
+<span class="n">DEFAULT_STYLESHEET</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># deprecated</span>
+<span class="n">DEFAULT_FORMAT</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> </span><span class="si">%(levelname)-5s</span><span class="s1"> </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+<span class="n">DEFAULT_OUTDIR</span> <span class="o">=</span> <span class="s1">&#39;win&#39;</span> <span class="k">if</span> <span class="n">PLATFORM</span><span class="o">==</span><span class="s1">&#39;win32&#39;</span> <span class="k">else</span> <span class="n">PLATFORM</span> <span class="c1"># this constant is not currently public API</span>
+
+<span class="n">OSWALK_IGNORES</span> <span class="o">=</span> <span class="p">[</span> <span class="n">DEFAULT_INPUT</span><span class="p">,</span> <span class="n">DEFAULT_OUTPUT</span><span class="p">,</span> <span class="n">DEFAULT_REFERENCE</span><span class="p">,</span> <span class="s1">&#39;CVS&#39;</span><span class="p">,</span> <span class="s1">&#39;.svn&#39;</span><span class="p">,</span> <span class="s1">&#39;__pycache__&#39;</span><span class="p">,</span> <span class="s1">&#39;.git&#39;</span> <span class="p">]</span>
+<span class="sd">&quot;&quot;&quot; A list of directory names to exclude when recursively walking a directory tree. </span>
+
+<span class="sd">:meta private: Hidden since 1.5.1, not something end-users need to be concerned with. &quot;&quot;&quot;</span>
+
+<span class="n">DEFAULT_TIMEOUT</span> <span class="o">=</span> <span class="mi">600</span>
+<span class="sd">&quot;&quot;&quot;Deprecated: Use a specific member of `TIMEOUTS` instead.&quot;&quot;&quot;</span>
+<span class="n">TIMEOUTS</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="sd">&quot;&quot;&quot; Default timeouts used for various operations. </span>
+
+<span class="sd">Each timeout is given as a floating point number of seconds.</span>
+
+<span class="sd">These timeouts can be customized from a runner plugin (or `pysys.baserunner.BaseRunner.setup()`) if needed </span>
+<span class="sd">(but never change them from within individual testcases). </span>
+<span class="sd"> &quot;&quot;&quot;</span>
+<span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForSocket&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">60</span>
+<span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForFile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForSignal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">60</span>
+<span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForProcessStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForProcess&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="mi">10</span>
+<span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;WaitForAvailableTCPPort&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="mi">5</span> <span class="c1"># in case other tests are using up all ports</span>
+<span class="n">TIMEOUTS</span><span class="p">[</span><span class="s1">&#39;ManualTester&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1800</span>
+
+<span class="c1"># the supported distinct log categories</span>
+<span class="n">LOG_WARN</span> <span class="o">=</span> <span class="s1">&#39;warn&#39;</span>
+<span class="n">LOG_ERROR</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+<span class="n">LOG_DEBUG</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span>
+<span class="n">LOG_TRACEBACK</span> <span class="o">=</span> <span class="s1">&#39;traceback&#39;</span>
+<span class="n">LOG_FILE_CONTENTS</span> <span class="o">=</span> <span class="s1">&#39;filecontents&#39;</span>
+<span class="n">LOG_TEST_DETAILS</span> <span class="o">=</span> <span class="s1">&#39;details&#39;</span>
+<span class="n">LOG_TEST_OUTCOMES</span> <span class="o">=</span> <span class="s1">&#39;outcomereason&#39;</span>
+<span class="n">LOG_TEST_PROGRESS</span> <span class="o">=</span> <span class="s1">&#39;progress&#39;</span>
+<span class="n">LOG_TEST_PERFORMANCE</span> <span class="o">=</span> <span class="s1">&#39;performance&#39;</span>
+<span class="n">LOG_TIMEOUTS</span> <span class="o">=</span> <span class="s1">&#39;timed out&#39;</span>
+<span class="n">LOG_FAILURES</span> <span class="o">=</span> <span class="s1">&#39;failed&#39;</span>
+<span class="n">LOG_PASSES</span> <span class="o">=</span> <span class="s1">&#39;passed&#39;</span>
+<span class="n">LOG_SKIPS</span> <span class="o">=</span> <span class="s1">&#39;skipped&#39;</span>
+<span class="n">LOG_DIFF_ADDED</span> <span class="o">=</span> <span class="s1">&#39;diff+&#39;</span>
+<span class="n">LOG_DIFF_REMOVED</span> <span class="o">=</span> <span class="s1">&#39;diff-&#39;</span>
+<span class="n">LOG_END</span> <span class="o">=</span> <span class="s1">&#39;end&#39;</span>
+
+<div class="viewcode-block" id="PrintLogs"><a class="viewcode-back" href="../../autodocgen/pysys.constants.html#pysys.constants.PrintLogs">[docs]</a><span class="k">class</span> <span class="nc">PrintLogs</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Enumeration constants that specify when run.log contents are printed to the stdout console.</span>
+<span class="sd">	</span>
+<span class="sd">	In all cases a summary of failures is printed at the end, and the user can always </span>
+<span class="sd">	look at the run.log inside each output directory if they need more detail. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;PrintLogs.NONE&#39;</span>
+	<span class="sd">&quot;&quot;&quot;Detailed run.log output is not printed to the stdout console. &quot;&quot;&quot;</span>
+	<span class="n">ALL</span> <span class="o">=</span> <span class="s1">&#39;PrintLogs.ALL&#39;</span>
+	<span class="sd">&quot;&quot;&quot;Detailed run.log output is always printed to the stdout console, for both passed and failed testcases. &quot;&quot;&quot;</span>
+	<span class="n">FAILURES</span> <span class="o">=</span> <span class="s1">&#39;PrintLogs.FAILURES&#39;</span>
+	<span class="sd">&quot;&quot;&quot;Detailed run.log output is only printed to the stdout console for failed testcases. &quot;&quot;&quot;</span></div>
+
+<span class="n">PROJECT</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="sd">&quot;&quot;&quot;:meta private: Hide this since 1.5.1 since we don&#39;t want people to use it. </span>
+
+<span class="sd">Holds the L{pysys.xml.project.Project} instance containing settings for this PySys project.</span>
+<span class="sd">Instead of using this constant, use `pysys.basetest.BaseTest.project` (or`pysys.process.user.ProcessUser.project`) </span>
+<span class="sd">field to access this. If this is not possible, use Project.getInstance().</span>
+
+<span class="sd">This is set by the console_XXX modules when the project is loaded. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pysys.xml.project</span> <span class="kn">import</span> <span class="n">Project</span> <span class="c1"># retained for compatibility when using &#39;from constants import *&#39;</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

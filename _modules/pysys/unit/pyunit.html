@@ -1,0 +1,345 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.unit.pyunit &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.unit.pyunit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.unit.pyunit</h1><div class="highlight"><pre>
+<span></span><span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the test class used to run PyUnit tests. </span>
+
+<span class="sd">A suite of PyUnit tests becomes a single PySys test. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.basetest</span> <span class="kn">import</span> <span class="n">BaseTest</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span>
+<span class="kn">import</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">unittest</span>
+
+<div class="viewcode-block" id="PyUnitTest"><a class="viewcode-back" href="../../../autodocgen/pysys.unit.pyunit.html#pysys.unit.pyunit.PyUnitTest">[docs]</a><span class="k">class</span> <span class="nc">PyUnitTest</span><span class="p">(</span><span class="n">BaseTest</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Class for running PyUnit tests (standard Python unittest module). The</span>
+<span class="sd">	execute method will execute all the .py files, find all the</span>
+<span class="sd">	unittest.TestCase classes within those files and run the test methods</span>
+<span class="sd">	within them. A separate Python process will be spawned for each input</span>
+<span class="sd">	test file. By default child Python processes will have the same</span>
+<span class="sd">	PYTHONPATH as the python process which is running pysys. However,</span>
+<span class="sd">	this can be changed by overriding the getPythonPath() method.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PyUnitTest.execute"><a class="viewcode-back" href="../../../autodocgen/pysys.unit.pyunit.html#pysys.unit.pyunit.PyUnitTest.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Implementation of the execute() abstract method which simply</span>
+<span class="sd">		calls executePyUnitTests()</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">executePyUnitTests</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PyUnitTest.executePyUnitTests"><a class="viewcode-back" href="../../../autodocgen/pysys.unit.pyunit.html#pysys.unit.pyunit.PyUnitTest.executePyUnitTests">[docs]</a>	<span class="k">def</span> <span class="nf">executePyUnitTests</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Run all the PyUnit tests in the Input directory.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">pyfiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findPythonFiles</span><span class="p">()</span>
+		<span class="k">for</span> <span class="n">pyfile</span> <span class="ow">in</span> <span class="n">pyfiles</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_runTestFile</span><span class="p">(</span><span class="n">pyfile</span><span class="p">)</span></div>
+
+	<span class="k">def</span> <span class="nf">_findPythonFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span>  <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="p">,</span> <span class="s1">&#39;*.py&#39;</span><span class="p">))</span>
+
+	<span class="k">def</span> <span class="nf">_runTestFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testFile</span><span class="p">):</span>
+		<span class="nb">globals</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="nb">locals</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="n">displayName</span> <span class="o">=</span> <span class="s1">&#39;PyUnit&#39;</span>
+		<span class="n">instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getInstanceCount</span><span class="p">(</span><span class="n">displayName</span><span class="p">)</span>
+		<span class="n">dstdout</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s1">&#39;pyunit.out&#39;</span><span class="p">)</span>
+		<span class="n">dstderr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s1">&#39;pyunit.err&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">instance</span><span class="p">:</span> <span class="n">dstdout</span>  <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dstdout</span><span class="p">,</span> <span class="n">instance</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">instance</span><span class="p">:</span> <span class="n">dstderr</span>  <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dstderr</span><span class="p">,</span> <span class="n">instance</span><span class="p">)</span>
+		<span class="n">arguments</span> <span class="o">=</span> <span class="p">[</span><span class="vm">__file__</span><span class="p">,</span> <span class="n">testFile</span><span class="p">]</span>		
+		<span class="n">environ</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+		<span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PYTHONPATH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getPythonPath</span><span class="p">()</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+		<span class="n">process</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startPython</span><span class="p">(</span><span class="n">arguments</span><span class="p">,</span> <span class="n">environs</span><span class="o">=</span><span class="n">environ</span><span class="p">,</span> <span class="n">workingDir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> 
+			<span class="n">state</span><span class="o">=</span><span class="n">FOREGROUND</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_TIMEOUT</span><span class="p">,</span> 
+			<span class="n">stdout</span><span class="o">=</span><span class="n">dstdout</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">dstderr</span><span class="p">,</span> 
+			<span class="n">displayName</span><span class="o">=</span><span class="n">displayName</span><span class="p">,</span> <span class="n">ignoreExitStatus</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">exitStatus</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">FAILED</span><span class="p">,</span> <span class="s1">&#39;Non-zero exit code from </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">testFile</span><span class="p">),</span> <span class="n">printReason</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">addOutcome</span><span class="p">(</span><span class="n">PASSED</span><span class="p">)</span>
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">dstdout</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultFileEncoding</span><span class="p">(</span><span class="n">dstdout</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+
+<div class="viewcode-block" id="PyUnitTest.getPythonPath"><a class="viewcode-back" href="../../../autodocgen/pysys.unit.pyunit.html#pysys.unit.pyunit.PyUnitTest.getPythonPath">[docs]</a>	<span class="k">def</span> <span class="nf">getPythonPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Override this method to return a sequence of paths to put</span>
+<span class="sd">		at the beginning of the PYTHONPATH when running the PyUnit</span>
+<span class="sd">		tests. See PyUnit_test_002 for an example of this.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="p">[]</span></div></div>
+
+<span class="k">class</span> <span class="nc">__PysysTestResult</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestResult</span><span class="p">):</span> <span class="c1"># pragma: no cover (undocumented, little used executable entry point)</span>
+	
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">unittest</span><span class="o">.</span><span class="n">TestResult</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">successes</span> <span class="o">=</span> <span class="p">[]</span>
+
+	<span class="k">def</span> <span class="nf">addSuccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">successes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span> <span class="c1"># pragma: no cover (undocumented, little used executable entry point)</span>
+
+	<span class="k">def</span> <span class="nf">getTestClasses</span><span class="p">(</span><span class="n">testFile</span><span class="p">):</span>
+		<span class="nb">globals</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="c1"># Use globals dictionary for locals as well because we</span>
+		<span class="c1"># want to treat this like it is being run in a global</span>
+		<span class="c1"># (file scope) context)</span>
+		<span class="n">exec</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="n">openfile</span><span class="p">(</span><span class="n">testFile</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">testFile</span><span class="p">,</span> <span class="s1">&#39;exec&#39;</span><span class="p">),</span> <span class="nb">globals</span><span class="p">,</span> <span class="nb">globals</span><span class="p">)</span>
+		<span class="n">testClasses</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">globals</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+			<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">)):</span>
+				<span class="n">testClasses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+		<span class="k">return</span> <span class="p">(</span><span class="n">testClasses</span><span class="p">,</span> <span class="nb">globals</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">createTestSuite</span><span class="p">(</span><span class="n">testFile</span><span class="p">):</span>
+		<span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">()</span>
+		<span class="n">loader</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestLoader</span><span class="p">()</span>
+		<span class="n">testClasses</span><span class="p">,</span> <span class="nb">globals</span> <span class="o">=</span> <span class="n">getTestClasses</span><span class="p">(</span><span class="n">testFile</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">testClass</span> <span class="ow">in</span> <span class="n">testClasses</span><span class="p">:</span>
+			<span class="n">methods</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">getTestCaseNames</span><span class="p">(</span><span class="n">testClass</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+				<span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">testClass</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
+		<span class="k">return</span> <span class="p">(</span><span class="n">suite</span><span class="p">,</span> <span class="nb">globals</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">getTestName</span><span class="p">(</span><span class="n">testcase</span><span class="p">):</span>
+		<span class="n">name</span> <span class="o">=</span> <span class="n">testcase</span><span class="o">.</span><span class="n">id</span><span class="p">()</span>
+		<span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;__builtin__.&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+	<span class="n">testFile</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+	<span class="n">suite</span><span class="p">,</span> <span class="nb">globals</span> <span class="o">=</span> <span class="n">createTestSuite</span><span class="p">(</span><span class="n">testFile</span><span class="p">)</span>
+	<span class="n">results</span> <span class="o">=</span> <span class="n">__PysysTestResult</span><span class="p">()</span>
+	
+	<span class="nb">globals</span><span class="p">[</span><span class="s1">&#39;_suite_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">suite</span>
+	<span class="nb">globals</span><span class="p">[</span><span class="s1">&#39;_results_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span>
+	
+	<span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;_suite_.run(_results_)&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">)</span>
+
+	<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">successes</span><span class="p">:</span>
+		<span class="nb">print</span><span class="p">(</span><span class="n">getTestName</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; ... passed&#39;</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+		<span class="nb">print</span><span class="p">(</span><span class="n">getTestName</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span> <span class="s1">&#39; ... failed&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+	<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">failures</span><span class="p">:</span>
+		<span class="nb">print</span><span class="p">(</span><span class="n">getTestName</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39; ... failed&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+	
+	<span class="k">if</span> <span class="n">results</span><span class="o">.</span><span class="n">wasSuccessful</span><span class="p">():</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

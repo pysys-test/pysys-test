@@ -1,0 +1,995 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.xml.descriptor &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.xml.descriptor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.xml.descriptor</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env pytho</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The `TestDescriptor &lt;pysys.xml.descriptor.TestDescriptor&gt;` class holds metadata for each testcase </span>
+<span class="sd">(``pysystest.xml``) or directory (``pysysdirconfig.xml``), and the `DescriptorLoader &lt;pysys.xml.descriptor.DescriptorLoader&gt;` </span>
+<span class="sd">class allows customization of the test discovery process. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">xml.dom.minidom</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+
+<span class="kn">import</span> <span class="nn">pysys</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">PY2</span><span class="p">,</span> <span class="n">isstring</span><span class="p">,</span> <span class="n">openfile</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.xml.descriptor&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TestDescriptor"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.descriptor.html#pysys.xml.descriptor.TestDescriptor">[docs]</a><span class="k">class</span> <span class="nc">TestDescriptor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory </span>
+<span class="sd">	subtree (``pysysdirconfig.xml``). </span>
+<span class="sd">	</span>
+<span class="sd">	The `DescriptorLoader` class is responsible for determining the available </span>
+<span class="sd">	descriptor instances. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.file: The absolute path of the testcase descriptor file. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.testDir: The absolute path of the test, which is used to convert </span>
+<span class="sd">		any relative paths into absolute paths. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.id: The testcase identifier, or the id prefix if this is a </span>
+<span class="sd">		directory config descriptor rather than a testcase descriptor. </span>
+<span class="sd">		Includes a mode suffix if this is a multi-mode test and </span>
+<span class="sd">		supportMultipleModesPerRun=True.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.idWithoutMode: The raw testcase identifier with no mode suffix. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.type: The kind of test this is (``auto`` or ``manual``)</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.skippedReason: If set to a non-empty string, indicates that this </span>
+<span class="sd">		testcase is skipped and provides the reason. If this is set then the test </span>
+<span class="sd">		is skipped regardless of the value of `state`. </span>
+
+<span class="sd">	:ivar str ~.state: The state of the testcase (runnable, deprecated or skipped). This field is deprecated - we </span>
+<span class="sd">		recommend using `skippedReason` instead, which provides a descriptive outcome to explain why. </span>
+<span class="sd">		</span>
+<span class="sd">	:ivar str ~.title: The one-line title summarizing this testcase.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.purpose: A detailed description of the purpose of the testcase.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar list[str] ~.groups: A list of the user defined groups the testcase belongs to.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar list[str] ~.modes: A list of the user defined modes the testcase can be run in.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.primaryMode: Specifies the primary mode for this test id (which may be None </span>
+<span class="sd">		if this test has no modes). Usually this is the first mode in the list. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.mode: Specifies which of the possible modes this descriptor represents or None if the </span>
+<span class="sd">		the descriptor has no modes. This field is only present after the </span>
+<span class="sd">		raw descriptors have been expanded into multiple mode-specific </span>
+<span class="sd">		descriptors, and only if supportMultipleModesPerRun=True. </span>
+<span class="sd">		Note that after a descriptor is created from the on-disk file, the `mode` attribute is not set until </span>
+<span class="sd">		the later phase when multi-mode descripors are cloned and expanded based on the selected modes. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.classname: The Python classname to be executed for this testcase.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.module: The path to the python module containing the testcase class. Relative to testDir, or an absolute path.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.input: The path to the input directory of the testcase. Relative to testDir, or an absolute path.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.output: The path to the output parent directory of the testcase. Relative to testDir, or an absolute path.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.reference: The path to the reference directory of the testcase. Relative to testDir, or an absolute path.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar list ~.traceability: A list of the requirements covered by the testcase.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar float ~.executionOrderHint: A float priority value used to determine the </span>
+<span class="sd">		order in which testcases will be run; higher values are executed before </span>
+<span class="sd">		low values. The default is 0.0. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar bool ~.isDirConfig: True if this is a directory configuration, or False if </span>
+<span class="sd">		it&#39;s a normal testcase. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar dict(str,obj) ~.userData: A dictionary that can be used for storing user-defined data </span>
+<span class="sd">		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements e.g. </span>
+<span class="sd">		``&lt;data&gt;&lt;user-data name=&quot;key&quot; value=&quot;val&quot;&lt;/user-data&gt;&lt;/data&gt;``.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="vm">__slots__</span> <span class="o">=</span> <span class="s1">&#39;isDirConfig&#39;</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;testDir&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;purpose&#39;</span><span class="p">,</span> <span class="s1">&#39;groups&#39;</span><span class="p">,</span> <span class="s1">&#39;modes&#39;</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> \
+		<span class="s1">&#39;classname&#39;</span><span class="p">,</span> <span class="s1">&#39;module&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;output&#39;</span><span class="p">,</span> <span class="s1">&#39;reference&#39;</span><span class="p">,</span> <span class="s1">&#39;traceability&#39;</span><span class="p">,</span> <span class="s1">&#39;executionOrderHint&#39;</span><span class="p">,</span> <span class="s1">&#39;executionOrderHintsByMode&#39;</span><span class="p">,</span> \
+		<span class="s1">&#39;skippedReason&#39;</span><span class="p">,</span> <span class="s1">&#39;primaryMode&#39;</span><span class="p">,</span> <span class="s1">&#39;idWithoutMode&#39;</span><span class="p">,</span> <span class="s1">&#39;_defaultSortKey&#39;</span><span class="p">,</span> <span class="s1">&#39;userData&#39;</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> 
+		<span class="nb">type</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s2">&quot;runnable&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;(no title)&#39;</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="p">[],</span> <span class="n">modes</span><span class="o">=</span><span class="p">[],</span> 
+		<span class="n">classname</span><span class="o">=</span><span class="n">DEFAULT_TESTCLASS</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">DEFAULT_MODULE</span><span class="p">,</span> 
+		<span class="nb">input</span><span class="o">=</span><span class="n">DEFAULT_INPUT</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">DEFAULT_OUTPUT</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="n">DEFAULT_REFERENCE</span><span class="p">,</span> 
+		<span class="n">traceability</span><span class="o">=</span><span class="p">[],</span> <span class="n">executionOrderHint</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">skippedReason</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+		<span class="n">testDir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+		<span class="n">isDirConfig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">userData</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">skippedReason</span><span class="p">:</span> <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;skipped&#39;</span>
+		<span class="k">if</span> <span class="n">state</span><span class="o">==</span><span class="s1">&#39;skipped&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">skippedReason</span><span class="p">:</span> <span class="n">skippedReason</span> <span class="o">=</span> <span class="s1">&#39;&lt;unknown skipped reason&gt;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">isDirConfig</span> <span class="o">=</span> <span class="n">isDirConfig</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">file</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">isDirConfig</span><span class="p">:</span>
+			<span class="k">assert</span> <span class="n">file</span><span class="p">,</span> <span class="p">[</span><span class="n">file</span><span class="p">,</span> <span class="nb">id</span><span class="p">]</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">testDir</span> <span class="o">=</span> <span class="n">testDir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">purpose</span> <span class="o">=</span> <span class="n">purpose</span>
+		<span class="c1"># copy groups/modes so we can safely mutate them later if desired</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">modes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">modes</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">classname</span> <span class="o">=</span> <span class="n">classname</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="nb">input</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">output</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">reference</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">traceability</span> <span class="o">=</span> <span class="n">traceability</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">executionOrderHint</span> <span class="o">=</span> <span class="n">executionOrderHint</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">skippedReason</span> <span class="o">=</span> <span class="n">skippedReason</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">primaryMode</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">modes</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">idWithoutMode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+		
+		<span class="c1"># for internal use only (we cache this to speed up sorting based on path), </span>
+		<span class="c1"># and only for tests not dir configs; </span>
+		<span class="c1"># convert to lowercase to ensure a canonical sort order on case insensitive OSes; </span>
+		<span class="c1"># add id to be sure they&#39;re unique (e.g. including mode)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultSortKey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+		
+		<span class="c1"># NB: self.mode is set after construction and </span>
+		<span class="c1"># cloning for each supported mode when supportMultipleModesPerRun=true</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">userData</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">userData</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">userData</span>
+	
+	<span class="k">def</span> <span class="nf">_createDescriptorForMode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Internal API for creating a test descriptor for a specific mode of this test.</span>
+<span class="sd">		:meta private:</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">assert</span> <span class="n">mode</span><span class="p">,</span> <span class="s1">&#39;Mode must be specified&#39;</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">),</span> <span class="s1">&#39;Cannot create a mode descriptor from a descriptor that already has its mode set&#39;</span>
+		<span class="n">newdescr</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="n">newdescr</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+		<span class="n">newdescr</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39;~&#39;</span><span class="o">+</span><span class="n">mode</span>
+		<span class="n">newdescr</span><span class="o">.</span><span class="n">_defaultSortKey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultSortKey</span><span class="o">+</span><span class="s1">&#39;~&#39;</span><span class="o">+</span><span class="n">mode</span>
+		<span class="k">return</span> <span class="n">newdescr</span>
+	
+<div class="viewcode-block" id="TestDescriptor.toDict"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.descriptor.html#pysys.xml.descriptor.TestDescriptor.toDict">[docs]</a>	<span class="k">def</span> <span class="nf">toDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Converts this descriptor to an (ordered) dict suitable for serialization.&quot;&quot;&quot;</span>
+		<span class="n">d</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;testDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">testDir</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;xmlDescriptor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;skippedReason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">skippedReason</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;purpose&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">purpose</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;modes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modes</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;primaryMode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">primaryMode</span>
+		<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">):</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="c1"># only if supportMultipleModesPerRun=true</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;requirements&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceability</span>
+		
+		<span class="c1"># this is always a list with at least one item, or more if there are multiple modes</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;executionOrderHint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionOrderHintsByMode</span>
+			<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;executionOrderHintsByMode&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">executionOrderHint</span><span class="p">])</span>
+
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;classname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classname</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span>
+		<span class="n">d</span><span class="p">[</span><span class="s1">&#39;userData&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userData</span>
+		
+		<span class="k">return</span> <span class="n">d</span></div>
+		
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Return an informal string representation of the xml descriptor container object</span>
+<span class="sd">		</span>
+<span class="sd">		:return: The string represention</span>
+<span class="sd">		:rtype: string</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		
+		<span class="nb">str</span><span class="o">=</span>    <span class="s2">&quot;Test id:           </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+		<span class="n">reltestdir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">testDir</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDirConfig</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="c1"># relative to current dir is most useful</span>
+		<span class="k">if</span> <span class="n">reltestdir</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)):</span> <span class="n">reltestdir</span> <span class="o">=</span> <span class="n">reltestdir</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test directory:    </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">reltestdir</span> <span class="c1"># use OS slashes to facilitate copy+paste</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test type:         </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test state:        </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skippedReason</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test skip reason:  </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">skippedReason</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test title:        </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test purpose:      &quot;</span>
+		<span class="n">purpose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">purpose</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">purpose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+		<span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">purpose</span><span class="p">)):</span>
+			<span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">purpose</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+			<span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;                   </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">purpose</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> 
+
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test order hint:   </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+			<span class="sa">u</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">hint</span> <span class="k">for</span> <span class="n">hint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">executionOrderHintsByMode</span><span class="p">)</span> <span class="c1"># for multi-mode tests</span>
+			<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;executionOrderHintsByMode&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">executionOrderHint</span><span class="p">)</span>	
+
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test groups:       </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">u</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="sa">u</span><span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="o">%</span><span class="n">x</span> <span class="k">if</span> <span class="sa">u</span><span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">u</span><span class="s1">&#39;&lt;none&gt;&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">):</span> <span class="c1"># multi mode per run</span>
+			<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test mode:         </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>
+		<span class="k">else</span><span class="p">:</span> <span class="c1"># print available modes instead</span>
+			<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test modes:        </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">u</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="sa">u</span><span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="o">%</span><span class="n">x</span> <span class="k">if</span> <span class="sa">u</span><span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">u</span><span class="s1">&#39;&lt;none&gt;&#39;</span><span class="p">)</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test classname:    </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">classname</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test module:       </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test input:        </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test output:       </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test reference:    </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test traceability: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">u</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="sa">u</span><span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="o">%</span><span class="n">x</span> <span class="k">if</span> <span class="sa">u</span><span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceability</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">u</span><span class="s1">&#39;&lt;none&gt;&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">userData</span><span class="p">:</span>
+			<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;Test user data:    </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">userData</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+		<span class="nb">str</span><span class="o">=</span><span class="nb">str</span><span class="o">+</span><span class="s2">&quot;&quot;</span>
+		<span class="k">return</span> <span class="nb">str</span>
+	
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<span class="k">class</span> <span class="nc">_XMLDescriptorCreator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;Helper class to create a test descriptor template. DEPRECATED. </span>
+<span class="sd">	</span>
+<span class="sd">	:meta private: If we want an API for this, having a writeToFile method on TestDescriptor would be a better way </span>
+<span class="sd">	  to go.</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+		
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">DEFAULT_GROUP</span><span class="p">,</span> <span class="n">testclass</span><span class="o">=</span><span class="n">DEFAULT_TESTCLASS</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">DEFAULT_MODULE</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Class constructor.&#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">=</span><span class="n">file</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">testclass</span> <span class="o">=</span> <span class="n">testclass</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+	
+	<span class="k">def</span> <span class="nf">writeXML</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Write a test descriptor template to file.&#39;&#39;&#39;</span>
+		<span class="n">fp</span> <span class="o">=</span> <span class="n">openfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+		<span class="n">fp</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">DESCRIPTOR_TEMPLATE</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testclass</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">))</span>
+		<span class="n">fp</span><span class="o">.</span><span class="n">close</span>
+		
+<span class="n">XMLDescriptorContainer</span> <span class="o">=</span> <span class="n">TestDescriptor</span>
+<span class="sd">&quot;&quot;&quot; XMLDescriptorContainer is an alias for the TestDescriptor class, which </span>
+<span class="sd">exists for compatibility reasons only. </span>
+
+<span class="sd">:meta private:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">class</span> <span class="nc">_XMLDescriptorParser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. </span>
+<span class="sd">	</span>
+<span class="sd">	:meta private:</span>
+<span class="sd">	</span>
+<span class="sd">	Helper class to parse an XML test descriptor - either for a testcase, </span>
+<span class="sd">	or for defaults for a (sub-)directory of testcases.</span>
+
+<span class="sd">	The class uses the minidom DOM (Document Object Model) non validating</span>
+<span class="sd">	parser to provide accessor methods to return element attributes	and character</span>
+<span class="sd">	data from the test descriptor file. The class is instantiated with the filename</span>
+<span class="sd">	of the test descriptor. It is the responsibility of the user of the class to</span>
+<span class="sd">	call the unlink() method of the class on completion in order to free the memory</span>
+<span class="sd">	used in the parsing.</span>
+<span class="sd">	</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmlfile</span><span class="p">,</span> <span class="n">istest</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="k">assert</span> <span class="n">project</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">xmlfile</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">xmlfile</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">istest</span> <span class="o">=</span> <span class="n">istest</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">defaults</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_DESCRIPTOR</span> <span class="k">if</span> <span class="n">parentDirDefaults</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parentDirDefaults</span>
+		<span class="n">roottag</span> <span class="o">=</span> <span class="s1">&#39;pysystest&#39;</span> <span class="k">if</span> <span class="n">istest</span> <span class="k">else</span> <span class="s1">&#39;pysysdirconfig&#39;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">xmlfile</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;Unable to find supplied descriptor </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">xmlfile</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+		
+		<span class="k">try</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">dom</span><span class="o">.</span><span class="n">minidom</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">xmlfile</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;Invalid XML in descriptor &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xmlfile</span><span class="p">,</span> <span class="n">ex</span><span class="p">))</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="n">roottag</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]:</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;No &lt;</span><span class="si">%s</span><span class="s2">&gt; element supplied in XML descriptor &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">roottag</span><span class="p">,</span> <span class="n">xmlfile</span><span class="p">))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="n">roottag</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">xmlfile</span><span class="p">,</span> <span class="n">istest</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Parses the test/dir descriptor in the specified path and returns the </span>
+<span class="sd">		TestDescriptor object. </span>
+<span class="sd">		</span>
+<span class="sd">		:param istest: True if this is a pysystest.xml file, false if it is </span>
+<span class="sd">			a descritor giving defaults for a directory of testcases.  </span>
+<span class="sd">			:param parentDirDefaults: Optional TestDescriptor instance </span>
+<span class="sd">			specifying default values to be filtered in from the parent </span>
+<span class="sd">			directory.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="n">_XMLDescriptorParser</span><span class="p">(</span><span class="n">xmlfile</span><span class="p">,</span> <span class="n">istest</span><span class="o">=</span><span class="n">istest</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="n">parentDirDefaults</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">)</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">getContainer</span><span class="p">()</span>
+		<span class="k">finally</span><span class="p">:</span>
+			<span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+
+	<span class="n">DEFAULT_DESCRIPTOR</span> <span class="o">=</span> <span class="n">TestDescriptor</span><span class="p">(</span>
+		<span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s2">&quot;runnable&quot;</span><span class="p">,</span> 
+		<span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="p">[],</span> <span class="n">modes</span><span class="o">=</span><span class="p">[],</span> 
+		<span class="n">classname</span><span class="o">=</span><span class="n">DEFAULT_TESTCLASS</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">DEFAULT_MODULE</span><span class="p">,</span>
+		<span class="nb">input</span><span class="o">=</span><span class="n">DEFAULT_INPUT</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">DEFAULT_OUTPUT</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="n">DEFAULT_REFERENCE</span><span class="p">,</span> 
+		<span class="n">traceability</span><span class="o">=</span><span class="p">[],</span> <span class="n">executionOrderHint</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">skippedReason</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isDirConfig</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A directory config descriptor instance of TestDescriptor holding </span>
+<span class="sd">	the default values to be used if there is no directory config descriptor. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+
+	<span class="k">def</span> <span class="nf">getContainer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Create and return an instance of TestDescriptor for the contents of the descriptor.&#39;&#39;&#39;</span>
+		
+		<span class="k">for</span> <span class="n">attrName</span><span class="p">,</span> <span class="n">attrValue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+			<span class="k">if</span> <span class="n">attrName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">]:</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unknown attribute &quot;</span><span class="si">%s</span><span class="s1">&quot; in XML descriptor &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">attrName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">))</span>
+		
+		<span class="c1"># some elements that are mandatory for an individual test and not used for dir config</span>
+		<span class="k">return</span> <span class="n">TestDescriptor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getFile</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">getID</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">getType</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">getState</span><span class="p">(),</span>
+										<span class="bp">self</span><span class="o">.</span><span class="n">getTitle</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istest</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPurpose</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istest</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+										<span class="bp">self</span><span class="o">.</span><span class="n">getGroups</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModes</span><span class="p">(),</span>
+										<span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getClassDetails</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span>
+										<span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getClassDetails</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span>
+										<span class="bp">self</span><span class="o">.</span><span class="n">getTestInput</span><span class="p">(),</span>
+										<span class="bp">self</span><span class="o">.</span><span class="n">getTestOutput</span><span class="p">(),</span>
+										<span class="bp">self</span><span class="o">.</span><span class="n">getTestReference</span><span class="p">(),</span>
+										<span class="bp">self</span><span class="o">.</span><span class="n">getRequirements</span><span class="p">(),</span> 
+										<span class="bp">self</span><span class="o">.</span><span class="n">getExecutionOrderHint</span><span class="p">(),</span> 
+										<span class="n">skippedReason</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getSkippedReason</span><span class="p">(),</span> 
+										<span class="n">testDir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span>
+										<span class="n">userData</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getUserData</span><span class="p">(),</span>
+										<span class="n">isDirConfig</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">istest</span><span class="p">)</span>
+
+
+	<span class="k">def</span> <span class="nf">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Clean up the DOM on completion.&#39;&#39;&#39;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+
+	
+	<span class="k">def</span> <span class="nf">getFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the filename of the test descriptor.&#39;&#39;&#39;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span>
+
+	
+	<span class="k">def</span> <span class="nf">getID</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the id of the test, or for a pysysdirconfig, the id prefix.&#39;&#39;&#39;</span>
+		<span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">id</span>
+		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;id-prefix&#39;</span><span class="p">):</span>
+			<span class="nb">id</span> <span class="o">=</span> <span class="nb">id</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+		
+		<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">/:~#&lt;&gt;&#39;</span><span class="p">:</span>
+			<span class="c1"># reserve a few characters that we might need for other purposes; _ and . can be used however</span>
+			<span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">id</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;The &lt;id-prefix&gt; is not permitted to contain &quot;</span><span class="si">%s</span><span class="s1">&quot;; error in &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">))</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istest</span><span class="p">:</span> <span class="nb">id</span> <span class="o">=</span> <span class="nb">id</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">)</span>
+		
+		<span class="k">return</span> <span class="nb">id</span>
+
+
+	<span class="k">def</span> <span class="nf">getType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the type attribute of the test element.&#39;&#39;&#39;</span>
+		<span class="nb">type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">type</span>
+		<span class="k">if</span> <span class="nb">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;manual&quot;</span><span class="p">]:</span>
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;The type attribute of the test element should be </span><span class="se">\&quot;</span><span class="s2">auto</span><span class="se">\&quot;</span><span class="s2"> or </span><span class="se">\&quot;</span><span class="s2">manual</span><span class="se">\&quot;</span><span class="s2"> in </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+		<span class="k">return</span> <span class="nb">type</span>
+
+
+	<span class="k">def</span> <span class="nf">getState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the state attribute of the test element.&#39;&#39;&#39;</span>
+		<span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">)</span>	 <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">state</span>
+		<span class="k">if</span> <span class="n">state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;runnable&quot;</span><span class="p">,</span> <span class="s2">&quot;deprecated&quot;</span><span class="p">,</span> <span class="s2">&quot;skipped&quot;</span><span class="p">]:</span> 
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;The state attribute of the test element should be </span><span class="se">\&quot;</span><span class="s2">runnable</span><span class="se">\&quot;</span><span class="s2">, </span><span class="se">\&quot;</span><span class="s2">deprecated</span><span class="se">\&quot;</span><span class="s2"> or </span><span class="se">\&quot;</span><span class="s2">skipped</span><span class="se">\&quot;</span><span class="s2"> in </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">state</span> 
+
+	<span class="k">def</span> <span class="nf">getSkippedReason</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;skipped&#39;</span><span class="p">):</span>
+			<span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;reason&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> 
+			<span class="c1"># make this mandatory, to encourage good practice</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">r</span><span class="p">:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Missing reason= attribute in &lt;skipped&gt; element of &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">r</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">skippedReason</span>
+
+	<span class="k">def</span> <span class="nf">getTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the test titlecharacter data of the description element.&#39;&#39;&#39;</span>
+		<span class="n">descriptionNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">descriptionNodeList</span> <span class="o">==</span> <span class="p">[]:</span>
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;No &lt;description&gt; element supplied in XML descriptor </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">descriptionNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]:</span>
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;No &lt;title&gt; child element of &lt;description&gt; supplied in XML descriptor </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">title</span> <span class="o">=</span> <span class="n">descriptionNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="k">return</span> <span class="n">title</span><span class="o">.</span><span class="n">childNodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">title</span>
+				
+				
+	<span class="k">def</span> <span class="nf">getPurpose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the test purpose character data of the description element.&#39;&#39;&#39;</span>
+		<span class="n">descriptionNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">descriptionNodeList</span> <span class="o">==</span> <span class="p">[]:</span>
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;No &lt;description&gt; element supplied in XML descriptor </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">descriptionNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;purpose&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]:</span>
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;No &lt;purpose&gt; child element of &lt;description&gt; supplied in XML descriptor </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">purpose</span> <span class="o">=</span> <span class="n">descriptionNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;purpose&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="k">return</span> <span class="n">purpose</span><span class="o">.</span><span class="n">childNodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+			<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">purpose</span>
+			
+				
+	<span class="k">def</span> <span class="nf">getGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return a list of the group names, contained in the character data of the group elements.&#39;&#39;&#39;</span>
+		<span class="n">classificationNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;classification&#39;</span><span class="p">)</span>
+		<span class="n">groupList</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">groups</span> <span class="o">=</span> <span class="n">classificationNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;groups&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;group&#39;</span><span class="p">):</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="n">node</span><span class="p">):</span> <span class="n">groupList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+
+			<span class="k">if</span> <span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;inherit&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;true&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">!=</span><span class="s1">&#39;true&#39;</span><span class="p">:</span>
+				<span class="k">return</span> <span class="n">groupList</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">pass</span>
+			
+		<span class="n">groupList</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">groups</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">groupList</span><span class="p">]</span><span class="o">+</span><span class="n">groupList</span>
+		<span class="k">return</span> <span class="n">groupList</span>
+	
+				
+	<span class="k">def</span> <span class="nf">getModes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return a list of the mode names, contained in the character data of the mode elements.&#39;&#39;&#39;</span>
+		<span class="n">classificationNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;classification&#39;</span><span class="p">)</span>
+		
+		<span class="n">modeList</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">modes</span> <span class="o">=</span> <span class="n">classificationNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;modes&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">modes</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;mode&#39;</span><span class="p">):</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="n">node</span><span class="p">):</span> <span class="n">modeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+
+			<span class="k">if</span> <span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;inherit&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;true&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">!=</span><span class="s1">&#39;true&#39;</span><span class="p">:</span>
+				<span class="k">return</span> <span class="n">modeList</span>
+
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">pass</span>
+		<span class="n">modeList</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">modes</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">modeList</span><span class="p">]</span><span class="o">+</span><span class="n">modeList</span>
+		<span class="k">return</span> <span class="n">modeList</span>
+
+				
+	<span class="k">def</span> <span class="nf">getClassDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the test class attributes (name, module, searchpath), contained in the class element.&#39;&#39;&#39;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">dataNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+			<span class="n">el</span> <span class="o">=</span> <span class="n">dataNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">return</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span> <span class="n">el</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;module&#39;</span><span class="p">)]</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">classname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">module</span><span class="p">]</span>
+
+	<span class="k">def</span> <span class="nf">getExecutionOrderHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;execution-order&#39;</span><span class="p">):</span>
+			<span class="n">r</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;hint&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">r</span><span class="p">:</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">r</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+				<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+					<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Invalid float value specified for execution-order hint in &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">r</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span> 
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">executionOrderHint</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">r</span>
+			
+	<span class="k">def</span> <span class="nf">getTestInput</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the test input path, contained in the input element.&#39;&#39;&#39;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">dataNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+			<span class="nb">input</span> <span class="o">=</span> <span class="n">dataNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">return</span> <span class="nb">input</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">input</span>
+
+	<span class="k">def</span> <span class="nf">getUserData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the userData from the user-data element.&#39;&#39;&#39;</span>
+		<span class="c1"># start with parent defaults, add children</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">userData</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;user-data&#39;</span><span class="p">):</span>
+				<span class="n">key</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+				<span class="k">assert</span> <span class="n">key</span><span class="p">,</span> <span class="s1">&#39;name= must be specified&#39;</span>
+				<span class="k">assert</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;output&#39;</span><span class="p">,</span> <span class="s1">&#39;reference&#39;</span><span class="p">,</span> <span class="s1">&#39;descriptor&#39;</span><span class="p">,</span> <span class="s1">&#39;runner&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="s1">&#39;project&#39;</span><span class="p">,</span> <span class="s1">&#39;lock&#39;</span><span class="p">},</span> <span class="n">key</span> <span class="c1"># prevent names that we reserve for use by the basetest/processuser</span>
+				<span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">result</span>
+
+	<span class="k">def</span> <span class="nf">getTestOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the test output path, contained in the output element.&#39;&#39;&#39;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">dataNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+			<span class="n">output</span> <span class="o">=</span> <span class="n">dataNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">output</span>
+
+
+	<span class="k">def</span> <span class="nf">getTestReference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return the test reference path, contained in the reference element.&#39;&#39;&#39;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">dataNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+			<span class="n">ref</span> <span class="o">=</span> <span class="n">dataNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;reference&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">return</span> <span class="n">ref</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">reference</span>
+
+
+	<span class="k">def</span> <span class="nf">getRequirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Return a list of the requirement ids, contained in the character data of the requirement elements.&#39;&#39;&#39;</span>
+		<span class="n">reqList</span> <span class="o">=</span> <span class="p">[]</span>			
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">traceabilityNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;traceability&#39;</span><span class="p">)</span>
+			<span class="n">requirements</span> <span class="o">=</span> <span class="n">traceabilityNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;requirements&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">requirements</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;requirement&#39;</span><span class="p">):</span>
+				<span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">):</span> <span class="n">reqList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">))</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">pass</span>
+		<span class="n">reqList</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">traceability</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reqList</span><span class="p">]</span><span class="o">+</span><span class="n">reqList</span>
+		<span class="k">return</span> <span class="n">reqList</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">getText</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Utility method that reads text from the specified element and </span>
+<span class="sd">		strips leading/trailing whitespace from it. Returns an empty string if none. &quot;&quot;&quot;</span>
+		<span class="n">t</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">element</span><span class="p">:</span> <span class="k">return</span> <span class="n">t</span>
+		<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">childNodes</span><span class="p">:</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">nodeType</span> <span class="o">==</span> <span class="n">element</span><span class="o">.</span><span class="n">TEXT_NODE</span><span class="p">)</span> <span class="ow">and</span> <span class="n">n</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+				<span class="n">t</span> <span class="o">+=</span> <span class="n">n</span><span class="o">.</span><span class="n">data</span>
+		<span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="DescriptorLoader"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.descriptor.html#pysys.xml.descriptor.DescriptorLoader">[docs]</a><span class="k">class</span> <span class="nc">DescriptorLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This class is responsible for locating and loading all available testcase </span>
+<span class="sd">	descriptors. </span>
+<span class="sd">	</span>
+<span class="sd">	A custom DescriptorLoader subclass can be provided to customize the test </span>
+<span class="sd">	discovery process, typically by overriding L{loadDescriptors} and modifying the </span>
+<span class="sd">	returned list of descriptors and configuring your ``pysysproject.xml`` with::</span>
+<span class="sd">	</span>
+<span class="sd">		&lt;descriptor-loader module=&quot;mypkg.custom&quot; classname=&quot;CustomDescriptorLoader&quot;/&gt;</span>
+<span class="sd">	</span>
+<span class="sd">	You could use this approach to add additional descriptor instances </span>
+<span class="sd">	to represent non-PySys testcases found under the search directory, for example </span>
+<span class="sd">	based on discovery of unit test classes. </span>
+<span class="sd">	</span>
+<span class="sd">	Another key use case would be dynamically adding or changing descriptor </span>
+<span class="sd">	settings such as the list of modes for each testcase or the </span>
+<span class="sd">	executionOrderHint, perhaps based on a per-group basis. For example, </span>
+<span class="sd">	you could modify descriptors in the &quot;database-tests&quot; group to have a </span>
+<span class="sd">	dynamically generated list of modes identifying the possible database </span>
+<span class="sd">	servers supported without having to hardcode that list into any descriptor </span>
+<span class="sd">	files on disk, and allowing for different database modes on different </span>
+<span class="sd">	platforms. </span>
+
+<span class="sd">	:ivar pysys.xml.project.Project ~.project: The `pysys.xml.project.Project` instance. </span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+		<span class="k">assert</span> <span class="n">project</span><span class="p">,</span> <span class="s1">&#39;project must be specified&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">__descriptorLoaderPlugins</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">pluginCls</span><span class="p">,</span> <span class="n">pluginProperties</span><span class="p">)</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">_descriptorLoaderPlugins</span><span class="p">:</span>
+			<span class="n">plugin</span> <span class="o">=</span> <span class="n">pluginCls</span><span class="p">()</span>
+			<span class="n">plugin</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+			<span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">setInstanceVariablesFromDict</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">pluginProperties</span><span class="p">,</span> <span class="n">errorOnMissingVariables</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+			<span class="n">plugin</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__descriptorLoaderPlugins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DescriptorLoader.loadDescriptors"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.descriptor.html#pysys.xml.descriptor.DescriptorLoader.loadDescriptors">[docs]</a>	<span class="k">def</span> <span class="nf">loadDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Find all descriptors located under the specified directory, and </span>
+<span class="sd">		return them as a list.</span>
+<span class="sd">		</span>
+<span class="sd">		Subclasses may change the returned descriptors and/or add additional </span>
+<span class="sd">		instances of their own to the list after calling the super implementation::</span>
+<span class="sd">		</span>
+<span class="sd">		  descriptors = super(CustomDescriptorLoader, self).loadDescriptors(dir, **kwargs)</span>
+<span class="sd">		  ...</span>
+<span class="sd">		  return descriptors</span>
+<span class="sd">		</span>
+<span class="sd">		:param dir: The parent directory to search for runnable tests. </span>
+<span class="sd">		</span>
+<span class="sd">		:return: List of L{pysys.xml.descriptor.TestDescriptor} objects </span>
+<span class="sd">			which could be selected for execution. </span>
+<span class="sd">			</span>
+<span class="sd">			If a test can be run in multiple modes there must be a single descriptor </span>
+<span class="sd">			for it in the list returned from this method. Each multi-mode </span>
+<span class="sd">			descriptor is later expanded out into separate mode-specific </span>
+<span class="sd">			descriptors (at the same time as descriptor filtering based on </span>
+<span class="sd">			command line arguments, and addition of project-level </span>
+<span class="sd">			execution-order), before the final list is sorted and passed to </span>
+<span class="sd">			L{pysys.baserunner.BaseRunner}. </span>
+<span class="sd">			</span>
+<span class="sd">			The order of the returned list is random, so the caller is responsible </span>
+<span class="sd">			for sorting this list to ensure deterministic behaviour. </span>
+<span class="sd">		</span>
+<span class="sd">		:rtype: list</span>
+<span class="sd">		:raises UserError: Raised if no testcases can be found.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">,</span> <span class="s1">&#39;reserved for future use: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;project must be specified&#39;</span>
+		<span class="k">assert</span> <span class="nb">dir</span><span class="p">,</span> <span class="s1">&#39;dir must be specified&#39;</span>
+		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="nb">dir</span><span class="p">),</span> <span class="s1">&#39;dir must be an absolute path: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">dir</span>
+		
+		<span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+		
+		<span class="n">descriptors</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">ignoreSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">OSWALK_IGNORES</span><span class="p">)</span>
+		
+		<span class="n">descriptorSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="s1">&#39;pysysTestDescriptorFileNames&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DEFAULT_DESCRIPTOR</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
+		
+		<span class="k">assert</span> <span class="n">project</span><span class="o">.</span><span class="n">projectFile</span> <span class="o">!=</span> <span class="kc">None</span>
+		<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.launcher&#39;</span><span class="p">)</span>
+
+		<span class="c1"># although it&#39;s highly unlikely, if any test paths did slip outside the Windows 256 char limit, </span>
+		<span class="c1"># it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path), </span>
+		<span class="c1"># so must use long-path-safe - but need to re-encode from unicode string back to bytestring in Python 2</span>
+		<span class="n">i18n_reencode</span> <span class="o">=</span> <span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">()</span> <span class="k">if</span> <span class="n">PY2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+		
+		<span class="nb">dir</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="nb">dir</span><span class="p">))</span>
+		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">dir</span><span class="p">),</span> <span class="nb">dir</span> <span class="c1"># sanity check</span>
+		<span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">projectFile</span><span class="p">:</span>
+			<span class="n">projectroot</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">projectFile</span><span class="p">)))</span>
+
+		<span class="n">DIR_CONFIG_DESCRIPTOR</span> <span class="o">=</span> <span class="s1">&#39;pysysdirconfig.xml&#39;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">projectFile</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">dir</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">projectroot</span><span class="p">):</span>
+			<span class="n">dirconfigs</span> <span class="o">=</span> <span class="kc">None</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Project file does not exist under &quot;</span><span class="si">%s</span><span class="s1">&quot; so processing of </span><span class="si">%s</span><span class="s1"> files is disabled&#39;</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span> <span class="n">DIR_CONFIG_DESCRIPTOR</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="c1"># find directory config descriptors between the project root and the testcase </span>
+			<span class="c1"># dirs. We deliberately use project dir not current working dir since </span>
+			<span class="c1"># we don&#39;t want descriptors to be loaded differently depending on where the </span>
+			<span class="c1"># tests are run from (i.e. should be independent of cwd). </span>
+			<span class="n">dirconfigs</span> <span class="o">=</span> <span class="p">{}</span>
+
+			<span class="c1"># load any descriptors between the project dir up to (but not including) the dir we&#39;ll be walking</span>
+			<span class="n">searchdirsuffix</span> <span class="o">=</span> <span class="nb">dir</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">projectroot</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span><span class="o">&gt;</span><span class="nb">len</span><span class="p">(</span><span class="n">projectroot</span><span class="p">)</span> <span class="k">else</span> <span class="p">[]</span>
+			<span class="n">currentconfig</span> <span class="o">=</span> <span class="kc">None</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">searchdirsuffix</span><span class="p">)):</span> <span class="c1"># up to but not including dir</span>
+				<span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+					<span class="n">currentdir</span> <span class="o">=</span> <span class="n">projectroot</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">currentdir</span> <span class="o">=</span> <span class="n">projectroot</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">searchdirsuffix</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span>
+				
+				<span class="k">if</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">currentdir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">DIR_CONFIG_DESCRIPTOR</span><span class="p">):</span>
+					<span class="n">currentconfig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseTestDescriptor</span><span class="p">(</span><span class="n">currentdir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">DIR_CONFIG_DESCRIPTOR</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="n">currentconfig</span><span class="p">,</span> <span class="n">isDirConfig</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loaded directory configuration descriptor from </span><span class="si">%s</span><span class="s1">: </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">currentdir</span><span class="p">,</span> <span class="n">currentconfig</span><span class="p">)</span>
+			<span class="c1"># this is the top-level directory that will be checked below</span>
+			<span class="n">dirconfigs</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="nb">dir</span><span class="p">)]</span> <span class="o">=</span> <span class="n">currentconfig</span>
+
+		<span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="nb">dir</span><span class="p">)):</span>
+			<span class="n">ignorematch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span> <span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="p">(</span><span class="n">f</span> <span class="o">==</span> <span class="s1">&#39;.pysysignore&#39;</span> <span class="ow">or</span> <span class="n">f</span> <span class="o">==</span> <span class="s1">&#39;pysysignore&#39;</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">ignorematch</span><span class="p">:</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Skipping directory </span><span class="si">%s</span><span class="s1"> due to ignore file </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ignorematch</span><span class="p">)</span>
+				<span class="k">del</span> <span class="n">dirs</span><span class="p">[:]</span>
+				<span class="k">continue</span>
+				
+			<span class="n">parentconfig</span> <span class="o">=</span> <span class="kc">None</span>
+			<span class="k">if</span> <span class="n">dirconfigs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">parentconfig</span> <span class="o">=</span> <span class="n">dirconfigs</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">root</span><span class="p">)]</span>
+				<span class="k">if</span> <span class="nb">next</span><span class="p">(</span> <span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="p">(</span><span class="n">f</span> <span class="o">==</span> <span class="n">DIR_CONFIG_DESCRIPTOR</span><span class="p">)),</span> <span class="kc">None</span><span class="p">):</span>
+					<span class="n">parentconfig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseTestDescriptor</span><span class="p">(</span><span class="n">root</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="n">DIR_CONFIG_DESCRIPTOR</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="n">parentconfig</span><span class="p">,</span> <span class="n">isDirConfig</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loaded directory configuration descriptor from </span><span class="si">%s</span><span class="s1">: </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">parentconfig</span><span class="p">)</span>
+
+			<span class="c1"># allow subclasses to modify descriptors list and/or avoid processing </span>
+			<span class="c1"># subdirectories</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handleSubDirectory</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="n">parentconfig</span><span class="p">):</span>
+				<span class="k">del</span> <span class="n">dirs</span><span class="p">[:]</span>
+				<span class="k">continue</span>
+
+			<span class="n">intersection</span> <span class="o">=</span> <span class="n">descriptorSet</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">intersection</span><span class="p">:</span> 
+				<span class="n">descriptorfile</span> <span class="o">=</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">intersection</span><span class="o">.</span><span class="n">pop</span><span class="p">()))</span>
+				<span class="c1"># PY2 gets messed up if we start passing unicode rather than byte str objects here, </span>
+				<span class="c1"># as it proliferates to all strings in each test</span>
+				<span class="k">if</span> <span class="n">i18n_reencode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">descriptorfile</span> <span class="o">=</span> <span class="n">descriptorfile</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">i18n_reencode</span><span class="p">)</span> 
+
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseTestDescriptor</span><span class="p">(</span><span class="n">descriptorfile</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="n">parentconfig</span><span class="p">)</span>
+					<span class="k">if</span> <span class="n">parsed</span><span class="p">:</span>
+						<span class="n">descriptors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span>
+				<span class="k">except</span> <span class="n">UserError</span><span class="p">:</span>
+					<span class="k">raise</span> <span class="c1"># no stack trace needed, will already include descriptorfile name</span>
+				<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Failed to read descriptor: &#39;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+					<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error reading descriptor file &#39;</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">descriptorfile</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+				<span class="c1"># if this is a test dir, it never makes sense to look at sub directories</span>
+				<span class="k">del</span> <span class="n">dirs</span><span class="p">[:]</span>
+				<span class="k">continue</span>
+			
+			<span class="k">for</span> <span class="n">ignore</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ignoreSet</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">dirs</span><span class="p">)):</span> <span class="n">dirs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ignore</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="n">dirconfigs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">dirs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+				<span class="c1"># stash it for when we navigate down to subdirectories</span>
+				<span class="c1"># only add to dict if we&#39;re continuing to process children</span>
+				<span class="n">dirconfigs</span><span class="p">[</span><span class="n">root</span><span class="p">]</span> <span class="o">=</span> <span class="n">parentconfig</span> 
+
+		<span class="k">return</span> <span class="n">descriptors</span></div>
+		
+<div class="viewcode-block" id="DescriptorLoader._handleSubDirectory"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.descriptor.html#pysys.xml.descriptor.DescriptorLoader._handleSubDirectory">[docs]</a>	<span class="k">def</span> <span class="nf">_handleSubDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span> <span class="n">subdirs</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Overrides the handling of each sub-directory found while walking </span>
+<span class="sd">		the directory tree during `loadDescriptors`. </span>
+<span class="sd">		</span>
+<span class="sd">		Can be used to add test descriptors, and/or add custom logic for </span>
+<span class="sd">		preventing PySys searching a particular part of the directory tree </span>
+<span class="sd">		perhaps based on the presence of specific files or subdirectories </span>
+<span class="sd">		within it. </span>
+
+<span class="sd">		This method is called before directories containing pysysignore </span>
+<span class="sd">		files are stripped out. </span>
+<span class="sd">		</span>
+<span class="sd">		:param str dir: The full path of the directory to be processed.</span>
+<span class="sd">			On Windows, this will be a long-path safe unicode string. </span>
+<span class="sd">		:param list[str] subdirs: a list of the subdirectories under dir, which </span>
+<span class="sd">			can be used to detect what kind of directory this is, and also can be modified by this method to prevent </span>
+<span class="sd">			other loaders looking at subdirectories. </span>
+<span class="sd">		:param list[str] files: a list of the files under dir, which </span>
+<span class="sd">			can be used to detect what kind of directory this is, and also can be modified by this method to prevent </span>
+<span class="sd">			other loaders looking at them. </span>
+<span class="sd">		:param list[TestDescriptor] descriptors: A list of `TestDescriptor` items which this method </span>
+<span class="sd">			can add to if desired. </span>
+<span class="sd">		:param TestDescriptor parentDirDefaults: A `TestDescriptor` containing defaults </span>
+<span class="sd">			from the parent directory, or None if there are none. Test loaders may </span>
+<span class="sd">			optionally merge some of this information with test-specific </span>
+<span class="sd">			information when creating test descriptors. </span>
+<span class="sd">		:param dict kwargs: Reserved for future use. Pass this to the base class </span>
+<span class="sd">			implementation when calling it. </span>
+<span class="sd">		:return: If True, this part of the directory tree has been fully </span>
+<span class="sd">			handled and PySys will not search under it any more. False to allow </span>
+<span class="sd">			normal PySys handling of the directory to proceed. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">,</span> <span class="s1">&#39;reserved for future use: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+		
+		<span class="c1"># default implementation just delegates to any plugins</span>
+		<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__descriptorLoaderPlugins</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">addDescriptorsFromDirectory</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="nb">dir</span><span class="p">,</span> <span class="n">subdirs</span><span class="o">=</span><span class="n">subdirs</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="n">parentDirDefaults</span><span class="p">,</span> <span class="n">descriptors</span><span class="o">=</span><span class="n">descriptors</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+				<span class="k">return</span> <span class="kc">True</span>
+		
+		<span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DescriptorLoader._parseTestDescriptor"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.descriptor.html#pysys.xml.descriptor.DescriptorLoader._parseTestDescriptor">[docs]</a>	<span class="k">def</span> <span class="nf">_parseTestDescriptor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptorfile</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isDirConfig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Parses a single descriptor file (typically an XML file) for a testcase or directory configuration </span>
+<span class="sd">		and returns the resulting descriptor. </span>
+<span class="sd">		</span>
+<span class="sd">		:param descriptorfile: The absolute path of the descriptor file. </span>
+<span class="sd">		:param parentDirDefaults: A L{TestDescriptor} instance containing </span>
+<span class="sd">			defaults to inherit from the parent directory, or None if none was found. </span>
+<span class="sd">		:param isDirConfig: False for normal test descriptors, True for a directory configuration. </span>
+<span class="sd">		:return: The L{TestDescriptor} instance, or None if none should be </span>
+<span class="sd">			added for this descriptor file. Note that subclasses may modify the </span>
+<span class="sd">			contents of the returned instance. </span>
+<span class="sd">		:raises UserError: If the descriptor is invalid and an error should be </span>
+<span class="sd">			displayed to the user without any Python stacktrace. </span>
+<span class="sd">			The exception message must contain the path of the descriptorfile.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">,</span> <span class="s1">&#39;reserved for future use: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+		<span class="k">return</span> <span class="n">_XMLDescriptorParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">descriptorfile</span><span class="p">,</span> <span class="n">parentDirDefaults</span><span class="o">=</span><span class="n">parentDirDefaults</span><span class="p">,</span> <span class="n">istest</span><span class="o">=</span><span class="ow">not</span> <span class="n">isDirConfig</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

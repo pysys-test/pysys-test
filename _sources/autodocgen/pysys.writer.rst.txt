@@ -1,0 +1,17 @@
+
+pysys.writer
+~~~~~~~~~~~~
+
+.. automodule:: pysys.writer
+
+.. currentmodule:: pysys.writer
+
+
+.. autosummary::
+  :toctree: ./
+
+  pysys.writer.api
+  pysys.writer.ci
+  pysys.writer.console
+  pysys.writer.outcomes
+  pysys.writer.testoutput

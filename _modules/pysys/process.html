@@ -1,0 +1,440 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.process &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.process</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.process</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Process execution and monitoring implementations. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># set the modules to import when imported the pysys.process package</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;helper&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;monitor&quot;</span><span class="p">,</span> 
+			<span class="s2">&quot;monitorimpl&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;user&quot;</span><span class="p">,</span> 
+			<span class="s2">&quot;Process&quot;</span><span class="p">]</span>
+
+<span class="c1"># add to the __path__ to import the platform specific process.helper module</span>
+<span class="n">dirname</span> <span class="o">=</span> <span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">if</span> <span class="n">IS_WINDOWS</span><span class="p">:</span>
+	<span class="n">__path__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s2">&quot;plat-win32&quot;</span><span class="p">))</span>
+<span class="k">else</span><span class="p">:</span>
+	<span class="n">__path__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s2">&quot;plat-unix&quot;</span><span class="p">))</span>
+
+
+<span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">locale</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+	<span class="kn">import</span> <span class="nn">Queue</span>
+<span class="k">else</span><span class="p">:</span>
+	<span class="kn">import</span> <span class="nn">queue</span> <span class="k">as</span> <span class="nn">Queue</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">_stringToUnicode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; Converts a unicode string or a utf-8 bit string into a unicode string. </span>
+<span class="sd">	@deprecated: for internal use only, will be removed in future. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">PY2</span><span class="p">:</span> <span class="k">return</span> <span class="n">s</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">unicode</span><span class="p">):</span>
+		<span class="k">return</span> <span class="n">s</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">unicode</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.process&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Process"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process">[docs]</a><span class="k">class</span> <span class="nc">Process</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Represents a process that PySys has started (or can start).</span>
+<span class="sd">	</span>
+<span class="sd">	Instances of a platform-specific implementation of this interface are returned </span>
+<span class="sd">	by `pysys.process.user.ProcessUser.startProcess`.</span>
+<span class="sd">	</span>
+<span class="sd">	:ivar str ~.command:  The full path to the executable.</span>
+<span class="sd">	:ivar list[str] ~.arguments:  A list of arguments to the command.</span>
+<span class="sd">	:ivar dict(str,str) ~.environs:  A dictionary of environment variables (key, value) for the process context execution. </span>
+<span class="sd">		Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted </span>
+<span class="sd">		automatically to unicode using utf-8. </span>
+<span class="sd">	:ivar str ~.workingDir:  The working directory for the process</span>
+<span class="sd">	:ivar ~.state: The state of the process.</span>
+<span class="sd">	:vartype state: `pysys.constants.FOREGROUND` or `pysys.constants.BACKGROUND`</span>
+<span class="sd">	:ivar int ~.timeout:  The time in seconds for a foreground process to complete.</span>
+<span class="sd">	:ivar str ~.stdout: The full path to the filename to write the stdout of the process, or None for no stderr stream.</span>
+<span class="sd">	:ivar str ~.stderr: The full path to the filename to write the stderr of the process, or None for no stderr stream. </span>
+<span class="sd">	:ivar str ~.displayName: Display name for this process (defaults to the basename if not explicitly specified). The </span>
+<span class="sd">		display name is returned by calling ``str()`` on this instance. The display name and pid are returned by </span>
+<span class="sd">		``repr()``.</span>
+<span class="sd">	:ivar str expectedExitStatus: The condition string used to determine whether the exit status/code </span>
+<span class="sd">		returned by the process is correct, for example &#39;==0&#39;.</span>
+
+<span class="sd">	:ivar int ~.pid: The process id for a running or complete process (as set by the OS), or None if it is not yet started.</span>
+<span class="sd">	:ivar int ~.exitStatus: The process exit status for a completed process (for many processes 0 represents success), </span>
+<span class="sd">		or None if it has not yet completed. </span>
+<span class="sd">	:ivar dict[str,obj] ~.info: A mutable dictionary of user-supplied information that was passed into startProcess, </span>
+<span class="sd">		for example port numbers, log file paths etc. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">environs</span><span class="p">,</span> <span class="n">workingDir</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+		<span class="n">expectedExitStatus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{}):</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">displayName</span> <span class="k">if</span> <span class="n">displayName</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">info</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">arguments</span> <span class="o">=</span> <span class="n">arguments</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">environs</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">environs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="p">[</span><span class="n">_stringToUnicode</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">_stringToUnicode</span><span class="p">(</span><span class="n">environs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span> <span class="o">=</span> <span class="n">workingDir</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">expectedExitStatus</span> <span class="o">=</span> <span class="n">expectedExitStatus</span>
+
+		<span class="c1"># &#39;publicly&#39; available data attributes set on execution</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">exitStatus</span> <span class="o">=</span> <span class="kc">None</span>
+		
+		<span class="c1"># these may be further updated by the subclass</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span>
+
+		<span class="c1"># catch these common mistakes</span>
+		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">),</span> <span class="s1">&#39;Working directory for </span><span class="si">%s</span><span class="s1"> does not exist: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span> <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)),</span> <span class="s1">&#39;Parent directory for stdout does not exist: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span>
+
+		<span class="c1"># print process debug information</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Process parameters for executable </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">))</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  command      : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  argument     : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  working dir  : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">)</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  stdout       : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stdout</span><span class="p">)</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  stderr       : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span>
+		<span class="n">keys</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+		<span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  environment  : </span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">environs</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+		<span class="k">if</span> <span class="n">info</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  info         : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+
+		<span class="c1"># private</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayName</span>
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (pid </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+	<span class="c1"># these abstract methods must be implemented by subclasses; no need to publically document</span>
+	<span class="k">def</span> <span class="nf">setExitStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">startBackgroundProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">writeStdin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Process.stop"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.stop">[docs]</a>	<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot;Stop a running process.</span>
+<span class="sd">		</span>
+<span class="sd">		Does nothing if the process is not running. </span>
+<span class="sd">		</span>
+<span class="sd">		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to stop the process.		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span></div>
+		
+<div class="viewcode-block" id="Process.signal"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.signal">[docs]</a>	<span class="k">def</span> <span class="nf">signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot;Send a signal to a running process. </span>
+<span class="sd">	</span>
+<span class="sd">		Typically this uses ``os.kill`` to send the signal. </span>
+<span class="sd">	</span>
+<span class="sd">		:param int signal: The integer signal to send to the process, e.g. ``process.signal(signal.SIGTERM)``.</span>
+<span class="sd">		@raise pysys.exceptions.ProcessError: Raised if an error occurred whilst trying to signal the process</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">signal</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">ProcessError</span><span class="p">(</span><span class="s2">&quot;Error sending signal </span><span class="si">%s</span><span class="s2"> to process </span><span class="si">%r</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Process.write"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.write">[docs]</a>	<span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">addNewLine</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Write binary data to the stdin of the process.</span>
+<span class="sd">		</span>
+<span class="sd">		Note that when the addNewLine argument is set to true, if a new line does not </span>
+<span class="sd">		terminate the input data string, a newline character will be added. If one </span>
+<span class="sd">		already exists a new line character will not be added. Should you explicitly </span>
+<span class="sd">		require to add data without the method appending a new line charater set </span>
+<span class="sd">		addNewLine to false.</span>
+<span class="sd">		</span>
+<span class="sd">		:param data: The data to write to the process stdin. </span>
+<span class="sd">			As only binary data can be written to a process stdin, </span>
+<span class="sd">			if a character string rather than a byte object is passed as the data,</span>
+<span class="sd">			it will be automatically converted to a bytes object using the encoding </span>
+<span class="sd">			given by ``locale.getpreferredencoding()``. </span>
+<span class="sd">		:param addNewLine: True if a new line character is to be added to the end of </span>
+<span class="sd">			the data string</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">():</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot write to process stdin when it is not running&#39;</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span> <span class="k">return</span>
+		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">binary_type</span><span class="p">:</span>
+			<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">())</span>
+		<span class="k">if</span> <span class="n">addNewLine</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">+</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+			
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="c1"># start thread on demand</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">=</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+			<span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">writeStdin</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;pysys.stdinreader_</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+			<span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+			
+		<span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+		
+<div class="viewcode-block" id="Process.running"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.running">[docs]</a>	<span class="k">def</span> <span class="nf">running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Check to see if a process is running.</span>
+<span class="sd">		</span>
+<span class="sd">		:return: True if the process is currently running, False if not. </span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setExitStatus</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Process.wait"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.wait">[docs]</a>	<span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Wait for a process to complete execution, raising an exception on timeout.</span>
+<span class="sd">		</span>
+<span class="sd">		This method provides basic functionality but does not check the exit status or log any messages; </span>
+<span class="sd">		see `pysys.basetest.BaseTest.waitProcess` for a wrapper that adds additional functionality. </span>
+<span class="sd">		</span>
+<span class="sd">		Note that this method will not terminate the process if the timeout is exceeded. </span>
+<span class="sd">		</span>
+<span class="sd">		:param timeout: The timeout to wait in seconds, for example ``timeout=TIMEOUTS[&#39;WaitForProcess&#39;]``.</span>
+<span class="sd">		:raise pysys.exceptions.ProcessTimeout: Raised if the timeout is exceeded.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">assert</span> <span class="n">timeout</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;timeout must always be specified&#39;</span>
+		<span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Waiting up to </span><span class="si">%d</span><span class="s2"> secs for process </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+		<span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">():</span>
+			<span class="n">currentTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+			<span class="k">if</span> <span class="n">currentTime</span> <span class="o">&gt;</span> <span class="n">startTime</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">ProcessTimeout</span><span class="p">(</span><span class="s1">&#39;Waiting for completion of </span><span class="si">%s</span><span class="s1"> timed out after </span><span class="si">%d</span><span class="s1"> seconds&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeout</span><span class="p">)))</span>
+			<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span></div>
+		
+
+
+<div class="viewcode-block" id="Process.start"><a class="viewcode-back" href="../../autodocgen/pysys.process.html#pysys.process.Process.start">[docs]</a>	<span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Start a process using the runtime parameters set at instantiation.</span>
+<span class="sd">		</span>
+<span class="sd">		@raise pysys.exceptions.ProcessError: Raised if there is an error creating the process</span>
+<span class="sd">		@raise pysys.exceptions.ProcessTimeout: Raised in the process timed out (foreground process only)</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_outQueue</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># always reset</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot start process </span><span class="si">%s</span><span class="s1"> as workingDir &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span><span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workingDir</span><span class="p">))</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">FOREGROUND</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">startBackgroundProcess</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">startBackgroundProcess</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

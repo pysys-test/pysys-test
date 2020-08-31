@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.writer.console &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.writer.console</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.writer.console</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Writers that record test outcomes on the console (stdout) when running PySys. </span>
+
+<span class="sd">If no progress writers are explicitly configured in the PySys project XML file, an instance of</span>
+<span class="sd">`ConsoleProgressResultsWriter` is used. If no summary writer is explicitly configured in the PySys project</span>
+<span class="sd">XML file, an instance of `ConsoleSummaryResultsWriter` is used.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+	<span class="s2">&quot;ConsoleSummaryResultsWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;ConsoleProgressResultsWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;ConsoleFailureAnnotationsWriter&quot;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">stat</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.writer.api</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="n">stripANSIEscapeCodes</span><span class="p">,</span> <span class="n">stdoutPrint</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">PY2</span><span class="p">,</span> <span class="n">openfile</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConsoleSummaryResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.console.html#pysys.writer.console.ConsoleSummaryResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">ConsoleSummaryResultsWriter</span><span class="p">(</span><span class="n">BaseSummaryResultsWriter</span><span class="p">,</span> <span class="n">TestOutcomeSummaryGenerator</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Default summary writer that is used to list a summary of the test results at the end of execution.</span>
+
+<span class="sd">	Support the same configuration options as `pysys.writer.api.TestOutcomeSummaryGenerator`.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># change some of the TestOutcomeSummaryGenerator defaults for the console</span>
+	<span class="n">showOutcomeReason</span> <span class="o">=</span> <span class="kc">True</span>
+	<span class="n">showOutputDir</span> <span class="o">=</span> <span class="kc">True</span>
+	<span class="n">showDuration</span> <span class="o">=</span> <span class="kc">True</span>
+	<span class="n">showTestIdList</span> <span class="o">=</span> <span class="kc">True</span>
+	<span class="n">showRunDetails</span> <span class="o">=</span> <span class="kc">True</span>
+	
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.resultssummary&#39;</span><span class="p">)</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">logSummary</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConsoleProgressResultsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.console.html#pysys.writer.console.ConsoleProgressResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">ConsoleProgressResultsWriter</span><span class="p">(</span><span class="n">BaseProgressResultsWriter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Default progress writer that logs a summary of progress so far to the console, after each test completes.</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">recentFailures</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># configurable</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">numTests</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">threads</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">ConsoleProgressResultsWriter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">cycles</span><span class="o">=</span><span class="n">cycles</span><span class="p">,</span> <span class="n">numTests</span><span class="o">=</span><span class="n">numTests</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="n">threads</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">cycles</span> <span class="o">=</span> <span class="n">cycles</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">numTests</span> <span class="o">=</span> <span class="n">numTests</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">OUTCOMES</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_recentFailureReasons</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="n">threads</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">inprogress</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span> <span class="c1"># this is thread-safe for add/remove</span>
+
+	<span class="k">def</span> <span class="nf">processTestStarting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">inprogress</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testToDisplay</span><span class="p">(</span><span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="p">))</span>
+
+	<span class="k">def</span> <span class="nf">testToDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="p">):</span>
+		<span class="nb">id</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycles</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="nb">id</span> <span class="o">+=</span> <span class="s1">&#39; [CYCLE </span><span class="si">%02d</span><span class="s1">]&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">cycle</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">return</span> <span class="nb">id</span>
+
+	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">numTests</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span>
+		<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.resultsprogress&#39;</span><span class="p">)</span>
+		
+		<span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">testToDisplay</span><span class="p">(</span><span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">inprogress</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+		
+		<span class="n">outcome</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="p">[</span><span class="n">outcome</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+		
+		<span class="n">executed</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+		
+		<span class="k">if</span> <span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">():</span>
+			<span class="n">m</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">():</span> <span class="n">m</span> <span class="o">+=</span> <span class="s1">&#39;: &#39;</span><span class="o">+</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_recentFailureReasons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_recentFailureReasons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recentFailureReasons</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">recentFailures</span><span class="p">:]</span> <span class="c1"># keep last N</span>
+		
+		<span class="c1"># nb: no need to lock since this always executes on the main thread</span>
+		<span class="n">timediv</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">startTime</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span> <span class="n">timediv</span> <span class="o">=</span> <span class="mi">60</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Test progress: </span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1"> of tests in </span><span class="si">%d</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;completed </span><span class="si">%d</span><span class="s1">/</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">executed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numTests</span><span class="p">)),</span>
+				<span class="s1">&#39;</span><span class="si">%0.1f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mf">100.0</span> <span class="o">*</span> <span class="n">executed</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">numTests</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">startTime</span><span class="p">)</span><span class="o">/</span><span class="n">timediv</span><span class="p">),</span>
+				<span class="s1">&#39;seconds&#39;</span> <span class="k">if</span> <span class="n">timediv</span><span class="o">==</span><span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;minutes&#39;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_PROGRESS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
+		<span class="n">failednumber</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">OUTCOMES</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()])</span>
+		<span class="n">passed</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="p">[</span><span class="n">o</span><span class="p">],</span> <span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">OUTCOMES</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">o</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">])</span>
+		<span class="n">failed</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="p">[</span><span class="n">o</span><span class="p">],</span> <span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">OUTCOMES</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">])</span>
+		<span class="k">if</span> <span class="n">passed</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%0.1f%%</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">passed</span><span class="p">,</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">executed</span><span class="o">-</span><span class="n">failednumber</span><span class="p">)</span> <span class="o">/</span> <span class="n">executed</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_PASSES</span><span class="p">))</span>
+		<span class="k">if</span> <span class="n">failed</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">failed</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_FAILURES</span><span class="p">))</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recentFailureReasons</span><span class="p">:</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Recent failures: &#39;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_PROGRESS</span><span class="p">))</span>
+			<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recentFailureReasons</span><span class="p">:</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;   &#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_FAILURES</span><span class="p">))</span>
+		<span class="n">inprogress</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inprogress</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">inprogress</span><span class="p">:</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Currently executing: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">inprogress</span><span class="p">)),</span> <span class="n">extra</span><span class="o">=</span><span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">LOG_TEST_PROGRESS</span><span class="p">))</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConsoleFailureAnnotationsWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.console.html#pysys.writer.console.ConsoleFailureAnnotationsWriter">[docs]</a><span class="k">class</span> <span class="nc">ConsoleFailureAnnotationsWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Writer that prints a single annotation line to stdout for each test failure, for IDEs </span>
+<span class="sd">	and CI providers that can highlight failures found by regular expression stdout parsing.</span>
+<span class="sd">	</span>
+<span class="sd">	An instance of this writer is automatically added to every project, and enables itself only </span>
+<span class="sd">	if the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set. </span>
+<span class="sd">	</span>
+<span class="sd">	This class is designed for simple cases. If you need to output in a format that requires escaping of special </span>
+<span class="sd">	characters it is best to create a custom writer class. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="nb">format</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The format that will be written to stdout. If not specified as a writer property in pysysproject.xml, the </span>
+<span class="sd">	environment variable ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` will be used as the format. </span>
+<span class="sd">	</span>
+<span class="sd">	The format can include the following placeholders:</span>
+<span class="sd">	</span>
+<span class="sd">		- ``@testFile@``: the absolute path to the test file (e.g. run.py), using platform-specific slashes.</span>
+<span class="sd">		- ``@testFile/@``: the absolute path to the test file, using forward slashes on all OSes.</span>
+<span class="sd">		- ``@testFileLine@``: the line number in the test file (if available, else 0).</span>
+<span class="sd">		- ``@runLogFile@``: the absolute path to the run log (e.g. run.log), using platform-specific slashes.</span>
+<span class="sd">		- ``@runLogFile/@``: the absolute path to the run log (e.g. run.log), using forward slashes on all OSes.</span>
+<span class="sd">		- ``@category@``: either ``error`` or if it&#39;s a non-failure outcome, ``warning``. </span>
+<span class="sd">		- ``@outcome@``: the outcome e.g. ``FAILED``.</span>
+<span class="sd">		- ``@outcomeReason@``: the string containing the reason for the failure; this string can </span>
+<span class="sd">		  contain any characters (other than newline).</span>
+<span class="sd">		- ``@testIdAndCycle@``: the test identifier, with a cycle suffix if this is a multi-cycle test.</span>
+<span class="sd">	</span>
+<span class="sd">	The default format if the environment variable is empty and format is not provided is `DEFAULT_FORMAT`. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">DEFAULT_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;@testFile@:@testFileLine@: @category@: @outcome@ - @outcomeReason@ (@testIdAndCycle@)&quot;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This is the default format if the environment variable is empty and ``format`` is not provided. </span>
+
+<span class="sd">	The output looks like this::</span>
+<span class="sd">	</span>
+<span class="sd">		c:\\myproject\\tests\\MyTest_001\\run.py:4: error: TIMED OUT - This test timed out (MyTest_001 [CYCLE 03])</span>
+<span class="sd">	</span>
+<span class="sd">	which is similar to output from &quot;make&quot; and so should be parseable by many tools and IDEs. </span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">includeNonFailureOutcomes</span> <span class="o">=</span> <span class="s1">&#39;NOT VERIFIED&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be reported </span>
+<span class="sd">	(with a ``@category@`` of ``warning`` rather than ``error``). </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">enableIfEnvironmentVariable</span> <span class="o">=</span> <span class="s2">&quot;PYSYS_CONSOLE_FAILURE_ANNOTATIONS&quot;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The environment variable used to control whether it is enabled. </span>
+<span class="sd">	</span>
+<span class="sd">	This writer will be enabled if the specified environment variable is set (either to any empty string or to any </span>
+<span class="sd">	value other than &quot;false&quot;). </span>
+<span class="sd">	</span>
+<span class="sd">	Set enableIfEnvironmentVariable to &quot;&quot; to ignore the environment and instead enable when running with ``--record``. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pluginProperties</span><span class="p">:</span> 
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">k</span><span class="p">):</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unknown property &quot;</span><span class="si">%s</span><span class="s1">&quot; for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
+		<span class="nb">super</span><span class="p">(</span><span class="n">ConsoleFailureAnnotationsWriter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">cycles</span><span class="o">=</span><span class="n">cycles</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">cycles</span><span class="o">=</span><span class="n">cycles</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_CONSOLE_FAILURE_ANNOTATIONS&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_FORMAT</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_FORMAT</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+		<span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">OUTCOMES</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unknown outcome display name &quot;</span><span class="si">%s</span><span class="s1">&quot; in includeNonFailureOutcomes&#39;</span><span class="o">%</span><span class="n">o</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enableIfEnvironmentVariable</span><span class="p">:</span> <span class="k">return</span> <span class="n">record</span>
+		
+		<span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enableIfEnvironmentVariable</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">env</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">env</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;false&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+		<span class="k">return</span> <span class="kc">True</span>
+
+	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="n">outcome</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">():</span>
+			<span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+		<span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="p">:</span>
+			<span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;warning&#39;</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span>
+		
+		<span class="n">loc</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeLocation</span><span class="p">()</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/run.log&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># this is a reasonable fallback</span>
+		<span class="n">stdoutPrint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span>\
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@testFile@&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@testFile/@&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escape</span><span class="p">((</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)))</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@testFileLine@&#39;</span><span class="p">,</span> <span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="s1">&#39;0&#39;</span><span class="p">)</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@runLogFile@&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/run.log&#39;</span><span class="p">))</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@runLogFile/@&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escape</span><span class="p">((</span><span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/run.log&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)))</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@category@&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@outcome@&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()))</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@outcomeReason@&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeReason</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;(no outcome reason)&#39;</span><span class="p">))</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@testIdAndCycle@&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="p">(</span><span class="s1">&#39; [CYCLE </span><span class="si">%02d</span><span class="s1">]&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">cycle</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycles</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span>
+			<span class="p">)</span>
+	
+	<span class="k">def</span> <span class="nf">escape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+		<span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;; &#39;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

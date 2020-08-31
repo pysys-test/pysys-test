@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.unit.pyunit &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.utils" href="pysys.utils.html" />
+    <link rel="prev" title="pysys.unit" href="pysys.unit.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.unit.html">pysys.unit</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.unit.pyunit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyunittest">PyUnitTest</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.unit.html">pysys.unit</a> &raquo;</li>
+        
+      <li>pysys.unit.pyunit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.unit.pyunit.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.unit.pyunit">
+<span id="pysys-unit-pyunit"></span><h1>pysys.unit.pyunit<a class="headerlink" href="#module-pysys.unit.pyunit" title="Permalink to this headline">¶</a></h1>
+<p>Contains the test class used to run PyUnit tests.</p>
+<p>A suite of PyUnit tests becomes a single PySys test.</p>
+<div class="section" id="pyunittest">
+<h2>PyUnitTest<a class="headerlink" href="#pyunittest" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.unit.pyunit.PyUnitTest">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.unit.pyunit.</code><code class="sig-name descname">PyUnitTest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">descriptor</span></em>, <em class="sig-param"><span class="n">outsubdir</span></em>, <em class="sig-param"><span class="n">runner</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/unit/pyunit.html#PyUnitTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.unit.pyunit.PyUnitTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a></p>
+<p>Class for running PyUnit tests (standard Python unittest module). The
+execute method will execute all the .py files, find all the
+unittest.TestCase classes within those files and run the test methods
+within them. A separate Python process will be spawned for each input
+test file. By default child Python processes will have the same
+PYTHONPATH as the python process which is running pysys. However,
+this can be changed by overriding the getPythonPath() method.</p>
+<dl class="py method">
+<dt id="pysys.unit.pyunit.PyUnitTest.execute">
+<code class="sig-name descname">execute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/unit/pyunit.html#PyUnitTest.execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.unit.pyunit.PyUnitTest.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the execute() abstract method which simply
+calls executePyUnitTests()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.unit.pyunit.PyUnitTest.executePyUnitTests">
+<code class="sig-name descname">executePyUnitTests</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/unit/pyunit.html#PyUnitTest.executePyUnitTests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.unit.pyunit.PyUnitTest.executePyUnitTests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run all the PyUnit tests in the Input directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.unit.pyunit.PyUnitTest.getPythonPath">
+<code class="sig-name descname">getPythonPath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/unit/pyunit.html#PyUnitTest.getPythonPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.unit.pyunit.PyUnitTest.getPythonPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this method to return a sequence of paths to put
+at the beginning of the PYTHONPATH when running the PyUnit
+tests. See PyUnit_test_002 for an example of this.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.utils.html" class="btn btn-neutral float-right" title="pysys.utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.unit.html" class="btn btn-neutral float-left" title="pysys.unit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

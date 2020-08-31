@@ -1,0 +1,71 @@
+
+pysys.exceptions
+~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.exceptions
+
+.. currentmodule:: pysys.exceptions
+
+
+
+AbortExecution
+==============
+
+.. autoclass:: AbortExecution
+   :members:
+
+
+FileNotFoundException
+=====================
+
+.. autoclass:: FileNotFoundException
+   :members:
+
+
+IncorrectFileTypeException
+==========================
+
+.. autoclass:: IncorrectFileTypeException
+   :members:
+
+
+ExecutableNotFoundException
+===========================
+
+.. autoclass:: ExecutableNotFoundException
+   :members:
+
+
+ProcessError
+============
+
+.. autoclass:: ProcessError
+   :members:
+
+
+ProcessTimeout
+==============
+
+.. autoclass:: ProcessTimeout
+   :members:
+
+
+InvalidDescriptorException
+==========================
+
+.. autoclass:: InvalidDescriptorException
+   :members:
+
+
+InvalidXMLException
+===================
+
+.. autoclass:: InvalidXMLException
+   :members:
+
+
+UserError
+=========
+
+.. autoclass:: UserError
+   :members:

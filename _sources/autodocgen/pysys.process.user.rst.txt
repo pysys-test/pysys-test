@@ -1,0 +1,21 @@
+
+pysys.process.user
+~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.process.user
+
+.. currentmodule:: pysys.process.user
+
+
+
+STDOUTERR\_TUPLE
+================
+
+.. autodata:: STDOUTERR_TUPLE
+
+
+ProcessUser
+===========
+
+.. autoclass:: ProcessUser
+   :members:

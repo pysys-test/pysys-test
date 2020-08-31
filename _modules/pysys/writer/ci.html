@@ -1,0 +1,440 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.writer.ci &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.writer.ci</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.writer.ci</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Writers for recording test results to Continuous Integration providers.</span>
+
+<span class="sd">These writers only generate output if the </span>
+<span class="sd">environment variables associated with their CI system are set. </span>
+
+<span class="sd">If you wish to run PySys from a CI provider that&#39;s not listed here, for basic functionality all you need to </span>
+<span class="sd">do is run the tests with the ``--ci`` option. Many CI providers (including Jenkins) will be able to read the </span>
+<span class="sd">results of PySys tests if you configure them to look in the results directory generated by </span>
+<span class="sd">`pysys.writer.outcomes.JUnitXMLResultsWriter`. </span>
+<span class="sd">It may also be possible to configure some providers to automatically pick up archived test output from artifacts </span>
+<span class="sd">from the `pysys.writer.testoutput.TestOutputArchiveWriter` directory. </span>
+
+<span class="sd">If you want to implement additional functionality for your </span>
+<span class="sd">CI provider, subclass `pysys.writer.api.BaseRecordResultsWriter` (using the classes in this module as an example), and </span>
+<span class="sd">consider contributing your implementation back to the PySys project with a pull request.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GitHubActionsCIWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;TravisCIWriter&quot;</span><span class="p">,</span> <span class="s2">&quot;stdoutPrint&quot;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">collections</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="n">PrintLogs</span><span class="p">,</span> <span class="n">OUTCOMES</span>
+<span class="kn">from</span> <span class="nn">pysys.writer.api</span> <span class="kn">import</span> <span class="n">BaseRecordResultsWriter</span><span class="p">,</span> <span class="n">TestOutcomeSummaryGenerator</span><span class="p">,</span> <span class="n">ArtifactPublisher</span><span class="p">,</span> <span class="n">stripANSIEscapeCodes</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="n">stdoutPrint</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">PY2</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GitHubActionsCIWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.ci.html#pysys.writer.ci.GitHubActionsCIWriter">[docs]</a><span class="k">class</span> <span class="nc">GitHubActionsCIWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">,</span> <span class="n">TestOutcomeSummaryGenerator</span><span class="p">,</span> <span class="n">ArtifactPublisher</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Writer for GitHub(R) Actions. </span>
+<span class="sd">	</span>
+<span class="sd">	Produces annotations summarizing failures, adds grouping/folding of detailed test output, and </span>
+<span class="sd">	sets step output variables for any published artifacts (e.g. performance .csv files, archived test output etc) </span>
+<span class="sd">	which can be used to upload the artifacts when present. Step output variables for published artifacts are named </span>
+<span class="sd">	&#39;artifact_CATEGORY&#39; (for more details on artifact categories see `pysys.writer.api.ArtifactPublisher.publishArtifact`).</span>
+<span class="sd">	</span>
+<span class="sd">	For example, if the step is given the id ``pysys`` then the directory containing archived test output for failures </span>
+<span class="sd">	can be uploaded using ``{{ steps.pysys.outputs.artifact_TestOutputArchiveDir }}``.</span>
+<span class="sd">	</span>
+<span class="sd">	Be sure to include a unique run id (e.g. outdir) for each OS/job in the name of any uploaded artifacts so that </span>
+<span class="sd">	they do not overwrite each other when uploaded. </span>
+<span class="sd">	</span>
+<span class="sd">	See the PySys sample projects on GitHub(R) for a workflow file you can copy into your own project to enable </span>
+<span class="sd">	running your PySys tests with GitHub(R) Actions. </span>
+<span class="sd">	</span>
+<span class="sd">	Only enabled when running under GitHub Actions (specifically, if the ``GITHUB_ACTIONS=true`` environment variable is set).</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">failureSummaryAnnotations</span> <span class="o">=</span> <span class="kc">True</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Configures whether a single annotation is added with a summary of the number of failures and the outcome and reason </span>
+<span class="sd">	for all failures. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">failureTestLogAnnotations</span> <span class="o">=</span> <span class="kc">True</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Configures whether annotations are added with the (run.log) log output for each of the first few test failures. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">maxAnnotations</span> <span class="o">=</span> <span class="mi">10</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Configures the maximum number of annotations generated by this invocation of PySys, to cope with GitHub limits. </span>
+<span class="sd">	</span>
+<span class="sd">	This ensure we don&#39;t use up our entire allocation of annotations leaving no space for annotations from other </span>
+<span class="sd">	tools. Being aware of this limit also allows to us add a warning to the end of the last one to make clear no more </span>
+<span class="sd">	annotations will be shown even if there are more warnings. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;GITHUB_ACTIONS&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;true&#39;</span>
+
+	<span class="k">def</span> <span class="nf">outputGitHubCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{}):</span>
+		<span class="c1"># syntax is: ::workflow-command parameter1={data},parameter2={data}::{command value}</span>
+		<span class="c1"># escaping based on https://github.com/actions/toolkit/blob/master/packages/core/src/command.ts</span>
+
+		<span class="n">toprint</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;::</span><span class="si">%s%s</span><span class="s1">::</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> 
+			<span class="p">(</span><span class="sa">u</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="sa">u</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span>\
+				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;%25&#39;</span><span class="p">)</span>\
+				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;%0D&#39;</span><span class="p">)</span>\
+				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;%0A&#39;</span><span class="p">)</span>\
+				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;%3A&#39;</span><span class="p">)</span>\
+				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;%2C&#39;</span><span class="p">)</span>
+				<span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span> <span class="k">if</span> <span class="n">params</span> <span class="k">else</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">value</span>\
+				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;%25&#39;</span><span class="p">)</span>\
+				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;%0D&#39;</span><span class="p">)</span>\
+				<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;%0A&#39;</span><span class="p">)</span>
+				<span class="p">)</span>
+		<span class="k">if</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">u</span><span class="s1">&#39;set-output&#39;</span><span class="p">]:</span> <span class="c1"># since GitHub suppresses the actual commands written, it&#39;s useful to log this at debug</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GitHub Actions command </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">toprint</span><span class="p">)</span>
+
+		<span class="n">stdoutPrint</span><span class="p">(</span><span class="n">toprint</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numTests</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testoutdir</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">GitHubActionsCIWriter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">numTests</span><span class="o">=</span><span class="n">numTests</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="n">cycles</span><span class="p">,</span> <span class="n">xargs</span><span class="o">=</span><span class="n">xargs</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="n">threads</span><span class="p">,</span> 
+			<span class="n">testoutdir</span><span class="o">=</span><span class="n">testoutdir</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">runner</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">remainingAnnotations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxAnnotations</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span> <span class="c1"># one is used up for the non-zero exit status and one is used for the summary</span>
+		<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failureTestLogAnnotations</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">!=</span><span class="s1">&#39;true&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainingAnnotations</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">failureTestLogAnnotations</span> <span class="o">=</span> <span class="p">[]</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">runid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">testoutdir</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">runner</span><span class="o">.</span><span class="n">printLogs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="c1"># if setting was not overridden by user, default for CI is </span>
+			<span class="c1"># to only print failures since otherwise the output is too long </span>
+			<span class="c1"># and hard to find the logs of interest</span>
+			<span class="n">runner</span><span class="o">.</span><span class="n">printLogs</span> <span class="o">=</span> <span class="n">PrintLogs</span><span class="o">.</span><span class="n">FAILURES</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;Logs for failed test run: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">runid</span><span class="p">)</span>
+		
+		<span class="c1"># enable coloring automatically, since this CI provider supports it</span>
+		<span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">formatters</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="kc">True</span>
+		<span class="c1"># in this provider, colors render more clearly with bright=False</span>
+		<span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">configureANSIEscapeCodes</span><span class="p">(</span><span class="n">bright</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># map of category:[paths]</span>
+
+	<span class="k">def</span> <span class="nf">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+			<span class="c1"># normally we accumulate all the paths for each category ready to write out during cleanup</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="c1"># if this writer&#39;s cleanup was already called, fallback to separate invocation (probably this will only </span>
+			<span class="c1"># happen for categories that publish just one path, so it&#39;ll work out OK)</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GitHubActionsCIWriter got publishArtifact after cleanup(), will publish anyway; category=</span><span class="si">%s</span><span class="s1"> path=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_publishToGitHub</span><span class="p">([</span><span class="n">path</span><span class="p">],</span> <span class="n">category</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">_publishToGitHub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="k">return</span> <span class="c1"># auto-skip things that don&#39;t exist</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;set-output&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">paths</span><span class="p">),</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="sa">u</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="sa">u</span><span class="s1">&#39;artifact_&#39;</span><span class="o">+</span><span class="n">category</span><span class="p">})</span>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">GitHubActionsCIWriter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">cleanup</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+		<span class="c1"># invoked after all tests but before summary is printed, </span>
+		<span class="c1"># a good place to close the folding detail section</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;endgroup&#39;</span><span class="p">)</span>
+		
+		<span class="c1"># artifact publishing, mostly for use with uploading</span>
+		<span class="c1"># currently categories with multiple artifacts can&#39;t be used directly with the artifact action, but this may change in future</span>
+		<span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">paths</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_publishToGitHub</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span> <span class="o">=</span> <span class="kc">None</span>
+		
+		<span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">outcomes</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">OUTCOMES</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()]):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;(GitHub test failure annotations)&#39;</span><span class="p">)</span>
+			
+			<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failureSummaryAnnotations</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSummaryText</span><span class="p">(),</span> 
+					<span class="c1"># Slightly better than the default (&quot;.github&quot;) is to include the path to the project file</span>
+					<span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="sa">u</span><span class="s1">&#39;file&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">projectFile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;/&#39;</span><span class="p">)})</span>
+			
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureTestLogAnnotations</span><span class="p">:</span>
+				<span class="c1"># Do them all in a group at the end since otherwise the annotation output gets mixed up with the test </span>
+				<span class="c1"># log output making it hard to understand</span>
+				<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">failureTestLogAnnotations</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
+
+			<span class="bp">self</span><span class="o">.</span><span class="n">outputGitHubCommand</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;endgroup&#39;</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testTime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testStart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">runLogOutput</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">GitHubActionsCIWriter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">processResult</span><span class="p">(</span><span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="n">cycle</span><span class="p">,</span> <span class="n">testTime</span><span class="o">=</span><span class="n">testTime</span><span class="p">,</span> 
+			<span class="n">testStart</span><span class="o">=</span><span class="n">testStart</span><span class="p">,</span> <span class="n">runLogOutput</span><span class="o">=</span><span class="n">runLogOutput</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainingAnnotations</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="o">.</span><span class="n">isFailure</span><span class="p">():</span>
+			<span class="c1"># Currently, GitHub actions doesn&#39;t show the annotation against the source code unless the specified line </span>
+			<span class="c1"># number is one of the lines changes or surrounding context lines, but we do the best we can</span>
+			<span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39; </span><span class="se">\\</span><span class="s1">[run</span><span class="se">\\</span><span class="s1">.py:(</span><span class="se">\\</span><span class="s1">d+)</span><span class="se">\\</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="n">runLogOutput</span> <span class="ow">or</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+			<span class="n">lineno</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">m</span> <span class="k">else</span> <span class="kc">None</span>
+			
+			<span class="n">msg</span> <span class="o">=</span> <span class="n">stripANSIEscapeCodes</span><span class="p">(</span><span class="n">runLogOutput</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">remainingAnnotations</span> <span class="o">-=</span> <span class="mi">1</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainingAnnotations</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">(annotation limit reached; for any additional test failures, see the detailed log)&#39;</span>
+			<span class="n">params</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+			
+			<span class="n">file</span><span class="p">,</span> <span class="n">lineno</span> <span class="o">=</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcomeLocation</span><span class="p">()</span>
+			<span class="k">if</span> <span class="n">file</span><span class="p">:</span>
+				<span class="n">params</span><span class="p">[</span><span class="sa">u</span><span class="s1">&#39;file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">lineno</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="sa">u</span><span class="s1">&#39;line&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lineno</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">failureTestLogAnnotations</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="sa">u</span><span class="s1">&#39;warning&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">params</span><span class="p">])</span></div>
+			
+
+<div class="viewcode-block" id="TravisCIWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.ci.html#pysys.writer.ci.TravisCIWriter">[docs]</a><span class="k">class</span> <span class="nc">TravisCIWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Writer for Travis CI(R). 	</span>
+<span class="sd">	</span>
+<span class="sd">	Provides folding of test log details, and correct coloring of console output for Travis. </span>
+<span class="sd">	</span>
+<span class="sd">	Only enabled when running under Travis (specifically, </span>
+<span class="sd">	if the ``TRAVIS=true`` environment variable is set).</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+		
+	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;TRAVIS&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;true&#39;</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numTests</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testoutdir</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">testoutdir</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">runner</span><span class="o">.</span><span class="n">printLogs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="c1"># if setting was not overridden by user, default for Travis is </span>
+			<span class="c1"># to only print failures since otherwise the output is too long </span>
+			<span class="c1"># and hard to find the logs of interest</span>
+			<span class="n">runner</span><span class="o">.</span><span class="n">printLogs</span> <span class="o">=</span> <span class="n">PrintLogs</span><span class="o">.</span><span class="n">FAILURES</span>
+		
+		<span class="n">stdoutPrint</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;travis_fold:start:PySys-</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">runid</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">))</span>
+		
+		<span class="c1"># enable coloring automatically, since this CI provider supports it, </span>
+		<span class="c1"># but must explicitly disable bright colors since it doesn&#39;t yet support that</span>
+		<span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">formatters</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="kc">True</span>
+		<span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">configureANSIEscapeCodes</span><span class="p">(</span><span class="n">bright</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="c1"># invoked after all tests but before summary is printed, </span>
+		<span class="c1"># a good place to close the folding detail section</span>
+		<span class="n">stdoutPrint</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;travis_fold:end:PySys-</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">runid</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">))</span>
+
+	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testTime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testStart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">runLogOutput</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="c1"># nothing to do for Travis as it doesn&#39;t collect results, we use the </span>
+		<span class="c1"># standard log printing mechanism</span>
+		<span class="k">pass</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

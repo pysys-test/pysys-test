@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.writer.console &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.writer.outcomes" href="pysys.writer.outcomes.html" />
+    <link rel="prev" title="pysys.writer.ci" href="pysys.writer.ci.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.writer.html">pysys.writer</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.api.html">pysys.writer.api</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.ci.html">pysys.writer.ci</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.writer.console</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#consolesummaryresultswriter">ConsoleSummaryResultsWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#consoleprogressresultswriter">ConsoleProgressResultsWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#consolefailureannotationswriter">ConsoleFailureAnnotationsWriter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.outcomes.html">pysys.writer.outcomes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.testoutput.html">pysys.writer.testoutput</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.writer.html">pysys.writer</a> &raquo;</li>
+        
+      <li>pysys.writer.console</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.writer.console.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.writer.console">
+<span id="pysys-writer-console"></span><h1>pysys.writer.console<a class="headerlink" href="#module-pysys.writer.console" title="Permalink to this headline">¶</a></h1>
+<p>Writers that record test outcomes on the console (stdout) when running PySys.</p>
+<p>If no progress writers are explicitly configured in the PySys project XML file, an instance of
+<a class="reference internal" href="#pysys.writer.console.ConsoleProgressResultsWriter" title="pysys.writer.console.ConsoleProgressResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConsoleProgressResultsWriter</span></code></a> is used. If no summary writer is explicitly configured in the PySys project
+XML file, an instance of <a class="reference internal" href="#pysys.writer.console.ConsoleSummaryResultsWriter" title="pysys.writer.console.ConsoleSummaryResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConsoleSummaryResultsWriter</span></code></a> is used.</p>
+<div class="section" id="consolesummaryresultswriter">
+<h2>ConsoleSummaryResultsWriter<a class="headerlink" href="#consolesummaryresultswriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.console.ConsoleSummaryResultsWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.console.</code><code class="sig-name descname">ConsoleSummaryResultsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/console.html#ConsoleSummaryResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.console.ConsoleSummaryResultsWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseSummaryResultsWriter" title="pysys.writer.api.BaseSummaryResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseSummaryResultsWriter</span></code></a>, <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.TestOutcomeSummaryGenerator" title="pysys.writer.api.TestOutcomeSummaryGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.TestOutcomeSummaryGenerator</span></code></a></p>
+<p>Default summary writer that is used to list a summary of the test results at the end of execution.</p>
+<p>Support the same configuration options as <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.TestOutcomeSummaryGenerator" title="pysys.writer.api.TestOutcomeSummaryGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.TestOutcomeSummaryGenerator</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="consoleprogressresultswriter">
+<h2>ConsoleProgressResultsWriter<a class="headerlink" href="#consoleprogressresultswriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.console.ConsoleProgressResultsWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.console.</code><code class="sig-name descname">ConsoleProgressResultsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/console.html#ConsoleProgressResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.console.ConsoleProgressResultsWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseProgressResultsWriter" title="pysys.writer.api.BaseProgressResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseProgressResultsWriter</span></code></a></p>
+<p>Default progress writer that logs a summary of progress so far to the console, after each test completes.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="consolefailureannotationswriter">
+<h2>ConsoleFailureAnnotationsWriter<a class="headerlink" href="#consolefailureannotationswriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.console.ConsoleFailureAnnotationsWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.console.</code><code class="sig-name descname">ConsoleFailureAnnotationsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/console.html#ConsoleFailureAnnotationsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a></p>
+<p>Writer that prints a single annotation line to stdout for each test failure, for IDEs 
+and CI providers that can highlight failures found by regular expression stdout parsing.</p>
+<p>An instance of this writer is automatically added to every project, and enables itself only 
+if the <code class="docutils literal notranslate"><span class="pre">PYSYS_CONSOLE_FAILURE_ANNOTATIONS</span></code> environment variable is set.</p>
+<p>This class is designed for simple cases. If you need to output in a format that requires escaping of special 
+characters it is best to create a custom writer class.</p>
+<dl class="py attribute">
+<dt id="pysys.writer.console.ConsoleFailureAnnotationsWriter.format">
+<code class="sig-name descname">format</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.format" title="Permalink to this definition">¶</a></dt>
+<dd><p>The format that will be written to stdout. If not specified as a writer property in pysysproject.xml, the 
+environment variable <code class="docutils literal notranslate"><span class="pre">PYSYS_CONSOLE_FAILURE_ANNOTATIONS</span></code> will be used as the format.</p>
+<p>The format can include the following placeholders:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;testFile&#64;</span></code>: the absolute path to the test file (e.g. run.py), using platform-specific slashes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;testFile/&#64;</span></code>: the absolute path to the test file, using forward slashes on all OSes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;testFileLine&#64;</span></code>: the line number in the test file (if available, else 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;runLogFile&#64;</span></code>: the absolute path to the run log (e.g. run.log), using platform-specific slashes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;runLogFile/&#64;</span></code>: the absolute path to the run log (e.g. run.log), using forward slashes on all OSes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;category&#64;</span></code>: either <code class="docutils literal notranslate"><span class="pre">error</span></code> or if it’s a non-failure outcome, <code class="docutils literal notranslate"><span class="pre">warning</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;outcome&#64;</span></code>: the outcome e.g. <code class="docutils literal notranslate"><span class="pre">FAILED</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;outcomeReason&#64;</span></code>: the string containing the reason for the failure; this string can 
+contain any characters (other than newline).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;testIdAndCycle&#64;</span></code>: the test identifier, with a cycle suffix if this is a multi-cycle test.</p></li>
+</ul>
+</div></blockquote>
+<p>The default format if the environment variable is empty and format is not provided is <a class="reference internal" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT" title="pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_FORMAT</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT">
+<code class="sig-name descname">DEFAULT_FORMAT</code><em class="property"> = '&#64;testFile&#64;:&#64;testFileLine&#64;: &#64;category&#64;: &#64;outcome&#64; - &#64;outcomeReason&#64; (&#64;testIdAndCycle&#64;)'</em><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.DEFAULT_FORMAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the default format if the environment variable is empty and <code class="docutils literal notranslate"><span class="pre">format</span></code> is not provided.</p>
+<p>The output looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="p">:</span>\<span class="n">myproject</span>\<span class="n">tests</span>\<span class="n">MyTest_001</span>\<span class="n">run</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">4</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="n">TIMED</span> <span class="n">OUT</span> <span class="o">-</span> <span class="n">This</span> <span class="n">test</span> <span class="n">timed</span> <span class="n">out</span> <span class="p">(</span><span class="n">MyTest_001</span> <span class="p">[</span><span class="n">CYCLE</span> <span class="mi">03</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>which is similar to output from “make” and so should be parseable by many tools and IDEs.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.console.ConsoleFailureAnnotationsWriter.includeNonFailureOutcomes">
+<code class="sig-name descname">includeNonFailureOutcomes</code><em class="property"> = 'NOT VERIFIED'</em><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.includeNonFailureOutcomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be reported 
+(with a <code class="docutils literal notranslate"><span class="pre">&#64;category&#64;</span></code> of <code class="docutils literal notranslate"><span class="pre">warning</span></code> rather than <code class="docutils literal notranslate"><span class="pre">error</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.console.ConsoleFailureAnnotationsWriter.enableIfEnvironmentVariable">
+<code class="sig-name descname">enableIfEnvironmentVariable</code><em class="property"> = 'PYSYS_CONSOLE_FAILURE_ANNOTATIONS'</em><a class="headerlink" href="#pysys.writer.console.ConsoleFailureAnnotationsWriter.enableIfEnvironmentVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>The environment variable used to control whether it is enabled.</p>
+<p>This writer will be enabled if the specified environment variable is set (either to any empty string or to any 
+value other than “false”).</p>
+<p>Set enableIfEnvironmentVariable to “” to ignore the environment and instead enable when running with <code class="docutils literal notranslate"><span class="pre">--record</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.writer.outcomes.html" class="btn btn-neutral float-right" title="pysys.writer.outcomes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.writer.ci.html" class="btn btn-neutral float-left" title="pysys.writer.ci" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

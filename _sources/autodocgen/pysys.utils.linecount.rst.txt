@@ -1,0 +1,14 @@
+
+pysys.utils.linecount
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.linecount
+
+.. currentmodule:: pysys.utils.linecount
+
+
+
+linecount
+=========
+
+.. autofunction:: linecount

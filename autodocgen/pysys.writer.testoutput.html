@@ -1,0 +1,496 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.writer.testoutput &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.xml" href="pysys.xml.html" />
+    <link rel="prev" title="pysys.writer.outcomes" href="pysys.writer.outcomes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.writer.html">pysys.writer</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.api.html">pysys.writer.api</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.ci.html">pysys.writer.ci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.console.html">pysys.writer.console</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.outcomes.html">pysys.writer.outcomes</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.writer.testoutput</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#testoutputarchivewriter">TestOutputArchiveWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#collecttestoutputwriter">CollectTestOutputWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pythoncoveragewriter">PythonCoverageWriter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.writer.html">pysys.writer</a> &raquo;</li>
+        
+      <li>pysys.writer.testoutput</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.writer.testoutput.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.writer.testoutput">
+<span id="pysys-writer-testoutput"></span><h1>pysys.writer.testoutput<a class="headerlink" href="#module-pysys.writer.testoutput" title="Permalink to this headline">¶</a></h1>
+<p>Writers that process the contents of test output directories, archiving or collecting output files, or aggregating 
+code coverage data.</p>
+<div class="section" id="testoutputarchivewriter">
+<h2>TestOutputArchiveWriter<a class="headerlink" href="#testoutputarchivewriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.testoutput.</code><code class="sig-name descname">TestOutputArchiveWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#TestOutputArchiveWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a></p>
+<p>Writer that creates zip archives of each failed test’s output directory, 
+producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed.</p>
+<p>This writer is enabled when running with <code class="docutils literal notranslate"><span class="pre">--record</span></code>. If using this writer in conjunction with a CI writer that 
+publishes the generated archives, be sure to include this writer first in the list of writers in your project 
+configuration.</p>
+<p>Publishes artifacts with category name “TestOutputArchive” and the directory (unless there are no archives) 
+as “TestOutputArchiveDir” for any enabled <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.ArtifactPublisher" title="pysys.writer.api.ArtifactPublisher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.ArtifactPublisher</span></code></a> writers.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 1.6.0.</span></p>
+</div>
+<p>The following properties can be set in the project configuration for this writer:</p>
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.destDir">
+<code class="sig-name descname">destDir</code><em class="property"> = '__pysys_output_archives.${outDirName}/'</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.destDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>The directory to write the archives to, as an absolute path, or relative to the testRootDir (or –outdir if specified).</p>
+<p>This directory will be deleted at the start of the run if it already exists.</p>
+<p>Project <code class="docutils literal notranslate"><span class="pre">${...}</span></code> properties can be used in the path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.maxTotalSizeMB">
+<code class="sig-name descname">maxTotalSizeMB</code><em class="property"> = 1024.0</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.maxTotalSizeMB" title="Permalink to this definition">¶</a></dt>
+<dd><p>The (approximate) limit on the total size of all archives.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.maxArchiveSizeMB">
+<code class="sig-name descname">maxArchiveSizeMB</code><em class="property"> = 200.0</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.maxArchiveSizeMB" title="Permalink to this definition">¶</a></dt>
+<dd><p>The (approximate) limit on the size each individual test archive.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.maxArchives">
+<code class="sig-name descname">maxArchives</code><em class="property"> = 50</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.maxArchives" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maximum number of archives to create.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.archiveAtEndOfRun">
+<code class="sig-name descname">archiveAtEndOfRun</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.archiveAtEndOfRun" title="Permalink to this definition">¶</a></dt>
+<dd><p>By default all archives are created at the end of the run once all tests have finished executing. This avoids 
+I/O contention with execution of tests, and also selection of the tests to generated archives to be done 
+in a deterministic (but pseudo-random) fashion rather than just taking the first N failures.</p>
+<p>Alternatively you can this property to false if you wish to create archives during the test run as each failure 
+occurs.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.includeNonFailureOutcomes">
+<code class="sig-name descname">includeNonFailureOutcomes</code><em class="property"> = 'REQUIRES INSPECTION'</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.includeNonFailureOutcomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be archived.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.fileExcludesRegex">
+<code class="sig-name descname">fileExcludesRegex</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.fileExcludesRegex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A regular expression indicating test output paths that will be excluded from archiving, for example large 
+temporary files that are not useful for diagnosing problems.</p>
+<p>For example <code class="docutils literal notranslate"><span class="pre">&quot;.*/MyTest_001/.*/mybigfile.*[.]tmp&quot;</span></code>.</p>
+<p>The expression is matched against the path of each output file relative to the test root dir, 
+using forward slashes as the path separator. Multiple paths can be specified using “(path1|path2)” syntax.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.fileIncludesRegex">
+<code class="sig-name descname">fileIncludesRegex</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.fileIncludesRegex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A regular expression indicating test output paths that will be included in the archive. This can be used to 
+archive just some particular files. Note that for use cases such as collecting graphs and code coverage files 
+generated by a test run, the collect-test-output feature is usually a better fit than using this writer.</p>
+<p>The expression is matched against the path of each output file relative to the test root dir, 
+using forward slashes as the path separator. Multiple paths can be specified using “(path1|path2)” syntax.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter.shouldArchive">
+<code class="sig-name descname">shouldArchive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testObj</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#TestOutputArchiveWriter.shouldArchive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter.shouldArchive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decides whether this test is eligible for archiving of its output.</p>
+<p>The default implementation archives only tests that have a failure outcome, or are listed in 
+<code class="docutils literal notranslate"><span class="pre">includeNonFailureOutcomes</span></code>, but this can be customized if needed by subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>testObj</strong> (<a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><em>pysys.basetest.BaseTest</em></a>) – The test object under consideration.</p>
+</dd>
+<dt class="field-even">Return bool</dt>
+<dd class="field-even"><p>True if this test’s output can be archived.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter._newArchive">
+<code class="sig-name descname">_newArchive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#TestOutputArchiveWriter._newArchive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter._newArchive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates and opens a new archive file for the specified id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(str path, filehandle) The path will include an appropriate extension for this archive type. 
+The filehandle must have the same API as Python’s ZipFile class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.testoutput.TestOutputArchiveWriter._archiveTestOutputDir">
+<code class="sig-name descname">_archiveTestOutputDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">outputDir</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#TestOutputArchiveWriter._archiveTestOutputDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.TestOutputArchiveWriter._archiveTestOutputDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an archive for the specified test, unless doing so would violate the configured limits 
+(e.g. maxArchives).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em>) – The testId (plus a cycle suffix if it’s a multi-cycle run).</p></li>
+<li><p><strong>outputDir</strong> (<em>str</em>) – The path of the test output dir.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="collecttestoutputwriter">
+<h2>CollectTestOutputWriter<a class="headerlink" href="#collecttestoutputwriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.testoutput.</code><code class="sig-name descname">CollectTestOutputWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#CollectTestOutputWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a>, <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.TestOutputVisitor" title="pysys.writer.api.TestOutputVisitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.TestOutputVisitor</span></code></a></p>
+<p>Writer that collects files matching a specified pattern from the output directory after each test, and puts 
+them in a single directory or archive - for example code coverage files or performance graphs.</p>
+<p>This writer can be used as-is or as a base class for writers that need to collect files during test execution 
+then do something with them during cleanup, for example generate a code coverage report.</p>
+<p>Empty files are ignored.</p>
+<p>This writer is always enabled.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 1.6.0.</span></p>
+</div>
+<p>The following properties can be set in the project configuration for this writer:</p>
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.destDir">
+<code class="sig-name descname">destDir</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.destDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>The directory in which the files will be collected, as an absolute path, or relative to the testRootDir (or –outdir if specified).</p>
+<p>This directory will be deleted at the start of the run if it already exists.</p>
+<p>Project <code class="docutils literal notranslate"><span class="pre">${...}</span></code> properties can be used in the path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.destArchive">
+<code class="sig-name descname">destArchive</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.destArchive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional filename of a .zip archive to generate with the contents of the destDir.</p>
+<p>If a non-absolute path is specified it is evaluated relative to the destDir.</p>
+<p>Project <code class="docutils literal notranslate"><span class="pre">${...}</span></code> properties can be used in the path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.fileIncludesRegex">
+<code class="sig-name descname">fileIncludesRegex</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.fileIncludesRegex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A regular expression indicating the test output paths that will be collected. This can be used to 
+archive just some particular files. This is required.</p>
+<p>The expression is matched against the final characters of each output file’s path (with the test root dir stripped 
+off), using forward slashes as the path separator. Multiple paths can be specified using “(path1|path2)” syntax.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.fileExcludesRegex">
+<code class="sig-name descname">fileExcludesRegex</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.fileExcludesRegex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A regular expression indicating test output paths that will be excluded from collection.</p>
+<p>For example <code class="docutils literal notranslate"><span class="pre">&quot;.*/MyTest_001/.*/mybigfile.*[.]tmp&quot;</span></code>.</p>
+<p>The expression is matched against the path as described for fileIncludesRegex.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.outputPattern">
+<code class="sig-name descname">outputPattern</code><em class="property"> = '&#64;TESTID&#64;.&#64;FILENAME&#64;.&#64;UNIQUE&#64;.&#64;FILENAME_EXT&#64;'</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.outputPattern" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string indicating the file (and optionally subdirectory name) to use when writing each collected file to 
+the destDir.</p>
+<p>In addition to any standard <code class="docutils literal notranslate"><span class="pre">${...}</span></code> property variables from the project 
+configuration, the output pattern can contain these <code class="docutils literal notranslate"><span class="pre">&#64;...&#64;</span></code> 
+substitutions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;FILENAME&#64;</span></code> is the original base filename with directory and extension removed, to which you 
+can add prefixes or suffixes as desired.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.&#64;FILENAME_EXT&#64;</span></code> is the filename extension, such that the original filename 
+is <code class="docutils literal notranslate"><span class="pre">&#64;FILENAME&#64;.&#64;FILENAME_EXT&#64;</span></code> (note the dot prefix is mandatory here, and will be replaced with 
+empty string is there is no extension).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;TESTID&#64;</span></code> is replaced by the identifier of the test that generated the 
+output file (including mode suffix if present), which may be useful for tracking where each one came from.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;UNIQUE&#64;</span></code> is replaced by a number that ensures the file does not clash 
+with any other collected output file from another test. The <code class="docutils literal notranslate"><span class="pre">&#64;UNIQUE&#64;</span></code> 
+substitution variable is mandatory.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.publishArtifactDirCategory">
+<code class="sig-name descname">publishArtifactDirCategory</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.publishArtifactDirCategory" title="Permalink to this definition">¶</a></dt>
+<dd><p>If specified, the output directory will be published as an artifact using the specified category name, 
+e.g. <code class="docutils literal notranslate"><span class="pre">MyCodeCoverageDir</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.publishArtifactArchiveCategory">
+<code class="sig-name descname">publishArtifactArchiveCategory</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.publishArtifactArchiveCategory" title="Permalink to this definition">¶</a></dt>
+<dd><p>If specified the <code class="docutils literal notranslate"><span class="pre">destArchive</span></code> file (if any) will be published as an artifact using the specified category name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.testoutput.CollectTestOutputWriter.archiveAndPublish">
+<code class="sig-name descname">archiveAndPublish</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#CollectTestOutputWriter.archiveAndPublish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.CollectTestOutputWriter.archiveAndPublish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an archive of the destDir (if configured) and publish artifacts (if configured).</p>
+<p>Called by default as part of <code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup()</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="pythoncoveragewriter">
+<h2>PythonCoverageWriter<a class="headerlink" href="#pythoncoveragewriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.testoutput.PythonCoverageWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.testoutput.</code><code class="sig-name descname">PythonCoverageWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/testoutput.html#PythonCoverageWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.testoutput.PythonCoverageWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.testoutput.CollectTestOutputWriter</span></code></a></p>
+<p>Writer that collects Python code coverage files in a single directory and writes a coverage report during 
+runner cleanup. Requires the “coverage.py” library to be installed.</p>
+<p>To enable this, run with <code class="docutils literal notranslate"><span class="pre">-XcodeCoverage</span></code> (or <code class="docutils literal notranslate"><span class="pre">-XpythonCoverage</span></code>) and configure the <code class="docutils literal notranslate"><span class="pre">destDir</span></code> plugin property 
+in pysysproject.xml (e.g. to <code class="docutils literal notranslate"><span class="pre">__coverage_python.${outDirName}</span></code>).</p>
+<p>If coverage is generated, the directory containing all coverage files is published as an artifact named 
+“PythonCoverageDir”. Optionally an archive of this directory can be generated by setting the 
+<code class="docutils literal notranslate"><span class="pre">destArchive</span></code> property (see <a class="reference internal" href="#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CollectTestOutputWriter</span></code></a>), and published as “PythonCoverageArchive”.</p>
+<p>Note that to maintain compatibility with pre-1.6.0 projects, a PythonCoverageWriter instance will be _automatically_ 
+added to the project if the <code class="docutils literal notranslate"><span class="pre">pythonCoverageDir</span></code> project property is set and none is explicitly configured; but 
+the automatic addition is deprecated so you should explicity add this writer to your project if you need it.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 1.6.0.</span></p>
+</div>
+<p>The following property can be set in the project configuration for this writer (and see also 
+<a class="reference internal" href="#pysys.writer.testoutput.CollectTestOutputWriter" title="pysys.writer.testoutput.CollectTestOutputWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CollectTestOutputWriter</span></code></a> for inherited properties such as <code class="docutils literal notranslate"><span class="pre">destArchive</span></code>):</p>
+<dl class="py attribute">
+<dt id="pysys.writer.testoutput.PythonCoverageWriter.pythonCoverageArgs">
+<code class="sig-name descname">pythonCoverageArgs</code><em class="property"> = ''</em><a class="headerlink" href="#pysys.writer.testoutput.PythonCoverageWriter.pythonCoverageArgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string of command line arguments used to customize the <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">run</span></code> and <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">html</span></code> commands. 
+Use “…” double quotes around any arguments that contain spaces.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;pythonCoverageArgs&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;--rcfile=$</span><span class="si">{testRootDir}</span><span class="s2">/python_coveragerc&quot;</span><span class="o">/&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.xml.html" class="btn btn-neutral float-right" title="pysys.xml" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.writer.outcomes.html" class="btn btn-neutral float-left" title="pysys.writer.outcomes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

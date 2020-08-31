@@ -1,0 +1,22 @@
+
+pysys.writer.ci
+~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.writer.ci
+
+.. currentmodule:: pysys.writer.ci
+
+
+
+GitHubActionsCIWriter
+=====================
+
+.. autoclass:: GitHubActionsCIWriter
+   :members:
+
+
+TravisCIWriter
+==============
+
+.. autoclass:: TravisCIWriter
+   :members:

@@ -1,0 +1,22 @@
+
+pysys.xml.descriptor
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.xml.descriptor
+
+.. currentmodule:: pysys.xml.descriptor
+
+
+
+TestDescriptor
+==============
+
+.. autoclass:: TestDescriptor
+   :members:
+
+
+DescriptorLoader
+================
+
+.. autoclass:: DescriptorLoader
+   :members:

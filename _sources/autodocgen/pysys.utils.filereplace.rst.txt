@@ -1,0 +1,14 @@
+
+pysys.utils.filereplace
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.filereplace
+
+.. currentmodule:: pysys.utils.filereplace
+
+
+
+replace
+=======
+
+.. autofunction:: replace

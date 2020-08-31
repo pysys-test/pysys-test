@@ -1,0 +1,36 @@
+
+pysys.writer.outcomes
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.writer.outcomes
+
+.. currentmodule:: pysys.writer.outcomes
+
+
+
+TextResultsWriter
+=================
+
+.. autoclass:: TextResultsWriter
+   :members:
+
+
+XMLResultsWriter
+================
+
+.. autoclass:: XMLResultsWriter
+   :members:
+
+
+JUnitXMLResultsWriter
+=====================
+
+.. autoclass:: JUnitXMLResultsWriter
+   :members:
+
+
+CSVResultsWriter
+================
+
+.. autoclass:: CSVResultsWriter
+   :members:

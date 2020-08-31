@@ -1,0 +1,393 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.launcher.console_make &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.launcher.console_make</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.launcher.console_make</h1><div class="highlight"><pre>
+<span></span><span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Implements ``pysys.py make`` to create new testcases. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">stat</span><span class="o">,</span> <span class="nn">getopt</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">log</span>
+
+<span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.launcher</span> <span class="kn">import</span> <span class="n">createDescriptors</span>
+<span class="kn">from</span> <span class="nn">pysys.xml.project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.loader</span> <span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span><span class="p">,</span> <span class="n">PY2</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">toLongPathSafe</span>
+
+<div class="viewcode-block" id="ConsoleMakeTestHelper"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ConsoleMakeTestHelper">[docs]</a><span class="k">class</span> <span class="nc">ConsoleMakeTestHelper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The default implementation of ``pysys.py make``.</span>
+<span class="sd">	</span>
+<span class="sd">	A custom subclass can be specified in the project if required. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">TEST_TEMPLATE</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;import pysys</span>
+<span class="si">%s</span><span class="s1"></span>
+<span class="si">%s</span><span class="s1"></span>
+
+<span class="s1">class </span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">):</span>
+<span class="s1">	def execute(self):</span>
+<span class="s1">		pass</span>
+
+<span class="s1">	def validate(self):</span>
+<span class="s1">		pass</span>
+<span class="s1">	&#39;&#39;&#39;</span> <span class="c1"># not public API, do not use</span>
+
+	<span class="n">DESCRIPTOR_TEMPLATE</span> <span class="o">=</span><span class="s1">&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="s1">&lt;pysystest type=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span>
+<span class="s1">  </span>
+<span class="s1">  &lt;description&gt; </span>
+<span class="s1">	&lt;title&gt;&lt;/title&gt;    </span>
+<span class="s1">	&lt;purpose&gt;&lt;![CDATA[</span>
+<span class="s1">]]&gt;</span>
+<span class="s1">	&lt;/purpose&gt;</span>
+<span class="s1">  &lt;/description&gt;</span>
+
+<span class="s1">  &lt;!-- uncomment this to skip the test:  </span>
+<span class="s1">  &lt;skipped reason=&quot;&quot;/&gt; </span>
+<span class="s1">  --&gt;</span>
+<span class="s1">  </span>
+<span class="s1">  &lt;classification&gt;</span>
+<span class="s1">	&lt;groups inherit=&quot;true&quot;&gt;</span>
+<span class="s1">	  &lt;group&gt;</span><span class="si">%s</span><span class="s1">&lt;/group&gt;</span>
+<span class="s1">	&lt;/groups&gt;</span>
+<span class="s1">	&lt;modes inherit=&quot;true&quot;&gt;</span>
+<span class="s1">	&lt;/modes&gt;</span>
+<span class="s1">  &lt;/classification&gt;</span>
+
+<span class="s1">  &lt;data&gt;</span>
+<span class="s1">	&lt;class name=&quot;</span><span class="si">%s</span><span class="s1">&quot; module=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;</span>
+<span class="s1">  &lt;/data&gt;</span>
+<span class="s1">  </span>
+<span class="s1">  &lt;traceability&gt;</span>
+<span class="s1">	&lt;requirements&gt;</span>
+<span class="s1">	  &lt;requirement id=&quot;&quot;/&gt;     </span>
+<span class="s1">	&lt;/requirements&gt;</span>
+<span class="s1">  &lt;/traceability&gt;</span>
+<span class="s1">&lt;/pysystest&gt;</span>
+<span class="s1">&#39;&#39;&#39;</span> 
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">testId</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">testdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ConsoleMakeTestHelper.printUsage"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ConsoleMakeTestHelper.printUsage">[docs]</a>	<span class="k">def</span> <span class="nf">printUsage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Print help info and exit. &quot;&quot;&quot;</span>
+		<span class="n">_PYSYS_SCRIPT_NAME</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="s1">&#39;__main__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;pysys.py&#39;</span>
+		<span class="c1">#######                                                                                                                        |</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PySys System Test Framework (version </span><span class="si">%s</span><span class="s2">): New test maker&quot;</span> <span class="o">%</span> <span class="n">__version__</span><span class="p">)</span> 
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Usage: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> [option]+ TESTID&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_PYSYS_SCRIPT_NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   where [option] includes:&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       -d | --dir      STRING      parent directory in which to create TESTID (default is current working dir)&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       -a | --type     STRING      set the test type (auto or manual, default is auto)&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       -h | --help                 print this message&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   and where TESTID is the id of the new test which should consist of letters, numbers and underscores, &quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   for example: MyApp_perf_001 (numeric style) or InvalidFooBarProducesError (&#39;test that XXX&#39; long string style).&quot;</span><span class="p">)</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ConsoleMakeTestHelper.parseArgs"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ConsoleMakeTestHelper.parseArgs">[docs]</a>	<span class="k">def</span> <span class="nf">parseArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Parse the command line arguments after ``pysys make``. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">optlist</span><span class="p">,</span> <span class="n">arguments</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">gnu_getopt</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s1">&#39;ha:d:&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;help&quot;</span><span class="p">,</span><span class="s2">&quot;type=&quot;</span><span class="p">,</span><span class="s2">&quot;dir=&quot;</span><span class="p">]</span> <span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error parsing command line arguments: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">printUsage</span><span class="p">()</span>
+			
+		<span class="k">for</span> <span class="n">option</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">optlist</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">option</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">printUsage</span><span class="p">()</span>
+
+			<span class="k">elif</span> <span class="n">option</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="s2">&quot;--type&quot;</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">value</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;manual&quot;</span><span class="p">]:</span>
+					<span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Unsupported test type - valid types are auto and manual&quot;</span><span class="p">)</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>	
+
+			<span class="k">elif</span> <span class="n">option</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;--dir&quot;</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">testdir</span> <span class="o">=</span> <span class="n">value</span>		
+
+			<span class="k">else</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unknown option: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">option</span><span class="p">)</span>
+				<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+		<span class="k">if</span> <span class="n">arguments</span> <span class="o">==</span> <span class="p">[]:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A valid string test id must be supplied&quot;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">printUsage</span><span class="p">()</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">testId</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span></div>
+
+
+<div class="viewcode-block" id="ConsoleMakeTestHelper.makeTest"><a class="viewcode-back" href="../../../autodocgen/pysys.launcher.console_make.html#pysys.launcher.console_make.ConsoleMakeTestHelper.makeTest">[docs]</a>	<span class="k">def</span> <span class="nf">makeTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">testclass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+				 <span class="n">group</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">constantsImport</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basetestImport</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basetest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">teststring</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Makes a new test on disk. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">input</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="nb">input</span> <span class="o">=</span> <span class="n">DEFAULT_INPUT</span>
+		<span class="k">if</span> <span class="n">output</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="n">output</span> <span class="o">=</span> <span class="n">DEFAULT_OUTPUT</span>
+		<span class="k">if</span> <span class="n">reference</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="n">reference</span> <span class="o">=</span> <span class="n">DEFAULT_REFERENCE</span>
+		<span class="k">if</span> <span class="n">descriptor</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="n">descriptor</span> <span class="o">=</span> <span class="n">DEFAULT_DESCRIPTOR</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">testclass</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="n">testclass</span> <span class="o">=</span> <span class="n">DEFAULT_TESTCLASS</span>
+		<span class="k">if</span> <span class="n">module</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="n">module</span> <span class="o">=</span> <span class="n">DEFAULT_MODULE</span>
+		<span class="k">if</span> <span class="n">constantsImport</span> <span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="n">constantsImport</span> <span class="o">=</span> <span class="s2">&quot;from pysys.constants import *&quot;</span>
+		<span class="k">if</span> <span class="n">basetestImport</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span> <span class="n">basetestImport</span> <span class="o">=</span> <span class="s2">&quot;from pysys.basetest import BaseTest&quot;</span>
+		<span class="k">if</span> <span class="n">basetest</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span> <span class="n">basetest</span> <span class="o">=</span> <span class="s2">&quot;BaseTest&quot;</span>
+
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating testcase </span><span class="si">%s</span><span class="s2"> ...&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">)</span>
+		<span class="k">try</span><span class="p">:</span>	
+			<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">))</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created directory </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">))</span>
+		<span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Error creating testcase &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">)</span> <span class="o">+</span>  <span class="s2">&quot; - directory already exists&quot;</span><span class="p">)</span>
+			<span class="k">return</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="nb">input</span><span class="p">))</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created directory </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="nb">input</span><span class="p">))</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created directory </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">output</span><span class="p">))</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">reference</span><span class="p">))</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created directory </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">reference</span><span class="p">))</span>
+			<span class="n">descriptor_fp</span> <span class="o">=</span> <span class="n">openfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">PY2</span> <span class="k">else</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+			<span class="n">descriptor_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DESCRIPTOR_TEMPLATE</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">testclass</span><span class="p">,</span> <span class="n">module</span><span class="p">))</span>
+			<span class="n">descriptor_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created descriptor </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">))</span>
+			<span class="n">testclass_fp</span> <span class="o">=</span> <span class="n">openfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.py&quot;</span> <span class="o">%</span> <span class="n">module</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">teststring</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">testclass_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TEST_TEMPLATE</span> <span class="o">%</span> <span class="p">(</span><span class="n">constantsImport</span><span class="p">,</span> <span class="n">basetestImport</span><span class="p">,</span> <span class="n">testclass</span><span class="p">,</span> <span class="n">basetest</span><span class="p">))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">testclass_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">teststring</span><span class="p">)</span>
+			<span class="n">testclass_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created test class module </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testId</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.py&quot;</span> <span class="o">%</span> <span class="n">module</span><span class="p">))</span>	</div></div>
+
+<span class="k">def</span> <span class="nf">makeTest</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+	<span class="n">Project</span><span class="o">.</span><span class="n">findAndLoadProject</span><span class="p">()</span>
+
+	<span class="bp">cls</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span><span class="o">.</span><span class="n">makerClassname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+	<span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+	<span class="n">maker</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="bp">cls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="s2">&quot;make&quot;</span><span class="p">)</span>
+
+	<span class="n">maker</span><span class="o">.</span><span class="n">parseArgs</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+	<span class="n">maker</span><span class="o">.</span><span class="n">makeTest</span><span class="p">()</span>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.pycompat &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.pycompat</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.pycompat</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2018 M.B.Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Compatibility utilities to allow PySys to support both Python 2 and 3. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">io</span><span class="o">,</span> <span class="nn">locale</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">__log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.pycompat&#39;</span><span class="p">)</span>
+
+<span class="n">PY2</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+
+<span class="n">string_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">basestring</span><span class="p">,)</span> <span class="k">if</span> <span class="n">PY2</span> <span class="k">else</span> <span class="p">(</span><span class="nb">str</span><span class="p">,)</span>
+
+<span class="n">binary_type</span> <span class="o">=</span> <span class="nb">str</span> <span class="k">if</span> <span class="n">PY2</span> <span class="k">else</span> <span class="nb">bytes</span>
+
+<div class="viewcode-block" id="isstring"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.pycompat.html#pysys.utils.pycompat.isstring">[docs]</a><span class="k">def</span> <span class="nf">isstring</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> 
+	<span class="sd">&quot;&quot;&quot; Returns True if the specified object is a python string. </span>
+<span class="sd">	On Python 2 this could be a unicode character string or a byte str, </span>
+<span class="sd">	on python 3 this must be a character str. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">string_types</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="quotestring"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.pycompat.html#pysys.utils.pycompat.quotestring">[docs]</a><span class="k">def</span> <span class="nf">quotestring</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; Adds double quotation marks around the specified character or byte string, </span>
+<span class="sd">	and additional escaping only if needed to make the meaning clear, but trying to </span>
+<span class="sd">	avoid double-slashes unless actually needed since it makes paths harder to read</span>
+<span class="sd">	</span>
+<span class="sd">	If a byte string is provided and this is Python 3+ then the </span>
+<span class="sd">	``repr()`` representation is used instead. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># this function exists primarily to provide the same quoting behaviour </span>
+	<span class="c1"># for str/unicode in Python 2 and str in Python 3, but avoiding </span>
+	<span class="c1"># the confusing &quot;b&#39;valuehere&#39;&quot; representation that &quot;%s&quot; would </span>
+	<span class="c1"># produce for python 3 bytes objects</span>
+	<span class="n">r</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">isstring</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="k">return</span> <span class="n">r</span>
+	
+	<span class="k">if</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="c1"># if it contains escape sequences like \n to \&quot; we&#39;d better just use repr so it&#39;s unambiguous</span>
+		<span class="k">return</span> <span class="n">r</span>
+	
+	<span class="c1"># repr uses single quotes, so using double quotes is a good way to make it distinguishable </span>
+	<span class="c1"># (the other option would be using r&#39;...&#39; since essentially this is like a Python raw string</span>
+
+	<span class="k">return</span> <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="n">s</span></div>
+	
+<div class="viewcode-block" id="openfile"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.pycompat.html#pysys.utils.pycompat.openfile">[docs]</a><span class="k">def</span> <span class="nf">openfile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Opens the specified file, following the default </span>
+<span class="sd">	&quot;open()&quot; semantics for this Python version unless an encoding is </span>
+<span class="sd">	explicitly specified, in which case a file stream </span>
+<span class="sd">	yielding (unicode) character strings is always returned. </span>
+<span class="sd">	</span>
+<span class="sd">	Specifically:</span>
+<span class="sd">	</span>
+<span class="sd">	On Python 3 this method returns a file stream yielding character strings </span>
+<span class="sd">	unless a binary mode was specified in which case a stream yielding </span>
+<span class="sd">	bytes is returned. </span>
+<span class="sd">	</span>
+<span class="sd">	On Python 2 this method returns a file stream yielding unicode </span>
+<span class="sd">	character strings only if an encoding was explicitly specified; </span>
+<span class="sd">	otherwise it returns a file stream yielding &quot;str&quot; bytes objects. </span>
+<span class="sd">	</span>
+<span class="sd">	:param path: The path to open; must be an absolute path. </span>
+<span class="sd">		Even on Windows this path can be long (e.g. more than the usual 256 </span>
+<span class="sd">		character Windows limit). </span>
+<span class="sd">	</span>
+<span class="sd">	:param mode: The file mode, e.g. &#39;r&#39; for reading, &#39;wb&#39; for binary writing. </span>
+<span class="sd">	</span>
+<span class="sd">	:param encoding: The encoding to use to translate between the bytes of the </span>
+<span class="sd">		file and the characters used in the returned stream. If an encoding </span>
+<span class="sd">		is specified then the returned stream is always a unicode character stream. </span>
+<span class="sd">		This must be None if the mode specifies binary. </span>
+<span class="sd">	</span>
+<span class="sd">	:param errors: Optional string that specifies how encoding/decoding errors </span>
+<span class="sd">		are handled, such as &#39;strict&#39;, &#39;ignore&#39;, &#39;replace&#39;; see documentation of </span>
+<span class="sd">		io module for more details. The value of this attribute is ignored </span>
+<span class="sd">		if using the python 2 open() built-in with bytes mode that does not support it. </span>
+<span class="sd">	</span>
+<span class="sd">	:param kwargs: Any additional args to be passed to open() or io.open(). </span>
+<span class="sd">	</span>
+<span class="sd">	:return: A file stream, either using unicode characters or binary bytes. </span>
+<span class="sd">		This stream should be closed when no longer required.</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">assert</span> <span class="n">path</span>
+	<span class="c1"># sanity check to avoid accidentally creating files in cwd rather than test output directory</span>
+	<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">path</span>
+	
+	<span class="k">if</span> <span class="n">encoding</span><span class="p">:</span>
+		<span class="n">__log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Opening file using encoding=</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+	
+	<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">toLongPathSafe</span> <span class="c1"># import here to avoid circular dependency</span>
+	<span class="n">path</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">onlyIfNeeded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	
+	<span class="k">if</span> <span class="n">encoding</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">PY2</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">encoding</span><span class="p">:</span> <span class="k">assert</span> <span class="s1">&#39;b&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">,</span> <span class="s1">&#39;cannot open file </span><span class="si">%s</span><span class="s1"> with binary mode </span><span class="si">%s</span><span class="s1"> as an encoding was specified&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="n">PY2</span><span class="p">:</span>
+	<span class="n">Enum</span> <span class="o">=</span> <span class="nb">object</span>
+	<span class="sd">&quot;&quot;&quot;In Python 2 an enumeration can be simulated by just assigning </span>
+<span class="sd">	constant values with a unique value (perhaps a string) as </span>
+<span class="sd">	statics in a simple object, e.g. ::</span>
+<span class="sd">	</span>
+<span class="sd">		class MyEnum(Enum):</span>
+<span class="sd">			OPTION1 = &#39;MyEnum.OPTION1&#39;</span>
+<span class="sd">			OPTION2 = &#39;MyEnum.OPTION2&#39;</span>
+<span class="sd">			</span>
+<span class="sd">		val = getattr(MyEnum, &#39;option1&#39;.upper(), None)</span>
+<span class="sd">		if val is None: raise Exception(&#39;Bad option: &quot;%s&quot;&#39;%...)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="nf">makeReadOnlyDict</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span> <span class="k">return</span> <span class="nb">input</span>
+	<span class="c1"># We can just make do without the additional safety in Python2</span>
+
+<span class="k">else</span><span class="p">:</span>
+	<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+	<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">MappingProxyType</span> <span class="k">as</span> <span class="n">makeReadOnlyDict</span>
+	<span class="c1"># May replace this with frozenmap once available</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,681 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.writer.api &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.writer.ci" href="pysys.writer.ci.html" />
+    <link rel="prev" title="pysys.writer" href="pysys.writer.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.writer.html">pysys.writer</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.writer.api</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#baseresultswriter">BaseResultsWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#baserecordresultswriter">BaseRecordResultsWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#basesummaryresultswriter">BaseSummaryResultsWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#baseprogressresultswriter">BaseProgressResultsWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#artifactpublisher">ArtifactPublisher</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#testoutputvisitor">TestOutputVisitor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#testoutcomesummarygenerator">TestOutcomeSummaryGenerator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#replaceillegalxmlcharacters">replaceIllegalXMLCharacters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.ci.html">pysys.writer.ci</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.console.html">pysys.writer.console</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.outcomes.html">pysys.writer.outcomes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.testoutput.html">pysys.writer.testoutput</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.writer.html">pysys.writer</a> &raquo;</li>
+        
+      <li>pysys.writer.api</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.writer.api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.writer.api">
+<span id="pysys-writer-api"></span><h1>pysys.writer.api<a class="headerlink" href="#module-pysys.writer.api" title="Permalink to this headline">¶</a></h1>
+<p>API for creating new writers.</p>
+<p>Writers are responsible for summarising test results or processing test output as each test completes, or at the end 
+when all tests has completed.</p>
+<p>The most common type of writer is the standard ‘Record’ writer, but there are also ‘Progress’, and
+‘Summary’ writers which do their things at different stages of the test run:</p>
+<blockquote>
+<div><ul>
+<li><p><a class="reference internal" href="#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseRecordResultsWriter</span></code></a>: <strong>Record writers</strong> record the outcome or output of tests, allowing 
+runtime auditing of the test output, e.g. into text file, a database, or to the console in a format that 
+can be read by your Continuous Integration (CI) tooling, or collection/archiving of test output files.</p>
+<p>Several record writers are distributed with the PySys framework, such as the 
+<a class="reference internal" href="pysys.writer.outcomes.html#pysys.writer.outcomes.JUnitXMLResultsWriter" title="pysys.writer.outcomes.JUnitXMLResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes.JUnitXMLResultsWriter</span></code></a> and <a class="reference internal" href="pysys.writer.ci.html#pysys.writer.ci.GitHubActionsCIWriter" title="pysys.writer.ci.GitHubActionsCIWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.ci.GitHubActionsCIWriter</span></code></a>.
+By default, record writers are enabled only when the <code class="docutils literal notranslate"><span class="pre">--record</span></code> flag is given to the PySys launcher, 
+though some writers may enable/disable themselves under different conditions, by overriding the 
+<a class="reference internal" href="#pysys.writer.api.BaseResultsWriter.isEnabled" title="pysys.writer.api.BaseResultsWriter.isEnabled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseResultsWriter.isEnabled</span></code></a> method.</p>
+</li>
+<li><p><a class="reference internal" href="#pysys.writer.api.BaseProgressResultsWriter" title="pysys.writer.api.BaseProgressResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseProgressResultsWriter</span></code></a>: <strong>Progress writers</strong> output a summary of the test progress after completion of each test, to give
+an indication of how far and how well the run is progressing. A single implementation of a progress
+writer is distributed with the PySys framework, namely the <a class="reference internal" href="pysys.writer.console.html#pysys.writer.console.ConsoleProgressResultsWriter" title="pysys.writer.console.ConsoleProgressResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.console.ConsoleProgressResultsWriter</span></code></a>,
+which details the percentage of tests selected to be run and that have executed, and a summary
+of the recent test failures. 
+Progress writers should extend the <a class="reference internal" href="#pysys.writer.api.BaseProgressResultsWriter" title="pysys.writer.api.BaseProgressResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseProgressResultsWriter</span></code></a> and
+are enabled when the <code class="docutils literal notranslate"><span class="pre">--progress</span></code> flag is given to the PySys launcher, or when <code class="docutils literal notranslate"><span class="pre">PYSYS_PROGRESS=true</span></code> is
+set in the local environment.</p></li>
+<li><p><a class="reference internal" href="#pysys.writer.api.BaseSummaryResultsWriter" title="pysys.writer.api.BaseSummaryResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSummaryResultsWriter</span></code></a>: <strong>Summary writers</strong> output an overall summary of the status at the end of a test run. 
+A single implementation of a summary writer is distributed with the PySys framework, namely the 
+<a class="reference internal" href="pysys.writer.console.html#pysys.writer.console.ConsoleSummaryResultsWriter" title="pysys.writer.console.ConsoleSummaryResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.console.ConsoleSummaryResultsWriter</span></code></a>, which details the overall test run outcome and lists any tests 
+that did not pass. 
+Summary writers are always enabled regardless of the flags given to the PySys launcher.</p></li>
+</ul>
+</div></blockquote>
+<p>Project configuration of the writers is through the PySys project XML file using the <code class="docutils literal notranslate"><span class="pre">&lt;writer&gt;</span></code> tag. Multiple
+writers may be configured and their individual properties set through the nested <code class="docutils literal notranslate"><span class="pre">&lt;property&gt;</span></code> tag. Writer
+properties are set as attributes to the writer instance just before setup is called, with automatic conversion of 
+type to match the default value if specified as a static attribute on the class.</p>
+<p>The writers are instantiated and invoked by the <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a> class instance. This calls the class
+constructors of all configured test writers, and then the setup (prior to executing the set of tests), processResult
+(process a test result), and cleanup (upon completion of the execution of all tests). The <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> method parameter
+should always be included in the signature of each method, to allow for future additions to PySys without
+breaking existing writer implementations.</p>
+<p>Writers that generate output files/directories should by default put that output under either the 
+<a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.output</span></code></a> directory, or (for increased prominence) the <code class="docutils literal notranslate"><span class="pre">runner.output+'/..'</span></code> 
+directory (which is typically <code class="docutils literal notranslate"><span class="pre">testRootDir</span></code> unless an absolute <code class="docutils literal notranslate"><span class="pre">--outdir</span></code> path was provided) . 
+A prefix of double underscore <code class="docutils literal notranslate"><span class="pre">__pysys</span></code> is recommended to distinguish dynamically created directories 
+(ignored by version control) from the testcase directories (checked into version control).</p>
+<p>Writer authors may wish to make use of these helpers:</p>
+<blockquote>
+<div><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.writer.api.replaceIllegalXMLCharacters" title="pysys.writer.api.replaceIllegalXMLCharacters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replaceIllegalXMLCharacters</span></code></a>(unicodeString[, …])</p></td>
+<td><p>Utility function that takes a unicode character string and replaces all characters  that are not permitted to appear in an XML document.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.stripANSIEscapeCodes" title="pysys.utils.logutils.stripANSIEscapeCodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.stripANSIEscapeCodes</span></code></a>(text)</p></td>
+<td><p>Remove any ANSI escape sequences (for example to set console color) present in the specified string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.stdoutPrint" title="pysys.utils.logutils.stdoutPrint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.stdoutPrint</span></code></a>(s)</p></td>
+<td><p>Writes the specified bytes or (preferably) unicode character string  to stdout, avoiding any redirection to loggers performed by PySys, and  performing replacements if needed based on the characters  supported by the stdout encoding, and with support for output coloring  using escape sequences (if enabled in PySys).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter" title="pysys.utils.logutils.ColorLogFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.ColorLogFormatter</span></code></a>(…)</p></td>
+<td><p>Formatter supporting colored output to a console.</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="section" id="baseresultswriter">
+<h2>BaseResultsWriter<a class="headerlink" href="#baseresultswriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.api.BaseResultsWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.api.</code><code class="sig-name descname">BaseResultsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseResultsWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for all writers that get notified as and when test results are available.</p>
+<p>Writer can additionally subclass <a class="reference internal" href="#pysys.writer.api.ArtifactPublisher" title="pysys.writer.api.ArtifactPublisher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ArtifactPublisher</span></code></a> to be notified of artifacts produced by other writers 
+that they wish to publish, or <a class="reference internal" href="#pysys.writer.api.TestOutputVisitor" title="pysys.writer.api.TestOutputVisitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestOutputVisitor</span></code></a> to be notified of each file in the test output directory. If you 
+are implementing a writer that needs a textual summary of the test outcomes, 
+you can add <a class="reference internal" href="#pysys.writer.api.TestOutcomeSummaryGenerator" title="pysys.writer.api.TestOutcomeSummaryGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestOutcomeSummaryGenerator</span></code></a> as a superclass to get this functionality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logfile</strong> (<em>str</em>) – Optional configuration property specifying a file to store output in. 
+Does not apply to all writers, can be ignored if not needed.</p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments may be added in a future release.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pysys.writer.api.BaseResultsWriter.isEnabled">
+<code class="sig-name descname">isEnabled</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseResultsWriter.isEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseResultsWriter.isEnabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines whether this writer can be used in the current environment.</p>
+<p>If set to False then after construction none of the other methods 
+(including <a class="reference internal" href="#pysys.writer.api.BaseResultsWriter.setup" title="pysys.writer.api.BaseResultsWriter.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code></a>)) will be called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>record</strong> – True if the user ran PySys with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">--record</span></code> flag, 
+indicating that test results should be recorded.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>For record writers, the default to enable only if record==True, 
+but individual writers can use different criteria if desired, e.g. 
+writers for logging output to a CI system may enable themselves 
+based on environment variables indicating that system is present, 
+even if record is not specified explicitly.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.api.BaseResultsWriter.setup">
+<code class="sig-name descname">setup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">numTests</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">cycles</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">xargs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">threads</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">testoutdir</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">runner</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseResultsWriter.setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseResultsWriter.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called before any tests begin.</p>
+<p>Before this method is called, for each property “PROP” specified for this 
+writer in the project configuration file, the configured value will be 
+assigned to <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.PROP</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numTests</strong> – The total number of tests (cycles*testids) to be executed</p></li>
+<li><p><strong>cycles</strong> – The number of cycles.</p></li>
+<li><p><strong>xargs</strong> – The runner’s xargs</p></li>
+<li><p><strong>threads</strong> – The number of threads used for running tests.</p></li>
+<li><p><strong>testoutdir</strong> – The output directory used for this test run 
+(equal to <code class="xref py py-obj docutils literal notranslate"><span class="pre">runner.outsubdir</span></code>), an identifying string which often contains 
+the platform, or when there are multiple test runs on the same machine 
+may be used to distinguish between them. This is usually a relative path 
+but may be an absolute path.</p></li>
+<li><p><strong>runner</strong> – The runner instance that owns this writer. The default implementation of this methods sets 
+the <code class="docutils literal notranslate"><span class="pre">self.runner</span></code> attribute to this value.</p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments may be added in a future release.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.api.BaseResultsWriter.cleanup">
+<code class="sig-name descname">cleanup</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseResultsWriter.cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseResultsWriter.cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called after all tests have finished executing (or been cancelled).</p>
+<p>This is where file headers can be written, and open handles should be closed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – Additional keyword arguments may be added in a future release.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.api.BaseResultsWriter.processResult">
+<code class="sig-name descname">processResult</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testObj</span></em>, <em class="sig-param"><span class="n">cycle</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">testTime</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">testStart</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">runLogOutput</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseResultsWriter.processResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseResultsWriter.processResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when each test has completed.</p>
+<p>This method is always invoked under a lock that prevents multiple concurrent invocations so additional 
+locking is not usually necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testObj</strong> (<a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><em>pysys.basetest.BaseTest</em></a>) – Reference to an instance of a <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a> class. 
+The writer can extract data from this object but should not store a reference to it. 
+The <code class="docutils literal notranslate"><span class="pre">testObj.descriptor.id</span></code> indicates the test that ran.</p></li>
+<li><p><strong>cycle</strong> (<em>int</em>) – The cycle number. These start from 0, so please add 1 to this value before using.</p></li>
+<li><p><strong>testTime</strong> (<em>float</em>) – Duration of the test in seconds as a floating point number.</p></li>
+<li><p><strong>testStart</strong> (<em>float</em>) – The time when the test started.</p></li>
+<li><p><strong>runLogOutput</strong> (<em>str</em>) – The logging output written to the console/run.log, as a unicode character string. This 
+string will include ANSI escape codes if colored output is enabled; if desired these can be removed using 
+<a class="reference internal" href="pysys.utils.logutils.html#pysys.utils.logutils.stripANSIEscapeCodes" title="pysys.utils.logutils.stripANSIEscapeCodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.logutils.stripANSIEscapeCodes()</span></code></a>.</p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments may be added in future releases.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.api.BaseResultsWriter.processTestStarting">
+<code class="sig-name descname">processTestStarting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testObj</span></em>, <em class="sig-param"><span class="n">cycle</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseResultsWriter.processTestStarting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseResultsWriter.processTestStarting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a test is just about to begin executing.</p>
+<p>Note on thread-safety: unlike the other methods on this interface, this is usually executed on a
+worker thread, so any data structures accessed in this method and others on this class must be
+synchronized if performing non-atomic operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testObj</strong> – Reference to an instance of a <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest</span></code></a> class. The writer 
+can extract data from this object but should not store a reference to it. The testObj.descriptor.id
+indicates the test that ran.</p></li>
+<li><p><strong>cycle</strong> – The cycle number. These start from 0, so please add 1 to this value before using.</p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments may be added in a future release.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="baserecordresultswriter">
+<h2>BaseRecordResultsWriter<a class="headerlink" href="#baserecordresultswriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.api.BaseRecordResultsWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.api.</code><code class="sig-name descname">BaseRecordResultsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseRecordResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseRecordResultsWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pysys.writer.api.BaseResultsWriter" title="pysys.writer.api.BaseResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter</span></code></a></p>
+<p>Base class for writers that record the results of tests, and are enabled only when the <code class="docutils literal notranslate"><span class="pre">--record</span></code> flag is specified.</p>
+<p>For compatibility reasons writers that do not subclass BaseSummaryResultsWriter or BaseProgressResultsWriter are
+treated as “record” writers even if they do not inherit from this class.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="basesummaryresultswriter">
+<h2>BaseSummaryResultsWriter<a class="headerlink" href="#basesummaryresultswriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.api.BaseSummaryResultsWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.api.</code><code class="sig-name descname">BaseSummaryResultsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseSummaryResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseSummaryResultsWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pysys.writer.api.BaseResultsWriter" title="pysys.writer.api.BaseResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter</span></code></a></p>
+<p>Base class for writers that display a summary of test results.</p>
+<p>Summary writers are always enabled (regardless of whether <code class="docutils literal notranslate"><span class="pre">--progress</span></code> or <code class="docutils literal notranslate"><span class="pre">--record</span></code> are specified). If
+no “summary” writers are configured, a default ConsoleSummaryResultsWriter instance will be added
+automatically.</p>
+<p>Summary writers are invoked after all other writers, ensuring that their output 
+will be displayed after output from any other writer types.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="baseprogressresultswriter">
+<h2>BaseProgressResultsWriter<a class="headerlink" href="#baseprogressresultswriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.api.BaseProgressResultsWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.api.</code><code class="sig-name descname">BaseProgressResultsWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#BaseProgressResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.BaseProgressResultsWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pysys.writer.api.BaseResultsWriter" title="pysys.writer.api.BaseResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter</span></code></a></p>
+<p>Base class for writers that display progress information while tests are running.</p>
+<p>Progress writers are only enabled if the <code class="docutils literal notranslate"><span class="pre">--progress</span></code> flag is specified.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="artifactpublisher">
+<h2>ArtifactPublisher<a class="headerlink" href="#artifactpublisher" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.api.ArtifactPublisher">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.api.</code><code class="sig-name descname">ArtifactPublisher</code><a class="reference internal" href="../_modules/pysys/writer/api.html#ArtifactPublisher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.ArtifactPublisher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Interface implemented by writers that implement publishing of file/directory artifacts.</p>
+<p>For example, a writer for a CI provider that supports artifact uploading can subclass this interface to 
+be notified when another writer (or performance reporter) produces an artifact. If implementing this interface, 
+remember that the order each writer’s cleanup() is called is the same as the order the writers appear in the 
+project configuration file, so if your writer relies on output published from another’s cleanup you may need to 
+document this, or code your writer such that it doesn’t care what order the cleanup() methods are called.</p>
+<p>To publish an artifact to all registered writers, call <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner.publishArtifact" title="pysys.baserunner.BaseRunner.publishArtifact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.publishArtifact()</span></code></a>.</p>
+<p>It is possible to restrict artifact publishing to just the categories you care about by setting the 
+project property <code class="docutils literal notranslate"><span class="pre">publishArtifactCategoryIncludeRegex</span></code> which (if specified) must match the category name 
+in order for writers to be notified.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 1.6.0.</span></p>
+</div>
+<dl class="py method">
+<dt id="pysys.writer.api.ArtifactPublisher.publishArtifact">
+<code class="sig-name descname">publishArtifact</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">category</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#ArtifactPublisher.publishArtifact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.ArtifactPublisher.publishArtifact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a file or directory artifact has been written and is ready to be published (e.g. by another writer).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Absolute path of the file or directory, using forward slashes as the path separator.</p></li>
+<li><p><strong>category</strong> (<em>str</em>) – A string identifying what kind of artifact this is, e.g. 
+“TestOutputArchive” and “TestOutputArchiveDir” (from <a class="reference internal" href="pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter" title="pysys.writer.testoutput.TestOutputArchiveWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.TestOutputArchiveWriter</span></code></a>) or 
+“CSVPerformanceReport” (from <a class="reference internal" href="pysys.utils.perfreporter.html#pysys.utils.perfreporter.CSVPerformanceReporter" title="pysys.utils.perfreporter.CSVPerformanceReporter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.utils.perfreporter.CSVPerformanceReporter</span></code></a>). 
+If you create your own category, be sure to add an org/company name prefix to avoid clashes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="testoutputvisitor">
+<h2>TestOutputVisitor<a class="headerlink" href="#testoutputvisitor" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.api.TestOutputVisitor">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.api.</code><code class="sig-name descname">TestOutputVisitor</code><a class="reference internal" href="../_modules/pysys/writer/api.html#TestOutputVisitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.TestOutputVisitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Interface implemented by writers that wish to be notified of each file in the test output directory.</p>
+<p>Implementing this interface is a lot more efficient than explicitly walking the directory tree. 
+Note that in the interests of performance empty (zero byte) files are ignored.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 1.6.0.</span></p>
+</div>
+<dl class="py method">
+<dt id="pysys.writer.api.TestOutputVisitor.visitTestOutputFile">
+<code class="sig-name descname">visitTestOutputFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">testObj</span></em>, <em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#TestOutputVisitor.visitTestOutputFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.TestOutputVisitor.visitTestOutputFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called after execution of each test (and before purging of files) for each file found in the output 
+directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testObj</strong> (<a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest" title="pysys.basetest.BaseTest"><em>pysys.basetest.BaseTest</em></a>) – The test object, which can be used to find the outcome etc.</p></li>
+<li><p><strong>str</strong> – The absolute, normalize path to the output file (will be a ?long path safe path on windows).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return bool</dt>
+<dd class="field-even"><p>Return True if this visitor has handled this file fully (e.g. by deleting it) and it should not be 
+passed on to any other registered visitors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="testoutcomesummarygenerator">
+<h2>TestOutcomeSummaryGenerator<a class="headerlink" href="#testoutcomesummarygenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.api.</code><code class="sig-name descname">TestOutcomeSummaryGenerator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#TestOutcomeSummaryGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pysys.writer.api.BaseResultsWriter" title="pysys.writer.api.BaseResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseResultsWriter</span></code></a></p>
+<p>Mix-in helper class that can be inherited by any writer to allow (configurable) generation of a textual 
+summary of the test outcomes.</p>
+<p>If subclasses provide their own implementation of <code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">processResult</span></code> they must ensure this class’s 
+methods of those names are also called. Then the summary can be obtained from <a class="reference internal" href="#pysys.writer.api.TestOutcomeSummaryGenerator.logSummary" title="pysys.writer.api.TestOutcomeSummaryGenerator.logSummary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logSummary</span></code></a> or <a class="reference internal" href="#pysys.writer.api.TestOutcomeSummaryGenerator.getSummaryText" title="pysys.writer.api.TestOutcomeSummaryGenerator.getSummaryText"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getSummaryText</span></code></a>, 
+typically in the writer’s <code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code> method.</p>
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showOutcomeReason">
+<code class="sig-name descname">showOutcomeReason</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showOutcomeReason" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes the reason for each failure.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showOutputDir">
+<code class="sig-name descname">showOutputDir</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showOutputDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes the (relative) path to the output directory for each failure.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showTestDir">
+<code class="sig-name descname">showTestDir</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showTestDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes the (relative) path to the test directory for each failure, 
+unless the output dir is displayed and the test dir is a parent of it. 
+This is useful if you run tests with an absolute –outdir.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showTestTitle">
+<code class="sig-name descname">showTestTitle</code><em class="property"> = False</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showTestTitle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes the test title for each failure.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showOutcomeStats">
+<code class="sig-name descname">showOutcomeStats</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showOutcomeStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes a count of the number of each outcomes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showDuration">
+<code class="sig-name descname">showDuration</code><em class="property"> = False</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showDuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes the total duration of all tests.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showRunDetails">
+<code class="sig-name descname">showRunDetails</code><em class="property"> = False</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showRunDetails" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes the <code class="docutils literal notranslate"><span class="pre">runDetails</span></code> from the <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner" title="pysys.baserunner.BaseRunner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner</span></code></a>, 
+such as <code class="docutils literal notranslate"><span class="pre">outDirName</span></code> and <code class="docutils literal notranslate"><span class="pre">hostname</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showInspectSummary">
+<code class="sig-name descname">showInspectSummary</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showInspectSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes a summary of INSPECT outcomes (if any).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showNotVerifiedSummary">
+<code class="sig-name descname">showNotVerifiedSummary</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showNotVerifiedSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes a summary of NOTVERIFIED outcomes (if any).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.showTestIdList">
+<code class="sig-name descname">showTestIdList</code><em class="property"> = False</em><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.showTestIdList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether the summary includes a short list of the failing test ids in a form that’s easy to paste onto the 
+command line to re-run the failed tests.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.getSummaryText">
+<code class="sig-name descname">getSummaryText</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#TestOutcomeSummaryGenerator.getSummaryText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.getSummaryText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the textual summary as a single string (with no coloring).</p>
+<p>To customize what is included in the summary (rather than letting it be user-configurable), 
+use the keyword arguments as for <a class="reference internal" href="#pysys.writer.api.TestOutcomeSummaryGenerator.logSummary" title="pysys.writer.api.TestOutcomeSummaryGenerator.logSummary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logSummary</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return str</dt>
+<dd class="field-odd"><p>The summary as a string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pysys.writer.api.TestOutcomeSummaryGenerator.logSummary">
+<code class="sig-name descname">logSummary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span></em>, <em class="sig-param"><span class="n">showDuration</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">showOutcomeStats</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">showTestIdList</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">showFailureSummary</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">showRunDetails</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#TestOutcomeSummaryGenerator.logSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.TestOutcomeSummaryGenerator.logSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a textual summary using the specified log function, with colored output if enabled.</p>
+<p>The keyword arguments can be used to disable sections of the output (overriding the settings) if needed by 
+the caller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>log</strong> (<em>Callable</em><em>[</em><em>format</em><em>,</em><em>args</em><em>,</em><em>kwargs=</em><em>]</em>) – The function to call for each line of the summary (e.g. log.critical). 
+The message is obtained with <code class="docutils literal notranslate"><span class="pre">format</span> <span class="pre">%</span> <span class="pre">args</span></code>, and color information is available from the <code class="docutils literal notranslate"><span class="pre">extra=</span></code> 
+keyword argument.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="replaceillegalxmlcharacters">
+<h2>replaceIllegalXMLCharacters<a class="headerlink" href="#replaceillegalxmlcharacters" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.writer.api.replaceIllegalXMLCharacters">
+<code class="sig-prename descclassname">pysys.writer.api.</code><code class="sig-name descname">replaceIllegalXMLCharacters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unicodeString</span></em>, <em class="sig-param"><span class="n">replaceWith</span><span class="o">=</span><span class="default_value">'?'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/api.html#replaceIllegalXMLCharacters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.api.replaceIllegalXMLCharacters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility function that takes a unicode character string and replaces all characters 
+that are not permitted to appear in an XML document.</p>
+<p>The XML specification says Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]</p>
+<p>Currently Python’s XML libraries do not perform checking or removal of such 
+characters, so if this function is not used then they may generate XML documents 
+that no XML API (including Python’s) can read.</p>
+<p>See <a class="reference external" href="https://bugs.python.org/issue5166">https://bugs.python.org/issue5166</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unicodeString</strong> – a unicode character string (not a byte string). 
+Since most XML documents are encoded in utf-8, typical usage would be to 
+decode the UTF-8 bytes into characters before calling this function and then 
+re-encode as UTF-8 again afterwards.</p></li>
+<li><p><strong>replaceWith</strong> – the unicode character string to replace each illegal character with.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.writer.ci.html" class="btn btn-neutral float-right" title="pysys.writer.ci" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.writer.html" class="btn btn-neutral float-left" title="pysys.writer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

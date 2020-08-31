@@ -1,0 +1,530 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.logutils &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.logutils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.logutils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Log formatting classes that can be used or customized from the project configuration, including support for colored </span>
+<span class="sd">output on the console. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pysys</span><span class="o">,</span> <span class="nn">threading</span>
+
+<div class="viewcode-block" id="stripANSIEscapeCodes"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.stripANSIEscapeCodes">[docs]</a><span class="k">def</span> <span class="nf">stripANSIEscapeCodes</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Remove any ANSI escape sequences (for example to set console color) present in the specified string. </span>
+<span class="sd">	</span>
+<span class="sd">	..versionadded:: 1.6.0</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span> <span class="k">return</span> <span class="n">text</span>
+	
+	<span class="k">if</span> <span class="n">PY2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">binary_type</span><span class="p">):</span>
+		<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">033</span><span class="se">\\</span><span class="s1">[[0-9;]+m&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">033</span><span class="se">\\</span><span class="s1">[[0-9;]+m&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseLogFormatter"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter">[docs]</a><span class="k">class</span> <span class="nc">BaseLogFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Base class for formatting log messages.</span>
+<span class="sd">	</span>
+<span class="sd">	This implementation delegates everything to logging.Formatter using the messagefmt and datefmt</span>
+<span class="sd">	properties. Subclasses may be implemented to provide required customizations, and can be registered</span>
+<span class="sd">	by specifying classname in the formatter node of the project configuration file.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1"># the key to add to the extra={} dict of a logger call to specify the category</span>
+	<span class="n">CATEGORY</span> <span class="o">=</span> <span class="s1">&#39;log_category&#39;</span>
+
+	<span class="c1"># the key to add to the extra={} dict of a logger call to specify the arg index for the category</span>
+	<span class="n">ARG_INDEX</span> <span class="o">=</span> <span class="s1">&#39;log_arg_index&#39;</span>
+
+<div class="viewcode-block" id="BaseLogFormatter.tag"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.BaseLogFormatter.tag">[docs]</a>	<span class="nd">@classmethod</span>
+	<span class="k">def</span> <span class="nf">tag</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">arg_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Return  dictionary to tag a string to format with color encodings.</span>
+
+<span class="sd">		:param category: The category, as defined in L{ColorLogFormatter.COLOR_CATEGORIES}</span>
+<span class="sd">		:param arg_index: The index of argument in the string expansion to color. This can be either a single</span>
+<span class="sd">			integer value representing the index, or a list of integers representing a set of indexes to be colored. </span>
+<span class="sd">			Note that format arguments for coloring must be of string type. </span>
+<span class="sd">		:return: A dictionary that can then be used in calls to the logger</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg_index</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span> <span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ARG_INDEX</span><span class="p">:[</span><span class="n">arg_index</span><span class="p">]}</span>
+		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg_index</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arg_index</span><span class="p">):</span> <span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ARG_INDEX</span><span class="p">:</span><span class="n">arg_index</span><span class="p">}</span>
+		<span class="k">return</span> <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">:</span><span class="n">category</span><span class="p">}</span></div>
+
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertiesDict</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Create an instance of the formatter class.</span>
+
+<span class="sd">		The class is constructed with a dictionary of properties, which are configured by providing</span>
+<span class="sd">		&lt;property name=&quot;...&quot; value=&quot;...&quot;/&gt; elements or attributes on the formatter node of the project</span>
+<span class="sd">		configuration file. Entries in the properties should be specific to the class, and removed</span>
+<span class="sd">		when passing the properties to the super class, which will throw an exception if any unexpected</span>
+<span class="sd">		options are present</span>
+<span class="sd">		</span>
+<span class="sd">		:param propertiesDict: dictionary of formatter-specific options</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">propertiesDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="c1"># probably not used</span>
+		
+		<span class="n">__formatterName</span> <span class="o">=</span> <span class="n">propertiesDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;__formatterName&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+		<span class="nb">super</span><span class="p">(</span><span class="n">BaseLogFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+			<span class="n">propertiesDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;messagefmt&#39;</span><span class="p">,</span> <span class="n">DEFAULT_FORMAT</span><span class="p">),</span>
+			<span class="n">propertiesDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;datefmt&#39;</span><span class="p">,</span> <span class="s1">&#39;%H:%M:%S&#39;</span> <span class="k">if</span> <span class="n">__formatterName</span><span class="o">==</span><span class="s1">&#39;stdout&#39;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="p">)</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fmt</span><span class="p">,</span> <span class="n">binary_type</span><span class="p">),</span> <span class="s1">&#39;message format must be a unicode not a byte string otherwise </span><span class="si">% a</span><span class="s1">rg formatting will not work consistently&#39;</span>
+		<span class="k">if</span> <span class="n">propertiesDict</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unknown formatter option(s) specified: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">propertiesDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span></div>
+
+
+<div class="viewcode-block" id="ColorLogFormatter"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter">[docs]</a><span class="k">class</span> <span class="nc">ColorLogFormatter</span><span class="p">(</span><span class="n">BaseLogFormatter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Formatter supporting colored output to a console.</span>
+<span class="sd">	</span>
+<span class="sd">	This implementation supports color coding of messages based on the category of the message,</span>
+<span class="sd">	and the index of the string in the format encoding. This implementation is the default for</span>
+<span class="sd">	console output, with the color coding enabled either by the color option on the formatter</span>
+<span class="sd">	set to true. </span>
+<span class="sd">	</span>
+<span class="sd">	The ``PYSYS_COLOR`` environment variable can be set to true or false, overriding any </span>
+<span class="sd">	setting specified in the project configuration.</span>
+<span class="sd">	</span>
+<span class="sd">	The colors used for each category defined by this class can be overridden </span>
+<span class="sd">	by specifying &quot;color:XXX&quot; options, e.g.::</span>
+
+<span class="sd">		&lt;formatter&gt;&lt;property name=&quot;color:dumped core&quot; value=&quot;YELLOW&quot;/&gt;&lt;/formatter&gt;</span>
+
+<span class="sd">	:ivar dict(str,str) COLOR_CATEGORIES: the color map for the defined logging categories</span>
+<span class="sd">	:ivar dict(str,str) COLOR_ESCAPE_CODES: the escape codes for each of the support colors</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># use a lookup map from message &quot;categories&quot; to colors,</span>
+	<span class="n">COLOR_CATEGORIES</span> <span class="o">=</span> <span class="p">{</span>
+		<span class="n">LOG_WARN</span><span class="p">:</span><span class="s1">&#39;MAGENTA&#39;</span><span class="p">,</span>
+		<span class="n">LOG_ERROR</span><span class="p">:</span><span class="s1">&#39;RED&#39;</span><span class="p">,</span>
+		<span class="n">LOG_TRACEBACK</span><span class="p">:</span><span class="s1">&#39;RED&#39;</span><span class="p">,</span>
+		<span class="n">LOG_DEBUG</span><span class="p">:</span><span class="s1">&#39;BLUE&#39;</span><span class="p">,</span>
+		<span class="n">LOG_FILE_CONTENTS</span><span class="p">:</span><span class="s1">&#39;BLUE&#39;</span><span class="p">,</span>
+		<span class="n">LOG_TEST_DETAILS</span><span class="p">:</span><span class="s1">&#39;CYAN&#39;</span><span class="p">,</span>
+		<span class="n">LOG_TEST_OUTCOMES</span><span class="p">:</span> <span class="s1">&#39;CYAN&#39;</span><span class="p">,</span>
+		<span class="n">LOG_TEST_PROGRESS</span><span class="p">:</span> <span class="s1">&#39;CYAN&#39;</span><span class="p">,</span>
+		<span class="n">LOG_TEST_PERFORMANCE</span><span class="p">:</span> <span class="s1">&#39;CYAN&#39;</span><span class="p">,</span>
+		<span class="n">LOG_TIMEOUTS</span><span class="p">:</span> <span class="s1">&#39;MAGENTA&#39;</span><span class="p">,</span>
+		<span class="n">LOG_FAILURES</span><span class="p">:</span> <span class="s1">&#39;RED&#39;</span><span class="p">,</span>
+		<span class="n">LOG_PASSES</span><span class="p">:</span> <span class="s1">&#39;GREEN&#39;</span><span class="p">,</span>
+		<span class="n">LOG_SKIPS</span><span class="p">:</span> <span class="s1">&#39;YELLOW&#39;</span><span class="p">,</span>
+		<span class="n">LOG_DIFF_ADDED</span><span class="p">:</span> <span class="s1">&#39;CYAN&#39;</span><span class="p">,</span> <span class="n">LOG_DIFF_REMOVED</span><span class="p">:</span> <span class="s1">&#39;MAGENTA&#39;</span><span class="p">,</span> <span class="c1"># can&#39;t use red/green here without confusion with fail/pass</span>
+		<span class="n">LOG_END</span><span class="p">:</span><span class="s1">&#39;END&#39;</span><span class="p">,</span>
+	<span class="p">}</span>
+	
+	<span class="c1"># by default we use standard ANSI escape sequences, supported by most unix terminals</span>
+	<span class="n">COLOR_ESCAPE_CODES</span> <span class="o">=</span> <span class="p">{</span>
+		<span class="s1">&#39;BLUE&#39;</span><span class="p">:</span>    <span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;GREEN&#39;</span><span class="p">:</span>   <span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;YELLOW&#39;</span><span class="p">:</span>  <span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;RED&#39;</span><span class="p">:</span>     <span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;MAGENTA&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;CYAN&#39;</span><span class="p">:</span>    <span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;WHITE&#39;</span><span class="p">:</span>   <span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;BLACK&#39;</span><span class="p">:</span>   <span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;END&#39;</span><span class="p">:</span>     <span class="s1">&#39;&#39;</span><span class="p">,</span>
+	<span class="p">}</span>
+
+<div class="viewcode-block" id="ColorLogFormatter.configureANSIEscapeCodes"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.configureANSIEscapeCodes">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">configureANSIEscapeCodes</span><span class="p">(</span><span class="n">bright</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Sets the ANSI escape codes to be used, either using the extended </span>
+<span class="sd">		&quot;bright&quot; colors that look better, or the more widely supported </span>
+<span class="sd">		standard ones. </span>
+<span class="sd">		</span>
+<span class="sd">		Called during startup, but can also be programatically invoked </span>
+<span class="sd">		later </span>
+<span class="sd">		</span>
+<span class="sd">		:param bright: set to False to force only the basic (30-39) codes </span>
+<span class="sd">			or True to use the better-looking 90-99 bright codes which are not </span>
+<span class="sd">			supported by all terminals. Default is bright=False, but can be </span>
+<span class="sd">			overridden by the ``PYSYS_COLOR_BASIC`` environment var. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">bright</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">bright</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_COLOR_BRIGHT&#39;</span><span class="p">,</span><span class="s1">&#39;true&#39;</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;true&#39;</span>
+		<span class="c1"># by default we use standard ANSI escape sequences, supported by most unix terminals</span>
+		<span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">COLOR_ESCAPE_CODES</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s1">&#39;BLACK&#39;</span><span class="p">:</span>   <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">30</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">bright</span> <span class="k">else</span> <span class="mi">90</span><span class="p">),</span>
+			<span class="s1">&#39;RED&#39;</span><span class="p">:</span>     <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">31</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">bright</span> <span class="k">else</span> <span class="mi">91</span><span class="p">),</span>
+			<span class="s1">&#39;GREEN&#39;</span><span class="p">:</span>   <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">32</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">bright</span> <span class="k">else</span> <span class="mi">92</span><span class="p">),</span>
+			<span class="s1">&#39;YELLOW&#39;</span><span class="p">:</span>  <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">33</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">bright</span> <span class="k">else</span> <span class="mi">93</span><span class="p">),</span>
+			<span class="s1">&#39;BLUE&#39;</span><span class="p">:</span>    <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">34</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">bright</span> <span class="k">else</span> <span class="mi">94</span><span class="p">),</span>
+			<span class="s1">&#39;MAGENTA&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">35</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">bright</span> <span class="k">else</span> <span class="mi">95</span><span class="p">),</span>
+			<span class="s1">&#39;CYAN&#39;</span><span class="p">:</span>    <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">36</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">bright</span> <span class="k">else</span> <span class="mi">96</span><span class="p">),</span>
+			<span class="s1">&#39;WHITE&#39;</span><span class="p">:</span>   <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">37</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">bright</span> <span class="k">else</span> <span class="mi">97</span><span class="p">),</span>
+			<span class="s1">&#39;END&#39;</span><span class="p">:</span>     <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[</span><span class="si">%d</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+		<span class="p">}</span></div>
+
+	<span class="n">__STDOUT_LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span> <span class="c1"># global lock shared by all instances of this class</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertiesDict</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Create an instance of the formatter class.&quot;&quot;&quot;</span>
+
+		<span class="c1"># extract to override entries in the color map from properties</span>
+		<span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">propertiesDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+			<span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;color:&#39;</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">COLOR_CATEGORIES</span><span class="p">[</span><span class="n">prop</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;color:&#39;</span><span class="p">):]</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">propertiesDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="k">if</span> <span class="s1">&#39;color&#39;</span> <span class="ow">in</span> <span class="n">propertiesDict</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">propertiesDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;color&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span>
+		<span class="c1"># env vars should take precedence over project settings</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;NO_COLOR&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># this is a growing cross-product standard way to disable color</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_COLOR&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_COLOR&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+			<span class="c1"># heuristically decide on an appropriate default if not configured in the project</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span><span class="o">.</span><span class="n">isatty</span><span class="p">():</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="kc">False</span>
+			<span class="k">elif</span> <span class="ow">not</span> <span class="n">IS_WINDOWS</span><span class="p">:</span> <span class="c1"># most unix terminals will support coloring</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="kc">True</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="kn">import</span> <span class="nn">colorama</span>
+				<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="kc">False</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="kc">True</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">:</span> 
+			<span class="c1"># initColoringLibrary, which might result in sys.stdout getting rewritten; PySys needs control of sys.stdout </span>
+			<span class="c1"># so capture the new stdout then restore the original</span>
+			<span class="k">with</span> <span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">__STDOUT_LOCK</span><span class="p">:</span>
+				<span class="n">stdoutbak</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">initColoringLibrary</span><span class="p">()</span>
+				<span class="k">finally</span><span class="p">:</span>
+					<span class="n">updatedstdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdoutbak</span>
+				<span class="c1"># now update the stream used by our handler</span>
+				<span class="k">if</span> <span class="s1">&#39;PySysPrintRedirector&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">updatedstdout</span><span class="p">):</span>
+					<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Formatter has redirector: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">repr</span><span class="p">(</span><span class="n">updatedstdout</span><span class="p">))</span>
+
+				<span class="n">stdoutHandler</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">updateUnderlyingStream</span><span class="p">(</span><span class="n">updatedstdout</span><span class="p">)</span>
+
+		<span class="nb">super</span><span class="p">(</span><span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">propertiesDict</span><span class="p">)</span>
+
+		<span class="c1"># ensure all outcomes are permitted as possible precedents		</span>
+		<span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">OUTCOMES</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_CATEGORIES</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">COLOR_CATEGORIES</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_CATEGORIES</span><span class="p">[</span><span class="n">LOG_FAILURES</span><span class="p">]</span> <span class="k">if</span> <span class="n">outcome</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_CATEGORIES</span><span class="p">[</span><span class="n">LOG_PASSES</span><span class="p">]</span>
+		<span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_CATEGORIES</span><span class="p">:</span> <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_CATEGORIES</span><span class="p">[</span><span class="n">cat</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_ESCAPE_CODES</span><span class="p">,</span> <span class="n">cat</span>
+
+
+<div class="viewcode-block" id="ColorLogFormatter.formatException"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.formatException">[docs]</a>	<span class="k">def</span> <span class="nf">formatException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_info</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Format an exception for logging, returning the new value.</span>
+
+<span class="sd">		:param exc_info: The exception info</span>
+<span class="sd">		:return: The formatted message ready for logging</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">msg</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">formatException</span><span class="p">(</span><span class="n">exc_info</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorCategoryToEscapeSequence</span><span class="p">(</span><span class="n">LOG_TRACEBACK</span><span class="p">)</span><span class="o">+</span> <span class="n">msg</span> <span class="o">+</span> \
+				<span class="bp">self</span><span class="o">.</span><span class="n">colorCategoryToEscapeSequence</span><span class="p">(</span><span class="n">LOG_END</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">msg</span></div>
+
+
+<div class="viewcode-block" id="ColorLogFormatter.format"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.format">[docs]</a>	<span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Format a log record for logging, returning the new value.</span>
+
+<span class="sd">		:param record: The message to be formatted</span>
+<span class="sd">		:return: The formatted message ready for logging</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">cat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">CATEGORY</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">cat</span><span class="p">:</span>
+					<span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">levelname</span> <span class="o">==</span> <span class="s1">&#39;WARN&#39;</span><span class="p">:</span> <span class="n">cat</span> <span class="o">=</span> <span class="n">LOG_WARN</span>
+					<span class="k">elif</span> <span class="n">record</span><span class="o">.</span><span class="n">levelname</span> <span class="o">==</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">:</span> <span class="n">cat</span> <span class="o">=</span> <span class="n">LOG_ERROR</span>
+					<span class="k">elif</span> <span class="n">record</span><span class="o">.</span><span class="n">levelname</span> <span class="o">==</span> <span class="s1">&#39;DEBUG&#39;</span><span class="p">:</span> <span class="n">cat</span> <span class="o">=</span> <span class="n">LOG_DEBUG</span>
+				<span class="k">if</span> <span class="n">cat</span><span class="p">:</span>
+					<span class="n">cat</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+					<span class="n">record</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+					<span class="n">indexes</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ARG_INDEX</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+					<span class="k">if</span> <span class="n">indexes</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+						<span class="n">record</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorCategoryToEscapeSequence</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span><span class="o">+</span><span class="n">record</span><span class="o">.</span><span class="n">msg</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">colorCategoryToEscapeSequence</span><span class="p">(</span><span class="n">LOG_END</span><span class="p">)</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+						<span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatArg</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+						<span class="n">record</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+					
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.utils.logutils&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to format log message &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+
+		<span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ColorLogFormatter.formatArg"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.formatArg">[docs]</a>	<span class="k">def</span> <span class="nf">formatArg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Format a single argument within a record, based on its category.</span>
+
+<span class="sd">		:param category: The logging category</span>
+<span class="sd">		:param arg: The argument within the record.</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorCategoryToEscapeSequence</span><span class="p">(</span><span class="n">category</span><span class="p">)</span><span class="o">+</span><span class="n">arg</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">colorCategoryToEscapeSequence</span><span class="p">(</span><span class="n">LOG_END</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">arg</span></div>
+
+
+<div class="viewcode-block" id="ColorLogFormatter.colorCategoryToEscapeSequence"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.colorCategoryToEscapeSequence">[docs]</a>	<span class="k">def</span> <span class="nf">colorCategoryToEscapeSequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Return the escape sequence to be used for the specified category of logging output. </span>
+<span class="sd">		</span>
+<span class="sd">		:param category: The category of the log message</span>
+<span class="sd">		:return: The escape sequence</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_CATEGORIES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="o">%</span><span class="n">category</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">COLOR_ESCAPE_CODES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">color</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="o">%</span><span class="n">color</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ColorLogFormatter.initColoringLibrary"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.ColorLogFormatter.initColoringLibrary">[docs]</a>	<span class="k">def</span> <span class="nf">initColoringLibrary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Initialize any python library required for ensuring ANSI escape sequences can be processed.</span>
+
+<span class="sd">		The default implementation does nothing on Unix but on Windows attempts to load the &quot;Colorama&quot;</span>
+<span class="sd">		library if is is present (unless the environment variable </span>
+<span class="sd">		PYSYS_DISABLE_COLORAMA=true is set).</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">OSFAMILY</span><span class="o">==</span><span class="s1">&#39;windows&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_DISABLE_COLORAMA&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">!=</span><span class="s1">&#39;true&#39;</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="kn">import</span> <span class="nn">colorama</span>
+				<span class="n">colorama</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.utils.logutils&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Successfully initialized the coloring library&#39;</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+				<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.utils.logutils&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to load coloring library: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div></div>
+<span class="n">ColorLogFormatter</span><span class="o">.</span><span class="n">configureANSIEscapeCodes</span><span class="p">()</span>
+
+<div class="viewcode-block" id="stdoutPrint"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.logutils.html#pysys.utils.logutils.stdoutPrint">[docs]</a><span class="k">def</span> <span class="nf">stdoutPrint</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Writes the specified bytes or (preferably) unicode character string </span>
+<span class="sd">	to stdout, avoiding any redirection to loggers performed by PySys, and </span>
+<span class="sd">	performing replacements if needed based on the characters </span>
+<span class="sd">	supported by the stdout encoding, and with support for output coloring </span>
+<span class="sd">	using escape sequences (if enabled in PySys). </span>
+
+<span class="sd">	In most cases a logger should be used for output from PySys, but this </span>
+<span class="sd">	function is provided as a way to write to stdout for cases where it is truly </span>
+<span class="sd">	needed, such as unconditionally writing status messages to a CI system. </span>
+<span class="sd">	</span>
+<span class="sd">	:param s: a unicode or bytes string. A newline will be added automatically. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">binary_type</span><span class="p">):</span>
+		<span class="n">s</span> <span class="o">+=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">s</span> <span class="o">+=</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+	<span class="k">return</span> <span class="n">stdoutHandler</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

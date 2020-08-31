@@ -1,0 +1,50 @@
+
+pysys.utils.fileutils
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.fileutils
+
+.. currentmodule:: pysys.utils.fileutils
+
+
+
+toLongPathSafe
+==============
+
+.. autofunction:: toLongPathSafe
+
+
+fromLongPathSafe
+================
+
+.. autofunction:: fromLongPathSafe
+
+
+pathexists
+==========
+
+.. autofunction:: pathexists
+
+
+mkdir
+=====
+
+.. autofunction:: mkdir
+
+
+deletedir
+=========
+
+.. autofunction:: deletedir
+
+
+loadProperties
+==============
+
+.. autofunction:: loadProperties
+
+
+loadJSON
+========
+
+.. autofunction:: loadJSON

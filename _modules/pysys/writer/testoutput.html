@@ -1,0 +1,782 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.writer.testoutput &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.writer.testoutput</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.writer.testoutput</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Writers that process the contents of test output directories, archiving or collecting output files, or aggregating </span>
+<span class="sd">code coverage data. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+	<span class="s2">&quot;TestOutputArchiveWriter&quot;</span><span class="p">,</span> 
+	<span class="s2">&quot;CollectTestOutputWriter&quot;</span><span class="p">,</span>
+	<span class="s2">&quot;PythonCoverageWriter&quot;</span><span class="p">,]</span>
+
+<span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">stat</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.writer.api</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="n">stripANSIEscapeCodes</span><span class="p">,</span> <span class="n">stdoutPrint</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">deletedir</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">,</span> <span class="n">fromLongPathSafe</span><span class="p">,</span> <span class="n">pathexists</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">PY2</span><span class="p">,</span> <span class="n">openfile</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.writer&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TestOutputArchiveWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter">[docs]</a><span class="k">class</span> <span class="nc">TestOutputArchiveWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Writer that creates zip archives of each failed test&#39;s output directory, </span>
+<span class="sd">	producing artifacts that could be uploaded to a CI system or file share to allow the failures to be analysed. </span>
+<span class="sd">	</span>
+<span class="sd">	This writer is enabled when running with ``--record``. If using this writer in conjunction with a CI writer that </span>
+<span class="sd">	publishes the generated archives, be sure to include this writer first in the list of writers in your project </span>
+<span class="sd">	configuration. </span>
+
+<span class="sd">	Publishes artifacts with category name &quot;TestOutputArchive&quot; and the directory (unless there are no archives) </span>
+<span class="sd">	as &quot;TestOutputArchiveDir&quot; for any enabled `pysys.writer.api.ArtifactPublisher` writers. </span>
+
+<span class="sd">	.. versionadded:: 1.6.0</span>
+
+<span class="sd">	The following properties can be set in the project configuration for this writer:		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">destDir</span> <span class="o">=</span> <span class="s1">&#39;__pysys_output_archives.$</span><span class="si">{outDirName}</span><span class="s1">/&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The directory to write the archives to, as an absolute path, or relative to the testRootDir (or --outdir if specified). </span>
+
+<span class="sd">	This directory will be deleted at the start of the run if it already exists. </span>
+<span class="sd">	</span>
+<span class="sd">	Project ``${...}`` properties can be used in the path. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">maxTotalSizeMB</span> <span class="o">=</span> <span class="mf">1024.0</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The (approximate) limit on the total size of all archives.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">maxArchiveSizeMB</span> <span class="o">=</span> <span class="mf">200.0</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The (approximate) limit on the size each individual test archive.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">maxArchives</span> <span class="o">=</span> <span class="mi">50</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The maximum number of archives to create. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">archiveAtEndOfRun</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># if at end of run can give deterministic order, also reduces I/O while tests are executing</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	By default all archives are created at the end of the run once all tests have finished executing. This avoids </span>
+<span class="sd">	I/O contention with execution of tests, and also selection of the tests to generated archives to be done </span>
+<span class="sd">	in a deterministic (but pseudo-random) fashion rather than just taking the first N failures. </span>
+<span class="sd">	</span>
+<span class="sd">	Alternatively you can this property to false if you wish to create archives during the test run as each failure </span>
+<span class="sd">	occurs. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+
+	<span class="n">includeNonFailureOutcomes</span> <span class="o">=</span> <span class="s1">&#39;REQUIRES INSPECTION&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	In addition to failure outcomes, any outcomes listed here (as comma-separated display names) will be archived. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A regular expression indicating test output paths that will be excluded from archiving, for example large </span>
+<span class="sd">	temporary files that are not useful for diagnosing problems. </span>
+<span class="sd">	</span>
+<span class="sd">	For example ``&quot;.*/MyTest_001/.*/mybigfile.*[.]tmp&quot;``.</span>
+<span class="sd">	</span>
+<span class="sd">	The expression is matched against the path of each output file relative to the test root dir, </span>
+<span class="sd">	using forward slashes as the path separator. Multiple paths can be specified using &quot;(path1|path2)&quot; syntax. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span> <span class="c1"># executed against the path relative to the test root dir e.g. (pattern1|pattern2)</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A regular expression indicating test output paths that will be included in the archive. This can be used to </span>
+<span class="sd">	archive just some particular files. Note that for use cases such as collecting graphs and code coverage files </span>
+<span class="sd">	generated by a test run, the collect-test-output feature is usually a better fit than using this writer. </span>
+<span class="sd">	</span>
+<span class="sd">	The expression is matched against the path of each output file relative to the test root dir, </span>
+<span class="sd">	using forward slashes as the path separator. Multiple paths can be specified using &quot;(path1|path2)&quot; syntax. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numTests</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testoutdir</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pluginProperties</span><span class="p">:</span> 
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">k</span><span class="p">):</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unknown property &quot;</span><span class="si">%s</span><span class="s1">&quot; for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot set destDir to &quot;&quot;&#39;</span><span class="p">)</span>
+		
+		<span class="c1"># avoid double-expanding (which could mess up ${$} escapes), but if using default value we need to expand it</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span> <span class="o">==</span> <span class="n">TestOutputArchiveWriter</span><span class="o">.</span><span class="n">destDir</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">destDir</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)))</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;.zip&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)):</span>
+			<span class="n">deletedir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span> <span class="c1"># remove any existing archives (but not if this dir seems to have other stuff in it!)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span> <span class="k">else</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileIncludesRegex</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileIncludesRegex</span> <span class="k">else</span> <span class="kc">None</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">__totalBytesRemaining</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxTotalSizeMB</span><span class="p">)</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archiveAtEndOfRun</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">queuedInstructions</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">skippedTests</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">archivesCreated</span> <span class="o">=</span> <span class="mi">0</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+		<span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span> <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">OUTCOMES</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unknown outcome display name &quot;</span><span class="si">%s</span><span class="s1">&quot; in includeNonFailureOutcomes&#39;</span><span class="o">%</span><span class="n">o</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archiveAtEndOfRun</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">outputDir</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queuedInstructions</span><span class="p">):</span> <span class="c1"># sort by hash of testId so make order deterministic</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_archiveTestOutputDir</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">outputDir</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skippedTests</span><span class="p">:</span>
+			<span class="c1"># if we hit a limit, at least record the names of the tests we missed</span>
+			<span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span>
+			<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s1">&#39;skipped_artifacts.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">PY2</span> <span class="k">else</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+				<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skippedTests</span><span class="p">))</span>
+		
+		<span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">info</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archivesCreated</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">)(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> created </span><span class="si">%d</span><span class="s1"> test output archive artifacts in: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> 
+			<span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">archivesCreated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archivesCreated</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">,</span> <span class="s1">&#39;TestOutputArchiveDir&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TestOutputArchiveWriter.shouldArchive"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter.shouldArchive">[docs]</a>	<span class="k">def</span> <span class="nf">shouldArchive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Decides whether this test is eligible for archiving of its output. </span>
+<span class="sd">		</span>
+<span class="sd">		The default implementation archives only tests that have a failure outcome, or are listed in </span>
+<span class="sd">		``includeNonFailureOutcomes``, but this can be customized if needed by subclasses. </span>
+<span class="sd">		</span>
+<span class="sd">		:param pysys.basetest.BaseTest testObj: The test object under consideration.</span>
+<span class="sd">		:return bool: True if this test&#39;s output can be archived. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">()</span><span class="o">.</span><span class="n">isFailure</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">getOutcome</span><span class="p">())</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeNonFailureOutcomes</span></div>
+
+
+	<span class="k">def</span> <span class="nf">processResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testTime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testStart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">runLogOutput</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">shouldArchive</span><span class="p">(</span><span class="n">testObj</span><span class="p">):</span> <span class="k">return</span> 
+		
+		<span class="nb">id</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.cycle</span><span class="si">%03d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">testCycle</span><span class="p">))</span> <span class="k">if</span> <span class="n">testObj</span><span class="o">.</span><span class="n">testCycle</span> <span class="k">else</span> <span class="n">testObj</span><span class="o">.</span><span class="n">descriptor</span><span class="o">.</span><span class="n">id</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archiveAtEndOfRun</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">queuedInstructions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">hash</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span> <span class="nb">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="p">])</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_archiveTestOutputDir</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">testObj</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+	
+<div class="viewcode-block" id="TestOutputArchiveWriter._newArchive"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter._newArchive">[docs]</a>	<span class="k">def</span> <span class="nf">_newArchive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Creates and opens a new archive file for the specified id.</span>
+<span class="sd">		</span>
+<span class="sd">		:return: (str path, filehandle) The path will include an appropriate extension for this archive type. </span>
+<span class="sd">		  The filehandle must have the same API as Python&#39;s ZipFile class. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.zip&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;outDirName&#39;</span><span class="p">]))</span>
+		<span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZIP_DEFLATED</span><span class="p">,</span> <span class="n">allowZip64</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestOutputArchiveWriter._archiveTestOutputDir"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter._archiveTestOutputDir">[docs]</a>	<span class="k">def</span> <span class="nf">_archiveTestOutputDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">outputDir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Creates an archive for the specified test, unless doing so would violate the configured limits </span>
+<span class="sd">		(e.g. maxArchives). </span>
+<span class="sd">		</span>
+<span class="sd">		:param str id: The testId (plus a cycle suffix if it&#39;s a multi-cycle run). </span>
+<span class="sd">		:param str outputDir: The path of the test output dir. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archivesCreated</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">archivesCreated</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxArchives</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">skippedTests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outputDir</span><span class="p">)</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Skipping archiving for </span><span class="si">%s</span><span class="s1"> as maxArchives limit is reached&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+			<span class="k">return</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__totalBytesRemaining</span> <span class="o">&lt;</span> <span class="mi">500</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">skippedTests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outputDir</span><span class="p">)</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Skipping archiving for </span><span class="si">%s</span><span class="s1"> as maxTotalMB limit is reached&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+			<span class="k">return</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">archivesCreated</span> <span class="o">+=</span> <span class="mi">1</span>
+
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">outputDir</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">outputDir</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">PY2</span><span class="p">:</span> <span class="c1"># it&#39;s simpler if we always deal with unicode strings (which would happen on windows anyway due to the longpathsafe stuff)</span>
+				<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputDir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">outputDir</span> <span class="o">=</span> <span class="n">unicode</span><span class="p">(</span><span class="n">outputDir</span><span class="p">,</span> <span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">())</span>
+			<span class="n">skippedFiles</span> <span class="o">=</span> <span class="p">[]</span>
+			
+			<span class="c1"># this is performance-critical so worth caching these</span>
+			<span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span>
+			<span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileIncludesRegex</span>
+			<span class="n">isPurgableFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">isPurgableFile</span>
+			
+			<span class="n">bytesRemaining</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxArchiveSizeMB</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__totalBytesRemaining</span><span class="p">)</span>
+			<span class="n">triedTmpZipFile</span> <span class="o">=</span> <span class="kc">False</span>
+			
+			
+			<span class="n">zippath</span><span class="p">,</span> <span class="n">myzip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newArchive</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+			<span class="n">filesInZip</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="k">with</span> <span class="n">myzip</span><span class="p">:</span>
+				<span class="n">rootlen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">outputDir</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+				<span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">outputDir</span><span class="p">):</span>
+					<span class="c1"># Just the files, don&#39;t bother with the directories for now</span>
+					
+					<span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">fn</span><span class="p">:</span> <span class="p">[</span><span class="n">fn</span><span class="o">!=</span><span class="s1">&#39;run.log&#39;</span><span class="p">,</span> <span class="n">fn</span><span class="p">]</span> <span class="p">)</span> <span class="c1"># be deterministic, and put run.log first</span>
+					
+					<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+						<span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+						<span class="k">if</span> <span class="n">fileExcludesRegex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fileExcludesRegex</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)):</span>
+							<span class="n">skippedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+							<span class="k">continue</span>
+						<span class="k">if</span> <span class="n">fileIncludesRegex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fileIncludesRegex</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)):</span>
+							<span class="n">skippedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+							<span class="k">continue</span>
+						
+						<span class="n">fileSize</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+						<span class="k">if</span> <span class="n">fileSize</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+							<span class="c1"># Since (if not waiting until end) this gets called before testComplete has had a chance to clean things up, skip the </span>
+							<span class="c1"># files that it would have deleted. Don&#39;t bother listing these in skippedFiles since user </span>
+							<span class="c1"># won&#39;t be expecting them anyway</span>
+							<span class="k">continue</span>
+						
+						<span class="k">if</span> <span class="n">bytesRemaining</span> <span class="o">&lt;</span> <span class="mi">500</span><span class="p">:</span>
+							<span class="n">skippedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+							<span class="k">continue</span>
+						
+						<span class="k">try</span><span class="p">:</span>
+							<span class="k">if</span> <span class="n">fileSize</span> <span class="o">&gt;</span> <span class="n">bytesRemaining</span><span class="p">:</span>
+								<span class="k">if</span> <span class="n">triedTmpZipFile</span><span class="p">:</span> <span class="c1"># to save effort, don&#39;t keep trying once we&#39;re close - from now on only attempt small files</span>
+									<span class="n">skippedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+									<span class="k">continue</span>
+								<span class="n">triedTmpZipFile</span> <span class="o">=</span> <span class="kc">True</span>
+								
+								<span class="c1"># Only way to know if it&#39;ll fit is to try compressing it</span>
+								<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File size of </span><span class="si">%s</span><span class="s1"> might push the archive above the limit; creating a temp zip to check&#39;</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+								<span class="n">tmpname</span><span class="p">,</span> <span class="n">tmpzip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newArchive</span><span class="p">(</span><span class="nb">id</span><span class="o">+</span><span class="s1">&#39;.tmp&#39;</span><span class="p">)</span>
+								<span class="k">try</span><span class="p">:</span>
+									<span class="k">with</span> <span class="n">tmpzip</span><span class="p">:</span>
+										<span class="n">tmpzip</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;tmp&#39;</span><span class="p">)</span>
+										<span class="n">compressedSize</span> <span class="o">=</span> <span class="n">tmpzip</span><span class="o">.</span><span class="n">getinfo</span><span class="p">(</span><span class="s1">&#39;tmp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">compress_size</span>
+										<span class="k">if</span> <span class="n">compressedSize</span> <span class="o">&gt;</span> <span class="n">bytesRemaining</span><span class="p">:</span>
+											<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Skipping file as compressed size of </span><span class="si">%s</span><span class="s1"> bytes exceeds remaining limit of </span><span class="si">%s</span><span class="s1"> bytes: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> 
+												<span class="n">compressedSize</span><span class="p">,</span> <span class="n">bytesRemaining</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+											<span class="n">skippedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+											<span class="k">continue</span>
+								<span class="k">finally</span><span class="p">:</span>
+									<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmpname</span><span class="p">)</span>
+									
+							<span class="c1"># Here&#39;s where we actually add it to the real archive</span>
+							<span class="n">memberName</span> <span class="o">=</span> <span class="n">fn</span><span class="p">[</span><span class="n">rootlen</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+							<span class="n">myzip</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">memberName</span><span class="p">)</span>
+						<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span> <span class="c1"># might happen due to file locking or similar</span>
+							<span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Failed to add output file &quot;</span><span class="si">%s</span><span class="s1">&quot; to archive: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span>
+							<span class="n">skippedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+							<span class="k">continue</span>
+						<span class="n">filesInZip</span> <span class="o">+=</span> <span class="mi">1</span>
+						<span class="n">bytesRemaining</span> <span class="o">-=</span> <span class="n">myzip</span><span class="o">.</span><span class="n">getinfo</span><span class="p">(</span><span class="n">memberName</span><span class="p">)</span><span class="o">.</span><span class="n">compress_size</span>
+				
+				<span class="k">if</span> <span class="n">skippedFiles</span> <span class="ow">and</span> <span class="n">fileIncludesRegex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># keep the archive clean if there&#39;s an explicit include</span>
+					<span class="n">skippedFilesStr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">skippedFiles</span><span class="p">])</span>
+					<span class="n">skippedFilesStr</span> <span class="o">=</span> <span class="n">skippedFilesStr</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+					<span class="n">myzip</span><span class="o">.</span><span class="n">writestr</span><span class="p">(</span><span class="s1">&#39;__pysys_skipped_archive_files.txt&#39;</span><span class="p">,</span> <span class="n">skippedFilesStr</span><span class="p">)</span>
+	
+			<span class="k">if</span> <span class="n">filesInZip</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="c1"># don&#39;t leave empty zips around</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No files added to zip so deleting: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">zippath</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">archivesCreated</span> <span class="o">-=</span> <span class="mi">1</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">zippath</span><span class="p">)</span>
+				<span class="k">return</span>
+	
+			<span class="bp">self</span><span class="o">.</span><span class="n">__totalBytesRemaining</span> <span class="o">-=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">zippath</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="n">zippath</span><span class="p">,</span> <span class="s1">&#39;TestOutputArchive&#39;</span><span class="p">)</span>
+	
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">skippedTests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outputDir</span><span class="p">)</span>
+			<span class="k">raise</span></div></div>
+		
+<div class="viewcode-block" id="CollectTestOutputWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter">[docs]</a><span class="k">class</span> <span class="nc">CollectTestOutputWriter</span><span class="p">(</span><span class="n">BaseRecordResultsWriter</span><span class="p">,</span> <span class="n">TestOutputVisitor</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Writer that collects files matching a specified pattern from the output directory after each test, and puts </span>
+<span class="sd">	them in a single directory or archive - for example code coverage files or performance graphs. </span>
+<span class="sd">	</span>
+<span class="sd">	This writer can be used as-is or as a base class for writers that need to collect files during test execution </span>
+<span class="sd">	then do something with them during cleanup, for example generate a code coverage report. </span>
+<span class="sd">	</span>
+<span class="sd">	Empty files are ignored. </span>
+<span class="sd">	</span>
+<span class="sd">	This writer is always enabled. </span>
+
+<span class="sd">	.. versionadded:: 1.6.0</span>
+
+<span class="sd">	The following properties can be set in the project configuration for this writer:		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">destDir</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The directory in which the files will be collected, as an absolute path, or relative to the testRootDir (or --outdir if specified). </span>
+
+<span class="sd">	This directory will be deleted at the start of the run if it already exists. </span>
+<span class="sd">	</span>
+<span class="sd">	Project ``${...}`` properties can be used in the path. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">destArchive</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Optional filename of a .zip archive to generate with the contents of the destDir. </span>
+<span class="sd">	</span>
+<span class="sd">	If a non-absolute path is specified it is evaluated relative to the destDir. </span>
+<span class="sd">	</span>
+<span class="sd">	Project ``${...}`` properties can be used in the path. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span> <span class="c1"># executed against the path relative to the test root dir e.g. (pattern1|pattern2)</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A regular expression indicating the test output paths that will be collected. This can be used to </span>
+<span class="sd">	archive just some particular files. This is required. </span>
+<span class="sd">	</span>
+<span class="sd">	The expression is matched against the final characters of each output file&#39;s path (with the test root dir stripped </span>
+<span class="sd">	off), using forward slashes as the path separator. Multiple paths can be specified using &quot;(path1|path2)&quot; syntax. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A regular expression indicating test output paths that will be excluded from collection. </span>
+<span class="sd">	</span>
+<span class="sd">	For example ``&quot;.*/MyTest_001/.*/mybigfile.*[.]tmp&quot;``.</span>
+<span class="sd">	</span>
+<span class="sd">	The expression is matched against the path as described for fileIncludesRegex.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">outputPattern</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;@TESTID@.@FILENAME@.@UNIQUE@.@FILENAME_EXT@&#39;</span> 
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A string indicating the file (and optionally subdirectory name) to use when writing each collected file to </span>
+<span class="sd">	the destDir. </span>
+<span class="sd">	</span>
+<span class="sd">	In addition to any standard ``${...}`` property variables from the project </span>
+<span class="sd">	configuration, the output pattern can contain these ``@...@`` </span>
+<span class="sd">	substitutions:</span>
+
+<span class="sd">		- ``@FILENAME@`` is the original base filename with directory and extension removed, to which you </span>
+<span class="sd">		  can add prefixes or suffixes as desired. </span>
+
+<span class="sd">		- ``.@FILENAME_EXT@`` is the filename extension, such that the original filename </span>
+<span class="sd">		  is ``@FILENAME@.@FILENAME_EXT@`` (note the dot prefix is mandatory here, and will be replaced with </span>
+<span class="sd">		  empty string is there is no extension). </span>
+
+<span class="sd">		- ``@TESTID@`` is replaced by the identifier of the test that generated the </span>
+<span class="sd">		  output file (including mode suffix if present), which may be useful for tracking where each one came from. </span>
+
+<span class="sd">		- ``@UNIQUE@`` is replaced by a number that ensures the file does not clash </span>
+<span class="sd">		  with any other collected output file from another test. The ``@UNIQUE@`` </span>
+<span class="sd">		  substitution variable is mandatory. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">publishArtifactDirCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span> 
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	If specified, the output directory will be published as an artifact using the specified category name, </span>
+<span class="sd">	e.g. ``MyCodeCoverageDir``. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">publishArtifactArchiveCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span> 
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	If specified the ``destArchive`` file (if any) will be published as an artifact using the specified category name.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+		<span class="k">return</span> <span class="kc">True</span>
+
+	<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numTests</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">testoutdir</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pluginProperties</span><span class="p">:</span> 
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">k</span><span class="p">):</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unknown property &quot;</span><span class="si">%s</span><span class="s1">&quot; for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot set destDir to &quot;&quot;&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileIncludesRegex</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;fileIncludesRegex must be specified for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">destDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;/..&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">))</span>
+		<span class="k">if</span> <span class="n">pathexists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s1">&#39;pysysproject.xml&#39;</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot set destDir to testRootDir&#39;</span><span class="p">)</span>
+		
+		<span class="c1"># the code below assumes (for long path safe logic) this includes correct slashes (if any)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">outputPattern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputPattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">):</span>
+			<span class="n">deletedir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span> <span class="c1"># remove any existing archives (but not if this dir seems to have other stuff in it!)</span>
+		
+		<span class="k">def</span> <span class="nf">prepRegex</span><span class="p">(</span><span class="n">exp</span><span class="p">):</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">exp</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">exp</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">):</span> <span class="n">exp</span> <span class="o">=</span> <span class="n">exp</span><span class="o">+</span><span class="s1">&#39;$&#39;</span> <span class="c1"># by default require regex to match up to the end to avoid common mistakes</span>
+			<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="n">prepRegex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="n">prepRegex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileIncludesRegex</span><span class="p">)</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">collectedFileCount</span> <span class="o">=</span> <span class="mi">0</span>
+
+	<span class="k">def</span> <span class="nf">visitTestOutputFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="c1"># strip off test root dir prefix for the regex comparison</span>
+		<span class="n">cmppath</span> <span class="o">=</span> <span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">cmppath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">):</span>
+			<span class="n">cmppath</span> <span class="o">=</span> <span class="n">cmppath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">testRootDir</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="n">cmppath</span> <span class="o">=</span> <span class="n">cmppath</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileIncludesRegex</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">cmppath</span><span class="p">):</span> 
+			<span class="c1">#log.debug(&#39;skipping file due to fileIncludesRegex: %s&#39;, cmppath)</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		
+		<span class="n">fileExcludesRegex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileExcludesRegex</span>
+		<span class="k">if</span> <span class="n">fileExcludesRegex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fileExcludesRegex</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">cmppath</span><span class="p">):</span> 
+			<span class="c1">#log.debug(&#39;skipping file due to fileExcludesRegex: %s&#39;, cmppath)</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">collectPath</span><span class="p">(</span><span class="n">testObj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">collectPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testObj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+		<span class="n">collectdest</span> <span class="o">=</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputPattern</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@TESTID@&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">testObj</span><span class="p">))</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@FILENAME@&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+			<span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.@FILENAME_EXT@&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+			<span class="p">)))</span>
+		<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="k">while</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">collectdest</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@UNIQUE@&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="p">))):</span>
+			<span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="n">collectdest</span> <span class="o">=</span> <span class="n">collectdest</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@UNIQUE@&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+		<span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">collectdest</span><span class="p">))</span>
+		<span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)),</span> <span class="n">collectdest</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">collectedFileCount</span> <span class="o">+=</span> <span class="mi">1</span>
+	
+<div class="viewcode-block" id="CollectTestOutputWriter.archiveAndPublish"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.CollectTestOutputWriter.archiveAndPublish">[docs]</a>	<span class="k">def</span> <span class="nf">archiveAndPublish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Generate an archive of the destDir (if configured) and publish artifacts (if configured). </span>
+<span class="sd">		</span>
+<span class="sd">		Called by default as part of `cleanup()`.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">:</span>
+			<span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">)))</span>
+			<span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">toLongPathSafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZIP_DEFLATED</span><span class="p">,</span> <span class="n">allowZip64</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">archive</span><span class="p">:</span>
+				<span class="n">rootlen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)</span>
+				<span class="k">for</span> <span class="n">base</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">):</span>
+					<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+						<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span><span class="o">==</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">):</span> <span class="k">continue</span>
+						<span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+						<span class="n">archive</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">fn</span><span class="p">[</span><span class="n">rootlen</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactDirCategory</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactDirCategory</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactArchiveCategory</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">publishArtifact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destArchive</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">publishArtifactArchiveCategory</span><span class="p">)</span></div>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">):</span> 
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No matching output files were found for collection directory: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">))</span>
+			<span class="k">return</span>
+
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Collected </span><span class="si">%s</span><span class="s1"> test output files to directory: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{:}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collectedFileCount</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">)))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">archiveAndPublish</span><span class="p">()</span></div>
+		
+
+<div class="viewcode-block" id="PythonCoverageWriter"><a class="viewcode-back" href="../../../autodocgen/pysys.writer.testoutput.html#pysys.writer.testoutput.PythonCoverageWriter">[docs]</a><span class="k">class</span> <span class="nc">PythonCoverageWriter</span><span class="p">(</span><span class="n">CollectTestOutputWriter</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Writer that collects Python code coverage files in a single directory and writes a coverage report during </span>
+<span class="sd">	runner cleanup. Requires the &quot;coverage.py&quot; library to be installed. </span>
+<span class="sd">	</span>
+<span class="sd">	To enable this, run with ``-XcodeCoverage`` (or ``-XpythonCoverage``) and configure the ``destDir`` plugin property </span>
+<span class="sd">	in pysysproject.xml (e.g. to ``__coverage_python.${outDirName}``). </span>
+
+<span class="sd">	If coverage is generated, the directory containing all coverage files is published as an artifact named </span>
+<span class="sd">	&quot;PythonCoverageDir&quot;. Optionally an archive of this directory can be generated by setting the </span>
+<span class="sd">	``destArchive`` property (see `CollectTestOutputWriter`), and published as &quot;PythonCoverageArchive&quot;. </span>
+
+<span class="sd">	Note that to maintain compatibility with pre-1.6.0 projects, a PythonCoverageWriter instance will be _automatically_ </span>
+<span class="sd">	added to the project if the ``pythonCoverageDir`` project property is set and none is explicitly configured; but </span>
+<span class="sd">	the automatic addition is deprecated so you should explicity add this writer to your project if you need it. </span>
+
+<span class="sd">	.. versionadded:: 1.6.0</span>
+
+<span class="sd">	The following property can be set in the project configuration for this writer (and see also </span>
+<span class="sd">	`CollectTestOutputWriter` for inherited properties such as ``destArchive``):		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1"># override CollectTestOutputWriter property values</span>
+	<span class="n">destDir</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
+	<span class="n">fileIncludesRegex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;.*/[.]coverage[.]python.*&#39;</span> <span class="c1"># executed against the path relative to the test root dir e.g. (pattern1|pattern2)</span>
+	<span class="n">outputPattern</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;.coverage.python.@TESTID@_@FILENAME@.@FILENAME_EXT@.@UNIQUE@&#39;</span> 
+	<span class="n">publishArtifactDirCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;PythonCoverageDir&#39;</span>
+	<span class="n">publishArtifactArchiveCategory</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;PythonCoverageArchive&#39;</span>
+
+	<span class="n">pythonCoverageArgs</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A string of command line arguments used to customize the ``coverage run`` and ``coverage html`` commands. </span>
+<span class="sd">	Use &quot;...&quot; double quotes around any arguments that contain spaces. </span>
+<span class="sd">	</span>
+<span class="sd">	For example::</span>
+<span class="sd">	</span>
+<span class="sd">		&lt;property name=&quot;pythonCoverageArgs&quot; value=&quot;--rcfile=${testRootDir}/python_coveragerc&quot;/&gt;</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;pythonCoverage&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getBoolProperty</span><span class="p">(</span><span class="s1">&#39;codeCoverage&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span><span class="p">):</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="kn">import</span> <span class="nn">coverage</span>
+		<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+			<span class="c1"># don&#39;t log higher than debug because this user may just be doing a --ci run with -XcodeCoverage for some </span>
+			<span class="c1"># other reason and may not even be intending to run with Python coverage</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Not enabling Python coverage because the coverage.py package is not installed&#39;</span><span class="p">)</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">True</span>
+
+	<span class="k">def</span> <span class="nf">getCoverageArgsList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># also used by startPython()</span>
+		<span class="k">return</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pythonCoverageArgs</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">))</span> <span class="c1"># need to escape windows \ else it gets removed; do this the same on all platforms for consistency</span>
+
+	<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="n">pythonCoverageDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">destDir</span>
+		<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">)</span>
+		<span class="n">pythonCoverageDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">fromLongPathSafe</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">))</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">):</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No Python coverage files were generated.&#39;</span><span class="p">)</span>
+			<span class="k">return</span>
+			
+		<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Preparing Python coverage report in: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">pythonCoverageDir</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;combine&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+			<span class="n">workingDir</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-combine&#39;</span><span class="p">,</span> 
+			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> 
+				<span class="s1">&#39;Failed to combine Python code coverage data: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+					<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+		<span class="c1"># produces coverage.xml in a standard format that is useful to code coverage tools</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">],</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+			<span class="n">workingDir</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-xml&#39;</span><span class="p">,</span> 
+			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+				<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+	
+		<span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">startPython</span><span class="p">([</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span> <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="n">toLongPathSafe</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="o">+</span><span class="s1">&#39;/htmlcov&#39;</span><span class="p">)]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">getCoverageArgsList</span><span class="p">(),</span> <span class="n">abortOnError</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+			<span class="n">workingDir</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="p">,</span> <span class="n">stdouterr</span><span class="o">=</span><span class="n">pythonCoverageDir</span><span class="o">+</span><span class="s1">&#39;/python-coverage-html&#39;</span><span class="p">,</span> 
+			<span class="n">disableCoverage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onError</span><span class="o">=</span><span class="k">lambda</span> <span class="n">process</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">getExprFromFile</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;.+&#39;</span><span class="p">,</span> <span class="n">returnNoneIfMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+				<span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">logFileContents</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">maxLines</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+		<span class="c1"># to avoid confusion, remove any zero byte out/err files from the above</span>
+		<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">):</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pythonCoverageDir</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.out&#39;</span><span class="p">,</span> <span class="s1">&#39;.err&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+			
+		<span class="bp">self</span><span class="o">.</span><span class="n">archiveAndPublish</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

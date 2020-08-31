@@ -1,0 +1,412 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.filediff &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.utils.filediff</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.utils.filediff</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Comparing (diffing) text file contents.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">difflib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span><span class="p">,</span> <span class="n">isstring</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">pathexists</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.assertions&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="trimContents"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filediff.html#pysys.utils.filediff.trimContents">[docs]</a><span class="k">def</span> <span class="nf">trimContents</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">expressions</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Reduce a list of strings based by including/excluding lines which match any of a set of regular expressions, returning the processed list.</span>
+<span class="sd">	</span>
+<span class="sd">	The method reduces an input list of strings based on whether each string matches or does not match a </span>
+<span class="sd">	list of regular expressions.</span>
+<span class="sd">	</span>
+<span class="sd">	:param contents: The input list of strings to trim based on matches to regular expressions</span>
+<span class="sd">	:param expressions: The input list of regular expressions</span>
+<span class="sd">	:param exclude: If true any matches to the regular expressions exclude the line, if false any matches include the line</span>
+<span class="sd">	:return: The processed list</span>
+<span class="sd">	:rtype: list</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">expressions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">contents</span>
+	
+	<span class="n">regexp</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">expressions</span><span class="p">)):</span>
+		<span class="n">regexp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">expressions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">))</span>
+	
+	<span class="nb">list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">contents</span><span class="p">)):</span>
+		<span class="n">anymatch</span> <span class="o">=</span> <span class="kc">False</span>
+		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">regexp</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">contents</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span> 
+				<span class="n">anymatch</span> <span class="o">=</span> <span class="kc">True</span>
+				<span class="k">break</span>
+		
+		<span class="k">if</span> <span class="p">(</span><span class="n">exclude</span> <span class="ow">and</span> <span class="n">anymatch</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">exclude</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">anymatch</span><span class="p">):</span>
+			<span class="nb">list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">contents</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+	<span class="k">return</span> <span class="nb">list</span></div>
+
+
+
+<div class="viewcode-block" id="replace"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filediff.html#pysys.utils.filediff.replace">[docs]</a><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">replacementList</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Replace all occurrences of keyword values in a list of strings with a set value, returning the processed list.</span>
+<span class="sd">	</span>
+<span class="sd">	The replacementList parameter should contain a list of tuples to use in the replacement, e.g. </span>
+<span class="sd">	[(&#39;foo&#39;, &#39;bar&#39;), (&#39;swim&#39;, &#39;swam&#39;)].</span>
+<span class="sd">	</span>
+<span class="sd">	:param list: The input list of strings to performed the replacement on</span>
+<span class="sd">	:param replacementList: A list of tuples (key, value) where matches to key are replaced with value</span>
+<span class="sd">	:return: The processed list</span>
+<span class="sd">	:rtype: list</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">replacementList</span><span class="p">:</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="n">isstring</span><span class="p">(</span><span class="n">pair</span><span class="p">),</span> <span class="s1">&#39;Each item in the replacement list must be a tuple of (string,string)&#39;</span>
+		<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">pair</span>
+		<span class="n">regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">)):</span>
+			<span class="nb">list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">regexp</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+	<span class="k">return</span> <span class="nb">list</span></div>
+
+
+
+<div class="viewcode-block" id="logContents"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filediff.html#pysys.utils.filediff.logContents">[docs]</a><span class="k">def</span> <span class="nf">logContents</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Log a list of strings, prepending the line number to each line in the log output.</span>
+<span class="sd">	</span>
+<span class="sd">	:param list: The list of strings to log</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span> <span class="k">return</span>
+	<span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">:</span>
+		<span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  Line </span><span class="si">%-5d</span><span class="s2">:  </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="filediff"><a class="viewcode-back" href="../../../autodocgen/pysys.utils.filediff.html#pysys.utils.filediff.filediff">[docs]</a><span class="k">def</span> <span class="nf">filediff</span><span class="p">(</span><span class="n">file1</span><span class="p">,</span> <span class="n">file2</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">replacementList</span><span class="o">=</span><span class="p">[],</span> <span class="n">include</span><span class="o">=</span><span class="p">[],</span> <span class="n">unifiedDiffOutput</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripWhitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.</span>
+<span class="sd">	</span>
+<span class="sd">	The method reads in the files and loads the contents of each as a list of strings. The two files are </span>
+<span class="sd">	said to be equal if the two lists are equal. The method allows for preprocessing of the string lists </span>
+<span class="sd">	to trim down their contents prior to the comparison being performed. Preprocessing is either to remove </span>
+<span class="sd">	entries from the lists which match any entry in a set of regular expressions, include only lines which </span>
+<span class="sd">	match any entry in a set of regular expressions, replace certain keywords in the string values of each list</span>
+<span class="sd">	with a set value (e.g. to replace time stamps etc), or to sort the lists before the comparison (e.g. where </span>
+<span class="sd">	determinism may not exist). Verbose logging of the method occurs at DEBUG level showing the contents of the </span>
+<span class="sd">	processed lists prior to the comparison being performed.  </span>
+<span class="sd">	</span>
+<span class="sd">	:param file1: The full path to the first file to use in the comparison</span>
+<span class="sd">	:param file2: The full path to the second file to use in the comparison, typically a reference file</span>
+<span class="sd">	:param ignore: A list of regular expressions which remove entries in the input file contents before making the comparison</span>
+<span class="sd">	:param sort: Boolean to sort the input file contents before making the comparison</span>
+<span class="sd">	:param replacementList: A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison</span>
+<span class="sd">	:param stripWhitespace: If True, every line has leading and trailing whitespace stripped before comparison, </span>
+<span class="sd">		which means indentation differences and whether the file ends with a blank line do not affect the outcome. </span>
+<span class="sd">		If False, only newline characters are stripped. </span>
+<span class="sd">	:param include: A list of regular expressions used to select lines from the input file contents to use in the comparison </span>
+<span class="sd">	:param unifiedDiffOutput: If specified, indicates the full path of a file to which unified diff output will be written, </span>
+<span class="sd">		if the diff fails. </span>
+<span class="sd">	:param encoding: Specifies the encoding to be used for opening the file, or None for default. </span>
+<span class="sd">	</span>
+<span class="sd">	:return: success (True / False)</span>
+<span class="sd">	:rtype: boolean</span>
+<span class="sd">	:raises FileNotFoundException: Raised if either of the files do not exist</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file1</span><span class="p">,</span> <span class="n">file2</span><span class="p">:</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">pathexists</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="n">FileNotFoundException</span><span class="p">(</span><span class="s2">&quot;unable to find file </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">file</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">stripchars</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">stripWhitespace</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span> <span class="c1"># None means all whitespace</span>
+
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">file1</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">list1</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">stripchars</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">file2</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">list2</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">stripchars</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+		
+		<span class="n">list1</span> <span class="o">=</span> <span class="n">trimContents</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">ignore</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		<span class="n">list2</span> <span class="o">=</span> <span class="n">trimContents</span><span class="p">(</span><span class="n">list2</span><span class="p">,</span> <span class="n">ignore</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		<span class="n">list1</span> <span class="o">=</span> <span class="n">trimContents</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">include</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		<span class="n">list2</span> <span class="o">=</span> <span class="n">trimContents</span><span class="p">(</span><span class="n">list2</span><span class="p">,</span> <span class="n">include</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		<span class="n">list1</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">replacementList</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		<span class="n">list2</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">list2</span><span class="p">,</span> <span class="n">replacementList</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
+			<span class="n">list1</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+			<span class="n">list2</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+		<span class="n">logContents</span><span class="p">(</span><span class="s2">&quot;Contents of </span><span class="si">%s</span><span class="s2"> after pre-processing;&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file1</span><span class="p">),</span> <span class="n">list1</span><span class="p">)</span>
+		<span class="n">logContents</span><span class="p">(</span><span class="s2">&quot;Contents of </span><span class="si">%s</span><span class="s2"> after pre-processing;&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file2</span><span class="p">),</span> <span class="n">list2</span><span class="p">)</span>		
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">list1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">list2</span><span class="p">:</span>
+			<span class="c1"># maybe this should be an exception... it&#39;s probably not what was intended</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;File comparison pre-processing has filtered out all lines from the files to be diffed, please check if this is intended: </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file1</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file2</span><span class="p">))</span>
+			
+		<span class="k">if</span> <span class="n">list1</span> <span class="o">!=</span> <span class="n">list2</span><span class="p">:</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Unified diff between pre-processed input files;&quot;</span><span class="p">)</span>
+			<span class="n">l1</span> <span class="o">=</span> <span class="p">[]</span>
+			<span class="n">l2</span> <span class="o">=</span> <span class="p">[]</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">list1</span><span class="p">:</span> <span class="n">l1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">i</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">list2</span><span class="p">:</span> <span class="n">l2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">i</span><span class="p">)</span>
+
+			<span class="n">file1display</span> <span class="o">=</span> <span class="n">file1</span>
+			<span class="n">file2display</span> <span class="o">=</span> <span class="n">file2</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">commonprefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">([</span><span class="n">file1display</span><span class="p">,</span> <span class="n">file2display</span><span class="p">])</span>
+			<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span> <span class="k">pass</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">commonprefix</span><span class="p">:</span>
+					<span class="c1"># heuristic to give a longer prefix than just basename (to distinguish reference+output files with same basename)</span>
+					<span class="n">file1display</span> <span class="o">=</span> <span class="n">file1display</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">commonprefix</span><span class="p">):]</span>
+					<span class="n">file2display</span> <span class="o">=</span> <span class="n">file2display</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">commonprefix</span><span class="p">):]</span>
+
+			<span class="c1"># nb: have to switch 1 and 2 around to get the right diff for a typical output,ref file pair</span>
+			<span class="n">diff</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">difflib</span><span class="o">.</span><span class="n">unified_diff</span><span class="p">(</span><span class="n">l2</span><span class="p">,</span> <span class="n">l1</span><span class="p">,</span> 
+				<span class="n">fromfile</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%d</span><span class="s1"> lines)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">file2display</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">l2</span><span class="p">)),</span>
+				<span class="n">tofile</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%d</span><span class="s1"> lines)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">file1display</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">l1</span><span class="p">)),</span>
+				<span class="p">))</span>
+			<span class="k">if</span> <span class="n">unifiedDiffOutput</span><span class="p">:</span>
+				<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">unifiedDiffOutput</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+					<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span> <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">list1</span> <span class="o">==</span> <span class="n">list2</span><span class="p">:</span> <span class="k">return</span> <span class="kc">True</span>
+		<span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<span class="c1"># entry point for running the script as an executable</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma: no cover (undocumented, little used executable entry point)</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Usage: filediff.py &lt;file1&gt; &lt;file2&gt; [regexpr1 [regexp2]...]&quot;</span><span class="p">)</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span>	
+		<span class="n">ignore</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)):</span>
+			<span class="n">ignore</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+	 
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">status</span> <span class="o">=</span> <span class="n">filediff</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ignore</span><span class="p">)</span>
+		<span class="k">except</span> <span class="n">FileNotFoundException</span> <span class="k">as</span> <span class="n">value</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;caught </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="p">))</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;unable to diff files... exiting&quot;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No differences detected&quot;</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Differences detected&quot;</span><span class="p">)</span>
+			
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.writer.ci &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.writer.console" href="pysys.writer.console.html" />
+    <link rel="prev" title="pysys.writer.api" href="pysys.writer.api.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.writer.html">pysys.writer</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.api.html">pysys.writer.api</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.writer.ci</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#githubactionsciwriter">GitHubActionsCIWriter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#travisciwriter">TravisCIWriter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.console.html">pysys.writer.console</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.outcomes.html">pysys.writer.outcomes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.writer.testoutput.html">pysys.writer.testoutput</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.writer.html">pysys.writer</a> &raquo;</li>
+        
+      <li>pysys.writer.ci</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.writer.ci.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.writer.ci">
+<span id="pysys-writer-ci"></span><h1>pysys.writer.ci<a class="headerlink" href="#module-pysys.writer.ci" title="Permalink to this headline">¶</a></h1>
+<p>Writers for recording test results to Continuous Integration providers.</p>
+<p>These writers only generate output if the 
+environment variables associated with their CI system are set.</p>
+<p>If you wish to run PySys from a CI provider that’s not listed here, for basic functionality all you need to 
+do is run the tests with the <code class="docutils literal notranslate"><span class="pre">--ci</span></code> option. Many CI providers (including Jenkins) will be able to read the 
+results of PySys tests if you configure them to look in the results directory generated by 
+<a class="reference internal" href="pysys.writer.outcomes.html#pysys.writer.outcomes.JUnitXMLResultsWriter" title="pysys.writer.outcomes.JUnitXMLResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.outcomes.JUnitXMLResultsWriter</span></code></a>. 
+It may also be possible to configure some providers to automatically pick up archived test output from artifacts 
+from the <a class="reference internal" href="pysys.writer.testoutput.html#pysys.writer.testoutput.TestOutputArchiveWriter" title="pysys.writer.testoutput.TestOutputArchiveWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.testoutput.TestOutputArchiveWriter</span></code></a> directory.</p>
+<p>If you want to implement additional functionality for your 
+CI provider, subclass <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a> (using the classes in this module as an example), and 
+consider contributing your implementation back to the PySys project with a pull request.</p>
+<div class="section" id="githubactionsciwriter">
+<h2>GitHubActionsCIWriter<a class="headerlink" href="#githubactionsciwriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.ci.GitHubActionsCIWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.ci.</code><code class="sig-name descname">GitHubActionsCIWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/ci.html#GitHubActionsCIWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.ci.GitHubActionsCIWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a>, <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.TestOutcomeSummaryGenerator" title="pysys.writer.api.TestOutcomeSummaryGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.TestOutcomeSummaryGenerator</span></code></a>, <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.ArtifactPublisher" title="pysys.writer.api.ArtifactPublisher"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.ArtifactPublisher</span></code></a></p>
+<p>Writer for GitHub(R) Actions.</p>
+<p>Produces annotations summarizing failures, adds grouping/folding of detailed test output, and 
+sets step output variables for any published artifacts (e.g. performance .csv files, archived test output etc) 
+which can be used to upload the artifacts when present. Step output variables for published artifacts are named 
+‘artifact_CATEGORY’ (for more details on artifact categories see <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.ArtifactPublisher.publishArtifact" title="pysys.writer.api.ArtifactPublisher.publishArtifact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.writer.api.ArtifactPublisher.publishArtifact</span></code></a>).</p>
+<p>For example, if the step is given the id <code class="docutils literal notranslate"><span class="pre">pysys</span></code> then the directory containing archived test output for failures 
+can be uploaded using <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">steps.pysys.outputs.artifact_TestOutputArchiveDir</span> <span class="pre">}}</span></code>.</p>
+<p>Be sure to include a unique run id (e.g. outdir) for each OS/job in the name of any uploaded artifacts so that 
+they do not overwrite each other when uploaded.</p>
+<p>See the PySys sample projects on GitHub(R) for a workflow file you can copy into your own project to enable 
+running your PySys tests with GitHub(R) Actions.</p>
+<p>Only enabled when running under GitHub Actions (specifically, if the <code class="docutils literal notranslate"><span class="pre">GITHUB_ACTIONS=true</span></code> environment variable is set).</p>
+<dl class="py attribute">
+<dt id="pysys.writer.ci.GitHubActionsCIWriter.failureSummaryAnnotations">
+<code class="sig-name descname">failureSummaryAnnotations</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.ci.GitHubActionsCIWriter.failureSummaryAnnotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether a single annotation is added with a summary of the number of failures and the outcome and reason 
+for all failures.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.ci.GitHubActionsCIWriter.failureTestLogAnnotations">
+<code class="sig-name descname">failureTestLogAnnotations</code><em class="property"> = True</em><a class="headerlink" href="#pysys.writer.ci.GitHubActionsCIWriter.failureTestLogAnnotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures whether annotations are added with the (run.log) log output for each of the first few test failures.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.writer.ci.GitHubActionsCIWriter.maxAnnotations">
+<code class="sig-name descname">maxAnnotations</code><em class="property"> = 10</em><a class="headerlink" href="#pysys.writer.ci.GitHubActionsCIWriter.maxAnnotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures the maximum number of annotations generated by this invocation of PySys, to cope with GitHub limits.</p>
+<p>This ensure we don’t use up our entire allocation of annotations leaving no space for annotations from other 
+tools. Being aware of this limit also allows to us add a warning to the end of the last one to make clear no more 
+annotations will be shown even if there are more warnings.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="travisciwriter">
+<h2>TravisCIWriter<a class="headerlink" href="#travisciwriter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.writer.ci.TravisCIWriter">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.writer.ci.</code><code class="sig-name descname">TravisCIWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/writer/ci.html#TravisCIWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.writer.ci.TravisCIWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pysys.writer.api.html#pysys.writer.api.BaseRecordResultsWriter" title="pysys.writer.api.BaseRecordResultsWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pysys.writer.api.BaseRecordResultsWriter</span></code></a></p>
+<p>Writer for Travis CI(R).</p>
+<p>Provides folding of test log details, and correct coloring of console output for Travis.</p>
+<p>Only enabled when running under Travis (specifically, 
+if the <code class="docutils literal notranslate"><span class="pre">TRAVIS=true</span></code> environment variable is set).</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.writer.console.html" class="btn btn-neutral float-right" title="pysys.writer.console" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.writer.api.html" class="btn btn-neutral float-left" title="pysys.writer.api" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

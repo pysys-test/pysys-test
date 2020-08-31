@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.fileunzip &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.utils.fileutils" href="pysys.utils.fileutils.html" />
+    <link rel="prev" title="pysys.utils.filereplace" href="pysys.utils.filereplace.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.utils.html">pysys.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.allocport.html">pysys.utils.allocport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filediff.html">pysys.utils.filediff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filegrep.html">pysys.utils.filegrep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filereplace.html">pysys.utils.filereplace</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.fileunzip</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#unzipall">unzipall</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unzip">unzip</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.fileutils.html">pysys.utils.fileutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.utils.html">pysys.utils</a> &raquo;</li>
+        
+      <li>pysys.utils.fileunzip</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.utils.fileunzip.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.utils.fileunzip">
+<span id="pysys-utils-fileunzip"></span><h1>pysys.utils.fileunzip<a class="headerlink" href="#module-pysys.utils.fileunzip" title="Permalink to this headline">¶</a></h1>
+<p>Unpacking one or more compressed files.</p>
+<div class="section" id="unzipall">
+<h2>unzipall<a class="headerlink" href="#unzipall" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileunzip.unzipall">
+<code class="sig-prename descclassname">pysys.utils.fileunzip.</code><code class="sig-name descname">unzipall</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">binary</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileunzip.html#unzipall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileunzip.unzipall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unzip all .gz files in a given directory.</p>
+<p>Archive files are automatically deleted after unzipping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – The full path to the directory containing the archive files.</p></li>
+<li><p><strong>binary</strong> – Boolean flag to indicate if the unzipped files should be written as binary. 
+The default value of False indicates that on some platforms newline characters will be 
+converted to the operating system default.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="pysys.exceptions.html#pysys.exceptions.FileNotFoundException" title="pysys.exceptions.FileNotFoundException"><strong>FileNotFoundException</strong></a> – Raised if the directory path does not exist.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="unzip">
+<h2>unzip<a class="headerlink" href="#unzip" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.fileunzip.unzip">
+<code class="sig-prename descclassname">pysys.utils.fileunzip.</code><code class="sig-name descname">unzip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zfilename</span></em>, <em class="sig-param"><span class="n">replace</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">binary</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/fileunzip.html#unzip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.fileunzip.unzip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unzip a .gz archive and write the contents to disk.</p>
+<p>The method will unpack a file of the form <code class="xref py py-obj docutils literal notranslate"><span class="pre">file.data.gz</span></code> to <code class="xref py py-obj docutils literal notranslate"><span class="pre">file.data</span></code>, removing the 
+archive file in the process if the <code class="xref py py-obj docutils literal notranslate"><span class="pre">replace</span></code> input parameter is set to true.</p>
+<p>By default the unpacked archive is treated as non-binary data, 
+unless the binary input parameter is set to true.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zfilename</strong> – The full path to the archive file.</p></li>
+<li><p><strong>replace</strong> – Boolean flag to indicate if the archive file should be removed after unpacking.</p></li>
+<li><p><strong>binary</strong> – Boolean flag to indicate if the unzipped file should be written as binary.
+The default value of False indicates that on some platforms newline characters will be 
+converted to the operating system default.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="pysys.exceptions.html#pysys.exceptions.FileNotFoundException" title="pysys.exceptions.FileNotFoundException"><strong>pysys.exceptions.FileNotFoundException</strong></a> – Raised if the archive file does not exist.</p></li>
+<li><p><strong>pysys.exceptions.IncorrectFileTypeEception</strong> – Raised if the archive file does not have a .gz extension.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.utils.fileutils.html" class="btn btn-neutral float-right" title="pysys.utils.fileutils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.utils.filereplace.html" class="btn btn-neutral float-left" title="pysys.utils.filereplace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

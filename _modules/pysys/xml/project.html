@@ -1,0 +1,884 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.xml.project &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.xml.project</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.xml.project</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The `Project &lt;pysys.xml.project.Project&gt;` class holds the ``pysysproject.xml`` project configuration, including all </span>
+<span class="sd">user-defined project properties. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Project&#39;</span><span class="p">]</span> <span class="c1"># Project is the only member we expose/document from this module</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">xml.dom.minidom</span><span class="o">,</span> <span class="nn">collections</span><span class="o">,</span> <span class="nn">codecs</span><span class="o">,</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+
+<span class="kn">import</span> <span class="nn">pysys</span>
+<span class="kn">import</span> <span class="nn">pysys.utils.misc</span>
+<span class="kn">from</span> <span class="nn">pysys.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pysys</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.loader</span> <span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.logutils</span> <span class="kn">import</span> <span class="n">ColorLogFormatter</span><span class="p">,</span> <span class="n">BaseLogFormatter</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.fileutils</span> <span class="kn">import</span> <span class="n">mkdir</span><span class="p">,</span> <span class="n">loadProperties</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">openfile</span><span class="p">,</span> <span class="n">makeReadOnlyDict</span>
+<span class="kn">from</span> <span class="nn">pysys.exceptions</span> <span class="kn">import</span> <span class="n">UserError</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.xml.project&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">_XMLProjectParser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	:meta private: Not public API. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">outdir</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">xmlfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading project file: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xmlfile</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="s1">&#39;env&#39;</span>
+		
+		<span class="c1"># project load time is a reasonable proxy for test start time, </span>
+		<span class="c1"># and we might want to substitute the date/time into property values</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">startTimestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s1">&#39;testRootDir&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span>
+			
+			<span class="s1">&#39;outDirName&#39;</span><span class="p">:</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">outdir</span><span class="p">),</span>
+			
+			<span class="s1">&#39;startDate&#39;</span><span class="p">:</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startTimestamp</span><span class="p">)),</span>
+			<span class="s1">&#39;startTime&#39;</span><span class="p">:</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H.%M.%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startTimestamp</span><span class="p">)),</span>
+			<span class="s1">&#39;startTimeSecs&#39;</span><span class="p">:</span><span class="s1">&#39;</span><span class="si">%0.3f</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">startTimestamp</span><span class="p">,</span>
+
+			<span class="s1">&#39;hostname&#39;</span><span class="p">:</span><span class="n">HOSTNAME</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+			<span class="s1">&#39;os&#39;</span><span class="p">:</span><span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="c1"># e.g. &#39;windows&#39;, &#39;linux&#39;, &#39;darwin&#39;; a more modern alternative to OSFAMILY</span>
+			<span class="s1">&#39;osfamily&#39;</span><span class="p">:</span><span class="n">OSFAMILY</span><span class="p">,</span> <span class="c1"># windows or unix</span>
+
+			<span class="c1"># old names</span>
+			<span class="s1">&#39;root&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="c1"># old name for testRootDir</span>
+		<span class="p">}</span>
+		
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xmlfile</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unable to find supplied project file </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">xmlfile</span><span class="p">)</span>
+		
+		<span class="k">try</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">dom</span><span class="o">.</span><span class="n">minidom</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xmlfile</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;pysysproject&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]:</span>
+				<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No &lt;pysysproject&gt; element supplied in project file&quot;</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;pysysproject&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+
+	<span class="k">def</span> <span class="nf">checkVersions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">requirespython</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;requires-python&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">requirespython</span> <span class="ow">and</span> <span class="n">requirespython</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">firstChild</span><span class="p">:</span> 
+			<span class="n">requirespython</span> <span class="o">=</span> <span class="n">requirespython</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">firstChild</span><span class="o">.</span><span class="n">nodeValue</span>
+			<span class="k">if</span> <span class="n">requirespython</span><span class="p">:</span>
+				<span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">requirespython</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))):</span>
+					<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;This test project requires Python version </span><span class="si">%s</span><span class="s1"> or greater, but this is version </span><span class="si">%s</span><span class="s1"> (from </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">requirespython</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">3</span><span class="p">]]),</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">))</span>
+
+		<span class="n">requirespysys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;requires-pysys&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">requirespysys</span> <span class="ow">and</span> <span class="n">requirespysys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">firstChild</span><span class="p">:</span> 
+			<span class="n">requirespysys</span> <span class="o">=</span> <span class="n">requirespysys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">firstChild</span><span class="o">.</span><span class="n">nodeValue</span>
+			<span class="k">if</span> <span class="n">requirespysys</span><span class="p">:</span>
+				<span class="n">thisversion</span> <span class="o">=</span> <span class="n">__version__</span>
+				<span class="k">if</span> <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">compareVersions</span><span class="p">(</span><span class="n">requirespysys</span><span class="p">,</span> <span class="n">thisversion</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+					<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;This test project requires PySys version </span><span class="si">%s</span><span class="s1"> or greater, but this is version </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">requirespysys</span><span class="p">,</span> <span class="n">thisversion</span><span class="p">))</span>
+
+
+	<span class="k">def</span> <span class="nf">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>	
+
+
+	<span class="k">def</span> <span class="nf">getProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">propertyNodeList</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;property&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">parentNode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">]</span>
+
+		<span class="k">for</span> <span class="n">propertyNode</span> <span class="ow">in</span> <span class="n">propertyNodeList</span><span class="p">:</span>
+			<span class="n">permittedAttributes</span> <span class="o">=</span> <span class="kc">None</span>
+			<span class="c1"># use of these options for customizing the property names of env/root/osfamily is no longer encouraged; just kept for compat</span>
+			<span class="k">if</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">hasAttribute</span><span class="p">(</span><span class="s2">&quot;environment&quot;</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;environment&quot;</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">hasAttribute</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">):</span> 
+				<span class="n">propname</span> <span class="o">=</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">propname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Setting project property </span><span class="si">%s</span><span class="s1">=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">propname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">hasAttribute</span><span class="p">(</span><span class="s2">&quot;osfamily&quot;</span><span class="p">):</span> <span class="c1"># just for older configs, better to use ${os} now</span>
+				<span class="n">propname</span> <span class="o">=</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;osfamily&quot;</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">propname</span><span class="p">]</span> <span class="o">=</span> <span class="n">OSFAMILY</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Setting project property </span><span class="si">%s</span><span class="s1">=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">propname</span><span class="p">,</span> <span class="n">OSFAMILY</span><span class="p">)</span>
+					
+			<span class="k">elif</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">hasAttribute</span><span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">):</span> 
+				<span class="n">file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="n">propertyNode</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;properties file reading&#39;</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">getPropertiesFromFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span> <span class="k">if</span> <span class="n">file</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> 
+					<span class="n">pathMustExist</span><span class="o">=</span><span class="p">(</span><span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;pathMustExist&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span><span class="p">,</span>
+					<span class="n">includes</span><span class="o">=</span><span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;includes&quot;</span><span class="p">),</span>
+					<span class="n">excludes</span><span class="o">=</span><span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;excludes&quot;</span><span class="p">),</span>
+					<span class="n">prefix</span><span class="o">=</span><span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;prefix&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+					<span class="p">)</span>
+				<span class="n">permittedAttributes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;pathMustExist&#39;</span><span class="p">,</span> <span class="s1">&#39;includes&#39;</span><span class="p">,</span> <span class="s1">&#39;excludes&#39;</span><span class="p">,</span> <span class="s1">&#39;prefix&#39;</span><span class="p">}</span>
+
+			<span class="k">elif</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">hasAttribute</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
+				<span class="n">name</span> <span class="o">=</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> 
+				<span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="n">propertyNode</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">:</span>
+					<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cannot set project property &quot;</span><span class="si">%s</span><span class="s1">&quot; as it is already set&#39;</span><span class="o">%</span><span class="n">name</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Setting project property </span><span class="si">%s</span><span class="s1">=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+				<span class="k">if</span> <span class="p">(</span><span class="n">propertyNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;pathMustExist&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span><span class="p">:</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">value</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="n">value</span><span class="p">))):</span>
+						<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cannot find path referenced in project property &quot;</span><span class="si">%s</span><span class="s1">&quot;: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span>
+							<span class="n">name</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="n">value</span><span class="p">))))</span>
+				<span class="n">permittedAttributes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;pathMustExist&#39;</span><span class="p">}</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Found &lt;property&gt; with no name= or file=&#39;</span><span class="p">)</span>
+			
+			<span class="k">if</span> <span class="n">permittedAttributes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">att</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">propertyNode</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">length</span><span class="p">):</span>
+					<span class="n">attName</span> <span class="o">=</span> <span class="n">propertyNode</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">att</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+					<span class="k">if</span> <span class="n">attName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">permittedAttributes</span><span class="p">:</span> 
+						<span class="c1"># not an error, to allow for adding new ones in future pysys versions, but worth warning about</span>
+						<span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Unknown &lt;property&gt; attribute &quot;</span><span class="si">%s</span><span class="s1">&quot; in project configuration&#39;</span><span class="o">%</span><span class="n">attName</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span>
+
+
+
+	<span class="k">def</span> <span class="nf">getPropertiesFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">pathMustExist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">includes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">excludes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+			<span class="k">if</span> <span class="n">pathMustExist</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cannot find properties file referenced in </span><span class="si">%s</span><span class="s1">: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">xmlfile</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Skipping project properties file which not exist: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+			<span class="k">return</span>
+
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">rawProps</span> <span class="o">=</span> <span class="n">loadProperties</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="c1"># since PySys 1.6.0 this is UTF-8 by default</span>
+		<span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+			<span class="c1"># fall back to ISO8859-1 if not valid UTF-8 (matching Java 9+ behaviour)</span>
+			<span class="n">rawProps</span> <span class="o">=</span> <span class="n">loadProperties</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;iso8859-1&#39;</span><span class="p">)</span>
+		
+		<span class="n">props</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">rawProps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+			<span class="k">if</span> <span class="n">includes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">includes</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span> <span class="k">continue</span>
+			<span class="k">if</span> <span class="n">excludes</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">excludes</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span> <span class="k">continue</span>
+			<span class="n">props</span><span class="p">[</span><span class="n">prefix</span><span class="o">+</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+				
+		<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">props</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+			<span class="c1"># when loading properties files it&#39;s not so helpful to give errors (and there&#39;s nowhere else to put an empty value) so default to empty string</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>	
+			
+			<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+				<span class="c1"># Whereas we want a hard error for duplicate &lt;property name=&quot;.../&gt; entries, for properties files </span>
+				<span class="c1"># there&#39;s a good case to allow overwriting of properties, but it log it at INFO</span>
+				<span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Overwriting previous value of project property &quot;</span><span class="si">%s</span><span class="s1">&quot; with new value &quot;</span><span class="si">%s</span><span class="s1">&quot; from &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">)))</span>
+
+			<span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Setting project property </span><span class="si">%s</span><span class="s1">=&quot;</span><span class="si">%s</span><span class="s1">&quot; (from </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">file</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">expandProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Expand any ${...} project properties or env vars, with ${$} for escaping.</span>
+<span class="sd">		The &quot;default&quot; is expanded and used if value contains some undefined variables. </span>
+<span class="sd">		If default=None then an error is raised instead. If default is a node, its &quot;default&quot; attribute is used</span>
+<span class="sd">		</span>
+<span class="sd">		The &quot;name&quot; is used to generate more informative error messages</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">envprefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">+</span><span class="s1">&#39;.&#39;</span>
+		<span class="n">errorprefix</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Error setting project property &quot;</span><span class="si">%s</span><span class="s1">&quot;: &#39;</span><span class="o">%</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+		
+		<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="s1">&#39;getAttribute&#39;</span><span class="p">):</span>
+			<span class="n">default</span> <span class="o">=</span> <span class="n">default</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">default</span><span class="o">.</span><span class="n">hasAttribute</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+		<span class="k">def</span> <span class="nf">expandProperty</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+			<span class="n">m</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="s1">&#39;$&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;$&#39;</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">envprefix</span><span class="p">):</span> 
+					<span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">envprefix</span><span class="p">):]]</span>
+			<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="n">errorprefix</span><span class="o">+</span><span class="s1">&#39;cannot find environment variable &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="n">m</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">envprefix</span><span class="p">):])</span>
+			
+			<span class="k">if</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">:</span>
+				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="n">errorprefix</span><span class="o">+</span><span class="s1">&#39;PySys project property ${</span><span class="si">%s</span><span class="s1">} is not defined, please check your pysysproject.xml file&quot;&#39;</span><span class="o">%</span><span class="n">m</span><span class="p">)</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[$][{]([^}]+)[}]&#39;</span><span class="p">,</span> <span class="n">expandProperty</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+		<span class="k">except</span> <span class="n">UserError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">; if this is intended to be an optional property please add a default=&quot;...&quot; value&#39;</span><span class="o">%</span><span class="n">ex</span><span class="p">)</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Failed to resolve value &quot;</span><span class="si">%s</span><span class="s1">&quot; of property &quot;</span><span class="si">%s</span><span class="s1">&quot;, so falling back to default value&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;&lt;unknown&gt;&#39;</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[$][{]([^}]+)[}]&#39;</span><span class="p">,</span> <span class="n">expandProperty</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">getRunnerDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;runner&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">nodes</span><span class="p">:</span> <span class="k">return</span> <span class="n">DEFAULT_RUNNER</span>
+		<span class="n">classname</span><span class="p">,</span> <span class="n">propertiesdict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="n">returnClassAsName</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="n">propertiesdict</span><span class="p">,</span> <span class="s1">&#39;Properties are not supported under &lt;runner&gt;&#39;</span>
+		<span class="k">return</span> <span class="n">classname</span>
+
+	<span class="k">def</span> <span class="nf">getCollectTestOutputDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;collect-test-output&#39;</span><span class="p">):</span>
+			<span class="n">x</span> <span class="o">=</span> <span class="p">{</span>
+				<span class="s1">&#39;pattern&#39;</span><span class="p">:</span><span class="n">n</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;pattern&#39;</span><span class="p">),</span>
+				<span class="s1">&#39;outputDir&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;outputDir&#39;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;collect-test-output outputDir&#39;</span><span class="p">),</span>
+				<span class="s1">&#39;outputPattern&#39;</span><span class="p">:</span><span class="n">n</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;outputPattern&#39;</span><span class="p">),</span>
+			<span class="p">}</span>
+			<span class="k">assert</span> <span class="s1">&#39;pattern&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span>
+			<span class="k">assert</span> <span class="s1">&#39;outputDir&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span>
+			<span class="k">assert</span> <span class="s1">&#39;outputPattern&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span>
+			<span class="k">assert</span> <span class="s1">&#39;@UNIQUE@&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;outputPattern&#39;</span><span class="p">],</span> <span class="s1">&#39;collect-test-output outputPattern must include @UNIQUE@&#39;</span>
+			<span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">r</span>
+
+
+	<span class="k">def</span> <span class="nf">getPerformanceReporterDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">nodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;performance-reporter&#39;</span><span class="p">)</span>
+		<span class="bp">cls</span><span class="p">,</span> <span class="n">optionsDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">nodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">nodeList</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;pysys.utils.perfreporter.CSVPerformanceReporter&#39;</span><span class="p">)</span>
+			
+		<span class="n">summaryfile</span> <span class="o">=</span> <span class="n">optionsDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;summaryfile&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+		<span class="n">summaryfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">summaryfile</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;performance-reporter summaryfile&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">optionsDict</span><span class="p">:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unexpected performancereporter attribute(s): &#39;</span><span class="o">+</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">optionsDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+		
+		<span class="k">return</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">summaryfile</span>
+
+	<span class="k">def</span> <span class="nf">getProjectHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">help</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+		<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;project-help&#39;</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">childNodes</span><span class="p">:</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">nodeType</span> <span class="ow">in</span> <span class="p">{</span><span class="n">e</span><span class="o">.</span><span class="n">TEXT_NODE</span><span class="p">,</span><span class="n">e</span><span class="o">.</span><span class="n">CDATA_SECTION_NODE</span><span class="p">})</span> <span class="ow">and</span> <span class="n">n</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+					<span class="n">help</span> <span class="o">+=</span> <span class="n">n</span><span class="o">.</span><span class="n">data</span>
+		<span class="k">return</span> <span class="n">help</span>
+
+	<span class="k">def</span> <span class="nf">getDescriptorLoaderClass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">nodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;descriptor-loader&#39;</span><span class="p">)</span>
+		<span class="bp">cls</span><span class="p">,</span> <span class="n">optionsDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">nodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">nodeList</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;pysys.xml.descriptor.DescriptorLoader&#39;</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">optionsDict</span><span class="p">:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Unexpected descriptor-loader attribute(s): &#39;</span><span class="o">+</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">optionsDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+		
+		<span class="k">return</span> <span class="bp">cls</span>
+
+	<span class="k">def</span> <span class="nf">getTestPlugins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">plugins</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;test-plugin&#39;</span><span class="p">):</span>
+			<span class="bp">cls</span><span class="p">,</span> <span class="n">optionsDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+			<span class="n">alias</span> <span class="o">=</span> <span class="n">optionsDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;alias&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+			<span class="n">plugins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">alias</span><span class="p">,</span> <span class="n">optionsDict</span><span class="p">)</span> <span class="p">)</span>
+		<span class="k">return</span> <span class="n">plugins</span>
+		
+	<span class="k">def</span> <span class="nf">getRunnerPlugins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">plugins</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;runner-plugin&#39;</span><span class="p">):</span>
+			<span class="bp">cls</span><span class="p">,</span> <span class="n">optionsDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+			<span class="n">alias</span> <span class="o">=</span> <span class="n">optionsDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;alias&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+			<span class="n">plugins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">alias</span><span class="p">,</span> <span class="n">optionsDict</span><span class="p">)</span> <span class="p">)</span>
+		<span class="k">return</span> <span class="n">plugins</span>
+
+	<span class="k">def</span> <span class="nf">getDescriptorLoaderPlugins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">plugins</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;descriptor-loader-plugin&#39;</span><span class="p">):</span>
+			<span class="bp">cls</span><span class="p">,</span> <span class="n">optionsDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+			<span class="n">plugins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">optionsDict</span><span class="p">)</span> <span class="p">)</span>
+		<span class="k">return</span> <span class="n">plugins</span>
+
+	<span class="k">def</span> <span class="nf">getMakerDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;maker&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">nodes</span><span class="p">:</span> <span class="k">return</span> <span class="n">DEFAULT_MAKER</span>
+		<span class="n">classname</span><span class="p">,</span> <span class="n">propertiesdict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="n">returnClassAsName</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="k">assert</span> <span class="ow">not</span> <span class="n">propertiesdict</span><span class="p">,</span> <span class="s1">&#39;Properties are not supported under &lt;maker&gt;&#39;</span>
+		<span class="k">return</span> <span class="n">classname</span>
+	
+	<span class="k">def</span> <span class="nf">createFormatters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">stdout</span> <span class="o">=</span> <span class="n">runlog</span> <span class="o">=</span> <span class="kc">None</span>
+		
+		<span class="n">formattersNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;formatters&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">formattersNodeList</span><span class="p">:</span>
+			<span class="n">formattersNodeList</span> <span class="o">=</span> <span class="n">formattersNodeList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;formatter&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">formattersNodeList</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">formatterNode</span> <span class="ow">in</span> <span class="n">formattersNodeList</span><span class="p">:</span>
+				<span class="n">fname</span> <span class="o">=</span> <span class="n">formatterNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">fname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;stdout&#39;</span><span class="p">,</span> <span class="s1">&#39;runlog&#39;</span><span class="p">]:</span>
+					<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Formatter &quot;</span><span class="si">%s</span><span class="s1">&quot; is invalid - must be stdout or runlog&#39;</span><span class="o">%</span><span class="n">fname</span><span class="p">)</span>
+
+				<span class="k">if</span> <span class="n">fname</span> <span class="o">==</span> <span class="s1">&#39;stdout&#39;</span><span class="p">:</span>
+					<span class="bp">cls</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">formatterNode</span><span class="p">,</span> <span class="s1">&#39;pysys.utils.logutils.ColorLogFormatter&#39;</span><span class="p">)</span>
+					<span class="n">options</span><span class="p">[</span><span class="s1">&#39;__formatterName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;stdout&#39;</span>
+					<span class="n">stdout</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="bp">cls</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">formatterNode</span><span class="p">,</span> <span class="s1">&#39;pysys.utils.logutils.BaseLogFormatter&#39;</span><span class="p">)</span>
+					<span class="n">options</span><span class="p">[</span><span class="s1">&#39;__formatterName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;runlog&#39;</span>
+					<span class="n">runlog</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">runlog</span>
+
+	<span class="k">def</span> <span class="nf">getDefaultFileEncodings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;default-file-encoding&#39;</span><span class="p">):</span>
+			<span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;pattern&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+			<span class="n">encoding</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">pattern</span><span class="p">:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;&lt;default-file-encoding&gt; element must include both a pattern= attribute&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">encoding</span><span class="p">:</span> 
+				<span class="n">codecs</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span> <span class="c1"># give an exception if an invalid encoding is specified</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">encoding</span><span class="o">=</span><span class="kc">None</span>
+			<span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;pattern&#39;</span><span class="p">:</span><span class="n">pattern</span><span class="p">,</span> <span class="s1">&#39;encoding&#39;</span><span class="p">:</span><span class="n">encoding</span><span class="p">})</span>
+		<span class="k">return</span> <span class="n">result</span>
+
+	<span class="k">def</span> <span class="nf">getExecutionOrderHints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">secondaryModesHintDelta</span> <span class="o">=</span> <span class="kc">None</span>
+		
+		<span class="k">def</span> <span class="nf">makeregex</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+			<span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;!&#39;</span><span class="p">):</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Exclusions such as !xxx are not permitted in execution-order configuration&#39;</span><span class="p">)</span>
+			
+			<span class="c1"># make a regex that will match either the entire expression as a literal </span>
+			<span class="c1"># or the entire expression as a regex</span>
+			<span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">)</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="c1">#return re.compile(&#39;(%s|%s)$&#39;%(re.escape(s), s))</span>
+				<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">$&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Invalid regular expression in execution-order &quot;</span><span class="si">%s</span><span class="s1">&quot;: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ex</span><span class="p">))</span>
+		
+		<span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;execution-order&#39;</span><span class="p">):</span>
+			<span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;secondaryModesHintDelta&#39;</span><span class="p">):</span>
+				<span class="n">secondaryModesHintDelta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;secondaryModesHintDelta&#39;</span><span class="p">))</span>
+			<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;execution-order&#39;</span><span class="p">):</span>
+				<span class="n">moderegex</span> <span class="o">=</span> <span class="n">makeregex</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;forMode&#39;</span><span class="p">))</span>
+				<span class="n">groupregex</span> <span class="o">=</span> <span class="n">makeregex</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;forGroup&#39;</span><span class="p">))</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">moderegex</span> <span class="ow">or</span> <span class="n">groupregex</span><span class="p">):</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Must specify either forMode, forGroup or both&#39;</span><span class="p">)</span>
+				
+				<span class="n">hintmatcher</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">groups</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">moderegex</span><span class="o">=</span><span class="n">moderegex</span><span class="p">,</span> <span class="n">groupregex</span><span class="o">=</span><span class="n">groupregex</span><span class="p">:</span> <span class="p">(</span>
+					<span class="p">(</span><span class="n">moderegex</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">moderegex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">mode</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="ow">and</span>
+					<span class="p">(</span><span class="n">groupregex</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">groupregex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">))</span>
+					<span class="p">)</span>
+				
+				<span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> 
+					<span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;hint&#39;</span><span class="p">)),</span> <span class="n">hintmatcher</span> <span class="p">)</span>
+					<span class="p">)</span>
+		<span class="k">if</span> <span class="n">secondaryModesHintDelta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+			<span class="n">secondaryModesHintDelta</span> <span class="o">=</span> <span class="o">+</span><span class="mf">100.0</span> <span class="c1"># default value</span>
+		<span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">secondaryModesHintDelta</span>
+
+	<span class="k">def</span> <span class="nf">getWriterDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="c1"># writers can optionally be under a &#39;writers&#39; parent node but this is now optional, to facilitate </span>
+		<span class="c1"># a third party plugin vendor providing a snippet of a few consecutive lines to paste into the project config </span>
+		<span class="c1"># to enable new functionality</span>
+		<span class="n">writers</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">writerNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;writer&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">writerNodeList</span><span class="p">:</span> <span class="k">return</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">writerNode</span> <span class="ow">in</span> <span class="n">writerNodeList</span><span class="p">:</span>
+			<span class="n">pythonclassconstructor</span><span class="p">,</span> <span class="n">propertiesdict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseClassAndConfigDict</span><span class="p">(</span><span class="n">writerNode</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+			<span class="n">writers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">pythonclassconstructor</span><span class="p">,</span> <span class="n">propertiesdict</span><span class="p">)</span> <span class="p">)</span>
+		<span class="k">return</span> <span class="n">writers</span>
+
+	<span class="k">def</span> <span class="nf">addToPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>		
+		<span class="k">for</span> <span class="n">elementname</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="s1">&#39;pythonpath&#39;</span><span class="p">]:</span>
+			<span class="n">pathNodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="n">elementname</span><span class="p">)</span>
+
+			<span class="k">for</span> <span class="n">pathNode</span> <span class="ow">in</span> <span class="n">pathNodeList</span><span class="p">:</span>
+					<span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">pathNode</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;pythonpath&#39;</span><span class="p">)</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span> 
+						<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cannot add directory to the pythonpath: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="n">value</span><span class="p">)</span>
+
+					<span class="c1"># we ignore the &quot;relative&quot; option and always make it relative to the testrootdir if not already absolute</span>
+					<span class="n">value</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+					<span class="n">value</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">value</span><span class="p">):</span> 
+						<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Cannot add non-existent directory to the python &lt;path&gt;: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="n">value</span><span class="p">)</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Adding value to path: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+						<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+	<span class="k">def</span> <span class="nf">writeXml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xmlfile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+		<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">toxml</span><span class="p">())</span>
+		<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+	<span class="k">def</span> <span class="nf">_parseClassAndConfigDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">defaultClass</span><span class="p">,</span> <span class="n">returnClassAsName</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Parses a dictionary of arbitrary options and a python class out of the specified XML node.</span>
+
+<span class="sd">		The node may optionally contain classname and module (if not specified as a separate attribute,</span>
+<span class="sd">		module will be extracted from the first part of classname); any other attributes will be returned in</span>
+<span class="sd">		the optionsDict, as will &lt;property name=&quot;&quot;&gt;&lt;/property&gt; child elements.</span>
+
+<span class="sd">		:param node: The node, may be None</span>
+<span class="sd">		:param defaultClass: a string specifying the name of the default fully-qualified class, if any</span>
+<span class="sd">		:return: a tuple of (pythonclassconstructor, propertiesdict), or if returnClassAsName (classname, propertiesDict)</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">optionsDict</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">att</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">length</span><span class="p">):</span>
+				<span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">att</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+				<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">optionsDict</span><span class="p">:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Duplicate property &quot;</span><span class="si">%s</span><span class="s1">&quot; in &lt;</span><span class="si">%s</span><span class="s1">&gt; configuration&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">tagName</span><span class="p">))</span>
+				<span class="n">optionsDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">att</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;property&#39;</span><span class="p">):</span>
+				<span class="n">name</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+				<span class="k">assert</span> <span class="n">name</span>
+				<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">optionsDict</span><span class="p">:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Duplicate property &quot;</span><span class="si">%s</span><span class="s1">&quot; in &lt;</span><span class="si">%s</span><span class="s1">&gt; configuration&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">tagName</span><span class="p">))</span>
+				<span class="n">optionsDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+		<span class="n">classname</span> <span class="o">=</span> <span class="n">optionsDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;classname&#39;</span><span class="p">,</span> <span class="n">defaultClass</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">classname</span><span class="p">:</span> <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Missing require attribute &quot;classname=&quot; for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="o">%</span><span class="n">node</span><span class="o">.</span><span class="n">tagName</span><span class="p">)</span>
+		<span class="n">mod</span> <span class="o">=</span> <span class="n">optionsDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;module&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">classname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+		<span class="n">classname</span> <span class="o">=</span> <span class="n">classname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+		<span class="k">if</span> <span class="n">returnClassAsName</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">(</span><span class="n">mod</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="o">+</span><span class="n">classname</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">),</span> <span class="n">optionsDict</span>
+
+		<span class="c1"># defer importing the module until we actually need to instantiate the </span>
+		<span class="c1"># class, to avoid introducing tricky module import order problems, given </span>
+		<span class="c1"># that the project itself needs loading very early</span>
+		<span class="k">def</span> <span class="nf">classConstructor</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+			<span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+			<span class="bp">cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">classname</span><span class="p">)</span>
+			<span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># invoke the constructor for this class</span>
+		<span class="k">return</span> <span class="n">classConstructor</span><span class="p">,</span> <span class="n">optionsDict</span>
+
+<span class="k">def</span> <span class="nf">getProjectConfigTemplates</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Get a list of available templates that can be used for creating a new project configuration. </span>
+<span class="sd">	</span>
+<span class="sd">	:return: A dict, where each value is an absolute path to an XML template file </span>
+<span class="sd">		and each key is the display name for that template. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">templatedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;/templates/project&#39;</span>
+	<span class="n">templates</span> <span class="o">=</span> <span class="p">{</span> <span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.xml&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="n">templatedir</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">t</span> 
+		<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">templatedir</span><span class="p">)</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xml&#39;</span><span class="p">)}</span>
+	<span class="k">assert</span> <span class="n">templates</span><span class="p">,</span> <span class="s1">&#39;No project templates found in </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">templatedir</span>
+	<span class="k">return</span> <span class="n">templates</span>
+
+<span class="k">def</span> <span class="nf">createProjectConfig</span><span class="p">(</span><span class="n">targetdir</span><span class="p">,</span> <span class="n">templatepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Create a new project configuration file in the specified targetdir. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">templatepath</span><span class="p">:</span> <span class="n">templatepath</span> <span class="o">=</span> <span class="n">getProjectConfigTemplates</span><span class="p">()[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span>
+	<span class="n">mkdir</span><span class="p">(</span><span class="n">targetdir</span><span class="p">)</span>
+	<span class="c1"># using ascii ensures we don&#39;t unintentionally add weird characters to the default (utf-8) file</span>
+	<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">templatepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+		<span class="k">with</span> <span class="n">openfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">targetdir</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">DEFAULT_PROJECTFILE</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">target</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">src</span><span class="p">:</span>
+				<span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@PYTHON_VERSION@&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+				<span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;@PYSYS_VERSION@&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]))</span>
+				<span class="n">target</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.project.html#pysys.xml.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Contains settings for the entire test project, as defined by the </span>
+<span class="sd">	``pysysproject.xml`` project configuration file.</span>
+<span class="sd">	</span>
+<span class="sd">	To get a reference to the current `Project` instance, use the </span>
+<span class="sd">	`pysys.basetest.BaseTest.project` </span>
+<span class="sd">	(or `pysys.process.user.ProcessUser.project`) field. </span>
+<span class="sd">	</span>
+<span class="sd">	All project properties are strings. If you need to get a project property value that&#39;s a a bool/int/float/list it is </span>
+<span class="sd">	recommended to use `getProperty()` which will automatically perform the conversion. For string properties </span>
+<span class="sd">	you can just use ``project.propName`` or ``project.properties[&#39;propName&#39;]``. </span>
+<span class="sd">	</span>
+<span class="sd">	:ivar dict(str,str) ~.properties: The resolved values of all project properties defined in the configuration file. </span>
+<span class="sd">		In addition, each of these is set as an attribute onto the `Project` instance itself. </span>
+<span class="sd">	:ivar str ~.root: Full path to the project root directory, as specified by the first PySys project</span>
+<span class="sd">		file encountered when walking up the directory tree from the start directory. </span>
+<span class="sd">		If no project file was found, this is just the start directory PySys was run from.</span>
+<span class="sd">	:ivar str ~.projectFile: Full path to the project file.  </span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">__INSTANCE</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="n">__frozen</span> <span class="o">=</span> <span class="kc">False</span>
+	
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">projectFile</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="k">assert</span> <span class="n">projectFile</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">outdir</span><span class="p">:</span> <span class="n">outdir</span> <span class="o">=</span> <span class="n">DEFAULT_OUTDIR</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">projectFile</span><span class="p">)):</span>
+			<span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s2">&quot;Project file not found: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">projectFile</span><span class="p">)))</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">parser</span> <span class="o">=</span> <span class="n">_XMLProjectParser</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">projectFile</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">)</span>
+		<span class="k">except</span> <span class="n">UserError</span><span class="p">:</span>
+			<span class="k">raise</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> 
+			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error parsing project file </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">projectFile</span><span class="p">),</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+
+		<span class="n">parser</span><span class="o">.</span><span class="n">checkVersions</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">projectFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">projectFile</span><span class="p">)</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">startTimestamp</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">startTimestamp</span>
+		
+		<span class="c1"># get the properties</span>
+		<span class="n">properties</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span>
+		<span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+		<span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+		<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span> 
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span> <span class="c1"># don&#39;t overwrite existing props; people will have to use .getProperty() to access them</span>
+				<span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+		
+		<span class="c1"># add to the python path</span>
+		<span class="n">parser</span><span class="o">.</span><span class="n">addToPath</span><span class="p">()</span>
+
+		<span class="c1"># get the runner if specified</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runnerClassname</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getRunnerDetails</span><span class="p">()</span>
+
+		<span class="c1"># get the maker if specified</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">makerClassname</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getMakerDetails</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">writers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getWriterDetails</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">testPlugins</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getTestPlugins</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runnerPlugins</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getRunnerPlugins</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_descriptorLoaderPlugins</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getDescriptorLoaderPlugins</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">perfReporterConfig</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getPerformanceReporterDetails</span><span class="p">()</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">descriptorLoaderClass</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getDescriptorLoaderClass</span><span class="p">()</span>
+
+		<span class="c1"># get the stdout and runlog formatters</span>
+		<span class="n">stdoutformatter</span><span class="p">,</span> <span class="n">runlogformatter</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">createFormatters</span><span class="p">()</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">defaultFileEncodings</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getDefaultFileEncodings</span><span class="p">()</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">executionOrderHints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">executionOrderSecondaryModesHintDelta</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getExecutionOrderHints</span><span class="p">()</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">collectTestOutput</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getCollectTestOutputDetails</span><span class="p">()</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">projectHelp</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getProjectHelp</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">projectHelp</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">expandProperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectHelp</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;project-help&#39;</span><span class="p">)</span>
+		
+		<span class="c1"># set the data attributes</span>
+		<span class="n">parser</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+		
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">stdoutformatter</span><span class="p">:</span> <span class="n">stdoutformatter</span> <span class="o">=</span> <span class="n">ColorLogFormatter</span><span class="p">({</span><span class="s1">&#39;__formatterName&#39;</span><span class="p">:</span><span class="s1">&#39;stdout&#39;</span><span class="p">})</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">runlogformatter</span><span class="p">:</span> <span class="n">runlogformatter</span> <span class="o">=</span> <span class="n">BaseLogFormatter</span><span class="p">({</span><span class="s1">&#39;__formatterName&#39;</span><span class="p">:</span><span class="s1">&#39;runlog&#39;</span><span class="p">})</span>
+		<span class="n">PySysFormatters</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;PySysFormatters&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;stdout&#39;</span><span class="p">,</span> <span class="s1">&#39;runlog&#39;</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">formatters</span> <span class="o">=</span> <span class="n">PySysFormatters</span><span class="p">(</span><span class="n">stdoutformatter</span><span class="p">,</span> <span class="n">runlogformatter</span><span class="p">)</span>
+		
+		<span class="c1"># for safety (test independence, and thread-safety), make it hard for people to accidentally edit project properties later</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">makeReadOnlyDict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__frozen</span> <span class="o">=</span> <span class="kc">True</span>
+
+	<span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frozen</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Project cannot be modified after it has been loaded (use the runner to store global state if needed)&#39;</span><span class="p">)</span>
+		<span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Project.expandProperties"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.project.html#pysys.xml.project.Project.expandProperties">[docs]</a>	<span class="k">def</span> <span class="nf">expandProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Expand any ${...} project properties in the specified string. </span>
+<span class="sd">		</span>
+<span class="sd">		An exception is thrown if any property is missing. This method is only for expanding project properties so </span>
+<span class="sd">		``${env.*}`` syntax is not permitted (if you need to expand an environment variable, use a project property). </span>
+<span class="sd">		</span>
+<span class="sd">		.. versionadded:: 1.6.0</span>
+<span class="sd">		</span>
+<span class="sd">		:param str value: The string in which any properties will be expanded. ${$} can be used for escaping a literal $ if needed. </span>
+<span class="sd">		:return str: The value with properties expanded, or None if value=None. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span> <span class="k">return</span> <span class="n">value</span>
+		<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[$][{]([^}]+)[}]&#39;</span><span class="p">,</span> 
+			<span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="s1">&#39;$&#39;</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;$&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)],</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Project.getProperty"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.project.html#pysys.xml.project.Project.getProperty">[docs]</a>	<span class="k">def</span> <span class="nf">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Get the specified project property value, or a default if it is not defined, with type conversion from string </span>
+<span class="sd">		to int/float/bool/list[str] (matching the default&#39;s type; for list[str], comma-separated input is assumed). </span>
+
+<span class="sd">		.. versionadded:: 1.6.0</span>
+<span class="sd">		</span>
+<span class="sd">		:param str key: The name of the property.</span>
+<span class="sd">		:param bool/int/float/str/list[str] default: The default value to return if the property is not set. </span>
+<span class="sd">			The type of the default parameter will be used to convert the property value from a string if it is </span>
+<span class="sd">			provided. An exception will be raised if the value is non-empty but cannot be converted to the indicated type. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="n">pysys</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">getTypedValueOrDefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">default</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Project.getInstance"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.project.html#pysys.xml.project.Project.getInstance">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">getInstance</span><span class="p">():</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Provides access to the singleton instance of Project.</span>
+<span class="sd">		</span>
+<span class="sd">		Raises an exception if the project has not yet been loaded.  </span>
+<span class="sd">		</span>
+<span class="sd">		Use ``self.project`` to get access to the project instance where possible, </span>
+<span class="sd">		for example from a `pysys.basetest.BaseTest` or `pysys.baserunner.BaseRunner` class. This attribute is for </span>
+<span class="sd">		use in internal functions and classes that do not have a ``self.project``.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">Project</span><span class="o">.</span><span class="n">__INSTANCE</span><span class="p">:</span> <span class="k">return</span> <span class="n">Project</span><span class="o">.</span><span class="n">__INSTANCE</span>
+		<span class="k">if</span> <span class="s1">&#39;doctest&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="k">return</span> <span class="kc">None</span> <span class="c1"># special-case for doctesting</span>
+		<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot call Project.getInstance() as the project has not been loaded yet&#39;</span><span class="p">)</span></div>
+	
+<div class="viewcode-block" id="Project.findAndLoadProject"><a class="viewcode-back" href="../../../autodocgen/pysys.xml.project.html#pysys.xml.project.Project.findAndLoadProject">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">findAndLoadProject</span><span class="p">(</span><span class="n">startdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Find and load a project file, starting from the specified directory. </span>
+<span class="sd">		</span>
+<span class="sd">		If this fails an error is logged and the process is terminated. </span>
+<span class="sd">		</span>
+<span class="sd">		The method walks up the directory tree from the supplied path until the </span>
+<span class="sd">		PySys project file is found. The location of the project file defines</span>
+<span class="sd">		the project root location. The contents of the project file determine </span>
+<span class="sd">		project specific constants as specified by property elements in the </span>
+<span class="sd">		xml project file.</span>
+<span class="sd">		</span>
+<span class="sd">		To ensure that all loaded modules have a pre-initialised projects </span>
+<span class="sd">		instance, any launching application should first import the loadproject</span>
+<span class="sd">		file, and then make a call to it prior to importing all names within the</span>
+<span class="sd">		constants module.</span>
+
+<span class="sd">		:param st rstartdir: The initial path to start from when trying to locate the project file</span>
+<span class="sd">		:param str outdir: The output directory specified on the command line. Some project properties may depend on </span>
+<span class="sd">			this. </span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">projectFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_PROJECTFILE&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+		<span class="n">search</span> <span class="o">=</span> <span class="n">startdir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">projectFile</span><span class="p">:</span>
+			<span class="n">projectFileSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">DEFAULT_PROJECTFILE</span><span class="p">)</span>
+			
+			<span class="n">drive</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitdrive</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+			<span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">search</span> <span class="o">==</span> <span class="n">drive</span><span class="p">):</span>
+				<span class="n">intersection</span> <span class="o">=</span>  <span class="n">projectFileSet</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">search</span><span class="p">))</span>
+				<span class="k">if</span> <span class="n">intersection</span> <span class="p">:</span> 
+					<span class="n">projectFile</span> <span class="o">=</span> <span class="n">intersection</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+					<span class="k">break</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">search</span><span class="p">,</span> <span class="n">drop</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="n">drop</span><span class="p">:</span> <span class="n">search</span> <span class="o">=</span> <span class="n">drive</span>
+		
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">projectFile</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">projectFile</span><span class="p">)):</span> <span class="c1"># pragma: no cover</span>
+				<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PYSYS_PERMIT_NO_PROJECTFILE&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;true&#39;</span><span class="p">:</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;FATAL ERROR: The PYSYS_PERMIT_NO_PROJECTFILE environment variable is no longer supported - you must create a pysysproject.xml file for your project&#39;</span><span class="p">)</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+						<span class="c1">#                                                                               |</span>
+						<span class="s2">&quot;WARNING: No PySys test project file exists in this directory (or its parents):&quot;</span><span class="p">,</span>
+						<span class="s2">&quot;  - If you wish to start a new project, begin by running &#39;pysys makeproject&#39;.&quot;</span><span class="p">,</span>
+						<span class="s2">&quot;  - If you are trying to use an existing project, change directory to a &quot;</span><span class="p">,</span>
+						<span class="s2">&quot;    location under the directory that contains your project file.&quot;</span><span class="p">,</span>
+						<span class="s2">&quot;&quot;</span>
+					<span class="p">]))</span>
+					<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">projectFile</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">)</span>
+			<span class="n">stdoutHandler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">formatters</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+			<span class="kn">import</span> <span class="nn">pysys.constants</span>
+			<span class="n">pysys</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PROJECT</span> <span class="o">=</span> <span class="n">project</span> <span class="c1"># for compatibility for old tests</span>
+			<span class="n">Project</span><span class="o">.</span><span class="n">__INSTANCE</span> <span class="o">=</span> <span class="n">project</span> <span class="c1"># set singleton</span>
+			<span class="k">return</span> <span class="n">project</span>
+		<span class="k">except</span> <span class="n">UserError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> 
+			<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ERROR: Failed to load project - </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">e</span><span class="p">)</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ERROR: Failed to load project due to </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+			<span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

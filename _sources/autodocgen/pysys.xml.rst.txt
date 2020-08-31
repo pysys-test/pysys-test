@@ -1,0 +1,14 @@
+
+pysys.xml
+~~~~~~~~~
+
+.. automodule:: pysys.xml
+
+.. currentmodule:: pysys.xml
+
+
+.. autosummary::
+  :toctree: ./
+
+  pysys.xml.descriptor
+  pysys.xml.project

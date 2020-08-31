@@ -1,0 +1,29 @@
+
+pysys.writer.console
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.writer.console
+
+.. currentmodule:: pysys.writer.console
+
+
+
+ConsoleSummaryResultsWriter
+===========================
+
+.. autoclass:: ConsoleSummaryResultsWriter
+   :members:
+
+
+ConsoleProgressResultsWriter
+============================
+
+.. autoclass:: ConsoleProgressResultsWriter
+   :members:
+
+
+ConsoleFailureAnnotationsWriter
+===============================
+
+.. autoclass:: ConsoleFailureAnnotationsWriter
+   :members:

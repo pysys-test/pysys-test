@@ -1,0 +1,15 @@
+
+pysys.baserunner
+~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.baserunner
+
+.. currentmodule:: pysys.baserunner
+
+
+
+BaseRunner
+==========
+
+.. autoclass:: BaseRunner
+   :inherited-members:

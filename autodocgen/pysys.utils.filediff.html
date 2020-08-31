@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.utils.filediff &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.utils.filegrep" href="pysys.utils.filegrep.html" />
+    <link rel="prev" title="pysys.utils.allocport" href="pysys.utils.allocport.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.constants.html">pysys.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysys.utils.html">pysys.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.allocport.html">pysys.utils.allocport</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysys.utils.filediff</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#trimcontents">trimContents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#replace">replace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logcontents">logContents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filediff">filediff</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filegrep.html">pysys.utils.filegrep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.filereplace.html">pysys.utils.filereplace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.fileunzip.html">pysys.utils.fileunzip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.fileutils.html">pysys.utils.fileutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.linecount.html">pysys.utils.linecount</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.logutils.html">pysys.utils.logutils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.misc.html">pysys.utils.misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.perfreporter.html">pysys.utils.perfreporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.pycompat.html">pysys.utils.pycompat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysys.utils.threadutils.html">pysys.utils.threadutils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="pysys.utils.html">pysys.utils</a> &raquo;</li>
+        
+      <li>pysys.utils.filediff</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.utils.filediff.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.utils.filediff">
+<span id="pysys-utils-filediff"></span><h1>pysys.utils.filediff<a class="headerlink" href="#module-pysys.utils.filediff" title="Permalink to this headline">¶</a></h1>
+<p>Comparing (diffing) text file contents.</p>
+<div class="section" id="trimcontents">
+<h2>trimContents<a class="headerlink" href="#trimcontents" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.filediff.trimContents">
+<code class="sig-prename descclassname">pysys.utils.filediff.</code><code class="sig-name descname">trimContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">contents</span></em>, <em class="sig-param"><span class="n">expressions</span></em>, <em class="sig-param"><span class="n">exclude</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">flags</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filediff.html#trimContents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filediff.trimContents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduce a list of strings based by including/excluding lines which match any of a set of regular expressions, returning the processed list.</p>
+<p>The method reduces an input list of strings based on whether each string matches or does not match a 
+list of regular expressions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contents</strong> – The input list of strings to trim based on matches to regular expressions</p></li>
+<li><p><strong>expressions</strong> – The input list of regular expressions</p></li>
+<li><p><strong>exclude</strong> – If true any matches to the regular expressions exclude the line, if false any matches include the line</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The processed list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="replace">
+<h2>replace<a class="headerlink" href="#replace" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.filediff.replace">
+<code class="sig-prename descclassname">pysys.utils.filediff.</code><code class="sig-name descname">replace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list</span></em>, <em class="sig-param"><span class="n">replacementList</span></em>, <em class="sig-param"><span class="n">flags</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filediff.html#replace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filediff.replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all occurrences of keyword values in a list of strings with a set value, returning the processed list.</p>
+<p>The replacementList parameter should contain a list of tuples to use in the replacement, e.g. 
+[(‘foo’, ‘bar’), (‘swim’, ‘swam’)].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list</strong> – The input list of strings to performed the replacement on</p></li>
+<li><p><strong>replacementList</strong> – A list of tuples (key, value) where matches to key are replaced with value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The processed list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="logcontents">
+<h2>logContents<a class="headerlink" href="#logcontents" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.filediff.logContents">
+<code class="sig-prename descclassname">pysys.utils.filediff.</code><code class="sig-name descname">logContents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span></em>, <em class="sig-param"><span class="n">list</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filediff.html#logContents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filediff.logContents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log a list of strings, prepending the line number to each line in the log output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list</strong> – The list of strings to log</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="filediff">
+<h2>filediff<a class="headerlink" href="#filediff" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pysys.utils.filediff.filediff">
+<code class="sig-prename descclassname">pysys.utils.filediff.</code><code class="sig-name descname">filediff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file1</span></em>, <em class="sig-param"><span class="n">file2</span></em>, <em class="sig-param"><span class="n">ignore</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">sort</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">replacementList</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">include</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">unifiedDiffOutput</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stripWhitespace</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">flags</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/utils/filediff.html#filediff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.utils.filediff.filediff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a file comparison between two (preprocessed) input files, returning true if the files are equivalent.</p>
+<p>The method reads in the files and loads the contents of each as a list of strings. The two files are 
+said to be equal if the two lists are equal. The method allows for preprocessing of the string lists 
+to trim down their contents prior to the comparison being performed. Preprocessing is either to remove 
+entries from the lists which match any entry in a set of regular expressions, include only lines which 
+match any entry in a set of regular expressions, replace certain keywords in the string values of each list
+with a set value (e.g. to replace time stamps etc), or to sort the lists before the comparison (e.g. where 
+determinism may not exist). Verbose logging of the method occurs at DEBUG level showing the contents of the 
+processed lists prior to the comparison being performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file1</strong> – The full path to the first file to use in the comparison</p></li>
+<li><p><strong>file2</strong> – The full path to the second file to use in the comparison, typically a reference file</p></li>
+<li><p><strong>ignore</strong> – A list of regular expressions which remove entries in the input file contents before making the comparison</p></li>
+<li><p><strong>sort</strong> – Boolean to sort the input file contents before making the comparison</p></li>
+<li><p><strong>replacementList</strong> – A list of tuples (key, value) where matches to key are replaced with value in the input file contents before making the comparison</p></li>
+<li><p><strong>stripWhitespace</strong> – If True, every line has leading and trailing whitespace stripped before comparison, 
+which means indentation differences and whether the file ends with a blank line do not affect the outcome. 
+If False, only newline characters are stripped.</p></li>
+<li><p><strong>include</strong> – A list of regular expressions used to select lines from the input file contents to use in the comparison</p></li>
+<li><p><strong>unifiedDiffOutput</strong> – If specified, indicates the full path of a file to which unified diff output will be written, 
+if the diff fails.</p></li>
+<li><p><strong>encoding</strong> – Specifies the encoding to be used for opening the file, or None for default.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>success (True / False)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="pysys.exceptions.html#pysys.exceptions.FileNotFoundException" title="pysys.exceptions.FileNotFoundException"><strong>FileNotFoundException</strong></a> – Raised if either of the files do not exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.utils.filegrep.html" class="btn btn-neutral float-right" title="pysys.utils.filegrep" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.utils.allocport.html" class="btn btn-neutral float-left" title="pysys.utils.allocport" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

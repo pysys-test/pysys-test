@@ -1,0 +1,533 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.constants &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysys.exceptions" href="pysys.exceptions.html" />
+    <link rel="prev" title="pysys.baserunner" href="pysys.baserunner.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pysys.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysys.baserunner.html">pysys.baserunner</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pysys.constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hostname">HOSTNAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#platform">PLATFORM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#is-windows">IS_WINDOWS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-exe">PYTHON_EXE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#background">BACKGROUND</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#foreground">FOREGROUND</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#passed">PASSED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inspect">INSPECT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notverified">NOTVERIFIED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#failed">FAILED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timedout">TIMEDOUT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dumpedcore">DUMPEDCORE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#blocked">BLOCKED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skipped">SKIPPED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#outcomes">OUTCOMES</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#precedent">PRECEDENT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fails">FAILS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lookup">LOOKUP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-timeout">DEFAULT_TIMEOUT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timeouts">TIMEOUTS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#outcome">Outcome</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#printlogs">PrintLogs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.exceptions.html">pysys.exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.launcher.html">pysys.launcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.mappers.html">pysys.mappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.process.html">pysys.process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.unit.html">pysys.unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.utils.html">pysys.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.writer.html">pysys.writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysys.xml.html">pysys.xml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pysys.html">API Reference</a> &raquo;</li>
+        
+      <li>pysys.constants</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodocgen/pysys.constants.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pysys.constants">
+<span id="pysys-constants"></span><h1>pysys.constants<a class="headerlink" href="#module-pysys.constants" title="Permalink to this headline">¶</a></h1>
+<p>Standard constants that are used throughout the PySys framework.</p>
+<p>The convention is to import all contents of the module so that the constants can 
+be referenced directly.</p>
+<div class="section" id="hostname">
+<h2>HOSTNAME<a class="headerlink" href="#hostname" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.HOSTNAME">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">HOSTNAME</code><em class="property"> = 'localhost'</em><a class="headerlink" href="#pysys.constants.HOSTNAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>The fully qualified name of this host.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="platform">
+<h2>PLATFORM<a class="headerlink" href="#platform" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.PLATFORM">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PLATFORM</code><em class="property"> = 'linux'</em><a class="headerlink" href="#pysys.constants.PLATFORM" title="Permalink to this definition">¶</a></dt>
+<dd><p>OS platform - current values are: <code class="xref py py-obj docutils literal notranslate"><span class="pre">linux</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">win32</span></code> (Windows), <code class="xref py py-obj docutils literal notranslate"><span class="pre">sunos</span></code> (Solaris), <code class="xref py py-obj docutils literal notranslate"><span class="pre">darwin</span></code> (Mac). 
+It is recommended to use standard Python functions such as <code class="docutils literal notranslate"><span class="pre">sys.platform</span></code> rather than this constant.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="is-windows">
+<h2>IS_WINDOWS<a class="headerlink" href="#is-windows" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.IS_WINDOWS">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">IS_WINDOWS</code><em class="property"> = False</em><a class="headerlink" href="#pysys.constants.IS_WINDOWS" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if this is Windows, False for other operating systems such as Unix.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="python-exe">
+<h2>PYTHON_EXE<a class="headerlink" href="#python-exe" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.PYTHON_EXE">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PYTHON_EXE</code><em class="property"> = '/home/travis/virtualenv/python3.8.0/bin/python3.8'</em><a class="headerlink" href="#pysys.constants.PYTHON_EXE" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to the current Python executable (=``sys.executable``).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="background">
+<h2>BACKGROUND<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.BACKGROUND">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">BACKGROUND</code><em class="property"> = 10</em><a class="headerlink" href="#pysys.constants.BACKGROUND" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant indicating a process is to be started asynchronously in the background.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="foreground">
+<h2>FOREGROUND<a class="headerlink" href="#foreground" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.FOREGROUND">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">FOREGROUND</code><em class="property"> = 11</em><a class="headerlink" href="#pysys.constants.FOREGROUND" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant indicating a process is to be run synchronously in the foreground.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="passed">
+<h2>PASSED<a class="headerlink" href="#passed" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.PASSED">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PASSED</code><em class="property"> = PASSED(non-failure)</em><a class="headerlink" href="#pysys.constants.PASSED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Non-failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating successful validation steps.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="inspect">
+<h2>INSPECT<a class="headerlink" href="#inspect" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.INSPECT">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">INSPECT</code><em class="property"> = INSPECT(non-failure)</em><a class="headerlink" href="#pysys.constants.INSPECT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Non-failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that manual inspection of the test output is required (in addition to any automated checks).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="notverified">
+<h2>NOTVERIFIED<a class="headerlink" href="#notverified" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.NOTVERIFIED">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">NOTVERIFIED</code><em class="property"> = NOTVERIFIED(non-failure)</em><a class="headerlink" href="#pysys.constants.NOTVERIFIED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Non-failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that it was not possible to positively validate correct operation. This is not treated as a failure outcome.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="failed">
+<h2>FAILED<a class="headerlink" href="#failed" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.FAILED">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">FAILED</code><em class="property"> = FAILED</em><a class="headerlink" href="#pysys.constants.FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating validation steps with a negative outcome.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="timedout">
+<h2>TIMEDOUT<a class="headerlink" href="#timedout" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.TIMEDOUT">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">TIMEDOUT</code><em class="property"> = TIMEDOUT</em><a class="headerlink" href="#pysys.constants.TIMEDOUT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that the test timed out while performing execution or validation operations.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="dumpedcore">
+<h2>DUMPEDCORE<a class="headerlink" href="#dumpedcore" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.DUMPEDCORE">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">DUMPEDCORE</code><em class="property"> = DUMPEDCORE</em><a class="headerlink" href="#pysys.constants.DUMPEDCORE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that a crash occurred, and a <code class="xref py py-obj docutils literal notranslate"><span class="pre">core</span></code> file was generated (UNIX only).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="blocked">
+<h2>BLOCKED<a class="headerlink" href="#blocked" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.BLOCKED">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">BLOCKED</code><em class="property"> = BLOCKED</em><a class="headerlink" href="#pysys.constants.BLOCKED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that something went wrong, for example an exception was raised by the testcase or a required file could not be found.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="skipped">
+<h2>SKIPPED<a class="headerlink" href="#skipped" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.SKIPPED">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">SKIPPED</code><em class="property"> = SKIPPED(non-failure)</em><a class="headerlink" href="#pysys.constants.SKIPPED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Non-failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that the test was ignored as it is not currently required to run on this platform/mode. 
+See <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.skipTest" title="pysys.basetest.BaseTest.skipTest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.skipTest</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="outcomes">
+<h2>OUTCOMES<a class="headerlink" href="#outcomes" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.OUTCOMES">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">OUTCOMES</code><em class="property"> = (SKIPPED(non-failure), BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED, NOTVERIFIED(non-failure), INSPECT(non-failure), PASSED(non-failure))</em><a class="headerlink" href="#pysys.constants.OUTCOMES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists all possible test outcomes, in descending order of precedence.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.constants.SKIPPED" title="pysys.constants.SKIPPED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SKIPPED</span></code></a></p></td>
+<td><p>Non-failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that the test was ignored as it is not currently required to run on this platform/mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.constants.BLOCKED" title="pysys.constants.BLOCKED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BLOCKED</span></code></a></p></td>
+<td><p>Failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that something went wrong, for example an exception was raised by the testcase or a required file could not be found.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.constants.DUMPEDCORE" title="pysys.constants.DUMPEDCORE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DUMPEDCORE</span></code></a></p></td>
+<td><p>Failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that a crash occurred, and a <code class="xref py py-obj docutils literal notranslate"><span class="pre">core</span></code> file was generated (UNIX only).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.constants.TIMEDOUT" title="pysys.constants.TIMEDOUT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TIMEDOUT</span></code></a></p></td>
+<td><p>Failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that the test timed out while performing execution or validation operations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.constants.FAILED" title="pysys.constants.FAILED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FAILED</span></code></a></p></td>
+<td><p>Failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating validation steps with a negative outcome.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.constants.NOTVERIFIED" title="pysys.constants.NOTVERIFIED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NOTVERIFIED</span></code></a></p></td>
+<td><p>Non-failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that it was not possible to positively validate correct operation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pysys.constants.INSPECT" title="pysys.constants.INSPECT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">INSPECT</span></code></a></p></td>
+<td><p>Non-failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating that manual inspection of the test output is required (in addition to any automated checks).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pysys.constants.PASSED" title="pysys.constants.PASSED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PASSED</span></code></a></p></td>
+<td><p>Non-failure test <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> indicating successful validation steps.</p></td>
+</tr>
+</tbody>
+</table>
+<p>If a test adds multiple outcomes, the outcome with highest precedence is used as the final test outcome 
+(i.e. SKIPPED rather than FAILED, FAILED rather than PASSED etc).</p>
+<p>Each item is an instance of <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a>. Use <a class="reference internal" href="#pysys.constants.Outcome.isFailure" title="pysys.constants.Outcome.isFailure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome.isFailure()</span></code></a> to check whether a given outcome is classed as a failure for reporting purposes.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="precedent">
+<h2>PRECEDENT<a class="headerlink" href="#precedent" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.PRECEDENT">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PRECEDENT</code><em class="property"> = (SKIPPED(non-failure), BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED, NOTVERIFIED(non-failure), INSPECT(non-failure), PASSED(non-failure))</em><a class="headerlink" href="#pysys.constants.PRECEDENT" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Deprecated</dt>
+<dd class="field-odd"><p>The old name for <a class="reference internal" href="#pysys.constants.OUTCOMES" title="pysys.constants.OUTCOMES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OUTCOMES</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="fails">
+<h2>FAILS<a class="headerlink" href="#fails" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.FAILS">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">FAILS</code><em class="property"> = [BLOCKED, DUMPEDCORE, TIMEDOUT, FAILED]</em><a class="headerlink" href="#pysys.constants.FAILS" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Deprecated</dt>
+<dd class="field-odd"><p>To test whether a specific outcome from OUTCOMES is a failure, use <a class="reference internal" href="#pysys.constants.Outcome.isFailure" title="pysys.constants.Outcome.isFailure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome.isFailure()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="lookup">
+<h2>LOOKUP<a class="headerlink" href="#lookup" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.LOOKUP">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">LOOKUP</code><em class="property"> = {SKIPPED(non-failure): 'SKIPPED', BLOCKED: 'BLOCKED', DUMPEDCORE: 'DUMPED CORE', TIMEDOUT: 'TIMED OUT', FAILED: 'FAILED', NOTVERIFIED(non-failure): 'NOT VERIFIED', INSPECT(non-failure): 'REQUIRES INSPECTION', PASSED(non-failure): 'PASSED', True: 'TRUE', False: 'FALSE'}</em><a class="headerlink" href="#pysys.constants.LOOKUP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup dictionary providing the string representation of test outcomes.
+:deprecated: Use <code class="docutils literal notranslate"><span class="pre">str(outcome)</span></code> on the <a class="reference internal" href="#pysys.constants.Outcome" title="pysys.constants.Outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcome</span></code></a> to convert to the display name.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="default-timeout">
+<h2>DEFAULT_TIMEOUT<a class="headerlink" href="#default-timeout" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.DEFAULT_TIMEOUT">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">DEFAULT_TIMEOUT</code><em class="property"> = 600</em><a class="headerlink" href="#pysys.constants.DEFAULT_TIMEOUT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deprecated: Use a specific member of <a class="reference internal" href="#pysys.constants.TIMEOUTS" title="pysys.constants.TIMEOUTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TIMEOUTS</span></code></a> instead.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="timeouts">
+<h2>TIMEOUTS<a class="headerlink" href="#timeouts" title="Permalink to this headline">¶</a></h2>
+<dl class="py data">
+<dt id="pysys.constants.TIMEOUTS">
+<code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">TIMEOUTS</code><em class="property"> = {'ManualTester': 1800, 'WaitForAvailableTCPPort': 300, 'WaitForFile': 30, 'WaitForProcess': 600, 'WaitForProcessStop': 30, 'WaitForSignal': 60, 'WaitForSocket': 60}</em><a class="headerlink" href="#pysys.constants.TIMEOUTS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default timeouts used for various operations.</p>
+<p>Each timeout is given as a floating point number of seconds.</p>
+<p>These timeouts can be customized from a runner plugin (or <a class="reference internal" href="pysys.baserunner.html#pysys.baserunner.BaseRunner.setup" title="pysys.baserunner.BaseRunner.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.baserunner.BaseRunner.setup()</span></code></a>) if needed 
+(but never change them from within individual testcases).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="outcome">
+<h2>Outcome<a class="headerlink" href="#outcome" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.constants.Outcome">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">Outcome</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">isFailure</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/constants.html#Outcome"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.constants.Outcome" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a PySys test outcome that can be reported using <a class="reference internal" href="../BaseTest.html#pysys.basetest.BaseTest.addOutcome" title="pysys.basetest.BaseTest.addOutcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysys.basetest.BaseTest.addOutcome()</span></code></a>.</p>
+<p>The possible outcomes are listed in <a class="reference internal" href="#pysys.constants.OUTCOMES" title="pysys.constants.OUTCOMES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OUTCOMES</span></code></a>.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">str()</span></code> or <code class="docutils literal notranslate"><span class="pre">%s</span></code> to get the display name for an outcome (e.g. “TIMED OUT”), and <a class="reference internal" href="#pysys.constants.Outcome.isFailure" title="pysys.constants.Outcome.isFailure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">isFailure()</span></code></a> to check 
+if it’s a failure outcome.</p>
+<dl class="py method">
+<dt id="pysys.constants.Outcome.isFailure">
+<code class="sig-name descname">isFailure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysys/constants.html#Outcome.isFailure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.constants.Outcome.isFailure" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return bool</dt>
+<dd class="field-odd"><p>True if this outcome is classed as failure, or False if not (e.g. <a class="reference internal" href="#pysys.constants.SKIPPED" title="pysys.constants.SKIPPED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SKIPPED</span></code></a> and <a class="reference internal" href="#pysys.constants.NOTVERIFIED" title="pysys.constants.NOTVERIFIED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NOTVERIFIED</span></code></a> are not failures).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="printlogs">
+<h2>PrintLogs<a class="headerlink" href="#printlogs" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pysys.constants.PrintLogs">
+<em class="property">class </em><code class="sig-prename descclassname">pysys.constants.</code><code class="sig-name descname">PrintLogs</code><a class="reference internal" href="../_modules/pysys/constants.html#PrintLogs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysys.constants.PrintLogs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>Enumeration constants that specify when run.log contents are printed to the stdout console.</p>
+<p>In all cases a summary of failures is printed at the end, and the user can always 
+look at the run.log inside each output directory if they need more detail.</p>
+<dl class="py attribute">
+<dt id="pysys.constants.PrintLogs.NONE">
+<code class="sig-name descname">NONE</code><em class="property"> = 'PrintLogs.NONE'</em><a class="headerlink" href="#pysys.constants.PrintLogs.NONE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detailed run.log output is not printed to the stdout console.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.constants.PrintLogs.ALL">
+<code class="sig-name descname">ALL</code><em class="property"> = 'PrintLogs.ALL'</em><a class="headerlink" href="#pysys.constants.PrintLogs.ALL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detailed run.log output is always printed to the stdout console, for both passed and failed testcases.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pysys.constants.PrintLogs.FAILURES">
+<code class="sig-name descname">FAILURES</code><em class="property"> = 'PrintLogs.FAILURES'</em><a class="headerlink" href="#pysys.constants.PrintLogs.FAILURES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detailed run.log output is only printed to the stdout console for failed testcases.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pysys.exceptions.html" class="btn btn-neutral float-right" title="pysys.exceptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pysys.baserunner.html" class="btn btn-neutral float-left" title="pysys.baserunner" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

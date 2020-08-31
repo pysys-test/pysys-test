@@ -1,0 +1,20 @@
+
+pysys.utils.misc
+~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.misc
+
+.. currentmodule:: pysys.utils.misc
+
+
+
+compareVersions
+===============
+
+.. autofunction:: compareVersions
+
+
+setInstanceVariablesFromDict
+============================
+
+.. autofunction:: setInstanceVariablesFromDict

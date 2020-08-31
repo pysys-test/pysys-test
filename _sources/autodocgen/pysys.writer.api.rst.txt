@@ -1,0 +1,63 @@
+
+pysys.writer.api
+~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.writer.api
+
+.. currentmodule:: pysys.writer.api
+
+
+
+BaseResultsWriter
+=================
+
+.. autoclass:: BaseResultsWriter
+   :members:
+
+
+BaseRecordResultsWriter
+=======================
+
+.. autoclass:: BaseRecordResultsWriter
+   :members:
+
+
+BaseSummaryResultsWriter
+========================
+
+.. autoclass:: BaseSummaryResultsWriter
+   :members:
+
+
+BaseProgressResultsWriter
+=========================
+
+.. autoclass:: BaseProgressResultsWriter
+   :members:
+
+
+ArtifactPublisher
+=================
+
+.. autoclass:: ArtifactPublisher
+   :members:
+
+
+TestOutputVisitor
+=================
+
+.. autoclass:: TestOutputVisitor
+   :members:
+
+
+TestOutcomeSummaryGenerator
+===========================
+
+.. autoclass:: TestOutcomeSummaryGenerator
+   :members:
+
+
+replaceIllegalXMLCharacters
+===========================
+
+.. autofunction:: replaceIllegalXMLCharacters

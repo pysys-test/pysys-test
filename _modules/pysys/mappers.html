@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pysys.mappers &mdash; PySys v1.6.1  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PySys v1.6.1
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../BaseTest.html">The BaseTest Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ProjectConfig.html">Project Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autodocgen/pysys.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ChangeLog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySys v1.6.1</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pysys.mappers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pysys.mappers</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve</span>
+
+<span class="c1"># This library is free software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU Lesser General Public</span>
+<span class="c1"># License as published by the Free Software Foundation; either</span>
+<span class="c1"># version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="c1"># This library is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
+<span class="c1"># Lesser General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU Lesser General Public</span>
+<span class="c1"># License along with this library; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Mappers that filter or transform lines of input, for use with methods such as `pysys.basetest.BaseTest.copy`. </span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">	RegexReplace</span>
+<span class="sd">	IncludeLinesBetween</span>
+<span class="sd">	IncludeLinesMatching</span>
+<span class="sd">	ExcludeLinesMatching</span>
+
+<span class="sd">.. versionadded:: 1.6.0</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">pysys.utils.pycompat</span> <span class="kn">import</span> <span class="n">isstring</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;pysys.mappers&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RegexReplace"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.RegexReplace">[docs]</a><span class="k">class</span> <span class="nc">RegexReplace</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Mapper that transforms lines by replacing all character sequences matching the specified regular expression. </span>
+<span class="sd">	</span>
+<span class="sd">	For example::</span>
+<span class="sd">	</span>
+<span class="sd">		self.copy(&#39;myfile.txt&#39;, &#39;myfile-processed.txt&#39;, mappers=[RegexReplace(RegexReplace.DATETIME_REGEX, &#39;&lt;timestamp&gt;&#39;)])</span>
+<span class="sd">	</span>
+<span class="sd">	:param str|compiled_regex regex: The regular expression to search for. </span>
+<span class="sd">	:param str replacement: The string to replace it with. This can contain backslash references to groups in the </span>
+<span class="sd">		regex; see ``re.sub()`` in the Python documentation for more information. </span>
+
+
+<span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.DATETIME_REGEX, &#39;&lt;timestamp&gt;&#39;)(&#39;Test string x=2020-07-15T19:22:34+00:00.&#39;)</span>
+<span class="sd">	&#39;Test string x=&lt;timestamp&gt;.&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.DATETIME_REGEX, &#39;&lt;timestamp&gt;&#39;)(&#39;Test string x=5/7/2020 19:22:34.1234.&#39;)</span>
+<span class="sd">	&#39;Test string x=&lt;timestamp&gt;.&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.DATETIME_REGEX, &#39;&lt;timestamp&gt;&#39;)(&#39;Test string x=20200715T192234Z.&#39;)</span>
+<span class="sd">	&#39;Test string x=&lt;timestamp&gt;.&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.NUMBER_REGEX, &#39;&lt;number&gt;&#39;)(&#39;Test string x=123.&#39;)</span>
+<span class="sd">	&#39;Test string x=&lt;number&gt;.&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; RegexReplace(RegexReplace.NUMBER_REGEX, &#39;&lt;number&gt;&#39;)(&#39;Test string x=-12.45e+10.&#39;)</span>
+<span class="sd">	&#39;Test string x=&lt;number&gt;.&#39;</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">DATETIME_REGEX</span> <span class="o">=</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+		<span class="s1">&#39;([0-9]{1,4}[/-][0-9]{1,2}[/-][0-9]{2,4}[ T]?)?[0-9]{1,2}:[0-9]</span><span class="si">{2}</span><span class="s1">:[0-9]</span><span class="si">{2}</span><span class="s1">([.][0-9]+|Z|[+-][0-9][0-9](:[0-9][0-9])?)?&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;[0-9]</span><span class="si">{8}</span><span class="s1">T[0-9]</span><span class="si">{6}</span><span class="s1">(Z|[+-][0-9][0-9]:)?&#39;</span><span class="p">,</span>
+		<span class="p">])</span>
+	<span class="sd">&quot;&quot;&quot;A regular expression that can be used to match timestamps in ISO 8601 format and other common alternatives such as:</span>
+<span class="sd">	&quot;2020-07-15T19:22:34+00:00&quot;, </span>
+<span class="sd">	&quot;5/7/2020 19:22:34.1234&quot;, </span>
+<span class="sd">	&quot;20200715T192234Z&quot;</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">NUMBER_REGEX</span> <span class="o">=</span> <span class="s1">&#39;[+-]?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?&#39;</span>
+	<span class="sd">&quot;&quot;&quot;Mapper that transforms lines, replacing all integer or floating point numbers with &quot;&lt;number&gt;&quot;. </span>
+<span class="sd">	</span>
+<span class="sd">	This is useful for removing ids that would diff-ing files more difficult, if you only care about validating </span>
+<span class="sd">	the non-numeric text.</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regex</span><span class="p">,</span> <span class="n">replacement</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">=</span> <span class="s1">&#39;RegexReplace(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">replacement</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span> <span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span> <span class="k">else</span> <span class="n">regex</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">repl</span> <span class="o">=</span> <span class="n">replacement</span>
+
+	<span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repl</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str</span></div>
+
+
+<div class="viewcode-block" id="IncludeLinesBetween"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.IncludeLinesBetween">[docs]</a><span class="k">class</span> <span class="nc">IncludeLinesBetween</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Mapper that filters out all lines except those within a range of expressions. </span>
+<span class="sd">	</span>
+<span class="sd">	This is useful when a log file contains lots of data you don&#39;t care about, in addition to some multi-line sequences </span>
+<span class="sd">	that you want to extract (with `pysys.basetest.BaseTest.copy`) ready for `pysys.basetest.BaseTest.assertDiff`.</span>
+<span class="sd">	</span>
+<span class="sd">	As this mapper is stateful, so not use a single instance of it in multiple tests (or multiple threads). </span>
+<span class="sd">	</span>
+<span class="sd">	The following parameters can be either a callable/lambda that accepts an input line and returns a boolean, or a </span>
+<span class="sd">	regular expression string to search for in the specified line. </span>
+<span class="sd">	</span>
+<span class="sd">	:param str|callable[str]-&gt;bool startAt: If it matches then the current line and subsequent lines are included </span>
+<span class="sd">		(not filtered out). If not specified, lines from the start of the file onwards are matched. </span>
+<span class="sd">		</span>
+<span class="sd">	:param str|callable[str]-&gt;bool stopAfter: If it matches then lines after the current one are filtered out </span>
+<span class="sd">		(unless/until a line matching startAt is found). Includes the stop line. </span>
+<span class="sd">		</span>
+<span class="sd">	:param str|callable[str]-&gt;bool stopBefore: If it matches then this line and lines after it are filtered out </span>
+<span class="sd">		(unless/until a line matching startAt is found). Excludes the stop line. </span>
+<span class="sd">		</span>
+<span class="sd">	&gt;&gt;&gt; def test_IncludeLinesBetween(mapper, input): return &#39;,&#39;.join(x for x in (mapper(line) for line in input.split(&#39;,&#39;)) if x is not None)</span>
+<span class="sd">	&gt;&gt;&gt; test_IncludeLinesBetween( IncludeLinesBetween(&#39;start.*&#39;, &#39;stopafter.*&#39;), &#39;a,start line,b,c,stopafter line,d,start line2,e&#39;)</span>
+<span class="sd">	&#39;start line,b,c,stopafter line,start line2,e&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; test_IncludeLinesBetween( IncludeLinesBetween(startAt=&#39;start.*&#39;), &#39;a,start line,b,c&#39;)</span>
+<span class="sd">	&#39;start line,b,c&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; test_IncludeLinesBetween( IncludeLinesBetween(stopAfter=&#39;stopafter.*&#39;), &#39;a,stopafter,b,c&#39;)</span>
+<span class="sd">	&#39;a,stopafter&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; test_IncludeLinesBetween( IncludeLinesBetween(stopBefore=&#39;stopbefore.*&#39;), &#39;a,b,stopbefore,c&#39;)</span>
+<span class="sd">	&#39;a,b&#39;</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startAt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stopAfter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stopBefore</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">=</span> <span class="s1">&#39;IncludeLinesBetween(</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span>
+			<span class="s1">&#39;startAt&#39;</span><span class="p">:</span><span class="n">startAt</span><span class="p">,</span>
+			<span class="s1">&#39;stopAfter&#39;</span><span class="p">:</span><span class="n">stopAfter</span><span class="p">,</span>
+			<span class="s1">&#39;stopBefore&#39;</span><span class="p">:</span><span class="n">stopBefore</span><span class="p">,</span>
+		<span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+	
+		<span class="k">if</span> <span class="n">startAt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">startAt</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">line</span><span class="p">,</span> <span class="n">startAt</span><span class="o">=</span><span class="n">startAt</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">startAt</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+		<span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="o">=</span> <span class="n">startAt</span>
+			
+		<span class="k">if</span> <span class="n">stopAfter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">stopAfter</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopAfter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">stopAfter</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+		<span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopAfter</span> <span class="o">=</span> <span class="n">stopAfter</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">stopBefore</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">stopBefore</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopBefore</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">stopBefore</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+		<span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopBefore</span> <span class="o">=</span> <span class="n">stopBefore</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="ow">is</span> <span class="kc">None</span>
+
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str</span>
+
+	<span class="k">def</span> <span class="nf">fileStarted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcPath</span><span class="p">,</span> <span class="n">destPath</span><span class="p">,</span> <span class="n">srcFile</span><span class="p">,</span> <span class="n">destFile</span><span class="p">):</span>
+		<span class="c1"># reset every time we start a new file</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="ow">is</span> <span class="kc">None</span>
+
+	<span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__including</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopAfter</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="kc">False</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopBefore</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="kc">False</span>
+				<span class="k">return</span> <span class="kc">None</span>
+			<span class="k">return</span> <span class="n">line</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">startAt</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">__including</span> <span class="o">=</span> <span class="kc">True</span>
+				<span class="k">return</span> <span class="n">line</span>
+		<span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="IncludeLinesMatching"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.IncludeLinesMatching">[docs]</a><span class="k">class</span> <span class="nc">IncludeLinesMatching</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Mapper that filters lines by including only lines matching the specified regular expression. </span>
+<span class="sd">	</span>
+<span class="sd">	:param str|compiled_regex regex: The regular expression to match (use ``.*`` at the beginning to allow extra </span>
+<span class="sd">		characters at the start of the line).  Multiple expressions can be combined using </span>
+<span class="sd">		``(expr1|expr2)`` syntax. </span>
+
+<span class="sd">	&gt;&gt;&gt; IncludeLinesMatching(&#39;Foo.*&#39;)(&#39;Foo bar&#39;)</span>
+<span class="sd">	&#39;Foo bar&#39;</span>
+
+<span class="sd">	&gt;&gt;&gt; IncludeLinesMatching(&#39;bar.*&#39;)(&#39;Foo bar&#39;) is None</span>
+<span class="sd">	True</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regex</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">=</span> <span class="s1">&#39;IncludeLinesMatching(</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span> <span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span> <span class="k">else</span> <span class="n">regex</span>
+
+	<span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+		<span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">line</span>
+
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str</span></div>
+
+
+<div class="viewcode-block" id="ExcludeLinesMatching"><a class="viewcode-back" href="../../autodocgen/pysys.mappers.html#pysys.mappers.ExcludeLinesMatching">[docs]</a><span class="k">class</span> <span class="nc">ExcludeLinesMatching</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Mapper that filters lines by excluding/ignoring lines matching the specified regular expression. </span>
+<span class="sd">	</span>
+<span class="sd">	:param str|compiled_regex regex: The regular expression to match (use ``.*`` at the beginning to allow extra </span>
+<span class="sd">		characters at the start of the line).  Multiple expressions can be combined using </span>
+<span class="sd">		``(expr1|expr2)`` syntax. </span>
+
+<span class="sd">	&gt;&gt;&gt; ExcludeLinesMatching(&#39;Foo.*&#39;)(&#39;Foo bar&#39;) is None</span>
+<span class="sd">	True</span>
+
+<span class="sd">	&gt;&gt;&gt; ExcludeLinesMatching(&#39;bar.*&#39;)(&#39;Foo bar&#39;)</span>
+<span class="sd">	&#39;Foo bar&#39;</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regex</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__str</span> <span class="o">=</span> <span class="s1">&#39;ExcludeLinesMatching(</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span> <span class="k">if</span> <span class="n">isstring</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span> <span class="k">else</span> <span class="n">regex</span>
+
+	<span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+		<span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">line</span>
+
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2006-2020 M.B. Grieve; documentation last updated on 2020-08-31
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

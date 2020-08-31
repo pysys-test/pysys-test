@@ -1,0 +1,27 @@
+
+pysys.utils.allocport
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: pysys.utils.allocport
+
+.. currentmodule:: pysys.utils.allocport
+
+
+
+TCPPortOwner
+============
+
+.. autoclass:: TCPPortOwner
+   :members:
+
+
+getEphemeralTCPPortRange
+========================
+
+.. autofunction:: getEphemeralTCPPortRange
+
+
+getServerTCPPorts
+=================
+
+.. autofunction:: getServerTCPPorts
