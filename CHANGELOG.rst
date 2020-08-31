@@ -494,7 +494,7 @@ The changes that everyone should pay attention to are:
         If a relative path is specified, it is relative to the testRootDir, or if an absolute --outdir was specified, 
         relative to that directory. 
     -->
-    <property name="pysysRunnerDirName" value="pysys_runner_${outDirName}"/>
+    <property name="pysysRunnerDirName" value="pysys-runner-${outDirName}"/>
 
     <!-- Overrides the default name use to for the performance summary .csv file. The default was changed to 
         "__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv" in PySys 1.6.0. 
