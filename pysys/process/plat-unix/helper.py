@@ -169,8 +169,11 @@ class ProcessWrapper(CommonProcessWrapper):
 					# and start a thread to write to the write end
 					os.close(stdin_r)
 					self.__stdin = stdin_w
-			except Exception:
-				if self.pid == 0: os._exit(os.EX_OSERR)	
+			except Exception as ex:
+				if self.pid == 0: 
+					sys.stderr.write('Failed with: %s\n'%ex)
+					sys.stderr.flush()
+					os._exit(os.EX_OSERR)	
 
 		if not self.running() and self.exitStatus == os.EX_OSERR:
 			raise ProcessError("Error creating process %s" % (self.command))
