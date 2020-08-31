@@ -28,6 +28,8 @@ PySys 1.6.2 is under development.
 	  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 
 	  Additionally, some extra items were added to the value of `pysys.constants.DYLD_LIBRARY_PATH` to match the 
 	  defaults as described in the latest macOS documentation. 
+	- Added improved debug logging to `BaseTest.startProcess()` including a full command line for manually re-running 
+	  troublesome commands, and expansion of PATH environment variables to show the individual components. 
 
 -------------------
 What's new in 1.6.1

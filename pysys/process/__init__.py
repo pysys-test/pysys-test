@@ -39,6 +39,7 @@ else:
 
 import os.path, time, threading, sys, locale
 import logging
+import shlex
 if sys.version_info[0] == 2:
 	import Queue
 else:
@@ -95,11 +96,11 @@ class Process(object):
 		
 		self.displayName = displayName if displayName else os.path.basename(command)
 		self.info = info
-		self.command = command
+		self.command = os.path.normpath(command)
 		self.arguments = arguments
 		self.environs = {}
 		for key in environs: self.environs[_stringToUnicode(key)] = _stringToUnicode(environs[key])
-		self.workingDir = workingDir
+		self.workingDir = os.path.normpath(workingDir)
 		self.state = state
 		self.timeout = timeout
 		self.expectedExitStatus = expectedExitStatus
@@ -120,12 +121,28 @@ class Process(object):
 		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
 		log.debug("  command      : %s", self.command)
 		for a in self.arguments: log.debug("  argument     : %s", a)
+		
+		if IS_WINDOWS or not hasattr(shlex, 'quote'):
+			quotearg = lambda c: 'X"%s"'%c if ' ' in c else c
+		else:
+			quotearg = shlex.quote
+		log.debug("  command line : %s", ' '.join(quotearg(c) for c in [self.command]+self.arguments))
 		log.debug("  working dir  : %s", self.workingDir)
 		log.debug("  stdout       : %s", stdout)
 		log.debug("  stderr       : %s", stderr)
 		keys=list(self.environs.keys())
 		keys.sort()
-		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])
+		for e in keys: 
+			value = self.environs[e]
+			log.debug("  environment  : %s=%s", e, value)
+			if 'PATH' in e.upper():
+				# it's worth paths/classpaths/pythonpaths as they're often long and quite hard to spot differences otherwise
+				pathelements = value.split(';' if ';' in value else os.pathsep)
+				if len(pathelements)>1:
+					for i, pathelement in enumerate(pathelements):
+						#                         : ABC=def
+						log.debug("                   #%-2d%s", i+1, pathelement)
+				
 		if info: log.debug("  info         : %s", info)
 
 		# private
