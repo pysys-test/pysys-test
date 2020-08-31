@@ -132,6 +132,8 @@ class Process(object):
 		for i, a in enumerate(self.arguments): debuginfo.append("    arg #%-2d    : %s"%( i+1, a) )
 		
 		debuginfo.append("  working dir  : %s"% self.workingDir)
+		if IS_WINDOWS and len(self.workingDir) > 256-30:
+			debuginfo.append("    NB: length of working dir is %d (Windows MAX_PATH limit is 256 chars)" % len(self.workingDir))
 		debuginfo.append("  stdout       : %s"% stdout)
 		debuginfo.append("  stderr       : %s"% stderr)
 		keys=list(self.environs.keys())
