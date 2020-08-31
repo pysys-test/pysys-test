@@ -291,7 +291,8 @@ class ProcessUser(object):
 			Added info parameter. 
 
 		:param str command: The path to the executable to be launched (should include the full path)
-		:param list[str] arguments: A list of arguments to pass to the command
+		:param list[str] arguments: A list of arguments to pass to the command. Any non-string values in the list are 
+			converted to strings automatically. 
 		
 		:param dict(str,str) environs: A dictionary specifying the environment to run the process in. 
 			If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 

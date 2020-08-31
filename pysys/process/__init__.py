@@ -97,7 +97,10 @@ class Process(object):
 		self.displayName = displayName if displayName else os.path.basename(command)
 		self.info = info
 		self.command = os.path.normpath(command)
+		if any(not isstring(arg) for arg in arguments):
+			arguments = [str(arg) for arg in arguments]
 		self.arguments = arguments
+		
 		self.environs = {}
 		for key in environs: self.environs[_stringToUnicode(key)] = _stringToUnicode(environs[key])
 		self.workingDir = os.path.normpath(workingDir)
