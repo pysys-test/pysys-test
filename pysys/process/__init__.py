@@ -121,32 +121,35 @@ class Process(object):
 		if self.stdout: assert os.path.dirname(self.stdout)==self.workingDir or os.path.isdir(os.path.dirname(self.stdout)), 'Parent directory for stdout does not exist: %s'%self.stdout
 
 		# print process debug information
-		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
+		
+		debuginfo = []
 
 		if IS_WINDOWS or not hasattr(shlex, 'quote'):
 			quotearg = lambda c: '"%s"'%c if ' ' in c else c
 		else:
 			quotearg = shlex.quote
-		log.debug("  command line : %s", ' '.join(quotearg(c) for c in [self.command]+self.arguments))
-		for i, a in enumerate(self.arguments): log.debug("    arg #%-2d    : %s", i+1, a)
+		debuginfo.append("  command line : %s"%' '.join(quotearg(c) for c in [self.command]+self.arguments))
+		for i, a in enumerate(self.arguments): debuginfo.append("    arg #%-2d    : %s"%( i+1, a) )
 		
-		log.debug("  working dir  : %s", self.workingDir)
-		log.debug("  stdout       : %s", stdout)
-		log.debug("  stderr       : %s", stderr)
+		debuginfo.append("  working dir  : %s"% self.workingDir)
+		debuginfo.append("  stdout       : %s"% stdout)
+		debuginfo.append("  stderr       : %s"% stderr)
 		keys=list(self.environs.keys())
 		keys.sort()
 		for e in keys: 
 			value = self.environs[e]
-			log.debug("  environment  : %s=%s", e, value)
+			debuginfo.append("  environment  : %s=%s"%( e, value) )
 			if 'PATH' in e.upper() and e.upper() not in ['PATHEXT']:
 				# it's worth paths/classpaths/pythonpaths as they're often long and quite hard to spot differences otherwise
 				pathelements = value.split(';' if ';' in value else os.pathsep)
 				if len(pathelements)>1:
 					for i, pathelement in enumerate(pathelements):
 						#                         : ABC=def
-						log.debug("                   #%-2d%s", i+1, pathelement)
+						debuginfo.append("                   #%-2d%s"%( i+1, pathelement))
 				
-		if info: log.debug("  info         : %s", info)
+		if info: debuginfo.append("  info         : %s"% info)
+
+		log.debug("Process parameters for %s\n%s", self, '\n'.join(d for d in debuginfo))
 
 		# private
 		self._outQueue = None
