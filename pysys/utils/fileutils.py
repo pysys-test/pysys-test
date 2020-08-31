@@ -121,6 +121,9 @@ def mkdir(path):
 	:return: Returns the path passed in. 
 	"""
 	origpath = path
+	if '.' in path: # this avoids makedirs creating directories that should have been '..'d away
+		path = os.path.normpath(path)
+
 	path = toLongPathSafe(path, onlyIfNeeded=True)
 	try:
 		os.makedirs(path)
