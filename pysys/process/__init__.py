@@ -135,7 +135,7 @@ class Process(object):
 		for e in keys: 
 			value = self.environs[e]
 			log.debug("  environment  : %s=%s", e, value)
-			if 'PATH' in e.upper():
+			if 'PATH' in e.upper() and e.upper() not in ['PATHEXT']:
 				# it's worth paths/classpaths/pythonpaths as they're often long and quite hard to spot differences otherwise
 				pathelements = value.split(';' if ';' in value else os.pathsep)
 				if len(pathelements)>1:
