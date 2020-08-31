@@ -344,7 +344,7 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 	"""
 	Optional filename of a .zip archive to generate with the contents of the destDir. 
 	
-	If an absolute path is specified it is evaluated relative to the destDir. 
+	If a non-absolute path is specified it is evaluated relative to the destDir. 
 	
 	Project ``${...}`` properties can be used in the path. 
 	"""
