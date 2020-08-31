@@ -636,7 +636,7 @@ class BaseRunner(ProcessUser):
 								if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
 							self.containerCallback(threading.current_thread().ident, singleThreadedResult)
 				except KeyboardInterrupt:
-					log.info("test interrupt from keyboard")
+					sys.stderr.write("Keyboard interrupt detected... \n")
 					self.handleKbrdInt()
 				
 				if not concurrentcycles:
@@ -644,7 +644,7 @@ class BaseRunner(ProcessUser):
 						try:
 							threadPool.wait()
 						except KeyboardInterrupt:
-							log.info("test interrupt from keyboard - joining threads ... ")
+							sys.stderr.write("Keyboard interrupt detected during multi-threaded test execution; waiting for running threads to terminate before beginning cleanup... \n")
 							threadPool.dismissWorkers(self.threads, True)
 							self.handleKbrdInt(prompt=False)
 		
@@ -652,7 +652,7 @@ class BaseRunner(ProcessUser):
 					try:
 						self.cycleComplete()
 					except KeyboardInterrupt:
-						log.info("test interrupt from keyboard")
+						sys.stderr.write("Keyboard interrupt detected while running cycleComplete... \n")
 						self.handleKbrdInt()
 					except:
 						log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
@@ -885,32 +885,43 @@ class BaseRunner(ProcessUser):
 			prompt = False
 		
 		def finish():
-			# perform cleanup on the test writers - this also takes care of logging summary results
-			for writer in self.writers:
-				try: writer.cleanup()
-				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
-			del self.writers[:]
+			self.log.info('Performing runner cleanup after keyboard interrupt')
+			
 			try:
-				self.cycleComplete()
-				self.cleanup()
-			except Exception: 
-				log.warn("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			sys.exit(1)
+				# perform cleanup on the test writers - this also takes care of logging summary results
+				# this is a stipped down
+				with self.__resultWritingLock:
+					for writer in self.writers:
+						try: 
+							writer.cleanup()
+						except Exception as ex: 
+							log.warn("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+					del self.writers[:]
+				
+				try:
+					self.cycleComplete()
+					self.cleanup()
+				except Exception: 
+					log.warn("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			except KeyboardInterrupt:
+				log.warn("Keyboard interrupted detected during cleanup; will exit immediately")
+			sys.exit(100) # keyboard interrupt
 
 		try:
 			if not prompt:
-				print("Keyboard interrupt detected, exiting ... ")
+				sys.stderr.write("\nKeyboard interrupt detected, exiting ... \n")
 				finish()
 
 			while 1:
-				sys.stdout.write("\nKeyboard interrupt detected, continue running tests? [yes|no] ... ")
+				sys.stderr.write("\nKeyboard interrupt detected, continue running remaining tests? [yes|no] ... ")
 				line = sys.stdin.readline().strip()
 				if line == "y" or line == "yes":
-					break
+					self.log.info('Keyboard interrupt detected; will try to continue running remaining tests')
+					return
 				elif line == "n" or line == "no":
 					finish()
 		except KeyboardInterrupt:
-			self.handleKbrdInt(prompt)
+			self.handleKbrdInt(prompt=False) # don't prompt the second time
 
 	def logTestHeader(self, descriptor, cycle, **kwargs):
 		"""
