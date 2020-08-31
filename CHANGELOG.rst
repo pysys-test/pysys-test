@@ -33,6 +33,7 @@ PySys 1.6.2 is under development.
 	- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
 	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
 	  refer to the old name). 
+	- Added a ``mappers=`` argument to `BaseTest.logFileContents()`. 
 
 -------------------
 What's new in 1.6.1

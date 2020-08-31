@@ -1575,7 +1575,7 @@ class ProcessUser(object):
 
 
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, 
-			logFunction=None, reFlags=0, stripWhitespace=True):
+			logFunction=None, reFlags=0, stripWhitespace=True, mappers=[]):
 		""" Logs some or all of the lines from the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
@@ -1592,7 +1592,16 @@ class ProcessUser(object):
 			log some unimportant text to stderr (or stdout) that would be distracting to log out. 
 			
 			Added in PySys 1.6.0. 
-		
+			
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+
+			Added in PySys 1.6.2. 
+
 		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
 		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'.
 		
@@ -1612,6 +1621,9 @@ class ProcessUser(object):
 			
 			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
 			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
+		:param bool stripWhitespace: By default blank lines are removed; set this to False to disable that behaviour. 
+			Added in PySys 1.6.2. 
 
 		:return: True if anything was logged, False if not.
 		
@@ -1635,10 +1647,18 @@ class ProcessUser(object):
 				return None
 			
 			tolog = []
-			
+
 			for l in f:
-				l = l.rstrip()
-				if not l: continue
+				# first, mapper handling
+				for mapper in mappers:
+					l = mapper(l)
+					if l is None: break
+				if l is None: continue
+			
+				if stripWhitespace:
+					l = l.rstrip()
+					if len(l) == 0: continue
+				
 				if includes:
 					l = matchesany(l, includes)
 					if not l: continue
