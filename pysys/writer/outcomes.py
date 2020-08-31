@@ -116,7 +116,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		self.fp.write('\n')
 		for k, v in kwargs['runner'].runDetails.items():
 			if k in {'startTime', 'hostname'}: continue # don't duplicate the above
-			self.fp.write("%-12s%s\n"%(k+': ', v))
+			self.fp.write("%-20s%s\n"%(k+': ', v))
 
 	def cleanup(self, **kwargs):
 		# Flushes and closes the file handle to the logfile.  
