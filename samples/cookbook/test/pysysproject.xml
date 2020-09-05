@@ -90,6 +90,13 @@
 	<property name="defaultEnvironsDefaultLang" value="en_US.UTF-8"/>
 
 	<!-- 
+	Set environment variables to encourage temporary files from test processes to go to the test output directory 
+	rather than the OS or user's default temporary folder. This ensures tests are truly independent from each other 
+	and from previous runs, and also avoids the danger of disk space being used up by temporary files from test runs. 
+	-->
+	<property name="defaultEnvironsTempDir" value="self.output"/>
+
+	<!-- 
 	The defaultEnvirons. prefix can be used to provide a default environment variable for use by 
 	all processes that PySys starts. For example, to set Java(R)'s JAVA_TOOL_OPTIONS environment variable:
 	-->
