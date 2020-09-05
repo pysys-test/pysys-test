@@ -32,8 +32,8 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='SOME_OVERRIDE=', contains=False)
 
 		if IS_WINDOWS:
-			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='SOME_OVERRIDE=some value')
-			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='PATHEXT=')
+			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='^SOME_OVERRIDE=some value')
+			self.assertGrep('pysys-legacy/PySys_NestedTestcase/env.txt', expr='^PATHEXT=')
 		else:
 			# depending on where python is installed, empty environment might mean we can't even start python
 			# or it might start and print an empty environment
@@ -48,7 +48,7 @@ class PySysTest(BaseTest):
 		if IS_WINDOWS:
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='python', contains=False)
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='LD_LIBRARY', contains=False)
-			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='PATH=.+')
+			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='^PATH=.+')
 		else:
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env.txt', expr='python', contains=False)
 			self.assertGrep('pysys-none/PySys_NestedTestcase/env-python.txt', expr='%s=.+'%LIBRARY_PATH_ENV_VAR)
@@ -59,7 +59,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys-tempdir/PySys_NestedTestcase/python.out', expr='TempDir=.*[Nn]ested[Tt]estcase.mytemp')
 
 		if IS_WINDOWS:
-			self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='LANG', contains=False)
+			self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='^LANG', contains=False)
 		else:
-			self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='LANG=my-lang')
-		self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='JAVA_TOOL_OPTIONS=-Xmx512M')
+			self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='^LANG=my-lang')
+		self.assertGrep('pysys-lang/PySys_NestedTestcase/env.txt', expr='^JAVA_TOOL_OPTIONS=-Xmx512M')

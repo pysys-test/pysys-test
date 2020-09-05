@@ -37,6 +37,11 @@ PySys 1.6.2 is under development.
 	  refer to the old name). 
 	- Added a ``mappers=`` argument to `BaseTest.logFileContents()`. 
 
+Fixes:
+
+	- Fixed the project property ``defaultEnvirons.ENVVAR`` added in 1.6.0 which did not in fact set the environment 
+	  variable as described (due to an additional unwanted ``.`` character); now it does. 
+
 -------------------
 What's new in 1.6.1
 -------------------

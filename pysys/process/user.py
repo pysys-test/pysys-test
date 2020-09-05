@@ -547,7 +547,7 @@ class ProcessUser(object):
 
 		for k, v in self.project.properties.items():
 			if k.startswith('defaultEnvirons.') and v:
-				e[k[k.find('.'):]] = v
+				e[k[k.find('.')+1:]] = v
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location; set to blank to do nothing
 		if self.project.getProperty('defaultEnvironsTempDir',''):
