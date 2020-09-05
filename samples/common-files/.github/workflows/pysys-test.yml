@@ -42,15 +42,6 @@ jobs:
           # Use older version of coverage as 5.0 requires an SQLite version that doesn't work on this macos image currently
           pip install coverage==4.5.4
 
-      - name: Windows TCP configuration
-        # Set the TCP dynamic/ephemeral port range on Windows back to the normal Windows default configuration
-        # (GitHub Actions currently sets *all* ports to be dynamic which leaves none to start test servers on)
-        if: runner.os == 'Windows'
-        run: |
-          netsh int ipv4 show dynamicport tcp
-          netsh int ipv4 set dynamicportrange tcp startport=49152 numberofports=16384
-          netsh int ipv6 set dynamicportrange tcp startport=49152 numberofports=16384
-
       - name: Test with PySys
         working-directory: test
         shell: bash
