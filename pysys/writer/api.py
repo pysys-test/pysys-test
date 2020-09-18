@@ -444,8 +444,12 @@ class TestOutcomeSummaryGenerator(BaseResultsWriter):
 						if showOutcomeReason and reason:
 							log("      %s", reason, extra=ColorLogFormatter.tag(LOG_TEST_OUTCOMES))
 							
-						outputdir = os.path.normpath(os.path.relpath(outputdir))+os.sep
-						testDir = os.path.normpath(os.path.relpath(testDir))+os.sep
+						try:
+							outputdir = os.path.normpath(os.path.relpath(fromLongPathSafe(outputdir)))+os.sep
+							testDir = os.path.normpath(os.path.relpath(fromLongPathSafe(testDir)))+os.sep
+						except Exception as ex: # relpath can fail if on different Windows drives
+							logging.getLogger('pysys.writer').debug('Failed to generate relative paths for "%s" and "%s": %s', outputdir, testDir, ex)
+							
 						if showTestDir and not (showOutputDir and outputdir.startswith(testDir)):
 							# don't confuse things by showing the testDir unless its information is not present in the outputDir (due to --outdir)
 							log("      %s", testDir)
