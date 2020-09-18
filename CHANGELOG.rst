@@ -672,7 +672,7 @@ the following list and consult it only if you get new test failures after upgrad
   anyway. If you need to get a property whose name clashes with a built-in member, use 
   `pysys.xml.project.Project.properties`.
 - PySys now checks that its working directory (``os.chdir()``) and environment (``os.environ``) have not been modified 
-  during execution of tests (after pysys.baserunner.BaseRunner.setup()'). Sometimes test authors do this by mistake 
+  during execution of tests (after `pysys.baserunner.BaseRunner.setup()'). Sometimes test authors do this by mistake 
   and it's extremely dangerous as it causes behaviour changes (and potentially file system race conditions) in 
   subsequent tests that can be very hard to debug. 
   The environment and working directory should only be modified for child processes not for PySys itself - 
