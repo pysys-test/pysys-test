@@ -588,7 +588,7 @@ class Project(object):
 		:param str value: The string in which any properties will be expanded. ${$} can be used for escaping a literal $ if needed. 
 		:return str: The value with properties expanded, or None if value=None. 
 		"""
-		if not value: return value
+		if (not value) or ('${' not in value): return value
 		return re.sub(r'[$][{]([^}]+)[}]', 
 			lambda m: '$' if m.group(1)=='$' else self.properties[m.group(1)], value)
 
