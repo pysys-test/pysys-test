@@ -29,6 +29,7 @@ import collections
 import platform
 import shlex
 import warnings
+import difflib
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -711,11 +712,18 @@ class BaseRunner(ProcessUser):
 			log.warn('Python reported %d warnings during execution of tests; is is recommended to do a test run with -Werror and fix them if possible, or filter them out if not (see Python\'s warnings module for details)', self.__pythonWarnings)
 
 		fatalerrors = self.runnerErrors+fatalerrors
-		
+
 		if self._initialEnviron != os.environ:
+			log.warn('os.environ has changed while tests were running: \n%s', 
+				''.join(difflib.unified_diff(
+					['%s=%s\n'%(k,v) for (k,v) in sorted(self._initialEnviron.items())], 
+					['%s=%s\n'%(k,v) for (k,v) in sorted(os.environ.items())], 
+					'original os.environ', 
+					'changed to'
+				)))
 			fatalerrors.append('Some test has changed the global os.environ of this PySys process; this is extremely unsafe while tests are running')
 		if self._initialCwd != os.getcwd():
-			fatalerrors.append('Some test has changed the working directory of this PySys process (e.g. with os.chdir()); this is extremely unsafe while tests are running')
+			fatalerrors.append('Some test has changed the working directory of this PySys process (e.g. with os.chdir()) to "%s"; this is extremely unsafe while tests are running'%os.getcwd())
 
 		if fatalerrors:
 			# these are so serious we need to make sure the user notices by returning a failure exit code
@@ -1215,8 +1223,8 @@ class TestContainer(object):
 			if self.runner._initialEnviron != os.environ:
 				self.testObj.addOutcome(BLOCKED, 'The global os.environ of this PySys process has changed while this test was running; this is extremely unsafe', override=True)
 			if self.runner._initialCwd != os.getcwd():
-				self.testObj.addOutcome(BLOCKED, 'The working directory of this PySys process has changed while this test was running (os.chdir()); this is extremely unsafe', override=True)
-		
+				self.testObj.addOutcome(BLOCKED, 'The working directory of this PySys process was changed to "%s" while this test was running (os.chdir()); this is extremely unsafe'%os.getcwd(), override=True)
+
 			# print summary and close file handles
 			self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
 			log.info("")
