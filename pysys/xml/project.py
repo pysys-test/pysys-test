@@ -589,8 +589,12 @@ class Project(object):
 		:return str: The value with properties expanded, or None if value=None. 
 		"""
 		if (not value) or ('${' not in value): return value
-		return re.sub(r'[$][{]([^}]+)[}]', 
-			lambda m: '$' if m.group(1)=='$' else self.properties[m.group(1)], value)
+		try:
+			return re.sub(r'[$][{]([^}]+)[}]', 
+				lambda m: '$' if m.group(1)=='$' else self.properties[m.group(1)], value)
+		except KeyError as ex:
+			# A more informative error, but not a UserError since we don't have the context of where it was called from
+			raise Exception('Cannot resolve project property %s in: %s'%(ex, value))
 
 	def getProperty(self, key, default):
 		"""
