@@ -54,10 +54,10 @@ enhancement issues or GitHub pull requests!
 
 Project Links
 =============
-.. image:: https://img.shields.io/pypi/v/PySys   :alt: PyPI
+.. image:: https://img.shields.io/pypi/v/PySys
 	:target: https://pypi.org/project/PySys/
 
-.. image:: https://img.shields.io/pypi/l/PySys   :alt: PyPI - License
+.. image:: https://img.shields.io/pypi/l/PySys
 	:target: https://pypi.org/project/PySys/
 
 .. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=master
