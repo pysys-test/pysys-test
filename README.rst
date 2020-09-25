@@ -57,8 +57,8 @@ Project Links
 .. image:: https://img.shields.io/pypi/v/PySys
 	:target: https://pypi.org/project/PySys/
 
-.. image:: https://img.shields.io/pypi/l/PySys
-	:target: https://pypi.org/project/PySys/
+.. image:: https://img.shields.io/badge/license-LGPL-blue
+	:target: https://pysys-test.github.io/pysys-test/license.html
 
 .. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=master
 	:target: https://travis-ci.com/pysys-test/pysys-test
