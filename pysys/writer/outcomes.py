@@ -350,7 +350,10 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		rootElement.setAttributeNode(attr3)
 		rootElement.setAttributeNode(attr4)
 		rootElement.setAttributeNode(attr5)
-		
+		attr = document.createAttribute('timestamp')	
+		attr.value = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime()) # use UTC/GMT like Ant does
+		rootElement.setAttributeNode(attr)
+
 		# add the testcase information
 		testcase = document.createElement('testcase')
 		attr1 = document.createAttribute('classname')
@@ -363,14 +366,18 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		# add in failure information if the test has failed
 		if (testObj.getOutcome().isFailure()):
 			failure = document.createElement('failure')
-			attr1 = document.createAttribute('message')
-			attr1.value = str(testObj.getOutcome())
-			failure.setAttributeNode(attr1)
-			failure.appendChild(document.createTextNode( testObj.getOutcomeReason() ))		
-						
+			attr = document.createAttribute('message')
+			attr.value = '%s%s'%(testObj.getOutcome(), (': %s'%testObj.getOutcomeReason()) if testObj.getOutcomeReason() else '')
+			failure.setAttributeNode(attr)
+
+			attr = document.createAttribute('type') # would be an exception class in a JUnit test
+			attr.value = str(testObj.getOutcome())
+			failure.setAttributeNode(attr)
+
 			stdout = document.createElement('system-out')
 			runLogOutput = stripANSIEscapeCodes(kwargs.get('runLogOutput','')) # always unicode characters
-			stdout.appendChild(document.createTextNode(runLogOutput.replace('\r','').replace('\n', os.linesep)))
+			runLogOutput = runLogOutput.replace('\r','').replace('\n', os.linesep)
+			stdout.appendChild(document.createTextNode(runLogOutput))
 			
 			testcase.appendChild(failure)
 			testcase.appendChild(stdout)

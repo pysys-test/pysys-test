@@ -52,7 +52,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('junit-report/TEST-NestedFail.xml', expr=u'Log with control characters: %s end'%escapedcontrolchars, encoding='utf-8')
 		
 		# given the above check all we need to verify here is that the outcome reason is included
-		self.assertGrep('junit-report/TEST-NestedFail.xml', expr=u'<failure message="FAILED">Outcome with control characters: .+ end', encoding='utf-8')
+		self.assertGrep('junit-report/TEST-NestedFail.xml', expr=u'<failure message="FAILED: Outcome with control characters: .+ end"', encoding='utf-8')
 		self.assertGrep('testsummary.xml', expr=u'<outcomeReason>Outcome with control characters: .+ end', encoding='utf-8')
 		
 		# ensure we're generating valid parseable XML, i.e. not getting exceptions from these

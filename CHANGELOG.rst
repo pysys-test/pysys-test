@@ -35,7 +35,17 @@ PySys 1.6.2 is under development.
 	- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
 	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
 	  refer to the old name). 
-	- Added a ``mappers=`` argument to `BaseTest.logFileContents()`. 
+	- Added a ``mappers=`` argument to `BaseTest.logFileContents()`.
+	- Changed `pysys.writer.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
+	  attribute, and changed the failure node to be:
+	  
+	    <failure message="OUTCOME: Outcome reason" type="OUTCOME"/>
+	    
+	  (where OUTCOME could be FAILED, BLOCKED, etc) instead of:
+	  
+	    <failure message="OUTCOME">Outcome reason</failure>
+	  
+	  This may produce better error indicators in CI systems and IDEs that parse these files. 
 
 Fixes:
 

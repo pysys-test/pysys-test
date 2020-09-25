@@ -157,8 +157,8 @@ class PySysTest(BaseTest):
 			if not PY2:
 				self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='Log bytes message including i18n string .+ end', encoding='utf-8')
 			
-			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED">outcome reason .+end</failure>', encoding='utf-8')
-			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED">outcome reason %s end</failure>'%self.utf8teststring, encoding='utf-8')
+			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED: outcome reason .+end"', encoding='utf-8')
+			self.assertGrep(runid+'/junitresults/TEST-NestedFail.1.xml', expr='<failure message="FAILED: outcome reason %s end"'%self.utf8teststring, encoding='utf-8')
 
 			# specific checks for specific runs
 			self.log.info('')
