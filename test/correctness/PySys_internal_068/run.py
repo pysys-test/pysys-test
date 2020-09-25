@@ -24,6 +24,8 @@ class PySysTest(BaseTest):
 	def execute(self):
 		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
+		import coverage # this test requires the coverage.py library so give a clear error if it's missing
+
 		self.copy(self.input, self.output+'/test')
 		# make testRootDir and working dir be different
 		os.rename(self.output+'/test/pysysproject.xml', self.output+'/pysysproject.xml')
