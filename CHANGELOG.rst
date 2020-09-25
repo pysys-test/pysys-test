@@ -41,6 +41,8 @@ Fixes:
 
 	- Fixed the project property ``defaultEnvirons.ENVVAR`` added in 1.6.0 which did not in fact set the environment 
 	  variable as described (due to an additional unwanted ``.`` character); now it does. 
+	- Avoid creating unnecessary runner output directory as a result of ``mkdir(runner.output+'/../xxx')`` by 
+	  normalizing paths before calling mkdir. 
 
 -------------------
 What's new in 1.6.1
