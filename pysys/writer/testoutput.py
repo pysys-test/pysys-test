@@ -480,7 +480,22 @@ class CollectTestOutputWriter(BaseRecordResultsWriter, TestOutputVisitor):
 					for f in files:
 						if os.path.normpath(os.path.join(base, f))==os.path.normpath(self.destArchive): continue
 						fn = os.path.join(base, f)
-						archive.write(fn, fn[rootlen:].replace('\\','/'))
+						
+						destname = fn[rootlen:].replace('\\','/').lstrip('/')
+						
+						try:
+							try:
+								archive.write(fn, destname)
+							except PermissionError: # pragma: no cover - can happen on windows due to file system locking issues
+								time.sleep(5.0)
+								archive.write(fn, destname)
+						except Exception as ex: # pragma: no cover
+							# Deal with failures (even after retry) - don't abort the whole archive 
+							# (e.g. a locked .err file in coverage output dir doesn't matter)
+							log.warn('Could not write file to archive %s: "%s" - %s: %s', os.path.basename(self.destArchive), fn, 
+								ex.__class__.__name__, ex)
+							archive.writestr(destname+'.pysyserror.txt', '!!! PySys could not write this file to the archive - %s: %s'%(
+								ex.__class__.__name__, ex))
 
 		if self.publishArtifactDirCategory:
 			self.runner.publishArtifact(self.destDir, self.publishArtifactDirCategory)
