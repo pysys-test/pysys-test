@@ -199,12 +199,16 @@ The helper methods for common file I/O operations are:
 	copy
 	mkdir
 	deleteDir
+	deleteFile
 	getExprFromFile
 	logFileContents
 	write_text
 	getDefaultFileEncoding
 
 To get the configured input/output directories for this test see `Test configuration`_.
+
+For additional file/directory helper functions such as support for loading JSON and properties files, 
+see the `pysys.utils.fileutils` module. 
 
 Miscellaneous
 =============
