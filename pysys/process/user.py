@@ -1450,12 +1450,13 @@ class ProcessUser(object):
 		stack=[]
 		from pysys.basetest import BaseTest
 		if isinstance(self, BaseTest):
+			testmodule = os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] if self.descriptor.module else None
 			for record in inspect.stack():
 				info = inspect.getframeinfo(record[0])
 				if (self.__skipFrame(info.filename, ProcessUser) ): continue
 				if (self.__skipFrame(info.filename, BaseTest) ): continue
 				stack.append( '%s:%s' % (info.filename.strip(), info.lineno) )
-				if (os.path.splitext(info.filename)[0] == os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] and (info.function == 'execute' or info.function == 'validate')): return stack
+				if (testmodule is None or os.path.splitext(info.filename)[0] == testmodule) and (info.function in ['execute', 'validate']): return stack
 		return None
 
 

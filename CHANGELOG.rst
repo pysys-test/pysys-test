@@ -48,7 +48,11 @@ PySys 1.6.2 is under development.
 	    <failure message="OUTCOME">Outcome reason</failure>
 	  
 	  This may produce better error indicators in CI systems and IDEs that parse these files. 
-
+	- PySys plugins sometimes provide a test class that can directly used by multiple tests (without each having their 
+	  own ``run.py``). You can now implement this pattern a lot more easily by specifying a fully qualified 
+	  ``classname`` and ``module`` in the ``pysystest.xml`` descriptor, which will lookup the specified classname 
+	  in the PYTHONPATH using Python's module importing mechanism. 
+	  	
 Fixes:
 
 	- Fixed the project property ``defaultEnvirons.ENVVAR`` added in 1.6.0 which did not in fact set the environment 

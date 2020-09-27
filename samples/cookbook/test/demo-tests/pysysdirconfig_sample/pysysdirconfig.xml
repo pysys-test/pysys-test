@@ -41,9 +41,10 @@
 	<skipped reason="These tests are skipped until bug XYZ is fixed"/>
 
 	<data>
-		<!-- By convention the test class uses module="run.py" located in this directory, but 
-		it is possible to use a different name, or to specify an absolute path if you want to use the same 
-		Python class for lots of tests. 
+		<!-- By convention the test class uses module="run.py" located in the test directory, but 
+		it is possible to use a different path (even an absolute path). If you want to use a single 
+		Python class for lots of tests rather, omit the module= attribute and make sure it's available 
+		on the project's <pythonpath> . 
 		-->
 		<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
 		

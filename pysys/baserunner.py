@@ -30,6 +30,7 @@ import platform
 import shlex
 import warnings
 import difflib
+import importlib
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -42,7 +43,6 @@ import pysys
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
-from pysys.utils.loader import import_module
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
@@ -1113,15 +1113,22 @@ class TestContainer(object):
 			with global_lock:
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 				try:
-					if not self.descriptor.module.endswith('.py'): self.descriptor.module += '.py'
-					runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module)
-					with open(toLongPathSafe(runpypath), 'rb') as runpyfile:
-						runpycode = compile(runpyfile.read(), runpypath, 'exec')
-					runpy_namespace = {}
-					exec(runpycode, runpy_namespace)
 					outsubdir = self.outsubdir
-					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, outsubdir, self.runner)
-					del runpy_namespace
+					if not self.descriptor.module: # get a shared test class from the sys.path
+						classname = self.descriptor.classname.split('.')
+						assert len(classname)>1, 'Please specify a fully qualified classname (e.g. mymodule.classname): %s'%self.descriptor.classname
+						module_name, classname = '.'.join(classname[:-1]), classname[-1]
+						clazz = getattr(importlib.import_module(module_name), classname)
+					else:
+						if not self.descriptor.module.endswith('.py'): self.descriptor.module += '.py'
+						runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module)
+						with open(toLongPathSafe(runpypath), 'rb') as runpyfile:
+							runpycode = compile(runpyfile.read(), runpypath, 'exec')
+						runpy_namespace = {}
+						exec(runpycode, runpy_namespace)
+						clazz = runpy_namespace[self.descriptor.classname]
+						del runpy_namespace
+					self.testObj = clazz(self.descriptor, outsubdir, self.runner)
 					
 					self.testObj.testPlugins = []
 					for pluginClass, pluginAlias, pluginProperties in self.runner.project.testPlugins:
@@ -1202,7 +1209,7 @@ class TestContainer(object):
 			except Exception:
 				log.warn("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
-		
+
 			# call the cleanup method to tear down the test
 			try:
 				log.debug('--- test cleanup')

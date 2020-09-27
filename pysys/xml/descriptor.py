@@ -84,6 +84,7 @@ class TestDescriptor(object):
 	:ivar str ~.classname: The Python classname to be executed for this testcase.
 	
 	:ivar str ~.module: The path to the python module containing the testcase class. Relative to testDir, or an absolute path.
+		If not set, the class is looked up in the PYTHONPATH. 
 	
 	:ivar str ~.input: The path to the input directory of the testcase. Relative to testDir, or an absolute path.
 	
@@ -131,8 +132,10 @@ class TestDescriptor(object):
 		# copy groups/modes so we can safely mutate them later if desired
 		self.groups = list(groups)
 		self.modes = list(modes)
+		
 		self.classname = classname
-		self.module = module
+		assert classname, 'Test descriptors cannot set the classname to nothing'
+		self.module = module if module else None
 		
 		self.input = input
 		self.output = output

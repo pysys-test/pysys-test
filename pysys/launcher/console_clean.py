@@ -103,7 +103,7 @@ class ConsoleCleanTestHelper(object):
 
 			for descriptor in descriptors:
 				if self.all:
-					modulepath = os.path.join(descriptor.testDir, descriptor.module)
+					modulepath = os.path.join(descriptor.testDir, descriptor.module or 'dummy.py')
 					cache=os.path.join(os.path.dirname(modulepath),"__pycache__")
 					if os.path.isdir(cache):
 						log.info("Deleting pycache: " + cache)
