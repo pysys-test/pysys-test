@@ -1120,7 +1120,6 @@ class TestContainer(object):
 						module_name, classname = '.'.join(classname[:-1]), classname[-1]
 						clazz = getattr(importlib.import_module(module_name), classname)
 					else:
-						if not self.descriptor.module.endswith('.py'): self.descriptor.module += '.py'
 						runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module)
 						with open(toLongPathSafe(runpypath), 'rb') as runpyfile:
 							runpycode = compile(runpyfile.read(), runpypath, 'exec')

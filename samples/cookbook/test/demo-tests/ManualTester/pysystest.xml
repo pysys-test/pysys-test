@@ -16,6 +16,6 @@ This example testcase demonstrates the use of the manual tester user interface t
 	</classification>
 
 	<data>
-		<class name="PySysTest" module="run"/>
+		<class name="PySysTest" module="run.py"/>
 	</data>
 </pysystest>

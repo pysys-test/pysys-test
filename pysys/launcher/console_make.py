@@ -178,7 +178,8 @@ class %s(%s):
 			descriptor_fp.write(self.DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
 			descriptor_fp.close()
 			log.info("Created descriptor %s " % os.path.join(self.testdir, self.testId, descriptor))
-			testclass_fp = openfile(os.path.join(self.testdir, self.testId, "%s.py" % module), "w")
+			if not module.endswith('.py'): module += '.py'
+			testclass_fp = openfile(os.path.join(self.testdir, self.testId, module), "w")
 			if teststring == None:
 				testclass_fp.write(self.TEST_TEMPLATE % (constantsImport, basetestImport, testclass, basetest))
 			else:

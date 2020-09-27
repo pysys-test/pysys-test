@@ -135,7 +135,10 @@ class TestDescriptor(object):
 		
 		self.classname = classname
 		assert classname, 'Test descriptors cannot set the classname to nothing'
-		self.module = module if module else None
+
+		if not module: self.module = None
+		elif module.endswith('.py'): self.module = module
+		else: self.module = module+'.py'
 		
 		self.input = input
 		self.output = output

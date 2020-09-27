@@ -52,6 +52,9 @@ PySys 1.6.2 is under development.
 	  own ``run.py``). You can now implement this pattern a lot more easily by specifying a fully qualified 
 	  ``classname`` and ``module`` in the ``pysystest.xml`` descriptor, which will lookup the specified classname 
 	  in the PYTHONPATH using Python's module importing mechanism. 
+	- Change the creation of new tests (and the loading of test descriptors) to include the ``.py`` suffix in the 
+	  ``module=`` filename, to make it more explicit what is going on. As before, specifying this suffix is optional 
+	  so there is no need to update existing tests. 
 	  	
 Fixes:
 
