@@ -1313,7 +1313,9 @@ class ProcessUser(object):
 			if (old == NOTVERIFIED and not self.__outcomeReason): old = None
 			self.outcome.append(outcome)
 
-			if callRecord==None: callRecord = self.__callRecord()
+			# only bother populating the callrecord (which is a bit costly) when there's a failure
+			if outcome.isFailure() and callRecord is None: callRecord = self.__callRecord()
+			
 			def parseLocation(cr):
 				if not cr or ':' not in cr: return None
 				return cr[:cr.rfind(':')], cr[cr.rfind(':')+1:]
