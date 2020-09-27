@@ -21,6 +21,18 @@
     <user-data name="testStringUserData" value="Hello ${non-existent}"/> <!-- use of ${...} is deliberately allowed but 
 		not automatically substituted since it's not clear from where (project props? other user-data? etc) and 
 		best to leave this for the user if they want to do it manually. -->
+    <user-data name="testStringUserData" value="Hello ${non-existent}"/> <!-- use of ${...} is deliberately allowed but 
+		not automatically substituted since it's not clear from where (project props? other user-data? etc) and 
+		best to leave this for the user if they want to do it manually. -->
+	<user-data name="testMultiLineListUserData">First line
+		second line
+		<!-- comment -->
+			third , comma-separated, line  
+			
+
+		fourth line
+		
+	</user-data>
   </data>
   
   <traceability>

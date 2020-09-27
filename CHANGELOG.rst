@@ -55,7 +55,21 @@ PySys 1.6.2 is under development.
 	- Change the creation of new tests (and the loading of test descriptors) to include the ``.py`` suffix in the 
 	  ``module=`` filename, to make it more explicit what is going on. As before, specifying this suffix is optional 
 	  so there is no need to update existing tests. 
-	  	
+	- Added support for specifying project properties and descriptor user-data values using multi-line XML text 
+	  (or CDATA) as an alternative to setting the ``value=`` attribute. When converting string values to a list, 
+	  newline is now considered as a delimited along with comma. This which allows long value (especially path-like) 
+	  values to be specified in a more readable form, for example::
+	  
+	    <property name="myTestDescriptorPath">
+	      ${testRootDir}/foo/foo
+	      ${testRootDir}/foo/bar, ${testRootDir}/foo/baz
+	      
+	      <!-- Comments and whitespace are ignored when converting a string to a list -->
+	      
+	      ${testRootDir}/foo/bosh
+	    </property>
+
+
 Fixes:
 
 	- Fixed the project property ``defaultEnvirons.ENVVAR`` added in 1.6.0 which did not in fact set the environment 

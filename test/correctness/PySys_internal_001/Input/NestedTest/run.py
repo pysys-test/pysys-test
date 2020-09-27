@@ -11,6 +11,7 @@ class PySysTest(BaseTest):
 	testNoneProperty = None
 	testFloatUserData = 0.0
 	testListProperty = []
+	testMultiLineListUserData = []
 
 	def execute(self):
 		self.write_text(self.project.sample_path+'.txt', 'xxx') # check these don't contain any non-file system characters
@@ -54,6 +55,16 @@ class PySysTest(BaseTest):
 		self.assertThat('actual == expected', actual=sorted([k for k in self.project.properties if k.startswith('prefix')]), 
 			expected=sorted(['prefix_a', 'prefix_a5']))
 
+		self.log.info('multiline_text:\n%s', self.project.multiline_text)
+		self.assertThat('multiline_text == expected', multiline_text=self.project.multiline_text, 
+			expected='First line\n\t\tsecond line\n\t\t\n\n\t\t\tthird line\n\t\t\t\n\n\t\tfourth line\n\t')
+		self.log.info('multiline_cdata:\n%s', self.project.multiline_cdata)
+		self.assertThat('multiline_cdata == expected', multiline_cdata=self.project.multiline_cdata, 
+			expected="\n\t\tmy data >' foo\n\t\t\tbar\n\t\t\t<!-- comment -->\n\t\t\tbaz\n\t\t\nno indent\n\t\t\t\n\t\tthird line\n\t")
+		self.assertThat('testMultiLineListUserData == expected', testMultiLineListUserData=self.testMultiLineListUserData, expected=[
+			'First line', 'second line', 'third', 'comma-separated', 'line', 'fourth line'
+		])
+		
 		#self.assertThat('throws1', testStringProperty__eval="self.project.getProperty('projectfloat', -1)")
 		#self.assertThat('throws2', testStringProperty__eval="self.project.getProperty('projectfloat', None)")
 

@@ -9,6 +9,27 @@
 	<property name="user_lastname" value="Smith" />
 	<property name="user_title" value="Professor" />
 	<property name="user_full" value="${user_title} ${user_firstname} ${user_lastname}" />
+
+	<property name="multiline_text">First line
+		second line
+		<!-- comment -->
+			third line
+			
+
+		fourth line
+	</property>
+
+	<property name="multiline_cdata"><![CDATA[
+		my data >' foo
+			bar
+			<!-- comment -->
+			baz
+		
+no indent
+			
+		third line
+	]]></property>
+
 	
 	<property name="projectbool" value="tRue"/>
 	<property name="projectbooloverride" value="tRue"/>

@@ -134,7 +134,11 @@ class _XMLProjectParser(object):
 
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
-				value = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name=name)
+				value = self.expandProperties(
+						propertyNode.getAttribute("value")
+						or '\n'.join(n.data for n in propertyNode.childNodes 
+							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data), 
+					default=propertyNode, name=name)
 				if name in self.properties:
 					raise UserError('Cannot set project property "%s" as it is already set'%name)
 				self.properties[name] = value
@@ -435,7 +439,10 @@ class _XMLProjectParser(object):
 				name = tag.getAttribute('name')
 				assert name
 				if name in optionsDict: raise UserError('Duplicate property "%s" in <%s> configuration'%(name, node.tagName))
-				optionsDict[name] = self.expandProperties(tag.getAttribute("value"), default=tag, name=name)
+				optionsDict[name] = self.expandProperties(
+					tag.getAttribute("value") or '\n'.join(n.data for n in tag.childNodes 
+							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data),
+					default=tag, name=name)
 		classname = optionsDict.pop('classname', defaultClass)
 		if not classname: raise UserError('Missing require attribute "classname=" for <%s>'%node.tagName)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))

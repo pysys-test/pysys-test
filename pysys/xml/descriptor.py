@@ -527,7 +527,15 @@ class _XMLDescriptorParser(object):
 				key = e.getAttribute('name').strip()
 				assert key, 'name= must be specified'
 				assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # prevent names that we reserve for use by the basetest/processuser
-				result[key] = e.getAttribute('value')
+				
+				# NB: we don't use inspect.cleandoc here since it'd probably slow down descriptor loading and in 99% 
+				# of for multi-line strings we will be stripping whitespace anyway so not a good use of time
+				value = e.getAttribute('value')
+				if not value and e.childNodes:
+					value = '\n'.join(n.data for n in e.childNodes 
+						if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data)
+				result[key] = value	 or ''
+				
 		return result
 
 	def getTestOutput(self):

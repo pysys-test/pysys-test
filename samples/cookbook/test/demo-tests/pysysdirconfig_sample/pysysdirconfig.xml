@@ -59,6 +59,15 @@
 		shared Python class for lots of tests. 
 		-->
 		<user-data name="myTestDescriptorData" value="foobar"/>
+		
+		<!-- For long values such as paths the value can be specified in a text (or CDATA) node, and if the 
+		value is to be converted to a list, newline and/or comma can be used as delimiters. -->
+		<user-data name="myTestDescriptorPath">
+			${testRootDir}/foo/foo
+			${testRootDir}/foo/bar, ${testRootDir}/foo/baz
+			<!-- Comments and whitespace are ignored when converting a string to a list. -->
+			${testRootDir}/foo/bosh
+		</user-data>
 	</data>
 
 	<traceability>
