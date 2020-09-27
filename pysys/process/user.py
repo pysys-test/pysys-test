@@ -34,7 +34,7 @@ from pysys.utils.logutils import BaseLogFormatter, stripANSIEscapeCodes
 from pysys.xml.project import Project
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
-from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe, fromLongPathSafe
+from pysys.utils.fileutils import mkdir, deletedir, deletefile, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
 import pysys.internal.safe_eval
 
@@ -1720,7 +1720,21 @@ class ProcessUser(object):
 		:param kwargs: Any additional arguments are passed to 
 			L{pysys.utils.fileutils.deletedir()}. 
 		"""
-		deletedir(os.path.join(self.output, path), **kwargs)
+		return deletedir(os.path.join(self.output, path), **kwargs)
+
+	def deleteFile(self, path, **kwargs):
+		"""
+		Recursively delete the specified file. 
+		
+		Does nothing if it does not exist. Raises an exception if the deletion fails. 
+		
+		:param path: The path to be deleted. This can be an absolute path or 
+			relative to the testcase output directory.
+		
+		:param kwargs: Any additional arguments are passed to 
+			L{pysys.utils.fileutils.deletefile()}. 
+		"""
+		return deletefile(os.path.join(self.output, path), **kwargs)
 		
 	def getDefaultFileEncoding(self, file, **xargs):
 		"""

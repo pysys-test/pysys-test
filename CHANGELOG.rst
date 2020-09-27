@@ -36,6 +36,8 @@ PySys 1.6.2 is under development.
 	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
 	  refer to the old name). 
 	- Added a ``mappers=`` argument to `BaseTest.logFileContents()`.
+	- Added `BaseTest.deleteFile()` which provides a simple and safe way to delete a file similar to the 
+	  `BaseTest.deleteDir()` method. 
 	- Changed `pysys.writer.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
 	  attribute, and changed the failure node to be:
 	  
