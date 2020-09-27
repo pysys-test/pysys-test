@@ -65,6 +65,10 @@ class PySysTest(BaseTest):
 			'First line', 'second line', 'third', 'comma-separated', 'line', 'fourth line'
 		])
 		
+		self.assertThat('testSlashes == expected', testSlashes=self.project.testSlashes, 
+			expected='mydir%smyfile'%os.sep)
+
+		
 		#self.assertThat('throws1', testStringProperty__eval="self.project.getProperty('projectfloat', -1)")
 		#self.assertThat('throws2', testStringProperty__eval="self.project.getProperty('projectfloat', None)")
 

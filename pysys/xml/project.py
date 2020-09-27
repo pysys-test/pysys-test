@@ -65,6 +65,8 @@ class _XMLProjectParser(object):
 			'hostname':HOSTNAME.lower().split('.')[0],
 			'os':platform.system().lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
 			'osfamily':OSFAMILY, # windows or unix
+			
+			'/': os.sep, # so people can write strings like foo${/}bar and get a forward or back-slash depending on platform
 
 			# old names
 			'root':self.dirname, # old name for testRootDir
@@ -141,13 +143,16 @@ class _XMLProjectParser(object):
 					default=propertyNode, name=name)
 				if name in self.properties:
 					raise UserError('Cannot set project property "%s" as it is already set'%name)
-				self.properties[name] = value
-				log.debug('Setting project property %s="%s"', name, value)
 
 				if (propertyNode.getAttribute("pathMustExist") or '').lower()=='true':
 					if not (value and os.path.exists(os.path.join(self.dirname, value))):
 						raise UserError('Cannot find path referenced in project property "%s": "%s"'%(
 							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
+					value = os.path.normpath(value) # since we know it's a path, make it a nice one
+
+				self.properties[name] = value
+				log.debug('Setting project property %s="%s"', name, value)
+
 				permittedAttributes = {'name', 'value', 'default', 'pathMustExist'}
 			else:
 				raise UserError('Found <property> with no name= or file=')

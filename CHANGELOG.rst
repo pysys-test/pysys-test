@@ -68,8 +68,10 @@ PySys 1.6.2 is under development.
 	      
 	      ${testRootDir}/foo/bosh
 	    </property>
-	 - Added automatic expansion of ``${...}`` project properties in a test/directory XML's ``user-data`` elements.
-
+	- Added automatic expansion of ``${...}`` project properties in a test/directory XML's ``user-data`` elements.
+	- Added automatic normalization of slashes and ``..`` sequences in project property values for which 
+	  ``pathMustExist=true``. 
+	- Added a pre-defined project property ``${/}`` which is resolved to forward or back slash character for this OS. 
 
 Fixes:
 

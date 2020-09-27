@@ -10,6 +10,8 @@
 	<property name="user_title" value="Professor" />
 	<property name="user_full" value="${user_title} ${user_firstname} ${user_lastname}" />
 
+	<property name="testSlashes" value="mydir${/}myfile" />
+
 	<property name="multiline_text">First line
 		second line
 		<!-- comment -->
