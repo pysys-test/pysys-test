@@ -653,7 +653,7 @@ class DescriptorLoader(object):
 		project = self.project
 		
 		descriptors = []
-		ignoreSet = set(OSWALK_IGNORES)
+		ignoreSet = set(OSWALK_IGNORES+[DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE])
 		
 		descriptorSet = set([s.strip() for s in project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')])
 		

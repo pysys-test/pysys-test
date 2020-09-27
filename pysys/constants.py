@@ -211,10 +211,11 @@ DEFAULT_STYLESHEET = None # deprecated
 DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_OUTDIR = 'win' if PLATFORM=='win32' else PLATFORM # this constant is not currently public API
 
-OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn', '__pycache__', '.git' ]
+OSWALK_IGNORES = [ '.git', '.svn', '__pycache__', 'CVS', ]
 """ A list of directory names to exclude when recursively walking a directory tree. 
 
-:meta private: Hidden since 1.5.1, not something end-users need to be concerned with. """
+This is used by PySys during test loading, and can also be used for subsequent directory walking operations. 
+"""
 
 DEFAULT_TIMEOUT = 600
 """Deprecated: Use a specific member of `TIMEOUTS` instead."""
