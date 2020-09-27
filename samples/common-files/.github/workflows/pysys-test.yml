@@ -48,14 +48,14 @@ jobs:
         id: pysys
         run: |
           python -m pysys run --ci --outdir=${{matrix.test-run-id}}
-        
-      # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
 
       - name: Upload Python code coverage
         uses: codecov/codecov-action@v1
-        if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
+        if: steps.pysys.outputs.artifact_PythonCoverageDir
         with:
-          file: test/__coverage_python.${{matrix.test-run-id}}/coverage.xml
+          file: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}/coverage.xml
+        
+      # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
       
       - name: Upload performance CSV artifacts
         uses: actions/upload-artifact@v2
