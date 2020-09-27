@@ -68,6 +68,7 @@ PySys 1.6.2 is under development.
 	      
 	      ${testRootDir}/foo/bosh
 	    </property>
+	 - Added automatic expansion of ``${...}`` project properties in a test/directory XML's ``user-data`` elements.
 
 
 Fixes:

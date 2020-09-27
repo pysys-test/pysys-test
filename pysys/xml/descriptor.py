@@ -102,8 +102,8 @@ class TestDescriptor(object):
 		it's a normal testcase. 
 	
 	:ivar dict(str,obj) ~.userData: A dictionary that can be used for storing user-defined data 
-		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements e.g. 
-		``<data><user-data name="key" value="val"</user-data></data>``.
+		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements, e.g. 
+		``<data><user-data name="key" value="val ${projectProperty}"</user-data></data>``.
 	"""
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
@@ -242,9 +242,18 @@ class TestDescriptor(object):
 		str=str+"Test reference:    %s\n" % self.reference
 		str=str+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		if self.userData:
-			str=str+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,repr(v).lstrip('u') if isstring(v) else str(v)) for k,v in (self.userData.items()))
+			str=str+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,self.__userDataValueToString(v)) for k,v in (self.userData.items()))
 		str=str+""
 		return str
+	
+	@staticmethod
+	def __userDataValueToString(v):
+		if not isstring(v): return str(v)
+		if '\n' in v:
+			# tab and newline character are difficult to read and in most cases whitespace will be stripped out so remove 
+			# it from this view of the strings
+			v = '<nl>'.join(x.strip() for x in v.split('\n') if x.strip())
+		return repr(v).lstrip('u')
 	
 	def __repr__(self): return str(self)
 
@@ -534,7 +543,13 @@ class _XMLDescriptorParser(object):
 				if not value and e.childNodes:
 					value = '\n'.join(n.data for n in e.childNodes 
 						if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data)
-				result[key] = value	 or ''
+				if value is None: value = ''
+				try:
+					value = self.project.expandProperties(value)
+				except Exception as ex: # pragma: no cover
+					raise UserError('Failed to resolve user-data value for "%s" in XML descriptor "%s": %s' % (key, self.file, ex))
+
+				result[key] = value
 				
 		return result
 

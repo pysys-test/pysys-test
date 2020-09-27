@@ -8,7 +8,7 @@ Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
 Test reference:    MyReference
 Test traceability: UserRequirement_1a, UserRequirement_2c, Performance, UserStory.XYZ-54321
-Test user data:    myTestDescriptorData='foobar'
+Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-1.2<nl>foo/bar, foo/baz<nl>foo/bosh'
 Test id:           PySysTestDescriptorSample
 Test state:        skipped
 Test skip reason:  This test is skipped until bug XYZ is fixed
@@ -19,4 +19,4 @@ Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
 Test reference:    MyReference
 Test traceability: UserRequirement_1a, UserRequirement_2c, Performance, UserStory.XYZ-54321
-Test user data:    myTestDescriptorData='foobar'
+Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-1.2<nl>foo/bar, foo/baz<nl>foo/bosh'

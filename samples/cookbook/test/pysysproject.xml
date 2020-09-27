@@ -70,7 +70,7 @@
 	the optional includes="regex" and excludes="regex" . 
 	-->
 	<property file="pysys-extensions/myproject-${osfamily}.properties" pathMustExist="true" prefix="os_"
-		includes=".*Dir" excludes=""/>
+		includes=".*(Dir|Version)$" excludes=""/>
 		
 	<!-- 
 	Special project properties

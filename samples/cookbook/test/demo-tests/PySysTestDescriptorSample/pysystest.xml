@@ -64,16 +64,18 @@
 		
 		<!-- The ability to add user-defined data to the test descriptor is mostly useful when using a 
 		shared Python class for lots of tests. 
+		
+		Project properties (but not other user-data values) can be substituted into the value using ${...}. 
 		-->
 		<user-data name="myTestDescriptorData" value="foobar"/>
 		
 		<!-- For long values such as paths the value can be specified in a text (or CDATA) node, and if the 
 		value is to be converted to a list, newline and/or comma can be used as delimiters. -->
 		<user-data name="myTestDescriptorPath">
-			${testRootDir}/foo/foo
-			${testRootDir}/foo/bar, ${testRootDir}/foo/baz
+			foo/foo-${os_myThirdPartyLibraryVersion}
+			foo/bar, foo/baz
 			<!-- Comments and whitespace are ignored when converting a string to a list. -->
-			${testRootDir}/foo/bosh
+			foo/bosh
 		</user-data>
 
 	</data>
