@@ -80,7 +80,9 @@ PySys 1.6.2 is under development.
 	  PySys see `BaseTest.assertThat` which uses the same mechanism. For example::
 	  
 	      <property name="logConfigURL" value='${eval: "file:///"+os.path.abspath(appHome).replace("\\", "/")+"/logConfig.xml"}'/>
-	
+
+	- Added `pysys.constants.EXE_SUFFIX` which is ``.exe`` on Windows and empty string on Unix. This is convenient 
+	  when running executables. 
 
 Fixes:
 

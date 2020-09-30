@@ -107,6 +107,10 @@ PYTHON_EXE = sys.executable # alias to increase readability
 The path to the current Python executable (=``sys.executable``). 
 """
 
+EXE_SUFFIX = '.exe' if IS_WINDOWS else ''
+""" The suffix added to binary executables, that is ``.exe`` on Windows, and empty string on Unix. 
+"""
+
 # constants used in testing
 TRUE=True 
 """ Deprecated. 
