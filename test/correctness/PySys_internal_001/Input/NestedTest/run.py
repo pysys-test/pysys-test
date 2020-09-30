@@ -68,9 +68,15 @@ class PySysTest(BaseTest):
 		self.assertThat('testSlashes == expected', testSlashes=self.project.testSlashes, 
 			expected='mydir%smyfile'%os.sep)
 
-		
+		self.assertThat('testEval == expected', testEval=self.project.testEval, 
+			expected='Foo foo is what Simon says test')
+		self.assertThat('testEvalUserData == expected', testEvalUserData=self.testEvalUserData, 
+			expected='Foo foo is what Simon says test')
+			
 		#self.assertThat('throws1', testStringProperty__eval="self.project.getProperty('projectfloat', -1)")
 		#self.assertThat('throws2', testStringProperty__eval="self.project.getProperty('projectfloat', None)")
+
+		self.log.info('Example from doc is: "%s"', self.project.logConfigURL)
 
 	def validate(self):
 		pass 

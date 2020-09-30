@@ -28,6 +28,8 @@
 		fourth line
 		
 	</user-data>
+	<user-data name="testEvalUserData" value='Foo ${eval:properties["999-my.invalid.identifier"]} is what ${eval:user_firstname} says ${eval:os.path.basename(testRootDir)}'/>
+
   </data>
   
   <traceability>

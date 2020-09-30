@@ -22,6 +22,7 @@ PySys 1.6.2 is under development.
 	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
 	- Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails. 
 	- Process management:
+	
 		- Added automatic killing of child processes of processes PySys has started (using Unix "process groups", and 
 		  Windows "jobs"). This is especially useful when starting a process using a shell script; previously 
 		  only the wrapper script would have been killed, whereas now the process it starts is also terminated. 
@@ -32,6 +33,7 @@ PySys 1.6.2 is under development.
 		  defaults as described in the latest macOS documentation. 
 		- Added improved debug logging to `BaseTest.startProcess()` including a full command line for manually re-running 
 		  troublesome commands, and expansion of PATH environment variables to show the individual components. 
+		  
 	- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
 	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
 	  refer to the old name). 
@@ -72,6 +74,13 @@ PySys 1.6.2 is under development.
 	- Added automatic normalization of slashes and ``..`` sequences in project property values for which 
 	  ``pathMustExist=true``. 
 	- Added a pre-defined project property ``${/}`` which is resolved to forward or back slash character for this OS. 
+	- Added support for executing Python eval() strings when resolving project properties. Other project properties 
+	  are available as Python variables when the eval string is executed (and also in a ``properties`` dict, in case of 
+	  any name that is not a valid Python identifier). For more details on how eval() strings are evaluated within 
+	  PySys see `BaseTest.assertThat` which uses the same mechanism. For example::
+	  
+	      <property name="logConfigURL" value='${eval: "file:///"+os.path.abspath(appHome).replace("\\", "/")+"/logConfig.xml"}'/>
+	
 
 Fixes:
 

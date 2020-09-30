@@ -221,16 +221,28 @@ class _XMLProjectParser(object):
 			try:
 				if m.startswith(envprefix): 
 					return os.environ[m[len(envprefix):]]
+				if m.startswith('env:'): # for consistency with eval: also support this syntax
+					return os.environ[m[4:]]
 			except KeyError as ex:
-				raise UserError(errorprefix+'cannot find environment variable "%s"'%m[len(envprefix):])
+				raise KeyError(errorprefix+'cannot find environment variable "%s"'%m[len(envprefix):])
 			
+			if m.startswith('eval:'):
+				props = dict(self.properties)
+				props.pop('os', None) # remove this to avoid hiding the os.path module
+				props['properties'] = self.properties
+				try:
+					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props)
+					return str(v)
+				except Exception as ex:
+					raise UserError(errorprefix+'error in Python eval() string "%s": %s'%(m, ex))
+
 			if m in self.properties:
 				return self.properties[m]
 			else:
-				raise UserError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file"'%m)
+				raise KeyError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file"'%m)
 		try:
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, value)
-		except UserError as ex:
+		except KeyError as ex:
 			if default is None: raise UserError('%s; if this is intended to be an optional property please add a default="..." value'%ex)
 			log.debug('Failed to resolve value "%s" of property "%s", so falling back to default value', value, name or '<unknown>')
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, default)
@@ -592,8 +604,9 @@ class Project(object):
 		"""
 		Expand any ${...} project properties in the specified string. 
 		
-		An exception is thrown if any property is missing. This method is only for expanding project properties so 
-		``${env.*}`` syntax is not permitted (if you need to expand an environment variable, use a project property). 
+		An exception is thrown if any property is missing. This method is only for expanding project properties 
+		and ``${eval:xxx})`` strings, so ``${env.*}`` syntax is not permitted (if you need to use an environment 
+		variable, put it into a project property first). 
 		
 		.. versionadded:: 1.6.0
 		
@@ -601,9 +614,24 @@ class Project(object):
 		:return str: The value with properties expanded, or None if value=None. 
 		"""
 		if (not value) or ('${' not in value): return value
+		
+		def expandProperty(m):
+			m = m.group(1)
+			if m == '$': return '$'
+	
+			if m.startswith('eval:'):
+				props = dict(self.properties)
+				props.pop('os', None) # remove this to avoid hiding the os.path module
+				props['properties'] = self.properties
+				try:
+					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props)
+					return str(v)
+				except Exception as ex:
+					raise Exception('Error resolving ${%s} eval() string: %s'%(m, ex))
+			return self.properties[m]
+		
 		try:
-			return re.sub(r'[$][{]([^}]+)[}]', 
-				lambda m: '$' if m.group(1)=='$' else self.properties[m.group(1)], value)
+			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, value)
 		except KeyError as ex:
 			# A more informative error, but not a UserError since we don't have the context of where it was called from
 			raise Exception('Cannot resolve project property %s in: %s'%(ex, value))
@@ -703,3 +731,5 @@ class Project(object):
 			sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
 			traceback.print_exc()
 			sys.exit(1)
+
+import pysys.internal.safe_eval # down here to break circular dependency

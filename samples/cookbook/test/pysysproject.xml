@@ -28,7 +28,11 @@
 			* ``${hostname}``    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
 			* ``${/}``           - The backslash or forward-slash character used on this OS. 
  		
-		In addition, within this file ``${env.VARNAME}`` syntax can be used to access environment variables. 
+ 		Python expressions can be evaluated using ``${eval: ...}`` (with access to other project properties 
+ 		as Python variables, or from a dictionary named ``properties``). 
+ 		
+		In addition, within this file ``${env:VARNAME}`` (or ``${env.VARNAME}``) syntax can be used to access 
+		environment variables. 
 
 		Project properties can be used as substitution variables within the project file, and 
 		are set as attributes on the `pysys.xml.project.Project` class for use by tests - so in the example below, 
@@ -38,8 +42,8 @@
 		the ``default`` is used instead (or "" if a default is not explicitly specified). If the default 
 		also contains undefined properties the project will fail to load. 
 		
-		The ``pathMustExist=true`` attribute can be used to stop the project loading if the property value 
-		does not specify a path that exists.
+		The ``pathMustExist=true`` attribute can be used to stop the project loading if the property specifies a  
+		path that does not exist.
 	-->
 	
 	<!-- Property identifying the home directory of the application build being tested. 
@@ -55,6 +59,9 @@
 	using an environment variable if desired. -->
 	<property name="myCredentials" value="${env.MYORG_CREDENTIALS}" default="testuser:testpassword"/>
 
+	<!-- This is an example of using a ${eval: ... } substitution to convert a path into a URL. -->
+	<property name="logConfigURL" value='${eval: "file:///"+os.path.abspath(appHome).replace("\\", "/")+"/logConfig.xml"}'/>
+ 		
 	<!-- 
 	Import project properties from any file, using the specified prefix for namespacing. 
 	

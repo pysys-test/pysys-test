@@ -3,7 +3,9 @@
 	<requires-pysys>@PYSYS_VERSION@</requires-pysys>
 	<requires-python>@PYTHON_VERSION@</requires-python>
 	
-	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${osfamily}, ${startDate}, ${startTime}, ${hostname}, ${/}. -->
+	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${osfamily}, ${startDate}, ${startTime}, 
+		${hostname}, ${/}, ${eval:*}, ${env:*}. 
+	-->
 	
 	<!-- Property identifying the home directory of the application build being tested. -->
 	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
