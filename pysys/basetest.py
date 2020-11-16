@@ -993,7 +993,7 @@ class BaseTest(ProcessUser):
 		substitution string (containing only A-Z chars) for the regex special characters and pass everything else 
 		through re.escape::
 		
-			elf.assertGrep('myserver.log', expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)'))
+			self.assertGrep('myserver.log', expr=re.escape(r'A"string[with \lots*] of crazy characters e.g. VALUE.').replace('VALUE', '(.*)'))
 
 		.. versionchanged:: 1.5.1
 			The return value and reFlags were added in 1.5.1.
