@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 			self.abort('Expected exception from failed process start')
 			
 		self.hprocess = self.startProcess(command=sys.executable,
-						  arguments = [script, "2", "3"],
+						  arguments = [script, "2", 3],
 						  environs = os.environ,
 						  workingDir = self.output,
 						  stdout = "counter.out",
