@@ -104,6 +104,7 @@ jobs:
           python -m pip install coverage==4.5.4 codecov
 
           # main test run
+          cd test
           python -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
 
           # upload Python code coverage - since we're measuring PySys itself, include both 
