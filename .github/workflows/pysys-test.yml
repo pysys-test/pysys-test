@@ -1,0 +1,137 @@
+# This workflow is for testing PySys itself. 
+# If you're looking for something to copy from for your own projects use pysys-test-samples.yml insead.
+
+name: PySys-Plugin
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    strategy:
+      # Disable fail fast since it's useful to see test results for all platforms even if some failed
+      fail-fast: false
+      
+      matrix:
+        # A selection range of OS, Python and Java versions
+        include:
+          - test-run-id: lnx-py3.8-doc-deploy
+            os: ubuntu-latest
+            python-version: 3.8
+            doc-and-deploy: true
+          
+          - test-run-id: mac-py2.7
+            os: macos-latest
+            python-version: 2.7
+
+          - test-run-id: win-py3.7
+            os: windows-latest
+            python-version: 3.7
+
+          # --- Additional testing combinations only on the main branch
+
+    runs-on: ${{matrix.os}}
+    
+    steps:
+      # Install the desired version of Python and PySys
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{matrix.python-version}}
+          
+      - name: Cache Python deps (get location)
+        id: pip-cache
+        run: |
+            python -m pip install -U "pip>=20.1"
+            echo "::set-output name=dir::$(pip cache dir)"
+      - name: Cache Python deps
+        uses: actions/cache@v2
+        with:
+            path: ${{ steps.pip-cache.outputs.dir }}
+            key: ${{ matrix.test-run-id }}-pip
+
+      - name: Python dependencies - install
+        id: deps
+        shell: bash
+        run: |
+          python -version
+          python -m pip install --upgrade setuptools wheel
+       
+      - name: Build PySys
+        shell: bash
+        run: |
+          export PYSYS_VERSION=`cat VERSION`
+
+          # pre-process module file to include current date, which also goes into the epydoc
+          sed -i "s/__date__ = .*/__date__ = \"`date --iso-8601`\"/g" "pysys/__init__.py"
+          echo Build date:
+          grep "__date__" "pysys/__init__.py"
+          
+          # build universal wheel and python source distribution
+          python setup.py check --strict
+          python setup.py bdist_wheel
+          python setup.py sdist
+
+          # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
+          echo --- Preparing PySys sample zip archives
+          cd samples
+          # copy everything - use . instead of * to avoid missing the hidden directories such as .github
+          cp -R common-files/. getting-started/
+          cp -R common-files/. cookbook/
+          tar -czf ../dist/PySys-$PYSYS_VERSION-samples-unix.tar.gz getting-started cookbook
+          
+          # don't change the .sh script since we need it to be executable
+          find . -type f -not -name "*.sh" | xargs todos
+          zip -r --quiet ../dist/PySys-$PYSYS_VERSION-samples-win.zip getting-started cookbook
+          cd ..
+
+      - name: Install PySys
+        shell: bash
+        run: |
+          python -m pip install ../dist/PySys*.whl
+          pysys.py --version
+      
+      - name: Main tests
+        shell: bash
+        run: |
+          # once it's installed, add the coverage module
+          # force coverage version to 4.5.4 since the next version requires an sqlite module that doesn't work on macos pythons
+          python -m pip install coverage==4.5.4 codecov
+
+          # main test run
+          python -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
+
+          # upload Python code coverage - since we're measuring PySys itself, include both 
+          # top-level .coverage file and the files collected by PySys from its PySys subprocesses
+          # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
+          mv .coverage ./__coverage_python.main/.coverage.toplevel
+          rm ./__coverage_python.main/coverage.xml
+          cd __coverage_python.main
+          codecov
+          cd ..
+      
+      - name: Upload Python package .whl
+        uses: actions/upload-artifact@v2
+        with:
+          name: installation_package
+          path: dist/*.whl
+
+      #- name: Upload Python code coverage
+      #  uses: codecov/codecov-action@v1
+      #  if: steps.pysys.outputs.artifact_PythonCoverageDir
+      #  with:
+      #    file: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}/coverage.xml
+        
+      # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
+
+      - name: Upload archive artifacts for any test failures
+        uses: actions/upload-artifact@v2
+        if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
+
+        with:
+          name: pysys_output_${{matrix.test-run-id}}
+          path: ${{ steps.pysys.outputs.artifact_TestOutputArchiveDir }}
