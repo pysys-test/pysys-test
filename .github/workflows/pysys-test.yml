@@ -1,13 +1,13 @@
 # This workflow is for testing PySys itself. 
 # If you're looking for something to copy from for your own projects use pysys-test-samples.yml insead.
 
-name: PySys-Plugin
+name: PySys
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master, 1.6.2features]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   test:
