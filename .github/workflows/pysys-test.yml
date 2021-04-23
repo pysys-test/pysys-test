@@ -85,7 +85,8 @@ jobs:
           tar -czf ../dist/PySys-$PYSYS_VERSION-samples-unix.tar.gz getting-started cookbook
           
           # don't change the .sh script since we need it to be executable
-          find . -type f -not -name "*.sh" | xargs todos
+          # TODO: find . -type f -not -name "*.sh" | xargs lfcr.py
+          env
           zip -r --quiet ../dist/PySys-$PYSYS_VERSION-samples-win.zip getting-started cookbook
           cd ..
 
