@@ -88,12 +88,12 @@ jobs:
           # TODO: find . -type f -not -name "*.sh" | xargs lfcr.py
           env
           zip -r --quiet ../dist/PySys-$PYSYS_VERSION-samples-win.zip getting-started cookbook
-          cd ..
+          #cd ..
 
       - name: Install PySys
         shell: bash
         run: |
-          python -m pip install ../dist/PySys*.whl
+          python -m pip install dist/PySys*.whl
           pysys.py --version
       
       - name: Main tests
