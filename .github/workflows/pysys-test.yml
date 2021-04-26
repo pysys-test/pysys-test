@@ -129,6 +129,7 @@ jobs:
           mv .coverage ./__coverage_python.main/.coverage.toplevel
           rm ./__coverage_python.main/coverage.xml
           
+          cd __coverage_python.main
           codecov
           
       - name: Upload archive artifacts for any test failures
