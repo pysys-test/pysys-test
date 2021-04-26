@@ -60,8 +60,8 @@ Project Links
 .. image:: https://img.shields.io/badge/license-LGPL-blue
 	:target: https://pysys-test.github.io/pysys-test/license.html
 
-.. image:: https://travis-ci.com/pysys-test/pysys-test.svg?branch=master
-	:target: https://travis-ci.com/pysys-test/pysys-test
+.. image:: https://github.com/pysys-test/pysys-test/actions/workflows/pysys-test.yml/badge.svg
+	:target: https://github.com/pysys-test/pysys-test/actions/workflows/pysys-test.yml
 
 .. image:: https://codecov.io/gh/pysys-test/pysys-test/branch/master/graph/badge.svg
 	:target: https://codecov.io/gh/pysys-test/pysys-test
