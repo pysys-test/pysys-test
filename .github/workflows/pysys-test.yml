@@ -144,12 +144,12 @@ jobs:
           
           # as a quick sanity-test, also run packaging tests after installing from source
           python -m pip uninstall --yes PySys
-          "python -m pip install ../dist/PySys-$PYSYS_VERSION.tar.gz"
+          python -m pip install "../dist/PySys-$PYSYS_VERSION.tar.gz"
           pysys.py run --ci --include pysys-packaging --outdir against-src-dist-setuptools
 
           # as a final sanity-test, also run packaging tests directly from source in "develop mode" as a pysys developer probably would
           python -m pip uninstall --yes PySys
-          "python -m pip install -e .."
+          python -m pip install -e ..
           pysys.py run --ci --include pysys-packaging --outdir against-src-develop-mode
 
 
