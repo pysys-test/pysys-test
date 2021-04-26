@@ -149,8 +149,7 @@ jobs:
         uses: codecov/codecov-action@967e2b38a85a62bd61be5529ada27ebc109948c2
         if: steps.pysys.outputs.artifact_PythonCoverageDir
         with:
-          directory: test/__coverage_python.main/.coverage
-          files: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
+          directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
 
       - name: Extra tests
         shell: bash
