@@ -69,7 +69,7 @@ jobs:
              mkdir dist
 
              # Install to-dos (for line endings)
-             sudo apt-get update
+             #sudo apt-get update
              sudo apt-get install tofrodos
 
              # pre-process module file to include current date, which also goes into the HTML doc
@@ -138,25 +138,42 @@ jobs:
         run: |
           # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
           # it's hard to override language on many OSes so just do this on linux
-          - if [[ ${{ runner.os }} = Linux ]]; then LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --ci --include i18n --outdir i18n-C ; fi
+          if [[ ${{ runner.os }} = Linux ]]; then LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --ci --include i18n --outdir i18n-C ; fi
           
           # as a quick sanity-test, also run packaging tests after installing from source
-          - python -m pip uninstall --yes PySys
-          - "python -m pip install ../dist/PySys-$PYSYS_VERSION.tar.gz"
-          - pysys.py run --ci --include pysys-packaging --outdir against-src-dist-setuptools
+          python -m pip uninstall --yes PySys
+          "python -m pip install ../dist/PySys-$PYSYS_VERSION.tar.gz"
+          pysys.py run --ci --include pysys-packaging --outdir against-src-dist-setuptools
 
           # as a final sanity-test, also run packaging tests directly from source in "develop mode" as a pysys developer probably would
-          - python -m pip uninstall --yes PySys
-          - "python -m pip install -e .."
-          - pysys.py run --ci --include pysys-packaging --outdir against-src-develop-mode
+          python -m pip uninstall --yes PySys
+          "python -m pip install -e .."
+          pysys.py run --ci --include pysys-packaging --outdir against-src-develop-mode
 
 
       - name: Build docs
         if: matrix.doc-and-deploy
         shell: bash
         run: |
-          echo TODO
+           # generate API docs, and a zip including these and the text files (with Windows line endings)
+           
+           # must do this AFTER testing to avoid polluting the installed packages while running the tests
+           # peg to specific versions to avoid our build breaking when there's an upgrade
+           pip install docutils==0.16 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3
 
+           pip install rstcheck
+           # check the non-sphinx documentation is valid rst
+           rstcheck *.rst
+
+           mkdir docs/build_output
+           $PY -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
+           
+           todos *.rst *.txt
+           # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions
+           cp README.rst CHANGELOG.rst LICENSE.txt docs/build_output/autodocgen_documented_items.txt docs/build_output/html/
+           cd docs/build_output/html/
+           zip -r --quiet ../../../dist/PySys-$PYSYS_VERSION-docs.zip .
+       
       - name: Upload Python package .whl
         if: matrix.doc-and-deploy
         uses: actions/upload-artifact@v2
