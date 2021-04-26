@@ -119,7 +119,7 @@ jobs:
       - name: Tests
         shell: bash
         working-directory: test
-        if: false
+        # TODO: if: false
         run: |
           python -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
 
