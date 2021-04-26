@@ -187,6 +187,7 @@ jobs:
            zip -r --quiet ../../../dist/PySys-$PYSYS_VERSION-docs.zip .
            
            # for the benefit of the release upload
+           cd ../../..
            cp CHANGELOG.rst dist/
                  
       - name: Upload Python code coverage
