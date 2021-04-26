@@ -110,6 +110,7 @@ jobs:
       - name: Main tests
         shell: bash
         working-directory: test
+        if: false
         run: |
           python -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
 
@@ -137,7 +138,7 @@ jobs:
         run: |
           # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
           # it's hard to override language on many OSes so just do this on linux
-          - if [[ ${{ runner.os }} == "Linux" ]]; then LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --ci --include i18n --outdir i18n-C ; fi
+          - if [[ ${{ runner.os }} = Linux ]]; then LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --ci --include i18n --outdir i18n-C ; fi
           
           # as a quick sanity-test, also run packaging tests after installing from source
           - python -m pip uninstall --yes PySys
