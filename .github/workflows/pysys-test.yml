@@ -128,13 +128,8 @@ jobs:
           # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
           mv .coverage ./__coverage_python.main/.coverage.toplevel
           rm ./__coverage_python.main/coverage.xml
-          ls -al ./__coverage_python.main
-          echo and:
-          #ls -l ../test/__coverage_python.main/.coverage
           
-          # TODO: remove this and also the 
-          #cd __coverage_python.main
-          #codecov
+          codecov
           
       - name: Upload archive artifacts for any test failures
         uses: actions/upload-artifact@v2
@@ -143,13 +138,6 @@ jobs:
         with:
           name: pysys_output_${{matrix.test-run-id}}
           path: ${{ steps.pysys.outputs.artifact_TestOutputArchiveDir }}
-
-      - name: Upload Python code coverage
-        # v1.4.1
-        uses: codecov/codecov-action@967e2b38a85a62bd61be5529ada27ebc109948c2
-        if: steps.pysys.outputs.artifact_PythonCoverageDir
-        with:
-          directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
 
       - name: Extra tests
         shell: bash
