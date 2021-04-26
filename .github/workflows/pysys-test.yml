@@ -126,11 +126,11 @@ jobs:
           # upload Python code coverage - since we're measuring PySys itself, include both 
           # top-level .coverage file and the files collected by PySys from its PySys subprocesses
           # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
+          mv .coverage ./__coverage_python.main/.coverage.toplevel
+          rm ./__coverage_python.main/coverage.xml
           ls -al ./__coverage_python.main
-          #mv .coverage ./__coverage_python.main/.coverage.toplevel
           echo and:
-          ls -l ../test/__coverage_python.main/.coverage
-          #rm ./__coverage_python.main/coverage.xml
+          #ls -l ../test/__coverage_python.main/.coverage
           
           # TODO: remove this and also the 
           #cd __coverage_python.main
@@ -149,8 +149,8 @@ jobs:
         uses: codecov/codecov-action@967e2b38a85a62bd61be5529ada27ebc109948c2
         if: steps.pysys.outputs.artifact_PythonCoverageDir
         with:
-          #files: test/.coverage, test/__coverage_python.main/.coverage
-          files: test/__coverage_python.main/.coverage
+          directory: test/__coverage_python.main/.coverage
+          files: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
 
       - name: Extra tests
         shell: bash
