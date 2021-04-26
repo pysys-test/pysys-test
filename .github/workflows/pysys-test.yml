@@ -68,6 +68,10 @@ jobs:
              export PYSYS_VERSION=`cat VERSION`
              mkdir dist
 
+             # Install to-dos (for line endings)
+             sudo apt-get update
+             sudo apt-get install tofrodos
+
              # pre-process module file to include current date, which also goes into the HTML doc
              sed -i "s/__date__ = .*/__date__ = \"`date --iso-8601`\"/g" "pysys/__init__.py"
              echo Build date:
@@ -82,7 +86,7 @@ jobs:
              tar -czf ../dist/PySys-$PYSYS_VERSION-samples-unix.tar.gz getting-started cookbook
 
              # don't change the .sh script since we need it to be executable
-             find . -type f -not -name "*.sh" | xargs dos2unix
+             find . -type f -not -name "*.sh" | xargs todos
              zip -r --quiet ../dist/PySys-$PYSYS_VERSION-samples-win.zip getting-started cookbook
        
       - name: Build PySys
@@ -105,7 +109,7 @@ jobs:
       
       - name: Main tests
         shell: bash
-        working-directory: tests
+        working-directory: test
         run: |
           python -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
 
@@ -129,7 +133,7 @@ jobs:
 
       - name: Extra tests
         shell: bash
-        working-directory: tests
+        working-directory: test
         run: |
           # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
           # it's hard to override language on many OSes so just do this on linux
@@ -145,6 +149,13 @@ jobs:
           - "python -m pip install -e .."
           - pysys.py run --ci --include pysys-packaging --outdir against-src-develop-mode
 
+
+      - name: Build docs
+        if: matrix.doc-and-deploy
+        shell: bash
+        run: |
+          echo TODO
+
       - name: Upload Python package .whl
         if: matrix.doc-and-deploy
         uses: actions/upload-artifact@v2
@@ -153,7 +164,8 @@ jobs:
           path: dist/*.whl
 
       - name: Upload Python code coverage
-        uses: codecov/codecov-action@v1
+        # v1.4.1
+        uses: codecov/codecov-action@967e2b38a85a62bd61be5529ada27ebc109948c2
         if: steps.pysys.outputs.artifact_PythonCoverageDir
         with:
           directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
