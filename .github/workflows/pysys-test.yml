@@ -60,12 +60,14 @@ jobs:
         run: |
           python --version
           python -m pip install --upgrade setuptools wheel
+          
+          # Set this env var ready for later steps
+          echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
 
       - name: Pre-build deployment tailoring
         if: matrix.doc-and-deploy
         shell: bash
         run: |
-             export PYSYS_VERSION=`cat VERSION`
              mkdir dist
 
              # Install to-dos (for line endings)
@@ -107,7 +109,7 @@ jobs:
           # force coverage version to 4.5.4 since the next version requires an sqlite module that doesn't work on macos pythons
           python -m pip install coverage==4.5.4 codecov
       
-      - name: Main tests
+      - name: Tests
         shell: bash
         working-directory: test
         if: false
