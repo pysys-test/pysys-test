@@ -128,6 +128,8 @@ jobs:
           # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
           ls -al ./__coverage_python.main
           #mv .coverage ./__coverage_python.main/.coverage.toplevel
+          echo and:
+          ls -l ../test/__coverage_python.main/.coverage
           #rm ./__coverage_python.main/coverage.xml
           
           # TODO: remove this and also the 
@@ -147,7 +149,8 @@ jobs:
         uses: codecov/codecov-action@967e2b38a85a62bd61be5529ada27ebc109948c2
         if: steps.pysys.outputs.artifact_PythonCoverageDir
         with:
-          files: test/.coverage, test/__coverage_python.main/.coverage
+          #files: test/.coverage, test/__coverage_python.main/.coverage
+          files: test/__coverage_python.main/.coverage
 
       - name: Extra tests
         shell: bash
