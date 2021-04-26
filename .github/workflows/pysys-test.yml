@@ -9,6 +9,13 @@ on:
   pull_request:
     branches: [ master ]
 
+  # When a new (empty) release is created via the GitHub UI, uploads the files to that release, upload it to PyPi 
+  # and upload the doc to GitHub pages. Only do this when all the tests are passing. 
+  # Requires defining secrets PYPI_USERNAME and PYPI_PASSWORD with your PyPi credentials. 
+  release:
+    types:
+      - created
+
 jobs:
   test:
     strategy:
@@ -157,7 +164,7 @@ jobs:
         if: matrix.doc-and-deploy
         shell: bash
         run: |
-           # generate API docs, and a zip including these and the text files (with Windows line endings)
+           # Generate API docs, and a zip including these and the text files (with Windows line endings)
            
            # must do this AFTER testing to avoid polluting the installed packages while running the tests
            # peg to specific versions to avoid our build breaking when there's an upgrade
@@ -168,21 +175,14 @@ jobs:
            rstcheck *.rst
 
            mkdir docs/build_output
-           $PY -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
+           python -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
            
            todos *.rst *.txt
            # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions
            cp README.rst CHANGELOG.rst LICENSE.txt docs/build_output/autodocgen_documented_items.txt docs/build_output/html/
            cd docs/build_output/html/
            zip -r --quiet ../../../dist/PySys-$PYSYS_VERSION-docs.zip .
-       
-      - name: Upload Python package .whl
-        if: matrix.doc-and-deploy
-        uses: actions/upload-artifact@v2
-        with:
-          name: installation_package
-          path: dist/*.whl
-
+                 
       - name: Upload Python code coverage
         # v1.4.1
         uses: codecov/codecov-action@967e2b38a85a62bd61be5529ada27ebc109948c2
@@ -190,4 +190,44 @@ jobs:
         with:
           directory: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}
         
-      # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
+      - name: Upload Python package .whl
+        if: success() && matrix.doc-and-deploy
+        uses: actions/upload-artifact@v2
+        with:
+          name: installation_package
+          path: dist/*.whl
+
+      - name: Upload HTML to gh-pages
+        if: success() && matrix.doc-and-deploy && (github.event_name == 'release' || github.ref == 'refs/heads/doc-updates')
+        # v4.1.1
+        uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: docs/build_output/html/
+
+      - name: Upload to GitHub Release
+        if: success() && matrix.doc-and-deploy && github.event_name == 'release'
+        id: upload-release-asset 
+        # v2.2.1
+        uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
+          file: 
+            - dist/*
+            - CHANGELOG.rst
+
+      - name: Upload to https://test.pypi.org
+        if: success() && matrix.doc-and-deploy && github.event_name == 'release'
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          # Test repo:
+          twine upload --repository-url https://test.pypi.org/legacy/ dist/*.whl
+          
+          # Real repo:
+          #twine upload dist/*.whl
