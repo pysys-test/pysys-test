@@ -993,7 +993,7 @@ class ProcessUser(object):
 			
 	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
 			ignores=[], process=None, errorExpr=[], errorIf=None, abortOnError=None, encoding=None, detailMessage='', filedir=None, 
-			reFlags=0, mappers=[]):
+			reFlags=0, mappers=[], quiet=False):
 		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
 		directory (waitForGrep was formerly known as `waitForSignal`).
 		
@@ -1091,6 +1091,9 @@ class ProcessUser(object):
 			
 		:param str filedir: Can be used to provide a directory name to add to the beginning of the ``file`` parameter; 
 			however usually it is clearer just to specify that directory in the ``file``.
+		
+		:param bool quiet: Set this to true to suppress INFO-level logging, which can be useful when you wish to 
+			print your own progress message in a more high-level fashion. 
 
 		:return list[re.Match]: Usually this returns a list of ``re.Match`` objects found for the ``expr``, or an 
 			empty list if there was no match.
@@ -1121,10 +1124,12 @@ class ProcessUser(object):
 
 		log.debug("Performing wait for grep signal %s %s in file %s with ignores %s", expr, condition, f, ignores)
 		
+		loginfo = (log.debug if quiet else log.info)
+		
 		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', True) and self.getBoolProperty('verboseWaitForGrep', True)
 		if verboseWaitForSignal: 
 			# if verbose, log when starting (which is very helpful for debugging hangs); non-verbose users get the message only when it's done
-			log.info('%s%s', msg, '; timeout=%ss'%timeout if timeout!=TIMEOUTS['WaitForSignal'] else '')
+			loginfo('%s%s', msg, '; timeout=%ss'%timeout if timeout!=TIMEOUTS['WaitForSignal'] else '')
 		
 		encoding = encoding or self.getDefaultFileEncoding(f)
 		
@@ -1144,10 +1149,10 @@ class ProcessUser(object):
 					# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time
 					# (this helps people debug tests that sometimes timeout and sometimes "nearly" timeout)
 					if verboseWaitForSignal:
-						(log.info if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
+						(loginfo if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
 					else:
 						# We use the phrase "grep signal" to avoid misleading anyone, whether people used waitForGrep or the older waitForSignal
-						log.info("Wait for grep signal in %s completed successfully", file)
+						loginfo("Wait for grep signal in %s completed successfully", file)
 					break
 				
 				if errorExpr:

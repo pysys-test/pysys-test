@@ -10,5 +10,7 @@ class PySysTest(BaseTest):
 		self.assertEval('{waitForGrepReturnValue_len} == 2', waitForGrepReturnValue_len=len(waitForGrepReturnValue))
 		self.assertEval('{waitForGrepReturnValue0_match} == {expected}', expected='"Hello" ', waitForGrepReturnValue0_match=waitForGrepReturnValue[0].group())
 		
+		self.waitForGrep('myprocess.log', 'Hell', quiet=True)
+		
 	def validate(self):
 		pass 

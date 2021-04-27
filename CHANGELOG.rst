@@ -40,6 +40,7 @@ PySys 1.6.2 is under development.
 	- Added a ``mappers=`` argument to `BaseTest.logFileContents()`.
 	- Added `BaseTest.deleteFile()` which provides a simple and safe way to delete a file similar to the 
 	  `BaseTest.deleteDir()` method. 
+	- Added a ``quiet=True/False`` option to `BaseTest.waitForGrep` to disable the INFO-level logging. 
 	- Changed `pysys.writer.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
 	  attribute, and changed the failure node to be:
 	  
