@@ -59,7 +59,7 @@ PySys 1.6.2 is under development.
 	  so there is no need to update existing tests. 
 	- Added support for specifying project properties and descriptor user-data values using multi-line XML text 
 	  (or CDATA) as an alternative to setting the ``value=`` attribute. When converting string values to a list, 
-	  newline is now considered as a delimited along with comma. This which allows long value (especially path-like) 
+	  newline is now considered as a delimiter along with comma. This allows long value (especially path-like) 
 	  values to be specified in a more readable form, for example::
 	  
 	    <property name="myTestDescriptorPath">
