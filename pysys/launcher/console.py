@@ -52,6 +52,10 @@ def main(args):
 	if len(args) < 1: 
 		printUsage()
 	else:
+		if sys.version_info[0] != 2:
+			import faulthandler
+			faulthandler.enable() # writes threads to stderr on fatal errors, and on linux also for signals such as SIGABRT
+	
 		mode = args[0]
 		if mode == "run":
 			runTest(args[1:])
