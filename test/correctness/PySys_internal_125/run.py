@@ -152,7 +152,7 @@ class PySysTest(BaseTest):
 		self.copy('run.log', 'assertions.txt', mappers=[
 			lambda line: line[line.find('Assert '):] if 'Assert that' in line else None,
 			
-			pysys.mappers.RegexReplace('at 0x[0-9A-Z]+', 'at 0xZZZZ'),
+			pysys.mappers.RegexReplace('at 0x[0-9A-Fa-f]+', 'at 0xZZZZ'),
 
 			# remove actual line numbers as it makes the test hard to maintain, and it appears that python 3.8 has 
 			# changed the line numbers for multi-line statements
