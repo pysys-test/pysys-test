@@ -185,7 +185,7 @@ class %s(%s):
 			else:
 				testclass_fp.write(teststring)
 			testclass_fp.close()
-			log.info("Created test class module %s " % os.path.join(self.testdir, self.testId, "%s.py" % module))	
+			log.info("Created test class module %s " % os.path.join(self.testdir, self.testId, module))	
 
 def makeTest(args):
 	Project.findAndLoadProject()
