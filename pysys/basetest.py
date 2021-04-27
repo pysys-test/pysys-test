@@ -72,6 +72,8 @@ class BaseTest(ProcessUser):
 			self.disableCoverage = True
 			self.log.debug('Disabling coverage for this test due to disableCoverage group')
 		
+		self.__assertDetailLogger = logging.getLogger(self.log.name+'.assertDetail')
+		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
 		and a suffix indicating the cycle number if this is a multi-cycle test run. 
@@ -480,9 +482,12 @@ class BaseTest(ProcessUser):
 			
 	def assertThat(self, conditionstring, *positional_arguments, **kwargs):
 		"""Performs equality/range tests or any general-purpose validation by evaluating a Python ``eval()`` expression 
-		in the context of some named values.
+		in the context of some named values. 
 		
-		For example::
+		This method is designed to produce very clear and informative logging and failure reasons if the assertion is 
+		unsuccessful (using the `logDiffValue` method). 
+		
+		Example usage::
 		
 			# Equality comparison of an 'actual' vs 'expected' message from when our server started; 
 			# note the use of a descriptive name for the 'actualXXX=' keyword to produce a nice clear message if it fails
@@ -643,61 +648,118 @@ class BaseTest(ProcessUser):
 				re.match(r'^ *\w+[.](startswith|endswith)[(] *\w+ *[)] *$', conditionstring)) and len(namesInUse)==2: 
 				# if we're checking a==b we can help the user see why they didn't match; 
 				# this kind of highlighting might be misleading for other conditionstrings, and certainly less useful
-				pad = max(len(key) for key in namesInUse)+1
 
-				# use %s for most objects, but repr for strings (so we see the escaping) and objects where str() would make them look the same
-				v1 = u'%s'%(namedvalues[namesInUse[0]],)
-				v2 = u'%s'%(namedvalues[namesInUse[1]],)
+				self.logValueDiff(**{
+					namesInUse[0]:namedvalues[namesInUse[0]],
+					namesInUse[1]:namedvalues[namesInUse[1]],
+				})
 
-				if isstring(namedvalues[namesInUse[0]]) and ( # for strings do minimal escaping, but only if we can do it consistently for both strings
-						('\\' in repr(namedvalues[namesInUse[0]]).replace('\\\\','')) == 
-						('\\' in repr(namedvalues[namesInUse[1]]).replace('\\\\','')) ):
-					v1 = quotestring(namedvalues[namesInUse[0]])
-					v2 = quotestring(namedvalues[namesInUse[1]])
-				elif v1==v2 or isstring(namedvalues[namesInUse[0]]):
-					v1 = u'%r'%(namedvalues[namesInUse[0]],)
-					v2 = u'%r'%(namedvalues[namesInUse[1]],)
-				
-				seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
-				
-				matches = seq.get_matching_blocks()
-				lastmatch = matches[-1] if len(matches)==2 else matches[-2] # may be of zero size
-				
-				# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
-				# Colouring will be red, white(first match, if any), red, white(last match, if any)
-				ijk = []
-				for v in [0,1]:
-					ijk.append([
-						matches[0][v], # i - start of first matching block
-						matches[0][v]+matches[0].size, # j - end of first matching block
-						lastmatch[v] + (0 if lastmatch.size+lastmatch[v] == len([v1,v2][v]) else lastmatch.size) # k - start of final matching block
-					])
-				i1, j1, k1 = ijk[0]
-				i2, j2, k2 = ijk[1]
-				
-				# for some cases such as "XXXyyyXXX", "ZZZyyyZZZ" the above gives only the quotes as matching which is useless, so 
-				# heuristically we'll do better with a longest substring match; compare number of matching chars to decide
-				longestblock = seq.find_longest_match(0, len(v1), 0, len(v2))
-				if (j1-i1) + (len(v1)-k1) < longestblock.size:
-					log.debug('Using longest match %s rather than block matching %s', longestblock, matches)
-					ijk = [
-						# v1 ijk
-						[longestblock.a, longestblock.a+longestblock.size, len(v1)],
-						#v2
-						[longestblock.b, longestblock.b+longestblock.size, len(v2)],
-					]
-					
-
-				for (index, key) in enumerate(namesInUse):
-					value = [v1,v2][index]
-					i, j, k = ijk[index]
-					#self.log.info(u'  %{pad}s: %s__%s__%s__%s'.format(pad=pad), key, 
-					self.log.info(u'  %{pad}s: %s%s%s%s'.format(pad=pad), key, 
-						value[:i], value[i:j], value[j:k], value[k:], # red - i:white (common prefix) - j:red - k:white (common suffix)
-						extra=BaseLogFormatter.tag(LOG_FAILURES, arg_index=[1,3]))
-				if j1==j2: # if there's a common prefix, show where it ends
-					self.log.info(u'  %{pad}s %s ^'.format(pad=pad), '', ' '*j1, extra=BaseLogFormatter.tag(LOG_FAILURES))
 			return False
+
+	def logValueDiff(self, actual=None, expected=None, logFunction=None, **namedvalues):
+		"""Logs the differences between two values in a human-friendly way, on multiple lines (as displayed by `assertThat`). 
+		
+		Special handling is provided for common types such as strings, lists and dicts (note that this isn't intended 
+		for use with data structures whose string representation is too big to display on the console). 
+	
+		:param obj actual: The actual value. 
+			Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead. 
+		:param obj expected: The baseline/expected value from which a diff will be computed to the actual value. 
+			Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead. 
+			
+		:param function logFunction: By default each line is logged at INFO level using ``log.info()``, but an alternative 
+			log function with the same signature can be provided if desired. 
+		"""
+		if logFunction is None: logFunction = self.__assertDetailLogger.info
+		
+		if len(namedvalues) < 2:
+			# adding actual before expected to the dict gives the right ordering for the diff later on
+			if actual is not None: namedvalues['actual'] = actual
+			if expected is not None: namedvalues['expected'] = expected
+		assert len(namedvalues)==2, 'Expecting 2 keyword args but got: %s'%namedvalues.keys()
+		
+		namesInUse = list(namedvalues.keys())
+		pad = max(len(key) for key in namesInUse)+1
+		
+		v1, v2 = namedvalues[namesInUse[0]], namedvalues[namesInUse[1]]
+
+		def tostringlist(x):
+			if isinstance(x, dict): 
+				# if they're dictionaries, convert to lists since otherwise the random ordering of the keys could mess up the comparisons
+				return [u'%s=%s'%(k, quotestring(v)) for (k,v) in sorted(x.items())]
+			return [quotestring(v) for v in x]
+
+		if len(str(v1)+str(v2)) > 100 and isinstance(v1, (list,dict)) and isinstance(v2, (list,dict)) and min(len(v1), len(v2))>1 and tostringlist(v1)!=tostringlist(v2):
+			# For list/dict data structures (unless of trivial size) it's clearer to display using a line-by-line diff approach
+
+			v1, v2 = tostringlist(v1), tostringlist(v2)
+				
+			def logDiffLine(line):
+				if line.startswith('-'): extra = BaseLogFormatter.tag(LOG_DIFF_REMOVED)
+				elif line.startswith('+'): extra = BaseLogFormatter.tag(LOG_DIFF_ADDED)
+				elif line.startswith('?'): extra, line = BaseLogFormatter.tag(LOG_FAILURES), ' '+line[1:] # e.g. ++++/---- pointers
+				else: extra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
+				logFunction(u'  %s', line.rstrip('\r\n'), extra=extra)
+			
+			# nb: since usually expected comes after actual, show actual (v1) as the delta from v2 (expected)
+			for line in difflib.ndiff(v2, v1, charjunk=None):
+				logDiffLine(line)
+					
+		else: 
+			# compare stringified values
+			
+			# use %s for most objects, but repr for strings (so we see the escaping) and objects where str() would make them look the same
+			v1 = u'%s'%(v1,)
+			v2 = u'%s'%(v2,)
+
+			if isstring(namedvalues[namesInUse[0]]) and ( # for strings do minimal escaping, but only if we can do it consistently for both strings
+					('\\' in repr(namedvalues[namesInUse[0]]).replace('\\\\','')) == 
+					('\\' in repr(namedvalues[namesInUse[1]]).replace('\\\\','')) ):
+				v1 = quotestring(namedvalues[namesInUse[0]])
+				v2 = quotestring(namedvalues[namesInUse[1]])
+			elif v1==v2 or isstring(namedvalues[namesInUse[0]]):
+				v1 = u'%r'%(namedvalues[namesInUse[0]],)
+				v2 = u'%r'%(namedvalues[namesInUse[1]],)
+			
+			seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
+			
+			matches = seq.get_matching_blocks()
+			lastmatch = matches[-1] if len(matches)==2 else matches[-2] # may be of zero size
+			
+			# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
+			# Colouring will be red, white(first match, if any), red, white(last match, if any)
+			ijk = []
+			for v in [0,1]:
+				ijk.append([
+					matches[0][v], # i - start of first matching block
+					matches[0][v]+matches[0].size, # j - end of first matching block
+					lastmatch[v] + (0 if lastmatch.size+lastmatch[v] == len([v1,v2][v]) else lastmatch.size) # k - start of final matching block
+				])
+			i1, j1, k1 = ijk[0]
+			i2, j2, k2 = ijk[1]
+			
+			# for some cases such as "XXXyyyXXX", "ZZZyyyZZZ" the above gives only the quotes as matching which is useless, so 
+			# heuristically we'll do better with a longest substring match; compare number of matching chars to decide
+			longestblock = seq.find_longest_match(0, len(v1), 0, len(v2))
+			if (j1-i1) + (len(v1)-k1) < longestblock.size:
+				log.debug('Using longest match %s rather than block matching %s', longestblock, matches)
+				ijk = [
+					# v1 ijk
+					[longestblock.a, longestblock.a+longestblock.size, len(v1)],
+					#v2
+					[longestblock.b, longestblock.b+longestblock.size, len(v2)],
+				]
+				
+
+			for (index, key) in enumerate(namesInUse):
+				value = [v1,v2][index]
+				i, j, k = ijk[index]
+				#self.logFunction(u'  %{pad}s: %s__%s__%s__%s'.format(pad=pad), key, 
+				logFunction(u'  %{pad}s: %s%s%s%s'.format(pad=pad), key, 
+					value[:i], value[i:j], value[j:k], value[k:], # red - i:white (common prefix) - j:red - k:white (common suffix)
+					extra=BaseLogFormatter.tag(LOG_FAILURES, arg_index=[1,3]))
+			if j1==j2: # if there's a common prefix, show where it ends
+				logFunction(u'  %{pad}s %s ^'.format(pad=pad), '', ' '*j1, extra=BaseLogFormatter.tag(LOG_FAILURES))
 
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.
@@ -850,7 +912,7 @@ class BaseTest(ProcessUser):
 			if line.startswith('-'): extra = BaseLogFormatter.tag(LOG_DIFF_REMOVED)
 			elif line.startswith('+'): extra = BaseLogFormatter.tag(LOG_DIFF_ADDED)
 			else: extra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
-			self.log.info(u'  %s', line, extra=extra)
+			self.__assertDetailLogger.info(u'  %s', line, extra=extra)
 
 		try:
 			for i in [0, 1]:

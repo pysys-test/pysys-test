@@ -8,6 +8,8 @@ Assert that (value == expected) with value=['c DIFF1 SCS DIFF2 c'], expected=['c
 Assert that (value == expected) with value=['c DIFFERENCE c'], expected=['c YIKES c'] ... failed [run.py:XX]
 Assert that (value == expected) with value="DIFFERENCE c", expected="YIKES c" ... failed [run.py:XX]
 Assert that (value == expected) with value="c DIFFERENCE", expected="c YIKES" ... failed [run.py:XX]
+Assert that (value == expected) with value=['c', 'DIFF1', 'LONG_COMMON_STRING DIFF2', 1.5, True, 'c2', 'c3', 'c4', 'c5', <MyClass2 object at 0xZZZZ>], expected=['c', 'xDIFF1x', 'LONG_COMMON_STRING', 'xDIFF2x', 2, False, 'c2', 'c3', 'c4', 'c5'] ... failed [run.py:XX]
+Assert that (value == expected) with value={'aaaaaaaaaaaaaaaaaaaaaaaaaaaa': 123, 'g': True, 'c': [1, 2, 'Hi "there"']}, expected={'g': True, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaa': 123, 'c': [1, 2, '\t"there"']} ... failed [run.py:XX]
 Assert that (reasonFailedEvalAssert.startswith(expected)) with reasonFailedEvalAssert='Assert that (actual == expected) with actual (\'prefix\'+\' foo bar \'+\'suffix\') ="prefix foo bar suffix", extraParamNotUsed="baz", expected="foobar"', expected="Assert that (actual == expected) with " ... passed
 Assert that (actualStartupMessage == expected) with expected="Started successfully", actualStartupMessage="Started successfully" ... passed
 Assert that (actualStartupMessage.endswith('successfully')) with actualStartupMessage="Started successfully" ... passed

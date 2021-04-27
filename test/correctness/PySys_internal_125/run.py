@@ -53,6 +53,14 @@ class PySysTest(BaseTest):
 		self.assertThat('value == expected', value="c DIFFERENCE", expected="c YIKES")
 
 		
+		# Finding using dict and list
+		self.assertThat('value == expected', value=["c","DIFF1", "LONG_COMMON_STRING DIFF2",1.5, True,"c2", "c3", "c4", "c5", MyClass2("extra")], 
+		                                  expected=["c","xDIFF1x","LONG_COMMON_STRING","xDIFF2x",2, False, "c2", "c3", "c4", "c5"])
+
+		self.assertThat('value == expected', value={'aaaaaaaaaaaaaaaaaaaaaaaaaaaa': 123, 'g': True, 'c':[1, 2, "Hi \"there\""]},
+		                                  expected={'g':True, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaa':123, 'c':[1, 2, "\t\"there\""]})
+
+		
 		self.addOutcome(PASSED, override=True)
 		
 		
@@ -63,6 +71,13 @@ class PySysTest(BaseTest):
 
 		self.assertThat('reasonFailedEvalAssert.startswith(expected)', reasonFailedEvalAssert=reasonFailedEvalAssert, 
 			expected="Assert that (actual == expected) with ")
+
+		# for the list/dict cases
+		self.assertGrep('run.log', '  - "LONG_COMMON_STRING"', literal=True)
+		self.assertGrep('run.log', '  + "LONG_COMMON_STRING DIFF2"', literal=True)
+		self.assertGrep('run.log', '    "c5"')
+		self.assertGrep('run.log', '  - c=[1, 2, \'\\t"there"\']', literal=True)
+		
 
 		self.log.info('------')
 
@@ -137,6 +152,8 @@ class PySysTest(BaseTest):
 		self.copy('run.log', 'assertions.txt', mappers=[
 			lambda line: line[line.find('Assert '):] if 'Assert that' in line else None,
 			
+			pysys.mappers.RegexReplace('at 0x[0-9A-Z]+', 'at 0xZZZZ'),
+
 			# remove actual line numbers as it makes the test hard to maintain, and it appears that python 3.8 has 
 			# changed the line numbers for multi-line statements
 			pysys.mappers.RegexReplace('run.py:[0-9]+', 'run.py:XX'),

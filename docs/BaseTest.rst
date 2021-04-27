@@ -214,6 +214,7 @@ Miscellaneous
 =============
 .. autosummary::
 	compareVersions
+	logValueDiff
 	disableLogging
 	startBackgroundThread
 	pythonDocTest

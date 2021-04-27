@@ -20,7 +20,8 @@ PySys 1.6.2 is under development.
 	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
 	  PySys.
 	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
-	- Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails. 
+	- Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails, for both 
+	  primitive values and list/dict values. 
 	- Process management:
 	
 		- Added automatic killing of child processes of processes PySys has started (using Unix "process groups", and 
