@@ -147,7 +147,7 @@ class Process(object):
 				if len(pathelements)>1:
 					for i, pathelement in enumerate(pathelements):
 						#                         : ABC=def
-						debuginfo.append("                   #%-2d%s"%( i+1, pathelement))
+						debuginfo.append("                   #%-2d %s"%( i+1, pathelement))
 				
 		if info: debuginfo.append("  info         : %s"% info)
 
