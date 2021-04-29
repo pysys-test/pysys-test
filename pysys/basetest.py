@@ -22,7 +22,7 @@ import difflib
 from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.utils.filegrep import filegrep
+from pysys.utils.filegrep import filegrep, getmatches
 from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
@@ -1180,7 +1180,11 @@ class BaseTest(ProcessUser):
 		try:
 			compiled = re.compile(expr, flags=reFlags)
 			namedGroupsMode = compiled.groupindex
-			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
+			
+			result = getmatches(f, expr, ignores=ignores, returnFirstOnly=(contains==True), encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
+			if not contains:
+				matchcount = len(result)
+				result = None if matchcount==0 else result[0]
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
@@ -1202,8 +1206,9 @@ class BaseTest(ProcessUser):
 					msg = 'Grep on %s contains %s'%(file, quotestring(expr))
 					if mappers: msg += ', using mappers %s'%mappers
 				else:
-					msg = 'Grep on %s does not contain %s failed with: %s'%(file, 
+					msg = 'Grep on %s does not contain %s failed with%s: %s'%(file, 
 						quotestring(expr),
+						' %d matches, first is'%matchcount if matchcount>1 else '',
 						# heuristic to give best possible message; expressions ending with .* are usually 
 						# complete and help to remove timestamps etc from the start so best to return match only; if user didn't do 
 						# that they probably haven't thought much about it and returning the entire match string 
@@ -1422,7 +1427,13 @@ class BaseTest(ProcessUser):
 		f = os.path.join(filedir, file)
 
 		try:
-			numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
+			if condition.replace(' ','') in ['==0', '<=0']:
+				m = getmatches(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
+				numberLines = len(m)
+				firstMatch = (m[0] if len(m)>0 else None)
+			else:
+				numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
+				firstMatch = None
 			log.debug("Number of matching lines in %s is %d", f, numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
@@ -1434,7 +1445,10 @@ class BaseTest(ProcessUser):
 				self.addOutcome(PASSED, msg)
 				return True
 			else:
-				msg = assertMessage or ('Line count on %s for %s%s (actual =%d) '%(file, quotestring(expr), condition, numberLines))
+				msg = assertMessage or ('Line count on %s for %s expected %s but got %d%s'%(file, quotestring(expr), condition.strip(), numberLines, 
+					('; first is: '+quotestring( # special handling for condition==0, to match assertGrep(..., contains=False)
+							(firstMatch.group(0) if expr.endswith('*') else firstMatch.string).rstrip('\n\r') # see assertGrep
+					)) if firstMatch else ''))
 				self.addOutcome(FAILED, msg, abortOnError=abortOnError)
 		return False
 

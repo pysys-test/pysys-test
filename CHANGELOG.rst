@@ -86,6 +86,9 @@ PySys 1.6.2 is under development.
 
 	- Added `pysys.constants.EXE_SUFFIX` which is ``.exe`` on Windows and empty string on Unix. This is convenient 
 	  when running executables. 
+	- Improved the failure messages for `BaseTest.assertGrep` (with contains=False) and `BaseTest.assertLineCount` 
+	  (with condition="==0") to include both the first matching expression and the total number of matches. This 
+	  is useful when checking log files for unexpected errors and warnings. 
 
 Fixes:
 
