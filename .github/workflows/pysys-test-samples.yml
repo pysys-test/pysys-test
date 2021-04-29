@@ -9,6 +9,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch # also allow manually invoking this
 
 jobs:
   test:
