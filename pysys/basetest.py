@@ -72,7 +72,7 @@ class BaseTest(ProcessUser):
 			self.disableCoverage = True
 			self.log.debug('Disabling coverage for this test due to disableCoverage group')
 		
-		self.__assertDetailLogger = logging.getLogger(self.log.name+'.assertDetail')
+		self.__assertDetailLogger = logging.getLogger('pysys.assertions.diffs')
 		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
