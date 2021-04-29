@@ -44,7 +44,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[]):
 	
 	"""
 	matches = []
-	rexp = re.compile(regexpr, flags=0)
+	rexp = re.compile(regexpr, flags=flags)
 	
 	log.debug("Looking for expression \"%s\" in input file %s" %(regexpr, file))
 

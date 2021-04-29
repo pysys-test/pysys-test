@@ -93,6 +93,7 @@ Fixes:
 	  variable as described (due to an additional unwanted ``.`` character); now it does. 
 	- Avoid creating unnecessary runner output directory as a result of ``mkdir(runner.output+'/../xxx')`` by 
 	  normalizing paths before calling mkdir. 
+	- Fixed `BaseTest.assertLineCount` bug in which ``reFlags`` parameter was not honoured. 
 
 -------------------
 What's new in 1.6.1
