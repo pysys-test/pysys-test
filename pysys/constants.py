@@ -47,7 +47,7 @@ if re.search('win32', sys.platform):
 	It is recommended to use standard Python functions such as ``sys.platform`` rather than this constant. """
 	OSFAMILY='windows'
 	DEVNULL = 'nul'
-	WINDIR = os.getenv('windir', 'c:\WINDOWS')
+	WINDIR = os.getenv('windir', r'c:\WINDOWS')
 	PATH = r'%s;%s\system32;%s\System32\Wbem' % (WINDIR, WINDIR, WINDIR)
 	LD_LIBRARY_PATH = ''
 	DYLD_LIBRARY_PATH = ''
