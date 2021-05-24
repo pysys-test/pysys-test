@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		
-		self.log.info('parent test: preferred encoding=%s, stdout encoding=%s', locale.getpreferredencoding(), sys.stdout.encoding)
+		self.log.info('parent test: preferred encoding=%s, stdout encoding=%s', PREFERRED_ENCODING, sys.stdout.encoding)
 
 		self.copy(self.input, self.output+'/test')
 		# make testRootDir and working dir be different
@@ -162,8 +162,8 @@ class PySysTest(BaseTest):
 
 			# specific checks for specific runs
 			self.log.info('')
-			self.assertGrep('default=local,stdout=local,color=true,threads=2,debug=true/pysys.out', expr=' DEBUG ', encoding=locale.getpreferredencoding())
-			self.assertGrep('default=local,stdout=local,color=true,threads=2,debug=true/pysys.out', expr='Failed to load coloring library', encoding=locale.getpreferredencoding(), contains=False)
+			self.assertGrep('default=local,stdout=local,color=true,threads=2,debug=true/pysys.out', expr=' DEBUG ', encoding=PREFERRED_ENCODING)
+			self.assertGrep('default=local,stdout=local,color=true,threads=2,debug=true/pysys.out', expr='Failed to load coloring library', encoding=PREFERRED_ENCODING, contains=False)
 
 		i = 0
 		for runid in runs:
@@ -175,7 +175,7 @@ class PySysTest(BaseTest):
 			stdout_enc = 'utf-8' if 'stdout=utf8' in runid else 'ascii'
 			if 'stdout=none' in runid: stdout_enc = runlog_enc
 			if 'default=local,stdout=local' in runid:
-				runlog_enc = stdout_enc = locale.getpreferredencoding().lower()
+				runlog_enc = stdout_enc = PREFERRED_ENCODING.lower()
 
 			self.log.info('Run %d: %s (run.log=%s stdout=%s)', i, runid, runlog_enc, stdout_enc)
 			

@@ -51,7 +51,7 @@ class _UnicodeSafeStreamWrapper(object):
 		assert underlying != self # avoid infinite loops
 		self.stream = underlying
 		# on python 2 stdout.encoding=None if redirected, and falling back on getpreferredencoding is the best we can do
-		self.__encoding = self.__requestedEncoding or getattr(underlying, 'encoding', None) or locale.getpreferredencoding()
+		self.__encoding = self.__requestedEncoding or getattr(underlying, 'encoding', None) or PREFERRED_ENCODING
 		assert self.__encoding
 	
 	def write(self, s):

@@ -224,7 +224,7 @@ class BaseRunner(ProcessUser):
 		if len(descriptors)*cycle == 1: self.threads = 1
 		log.info('Running {numDescriptors:,} tests with {threads} threads using PySys {pysysVersion} in Python {pythonVersion} and encoding {encoding}\n'.format(
 			numDescriptors=len(self.descriptors), threads=self.threads, pysysVersion=pysys.__version__, pythonVersion='%s.%s.%s'%
-			sys.version_info[0:3], encoding=locale.getpreferredencoding()))
+			sys.version_info[0:3], encoding=PREFERRED_ENCODING))
 		self.writers = []
 		summarywriters = []
 		progresswriters = []
@@ -336,8 +336,8 @@ class BaseRunner(ProcessUser):
 			try:
 				vcsProcess = subprocess.Popen(commitCmd, cwd=self.project.testRootDir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				(stdoutdata, stderrdata) = vcsProcess.communicate()
-				stdoutdata = stdoutdata.decode(locale.getpreferredencoding(), errors='replace')
-				stderrdata = stderrdata.decode(locale.getpreferredencoding(), errors='replace')
+				stdoutdata = stdoutdata.decode(PREFERRED_ENCODING, errors='replace')
+				stderrdata = stderrdata.decode(PREFERRED_ENCODING, errors='replace')
 				if vcsProcess.returncode != 0:
 					raise Exception('Process failed with %d: %s'%(vcsProcess.returncode, stderrdata.strip() or stdoutdata.strip() or '<no output>'))
 				
@@ -550,7 +550,7 @@ class BaseRunner(ProcessUser):
 					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) instead of print() within PySys tests: \n%s', ''.join(traceback.format_stack()))
 				# heuristic for coping with \n happening in a separate write to the message - ignore first newline after a non-newline
 				if s!='\n' or self.last=='\n': 
-					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
+					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or PREFERRED_ENCODING, errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
 			def __getattr__(self, name): return getattr(self.__origStdout, name)
@@ -1085,7 +1085,7 @@ class TestContainer(object):
 				initialOutputFiles = os.listdir(toLongPathSafe(self.outsubdir))
 
 				# run.log handler
-				runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or locale.getpreferredencoding()
+				runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or PREFERRED_ENCODING
 				self.testFileHandlerRunLog = logging.StreamHandler(_UnicodeSafeStreamWrapper(
 					io.open(toLongPathSafe(os.path.join(self.outsubdir, 'run.log')), 'a', encoding=runLogEncoding), 
 					writebytes=False, encoding=runLogEncoding))

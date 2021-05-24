@@ -200,7 +200,7 @@ class Process(object):
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
-			given by ``locale.getpreferredencoding()``. 
+			given by ``PREFERRED_ENCODING``. 
 		:param addNewLine: True if a new line character is to be added to the end of 
 			the data string
 		
@@ -209,7 +209,7 @@ class Process(object):
 		
 		if not data: return
 		if type(data) != binary_type:
-			data = data.encode(locale.getpreferredencoding())
+			data = data.encode(PREFERRED_ENCODING)
 		if addNewLine and not data.endswith(b'\n'): data = data+b'\n'
 			
 		if self._outQueue == None:

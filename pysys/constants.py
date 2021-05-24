@@ -25,7 +25,7 @@ be referenced directly.
 """
 # undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT
 
-import sys, re, os, os.path, socket, traceback
+import sys, re, os, os.path, socket, traceback, locale
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -94,6 +94,21 @@ else:  # pragma: no cover
 	LIBRARY_PATH_ENV_VAR = 'LD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
+PREFERRED_ENCODING = locale.getpreferredencoding()
+"""
+The operating system's preferred/default encoding for reading/writing the contents of text data in files and 
+process stdout/stderr for the current environment (or machine). 
+
+This returns the same value as Python's ``locale.getpreferredencoding()`` method, but as that method is not thread-safe, 
+this constant must always be used in test cases to avoid race conditions when running tests in parallel. 
+
+The OS preferred encoding should not be confused with Python's 'default' encoding (``sys.getdefaultencoding()``) which 
+is usually not relevant for testing purposes. 
+
+See also `pysys.basetest.BaseTest.getDefaultFileEncoding()`.
+
+@since 1.6.2
+"""
 
 ENVSEPERATOR = os.pathsep
 """ Deprecated. 

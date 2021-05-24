@@ -852,7 +852,7 @@ class ProcessUser(object):
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
-			given by locale.getpreferredencoding(). 
+			given by PREFERRED_ENCODING. 
 		:param bool addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""
@@ -1641,7 +1641,7 @@ class ProcessUser(object):
 		actualpath= os.path.join(self.output, path)
 		try:
 			# always open with a specific encoding not in bytes mode, since otherwise we can't reliably pass the read lines to the logger
-			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath) or locale.getpreferredencoding(), errors='replace')
+			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath) or PREFERRED_ENCODING, errors='replace')
 		except Exception as e:
 			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False
@@ -1765,9 +1765,8 @@ class ProcessUser(object):
 			<default-file-encoding pattern="*.xml" encoding="utf-8"/>
 		
 		A return value of None indicates default behaviour, which on Python 3 is to 
-		use the default encoding, as specified by python's 
-		``locale.getpreferredencoding()``, and on Python 2 is to use binary ``str`` 
-		objects with no character encoding or decoding applied. 
+		use the default OS encoding, as specified by `pysys.constants.PREFERRED_ENCODING`, 
+		and on Python 2 is to use binary ``str`` objects with no character encoding or decoding applied. 
 		
 		:param file: The filename to be read or written. This may be an 
 			absolute path or a relative path.

@@ -84,6 +84,8 @@ PySys 1.6.2 is under development.
 	  
 	      <property name="logConfigURL" value='${eval: "file:///"+os.path.abspath(appHome).replace("\\", "/")+"/logConfig.xml"}'/>
 
+	- Added `pysys.constants.PREFERRED_ENCODING` which should be used in testcases instead of 
+	  ``locale.getpreferredencoding()`` to avoid thread-safety issues. 
 	- Added `pysys.constants.EXE_SUFFIX` which is ``.exe`` on Windows and empty string on Unix. This is convenient 
 	  when running executables. 
 	- Improved the failure messages for `BaseTest.assertGrep` (with contains=False) and `BaseTest.assertLineCount` 
@@ -97,6 +99,12 @@ Fixes:
 	- Avoid creating unnecessary runner output directory as a result of ``mkdir(runner.output+'/../xxx')`` by 
 	  normalizing paths before calling mkdir. 
 	- Fixed `BaseTest.assertLineCount` bug in which ``reFlags`` parameter was not honoured. 
+
+Migration notes:
+
+	- It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
+	  ``locale.getpreferredencoding()``, to avoid thread-safety issues. 
+
 
 -------------------
 What's new in 1.6.1

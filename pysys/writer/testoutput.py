@@ -222,7 +222,7 @@ class TestOutputArchiveWriter(BaseRecordResultsWriter):
 		try:
 			outputDir = toLongPathSafe(outputDir)
 			if PY2: # it's simpler if we always deal with unicode strings (which would happen on windows anyway due to the longpathsafe stuff)
-				if isinstance(outputDir, str): outputDir = unicode(outputDir, locale.getpreferredencoding())
+				if isinstance(outputDir, str): outputDir = unicode(outputDir, PREFERRED_ENCODING)
 			skippedFiles = []
 			
 			# this is performance-critical so worth caching these

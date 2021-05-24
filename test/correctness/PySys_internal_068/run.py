@@ -22,7 +22,7 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+		if PREFERRED_ENCODING in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
 		import coverage # this test requires the coverage.py library so give a clear error if it's missing
 
@@ -148,7 +148,7 @@ class PySysTest(BaseTest):
 		self.assertThat('len(vcsCommit) > 4', vcsCommit__eval="self.runner.runDetails['vcsCommit']")
 		
 		# check PYSYS_CONSOLE_FAILURE_ANNOTATIONS did its thing
-		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*error: .*NestedTimedout .* 02.*', encoding=locale.getpreferredencoding()), 
+		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*error: .*NestedTimedout .* 02.*', encoding=PREFERRED_ENCODING), 
 			expected=u'NestedTimedout%srun.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness - %s (NestedTimedout [CYCLE 02])'%(os.sep, TEST_STR))
 
 		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*warning: .*NestedNotVerified .* 02.*'), 

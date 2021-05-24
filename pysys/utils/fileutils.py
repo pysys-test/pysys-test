@@ -45,7 +45,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	:param str path: A path. Must not be a relative path. Can be None/empty. Can 
 		contain ".." sequences. If possible, use a unicode character string. 
 		On Python 2, byte strings are permitted and converted using 
-		``locale.getpreferredencoding()``. Note that no normalization of ".." 
+		``PREFERRED_ENCODING``. Note that no normalization of ".." 
 		sequences and slashes is performed if the OS starts with ``\\?\`` already 
 		or is non-Windows so if in doubt run the path through ``os.path.normpath`` 
 		before calling this method on it (``\\?\`` paths with incorrect slashes or .. sequences 
@@ -83,7 +83,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 			path = path.replace('\\\\','\\')
 
 	if PY2 and isinstance(path, str):
-		path = path.decode(locale.getpreferredencoding())
+		path = path.decode(PREFERRED_ENCODING)
 	
 	if path.startswith(u'\\\\'): 
 		path = u'\\\\?\\UNC\\'+path.lstrip('\\') # \\?\UNC\server\share
@@ -97,7 +97,7 @@ def fromLongPathSafe(path):
 	
 	Note that this function does not convert unicode strings back to byte 
 	strings, so if you want a complete reversal of toLongPathSafe you will 
-	additionally have to call C{result.encode(locale.getpreferredencoding())}.
+	additionally have to call C{result.encode(PREFERRED_ENCODING)}.
 	"""
 	if not path: return path
 	if not path.startswith('\\\\?\\'): return path

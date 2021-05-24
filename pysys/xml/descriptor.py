@@ -686,7 +686,7 @@ class DescriptorLoader(object):
 		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
 		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path), 
 		# so must use long-path-safe - but need to re-encode from unicode string back to bytestring in Python 2
-		i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
+		i18n_reencode = PREFERRED_ENCODING if PY2 and isinstance(dir, str) else None
 		
 		dir = toLongPathSafe(os.path.normpath(dir))
 		assert os.path.exists(dir), dir # sanity check

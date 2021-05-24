@@ -7,12 +7,12 @@ import io, locale
 # contains a non-ascii � character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello � world' 
 # use a different encoding to the default/local encoding
-TEST_ENCODING = 'latin-1' if locale.getpreferredencoding().lower() == 'utf-8' else 'utf-8'
+TEST_ENCODING = 'latin-1' if PREFERRED_ENCODING.lower() == 'utf-8' else 'utf-8'
 
 class PySysTest(BaseTest):
 	def execute(self):
-		self.log.info('Python local/default/preferred encoding is %s; will test with non-local encoding %s', locale.getpreferredencoding(), TEST_ENCODING)
-		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+		self.log.info('Python local/default/preferred encoding is %s; will test with non-local encoding %s', PREFERRED_ENCODING, TEST_ENCODING)
+		if PREFERRED_ENCODING in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
 		self.__myDefaultEncoding = None
 
