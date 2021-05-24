@@ -132,6 +132,9 @@ def getServerTCPPorts():
 
 	If using these variables, be sure to avoid none of the ports reserved for ephemeral use is in the set of server 
 	ports you specify. 
+	
+	See `logPortAllocationStats()` for information about how to log statistics showing how many server ports your tests 
+	are using. 
 
 	:return: A list or set of all the server ports that can be used, e.g. [1024, 1025, ...]. 
 	:raises Exception: If the port range cannot be determined, which will prevent PySys from running any tests. 
@@ -178,10 +181,12 @@ def initializePortPool():
 	:meta private: Not public API
 	"""
 
-	global tcpServerPortPool
+	global tcpServerPortPool, __totalServerPorts
 	assert tcpServerPortPool is None, 'Cannot call initializePortPool() more than once per process'
 
 	tcpServerPortPool = list(getServerTCPPorts())
+	
+	__totalServerPorts = len(tcpServerPortPool)
 
 	# Randomize the port set to reduce the chance of clashes between
 	# simultaneous runs on the same machine
@@ -231,6 +236,9 @@ def portIsInUse(port, host='', socketAddressFamily=socket.AF_INET, type=socket.S
 			s.close()
 	return False
 
+__peakAllocatedPorts = 0
+__totalAllocatedPorts = 0
+
 def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET, type=socket.SOCK_STREAM, proto=0):
 	# nb: expose socket type and protocol number here but not higher up the stack just in case someone needs them, but 
 	# not very likely
@@ -258,8 +266,31 @@ def allocateTCPPort(hosts=['', 'localhost'], socketAddressFamily=socket.AF_INET,
 		else:
 			if haslogged:
 				_log.info('   successfully allocated TCP port %d after %0.1fs', port, time.time()-t)
+			global __totalAllocatedPorts, __peakAllocatedPorts
+			__totalAllocatedPorts += 1 # sufficiently thread-safe for statistics reporting due to GIL (minor errors tolerated)
+			__peakAllocatedPorts = max(__peakAllocatedPorts, __totalServerPorts-len(tcpServerPortPool))
 			return port
 	raise Exception('Timed out trying to allocate a free TCP server port after %0.1f secs; other tests are currently using all the available ports (hint: check that PySys has correctly detected the range of ephemeral vs server ports by running with -vDEBUG)'%TIMEOUTS['WaitForAvailableTCPPort'])
+
+def logPortAllocationStats(logger=logging.getLogger('pysys.portAllocationStats')):
+	"""
+	Logs a DEBUG level message indicating how many server ports were allocated so far over the lifetime of this 
+	PySys process, and the peak number in use any one time. 
+	
+	This method is called before PySys terminates after running all tests. 
+
+	To see these messages, run PySys with::
+	
+		pysys run -v portAllocationStats=DEBUG
+	
+	"""
+	logger.debug('TCP server port allocation stats: peakAllocatedPorts=%s, portPoolSize=%s, lifetimeTotalAllocatedPorts=%s',
+		__peakAllocatedPorts, __totalServerPorts, __totalAllocatedPorts)
+	return { # undocumented for now, but might be useful for hacking around
+		'peakAllocatedPorts': __peakAllocatedPorts,
+		'totalServerPorts': __totalServerPorts,
+		'lifetimeTotalAllocatedPorts': __totalAllocatedPorts,
+	}
 
 class TCPPortOwner(object):
 	"""

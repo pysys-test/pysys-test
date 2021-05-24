@@ -91,6 +91,8 @@ PySys 1.6.2 is under development.
 	- Improved the failure messages for `BaseTest.assertGrep` (with contains=False) and `BaseTest.assertLineCount` 
 	  (with condition="==0") to include both the first matching expression and the total number of matches. This 
 	  is useful when checking log files for unexpected errors and warnings. 
+	- Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
+	  pool of TCP ports. 
 
 Fixes:
 

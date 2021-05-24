@@ -708,6 +708,8 @@ class BaseRunner(ProcessUser):
 				log.warn("Caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
+		pysys.utils.allocport.logPortAllocationStats()
+
 		if self.__pythonWarnings:
 			log.warn('Python reported %d warnings during execution of tests; is is recommended to do a test run with -Werror and fix them if possible, or filter them out if not (see Python\'s warnings module for details)', self.__pythonWarnings)
 
