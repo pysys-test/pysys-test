@@ -77,7 +77,7 @@ class WorkerThread(threading.Thread):
 		"""
 		threading.Thread.__init__(self, **kwds)
 		log.debug("[%s] Creating thread for test execution" % self.getName())
-		self.setDaemon(1)
+		self.daemon = True
 		self._requests_queue = requests_queue
 		self._results_queue = results_queue
 		self._poll_timeout = poll_timeout
