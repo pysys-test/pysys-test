@@ -24,6 +24,8 @@ import sys, os, io, locale, logging, threading
 PY2 = sys.version_info[0] == 2
 binary_type = str if PY2 else bytes
 
+__PREFERRED_ENCODING = locale.getpreferredencoding() # also exists in pysys.constants.
+
 class _UnicodeSafeStreamWrapper(object):
 	"""
 	Non-public API - for internal use only, may change at any time. 
@@ -51,7 +53,7 @@ class _UnicodeSafeStreamWrapper(object):
 		assert underlying != self # avoid infinite loops
 		self.stream = underlying
 		# on python 2 stdout.encoding=None if redirected, and falling back on getpreferredencoding is the best we can do
-		self.__encoding = self.__requestedEncoding or getattr(underlying, 'encoding', None) or PREFERRED_ENCODING
+		self.__encoding = self.__requestedEncoding or getattr(underlying, 'encoding', None) or __PREFERRED_ENCODING
 		assert self.__encoding
 	
 	def write(self, s):
