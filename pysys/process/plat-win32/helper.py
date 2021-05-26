@@ -41,7 +41,7 @@ log = logging.getLogger('pysys.process')
 try:
 	IS_PRE_WINDOWS_8 = int(platform.version().split('.')[0]) < 8
 except Exception:
-	IS_PRE_WINDOWS_8 = Fals
+	IS_PRE_WINDOWS_8 = False
 	
 class ProcessWrapper(CommonProcessWrapper):
 	"""Windows Process wrapper for process execution and management. 
