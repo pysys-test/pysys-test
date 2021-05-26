@@ -985,7 +985,7 @@ class BaseRunner(ProcessUser):
 			# add a stack trace as otherwise it's not easy to see where in run.py the problem originated, as the 
 			# warning is usually logged from as shared base class
 			msg = '%s\n%s'%(msg.strip(), ''.join(traceback.format_stack()))
-			warningLogger.warn('Python reported a warning: %s', msg)
+			warningLogger.warning('Python reported a warning: %s', msg)
 			
 		warnings.showwarning = handlePythonWarning
 		
