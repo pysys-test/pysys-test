@@ -56,6 +56,11 @@ class PySysTest(pysys.basetest.BaseTest):
 		# It's good practice to check for unexpected errors and warnings so they don't go unnoticed
 		self.assertGrep('my_server.out', r' (ERROR|FATAL|WARN) .*', contains=False)
 		
+		# Checking for exception stack traces is also a good idea; and joining them into a single line with a mapper will 
+		# give a more descriptive error if the test fails
+		self.assertGrep('my_server.out', r'Traceback [(]most recent call last[)]', contains=False, 
+			mappers=[pysys.mappers.JoinLines.PythonTraceback()])
+		
 		self.assertThat('message == expected', 
 			message=pysys.utils.fileutils.loadJSON(self.output+'/httpget_myfile.out')['message'], 
 			expected="Hello world!", 

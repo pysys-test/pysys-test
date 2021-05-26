@@ -35,19 +35,36 @@ PySys 1.6.2 is under development.
 		- Added improved debug logging to `BaseTest.startProcess()` including a full command line for manually re-running 
 		  troublesome commands, and expansion of PATH environment variables to show the individual components. 
 		  
+	- Additions to the line mappers functionality:
+	
+		- Added `pysys.mappers.JoinLines` which combines consecutive related logs such as exception stack traces. There are 
+		  also pre-configured mappers for some common tools: `pysys.mappers.JoinLines.PythonTraceback`, 
+		  `pysys.mappers.JoinLines.JavaStackTrace`, `pysys.mappers.JoinLines.AntBuildFailure`. For example::
+		
+				self.assertGrep('myserver.log', expr=r' (ERROR|FATAL) .*', contains=False, 
+					mappers=[pysys.mappers.JoinLines.JavaStackTrace()], 	
+					ignores=['Caused by: java.lang.RuntimeError: My expected exception'])
+			
+		  ... will produce a failure outcome that includes the Java stack trace following any error lines, and also 
+		  has the ability to ignore errors based on the contents of their stack trace. 
+		
+		- Added `pysys.mappers.SortLines` which could be used with the `BaseTest.copy` method for ensuring deterministic 
+		  results in a `BaseTest.assertDiff`. 
+		- Added `pysys.mappers.applyMappers` which makes it easy to add mapper functionality to your own methods. 
+		- Added a ``mappers=`` argument to `BaseTest.logFileContents()`.
+	  
 	- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
 	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
 	  refer to the old name). 
-	- Added a ``mappers=`` argument to `BaseTest.logFileContents()`.
 	- Added `BaseTest.deleteFile()` which provides a simple and safe way to delete a file similar to the 
 	  `BaseTest.deleteDir()` method. 
 	- Added a ``quiet=True/False`` option to `BaseTest.waitForGrep` to disable the INFO-level logging. 
-	- Changed `pysys.writer.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
-	  attribute, and changed the failure node to be:
+	- Changed `pysys.writer.outcomes.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
+	  attribute, and changed the failure node to be::
 	  
 	    <failure message="OUTCOME: Outcome reason" type="OUTCOME"/>
 	    
-	  (where OUTCOME could be FAILED, BLOCKED, etc) instead of:
+	  (where OUTCOME could be FAILED, BLOCKED, etc) instead of::
 	  
 	    <failure message="OUTCOME">Outcome reason</failure>
 	  
@@ -106,6 +123,9 @@ Migration notes:
 
 	- It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
 	  ``locale.getpreferredencoding()``, to avoid thread-safety issues. 
+	- When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
+	  character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
+	  mappers. This is also now more clearly documented. 
 
 
 -------------------

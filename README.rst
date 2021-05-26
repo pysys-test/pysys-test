@@ -203,6 +203,11 @@ shows of the most common PySys methods:
       # It's good practice to check for unexpected errors and warnings so they don't go unnoticed
       self.assertGrep('my_server.out', ' (ERROR|FATAL|WARN) .*', contains=False)
       
+      # Checking for exception stack traces is also a good idea; and joining them into a single line with a mapper will 
+      # give a more descriptive error if the test fails
+      self.assertGrep('my_server.out', r'Traceback [(]most recent call last[)]', contains=False, 
+        mappers=[pysys.mappers.JoinLines.PythonTraceback()])
+      
       self.assertThat('message == expected', 
         message=pysys.utils.fileutils.loadJSON(self.output+'/httpget_myfile.out')['message'], 
         expected="Hello world!", 
@@ -220,6 +225,7 @@ methods and further examples in the documentation:
 	- `pysys.basetest.BaseTest.assertGrep()`
 	- `pysys.basetest.BaseTest.assertThat()`
 	- `pysys.basetest.BaseTest.logFileContents()`
+	- `pysys.mappers`
 
 Now take a look at `pysys.basetest` to begin exploring more of the powerful functionality 
 PySys provides to help you implement your own ``run.py`` system tests. 
@@ -234,7 +240,7 @@ License
 
 PySys System Test Framework
 
-Copyright (C) 2006-2020 M.B. Grieve
+Copyright (C) 2006-2021 M.B. Grieve
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public

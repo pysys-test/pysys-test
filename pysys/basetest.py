@@ -1033,7 +1033,7 @@ class BaseTest(ProcessUser):
 		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
 		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
-		use `assertThatGrep` instead of this function, as assertThatGrep can produce better message on failure, and 
+		use `assertThatGrep` instead of this function, as assertThatGrep can produce better messages on failure, and 
 		also allows for more powerful matching using a full Python expression 
 		(e.g. numeric range checks, pre-processing strings to normalize case, etc). 
 
@@ -1048,8 +1048,15 @@ class BaseTest(ProcessUser):
 		For example::
 		
 			self.assertGrep('myserver.log', expr=r' ERROR .*', contains=False)
+
+			# If error messages may be accompanied by stack traces you can use a mapper to join them into the same line 
+			# so if your test fails, the outcome reason includes all the information. This also allows ignoring errors 
+			# based on the stack trace:
+			self.assertGrep('myserver.log', expr=r' (ERROR|FATAL) .*', contains=False, 
+				mappers=[pysys.mappers.JoinLines.JavaStackTrace()], 	
+				ignores=['Caused by: java.lang.RuntimeError: My expected exception'])
 			
-			# in Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:
+			# In Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:
 			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{re.escape(username)}" in .* seconds[.]')
 			
 			# If you need to use \ characters use a raw r'...' string to avoid the need for Python \ escaping in 
@@ -1105,12 +1112,15 @@ class BaseTest(ProcessUser):
 		:param bool contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
 		:param list[str] ignores: Optional list of regular expressions that will be 
-			ignored when reading the file. 
+			ignored when reading the file. Ignore expressions are applied *after* any mappers. 
 		
 		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
 			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
 			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
-			provides the ability to filter in/out sections of a file. 
+			provides the ability to filter in/out sections of a file and `pysys.mappers.JoinLines` can combine related 
+			error lines such as stack trace to provide all the information in the test outcome reason. 
+			
+			Mappers must always preserve the final ``\\n`` of each line (if present). 
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 			

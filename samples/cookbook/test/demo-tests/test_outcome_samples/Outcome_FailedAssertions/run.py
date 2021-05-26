@@ -18,6 +18,9 @@ class PySysTest(pysys.basetest.BaseTest):
 		# assertGrep is good for checking errors aren't present, or positively for checking that an expression is 
 		# present but you don't care where.
 		self.assertGrep('my_server.out', r' (ERROR|FATAL|WARN) .*', contains=False)
+		self.assertGrep('my_server.out', r'Traceback \(most recent call last\)', contains=False, 
+			mappers=[pysys.mappers.JoinLines.PythonTraceback()])
+
 		self.assertGrep('sensorValues.out', r'"timestamp": ".+"') # contains some timestamp, don't care what or where
 
 		# Advanced: regular expression escaping can be tricky. Backslashes can be handled with r'...' strings, but 

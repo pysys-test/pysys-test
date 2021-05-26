@@ -28,6 +28,7 @@ from pysys.exceptions import *
 from pysys.utils.filediff import trimContents
 from pysys.utils.pycompat import openfile
 from pysys.utils.fileutils import pathexists
+from pysys.mappers import applyMappers
 
 log = logging.getLogger('pysys.assertions')
 
@@ -37,7 +38,8 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[], 
 	
 	:param file: The full path to the input file
 	:param regexpr: The regular expression used to search for matches
-	:param ignores: A list of regexes which will cause matches to be discarded
+	:param mappers: A list of lambdas or generator functions used to pre-process the file's lines before looking for matches. 
+	:param ignores: A list of regexes which will cause matches to be discarded. These are applied *after* any mappers. 
 	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
 	:param returnFirstOnly: If True, stops reading the file as soon as the first match is found and returns it. 
 	:return: A list of the match objects, or the match object or None if returnFirstOnly is True
@@ -52,20 +54,11 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[], 
 
 	ignores = [re.compile(i, flags=flags) for i in (ignores or [])]
 
-	if None in mappers: mappers = [m for m in mappers if m]
-
 	if not pathexists(file):
 		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
-			for l in f:
-				# pre-process
-				for mapper in mappers:
-					l = mapper(l)
-					if l is None: break
-				if l is None: continue
-
-			
+			for l in applyMappers(f, mappers):
 				match = rexp.search(l)
 				if match is not None: 
 					shouldignore = False

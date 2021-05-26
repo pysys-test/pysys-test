@@ -103,6 +103,23 @@ class PySysTest(pysys.basetest.BaseTest):
 		counter.fileStarted = incrementCounter
 		self.copy('srcdirname/src.txt', 'dest.txt', mappers=[CustomLineMapper(), counter, None])
 		self.assertThat('mappedFileCount == 1', mappedFileCount=count[0])
+		
+		# Mix of generator and lambda functions, and checks for correct ordering
+		self.write_text('mappertest.txt', 'Hello\n2021-05-25 ERROR [Thread1] The operation failed|java.lang.AssertionError: Invalid state|\tat org.junit.Assert.fail(Assert.java:100)|Caused by: java.lang.RuntimeError: Oh dear |\tat org.myorg.TestMyClass2|2021-05-25 ERROR [Thread1] Another error|2021-05-25 INFO [Thread1] normal operation'.replace('|','\n'))
+		self.assertDiff(self.copy('mappertest.txt', 'mappertest-processed.txt', mappers=[
+			lambda l: l.rstrip() + ' <suffix>\n',
+			None,
+			pysys.mappers.JoinLines.JavaStackTrace(),
+			lambda l: '<prefix> '+l, # if evaluated before the above this would stop it working
+			pysys.mappers.JoinLines.PythonTraceback(),  # not used
+			pysys.mappers.JoinLines.AntBuildFailure(),  # not used
+		]))
+
+		# Check handling if final newline chars when sorting
+		self.write_text('sorttest.txt', 'a\nc\nb')
+		self.assertDiff(self.copy('sorttest.txt', 'sorttest-processed.txt', mappers=[
+			pysys.mappers.SortLines(),
+		]))
 
 	def validate(self):
 		self.assertDiff('output-processed.txt', 'ref-output-processed.txt')

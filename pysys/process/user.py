@@ -37,6 +37,7 @@ from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, deletefile, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
 import pysys.internal.safe_eval
+from pysys.mappers import applyMappers
 
 if IS_WINDOWS:
 	import win32api, win32con
@@ -1551,15 +1552,9 @@ class ProcessUser(object):
 		
 		path = os.path.join(self.output, path)
 
-		if None in mappers: mappers = [m for m in mappers if m]
-
 		with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
 			matches = []
-			for l in f:
-				for mapper in mappers:
-					l = mapper(l)
-					if l is None: break
-				if l is None: continue
+			for l in applyMappers(f, mappers):
 			
 				match = compiled.search(l)
 				if not match: continue
@@ -1656,12 +1651,7 @@ class ProcessUser(object):
 			
 			tolog = []
 
-			for l in f:
-				# first, mapper handling
-				for mapper in mappers:
-					l = mapper(l)
-					if l is None: break
-				if l is None: continue
+			for l in applyMappers(f, mappers):
 			
 				if stripWhitespace:
 					l = l.rstrip()
@@ -1907,8 +1897,8 @@ class ProcessUser(object):
 	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
 		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
 		
-		If any mappers are provided, the file is copied in text mode and 
-		each mapper is given the chance to modify or omit each line. 
+		If any `pysys.mappers` are provided, the file is copied in text mode and 
+		each mapper is given the chance to modify or omit each line, or even reorder the lines of the file. 
 		If no mappers are provided, the file is copied in binary mode. 
 
 		For example::
@@ -1920,6 +1910,7 @@ class ProcessUser(object):
 					pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
 					pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
 				])
+		
 
 		In addition to the file contents the attributes such as modification time and 
 		executable permission will be copied where possible. 
@@ -1943,7 +1934,8 @@ class ProcessUser(object):
 			self.copy('src.txt', 'foo/')      # copies to outputdir/foo/src.txt since destination ends with a slash
 			self.copy('srcdirname', 'foo/')   # copies to outputdir/foo/srcdirname since destination ends with a slash
 
-		Usually custom mappers are simple functions or lambdas, however for advanced use cases you can 
+		For more information about pre-defined mappers, see `pysys.mappers`. Custom mappers can be specified as simple 
+		functions or lambdas, however for advanced use cases you can 
 		additionally provide ``mapper.fileStarted([self,] srcPath, destPath, srcFile, destFile)`` and/or  
 		``mapper.fileFinished(...)`` methods to allow stateful operations, or to perform extra read/write operations 
 		before lines are read/written. For example::
@@ -1986,9 +1978,10 @@ class ProcessUser(object):
 			in order, to map each line from source to destination. Each function accepts a string for 
 			the current line as input and returns either a string to write or 
 			None if the line is to be omitted. Any ``None`` items in the mappers list will be ignored. 
+			Mappers must always preserve the final ``\\n`` of each line (if present). 
 			
-			See `pysys.mappers` for some useful predefined mappers such as `pysys.mappers.IncludeLinesBetween` 
-			and `pysys.mappers.RegexReplace`. 
+			See `pysys.mappers` for some useful predefined mappers such as `pysys.mappers.IncludeLinesBetween`, 
+			`pysys.mappers.RegexReplace` and `pysys.mappers.SortLines`. 
 			
 			If present the ``mapper.fileStarted(...)`` and/or ``mapper.fileFinished(...)`` methods will be called on each 
 			mapper in the list at the start and end of each file; see above for an example. 
@@ -2075,11 +2068,8 @@ class ProcessUser(object):
 						fn = getattr(mapper, 'fileStarted', None)
 						if fn: fn(src, dest, srcf, destf)
 
-					for line in srcf:
-						for mapper in mappers:
-							line = mapper(line)
-							if line is None: break
-						if line is not None: destf.write(line)
+					for line in applyMappers(srcf, mappers):
+						destf.write(line)
 
 					for mapper in mappers:
 						fn = getattr(mapper, 'fileFinished', None)
