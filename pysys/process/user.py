@@ -1348,7 +1348,7 @@ class ProcessUser(object):
 
 			if outcomeReason and printReason:
 				if outcome.isFailure():
-					log.warn(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(
+					log.warning(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(
 						u'%s:%s'%(os.path.basename(loc[0]), loc[1]) for loc in map(parseLocation,callRecord)) if callRecord!=None else u'',
 							 extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 				else:
