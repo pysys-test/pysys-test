@@ -26,7 +26,7 @@ import collections
 import json
 import logging
 
-from pysys.constants import IS_WINDOWS
+from pysys.constants import IS_WINDOWS, PREFERRED_ENCODING
 from pysys.utils.pycompat import PY2, openfile
 
 log = logging.getLogger('pysys.fileutils')

@@ -1,4 +1,5 @@
 from pysys.constants import *
+from pysys.utils.pycompat import PY2
 from pysys.basetest import BaseTest
 from pysys.process.helper import ProcessWrapper
 
@@ -40,7 +41,7 @@ class PySysTest(BaseTest):
 		self.assertDiff('counter.out', 'ref_counter.out')
 		
 		# check the stderr of the process
-		if sys.prefix != sys.base_prefix:
+		if PY2 or sys.prefix != sys.base_prefix:
 			self.log.info('Skipping pid check because it doesnt work in a python venv')
 		else:
 			self.assertGrep('counter.err', expr='Process id of test executable is %d' % self.hprocess.pid)
