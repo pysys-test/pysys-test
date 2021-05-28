@@ -91,13 +91,13 @@ class BaseTest(ProcessUser):
 		
 		The ``setup`` method may be overridden by individual test classes, or (more commonly) in a custom `BaseTest` 
 		subclass that provides common functionality for multiple individual tests. However before implementing a custom 
-		BaseTest subclass with its own setup() method, consider whether the PySys concept of test plugins would meet 
+		``BaseTest`` subclass with its own ``setup()`` method, consider whether the PySys concept of test plugins would meet 
 		your needs. 
 		
 		If you do override this method, be sure to call ``super(BASETEST_CLASS_HERE, self).setup()`` to allow the 
 		setup commands from the base test to run. 
 		
-		If ``setup`` throws an exception, the `cleanup` method will still be called, to allow for clean up resources 
+		If ``setup`` throws an exception, the `cleanup` method will still be called, to clean up any resources 
 		that were already allocated.
 		
 		"""
