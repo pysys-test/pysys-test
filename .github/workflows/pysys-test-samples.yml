@@ -1,14 +1,13 @@
-# The samples are primarily tested using Travis CI, but we also run them in a GitHub workflow to check for additional 
-# issues that show up only on these VMs, and to allow manual inspection of the (expected) test failure output from the 
-# cookbook sample
+# The samples are primarily auto-tested using the main run, but we also run them here to allow manual inspection of 
+# the deliberate test failure output from the cookbook sample
 
-name: PySys samples
+name: Samples (expected to fail)
 
 on:
   push:
-    branches: [ master ]
+    branches: [ release ]
   pull_request:
-    branches: [ master ]
+    branches: [ release ]
   workflow_dispatch: # also allow manually invoking this
   
 
