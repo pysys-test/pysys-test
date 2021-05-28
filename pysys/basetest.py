@@ -1396,7 +1396,7 @@ class BaseTest(ProcessUser):
 
 	
 	def assertLineCount(self, file, _expr='', _unused=None, condition=">=1", ignores=None, encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None):
+			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None, mappers=[]):
 		"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -1407,10 +1407,22 @@ class BaseTest(ProcessUser):
 		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		:param expr: The regular expression string used to match a line of the input file
 		:param condition: The condition to be met for the number of lines matching the regular expression
-		:param ignores: A list of regular expressions that will cause lines to be excluded from the count
+		:param ignores: A list of regular expressions that will cause lines to be excluded from the count.
+			Ignore expressions are applied *after* any mappers. 
 		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file and `pysys.mappers.JoinLines` can combine related 
+			error lines such as stack trace to provide all the information in the test outcome reason. 
+			
+			Mappers must always preserve the final ``\\n`` of each line (if present). 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+			Added in PySys 1.6.2.
 
 		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
@@ -1438,11 +1450,11 @@ class BaseTest(ProcessUser):
 
 		try:
 			if condition.replace(' ','') in ['==0', '<=0']:
-				m = getmatches(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
+				m = getmatches(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
 				numberLines = len(m)
 				firstMatch = (m[0] if len(m)>0 else None)
 			else:
-				numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
+				numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
 				firstMatch = None
 			log.debug("Number of matching lines in %s is %d", f, numberLines)
 		except Exception:

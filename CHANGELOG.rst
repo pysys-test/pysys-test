@@ -51,7 +51,7 @@ PySys 1.6.2 is under development.
 		- Added `pysys.mappers.SortLines` which could be used with the `BaseTest.copy` method for ensuring deterministic 
 		  results in a `BaseTest.assertDiff`. 
 		- Added `pysys.mappers.applyMappers` which makes it easy to add mapper functionality to your own methods. 
-		- Added a ``mappers=`` argument to `BaseTest.logFileContents()`.
+		- Added a ``mappers=`` argument to `BaseTest.logFileContents` and `BaseTest.assertLineCount`.
 	  
 	- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
 	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
