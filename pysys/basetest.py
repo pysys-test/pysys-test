@@ -22,7 +22,7 @@ import difflib
 from pysys import log
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.utils.filegrep import filegrep
+from pysys.utils.filegrep import filegrep, getmatches
 from pysys.utils.filegrep import lastgrep
 from pysys.utils.filediff import filediff
 from pysys.utils.filegrep import orderedgrep
@@ -72,6 +72,8 @@ class BaseTest(ProcessUser):
 			self.disableCoverage = True
 			self.log.debug('Disabling coverage for this test due to disableCoverage group')
 		
+		self.__assertDetailLogger = logging.getLogger('pysys.assertions.diffs')
+		
 	def __str__(self): 
 		""" Returns a human-readable and unique string representation of this test object containing the descriptor id 
 		and a suffix indicating the cycle number if this is a multi-cycle test run. 
@@ -89,13 +91,13 @@ class BaseTest(ProcessUser):
 		
 		The ``setup`` method may be overridden by individual test classes, or (more commonly) in a custom `BaseTest` 
 		subclass that provides common functionality for multiple individual tests. However before implementing a custom 
-		BaseTest subclass with its own setup() method, consider whether the PySys concept of test plugins would meet 
+		``BaseTest`` subclass with its own ``setup()`` method, consider whether the PySys concept of test plugins would meet 
 		your needs. 
 		
 		If you do override this method, be sure to call ``super(BASETEST_CLASS_HERE, self).setup()`` to allow the 
 		setup commands from the base test to run. 
 		
-		If ``setup`` throws an exception, the `cleanup` method will still be called, to allow for clean up resources 
+		If ``setup`` throws an exception, the `cleanup` method will still be called, to clean up any resources 
 		that were already allocated.
 		
 		"""
@@ -480,9 +482,12 @@ class BaseTest(ProcessUser):
 			
 	def assertThat(self, conditionstring, *positional_arguments, **kwargs):
 		"""Performs equality/range tests or any general-purpose validation by evaluating a Python ``eval()`` expression 
-		in the context of some named values.
+		in the context of some named values. 
 		
-		For example::
+		This method is designed to produce very clear and informative logging and failure reasons if the assertion is 
+		unsuccessful (using the `logDiffValue` method). 
+		
+		Example usage::
 		
 			# Equality comparison of an 'actual' vs 'expected' message from when our server started; 
 			# note the use of a descriptive name for the 'actualXXX=' keyword to produce a nice clear message if it fails
@@ -643,34 +648,118 @@ class BaseTest(ProcessUser):
 				re.match(r'^ *\w+[.](startswith|endswith)[(] *\w+ *[)] *$', conditionstring)) and len(namesInUse)==2: 
 				# if we're checking a==b we can help the user see why they didn't match; 
 				# this kind of highlighting might be misleading for other conditionstrings, and certainly less useful
-				pad = max(len(key) for key in namesInUse)+1
 
-				# use %s for most objects, but repr for strings (so we see the escaping) and objects where str() would make them look the same
-				v1 = u'%s'%(namedvalues[namesInUse[0]],)
-				v2 = u'%s'%(namedvalues[namesInUse[1]],)
+				self.logValueDiff(**{
+					namesInUse[0]:namedvalues[namesInUse[0]],
+					namesInUse[1]:namedvalues[namesInUse[1]],
+				})
 
-				if isstring(namedvalues[namesInUse[0]]) and ( # for strings do minimal escaping, but only if we can do it consistently for both strings
-						('\\' in repr(namedvalues[namesInUse[0]]).replace('\\\\','')) == 
-						('\\' in repr(namedvalues[namesInUse[1]]).replace('\\\\','')) ):
-					v1 = quotestring(namedvalues[namesInUse[0]])
-					v2 = quotestring(namedvalues[namesInUse[1]])
-				elif v1==v2 or isstring(namedvalues[namesInUse[0]]):
-					v1 = u'%r'%(namedvalues[namesInUse[0]],)
-					v2 = u'%r'%(namedvalues[namesInUse[1]],)
-				
-				seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
-				i, j, k = seq.find_longest_match(0, len(v1), 0, len(v2))
-				# where v1[i:i+k] == v2[j:j+k]
-
-				for (index, key) in enumerate(namesInUse):
-					value = [v1,v2][index]
-					x = [i, j][index]
-					self.log.info(u'  %{pad}s: %s%s%s'.format(pad=pad), key, 
-						value[:x], value[x:x+k], value[x+k:],
-						extra=BaseLogFormatter.tag(LOG_FAILURES, arg_index=[1,3]))
-				if i == 0 and j == 0 and k > 0: # if there's a common prefix, show where it ends
-					self.log.info(u'  %{pad}s %s ^'.format(pad=pad), '', ' '*k, extra=BaseLogFormatter.tag(LOG_FAILURES))
 			return False
+
+	def logValueDiff(self, actual=None, expected=None, logFunction=None, **namedvalues):
+		"""Logs the differences between two values in a human-friendly way, on multiple lines (as displayed by `assertThat`). 
+		
+		Special handling is provided for common types such as strings, lists and dicts (note that this isn't intended 
+		for use with data structures whose string representation is too big to display on the console). 
+	
+		:param obj actual: The actual value. 
+			Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead. 
+		:param obj expected: The baseline/expected value from which a diff will be computed to the actual value. 
+			Alternatively, this parameter can be ignored and a value with a different key provided as a keyword argument instead. 
+			
+		:param function logFunction: By default each line is logged at INFO level using ``log.info()``, but an alternative 
+			log function with the same signature can be provided if desired. 
+		"""
+		if logFunction is None: logFunction = self.__assertDetailLogger.info
+		
+		if len(namedvalues) < 2:
+			# adding actual before expected to the dict gives the right ordering for the diff later on
+			if actual is not None: namedvalues['actual'] = actual
+			if expected is not None: namedvalues['expected'] = expected
+		assert len(namedvalues)==2, 'Expecting 2 keyword args but got: %s'%namedvalues.keys()
+		
+		namesInUse = list(namedvalues.keys())
+		pad = max(len(key) for key in namesInUse)+1
+		
+		v1, v2 = namedvalues[namesInUse[0]], namedvalues[namesInUse[1]]
+
+		def tostringlist(x):
+			if isinstance(x, dict): 
+				# if they're dictionaries, convert to lists since otherwise the random ordering of the keys could mess up the comparisons
+				return [u'%s=%s'%(k, quotestring(v)) for (k,v) in sorted(x.items())]
+			return [quotestring(v) for v in x]
+
+		if len(str(v1)+str(v2)) > 100 and isinstance(v1, (list,dict)) and isinstance(v2, (list,dict)) and min(len(v1), len(v2))>1 and tostringlist(v1)!=tostringlist(v2):
+			# For list/dict data structures (unless of trivial size) it's clearer to display using a line-by-line diff approach
+
+			v1, v2 = tostringlist(v1), tostringlist(v2)
+				
+			def logDiffLine(line):
+				if line.startswith('-'): extra = BaseLogFormatter.tag(LOG_DIFF_REMOVED)
+				elif line.startswith('+'): extra = BaseLogFormatter.tag(LOG_DIFF_ADDED)
+				elif line.startswith('?'): extra, line = BaseLogFormatter.tag(LOG_FAILURES), ' '+line[1:] # e.g. ++++/---- pointers
+				else: extra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
+				logFunction(u'  %s', line.rstrip('\r\n'), extra=extra)
+			
+			# nb: since usually expected comes after actual, show actual (v1) as the delta from v2 (expected)
+			for line in difflib.ndiff(v2, v1, charjunk=None):
+				logDiffLine(line)
+					
+		else: 
+			# compare stringified values
+			
+			# use %s for most objects, but repr for strings (so we see the escaping) and objects where str() would make them look the same
+			v1 = u'%s'%(v1,)
+			v2 = u'%s'%(v2,)
+
+			if isstring(namedvalues[namesInUse[0]]) and ( # for strings do minimal escaping, but only if we can do it consistently for both strings
+					('\\' in repr(namedvalues[namesInUse[0]]).replace('\\\\','')) == 
+					('\\' in repr(namedvalues[namesInUse[1]]).replace('\\\\','')) ):
+				v1 = quotestring(namedvalues[namesInUse[0]])
+				v2 = quotestring(namedvalues[namesInUse[1]])
+			elif v1==v2 or isstring(namedvalues[namesInUse[0]]):
+				v1 = u'%r'%(namedvalues[namesInUse[0]],)
+				v2 = u'%r'%(namedvalues[namesInUse[1]],)
+			
+			seq = difflib.SequenceMatcher(None, v1, v2, autojunk=False)
+			
+			matches = seq.get_matching_blocks()
+			lastmatch = matches[-1] if len(matches)==2 else matches[-2] # may be of zero size
+			
+			# Find values of ijk such that vN[iN:jN] is a matching prefix and vN[kN:] is a matching suffix
+			# Colouring will be red, white(first match, if any), red, white(last match, if any)
+			ijk = []
+			for v in [0,1]:
+				ijk.append([
+					matches[0][v], # i - start of first matching block
+					matches[0][v]+matches[0].size, # j - end of first matching block
+					lastmatch[v] + (0 if lastmatch.size+lastmatch[v] == len([v1,v2][v]) else lastmatch.size) # k - start of final matching block
+				])
+			i1, j1, k1 = ijk[0]
+			i2, j2, k2 = ijk[1]
+			
+			# for some cases such as "XXXyyyXXX", "ZZZyyyZZZ" the above gives only the quotes as matching which is useless, so 
+			# heuristically we'll do better with a longest substring match; compare number of matching chars to decide
+			longestblock = seq.find_longest_match(0, len(v1), 0, len(v2))
+			if (j1-i1) + (len(v1)-k1) < longestblock.size:
+				log.debug('Using longest match %s rather than block matching %s', longestblock, matches)
+				ijk = [
+					# v1 ijk
+					[longestblock.a, longestblock.a+longestblock.size, len(v1)],
+					#v2
+					[longestblock.b, longestblock.b+longestblock.size, len(v2)],
+				]
+				
+
+			for (index, key) in enumerate(namesInUse):
+				value = [v1,v2][index]
+				i, j, k = ijk[index]
+				#self.logFunction(u'  %{pad}s: %s__%s__%s__%s'.format(pad=pad), key, 
+				logFunction(u'  %{pad}s: %s%s%s%s'.format(pad=pad), key, 
+					value[:i], value[i:j], value[j:k], value[k:], # red - i:white (common prefix) - j:red - k:white (common suffix)
+					extra=BaseLogFormatter.tag(LOG_FAILURES, arg_index=[1,3]))
+			if j1==j2: # if there's a common prefix, show where it ends
+				logFunction(u'  %{pad}s %s ^'.format(pad=pad), '', ' '*j1, extra=BaseLogFormatter.tag(LOG_FAILURES))
 
 	def assertTrue(self, expr, abortOnError=False, assertMessage=None):
 		"""Perform a validation assert on the supplied expression evaluating to true.
@@ -823,7 +912,7 @@ class BaseTest(ProcessUser):
 			if line.startswith('-'): extra = BaseLogFormatter.tag(LOG_DIFF_REMOVED)
 			elif line.startswith('+'): extra = BaseLogFormatter.tag(LOG_DIFF_ADDED)
 			else: extra = BaseLogFormatter.tag(LOG_FILE_CONTENTS)
-			self.log.info(u'  %s', line, extra=extra)
+			self.__assertDetailLogger.info(u'  %s', line, extra=extra)
 
 		try:
 			for i in [0, 1]:
@@ -944,7 +1033,7 @@ class BaseTest(ProcessUser):
 		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
 		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
-		use `assertThatGrep` instead of this function, as assertThatGrep can produce better message on failure, and 
+		use `assertThatGrep` instead of this function, as assertThatGrep can produce better messages on failure, and 
 		also allows for more powerful matching using a full Python expression 
 		(e.g. numeric range checks, pre-processing strings to normalize case, etc). 
 
@@ -959,8 +1048,15 @@ class BaseTest(ProcessUser):
 		For example::
 		
 			self.assertGrep('myserver.log', expr=r' ERROR .*', contains=False)
+
+			# If error messages may be accompanied by stack traces you can use a mapper to join them into the same line 
+			# so if your test fails, the outcome reason includes all the information. This also allows ignoring errors 
+			# based on the stack trace:
+			self.assertGrep('myserver.log', expr=r' (ERROR|FATAL) .*', contains=False, 
+				mappers=[pysys.mappers.JoinLines.JavaStackTrace()], 	
+				ignores=['Caused by: java.lang.RuntimeError: My expected exception'])
 			
-			# in Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:
+			# In Python 3+, f-Strings can be used to substitute in parameters, including in-line escaping of regex literals:
 			self.assertGrep('myserver.log', expr=f'Successfully authenticated user "{re.escape(username)}" in .* seconds[.]')
 			
 			# If you need to use \ characters use a raw r'...' string to avoid the need for Python \ escaping in 
@@ -1016,12 +1112,15 @@ class BaseTest(ProcessUser):
 		:param bool contains: Boolean flag to specify if the expression should or should not be seen in the file.
 		
 		:param list[str] ignores: Optional list of regular expressions that will be 
-			ignored when reading the file. 
+			ignored when reading the file. Ignore expressions are applied *after* any mappers. 
 		
 		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
 			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
 			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
-			provides the ability to filter in/out sections of a file. 
+			provides the ability to filter in/out sections of a file and `pysys.mappers.JoinLines` can combine related 
+			error lines such as stack trace to provide all the information in the test outcome reason. 
+			
+			Mappers must always preserve the final ``\\n`` of each line (if present). 
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 			
@@ -1091,7 +1190,11 @@ class BaseTest(ProcessUser):
 		try:
 			compiled = re.compile(expr, flags=reFlags)
 			namedGroupsMode = compiled.groupindex
-			result = filegrep(f, expr, ignores=ignores, returnMatch=True, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
+			
+			result = getmatches(f, expr, ignores=ignores, returnFirstOnly=(contains==True), encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
+			if not contains:
+				matchcount = len(result)
+				result = None if matchcount==0 else result[0]
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
@@ -1113,8 +1216,9 @@ class BaseTest(ProcessUser):
 					msg = 'Grep on %s contains %s'%(file, quotestring(expr))
 					if mappers: msg += ', using mappers %s'%mappers
 				else:
-					msg = 'Grep on %s does not contain %s failed with: %s'%(file, 
+					msg = 'Grep on %s does not contain %s failed with%s: %s'%(file, 
 						quotestring(expr),
+						' %d matches, first is'%matchcount if matchcount>1 else '',
 						# heuristic to give best possible message; expressions ending with .* are usually 
 						# complete and help to remove timestamps etc from the start so best to return match only; if user didn't do 
 						# that they probably haven't thought much about it and returning the entire match string 
@@ -1292,7 +1396,7 @@ class BaseTest(ProcessUser):
 
 	
 	def assertLineCount(self, file, _expr='', _unused=None, condition=">=1", ignores=None, encoding=None, 
-			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None):
+			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None, mappers=[]):
 		"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
@@ -1303,10 +1407,22 @@ class BaseTest(ProcessUser):
 		:param filedir: The dirname of the file (defaults to the testcase output subdirectory)
 		:param expr: The regular expression string used to match a line of the input file
 		:param condition: The condition to be met for the number of lines matching the regular expression
-		:param ignores: A list of regular expressions that will cause lines to be excluded from the count
+		:param ignores: A list of regular expressions that will cause lines to be excluded from the count.
+			Ignore expressions are applied *after* any mappers. 
 		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 
 			to the L{getDefaultFileEncoding()} method. 
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file and `pysys.mappers.JoinLines` can combine related 
+			error lines such as stack trace to provide all the information in the test outcome reason. 
+			
+			Mappers must always preserve the final ``\\n`` of each line (if present). 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+			Added in PySys 1.6.2.
 
 		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 
@@ -1333,7 +1449,13 @@ class BaseTest(ProcessUser):
 		f = os.path.join(filedir, file)
 
 		try:
-			numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
+			if condition.replace(' ','') in ['==0', '<=0']:
+				m = getmatches(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
+				numberLines = len(m)
+				firstMatch = (m[0] if len(m)>0 else None)
+			else:
+				numberLines = linecount(f, expr, ignores=ignores, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags, mappers=mappers)
+				firstMatch = None
 			log.debug("Number of matching lines in %s is %d", f, numberLines)
 		except Exception:
 			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
@@ -1345,7 +1467,10 @@ class BaseTest(ProcessUser):
 				self.addOutcome(PASSED, msg)
 				return True
 			else:
-				msg = assertMessage or ('Line count on %s for %s%s (actual =%d) '%(file, quotestring(expr), condition, numberLines))
+				msg = assertMessage or ('Line count on %s for %s expected %s but got %d%s'%(file, quotestring(expr), condition.strip(), numberLines, 
+					('; first is: '+quotestring( # special handling for condition==0, to match assertGrep(..., contains=False)
+							(firstMatch.group(0) if expr.endswith('*') else firstMatch.string).rstrip('\n\r') # see assertGrep
+					)) if firstMatch else ''))
 				self.addOutcome(FAILED, msg, abortOnError=abortOnError)
 		return False
 
@@ -1462,7 +1587,7 @@ class BaseTest(ProcessUser):
 			
 			failures = []
 			lines = [] # accumulate each test
-			with openfile(os.path.join(self.output, output), encoding=locale.getpreferredencoding()) as f:
+			with openfile(os.path.join(self.output, output), encoding=PREFERRED_ENCODING) as f:
 				for line in f:
 					line = line.rstrip()
 					if line=='Trying:': # start of a new one, end of previous one

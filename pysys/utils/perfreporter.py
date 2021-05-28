@@ -179,7 +179,7 @@ class CSVPerformanceReporter(object):
 			.replace('@TESTID@', testobj.descriptor.id)
 		
 		assert summaryfile, repr(getRunSummaryFile) # must not be empty
-		summaryfile = os.path.join(self.runner.output+'/..', summaryfile)
+		summaryfile = os.path.normpath(os.path.join(self.runner.output+'/..', summaryfile))
 		return summaryfile
 
 	def getRunHeader(self):

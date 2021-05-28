@@ -29,6 +29,8 @@ import collections
 import platform
 import shlex
 import warnings
+import difflib
+import importlib
 
 if sys.version_info[0] == 2:
 	from StringIO import StringIO
@@ -41,7 +43,6 @@ import pysys
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.threadpool import *
-from pysys.utils.loader import import_module
 from pysys.utils.fileutils import mkdir, deletedir, toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.basetest import BaseTest
 from pysys.process.user import ProcessUser
@@ -172,6 +173,9 @@ class BaseRunner(ProcessUser):
 	:ivar list[object] ~.runnerPlugins: A list of any plugin instances configured for this runner. This allows plugins 
 		to access the functionality of other plugins if needed (for example looking them up by type in this list). 
 
+	:ivar pysys.baserunner.BaseRunner self.runner: Identical to self. Included so that you can write ``self.runner``
+		to get a reference to the runner whether self is a BaseTest object or already a BaseRunner object.
+
 	Additional variables that affect only the behaviour of a single method are documented in the associated method. 
 
 	There is also a field for any runner plugins that were configured with an "alias" (see above). 
@@ -185,6 +189,7 @@ class BaseRunner(ProcessUser):
 		pysys.utils.allocport.initializePortPool()
 
 		ProcessUser.__init__(self)
+		self.runner = self
 
 		# Set a sensible default output dir for the runner. Many projects do not actually write 
 		# any per-runner files so we do not create (or clean) this path automatically, it's up to 
@@ -219,7 +224,7 @@ class BaseRunner(ProcessUser):
 		if len(descriptors)*cycle == 1: self.threads = 1
 		log.info('Running {numDescriptors:,} tests with {threads} threads using PySys {pysysVersion} in Python {pythonVersion} and encoding {encoding}\n'.format(
 			numDescriptors=len(self.descriptors), threads=self.threads, pysysVersion=pysys.__version__, pythonVersion='%s.%s.%s'%
-			sys.version_info[0:3], encoding=locale.getpreferredencoding()))
+			sys.version_info[0:3], encoding=PREFERRED_ENCODING))
 		self.writers = []
 		summarywriters = []
 		progresswriters = []
@@ -331,8 +336,8 @@ class BaseRunner(ProcessUser):
 			try:
 				vcsProcess = subprocess.Popen(commitCmd, cwd=self.project.testRootDir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				(stdoutdata, stderrdata) = vcsProcess.communicate()
-				stdoutdata = stdoutdata.decode(locale.getpreferredencoding(), errors='replace')
-				stderrdata = stderrdata.decode(locale.getpreferredencoding(), errors='replace')
+				stdoutdata = stdoutdata.decode(PREFERRED_ENCODING, errors='replace')
+				stderrdata = stderrdata.decode(PREFERRED_ENCODING, errors='replace')
 				if vcsProcess.returncode != 0:
 					raise Exception('Process failed with %d: %s'%(vcsProcess.returncode, stderrdata.strip() or stdoutdata.strip() or '<no output>'))
 				
@@ -545,7 +550,7 @@ class BaseRunner(ProcessUser):
 					self.log.warning('This test is printing to stdout; it is recommended to use self.log.info(...) instead of print() within PySys tests: \n%s', ''.join(traceback.format_stack()))
 				# heuristic for coping with \n happening in a separate write to the message - ignore first newline after a non-newline
 				if s!='\n' or self.last=='\n': 
-					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or locale.getpreferredencoding(), errors='replace')
+					if isinstance(s, binary_type): s = s.decode(sys.stdout.encoding or PREFERRED_ENCODING, errors='replace')
 					self.log.info(s.rstrip())
 				self.last = s
 			def __getattr__(self, name): return getattr(self.__origStdout, name)
@@ -636,7 +641,7 @@ class BaseRunner(ProcessUser):
 								if singleThreadStdoutDisable: pysysLogHandler.setLogHandlersForCurrentThread([stdoutHandler])
 							self.containerCallback(threading.current_thread().ident, singleThreadedResult)
 				except KeyboardInterrupt:
-					log.info("test interrupt from keyboard")
+					sys.stderr.write("Keyboard interrupt detected... \n")
 					self.handleKbrdInt()
 				
 				if not concurrentcycles:
@@ -644,7 +649,7 @@ class BaseRunner(ProcessUser):
 						try:
 							threadPool.wait()
 						except KeyboardInterrupt:
-							log.info("test interrupt from keyboard - joining threads ... ")
+							sys.stderr.write("Keyboard interrupt detected during multi-threaded test execution; waiting for running threads to terminate before beginning cleanup... \n")
 							threadPool.dismissWorkers(self.threads, True)
 							self.handleKbrdInt(prompt=False)
 		
@@ -652,7 +657,7 @@ class BaseRunner(ProcessUser):
 					try:
 						self.cycleComplete()
 					except KeyboardInterrupt:
-						log.info("test interrupt from keyboard")
+						sys.stderr.write("Keyboard interrupt detected while running cycleComplete... \n")
 						self.handleKbrdInt()
 					except:
 						log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
@@ -703,15 +708,24 @@ class BaseRunner(ProcessUser):
 				log.warn("Caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
+		pysys.utils.allocport.logPortAllocationStats()
+
 		if self.__pythonWarnings:
 			log.warn('Python reported %d warnings during execution of tests; is is recommended to do a test run with -Werror and fix them if possible, or filter them out if not (see Python\'s warnings module for details)', self.__pythonWarnings)
 
 		fatalerrors = self.runnerErrors+fatalerrors
-		
+
 		if self._initialEnviron != os.environ:
+			log.warn('os.environ has changed while tests were running: \n%s', 
+				''.join(difflib.unified_diff(
+					['%s=%s\n'%(k,v) for (k,v) in sorted(self._initialEnviron.items())], 
+					['%s=%s\n'%(k,v) for (k,v) in sorted(os.environ.items())], 
+					'original os.environ', 
+					'changed to'
+				)))
 			fatalerrors.append('Some test has changed the global os.environ of this PySys process; this is extremely unsafe while tests are running')
 		if self._initialCwd != os.getcwd():
-			fatalerrors.append('Some test has changed the working directory of this PySys process (e.g. with os.chdir()); this is extremely unsafe while tests are running')
+			fatalerrors.append('Some test has changed the working directory of this PySys process (e.g. with os.chdir()) to "%s"; this is extremely unsafe while tests are running'%os.getcwd())
 
 		if fatalerrors:
 			# these are so serious we need to make sure the user notices by returning a failure exit code
@@ -885,32 +899,43 @@ class BaseRunner(ProcessUser):
 			prompt = False
 		
 		def finish():
-			# perform cleanup on the test writers - this also takes care of logging summary results
-			for writer in self.writers:
-				try: writer.cleanup()
-				except Exception: log.warn("caught %s cleaning up writer %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
-			del self.writers[:]
+			self.log.info('Performing runner cleanup after keyboard interrupt')
+			
 			try:
-				self.cycleComplete()
-				self.cleanup()
-			except Exception: 
-				log.warn("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
-			sys.exit(1)
+				# perform cleanup on the test writers - this also takes care of logging summary results
+				# this is a stipped down
+				with self.__resultWritingLock:
+					for writer in self.writers:
+						try: 
+							writer.cleanup()
+						except Exception as ex: 
+							log.warn("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+					del self.writers[:]
+				
+				try:
+					self.cycleComplete()
+					self.cleanup()
+				except Exception: 
+					log.warn("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			except KeyboardInterrupt:
+				log.warn("Keyboard interrupted detected during cleanup; will exit immediately")
+			sys.exit(100) # keyboard interrupt
 
 		try:
 			if not prompt:
-				print("Keyboard interrupt detected, exiting ... ")
+				sys.stderr.write("\nKeyboard interrupt detected, exiting ... \n")
 				finish()
 
 			while 1:
-				sys.stdout.write("\nKeyboard interrupt detected, continue running tests? [yes|no] ... ")
+				sys.stderr.write("\nKeyboard interrupt detected, continue running remaining tests? [yes|no] ... ")
 				line = sys.stdin.readline().strip()
 				if line == "y" or line == "yes":
-					break
+					self.log.info('Keyboard interrupt detected; will try to continue running remaining tests')
+					return
 				elif line == "n" or line == "no":
 					finish()
 		except KeyboardInterrupt:
-			self.handleKbrdInt(prompt)
+			self.handleKbrdInt(prompt=False) # don't prompt the second time
 
 	def logTestHeader(self, descriptor, cycle, **kwargs):
 		"""
@@ -960,7 +985,7 @@ class BaseRunner(ProcessUser):
 			# add a stack trace as otherwise it's not easy to see where in run.py the problem originated, as the 
 			# warning is usually logged from as shared base class
 			msg = '%s\n%s'%(msg.strip(), ''.join(traceback.format_stack()))
-			warningLogger.warn('Python reported a warning: %s', msg)
+			warningLogger.warning('Python reported a warning: %s', msg)
 			
 		warnings.showwarning = handlePythonWarning
 		
@@ -1062,7 +1087,7 @@ class TestContainer(object):
 				initialOutputFiles = os.listdir(toLongPathSafe(self.outsubdir))
 
 				# run.log handler
-				runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or locale.getpreferredencoding()
+				runLogEncoding = self.runner.getDefaultFileEncoding('run.log') or PREFERRED_ENCODING
 				self.testFileHandlerRunLog = logging.StreamHandler(_UnicodeSafeStreamWrapper(
 					io.open(toLongPathSafe(os.path.join(self.outsubdir, 'run.log')), 'a', encoding=runLogEncoding), 
 					writebytes=False, encoding=runLogEncoding))
@@ -1090,15 +1115,21 @@ class TestContainer(object):
 			with global_lock:
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 				try:
-					if not self.descriptor.module.endswith('.py'): self.descriptor.module += '.py'
-					runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module)
-					with open(toLongPathSafe(runpypath), 'rb') as runpyfile:
-						runpycode = compile(runpyfile.read(), runpypath, 'exec')
-					runpy_namespace = {}
-					exec(runpycode, runpy_namespace)
 					outsubdir = self.outsubdir
-					self.testObj = runpy_namespace[self.descriptor.classname](self.descriptor, outsubdir, self.runner)
-					del runpy_namespace
+					if not self.descriptor.module: # get a shared test class from the sys.path
+						classname = self.descriptor.classname.split('.')
+						assert len(classname)>1, 'Please specify a fully qualified classname (e.g. mymodule.classname): %s'%self.descriptor.classname
+						module_name, classname = '.'.join(classname[:-1]), classname[-1]
+						clazz = getattr(importlib.import_module(module_name), classname)
+					else:
+						runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module)
+						with open(toLongPathSafe(runpypath), 'rb') as runpyfile:
+							runpycode = compile(runpyfile.read(), runpypath, 'exec')
+						runpy_namespace = {}
+						exec(runpycode, runpy_namespace)
+						clazz = runpy_namespace[self.descriptor.classname]
+						del runpy_namespace
+					self.testObj = clazz(self.descriptor, outsubdir, self.runner)
 					
 					self.testObj.testPlugins = []
 					for pluginClass, pluginAlias, pluginProperties in self.runner.project.testPlugins:
@@ -1179,7 +1210,7 @@ class TestContainer(object):
 			except Exception:
 				log.warn("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
-		
+
 			# call the cleanup method to tear down the test
 			try:
 				log.debug('--- test cleanup')
@@ -1200,8 +1231,8 @@ class TestContainer(object):
 			if self.runner._initialEnviron != os.environ:
 				self.testObj.addOutcome(BLOCKED, 'The global os.environ of this PySys process has changed while this test was running; this is extremely unsafe', override=True)
 			if self.runner._initialCwd != os.getcwd():
-				self.testObj.addOutcome(BLOCKED, 'The working directory of this PySys process has changed while this test was running (os.chdir()); this is extremely unsafe', override=True)
-		
+				self.testObj.addOutcome(BLOCKED, 'The working directory of this PySys process was changed to "%s" while this test was running (os.chdir()); this is extremely unsafe'%os.getcwd(), override=True)
+
 			# print summary and close file handles
 			self.testTime = math.floor(100*(time.time() - self.testStart))/100.0
 			log.info("")

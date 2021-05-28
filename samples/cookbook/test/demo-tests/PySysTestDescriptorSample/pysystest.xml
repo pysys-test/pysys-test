@@ -50,18 +50,36 @@
 	<execution-order hint="+100.0"/>
 	
 	<data>
-		<!-- By convention the test class is in a module called "run.py" in this directory, but 
-		it is possible to use a different name, or to specify an absolute path if you want to use the same 
-		Python class for lots of tests. -->
+		<!-- By convention the test class uses module="run.py" located in the test directory, but 
+		it is possible to use a different path (even an absolute path). If you want to use a single 
+		Python class for lots of tests rather, omit the module= attribute and make sure it's available 
+		on the project's <pythonpath> . 
+		-->
 		<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
 
-		<!-- You can customize the Input/Output/Reference directory names if you wish. -->
+		<!-- You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute 
+		paths if needed). -->
 		<output path="MyOutput"/>
 		<input path="${testRootDir}/pysys-extensions/my_shared_input_files"/>
 		<reference path="MyReference"/>
 		
-		<!-- The ability to add user-defined data to the test descriptor is mostly useful -->
+		<!-- The ability to add user-defined data to the test descriptor is mostly useful when using a 
+		shared Python class for lots of tests. 
+		
+		Project properties (but not other user-data values) can be substituted into the value using ${...}, 
+		and ${eval: xxx} syntax can be used to evaluate some Python code (with project properties as Python variables). 
+		-->
 		<user-data name="myTestDescriptorData" value="foobar"/>
+		
+		<!-- For long values such as paths the value can be specified in a text (or CDATA) node, and if the 
+		value is to be converted to a list, newline and/or comma can be used as delimiters. -->
+		<user-data name="myTestDescriptorPath">
+			foo/foo-${os_myThirdPartyLibraryVersion}
+			foo/bar, foo/baz
+			<!-- Comments and whitespace are ignored when converting a string to a list. -->
+			foo/bosh
+		</user-data>
+
 	</data>
 	
 	<traceability>

@@ -47,9 +47,9 @@ class MyServerTestPlugin(object):
 		"""
 		Asserts that the specified log file does not contain any errors. 
 		"""
-		self.owner.assertGrep(logfile, ' (ERROR|FATAL) .*', contains=False, 
-			ignores=ignores or ['ERROR .*Expected error'])
-	
+		self.owner.assertGrep(logfile, r'( ERROR | FATAL |Traceback [(]most recent call last[)]).*', contains=False, 
+			ignores=ignores or ['ERROR .*Expected error'], mappers=[pysys.mappers.JoinLines.PythonTraceback()])
+
 	def startServer(self, name="my_server", arguments=[], waitForServerUp=True, **kwargs):
 		"""
 		Start this server as a background process on a dynamically assigned free port, and wait for it to come up. 

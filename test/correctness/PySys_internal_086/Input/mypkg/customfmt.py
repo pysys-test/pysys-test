@@ -1,5 +1,6 @@
 from pysys.utils.logutils import ColorLogFormatter
 from pysys import stdoutHandler
+import pysys.constants
 import logging, os, sys, locale
 
 # purely a hack to allow us to patch getpreferredencoding() before the coloring initializes (and before runner starts opening run.log files etc)
@@ -10,6 +11,7 @@ if os.getenv('LANG','') and 'win' in sys.platform:
 	def customized_getpreferredencoding(do_setlocale=True): 
 		return encodingoverride
 	locale.getpreferredencoding = customized_getpreferredencoding 
+	pysys.constants.PREFERRED_ENCODING = locale.getpreferredencoding()
 	sys.stdout.write('HACKED preferred encoding to: %s\n'%locale.getpreferredencoding())
 	
 	# in case coloring is not enabled we need this to explicitly re-execute the logic in _UnicodeSafeStreamWrapper that decides the encoding

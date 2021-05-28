@@ -13,7 +13,7 @@ class PySysTest(BaseTest):
 		f.join(1) # will fail cos we didn't ask it to stop. but it should now be asked to terminate
 		
 		f.join(timeout=30, abortOnError=True) # should succeed since the above will have implicitly cancelled it
-		self.assertTrue(not f.isAlive(), assertMessage='MethodThread is no longer alive')
+		self.assertTrue(not f.is_alive(), assertMessage='MethodThread is no longer alive')
 		
 		self.log.info('End of execute()')
 

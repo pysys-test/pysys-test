@@ -34,9 +34,10 @@ from pysys.utils.logutils import BaseLogFormatter, stripANSIEscapeCodes
 from pysys.xml.project import Project
 from pysys.process.helper import ProcessWrapper
 from pysys.utils.allocport import TCPPortOwner
-from pysys.utils.fileutils import mkdir, deletedir, pathexists, toLongPathSafe, fromLongPathSafe
+from pysys.utils.fileutils import mkdir, deletedir, deletefile, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
 import pysys.internal.safe_eval
+from pysys.mappers import applyMappers
 
 if IS_WINDOWS:
 	import win32api, win32con
@@ -291,7 +292,8 @@ class ProcessUser(object):
 			Added info parameter. 
 
 		:param str command: The path to the executable to be launched (should include the full path)
-		:param list[str] arguments: A list of arguments to pass to the command
+		:param list[str] arguments: A list of arguments to pass to the command. Any non-string values in the list are 
+			converted to strings automatically. 
 		
 		:param dict(str,str) environs: A dictionary specifying the environment to run the process in. 
 			If a None or empty dictionary is passed, L{getDefaultEnvirons} will be invoked to 
@@ -546,7 +548,7 @@ class ProcessUser(object):
 
 		for k, v in self.project.properties.items():
 			if k.startswith('defaultEnvirons.') and v:
-				e[k[k.find('.'):]] = v
+				e[k[k.find('.')+1:]] = v
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location; set to blank to do nothing
 		if self.project.getProperty('defaultEnvironsTempDir',''):
@@ -851,7 +853,7 @@ class ProcessUser(object):
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
-			given by locale.getpreferredencoding(). 
+			given by PREFERRED_ENCODING. 
 		:param bool addNewLine: True if a new line character is to be added to the end of the data string
 
 		"""
@@ -992,7 +994,7 @@ class ProcessUser(object):
 			
 	def waitForGrep(self, file, expr="", condition=">=1", timeout=TIMEOUTS['WaitForSignal'], poll=0.25, 
 			ignores=[], process=None, errorExpr=[], errorIf=None, abortOnError=None, encoding=None, detailMessage='', filedir=None, 
-			reFlags=0, mappers=[]):
+			reFlags=0, mappers=[], quiet=False):
 		"""Wait for a regular expression line to be seen (one or more times) in a text file in the output 
 		directory (waitForGrep was formerly known as `waitForSignal`).
 		
@@ -1090,6 +1092,9 @@ class ProcessUser(object):
 			
 		:param str filedir: Can be used to provide a directory name to add to the beginning of the ``file`` parameter; 
 			however usually it is clearer just to specify that directory in the ``file``.
+		
+		:param bool quiet: Set this to true to suppress INFO-level logging, which can be useful when you wish to 
+			print your own progress message in a more high-level fashion. 
 
 		:return list[re.Match]: Usually this returns a list of ``re.Match`` objects found for the ``expr``, or an 
 			empty list if there was no match.
@@ -1120,10 +1125,12 @@ class ProcessUser(object):
 
 		log.debug("Performing wait for grep signal %s %s in file %s with ignores %s", expr, condition, f, ignores)
 		
+		loginfo = (log.debug if quiet else log.info)
+		
 		verboseWaitForSignal = self.getBoolProperty('verboseWaitForSignal', True) and self.getBoolProperty('verboseWaitForGrep', True)
 		if verboseWaitForSignal: 
 			# if verbose, log when starting (which is very helpful for debugging hangs); non-verbose users get the message only when it's done
-			log.info('%s%s', msg, '; timeout=%ss'%timeout if timeout!=TIMEOUTS['WaitForSignal'] else '')
+			loginfo('%s%s', msg, '; timeout=%ss'%timeout if timeout!=TIMEOUTS['WaitForSignal'] else '')
 		
 		encoding = encoding or self.getDefaultFileEncoding(f)
 		
@@ -1143,10 +1150,10 @@ class ProcessUser(object):
 					# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time
 					# (this helps people debug tests that sometimes timeout and sometimes "nearly" timeout)
 					if verboseWaitForSignal:
-						(log.info if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
+						(loginfo if timetaken > 30 else log.debug)("   ... found %d matches in %ss", len(matches), int(timetaken))
 					else:
 						# We use the phrase "grep signal" to avoid misleading anyone, whether people used waitForGrep or the older waitForSignal
-						log.info("Wait for grep signal in %s completed successfully", file)
+						loginfo("Wait for grep signal in %s completed successfully", file)
 					break
 				
 				if errorExpr:
@@ -1312,7 +1319,9 @@ class ProcessUser(object):
 			if (old == NOTVERIFIED and not self.__outcomeReason): old = None
 			self.outcome.append(outcome)
 
-			if callRecord==None: callRecord = self.__callRecord()
+			# only bother populating the callrecord (which is a bit costly) when there's a failure
+			if outcome.isFailure() and callRecord is None: callRecord = self.__callRecord()
+			
 			def parseLocation(cr):
 				if not cr or ':' not in cr: return None
 				return cr[:cr.rfind(':')], cr[cr.rfind(':')+1:]
@@ -1339,7 +1348,7 @@ class ProcessUser(object):
 
 			if outcomeReason and printReason:
 				if outcome.isFailure():
-					log.warn(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(
+					log.warning(u'%s ... %s %s', outcomeReason, str(outcome).lower(), u'[%s]'%','.join(
 						u'%s:%s'%(os.path.basename(loc[0]), loc[1]) for loc in map(parseLocation,callRecord)) if callRecord!=None else u'',
 							 extra=BaseLogFormatter.tag(str(outcome).lower(),1))
 				else:
@@ -1447,12 +1456,13 @@ class ProcessUser(object):
 		stack=[]
 		from pysys.basetest import BaseTest
 		if isinstance(self, BaseTest):
+			testmodule = os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] if self.descriptor.module else None
 			for record in inspect.stack():
 				info = inspect.getframeinfo(record[0])
 				if (self.__skipFrame(info.filename, ProcessUser) ): continue
 				if (self.__skipFrame(info.filename, BaseTest) ): continue
 				stack.append( '%s:%s' % (info.filename.strip(), info.lineno) )
-				if (os.path.splitext(info.filename)[0] == os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] and (info.function == 'execute' or info.function == 'validate')): return stack
+				if (testmodule is None or os.path.splitext(info.filename)[0] == testmodule) and (info.function in ['execute', 'validate']): return stack
 		return None
 
 
@@ -1542,15 +1552,9 @@ class ProcessUser(object):
 		
 		path = os.path.join(self.output, path)
 
-		if None in mappers: mappers = [m for m in mappers if m]
-
 		with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
 			matches = []
-			for l in f:
-				for mapper in mappers:
-					l = mapper(l)
-					if l is None: break
-				if l is None: continue
+			for l in applyMappers(f, mappers):
 			
 				match = compiled.search(l)
 				if not match: continue
@@ -1574,7 +1578,7 @@ class ProcessUser(object):
 
 
 	def logFileContents(self, path, includes=None, excludes=None, maxLines=20, tail=False, encoding=None, 
-			logFunction=None, reFlags=0, stripWhitespace=True):
+			logFunction=None, reFlags=0, stripWhitespace=True, mappers=[]):
 		""" Logs some or all of the lines from the specified file.
 		
 		If the file does not exist or cannot be opened, does nothing. The method is useful for providing key
@@ -1591,7 +1595,16 @@ class ProcessUser(object):
 			log some unimportant text to stderr (or stdout) that would be distracting to log out. 
 			
 			Added in PySys 1.6.0. 
-		
+			
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+
+			Added in PySys 1.6.2. 
+
 		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
 		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'.
 		
@@ -1612,6 +1625,9 @@ class ProcessUser(object):
 			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
 			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
 
+		:param bool stripWhitespace: By default blank lines are removed; set this to False to disable that behaviour. 
+			Added in PySys 1.6.2. 
+
 		:return: True if anything was logged, False if not.
 		
 		"""
@@ -1620,7 +1636,7 @@ class ProcessUser(object):
 		actualpath= os.path.join(self.output, path)
 		try:
 			# always open with a specific encoding not in bytes mode, since otherwise we can't reliably pass the read lines to the logger
-			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath) or locale.getpreferredencoding(), errors='replace')
+			f = openfile(actualpath, 'r', encoding=encoding or self.getDefaultFileEncoding(actualpath) or PREFERRED_ENCODING, errors='replace')
 		except Exception as e:
 			self.log.debug('logFileContents cannot open file "%s": %s', actualpath, e)
 			return False
@@ -1634,10 +1650,13 @@ class ProcessUser(object):
 				return None
 			
 			tolog = []
+
+			for l in applyMappers(f, mappers):
 			
-			for l in f:
-				l = l.rstrip()
-				if not l: continue
+				if stripWhitespace:
+					l = l.rstrip()
+					if len(l) == 0: continue
+				
 				if includes:
 					l = matchesany(l, includes)
 					if not l: continue
@@ -1696,10 +1715,24 @@ class ProcessUser(object):
 		:param path: The path to be deleted. This can be an absolute path or 
 			relative to the testcase output directory.
 		
-		:param kwargs: Any additional arguments are passed to 
+		:param kwargs: Any additional arguments such as ``retries`` and ``ignore_errors`` are passed to 
 			L{pysys.utils.fileutils.deletedir()}. 
 		"""
-		deletedir(os.path.join(self.output, path), **kwargs)
+		return deletedir(os.path.join(self.output, path), **kwargs)
+
+	def deleteFile(self, path, **kwargs):
+		"""
+		Delete the specified file, with optional retries and ignoring of errors. 
+		
+		Does nothing if it does not exist. Raises an exception if the deletion fails. 
+		
+		:param path: The path to be deleted. This can be an absolute path or 
+			relative to the testcase output directory.
+		
+		:param kwargs: Any additional arguments such as ``retries`` and ``ignore_errors`` are passed to 
+			L{pysys.utils.fileutils.deletefile()}. 
+		"""
+		return deletefile(os.path.join(self.output, path), **kwargs)
 		
 	def getDefaultFileEncoding(self, file, **xargs):
 		"""
@@ -1722,9 +1755,8 @@ class ProcessUser(object):
 			<default-file-encoding pattern="*.xml" encoding="utf-8"/>
 		
 		A return value of None indicates default behaviour, which on Python 3 is to 
-		use the default encoding, as specified by python's 
-		``locale.getpreferredencoding()``, and on Python 2 is to use binary ``str`` 
-		objects with no character encoding or decoding applied. 
+		use the default OS encoding, as specified by `pysys.constants.PREFERRED_ENCODING`, 
+		and on Python 2 is to use binary ``str`` objects with no character encoding or decoding applied. 
 		
 		:param file: The filename to be read or written. This may be an 
 			absolute path or a relative path.
@@ -1865,8 +1897,8 @@ class ProcessUser(object):
 	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
 		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
 		
-		If any mappers are provided, the file is copied in text mode and 
-		each mapper is given the chance to modify or omit each line. 
+		If any `pysys.mappers` are provided, the file is copied in text mode and 
+		each mapper is given the chance to modify or omit each line, or even reorder the lines of the file. 
 		If no mappers are provided, the file is copied in binary mode. 
 
 		For example::
@@ -1878,6 +1910,7 @@ class ProcessUser(object):
 					pysys.mappers.IncludeLinesBetween('Error message .*:', stopBefore='^$'),
 					pysys.mappers.RegexReplace(pysys.mappers.RegexReplace.DATETIME_REGEX, '<timestamp>'),
 				])
+		
 
 		In addition to the file contents the attributes such as modification time and 
 		executable permission will be copied where possible. 
@@ -1901,7 +1934,8 @@ class ProcessUser(object):
 			self.copy('src.txt', 'foo/')      # copies to outputdir/foo/src.txt since destination ends with a slash
 			self.copy('srcdirname', 'foo/')   # copies to outputdir/foo/srcdirname since destination ends with a slash
 
-		Usually custom mappers are simple functions or lambdas, however for advanced use cases you can 
+		For more information about pre-defined mappers, see `pysys.mappers`. Custom mappers can be specified as simple 
+		functions or lambdas, however for advanced use cases you can 
 		additionally provide ``mapper.fileStarted([self,] srcPath, destPath, srcFile, destFile)`` and/or  
 		``mapper.fileFinished(...)`` methods to allow stateful operations, or to perform extra read/write operations 
 		before lines are read/written. For example::
@@ -1944,9 +1978,10 @@ class ProcessUser(object):
 			in order, to map each line from source to destination. Each function accepts a string for 
 			the current line as input and returns either a string to write or 
 			None if the line is to be omitted. Any ``None`` items in the mappers list will be ignored. 
+			Mappers must always preserve the final ``\\n`` of each line (if present). 
 			
-			See `pysys.mappers` for some useful predefined mappers such as `pysys.mappers.IncludeLinesBetween` 
-			and `pysys.mappers.RegexReplace`. 
+			See `pysys.mappers` for some useful predefined mappers such as `pysys.mappers.IncludeLinesBetween`, 
+			`pysys.mappers.RegexReplace` and `pysys.mappers.SortLines`. 
 			
 			If present the ``mapper.fileStarted(...)`` and/or ``mapper.fileFinished(...)`` methods will be called on each 
 			mapper in the list at the start and end of each file; see above for an example. 
@@ -2033,11 +2068,8 @@ class ProcessUser(object):
 						fn = getattr(mapper, 'fileStarted', None)
 						if fn: fn(src, dest, srcf, destf)
 
-					for line in srcf:
-						for mapper in mappers:
-							line = mapper(line)
-							if line is None: break
-						if line is not None: destf.write(line)
+					for line in applyMappers(srcf, mappers):
+						destf.write(line)
 
 					for mapper in mappers:
 						fn = getattr(mapper, 'fileFinished', None)

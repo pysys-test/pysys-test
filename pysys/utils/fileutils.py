@@ -24,9 +24,12 @@ support for long paths on Windows. Also some simple utilities for loading proper
 import os, shutil, time, locale
 import collections
 import json
+import logging
 
-from pysys.constants import IS_WINDOWS
+from pysys.constants import IS_WINDOWS, PREFERRED_ENCODING
 from pysys.utils.pycompat import PY2, openfile
+
+log = logging.getLogger('pysys.fileutils')
 
 def toLongPathSafe(path, onlyIfNeeded=False):
 	"""
@@ -39,12 +42,16 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	letters so they are always upper case regardless of OS version and current 
 	working directory. 
 	
-	:param path: A path. Must not be a relative path. Can be None/empty. Can 
+	:param str path: A path. Must not be a relative path. Can be None/empty. Can 
 		contain ".." sequences. If possible, use a unicode character string. 
 		On Python 2, byte strings are permitted and converted using 
-		``locale.getpreferredencoding()``.
+		``PREFERRED_ENCODING``. Note that no normalization of ".." 
+		sequences and slashes is performed if the OS starts with ``\\?\`` already 
+		or is non-Windows so if in doubt run the path through ``os.path.normpath`` 
+		before calling this method on it (``\\?\`` paths with incorrect slashes or .. sequences 
+		are not permitted by Windows). 
 	
-	:param onlyIfNeeded: Set to True to only adds the long path support if this 
+	:param bool onlyIfNeeded: Set to True to only adds the long path support if this 
 		path exceeds the maximum length on this OS (e.g. 256 chars). You must keep 
 		this at False if you will be adding extra characters on to the end of the 
 		returned string. 
@@ -76,7 +83,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 			path = path.replace('\\\\','\\')
 
 	if PY2 and isinstance(path, str):
-		path = path.decode(locale.getpreferredencoding())
+		path = path.decode(PREFERRED_ENCODING)
 	
 	if path.startswith(u'\\\\'): 
 		path = u'\\\\?\\UNC\\'+path.lstrip('\\') # \\?\UNC\server\share
@@ -90,7 +97,7 @@ def fromLongPathSafe(path):
 	
 	Note that this function does not convert unicode strings back to byte 
 	strings, so if you want a complete reversal of toLongPathSafe you will 
-	additionally have to call C{result.encode(locale.getpreferredencoding())}.
+	additionally have to call C{result.encode(PREFERRED_ENCODING)}.
 	"""
 	if not path: return path
 	if not path.startswith('\\\\?\\'): return path
@@ -121,6 +128,9 @@ def mkdir(path):
 	:return: Returns the path passed in. 
 	"""
 	origpath = path
+	if '.' in path: # this avoids makedirs creating directories that should have been '..'d away
+		path = os.path.normpath(path)
+
 	path = toLongPathSafe(path, onlyIfNeeded=True)
 	try:
 		os.makedirs(path)
@@ -157,12 +167,41 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 		# then try again, being more careful
 		if os.path.exists(path) and not ignore_errors:
 			shutil.rmtree(path, onerror=onerror)
-	except Exception: # pragma: no cover
+	except Exception as ex: # pragma: no cover
 		if not os.path.exists(path): return # nothing to do
 		if retries <= 0:
 			raise
-		time.sleep(0.5) # work around windows file-locking issues
+		time.sleep(1.0) # work around windows file-locking issues
+		log.debug('Retrying directory deletion of "%s" %d times after %s', path, retries, ex)
 		deletedir(path, retries = retries-1, onerror=onerror)
+
+def deletefile(path, retries=1, ignore_errors=False):
+	"""
+	Delete the specified file, with optional retries. 
+	
+	Does nothing if it does not exist. 
+
+	:param str path: The path to be deleted. Will be converted to be long-path safe on Windows. 
+	
+	:param int retries: The number of retries to attempt. This can be useful to 
+		work around temporary failures causes by Windows file locking. 
+	
+	:param bool ignore_errors: If True, an exception is raised if the path exists but cannot be deleted. 
+	
+	"""
+	path = toLongPathSafe(path)
+	try:
+		os.remove(path)
+	except Exception as ex: # pragma: no cover
+		if not os.path.exists(path): return # nothing to do
+		if retries <= 0:
+			if ignore_errors: 
+				log.debug('Failed to delete file "%s": %s', path, ex)
+				return
+			raise
+		time.sleep(1.0) # work around windows file-locking issues
+		log.debug('Retrying file deletion of "%s" %d times after %s', path, retries, ex)
+		deletefile(path, retries = retries-1, ignore_errors=ignore_errors)
 
 def loadProperties(path, encoding='utf-8-sig'):
 	"""

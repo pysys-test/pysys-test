@@ -20,3 +20,7 @@ class PySysTest(BaseTest):
 		# so this is what's actually in the run.log
 		self.assertGrep('testoutput/NestedPass/run.log', expr=
 			r"""Waiting for '["\']Hello["\'] ' in myprocess.log (to ensure myprocess logs appropriate greetings); timeout=123.5s""", literal=True)
+
+		# This should be suppressed due to quiet=True
+		self.assertGrep('testoutput/NestedPass/run.log', expr='"Hell"', contains=False)
+

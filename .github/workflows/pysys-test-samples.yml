@@ -1,14 +1,15 @@
-# The samples are primarily tested using Travis CI, but we also run them in a GitHub workflow to check for additional 
-# issues that show up only on these VMs, and to allow manual inspection of the (expected) test failure output from the 
-# cookbook sample
+# The samples are primarily auto-tested using the main run, but we also run them here to allow manual inspection of 
+# the deliberate test failure output from the cookbook sample
 
-name: PySys samples
+name: Samples (expected to fail)
 
 on:
   push:
-    branches: [ master ]
+    branches: [ release ]
   pull_request:
-    branches: [ master ]
+    branches: [ release ]
+  workflow_dispatch: # also allow manually invoking this
+  
 
 jobs:
   test:
@@ -47,15 +48,6 @@ jobs:
         run: |
           pip install pywin32 colorama
 
-      - name: Windows TCP configuration
-        # Set the TCP dynamic/ephemeral port range on Windows back to the normal Windows default configuration
-        # (GitHub Actions currently sets *all* ports to be dynamic which leaves none to start test servers on)
-        if: runner.os == 'Windows'
-        run: |
-          netsh int ipv4 show dynamicport tcp
-          netsh int ipv4 set dynamicportrange tcp startport=49152 numberofports=16384
-          netsh int ipv6 set dynamicportrange tcp startport=49152 numberofports=16384
-
       - name: Test sample-getting-started
         working-directory: samples/getting-started/test
         shell: bash
@@ -69,17 +61,18 @@ jobs:
         id: pysys
         run: |
           PYTHONPATH=../../.. python -m pysys run --ci --outdir=cookbook-${{matrix.test-run-id}}
+
+      - name: Upload Python code coverage
+        uses: codecov/codecov-action@v1
+        # In a real configuration we would only upload coverage on success, but for test puroses we add "always()" here
+        if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
+        with:
+          file: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}/coverage.xml
         
       # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
       # Since we expect failures only from the cookbook sample, that's the one we upload artifacts for (using id=pysys)
       # The follow lines are a copy from the sample pysys workflow
 
-      - name: Upload Python code coverage
-        uses: codecov/codecov-action@v1
-        if: always() && steps.pysys.outputs.artifact_PythonCoverageDir
-        with:
-          file: test/__coverage_python.${{matrix.test-run-id}}/coverage.xml
-      
       - name: Upload performance CSV artifacts
         uses: actions/upload-artifact@v2
         # Only do this if some performance results were generated

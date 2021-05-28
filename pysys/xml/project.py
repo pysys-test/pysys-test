@@ -65,6 +65,8 @@ class _XMLProjectParser(object):
 			'hostname':HOSTNAME.lower().split('.')[0],
 			'os':platform.system().lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
 			'osfamily':OSFAMILY, # windows or unix
+			
+			'/': os.sep, # so people can write strings like foo${/}bar and get a forward or back-slash depending on platform
 
 			# old names
 			'root':self.dirname, # old name for testRootDir
@@ -134,16 +136,23 @@ class _XMLProjectParser(object):
 
 			elif propertyNode.hasAttribute("name"):
 				name = propertyNode.getAttribute("name") 
-				value = self.expandProperties(propertyNode.getAttribute("value"), default=propertyNode, name=name)
+				value = self.expandProperties(
+						propertyNode.getAttribute("value")
+						or '\n'.join(n.data for n in propertyNode.childNodes 
+							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data), 
+					default=propertyNode, name=name)
 				if name in self.properties:
 					raise UserError('Cannot set project property "%s" as it is already set'%name)
-				self.properties[name] = value
-				log.debug('Setting project property %s="%s"', name, value)
 
 				if (propertyNode.getAttribute("pathMustExist") or '').lower()=='true':
 					if not (value and os.path.exists(os.path.join(self.dirname, value))):
 						raise UserError('Cannot find path referenced in project property "%s": "%s"'%(
 							name, '' if not value else os.path.normpath(os.path.join(self.dirname, value))))
+					value = os.path.normpath(value) # since we know it's a path, make it a nice one
+
+				self.properties[name] = value
+				log.debug('Setting project property %s="%s"', name, value)
+
 				permittedAttributes = {'name', 'value', 'default', 'pathMustExist'}
 			else:
 				raise UserError('Found <property> with no name= or file=')
@@ -212,16 +221,28 @@ class _XMLProjectParser(object):
 			try:
 				if m.startswith(envprefix): 
 					return os.environ[m[len(envprefix):]]
+				if m.startswith('env:'): # for consistency with eval: also support this syntax
+					return os.environ[m[4:]]
 			except KeyError as ex:
-				raise UserError(errorprefix+'cannot find environment variable "%s"'%m[len(envprefix):])
+				raise KeyError(errorprefix+'cannot find environment variable "%s"'%m[len(envprefix):])
 			
+			if m.startswith('eval:'):
+				props = dict(self.properties)
+				props.pop('os', None) # remove this to avoid hiding the os.path module
+				props['properties'] = self.properties
+				try:
+					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props)
+					return str(v)
+				except Exception as ex:
+					raise UserError(errorprefix+'error in Python eval() string "%s": %s'%(m, ex))
+
 			if m in self.properties:
 				return self.properties[m]
 			else:
-				raise UserError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file"'%m)
+				raise KeyError(errorprefix+'PySys project property ${%s} is not defined, please check your pysysproject.xml file"'%m)
 		try:
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, value)
-		except UserError as ex:
+		except KeyError as ex:
 			if default is None: raise UserError('%s; if this is intended to be an optional property please add a default="..." value'%ex)
 			log.debug('Failed to resolve value "%s" of property "%s", so falling back to default value', value, name or '<unknown>')
 			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, default)
@@ -435,7 +456,10 @@ class _XMLProjectParser(object):
 				name = tag.getAttribute('name')
 				assert name
 				if name in optionsDict: raise UserError('Duplicate property "%s" in <%s> configuration'%(name, node.tagName))
-				optionsDict[name] = self.expandProperties(tag.getAttribute("value"), default=tag, name=name)
+				optionsDict[name] = self.expandProperties(
+					tag.getAttribute("value") or '\n'.join(n.data for n in tag.childNodes 
+							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data),
+					default=tag, name=name)
 		classname = optionsDict.pop('classname', defaultClass)
 		if not classname: raise UserError('Missing require attribute "classname=" for <%s>'%node.tagName)
 		mod = optionsDict.pop('module', '.'.join(classname.split('.')[:-1]))
@@ -580,17 +604,37 @@ class Project(object):
 		"""
 		Expand any ${...} project properties in the specified string. 
 		
-		An exception is thrown if any property is missing. This method is only for expanding project properties so 
-		``${env.*}`` syntax is not permitted (if you need to expand an environment variable, use a project property). 
+		An exception is thrown if any property is missing. This method is only for expanding project properties 
+		and ``${eval:xxx})`` strings, so ``${env.*}`` syntax is not permitted (if you need to use an environment 
+		variable, put it into a project property first). 
 		
 		.. versionadded:: 1.6.0
 		
 		:param str value: The string in which any properties will be expanded. ${$} can be used for escaping a literal $ if needed. 
 		:return str: The value with properties expanded, or None if value=None. 
 		"""
-		if not value: return value
-		return re.sub(r'[$][{]([^}]+)[}]', 
-			lambda m: '$' if m.group(1)=='$' else self.properties[m.group(1)], value)
+		if (not value) or ('${' not in value): return value
+		
+		def expandProperty(m):
+			m = m.group(1)
+			if m == '$': return '$'
+	
+			if m.startswith('eval:'):
+				props = dict(self.properties)
+				props.pop('os', None) # remove this to avoid hiding the os.path module
+				props['properties'] = self.properties
+				try:
+					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props)
+					return str(v)
+				except Exception as ex:
+					raise Exception('Error resolving ${%s} eval() string: %s'%(m, ex))
+			return self.properties[m]
+		
+		try:
+			return re.sub(r'[$][{]([^}]+)[}]', expandProperty, value)
+		except KeyError as ex:
+			# A more informative error, but not a UserError since we don't have the context of where it was called from
+			raise Exception('Cannot resolve project property %s in: %s'%(ex, value))
 
 	def getProperty(self, key, default):
 		"""
@@ -687,3 +731,5 @@ class Project(object):
 			sys.stderr.write("ERROR: Failed to load project due to %s - %s\n"%(e.__class__.__name__, e))
 			traceback.print_exc()
 			sys.exit(1)
+
+import pysys.internal.safe_eval # down here to break circular dependency

@@ -107,7 +107,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		# Creates the file handle to the logfile and logs initial details of the date, 
 		# platform and test host. 
 
-		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
+		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
 
 		self.fp = flushfile(openfile(self.logfile, "w", encoding=None if PY2 else 'utf-8'))
 		self.fp.write('DATE:       %s\n' % (time.strftime('%Y-%m-%d %H:%M:%S (%Z)', time.localtime(time.time())) ))
@@ -116,7 +116,7 @@ class TextResultsWriter(BaseRecordResultsWriter):
 		self.fp.write('\n')
 		for k, v in kwargs['runner'].runDetails.items():
 			if k in {'startTime', 'hostname'}: continue # don't duplicate the above
-			self.fp.write("%-12s%s\n"%(k+': ', v))
+			self.fp.write("%-20s%s\n"%(k+': ', v))
 
 	def cleanup(self, **kwargs):
 		# Flushes and closes the file handle to the logfile.  
@@ -163,7 +163,7 @@ class XMLResultsWriter(BaseRecordResultsWriter):
 		# Creates the DOM for the test output summary and writes to logfile. 
 						
 		self.numTests = kwargs["numTests"] if "numTests" in kwargs else 0 
-		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
+		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
 		
 		try:
 			self.fp = io.open(toLongPathSafe(self.logfile), "wb")
@@ -319,8 +319,8 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 
 	def setup(self, **kwargs):	
 		# Creates the output directory for the writing of the test summary files.  
-		self.outputDir = (os.path.join(kwargs['runner'].project.root, 'target','pysys-reports') if not self.outputDir else 
-			os.path.join(kwargs['runner'].output+'/..', self.outputDir))
+		self.outputDir = os.path.normpath((os.path.join(kwargs['runner'].project.root, 'target','pysys-reports') if not self.outputDir else 
+			os.path.join(kwargs['runner'].output+'/..', self.outputDir)))
 		deletedir(self.outputDir)
 		mkdir(self.outputDir)
 		self.cycles = kwargs.pop('cycles', 0)
@@ -350,7 +350,10 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		rootElement.setAttributeNode(attr3)
 		rootElement.setAttributeNode(attr4)
 		rootElement.setAttributeNode(attr5)
-		
+		attr = document.createAttribute('timestamp')	
+		attr.value = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime()) # use UTC/GMT like Ant does
+		rootElement.setAttributeNode(attr)
+
 		# add the testcase information
 		testcase = document.createElement('testcase')
 		attr1 = document.createAttribute('classname')
@@ -363,14 +366,18 @@ class JUnitXMLResultsWriter(BaseRecordResultsWriter):
 		# add in failure information if the test has failed
 		if (testObj.getOutcome().isFailure()):
 			failure = document.createElement('failure')
-			attr1 = document.createAttribute('message')
-			attr1.value = str(testObj.getOutcome())
-			failure.setAttributeNode(attr1)
-			failure.appendChild(document.createTextNode( testObj.getOutcomeReason() ))		
-						
+			attr = document.createAttribute('message')
+			attr.value = '%s%s'%(testObj.getOutcome(), (': %s'%testObj.getOutcomeReason()) if testObj.getOutcomeReason() else '')
+			failure.setAttributeNode(attr)
+
+			attr = document.createAttribute('type') # would be an exception class in a JUnit test
+			attr.value = str(testObj.getOutcome())
+			failure.setAttributeNode(attr)
+
 			stdout = document.createElement('system-out')
 			runLogOutput = stripANSIEscapeCodes(kwargs.get('runLogOutput','')) # always unicode characters
-			stdout.appendChild(document.createTextNode(runLogOutput.replace('\r','').replace('\n', os.linesep)))
+			runLogOutput = runLogOutput.replace('\r','').replace('\n', os.linesep)
+			stdout.appendChild(document.createTextNode(runLogOutput))
 			
 			testcase.appendChild(failure)
 			testcase.appendChild(stdout)
@@ -414,7 +421,7 @@ class CSVResultsWriter(BaseRecordResultsWriter):
 		# Creates the file handle to the logfile and logs initial details of the date,
 		# platform and test host.
 
-		self.logfile = os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile)
+		self.logfile = os.path.normpath(os.path.join(self.outputDir or kwargs['runner'].output+'/..', self.logfile))
 
 		self.fp = flushfile(openfile(self.logfile, "w", encoding=None if PY2 else 'utf-8'))
 		self.fp.write('id, title, cycle, startTime, duration, outcome\n')

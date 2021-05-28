@@ -39,6 +39,7 @@ else:
 
 import os.path, time, threading, sys, locale
 import logging
+import shlex
 if sys.version_info[0] == 2:
 	import Queue
 else:
@@ -95,11 +96,14 @@ class Process(object):
 		
 		self.displayName = displayName if displayName else os.path.basename(command)
 		self.info = info
-		self.command = command
+		self.command = os.path.normpath(command)
+		if any(not isstring(arg) for arg in arguments):
+			arguments = [str(arg) for arg in arguments]
 		self.arguments = arguments
+		
 		self.environs = {}
 		for key in environs: self.environs[_stringToUnicode(key)] = _stringToUnicode(environs[key])
-		self.workingDir = workingDir
+		self.workingDir = os.path.normpath(workingDir)
 		self.state = state
 		self.timeout = timeout
 		self.expectedExitStatus = expectedExitStatus
@@ -113,20 +117,41 @@ class Process(object):
 		self.stderr = stderr
 
 		# catch these common mistakes
-		assert os.path.isdir(self.workingDir), 'Working directory for %s does not exist: %s'%(self.displayName, self.stdout)
+		assert os.path.isdir(self.workingDir), 'Working directory for %s does not exist: %s'%(self.displayName, self.workingDir)
 		if self.stdout: assert os.path.dirname(self.stdout)==self.workingDir or os.path.isdir(os.path.dirname(self.stdout)), 'Parent directory for stdout does not exist: %s'%self.stdout
 
 		# print process debug information
-		log.debug("Process parameters for executable %s" % os.path.basename(self.command))
-		log.debug("  command      : %s", self.command)
-		for a in self.arguments: log.debug("  argument     : %s", a)
-		log.debug("  working dir  : %s", self.workingDir)
-		log.debug("  stdout       : %s", stdout)
-		log.debug("  stderr       : %s", stderr)
+		
+		debuginfo = []
+
+		if IS_WINDOWS or not hasattr(shlex, 'quote'):
+			quotearg = lambda c: '"%s"'%c if ' ' in c else c
+		else:
+			quotearg = shlex.quote
+		debuginfo.append("  command line : %s"%' '.join(quotearg(c) for c in [self.command]+self.arguments))
+		for i, a in enumerate(self.arguments): debuginfo.append("    arg #%-2d    : %s"%( i+1, a) )
+		
+		debuginfo.append("  working dir  : %s"% self.workingDir)
+		if IS_WINDOWS and len(self.workingDir) > 256-30:
+			debuginfo.append("    NB: length of working dir is %d (Windows MAX_PATH limit is 256 chars)" % len(self.workingDir))
+		debuginfo.append("  stdout       : %s"% stdout)
+		debuginfo.append("  stderr       : %s"% stderr)
 		keys=list(self.environs.keys())
 		keys.sort()
-		for e in keys: log.debug("  environment  : %s=%s", e, self.environs[e])
-		if info: log.debug("  info         : %s", info)
+		for e in keys: 
+			value = self.environs[e]
+			debuginfo.append("  environment  : %s=%s"%( e, value) )
+			if 'PATH' in e.upper() and e.upper() not in ['PATHEXT']:
+				# it's worth paths/classpaths/pythonpaths as they're often long and quite hard to spot differences otherwise
+				pathelements = value.split(';' if ';' in value else os.pathsep)
+				if len(pathelements)>1:
+					for i, pathelement in enumerate(pathelements):
+						#                         : ABC=def
+						debuginfo.append("                   #%-2d %s"%( i+1, pathelement))
+				
+		if info: debuginfo.append("  info         : %s"% info)
+
+		log.debug("Process parameters for %s\n%s", self, '\n'.join(d for d in debuginfo))
 
 		# private
 		self._outQueue = None
@@ -175,7 +200,7 @@ class Process(object):
 			As only binary data can be written to a process stdin, 
 			if a character string rather than a byte object is passed as the data,
 			it will be automatically converted to a bytes object using the encoding 
-			given by ``locale.getpreferredencoding()``. 
+			given by ``PREFERRED_ENCODING``. 
 		:param addNewLine: True if a new line character is to be added to the end of 
 			the data string
 		
@@ -184,7 +209,7 @@ class Process(object):
 		
 		if not data: return
 		if type(data) != binary_type:
-			data = data.encode(locale.getpreferredencoding())
+			data = data.encode(PREFERRED_ENCODING)
 		if addNewLine and not data.endswith(b'\n'): data = data+b'\n'
 			
 		if self._outQueue == None:

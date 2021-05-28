@@ -28,7 +28,7 @@ class PySysTest(BaseTest):
 		self.assertThat('not os.path.exists(%s)', repr(self.output+'/bin/test.txt.gz'))
 		self.assertThat('os.path.exists(%s)', repr(self.output+'/txt/test.txt.gz'))
 
-		self.log.info('Test bytes are:                        %s', (TEST_BYTES.replace(b'\n', b'\\n').replace(b'\r', b'\\r')).decode(locale.getpreferredencoding(), 'replace'))
+		self.log.info('Test bytes are:                        %s', (TEST_BYTES.replace(b'\n', b'\\n').replace(b'\r', b'\\r')).decode(PREFERRED_ENCODING, 'replace'))
 
 		with open(self.output+'/bin/test.txt', 'rb') as f:
 			# no corruption for binary mode
@@ -36,7 +36,7 @@ class PySysTest(BaseTest):
 			
 		with open(self.output+'/txt/test.txt', 'rb') as f:
 			bytes = f.read()
-			self.log.info('Bytes read out of non-binary file are: %s', bytes.replace(b'\n', b'\\n').replace(b'\r', b'\\r').decode(locale.getpreferredencoding(), 'replace'))
+			self.log.info('Bytes read out of non-binary file are: %s', bytes.replace(b'\n', b'\\n').replace(b'\r', b'\\r').decode(PREFERRED_ENCODING, 'replace'))
 			# in non-binary mode, according to the python docs we expect conversion of \n to \r\n on windows, and no change on unix
 			# (not convinced this is very useful behaviour, but testing this to avoid breaking compatibility)
 			self.assertThat('%s == %s', repr(bytes), repr(

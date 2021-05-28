@@ -77,6 +77,8 @@ def getTypedValueOrDefault(key, value, default):
 		If this is an empty string then depending on the type of default, a boolean False, empty list[] or empty string will be returned; 
 		if instead you wish empty string to result in the default being returned, pass ``value or default`` instead of ``value``. 
 		
+		List entries are delimited by newline and/or commas and stripped of whitespace. 
+		
 	:param bool/int/float/str/list[str] default: The default value to return if the property is not set or is an empty string. 
 		The type of the default parameter will be used to convert the property value from a string if it is 
 		provided. An exception will be raised if the value is non-empty but cannot be converted to the indicated type. 
@@ -95,7 +97,7 @@ def getTypedValueOrDefault(key, value, default):
 	elif isinstance(default, float):
 		return float(value)
 	elif isinstance(default, list):
-		return [v.strip() for v in value.split(',') if v.strip()]
+		return [v.strip() for v in value.replace(',','\n').split('\n') if v.strip()]
 	elif isstring(default):
 		return value # nothing to do. allow it to be empty string
 	else:

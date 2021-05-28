@@ -1,3 +1,4 @@
+import pysys
 from pysys.exceptions import *
 from pysys.constants import *
 from pysys.basetest import BaseTest
@@ -19,6 +20,8 @@ class PySysTest(BaseTest):
 		assert result
 		self.logFileContents(self.output+'/f2.txt', maxLines=2, tail=True, excludes=['\d5'])
 		self.waitForGrep('run.log', expr='Contents of .*f2.txt', abortOnError=True, ignores=[' DEBUG '])
+
+		self.logFileContents(self.output+'/f1.txt', mappers=[pysys.mappers.IncludeLinesBetween('.*018', '.*020')])
 		
 	def validate(self):
 		self.assertGrep('run.log', expr='Contents of f1.txt')

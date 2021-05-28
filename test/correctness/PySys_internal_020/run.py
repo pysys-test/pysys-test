@@ -1,4 +1,5 @@
 from pysys.constants import *
+from pysys.utils.pycompat import PY2
 from pysys.basetest import BaseTest
 from pysys.process.helper import ProcessWrapper
 
@@ -18,7 +19,7 @@ class PySysTest(BaseTest):
 			self.abort('Expected exception from failed process start')
 			
 		self.hprocess = self.startProcess(command=sys.executable,
-						  arguments = [script, "2", "3"],
+						  arguments = [script, "2", 3],
 						  environs = os.environ,
 						  workingDir = self.output,
 						  stdout = "counter.out",
@@ -40,7 +41,10 @@ class PySysTest(BaseTest):
 		self.assertDiff('counter.out', 'ref_counter.out')
 		
 		# check the stderr of the process
-		self.assertGrep('counter.err', expr='Process id of test executable is %d' % self.hprocess.pid)
+		if PY2 or sys.prefix != sys.base_prefix:
+			self.log.info('Skipping pid check because it doesnt work in a python venv')
+		else:
+			self.assertGrep('counter.err', expr='Process id of test executable is %d' % self.hprocess.pid)
 		
 		# check the return status of the process
 		self.assertTrue(self.hprocess.exitStatus == 3)

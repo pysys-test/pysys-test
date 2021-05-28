@@ -16,8 +16,8 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		self.log.info('Preferred encoding = %s, test string = %s', locale.getpreferredencoding(), TEST_STR)
-		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+		self.log.info('Preferred encoding = %s, test string = %s', PREFERRED_ENCODING, TEST_STR)
+		if PREFERRED_ENCODING in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
 		self.copy(self.input, self.output+'/test')
 
@@ -30,4 +30,4 @@ class PySysTest(BaseTest):
 		self.assertGrep('pysys.err', expr='WARN.*', contains=False)
 
 		# pysys.out will be in the default encoding
-		self.assertGrep('pysys.out', expr='Reason for timed out outcome is general tardiness - %s'%TEST_STR, encoding=locale.getpreferredencoding())
+		self.assertGrep('pysys.out', expr='Reason for timed out outcome is general tardiness - %s'%TEST_STR, encoding=PREFERRED_ENCODING)

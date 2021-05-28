@@ -28,42 +28,37 @@ from pysys.exceptions import *
 from pysys.utils.filediff import trimContents
 from pysys.utils.pycompat import openfile
 from pysys.utils.fileutils import pathexists
+from pysys.mappers import applyMappers
 
 log = logging.getLogger('pysys.assertions')
 
-def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[]):
-	"""Look for matches on a regular expression in an input file, return a sequence of the matches.
+def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[], returnFirstOnly=False):
+	"""Look for matches on a regular expression in an input file, return a sequence of the matches 
+	(or if returnFirstOnly=True, just the first).
 	
 	:param file: The full path to the input file
 	:param regexpr: The regular expression used to search for matches
-	:param ignores: A list of regexes which will cause matches to be discarded
+	:param mappers: A list of lambdas or generator functions used to pre-process the file's lines before looking for matches. 
+	:param ignores: A list of regexes which will cause matches to be discarded. These are applied *after* any mappers. 
 	:param encoding: Specifies the encoding to be used for opening the file, or None for default. 
-	:return: A list of the match objects 
+	:param returnFirstOnly: If True, stops reading the file as soon as the first match is found and returns it. 
+	:return: A list of the match objects, or the match object or None if returnFirstOnly is True
 	:rtype: list
 	:raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
 	matches = []
-	rexp = re.compile(regexpr, flags=0)
+	rexp = re.compile(regexpr, flags=flags)
 	
 	log.debug("Looking for expression \"%s\" in input file %s" %(regexpr, file))
 
 	ignores = [re.compile(i, flags=flags) for i in (ignores or [])]
 
-	if None in mappers: mappers = [m for m in mappers if m]
-
 	if not pathexists(file):
 		raise FileNotFoundException("unable to find file \"%s\"" % (file))
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
-			for l in f:
-				# pre-process
-				for mapper in mappers:
-					l = mapper(l)
-					if l is None: break
-				if l is None: continue
-
-			
+			for l in applyMappers(f, mappers):
 				match = rexp.search(l)
 				if match is not None: 
 					shouldignore = False
@@ -74,11 +69,13 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[]):
 					if shouldignore: continue
 					
 					log.debug(("Found match for line: %s" % l).rstrip())
+					if returnFirstOnly is True: return match
 					matches.append(match)
+		if returnFirstOnly is True: return None
 		return matches
 
 
-def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0, mappers=[]):
+def filegrep(file, expr, returnMatch=False, **kwargs): # pragma: no cover
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
 	
 	:param file: The full path to the input file
@@ -94,37 +91,11 @@ def filegrep(file, expr, ignores=None, returnMatch=False, encoding=None, flags=0
 	:raises FileNotFoundException: Raised if the input file does not exist
 	
 	"""
-	if not pathexists(file):
-		raise FileNotFoundException("unable to find file \"%s\"" % (file))
+	m = getmatches(file, expr, returnFirstOnly=True, **kwargs)
+	if returnMatch: 
+		return m
 	else:
-		with openfile(file, 'r', encoding=encoding) as f:
-			if log.isEnabledFor(logging.DEBUG):
-				contents = f.readlines()
-				logContents("Contents of %s;" % os.path.basename(file), contents)
-			else:
-				contents = f
-			
-			ignores = [re.compile(i, flags=flags) for i in (ignores or [])]
-			
-			regexpr = re.compile(expr, flags=flags)
-			
-			if None in mappers: mappers = [m for m in mappers if m]
-
-			for line in contents:
-				# pre-process
-				for mapper in mappers:
-					line = mapper(line)
-					if line is None: break
-				if line is None: continue
-
-				m = regexpr.search(line)
-				if m is not None: 
-					if not any([i.search(line) for i in ignores]): 
-						if returnMatch: return m
-						return True
-			if returnMatch: return None
-			return False
-
+		return m is not None
 
 def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False, flags=0):
 	"""Search for matches to a regular expression in the last line of an input file, returning true if a match occurs.
@@ -141,7 +112,7 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False
 	
 	"""
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file \"%s\"" % (file))
+		raise FileNotFoundException("unable to find file \"%s\"" % (file)) # pragma: no cover
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
 			contents = f.readlines()
@@ -190,7 +161,7 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	regexpr = re.compile(expr, flags=flags)
 
 	if not pathexists(file):
-		raise FileNotFoundException('unable to find file "%s"' % (file))
+		raise FileNotFoundException('unable to find file "%s"' % (file)) # pragma: no cover
 	
 	
 	with openfile(file, 'r', encoding=encoding) as f:
@@ -205,8 +176,8 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	return '#%d: %s'%(exprIndex, expr) # the expression we were trying to match
 
 
-def logContents(message, list):
-	"""Log a list of strings, prepending the line number to each line in the log output.
+def logContents(message, list): # pragma: no cover
+	"""Log a list of strings at debug, prepending the line number to each line in the log output.
 	
 	:param list: The list of strings to log
 	"""

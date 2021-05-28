@@ -18,9 +18,18 @@
     <class name="PySysTest" module="run"/>
     <user-data name="testFloatProperty" value="0000"/> <!-- overridden with a -X -->
     <user-data name="testFloatUserData" value="12.345"/> <!-- not overridden -->
-    <user-data name="testStringUserData" value="Hello ${non-existent}"/> <!-- use of ${...} is deliberately allowed but 
-		not automatically substituted since it's not clear from where (project props? other user-data? etc) and 
-		best to leave this for the user if they want to do it manually. -->
+    <user-data name="testStringUserData" value="Hello ${user_firstname}"/>
+	<user-data name="testMultiLineListUserData">First line
+		second line
+		<!-- comment -->
+			third , comma-separated, line  
+			
+
+		fourth line
+		
+	</user-data>
+	<user-data name="testEvalUserData" value='Foo ${eval:properties["999-my.invalid.identifier"]} is what ${eval:user_firstname} says ${eval:os.path.basename(testRootDir)}'/>
+
   </data>
   
   <traceability>

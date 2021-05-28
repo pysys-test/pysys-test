@@ -20,11 +20,113 @@ PySys 1.6.2 is under development.
 	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
 	  PySys.
 	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
-	- Fixed the default library path on macOS(R). Instead of setting ``DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib`` 
-	  (which overrides executables' default libraries), we now use the ``DYLD_FALLBACK_LIBRARY_PATH`` environment 
-	  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 
-	  Additionally, some extra items were added to the value of `pysys.constants.DYLD_LIBRARY_PATH` to match the 
-	  defaults as described in the latest macOS documentation. 
+	- Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails, for both 
+	  primitive values and list/dict values. 
+	- Process management:
+	
+		- Added automatic killing of child processes of processes PySys has started (using Unix "process groups", and 
+		  Windows "jobs"). This is especially useful when starting a process using a shell script; previously 
+		  only the wrapper script would have been killed, whereas now the process it starts is also terminated. 
+		- Fixed the default library path on macOS(R). Instead of setting ``DYLD_LIBRARY_PATH=/usr/lib:/usr/local/lib`` 
+		  (which overrides executables' default libraries), we now use the ``DYLD_FALLBACK_LIBRARY_PATH`` environment 
+		  variable. The `pysys.constants.LIBRARY_PATH_ENV_VAR` constant is now set to 'DYLD_FALLBACK_LIBRARY_PATH`. 
+		  Additionally, some extra items were added to the value of `pysys.constants.DYLD_LIBRARY_PATH` to match the 
+		  defaults as described in the latest macOS documentation. 
+		- Added improved debug logging to `BaseTest.startProcess()` including a full command line for manually re-running 
+		  troublesome commands, and expansion of PATH environment variables to show the individual components. 
+		  
+	- Additions to the line mappers functionality:
+	
+		- Added `pysys.mappers.JoinLines` which combines consecutive related logs such as exception stack traces. There are 
+		  also pre-configured mappers for some common tools: `pysys.mappers.JoinLines.PythonTraceback`, 
+		  `pysys.mappers.JoinLines.JavaStackTrace`, `pysys.mappers.JoinLines.AntBuildFailure`. For example::
+		
+				self.assertGrep('myserver.log', expr=r' (ERROR|FATAL) .*', contains=False, 
+					mappers=[pysys.mappers.JoinLines.JavaStackTrace()], 	
+					ignores=['Caused by: java.lang.RuntimeError: My expected exception'])
+			
+		  ... will produce a failure outcome that includes the Java stack trace following any error lines, and also 
+		  has the ability to ignore errors based on the contents of their stack trace. 
+		
+		- Added `pysys.mappers.SortLines` which could be used with the `BaseTest.copy` method for ensuring deterministic 
+		  results in a `BaseTest.assertDiff`. 
+		- Added `pysys.mappers.applyMappers` which makes it easy to add mapper functionality to your own methods. 
+		- Added a ``mappers=`` argument to `BaseTest.logFileContents` and `BaseTest.assertLineCount`.
+	  
+	- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
+	  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
+	  refer to the old name). 
+	- Added `BaseTest.deleteFile()` which provides a simple and safe way to delete a file similar to the 
+	  `BaseTest.deleteDir()` method. 
+	- Added a ``quiet=True/False`` option to `BaseTest.waitForGrep` to disable the INFO-level logging. 
+	- Changed `pysys.writer.outcomes.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
+	  attribute, and changed the failure node to be::
+	  
+	    <failure message="OUTCOME: Outcome reason" type="OUTCOME"/>
+	    
+	  (where OUTCOME could be FAILED, BLOCKED, etc) instead of::
+	  
+	    <failure message="OUTCOME">Outcome reason</failure>
+	  
+	  This may produce better error indicators in CI systems and IDEs that parse these files. 
+	- PySys plugins sometimes provide a test class that can directly used by multiple tests (without each having their 
+	  own ``run.py``). You can now implement this pattern a lot more easily by specifying a fully qualified 
+	  ``classname`` and ``module`` in the ``pysystest.xml`` descriptor, which will lookup the specified classname 
+	  in the PYTHONPATH using Python's module importing mechanism. 
+	- Change the creation of new tests (and the loading of test descriptors) to include the ``.py`` suffix in the 
+	  ``module=`` filename, to make it more explicit what is going on. As before, specifying this suffix is optional 
+	  so there is no need to update existing tests. 
+	- Added support for specifying project properties and descriptor user-data values using multi-line XML text 
+	  (or CDATA) as an alternative to setting the ``value=`` attribute. When converting string values to a list, 
+	  newline is now considered as a delimiter along with comma. This allows long value (especially path-like) 
+	  values to be specified in a more readable form, for example::
+	  
+	    <property name="myTestDescriptorPath">
+	      ${testRootDir}/foo/foo
+	      ${testRootDir}/foo/bar, ${testRootDir}/foo/baz
+	      
+	      <!-- Comments and whitespace are ignored when converting a string to a list -->
+	      
+	      ${testRootDir}/foo/bosh
+	    </property>
+	- Added automatic expansion of ``${...}`` project properties in a test/directory XML's 
+	  ``input/output/reference/user-data`` elements.
+	- Added automatic normalization of slashes and ``..`` sequences in project property values for which 
+	  ``pathMustExist=true``. 
+	- Added a pre-defined project property ``${/}`` which is resolved to forward or back slash character for this OS. 
+	- Added support for executing Python eval() strings when resolving project properties. Other project properties 
+	  are available as Python variables when the eval string is executed (and also in a ``properties`` dict, in case of 
+	  any name that is not a valid Python identifier). For more details on how eval() strings are evaluated within 
+	  PySys see `BaseTest.assertThat` which uses the same mechanism. For example::
+	  
+	      <property name="logConfigURL" value='${eval: "file:///"+os.path.abspath(appHome).replace("\\", "/")+"/logConfig.xml"}'/>
+
+	- Added `pysys.constants.PREFERRED_ENCODING` which should be used in testcases instead of 
+	  ``locale.getpreferredencoding()`` to avoid thread-safety issues. 
+	- Added `pysys.constants.EXE_SUFFIX` which is ``.exe`` on Windows and empty string on Unix. This is convenient 
+	  when running executables. 
+	- Improved the failure messages for `BaseTest.assertGrep` (with contains=False) and `BaseTest.assertLineCount` 
+	  (with condition="==0") to include both the first matching expression and the total number of matches. This 
+	  is useful when checking log files for unexpected errors and warnings. 
+	- Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
+	  pool of TCP ports. 
+
+Fixes:
+
+	- Fixed the project property ``defaultEnvirons.ENVVAR`` added in 1.6.0 which did not in fact set the environment 
+	  variable as described (due to an additional unwanted ``.`` character); now it does. 
+	- Avoid creating unnecessary runner output directory as a result of ``mkdir(runner.output+'/../xxx')`` by 
+	  normalizing paths before calling mkdir. 
+	- Fixed `BaseTest.assertLineCount` bug in which ``reFlags`` parameter was not honoured. 
+
+Migration notes:
+
+	- It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
+	  ``locale.getpreferredencoding()``, to avoid thread-safety issues. 
+	- When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
+	  character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
+	  mappers. This is also now more clearly documented. 
+
 
 -------------------
 What's new in 1.6.1
@@ -107,7 +209,7 @@ provide a simpler way to share functionality across tests. There are currently 3
   before `pysys.baserunner.BaseRunner.setup()` is called. Unlike test plugins, any processes or state they maintain are 
   shared across all tests. These can be used to start servers/VMs that are shared across tests.
   Runner plugins are configured with ``<runner-plugin classname="..." alias="..."/>`` and can be any Python 
-  class provided it a method ``setup(self, runner)`` (and no constructor arguments). 
+  class provided it has a method ``setup(self, runner)`` (and no constructor arguments). 
 
 - **writer plugins**: this kind of plugin has existed in PySys for many releases and are effectively a special kind of 
   runner plugin with extra callbacks to allow them to write test results and/or output files to a variety of 
@@ -192,7 +294,8 @@ New and improved result writers
   of file (e.g. code coverage) and then do something with it during the runner cleanup phase when all tests have 
   completed.  
 
-- Moved Python code coverage generation out to `pysys.writer.testoutput.PythonCoverageWriter` as an example of how to plugin 
+- Moved Python code coverage generation out to ``pysys.writer.testoutput.PythonCoverageWriter`` (as of 1.6.2, 
+  it's now in `pysys.writer.coverage.PythonCoverageWriter`) as an example of how to use a plugin to add 
   code coverage support without subclassing the runner. Existing projects use this behind the scenes, but new projects 
   should add the writer to their configuration explicitly if they need it (see sample project). 
   
@@ -424,7 +527,7 @@ pysys.py and project configuration improvements
   the ``disableCoverage`` group to the ``pysystest.xml`` descriptor, or the ``pysysdirconfig.xml`` for a whole 
   directory. This is equivalent to setting the ``self.disableCoverage`` attribute on the base test. 
 
-- `Python code coverage <pysys.writer.testoutput.PythonCoverageWriter>` now produces an XML ``coverage.xml`` report 
+- `Python code coverage <pysys.writer.coverage.PythonCoverageWriter>` now produces an XML ``coverage.xml`` report 
   in addition to the ``.coverage`` file and HTML report. This is useful for some code coverage UI/aggregation services. 
 
 - The prefix "__" is now used for many files and directories PySys creates, to make it easier to spot which are 
@@ -510,7 +613,7 @@ The changes that everyone should pay attention to are:
         If a relative path is specified, it is relative to the testRootDir, or if an absolute --outdir was specified, 
         relative to that directory. 
     -->
-    <property name="pysysRunnerDirName" value="pysys_runner_${outDirName}"/>
+    <property name="pysysRunnerDirName" value="pysys-runner-${outDirName}"/>
 
     <!-- Overrides the default name use to for the performance summary .csv file. The default was changed to 
         "__pysys_performance/${outDirName}_${hostname}/perf_${startDate}_${startTime}.${outDirName}.csv" in PySys 1.6.0. 
@@ -601,6 +704,9 @@ Be sure to remove use of the following deprecated items at your earliest conveni
             <property name="destDir" value="__coverage_python.${outDirName}"/>
             <property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
         </writer>
+   
+  (if using 1.6.2+, use `pysys.writer.coverage.PythonCoverageWriter` instead of 
+  ``pysys.writer.testoutput.PythonCoverageWriter``. 
 
 Finally there are also some fixes, cleanup, and better error checking that *could* require changes (typically to 
 extension/framework classes rather than individual tests) but in most cases will not be noticed. Most users can ignore 
@@ -652,7 +758,7 @@ the following list and consult it only if you get new test failures after upgrad
   anyway. If you need to get a property whose name clashes with a built-in member, use 
   `pysys.xml.project.Project.properties`.
 - PySys now checks that its working directory (``os.chdir()``) and environment (``os.environ``) have not been modified 
-  during execution of tests (after pysys.baserunner.BaseRunner.setup()'). Sometimes test authors do this by mistake 
+  during execution of tests (after `pysys.baserunner.BaseRunner.setup()'). Sometimes test authors do this by mistake 
   and it's extremely dangerous as it causes behaviour changes (and potentially file system race conditions) in 
   subsequent tests that can be very hard to debug. 
   The environment and working directory should only be modified for child processes not for PySys itself - 

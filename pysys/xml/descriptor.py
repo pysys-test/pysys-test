@@ -83,13 +83,14 @@ class TestDescriptor(object):
 	
 	:ivar str ~.classname: The Python classname to be executed for this testcase.
 	
-	:ivar str ~.module: The path to the python module containing the testcase class. Relative to testDir, or an absoute path.
+	:ivar str ~.module: The path to the python module containing the testcase class. Relative to testDir, or an absolute path.
+		If not set, the class is looked up in the PYTHONPATH. 
 	
-	:ivar str ~.input: The path to the input directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.input: The path to the input directory of the testcase. Relative to testDir, or an absolute path.
 	
-	:ivar str ~.output: The path to the output parent directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.output: The path to the output parent directory of the testcase. Relative to testDir, or an absolute path.
 	
-	:ivar str ~.reference: The path to the reference directory of the testcase. Relative to testDir, or an absoute path.
+	:ivar str ~.reference: The path to the reference directory of the testcase. Relative to testDir, or an absolute path.
 	
 	:ivar list ~.traceability: A list of the requirements covered by the testcase.
 	
@@ -101,8 +102,8 @@ class TestDescriptor(object):
 		it's a normal testcase. 
 	
 	:ivar dict(str,obj) ~.userData: A dictionary that can be used for storing user-defined data 
-		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements e.g. 
-		``<data><user-data name="key" value="val"</user-data></data>``.
+		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements, e.g. 
+		``<data><user-data name="key" value="val ${projectProperty}"</user-data></data>``.
 	"""
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
@@ -131,8 +132,13 @@ class TestDescriptor(object):
 		# copy groups/modes so we can safely mutate them later if desired
 		self.groups = list(groups)
 		self.modes = list(modes)
+		
 		self.classname = classname
-		self.module = module
+		assert classname, 'Test descriptors cannot set the classname to nothing'
+
+		if not module: self.module = None
+		elif module.endswith('.py'): self.module = module
+		else: self.module = module+'.py'
 		
 		self.input = input
 		self.output = output
@@ -236,9 +242,18 @@ class TestDescriptor(object):
 		str=str+"Test reference:    %s\n" % self.reference
 		str=str+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		if self.userData:
-			str=str+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,repr(v).lstrip('u') if isstring(v) else str(v)) for k,v in (self.userData.items()))
+			str=str+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,self.__userDataValueToString(v)) for k,v in (self.userData.items()))
 		str=str+""
 		return str
+	
+	@staticmethod
+	def __userDataValueToString(v):
+		if not isstring(v): return str(v)
+		if '\n' in v:
+			# tab and newline character are difficult to read and in most cases whitespace will be stripped out so remove 
+			# it from this view of the strings
+			v = '<nl>'.join(x.strip() for x in v.split('\n') if x.strip())
+		return repr(v).lstrip('u')
 	
 	def __repr__(self): return str(self)
 
@@ -351,9 +366,9 @@ class _XMLDescriptorParser(object):
 										self.getGroups(), self.getModes(),
 										self.project.expandProperties(self.getClassDetails()[0]),
 										self.project.expandProperties(self.getClassDetails()[1]),
-										self.getTestInput(),
-										self.getTestOutput(),
-										self.getTestReference(),
+										self.project.expandProperties(self.getTestInput()),
+										self.project.expandProperties(self.getTestOutput()),
+										self.project.expandProperties(self.getTestReference()),
 										self.getRequirements(), 
 										self.getExecutionOrderHint(), 
 										skippedReason=self.getSkippedReason(), 
@@ -521,7 +536,21 @@ class _XMLDescriptorParser(object):
 				key = e.getAttribute('name').strip()
 				assert key, 'name= must be specified'
 				assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # prevent names that we reserve for use by the basetest/processuser
-				result[key] = e.getAttribute('value')
+				
+				# NB: we don't use inspect.cleandoc here since it'd probably slow down descriptor loading and in 99% 
+				# of for multi-line strings we will be stripping whitespace anyway so not a good use of time
+				value = e.getAttribute('value')
+				if not value and e.childNodes:
+					value = '\n'.join(n.data for n in e.childNodes 
+						if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data)
+				if value is None: value = ''
+				try:
+					value = self.project.expandProperties(value)
+				except Exception as ex: # pragma: no cover
+					raise UserError('Failed to resolve user-data value for "%s" in XML descriptor "%s": %s' % (key, self.file, ex))
+
+				result[key] = value
+				
 		return result
 
 	def getTestOutput(self):
@@ -647,7 +676,7 @@ class DescriptorLoader(object):
 		project = self.project
 		
 		descriptors = []
-		ignoreSet = set(OSWALK_IGNORES)
+		ignoreSet = set(OSWALK_IGNORES+[DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE])
 		
 		descriptorSet = set([s.strip() for s in project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')])
 		
@@ -657,7 +686,7 @@ class DescriptorLoader(object):
 		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
 		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path), 
 		# so must use long-path-safe - but need to re-encode from unicode string back to bytestring in Python 2
-		i18n_reencode = locale.getpreferredencoding() if PY2 and isinstance(dir, str) else None
+		i18n_reencode = PREFERRED_ENCODING if PY2 and isinstance(dir, str) else None
 		
 		dir = toLongPathSafe(os.path.normpath(dir))
 		assert os.path.exists(dir), dir # sanity check

@@ -25,7 +25,7 @@ be referenced directly.
 """
 # undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT
 
-import sys, re, os, os.path, socket, traceback
+import sys, re, os, os.path, socket, traceback, locale
 
 # if set is not available (>python 2.6) fall back to the sets module
 try:  
@@ -47,7 +47,7 @@ if re.search('win32', sys.platform):
 	It is recommended to use standard Python functions such as ``sys.platform`` rather than this constant. """
 	OSFAMILY='windows'
 	DEVNULL = 'nul'
-	WINDIR = os.getenv('windir', 'c:\WINDOWS')
+	WINDIR = os.getenv('windir', r'c:\WINDOWS')
 	PATH = r'%s;%s\system32;%s\System32\Wbem' % (WINDIR, WINDIR, WINDIR)
 	LD_LIBRARY_PATH = ''
 	DYLD_LIBRARY_PATH = ''
@@ -94,6 +94,21 @@ else:  # pragma: no cover
 	LIBRARY_PATH_ENV_VAR = 'LD_LIBRARY_PATH'
 	SITE_PACKAGES_DIR = os.path.join(sys.prefix, "lib", "python%s" % sys.version[:3], "site-packages")
 
+PREFERRED_ENCODING = locale.getpreferredencoding()
+"""
+The operating system's preferred/default encoding for reading/writing the contents of text data in files and 
+process stdout/stderr for the current environment (or machine). 
+
+This returns the same value as Python's ``locale.getpreferredencoding()`` method, but as that method is not thread-safe, 
+this constant must always be used in test cases to avoid race conditions when running tests in parallel. 
+
+The OS preferred encoding should not be confused with Python's 'default' encoding (``sys.getdefaultencoding()``) which 
+is usually not relevant for testing purposes. 
+
+See also `pysys.basetest.BaseTest.getDefaultFileEncoding()`.
+
+.. versionadded:: 1.6.2
+"""
 
 ENVSEPERATOR = os.pathsep
 """ Deprecated. 
@@ -105,6 +120,10 @@ IS_WINDOWS = OSFAMILY=='windows'
 PYTHON_EXE = sys.executable # alias to increase readability
 """
 The path to the current Python executable (=``sys.executable``). 
+"""
+
+EXE_SUFFIX = '.exe' if IS_WINDOWS else ''
+""" The suffix added to binary executables, that is ``.exe`` on Windows, and empty string on Unix. 
 """
 
 # constants used in testing
@@ -199,7 +218,7 @@ LOOKUP[FALSE] = "FALSE"
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_PROJECTFILE = ['pysysproject.xml']
 DEFAULT_DESCRIPTOR = ['pysystest.xml'] # can be customized with the pysysTestDescriptorFileNames project property
-DEFAULT_MODULE = 'run'
+DEFAULT_MODULE = 'run.py'
 DEFAULT_GROUP = ""
 DEFAULT_TESTCLASS = 'PySysTest'
 DEFAULT_INPUT = 'Input'
@@ -211,10 +230,11 @@ DEFAULT_STYLESHEET = None # deprecated
 DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_OUTDIR = 'win' if PLATFORM=='win32' else PLATFORM # this constant is not currently public API
 
-OSWALK_IGNORES = [ DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE, 'CVS', '.svn', '__pycache__', '.git' ]
+OSWALK_IGNORES = [ '.git', '.svn', '__pycache__', 'CVS', ]
 """ A list of directory names to exclude when recursively walking a directory tree. 
 
-:meta private: Hidden since 1.5.1, not something end-users need to be concerned with. """
+This is used by PySys during test loading, and can also be used for subsequent directory walking operations. 
+"""
 
 DEFAULT_TIMEOUT = 600
 """Deprecated: Use a specific member of `TIMEOUTS` instead."""

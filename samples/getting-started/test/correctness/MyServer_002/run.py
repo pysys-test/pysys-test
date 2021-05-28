@@ -6,7 +6,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		port = self.getNextAvailableTCPPort()
 		server1 = self.startProcess(
 			command=self.project.appHome+'/my_server.%s'%('bat' if IS_WINDOWS else 'sh'), 
-			arguments=['--port', str(port), ], 
+			arguments=['--port', port, ], 
 			
 			# By default startProcess() uses a clean environment with a minimal set of env vars. If you need to 
 			# override or add additional env vars, use the environs= keyword and the createEnvirons helper method

@@ -28,7 +28,7 @@ from pysys.constants import *
 from pysys.utils.pycompat import *
 from pysys.process.monitor import *
 
-if PLATFORM=='win32' and 'epydoc' not in sys.modules:
+if PLATFORM=='win32' and 'sphinx' not in sys.modules:
 	import win32api, win32pdh, win32con, win32process
 
 log = logging.getLogger('pysys.processmonitor')

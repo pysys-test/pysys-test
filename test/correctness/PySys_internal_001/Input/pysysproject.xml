@@ -1,7 +1,9 @@
 <pysysproject>
+	<property name="appHome" value="${testRootDir}/.."/>
+
 	<!-- Example properties to be set in the project -->
 	<property name="env_user" value="${env.TEST_USER}" />
-	<property name="env_user_prepend" value="append-on-front-${env.TEST_USER}" />
+	<property name="env_user_prepend" value="append-on-front-${env:TEST_USER}" />
 	<property name="env_user_append" value="${env.TEST_USER}-append-on-back" />
 	<property name="env_default" value="${env.NOT_EXIST}" default="default value"/>
 	<property name="env_default_none" value="${env.NOT_EXIST}" default=""/> 
@@ -9,11 +11,39 @@
 	<property name="user_lastname" value="Smith" />
 	<property name="user_title" value="Professor" />
 	<property name="user_full" value="${user_title} ${user_firstname} ${user_lastname}" />
+
+	<property name="testSlashes" value="mydir${/}myfile" />
+
+	<property name="999-my.invalid.identifier" value="foo" />
+	<property name="testEval">Foo ${eval:properties["999-my.invalid.identifier"]} is what ${eval:user_firstname} says ${eval:os.path.basename(testRootDir)}</property>
+
+	<property name="multiline_text">First line
+		second line
+		<!-- comment -->
+			third line
+			
+
+		fourth line
+	</property>
+
+	<property name="multiline_cdata"><![CDATA[
+		my data >' foo
+			bar
+			<!-- comment -->
+			baz
+		
+no indent
+			
+		third line
+	]]></property>
+
 	
 	<property name="projectbool" value="tRue"/>
 	<property name="projectbooloverride" value="tRue"/>
 
 	<property name="sample_path" value="${os}_${hostname}_${startDate}_${startTime}"/>
+
+	<property name="logConfigURL" value='${eval: "file:///"+os.path.abspath(appHome).replace("\\", "/")+"/logConfig.xml"}'/>
 
 	<property name="projectint" value="1234"/>
 	<property name="projectfloat" value="456.78"/>

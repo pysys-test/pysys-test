@@ -1,0 +1,4 @@
+<prefix> Hello <suffix>
+<prefix> 2021-05-25 ERROR [Thread1] The operation failed <suffix> / java.lang.AssertionError: Invalid state <suffix> / at org.junit.Assert.fail(Assert.java:100) <suffix> / Caused by: java.lang.RuntimeError: Oh dear <suffix> / at org.myorg.TestMyClass2 <suffix>
+<prefix> 2021-05-25 ERROR [Thread1] Another error <suffix>
+<prefix> 2021-05-25 INFO [Thread1] normal operation <suffix>

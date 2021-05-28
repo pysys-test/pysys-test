@@ -7,14 +7,14 @@ import io, locale
 # contains a non-ascii � character that is different in utf-8 vs latin-1
 TEST_STR = u'Hello � world' 
 # use a different encoding to the default/local encoding
-TEST_ENCODING = 'latin-1' if locale.getpreferredencoding().lower() == 'utf-8' else 'utf-8'
+TEST_ENCODING = 'latin-1' if PREFERRED_ENCODING.lower() == 'utf-8' else 'utf-8'
 
 class PySysTest(BaseTest):
 	def execute(self):
-		self.log.info('Python local/default/preferred encoding is %s; will test with non-local encoding %s', locale.getpreferredencoding(), TEST_ENCODING)
-		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+		self.log.info('Python local/default/preferred encoding is %s; will test with non-local encoding %s', PREFERRED_ENCODING, TEST_ENCODING)
+		if PREFERRED_ENCODING in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
 
-		with io.open(self.output+'/test-local.txt', 'w', encoding=locale.getpreferredencoding()) as f:
+		with io.open(self.output+'/test-local.txt', 'w', encoding=PREFERRED_ENCODING) as f:
 		#with open(self.output+'/test-local.txt', 'w') as f:
 			f.write(os.linesep.join([TEST_STR, TEST_STR, 'otherstring']))
 		with io.open(self.output+'/test-nonlocal.txt', 'w', encoding=TEST_ENCODING) as f:
@@ -50,18 +50,18 @@ class PySysTest(BaseTest):
 			# binary mode if a bytes object was passed for the expr, if we wanted to
 			return
 		self.assertLineCount('test-local.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==0')
-		self.assertLineCount('test-local.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), condition='==2')
+		self.assertLineCount('test-local.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), condition='==2')
 		
 		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==2')
-		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), condition='==0')
+		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), condition='==0')
 		# this one varies depending on utf8/latin1, so condition is permissive; just here to ensure there's no exception
 		self.assertLineCount('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='>=0', encoding=TEST_ENCODING)
 
 		self.assertGrep('test-local.txt', expr=TEST_STR.encode(TEST_ENCODING), contains=False)
-		self.assertGrep('test-local.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), contains=True)
+		self.assertGrep('test-local.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), contains=True)
 
 		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), contains=True)
-		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), contains=False)
+		self.assertGrep('test-nonlocal.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), contains=False)
 
-		self.waitForGrep('test-local.txt', expr=TEST_STR.encode(locale.getpreferredencoding()), condition='==2', timeout=2, abortOnError=True)
+		self.waitForGrep('test-local.txt', expr=TEST_STR.encode(PREFERRED_ENCODING), condition='==2', timeout=2, abortOnError=True)
 		self.waitForGrep('test-nonlocal.txt', expr=TEST_STR.encode(TEST_ENCODING), condition='==2', timeout=2, abortOnError=True)

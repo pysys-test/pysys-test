@@ -22,7 +22,9 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		if locale.getpreferredencoding() in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+		if PREFERRED_ENCODING in ['ANSI_X3.4-1968', 'ascii']: self.skipTest('cannot run in ASCII locale')
+
+		import coverage # this test requires the coverage.py library so give a clear error if it's missing
 
 		self.copy(self.input, self.output+'/test')
 		# make testRootDir and working dir be different
@@ -83,7 +85,8 @@ class PySysTest(BaseTest):
 		self.assertEval("{xml_NestedTimedout1} == {expected}", 
 			xml_NestedTimedout1="name={name}, tests={tests}, failures={failures}, skipped={skipped}".format(**dict(ET.parse(self.output+'/target/pysys-reports/TEST-NestedTimedout.2.xml').getroot().attrib)),
 			expected='name=NestedTimedout, tests=1, failures=1, skipped=0')
-		self.assertGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='<failure message="TIMED OUT">Reason for timed out outcome is general tardiness - %s</failure>'%TEST_STR, encoding='utf-8')
+		self.assertThatGrep('target/pysys-reports/TEST-NestedTimedout.1.xml', '<failure .*/>', 
+			expected='<failure message="TIMED OUT: Reason for timed out outcome is general tardiness - %s" type="TIMED OUT"/>'%TEST_STR, encoding='utf-8')
 		# check stdout is included, and does not have any ANSI control characters in it
 		self.assertThat('junitStdoutOutcome == expected', expected='TIMED OUT', 
 			junitStdoutOutcome=self.getExprFromFile('target/pysys-reports/TEST-NestedTimedout.1.xml', expr='Test final outcome: *(.*)', encoding='utf-8'))
@@ -145,7 +148,7 @@ class PySysTest(BaseTest):
 		self.assertThat('len(vcsCommit) > 4', vcsCommit__eval="self.runner.runDetails['vcsCommit']")
 		
 		# check PYSYS_CONSOLE_FAILURE_ANNOTATIONS did its thing
-		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*error: .*NestedTimedout .* 02.*', encoding=locale.getpreferredencoding()), 
+		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*error: .*NestedTimedout .* 02.*', encoding=PREFERRED_ENCODING), 
 			expected=u'NestedTimedout%srun.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness - %s (NestedTimedout [CYCLE 02])'%(os.sep, TEST_STR))
 
 		self.assertThat('actual.endswith(expected)', actual=self.getExprFromFile('pysys.out', '^[^0-9].*warning: .*NestedNotVerified .* 02.*'), 

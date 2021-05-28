@@ -9,6 +9,10 @@ class PySysTest(pysys.basetest.BaseTest):
 			'Number': [123, 456.789]
 		})
 
+		self.write_text('tobedeleted.txt', 'foo bar')
+		self.deleteFile('tobedeleted.txt', ignore_errors=True)
+		self.assertPathExists('tobedeleted.txt', exists=False)
+		self.deleteFile('tobedeleted.txt')
 		
 	def validate(self):
 		pass

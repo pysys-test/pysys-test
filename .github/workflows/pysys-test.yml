@@ -1,0 +1,261 @@
+# This workflow is for building and testing the PySys framewrok itself. 
+# If you're looking for something to copy to test your own projects look at the sample projects instead.
+
+name: PySys
+
+on:
+  push:
+    branches: [ master, 1.6.2features]
+  pull_request:
+    branches: [ master ]
+
+  # When a new (empty, non-draft) release is created via the GitHub UI, uploads the files to that release, upload it to PyPi 
+  # and upload the doc to GitHub pages. Only do this when all the tests are passing. 
+  # Requires defining secrets PYPI_USERNAME and PYPI_PASSWORD with your PyPi credentials. 
+  release:
+    types:
+      - created
+
+jobs:
+  test:
+    strategy:
+      # Disable fail fast since it's useful to see test results for all platforms even if some failed
+      fail-fast: false
+      
+      matrix:
+        # A selection range of OS, Python and Java versions
+        include:
+          - test-run-id: lnx-py3.8-doc-deploy
+            os: ubuntu-latest
+            python-version: 3.8
+            doc-and-deploy: true
+          
+          - test-run-id: mac-py2.7
+            os: macos-latest
+            python-version: 2.7
+
+          - test-run-id: win-py3.7
+            os: windows-latest
+            python-version: 3.7
+
+          # --- Additional testing combinations
+
+          #- test-run-id: lnx-py2.7
+          #  os: ubuntu-latest
+          #  python-version: 2.7
+
+          #- test-run-id: mac-py3.7
+          #  os: macos-latest
+          #  python-version: 3.7
+
+          #- test-run-id: win-py2.7
+          #  os: windows-latest
+          #  python-version: 2.7
+
+          #- test-run-id: lnx-py3.5
+          #  os: ubuntu-latest
+          #  python-version: 3.5
+
+          #- test-run-id: lnx-py3.6
+          #  os: ubuntu-latest
+          #  python-version: 3.6
+
+          #- test-run-id: lnx-py3.7
+          #  os: ubuntu-latest
+          #  python-version: 3.7
+          
+          #- test-run-id: lnx-py3.9
+          #  os: ubuntu-latest
+          #  python-version: 3.9
+
+          #- test-run-id: win-py3.9
+          #  os: windows-latest
+          #  python-version: 3.9
+
+    runs-on: ${{matrix.os}}
+    
+    steps:
+      # Install the desired version of Python and PySys
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{matrix.python-version}}
+          
+      - name: Cache Python deps (get location)
+        id: pip-cache
+        run: |
+            python -m pip install -U "pip>=20.1"
+            echo "::set-output name=dir::$(pip cache dir)"
+      - name: Cache Python deps
+        uses: actions/cache@v2
+        with:
+            path: ${{ steps.pip-cache.outputs.dir }}
+            key: ${{ matrix.test-run-id }}-pip
+
+      - name: Python dependencies - install
+        id: deps
+        shell: bash
+        run: |
+          python --version
+          python -m pip install --upgrade setuptools wheel
+          
+          # Set this env var ready for later steps
+          echo PYSYS_VERSION=`cat VERSION` >> $GITHUB_ENV
+
+      - name: Pre-build deployment tailoring
+        if: matrix.doc-and-deploy
+        shell: bash
+        run: |
+             mkdir dist
+
+             # Install to-dos (for line endings)
+             #sudo apt-get update
+             sudo apt-get install tofrodos
+
+             # pre-process module file to include current date, which also goes into the HTML doc
+             sed -i "s/__date__ = .*/__date__ = \"`date --iso-8601`\"/g" "pysys/__init__.py"
+             echo Build date:
+             grep "__date__" "pysys/__init__.py"
+
+             # create sample tests directory with both windows and linux line endings; leave it with windows endings so testing shows up any issues
+             echo --- Preparing PySys sample zip archives
+             cd samples
+             # copy everything - use . instead of * to avoid missing the hidden directories such as .github
+             cp -R common-files/. getting-started/
+             cp -R common-files/. cookbook/
+             tar -czf ../dist/PySys-$PYSYS_VERSION-samples-unix.tar.gz getting-started cookbook
+
+             # don't change the .sh script since we need it to be executable
+             find . -type f -not -name "*.sh" | xargs todos
+             zip -r --quiet ../dist/PySys-$PYSYS_VERSION-samples-win.zip getting-started cookbook
+       
+      - name: Build PySys
+        shell: bash
+        run: |
+          # build universal wheel and python source distribution
+          python setup.py check --strict
+          python setup.py bdist_wheel
+          python setup.py sdist
+
+      - name: Install PySys
+        shell: bash
+        run: |
+          python -m pip install --no-cache-dir dist/PySys*.whl
+          pysys.py --version
+
+          # Once it's installed, also add the coverage module
+          # force coverage version to 4.5.4 since the next version requires an sqlite module that doesn't work on macos pythons
+          python -m pip install coverage==4.5.4 codecov
+      
+      - name: Tests
+        shell: bash
+        working-directory: test
+        id: pysys
+        run: |
+          python -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
+
+          # upload Python code coverage - since we're measuring PySys itself, include both 
+          # top-level .coverage file and the files collected by PySys from its PySys subprocesses
+          # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
+          mv .coverage ./__coverage_python.main/.coverage.toplevel
+          rm ./__coverage_python.main/coverage.xml
+          
+          cd __coverage_python.main
+          codecov
+          
+      - name: Upload archive artifacts for any test failures
+        uses: actions/upload-artifact@v2
+        if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
+
+        with:
+          name: pysys_output_${{matrix.test-run-id}}
+          path: ${{ steps.pysys.outputs.artifact_TestOutputArchiveDir }}
+
+      - name: Extra tests
+        shell: bash
+        working-directory: test
+        run: |
+          # re-run the international tests with a different locale; would like to use iso8859-1 but not installed on Travis currently
+          # it's hard to override language on many OSes so just do this on linux
+          echo International tests:
+          if [[ ${{ runner.os }} = Linux ]]; then LANG=C LANGUAGE=C LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0 pysys.py run --ci --include i18n --outdir i18n-C ; fi
+          
+          # as a quick sanity-test, also run packaging tests after installing from source
+          echo Test packaging from an installed source dist:
+          python -m pip uninstall --yes PySys
+          python -m pip install --no-cache-dir "../dist/PySys-$PYSYS_VERSION.tar.gz"
+          pysys.py run --ci --include pysys-packaging --outdir against-src-dist-setuptools
+
+          # as a final sanity-test, also run packaging tests directly from source in "develop mode" as a pysys developer probably would
+          echo Test packaging from source checkout:
+          python -m pip uninstall --yes PySys
+          python -m pip install --no-cache-dir -e ..
+          pysys.py run --ci --include pysys-packaging --outdir against-src-develop-mode
+
+      - name: Build docs
+        if: matrix.doc-and-deploy
+        shell: bash
+        run: |
+           # Generate API docs, and a zip including these and the text files (with Windows line endings)
+           
+           # must do this AFTER testing to avoid polluting the installed packages while running the tests
+           # peg to specific versions to avoid our build breaking when there's an upgrade
+           pip install docutils==0.16 sphinx==3.0.1 sphinx-epytext==0.0.4 sphinx_rtd_theme==0.4.3
+
+           pip install rstcheck
+           # check the non-sphinx documentation is valid rst
+           rstcheck *.rst
+
+           mkdir docs/build_output
+           python -m sphinx -M html docs docs/build_output -w docs/build_output/doc_warnings.txt -W
+           
+           todos *.rst *.txt
+           # having a complete list of documented API in sorted form is useful for humans comparing API manually between versions
+           cp README.rst CHANGELOG.rst LICENSE.txt docs/build_output/autodocgen_documented_items.txt docs/build_output/html/
+           cd docs/build_output/html/
+           zip -r --quiet ../../../dist/PySys-$PYSYS_VERSION-docs.zip .
+           
+           # for the benefit of the release upload
+           cd ../../..
+           cp CHANGELOG.rst dist/
+
+      - name: Upload Python package .whl
+        if: success() && matrix.doc-and-deploy
+        uses: actions/upload-artifact@v2
+        with:
+          name: installation_package
+          path: dist/*.whl
+
+      - name: Upload HTML to gh-pages
+        if: success() && matrix.doc-and-deploy && (github.event_name == 'release' || github.ref == 'refs/heads/doc-updates')
+        # v4.1.1
+        uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9
+        with:
+          branch: gh-pages
+          folder: docs/build_output/html/
+
+      - name: Upload to GitHub Release
+        if: success() && matrix.doc-and-deploy && github.event_name == 'release'
+        id: upload-release-asset 
+        # v2.2.1
+        uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
+          file: dist/*
+
+      - name: Upload to https://test.pypi.org
+        if: success() && matrix.doc-and-deploy && github.event_name == 'release'
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          python -m pip install --no-cache-dir twine
+          # Test repo:
+          twine upload --repository-url https://test.pypi.org/legacy/ dist/*.whl
+          
+          # Real repo:
+          #twine upload dist/*.whl

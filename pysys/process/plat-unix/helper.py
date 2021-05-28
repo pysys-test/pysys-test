@@ -100,6 +100,8 @@ class ProcessWrapper(CommonProcessWrapper):
 		"""
 		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
 			state, timeout, stdout, stderr, displayName, **kwargs)
+
+		self.disableKillingChildProcesses = self.info.get('__pysys.disableKillingChildProcesses', False) # currently undocumented, just an emergency escape hatch for now
 		
 		if self.stdout is None: self.stdout = '/dev/null'
 		if self.stderr is None: self.stderr = '/dev/null'
@@ -136,6 +138,9 @@ class ProcessWrapper(CommonProcessWrapper):
 				self.pid = os.fork()
 
 				if self.pid == 0: # pragma: no cover
+					# create a new process group (same id as this pid) containing this new process, which we can use to kill grandchildren
+					os.setpgrp()
+				
 					# change working directory of the child process
 					os.chdir(self.workingDir)
 						
@@ -164,8 +169,11 @@ class ProcessWrapper(CommonProcessWrapper):
 					# and start a thread to write to the write end
 					os.close(stdin_r)
 					self.__stdin = stdin_w
-			except Exception:
-				if self.pid == 0: os._exit(os.EX_OSERR)	
+			except Exception as ex:
+				if self.pid == 0: 
+					sys.stderr.write('Failed with: %s\n'%ex)
+					sys.stderr.flush()
+					os._exit(os.EX_OSERR)	
 
 		if not self.running() and self.exitStatus == os.EX_OSERR:
 			raise ProcessError("Error creating process %s" % (self.command))
@@ -219,8 +227,22 @@ class ProcessWrapper(CommonProcessWrapper):
 		try:
 			with self.__lock:
 				if self.exitStatus is not None: return 
+				
+				# do the kill before the killpg, as there's a small race in which we might try to stop a process 
+				# before it has added itself to its own process group, in which case this is essential to avoid 
+				# leaking
 				os.kill(self.pid, signal.SIGTERM)
+				
+				# nb assuming setpgrp was called when we forked, this will signal the entire process group, 
+				# so any children are also killed; small chance this could fail if the process was stopped 
+				# before it had a chance to create its process group
+				if not self.disableKillingChildProcesses:
+					try:
+						os.killpg(self.pid, SIGTERM)
+					except Exception as ex:
+						# Best not to worry about these
+						log.debug('Failed to kill process group (but process itself was killed fine) for %s: %s', self, ex)
 			
 			self.wait(timeout=timeout)
-		except Exception:
-			raise ProcessError("Error stopping process")
+		except Exception as ex:
+			raise ProcessError("Error stopping process: %s"%ex)

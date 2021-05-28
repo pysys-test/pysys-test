@@ -78,7 +78,7 @@ class BackgroundThread(object):
 		:return: True if this thread is still running. 
 		:rtype: bool
 		"""
-		return self.thread.isAlive()
+		return self.thread.is_alive()
 	
 	def __run(self, **kwargs):
 		try:
@@ -149,7 +149,7 @@ class BackgroundThread(object):
 		if not timeout: timeout = self.joinTimeoutSecs
 		assert self.joinTimeoutSecs > 0, self.joinTimeoutSecs
 
-		if self.thread.isAlive() or (not outcomereported):
+		if self.thread.is_alive() or (not outcomereported):
 			# only log it the first time
 			self.log.info('Joining background thread %s'%self)
 		starttime = time.time()
@@ -157,16 +157,16 @@ class BackgroundThread(object):
 		# don't call thread.join for the entire time, since on windows that 
 		# leaves no opportunity to detect keyboard interrupts
 		if self.__kbdrInterrupt: raise self.__kbdrInterrupt # avoid repeatedly joining same thread
-		while self.thread.isAlive() and time.time()-starttime < timeout:
+		while self.thread.is_alive() and time.time()-starttime < timeout:
 			try:
 				self.thread.join(1)
-			except KeyboardInterrupt as ex: # progra: no cover
+			except KeyboardInterrupt as ex: # pragma: no cover
 				self.__kbdrInterrupt = ex
 				raise
 		
 		timetaken = time.time()-starttime
 		
-		if self.thread.isAlive():
+		if self.thread.is_alive():
 		
 			if not outcomereported:
 				self.owner.addOutcome(TIMEDOUT, 'Background thread %s is still running after waiting for allocated timeout period (%d secs)'%(
