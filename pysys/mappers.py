@@ -148,6 +148,9 @@ class IncludeLinesBetween(object):
 	>>> _mapperUnitTest( IncludeLinesBetween(startAt='start.*'), 'a|start line|b|c').replace('\\n','')
 	'start line|b|c'
 
+	>>> _mapperUnitTest( IncludeLinesBetween(startAt=lambda l: l.startswith('start')), 'a|start line|b|c').replace('\\n','')
+	'start line|b|c'
+
 	>>> _mapperUnitTest( IncludeLinesBetween(stopAfter='stopafter.*'), 'a|stopafter|b|c').replace('\\n','')
 	'a|stopafter'
 
