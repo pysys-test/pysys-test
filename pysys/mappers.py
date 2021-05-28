@@ -34,15 +34,14 @@ This package contains several pre-defined mappers:
 	applyMappers
 
 In addition to the above, you can create custom mappers, which are usually callables (functions, lambdas, or classes 
-with a ``__call__()`` method) that return the transformed copy of each incoming line (excluding the final newline 
-character). 
+with a ``__call__()`` method) that return the transformed copy of each incoming line. 
 
 For advanced cases you can provide a generator function that accepts a line iterator as input and yields the mapped 
 lines; this allows for stateful transformation and avoids the limitation of having a 1:1 (or 1:0) relationship between 
 input and output lines. 
 
-All "lines" passed to/from mappers end with a ``\\n`` character (on all platforms), except for the last line of the 
-file which will only have the ``\n`` if the file ends with a blank line. 
+All lines passed to/from mappers end with a ``\\n`` character (on all platforms), except for the last line of the 
+file which will only have the ``\\n`` if the file ends with a blank line. 
 Mappers must always preserve the final ``\\n`` of each line (if present). 
 
 .. versionadded:: 1.6.0
