@@ -1722,7 +1722,7 @@ class ProcessUser(object):
 
 	def deleteFile(self, path, **kwargs):
 		"""
-		Recursively delete the specified file. 
+		Delete the specified file. 
 		
 		Does nothing if it does not exist. Raises an exception if the deletion fails. 
 		
