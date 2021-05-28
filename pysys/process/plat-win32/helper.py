@@ -40,7 +40,7 @@ log = logging.getLogger('pysys.process')
 
 try:
 	IS_PRE_WINDOWS_8 = int(platform.version().split('.')[0]) < 8
-except Exception:
+except Exception: # pragma: no cover
 	IS_PRE_WINDOWS_8 = False
 	
 class ProcessWrapper(CommonProcessWrapper):
@@ -171,11 +171,11 @@ class ProcessWrapper(CommonProcessWrapper):
 				
 				# Windows CreateProcess maximum lpCommandLine length is 32,768
 				# http://msdn.microsoft.com/en-us/library/ms682425%28VS.85%29.aspx
-				if len(command)>=32768:
+				if len(command)>=32768: # pragma: no cover
 					raise ValueError("Command line length exceeded 32768 characters: %s..."%command[:1000])
 
 				dwCreationFlags = 0
-				if IS_PRE_WINDOWS_8:
+				if IS_PRE_WINDOWS_8: # pragma: no cover
 					# In case PySys is itself running in a job, might need to explicitly breakaway from it so we can give 
 					# it its own, but only for old pre-windows 8/2012, which support nested jobs
 					dwCreationFlags  = dwCreationFlags | win32process.CREATE_BREAKAWAY_FROM_JOB
@@ -197,9 +197,9 @@ class ProcessWrapper(CommonProcessWrapper):
 				try:
 					if not self.disableKillingChildProcesses:
 						win32job.AssignProcessToJobObject(self.__job, self.__hProcess)
-					else:
-						self.__job = None
-				except Exception as e:
+					else: 
+						self.__job = None # pragma: no cover
+				except Exception as e: # pragma: no cover
 					# Shouldn't fail unless process already terminated (which can happen since 
 					# if we didn't use SUSPENDED there's an inherent race here)
 					if win32process.GetExitCodeProcess(self.__hProcess)==win32con.STILL_ACTIVE:
@@ -243,9 +243,9 @@ class ProcessWrapper(CommonProcessWrapper):
 					if self.__hProcess: win32file.CloseHandle(self.__hProcess)
 					if self.__hThread: win32file.CloseHandle(self.__hThread)
 					if self.__stdin: win32file.CloseHandle(self.__stdin)
-				except Exception as e:
+				except Exception as e: # pragma: no cover
 					# these failed sometimes with 'handle is invalid', probably due to interference of stdin writer thread
-					log.warn('Could not close process and thread handles for process %s: %s', self.pid, e)
+					log.warn('Could not close process and thread handles for process %s: %s', self.pid, e) 
 				self.__stdin = self.__hThread = self.__hProcess = None
 				self._outQueue = None
 				self.exitStatus = exitStatus
@@ -267,9 +267,9 @@ class ProcessWrapper(CommonProcessWrapper):
 					if self.__job:
 						win32job.TerminateJobObject(self.__job, 0)
 					else:
-						win32process.TerminateProcess(self.__hProcess, 0)
+						win32process.TerminateProcess(self.__hProcess, 0) # pragma: no cover
 
-				except Exception as e:
+				except Exception as e: # pragma: no cover
 					# ignore errors unless the process is still running
 					if win32process.GetExitCodeProcess(self.hProcess)==win32con.STILL_ACTIVE:
 						log.warning('Failed to terminate job object for process %s: %s'%(self, e))
@@ -278,6 +278,6 @@ class ProcessWrapper(CommonProcessWrapper):
 						win32process.TerminateProcess(self.__hProcess, 0)
 
 			self.wait(timeout=timeout)
-		except Exception as ex:
+		except Exception as ex: # pragma: no cover
 			raise ProcessError("Error stopping process: %s"%ex)
 		

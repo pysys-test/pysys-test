@@ -160,7 +160,7 @@ class BackgroundThread(object):
 		while self.thread.is_alive() and time.time()-starttime < timeout:
 			try:
 				self.thread.join(1)
-			except KeyboardInterrupt as ex: # progra: no cover
+			except KeyboardInterrupt as ex: # pragma: no cover
 				self.__kbdrInterrupt = ex
 				raise
 		

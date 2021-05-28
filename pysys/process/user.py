@@ -1715,21 +1715,21 @@ class ProcessUser(object):
 		:param path: The path to be deleted. This can be an absolute path or 
 			relative to the testcase output directory.
 		
-		:param kwargs: Any additional arguments are passed to 
+		:param kwargs: Any additional arguments such as ``retries`` and ``ignore_errors`` are passed to 
 			L{pysys.utils.fileutils.deletedir()}. 
 		"""
 		return deletedir(os.path.join(self.output, path), **kwargs)
 
 	def deleteFile(self, path, **kwargs):
 		"""
-		Delete the specified file. 
+		Delete the specified file, with optional retries and ignoring of errors. 
 		
 		Does nothing if it does not exist. Raises an exception if the deletion fails. 
 		
 		:param path: The path to be deleted. This can be an absolute path or 
 			relative to the testcase output directory.
 		
-		:param kwargs: Any additional arguments are passed to 
+		:param kwargs: Any additional arguments such as ``retries`` and ``ignore_errors`` are passed to 
 			L{pysys.utils.fileutils.deletefile()}. 
 		"""
 		return deletefile(os.path.join(self.output, path), **kwargs)

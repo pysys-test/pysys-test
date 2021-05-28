@@ -75,7 +75,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[], 
 		return matches
 
 
-def filegrep(file, expr, returnMatch=False, **kwargs):
+def filegrep(file, expr, returnMatch=False, **kwargs): # pragma: no cover
 	"""Search for matches to a regular expression in an input file, returning true if a match occurs.
 	
 	:param file: The full path to the input file
@@ -112,7 +112,7 @@ def lastgrep(file, expr, ignore=[], include=[], encoding=None, returnMatch=False
 	
 	"""
 	if not pathexists(file):
-		raise FileNotFoundException("unable to find file \"%s\"" % (file))
+		raise FileNotFoundException("unable to find file \"%s\"" % (file)) # pragma: no cover
 	else:
 		with openfile(file, 'r', encoding=encoding) as f:
 			contents = f.readlines()
@@ -161,7 +161,7 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	regexpr = re.compile(expr, flags=flags)
 
 	if not pathexists(file):
-		raise FileNotFoundException('unable to find file "%s"' % (file))
+		raise FileNotFoundException('unable to find file "%s"' % (file)) # pragma: no cover
 	
 	
 	with openfile(file, 'r', encoding=encoding) as f:
@@ -176,8 +176,8 @@ def orderedgrep(file, exprList, encoding=None, flags=0):
 	return '#%d: %s'%(exprIndex, expr) # the expression we were trying to match
 
 
-def logContents(message, list):
-	"""Log a list of strings, prepending the line number to each line in the log output.
+def logContents(message, list): # pragma: no cover
+	"""Log a list of strings at debug, prepending the line number to each line in the log output.
 	
 	:param list: The list of strings to log
 	"""
