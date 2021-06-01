@@ -332,7 +332,7 @@ class JoinLines(object):
 			The combiner is configured to put the actual exception class and message (which is the most important information) 
 			at the start of the joined line rather than at the end (after the traceback). 
 
-			>>> def _mapperUnitTest(mapper, input): return '|'.join(x for x in (applyMappers([line for line in input.replace('|','\\n|').split('|')], [mapper]))).replace('\\n','')
+			>>> def _mapperUnitTest(mapper, input): return '|'.join(x for x in (applyMappers([line for line in input.replace('|','\\n|').replace('<tab>',chr(9)).split('|')], [mapper]))).replace('\\n','')
 			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")|KeyError: "foo bar"|Normal operation is resumed')
 			'a|KeyError: "foo bar" / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|Normal operation is resumed'
 
@@ -342,7 +342,7 @@ class JoinLines(object):
 			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")||KeyError: "foo bar"|Normal operation is resumed')
 			'a|KeyError: "foo bar" / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|Normal operation is resumed'
 
-			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |\\traise KeyError ("foo bar")||KeyError: "foo bar"|OtherError: baz|Normal operation is resumed')
+			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |<tab>raise KeyError ("foo bar")||KeyError: "foo bar"|OtherError: baz|Normal operation is resumed')
 			'a|KeyError: "foo bar" / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|OtherError: baz|Normal operation is resumed'
 
 			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")|Normal operation is resumed')
