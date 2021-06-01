@@ -116,7 +116,8 @@ def _createRegexMatchFunction(regex):
 	# Internal helper, not public API, do not use
 	
 	regex = re.compile(regex)
-	return lambda line: re.search(regex, line) is not None
+	def matchFunction(line, *optional): return re.search(regex, line) is not None
+	return matchFunction
 
 
 class IncludeLinesBetween(object):
@@ -208,21 +209,28 @@ class JoinLines(object):
 	As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads). 
 	
 	The following parameters can be either a callable/lambda that accepts an input line and returns a boolean, or a 
-	regular expression string to search for in the specified line. A lambda with a simple string operation such 
-	as ``startswith`` is usually more efficient than a regular expression. 
+	regular expression string to search for in the specified line. Note that a lambda with a simple string operation such 
+	as ``startswith(...)`` is usually a lot more efficient than a regular expression. 
 	
 	Typically you would use startAt and just one of continueWhile/stopAfter/stopBefore.
 	
-	:param str|callable[str]->bool startAt: If it matches then the current line and subsequent lines are joined into one. 
+	:param str|callable[str]->bool startAt: If it matches then the current line then subsequent lines are joined into one. 
+		Can be a regular expression or a function with argument ``line``. 
 		
-	:param str|callable[str]->bool continueWhile: After joining has started, then all consecutive lines 
+	:param str|callable[str,list[str]]->bool continueWhile: After joining has started, then all consecutive lines 
 		matching this will be included in the current join, and it will be stopped as soon as a non-matching line is found. 
-		
-	:param str|callable[str]->bool stopAfter: After joining has started, if this matches then this is the last line to be 
+		Can be a regular expression or a function with arguments ``(line, buffer)`` where ``buffer`` is the list of 
+		previous lines accumulated from the current startAt match. 
+				
+	:param str|callable[str,list[str]]->bool stopAfter: After joining has started, if this matches then this is the last line to be 
 		included in the current join. Includes the stop line.
+		Can be a regular expression or a function with arguments ``(line, buffer)`` where ``buffer`` is the list of 
+		previous lines accumulated from the current startAt match. 
 
-	:param str|callable[str]->bool stopBefore: After joining has started, if this matches, then the preceding line is 
+	:param str|callable[str,list[str]]->bool stopBefore: After joining has started, if this matches, then the preceding line is 
 		the last line to be included in the current join. Excludes the stop line. 
+		Can be a regular expression or a function with arguments ``(line, buffer)`` where ``buffer`` is the list of 
+		previous lines accumulated from the current startAt match. 
 
 	:param callable[list[str]]->str combiner: A function that combines the joined lines from a given sequence 
 		into a single line. The implementation is `defaultCombiner`. 
@@ -258,10 +266,10 @@ class JoinLines(object):
 		if not callable(startAt): startAt = _createRegexMatchFunction(startAt)
 		
 		if stopAfter is not None and not callable(stopAfter): stopAfter = _createRegexMatchFunction(stopAfter)
-		else: stopAfter = stopAfter or (lambda line: False)
+		else: stopAfter = stopAfter or (lambda line, buffer: False)
 		
 		if stopBefore is not None and not callable(stopBefore): stopBefore = _createRegexMatchFunction(stopBefore)
-		else: stopBefore = stopBefore or (lambda line: False)
+		else: stopBefore = stopBefore or (lambda line, buffer: False)
 
 		if continueWhile is not None and not callable(continueWhile): continueWhile = _createRegexMatchFunction(continueWhile)
 		# allow continueWhile to be None
@@ -275,13 +283,13 @@ class JoinLines(object):
 			buffer = [] # buffered lines
 			for l in it:
 				if len(buffer) > 0:
-					if stopAfter(l):
+					if stopAfter(l, buffer):
 						yield lineEndingSafeCombiner(buffer+[l])
-						del buffer[:]
+						buffer = []
 						continue
-					elif stopBefore(l) or (continueWhile is not None and not continueWhile(l)):
+					elif stopBefore(l, buffer) or (continueWhile is not None and not continueWhile(l, buffer)):
 						yield lineEndingSafeCombiner(buffer)
-						del buffer[:]
+						buffer = []
 						# don't "continue", i.e. drop down to the logic below
 					else:
 						buffer.append(l)
@@ -324,17 +332,35 @@ class JoinLines(object):
 			The combiner is configured to put the actual exception class and message (which is the most important information) 
 			at the start of the joined line rather than at the end (after the traceback). 
 
-			>>> def _mapperUnitTest(mapper, input): return '|'.join(x for x in (applyMappers([line for line in input.split('|')], [mapper]))).replace('\\n','')
+			>>> def _mapperUnitTest(mapper, input): return '|'.join(x for x in (applyMappers([line for line in input.replace('|','\\n|').split('|')], [mapper]))).replace('\\n','')
 			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")|KeyError: "foo bar"|Normal operation is resumed')
 			'a|KeyError: "foo bar" / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|Normal operation is resumed'
 
+			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")|AssertionError|Normal operation is resumed')
+			'a|AssertionError / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|Normal operation is resumed'
+
+			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")||KeyError: "foo bar"|Normal operation is resumed')
+			'a|KeyError: "foo bar" / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|Normal operation is resumed'
+
+			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")||KeyError: "foo bar"|OtherError: baz|Normal operation is resumed')
+			'a|KeyError: "foo bar" / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|OtherError: baz|Normal operation is resumed'
+
+			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")|Normal operation is resumed')
+			'a|Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|Normal operation is resumed'
+
+
 			"""
+			def maybeReorder(lines):
+				if not lines[-1].startswith(('  ', '\n')): return [lines[-1]]+lines[0:-1] # move the exception name to the beginning, if we can
+				return lines
+			
 			return JoinLines(
 				startAt=lambda l: l.startswith('Traceback (most recent call last):'),
-				# Stop when the indenting stops
-				stopAfter=lambda l: not l.startswith('  '), 
-				# Skip the "traceback" which is pointless, and put the actual exception first (since end of message may get truncated)
-				combiner=lambda lines: ' / '.join(l.strip() for l in [lines[-1]]+lines[0:-1] if l.strip())
+				
+				# Stop when the indenting stops, but also match the first non-indented line that starts with a Python exception class (and a preceding blank)
+				continueWhile=lambda l, buffer: l.startswith(('  ', '\n')) or (len(buffer)>0 and (buffer[-1].startswith(('  ', '\n')) and re.match('^[a-zA-Z0-9._]+(: |Exception|Error)', l))),
+				# Put the actual exception first (since end of message may get truncated)
+				combiner=lambda lines: JoinLines.defaultCombiner(maybeReorder(lines))
 				)
 
 	@staticmethod
@@ -383,7 +409,7 @@ class JoinLines(object):
 			return JoinLines(
 				startAt=lambda l: l.startswith('BUILD FAILED'),
 				# Continue until we get a blank line
-				continueWhile=lambda l: len(l.strip())>0, 
+				continueWhile=lambda l, _: len(l.strip())>0, 
 				)
 	
 def SortLines(key=None):
