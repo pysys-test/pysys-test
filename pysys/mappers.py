@@ -342,7 +342,7 @@ class JoinLines(object):
 			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")||KeyError: "foo bar"|Normal operation is resumed')
 			'a|KeyError: "foo bar" / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|Normal operation is resumed'
 
-			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")||KeyError: "foo bar"|OtherError: baz|Normal operation is resumed')
+			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |\\traise KeyError ("foo bar")||KeyError: "foo bar"|OtherError: baz|Normal operation is resumed')
 			'a|KeyError: "foo bar" / Traceback (most recent call last): / File "~/foo.py", line 1195, in __call__ / def __call__(self): myfunction() / File "~/bar.py", line 11, in myfunction / raise KeyError ("foo bar")|OtherError: baz|Normal operation is resumed'
 
 			>>> _mapperUnitTest( JoinLines.PythonTraceback(), 'a|Traceback (most recent call last):|  File "~/foo.py", line 1195, in __call__|    def __call__(self): myfunction()|  File "~/bar.py", line 11, in myfunction |    raise KeyError ("foo bar")|Normal operation is resumed')
@@ -351,14 +351,14 @@ class JoinLines(object):
 
 			"""
 			def maybeReorder(lines):
-				if not lines[-1].startswith(('  ', '\n')): return [lines[-1]]+lines[0:-1] # move the exception name to the beginning, if we can
+				if not lines[-1].startswith(('  ', '\t', '\n')): return [lines[-1]]+lines[0:-1] # move the exception name to the beginning, if we can
 				return lines
 			
 			return JoinLines(
 				startAt=lambda l: l.startswith('Traceback (most recent call last):'),
 				
 				# Stop when the indenting stops, but also match the first non-indented line that starts with a Python exception class (and a preceding blank)
-				continueWhile=lambda l, buffer: l.startswith(('  ', '\n')) or (len(buffer)>0 and (buffer[-1].startswith(('  ', '\n')) and re.match('^[a-zA-Z0-9._]+(: |Exception|Error)', l))),
+				continueWhile=lambda l, buffer: l.startswith(('  ', '\t', '\n')) or (len(buffer)>0 and (buffer[-1].startswith(('  ', '\t', '\n')) and re.match('^[a-zA-Z0-9._]+(: |Exception|Error)', l))),
 				# Put the actual exception first (since end of message may get truncated)
 				combiner=lambda lines: JoinLines.defaultCombiner(maybeReorder(lines))
 				)
