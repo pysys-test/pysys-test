@@ -1065,7 +1065,8 @@ class ProcessUser(object):
 		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
 			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
 			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
-			provides the ability to filter in/out sections of a file. 
+			provides the ability to filter in/out sections of a file, and `pysys.mappers.JoinLines` can be used to put 
+			exception stack traces onto the same line as the error message. 
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 			
@@ -1488,7 +1489,7 @@ class ProcessUser(object):
 		
 		If you have a complex expression with multiple values to extract, it is usually clearer to 
 		use ``(?P<groupName>...)`` named groups rather than unnamed groups referenced by index. This produces a 
-		dictionary 
+		dictionary::
 		
 			authInfo = self.getExprFromFile('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
 
