@@ -274,8 +274,10 @@ class JoinLines(object):
 		if continueWhile is not None and not callable(continueWhile): continueWhile = _createRegexMatchFunction(continueWhile)
 		# allow continueWhile to be None
 		
-		def lineEndingSafeCombiner(l):
-			l = combiner(l)
+		def lineEndingSafeCombiner(lines):
+			if len(lines) == 1: return lines[0] # don't apply combiner if we aren't joining multiple lines
+			
+			l = combiner(lines)
 			if not l.endswith('\n'): l += '\n' # don't rely on user remembering to not strip newlines in their combiner
 			return l
 		
