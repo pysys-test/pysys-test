@@ -6,7 +6,10 @@ name: PySys
 on:
   push:
     branches:
-      - "*"
+      # Run tests on the main branches only; for running tests on feature branches, use pull requests
+      - "master"
+      - "release"
+      - "doc-updates"
     
   pull_request:
     branches:
