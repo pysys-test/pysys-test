@@ -453,7 +453,7 @@ class ProcessUser(object):
 			else: # this wouldn't happen during a polling-until-success use case so is always worth logging even in quiet mode
 				log.info("%s", sys.exc_info()[1], exc_info=0)
 		except ProcessTimeout:
-			(log.warn if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+			(log.warning if not quiet else log.debug)("Process %r timed out after %d seconds, stopping process", process, timeout, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			process.stop()
 			self.addOutcome(TIMEDOUT, '%s timed out after %d seconds%s'%(process, timeout, handleErrorAndGetOutcomeSuffix(process)), printReason=False, abortOnError=abortOnError)
 		else:
