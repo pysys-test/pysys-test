@@ -40,9 +40,9 @@ jobs:
 
           # --- Additional testing combinations
 
-          #- test-run-id: lnx-py2.7
-          #  os: ubuntu-latest
-          #  python-version: 2.7
+          - test-run-id: lnx-py2.7
+            os: ubuntu-latest
+            python-version: 2.7
 
           #- test-run-id: mac-py3.7
           #  os: macos-latest
@@ -64,13 +64,13 @@ jobs:
           #  os: ubuntu-latest
           #  python-version: 3.7
           
-          #- test-run-id: lnx-py3.9
-          #  os: ubuntu-latest
-          #  python-version: 3.9
+          - test-run-id: lnx-py3.9
+            os: ubuntu-latest
+            python-version: 3.9
 
-          #- test-run-id: win-py3.9
-          #  os: windows-latest
-          #  python-version: 3.9
+          - test-run-id: win-py3.9
+            os: windows-latest
+            python-version: 3.9
 
     runs-on: ${{matrix.os}}
     
