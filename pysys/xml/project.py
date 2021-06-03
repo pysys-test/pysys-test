@@ -31,7 +31,7 @@ import pysys
 import pysys.utils.misc
 from pysys.constants import *
 from pysys import __version__
-from pysys.utils.loader import import_module
+from importlib import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
@@ -162,7 +162,7 @@ class _XMLProjectParser(object):
 					attName = propertyNode.attributes.item(att).name
 					if attName not in permittedAttributes: 
 						# not an error, to allow for adding new ones in future pysys versions, but worth warning about
-						log.warn('Unknown <property> attribute "%s" in project configuration'%attName)
+						log.warning('Unknown <property> attribute "%s" in project configuration'%attName)
 
 		return self.properties
 
@@ -472,7 +472,7 @@ class _XMLProjectParser(object):
 		# class, to avoid introducing tricky module import order problems, given 
 		# that the project itself needs loading very early
 		def classConstructor(*args, **kwargs):
-			module = import_module(mod, sys.path)
+			module = import_module(mod)
 			cls = getattr(module, classname)
 			return cls(*args, **kwargs) # invoke the constructor for this class
 		return classConstructor, optionsDict

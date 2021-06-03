@@ -174,7 +174,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	if dups:
 		dupmsg = 'Found %d duplicate descriptor ids: %s'%(len(dups), '\n'.join(dups))
 		if os.getenv('PYSYS_ALLOW_DUPLICATE_IDS','').lower()=='true':
-			logging.getLogger('pysys').warn(dupmsg) # undocumented option just in case anyone complains
+			logging.getLogger('pysys').warning(dupmsg) # undocumented option just in case anyone complains
 		else:
 			raise UserError(dupmsg)
 	

@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 				finally:
 					sock.close()
 			except Exception as e:
-				self.log.warn("Error binding to port %s; in use=%s", sys.exc_info()[1], portIsInUse(port), exc_info=0)
+				self.log.warning("Error binding to port %s; in use=%s", sys.exc_info()[1], portIsInUse(port), exc_info=0)
 				self.addOutcome(FAILED, "Error binding to 127.0.0.1 port %d (#%d): %s"%(port, i,e))
 				break
 				

@@ -11,7 +11,8 @@ from pysysinternalhelpers import *
 class PySysTest(BaseTest):
 
 	def execute(self):
-		runPySys(self, self.output+'/pysys', ['run', '-o', self.output+'/pysys_output'], workingDir=self.input)
+		runPySys(self, self.output+'/pysys', ['run', '-o', self.output+'/pysys_output'], workingDir=self.input, 
+			environs={'PYTHONWARNINGS':'default'})
 
 	def validate(self):
 		self.assertGrep('pysys.out', expr='Python reported 2 warnings during execution of tests.*')

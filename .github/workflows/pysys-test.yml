@@ -5,9 +5,15 @@ name: PySys
 
 on:
   push:
-    branches: [ master, 1.6.2features]
+    branches:
+      # Run tests on the main branches only; for running tests on feature branches, use pull requests
+      - "master"
+      - "release"
+      - "doc-updates"
+    
   pull_request:
-    branches: [ master ]
+    branches:
+      - "master"
 
   # When a new (empty, non-draft) release is created via the GitHub UI, uploads the files to that release, upload it to PyPi 
   # and upload the doc to GitHub pages. Only do this when all the tests are passing. 
@@ -40,9 +46,9 @@ jobs:
 
           # --- Additional testing combinations
 
-          #- test-run-id: lnx-py2.7
-          #  os: ubuntu-latest
-          #  python-version: 2.7
+          - test-run-id: lnx-py2.7
+            os: ubuntu-latest
+            python-version: 2.7
 
           #- test-run-id: mac-py3.7
           #  os: macos-latest
@@ -64,13 +70,13 @@ jobs:
           #  os: ubuntu-latest
           #  python-version: 3.7
           
-          #- test-run-id: lnx-py3.9
-          #  os: ubuntu-latest
-          #  python-version: 3.9
+          - test-run-id: lnx-py3.9
+            os: ubuntu-latest
+            python-version: 3.9
 
-          #- test-run-id: win-py3.9
-          #  os: windows-latest
-          #  python-version: 3.9
+          - test-run-id: win-py3.9
+            os: windows-latest
+            python-version: 3.9
 
     runs-on: ${{matrix.os}}
     

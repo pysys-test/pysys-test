@@ -17,6 +17,7 @@ What's new in 1.6.2
 
 PySys 1.6.2 is under development. 
 
+	- Added support for Python 3.9.
 	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
 	  PySys.
 	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
@@ -118,6 +119,7 @@ Fixes:
 	- Avoid creating unnecessary runner output directory as a result of ``mkdir(runner.output+'/../xxx')`` by 
 	  normalizing paths before calling mkdir. 
 	- Fixed `BaseTest.assertLineCount` bug in which ``reFlags`` parameter was not honoured. 
+	- Fixed numerous Python warnings. 
 
 Migration notes:
 
@@ -126,6 +128,8 @@ Migration notes:
 	- When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
 	  character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
 	  mappers. This is also now more clearly documented. 
+	- Removed undocumented internal module ``pysys.utils.loader``; no-one should be using this; if you are, use Python's 
+	  ``importlib.import_module()`` instead. 
 
 
 -------------------

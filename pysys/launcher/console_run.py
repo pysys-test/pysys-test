@@ -24,13 +24,13 @@ import os.path, stat, getopt, logging, traceback, sys
 import json
 import shlex
 import multiprocessing
+import importlib
 
 import pysys
 from pysys import log
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
-from pysys.utils.loader import import_module
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
 from pysys.exceptions import UserError
 from pysys.xml.project import Project
@@ -206,7 +206,7 @@ e.g.
 		try:
 			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
-			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
+			log.warning("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 
 		log.debug('PySys arguments: tests=%s options=%s', self.arguments, optlist)
@@ -262,7 +262,7 @@ e.g.
 				elif verbosity.upper() == "CRIT":					
 					verbosity = logging.CRITICAL
 				else:
-					log.warn('Invalid log level "%s"'%verbosity)
+					log.warning('Invalid log level "%s"'%verbosity)
 					sys.exit(1)
 				
 				if loggername is None:
@@ -279,7 +279,7 @@ e.g.
 			elif option in ("-a", "--type"):
 				self.type = value
 				if self.type not in ["auto", "manual"]:
-					log.warn("Unsupported test type - valid types are auto and manual")
+					log.warning("Unsupported test type - valid types are auto and manual")
 					sys.exit(1)
 
 			elif option in ("-t", "--trace"):
@@ -399,7 +399,7 @@ def runTest(args):
 		args = launcher.parseArgs(args)
 		
 		cls = Project.getInstance().runnerClassname.split('.')
-		module = import_module('.'.join(cls[:-1]), sys.path)
+		module = importlib.import_module('.'.join(cls[:-1]))
 		runner = getattr(module, cls[-1])(*args)
 		runner.start()
 	

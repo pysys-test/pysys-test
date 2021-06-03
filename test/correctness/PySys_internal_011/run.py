@@ -20,7 +20,7 @@ class PySysTest(BaseTest):
 						  state=BACKGROUND)
 						  	
 		# wait for the first unique id signal
-		matches = self.waitForGrep("testscript.out", expr="The first unique id is (?P<id1>\d+).*$", condition="==1", timeout=10)
+		matches = self.waitForGrep("testscript.out", expr=r"The first unique id is (?P<id1>\d+).*$", condition="==1", timeout=10)
 		
 		# grab the id from the match object
 		try: self.id1 = int(matches[0].group('id1'))
@@ -28,7 +28,7 @@ class PySysTest(BaseTest):
 		self.log.info("The first id is %d" % self.id1)
 			
 		# wait for the second unique id signal
-		matches = self.waitForGrep("testscript.out", expr="The second unique id is (?P<id2>\d+).*$", condition=">=2", timeout=10)
+		matches = self.waitForGrep("testscript.out", expr=r"The second unique id is (?P<id2>\d+).*$", condition=">=2", timeout=10)
 		
 		# grab the id from the match object
 		try: self.id2 = int(matches[1].group('id2'))

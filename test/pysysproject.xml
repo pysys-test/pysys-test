@@ -40,6 +40,7 @@
 	-->
 	<pythonpath value="${testRootDir}/pysys-extensions" />
 	<test-plugin classname="pysysinternalhelpers.PySysTestPlugin" alias="pysys"/>
+	<runner-plugin classname="pysysinternalhelpers.PySysRunnerPlugin"/>
 
 	<writers>
 		<writer classname="pysys.writer.testoutput.TestOutputArchiveWriter">

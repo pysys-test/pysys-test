@@ -27,7 +27,6 @@ from pysys import log
 from pysys import __version__
 from pysys.constants import *
 from pysys.xml.project import getProjectConfigTemplates, createProjectConfig
-from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
 
 
@@ -55,7 +54,7 @@ def makeProject(args):
 	try:
 		optlist, arguments = getopt.gnu_getopt(args, optionString, optionList)
 	except Exception:
-		log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
+		log.warning("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 		sys.exit(1)
 
 	dir = '.'

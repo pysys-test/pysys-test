@@ -157,7 +157,7 @@ def filediff(file1, file2, ignore=[], sort=True, replacementList=[], include=[],
 		logContents("Contents of %s after pre-processing;" % os.path.basename(file2), list2)		
 		if not list1 and not list2:
 			# maybe this should be an exception... it's probably not what was intended
-			log.warn('File comparison pre-processing has filtered out all lines from the files to be diffed, please check if this is intended: %s, %s', os.path.basename(file1), os.path.basename(file2))
+			log.warning('File comparison pre-processing has filtered out all lines from the files to be diffed, please check if this is intended: %s, %s', os.path.basename(file1), os.path.basename(file2))
 			
 		if list1 != list2:
 			log.debug("Unified diff between pre-processed input files;")

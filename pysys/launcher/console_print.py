@@ -28,7 +28,6 @@ from pysys import log
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
-from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
 from pysys.xml.project import Project
 
@@ -100,7 +99,7 @@ class ConsolePrintHelper(object):
 		try:
 			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
-			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
+			log.warning("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 			
 		for option, value in optlist:
@@ -126,7 +125,7 @@ class ConsolePrintHelper(object):
 			elif option in ("-a", "--type"):
 				self.type = value
 				if self.type not in ["auto", "manual"]:
-					log.warn("Unsupported test type - valid types are auto and manual")
+					log.warning("Unsupported test type - valid types are auto and manual")
 					sys.exit(1)
 
 			elif option in ("-t", "--trace"):
