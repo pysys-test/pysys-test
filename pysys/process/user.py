@@ -430,7 +430,7 @@ class ProcessUser(object):
 			if state == FOREGROUND:
 				correctExitStatus = pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
 				
-				logmethod = log.info if correctExitStatus else log.warn
+				logmethod = log.info if correctExitStatus else log.warning
 				if quiet: logmethod = log.debug
 				logmethod("Executed %s, exit status %d%s", displayName, process.exitStatus,
 					", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 10 else "")
