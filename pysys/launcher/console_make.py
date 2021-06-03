@@ -21,6 +21,7 @@ Implements ``pysys.py make`` to create new testcases.
 from __future__ import print_function
 import os.path, stat, getopt, logging, traceback, sys
 import json
+import importlib
 
 from pysys import log
 
@@ -28,7 +29,6 @@ from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.xml.project import Project
-from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
 from pysys.utils.pycompat import openfile, PY2
 from pysys.utils.fileutils import toLongPathSafe
@@ -191,7 +191,7 @@ def makeTest(args):
 	Project.findAndLoadProject()
 
 	cls = Project.getInstance().makerClassname.split('.')
-	module = import_module('.'.join(cls[:-1]), sys.path)
+	module = importlib.import_module('.'.join(cls[:-1]))
 	maker = getattr(module, cls[-1])("make")
 
 	maker.parseArgs(args)

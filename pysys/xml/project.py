@@ -31,7 +31,7 @@ import pysys
 import pysys.utils.misc
 from pysys.constants import *
 from pysys import __version__
-from pysys.utils.loader import import_module
+from importlib import import_module
 from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict

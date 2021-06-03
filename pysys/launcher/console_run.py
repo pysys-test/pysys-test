@@ -24,13 +24,13 @@ import os.path, stat, getopt, logging, traceback, sys
 import json
 import shlex
 import multiprocessing
+import importlib
 
 import pysys
 from pysys import log
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
-from pysys.utils.loader import import_module
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
 from pysys.exceptions import UserError
 from pysys.xml.project import Project
@@ -399,7 +399,7 @@ def runTest(args):
 		args = launcher.parseArgs(args)
 		
 		cls = Project.getInstance().runnerClassname.split('.')
-		module = import_module('.'.join(cls[:-1]), sys.path)
+		module = importlib.import_module('.'.join(cls[:-1]))
 		runner = getattr(module, cls[-1])(*args)
 		runner.start()
 	

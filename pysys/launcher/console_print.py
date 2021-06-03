@@ -28,7 +28,6 @@ from pysys import log
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
-from pysys.utils.loader import import_module
 from pysys.exceptions import UserError
 from pysys.xml.project import Project
 
