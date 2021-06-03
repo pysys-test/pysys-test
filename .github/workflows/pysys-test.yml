@@ -5,9 +5,12 @@ name: PySys
 
 on:
   push:
-    branches: [ master, 1.6.2features]
+    branches:
+      - "*"
+    
   pull_request:
-    branches: [ master ]
+    branches:
+      - "master"
 
   # When a new (empty, non-draft) release is created via the GitHub UI, uploads the files to that release, upload it to PyPi 
   # and upload the doc to GitHub pages. Only do this when all the tests are passing. 
