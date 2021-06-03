@@ -1244,7 +1244,7 @@ class ProcessUser(object):
 					log.debug('Running registered cleanup function: %r'%fn)
 					fn()
 				except Exception as e:
-					(log.warn if ignoreErrors else log.error)('Error while running cleanup function%s: ', ' (ignoreErrors=True)' if ignoreErrors else '', exc_info=True)
+					(log.warning if ignoreErrors else log.error)('Error while running cleanup function%s: ', ' (ignoreErrors=True)' if ignoreErrors else '', exc_info=True)
 					if not ignoreErrors:
 						exceptions.append('Cleanup function failed: %s (%s)'%(e, type(e).__name__))
 		finally:
