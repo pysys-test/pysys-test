@@ -922,13 +922,13 @@ class BaseTest(ProcessUser):
 				
 				if (not result) and self.getBoolProperty('autoUpdateAssertDiffReferences'):
 					self.logFileContents(unifiedDiffOutput, encoding=encoding or self.getDefaultFileEncoding(f1), logFunction=logDiffLine)
-					log.warn('... -XautoUpdateAssertDiffReferences option is enabled, so overwriting reference file %s and retrying ... '%f2)
+					log.warning('... -XautoUpdateAssertDiffReferences option is enabled, so overwriting reference file %s and retrying ... '%f2)
 					self.copy(f1, f2)
 					continue
 
 				break
 		except Exception:
-			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 			return False
 		else:
@@ -1196,7 +1196,7 @@ class BaseTest(ProcessUser):
 				matchcount = len(result)
 				result = None if matchcount==0 else result[0]
 		except Exception:
-			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Grep on %s %s %s'%(file, 'contains' if contains else 'does not contain', quotestring(expr) ))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 			result = None
@@ -1297,7 +1297,7 @@ class BaseTest(ProcessUser):
 			namedGroupsMode = compiled.groupindex
 			match = lastgrep(f, expr, ignores, includes, encoding=encoding or self.getDefaultFileEncoding(f), returnMatch=True, flags=reFlags)
 		except Exception:
-			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 			match = None
 		else:
@@ -1376,7 +1376,7 @@ class BaseTest(ProcessUser):
 		try:
 			expr = orderedgrep(f, exprList, encoding=encoding or self.getDefaultFileEncoding(f), flags=reFlags)
 		except Exception:
-			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
 			if expr is None and contains:
@@ -1458,7 +1458,7 @@ class BaseTest(ProcessUser):
 				firstMatch = None
 			log.debug("Number of matching lines in %s is %d", f, numberLines)
 		except Exception:
-			log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+			log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			msg = assertMessage or ('Line count on %s for %s%s '%(file, quotestring(expr), condition))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:

@@ -162,7 +162,7 @@ class _XMLProjectParser(object):
 					attName = propertyNode.attributes.item(att).name
 					if attName not in permittedAttributes: 
 						# not an error, to allow for adding new ones in future pysys versions, but worth warning about
-						log.warn('Unknown <property> attribute "%s" in project configuration'%attName)
+						log.warning('Unknown <property> attribute "%s" in project configuration'%attName)
 
 		return self.properties
 

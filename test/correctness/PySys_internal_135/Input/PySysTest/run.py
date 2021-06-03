@@ -8,7 +8,7 @@ import pysys
 class PySysTest(BaseTest):
 	def execute(self):
 		l = logging.getLogger('myloggercat')
-		l.warn('Hello at warn')
+		l.warning('Hello at warn')
 		l.info('Hello at info')
 		l.debug('Hello at debug')
 		

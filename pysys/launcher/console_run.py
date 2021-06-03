@@ -206,7 +206,7 @@ e.g.
 		try:
 			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
-			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
+			log.warning("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 
 		log.debug('PySys arguments: tests=%s options=%s', self.arguments, optlist)
@@ -262,7 +262,7 @@ e.g.
 				elif verbosity.upper() == "CRIT":					
 					verbosity = logging.CRITICAL
 				else:
-					log.warn('Invalid log level "%s"'%verbosity)
+					log.warning('Invalid log level "%s"'%verbosity)
 					sys.exit(1)
 				
 				if loggername is None:
@@ -279,7 +279,7 @@ e.g.
 			elif option in ("-a", "--type"):
 				self.type = value
 				if self.type not in ["auto", "manual"]:
-					log.warn("Unsupported test type - valid types are auto and manual")
+					log.warning("Unsupported test type - valid types are auto and manual")
 					sys.exit(1)
 
 			elif option in ("-t", "--trace"):

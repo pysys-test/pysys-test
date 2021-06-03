@@ -57,7 +57,7 @@ class ConsoleCleanTestHelper(object):
 		try:
 			optlist, self.arguments = getopt.gnu_getopt(args, self.optionString, self.optionList)
 		except Exception:
-			log.warn("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
+			log.warning("Error parsing command line arguments: %s" % (sys.exc_info()[1]))
 			sys.exit(1)
 
 		from pysys.internal.initlogging import pysysLogHandler, stdoutHandler
@@ -78,7 +78,7 @@ class ConsoleCleanTestHelper(object):
 				elif value.upper() == "CRIT":					
 					verbosity = logging.CRITICAL
 				else:
-					log.warn('Invalid log level "%s"'%value)
+					log.warning('Invalid log level "%s"'%value)
 					sys.exit(1)
 
 				log.setLevel(verbosity)

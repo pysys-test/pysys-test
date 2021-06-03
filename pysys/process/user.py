@@ -436,7 +436,7 @@ class ProcessUser(object):
 					", duration %d secs" % (time.time()-startTime) if (int(time.time()-startTime)) > 10 else "")
 				
 				if not ignoreExitStatus and not correctExitStatus:
-					if not stderr and not quiet: log.warn('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
+					if not stderr and not quiet: log.warning('Process %s has no stdouterr= specified; providing this parameter will allow PySys to capture the process output that shows why it failed', process)
 					self.addOutcome(BLOCKED, 
 						(
 							('%s returned non-zero exit code %d'%(process, process.exitStatus))
@@ -706,7 +706,7 @@ class ProcessUser(object):
 				log.info("Stopped process %r", process)
 			except ProcessError as e:
 				if not abortOnError:
-					log.warn("Ignoring failure to stop process %r due to: %s", process, e)
+					log.warning("Ignoring failure to stop process %r due to: %s", process, e)
 				else:
 					self.abort(BLOCKED, 'Unable to stop process %r'%(process), self.__callRecord())
 
@@ -732,7 +732,7 @@ class ProcessUser(object):
 				log.info("Sent %d signal to process %r", signal, process)
 			except ProcessError as e:
 				if not abortOnError:
-					log.warn("Ignoring failure to signal process %r due to: %s", process, e)
+					log.warning("Ignoring failure to signal process %r due to: %s", process, e)
 				else:
 					self.abort(BLOCKED, 'Unable to signal process %r'%(process), self.__callRecord())
 
@@ -767,7 +767,7 @@ class ProcessUser(object):
 				
 		except ProcessTimeout:
 			if not abortOnError:
-				log.warn("Ignoring timeout waiting for process %r after %d secs (as abortOnError=False)", process, time.time() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+				log.warning("Ignoring timeout waiting for process %r after %d secs (as abortOnError=False)", process, time.time() - t, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 			else:
 				self.abort(TIMEDOUT, 'Timed out waiting for process %s after %d secs'%(process, timeout), self.__callRecord())
 
@@ -923,7 +923,7 @@ class ProcessUser(object):
 						if abortOnError:
 							self.abort(BLOCKED, msg, self.__callRecord())
 						else:
-							log.warn('%s', msg)
+							log.warning('%s', msg)
 						return False
 
 					if timeout:
@@ -933,7 +933,7 @@ class ProcessUser(object):
 							if abortOnError:
 								self.abort(TIMEDOUT, msg, self.__callRecord())
 							else:
-								log.warn('%s', msg)
+								log.warning('%s', msg)
 							return False
 				if PLATFORM == 'darwin':
 					# MacOS gives an error if we try to connect to the same socket again after connection refused
@@ -975,7 +975,7 @@ class ProcessUser(object):
 					if abortOnError:
 						self.abort(TIMEDOUT, msg, self.__callRecord())
 					else:
-						log.warn(msg)
+						log.warning(msg)
 					break
 					
 			time.sleep(0.01)
@@ -1175,7 +1175,7 @@ class ProcessUser(object):
 				if abortOnError:
 					self.abort(TIMEDOUT, msg, self.__callRecord())
 				else:
-					log.warn(msg, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
+					log.warning(msg, extra=BaseLogFormatter.tag(LOG_TIMEOUTS))
 				break
 			
 			if errorIf is not None:
@@ -1185,7 +1185,7 @@ class ProcessUser(object):
 					if abortOnError:
 						self.abort(BLOCKED, msg, self.__callRecord())
 					else:
-						log.warn(msg)
+						log.warning(msg)
 					break
 				
 			if process and not process.running():
@@ -1193,7 +1193,7 @@ class ProcessUser(object):
 				if abortOnError:
 					self.abort(BLOCKED, msg, self.__callRecord())
 				else:
-					log.warn(msg)
+					log.warning(msg)
 				break
 
 			time.sleep(poll)

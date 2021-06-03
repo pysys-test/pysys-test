@@ -6,8 +6,8 @@ import warnings, traceback
 
 class PySysTest(BaseTest):
 	def execute(self):
-		warnings.warn('This is simulated warning 1')
-		warnings.warn('This is simulated warning 2')
+		warnings.warning('This is simulated warning 1')
+		warnings.warning('This is simulated warning 2')
 
 	def validate(self):
 		pass 

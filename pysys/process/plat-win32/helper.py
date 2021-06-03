@@ -203,7 +203,7 @@ class ProcessWrapper(CommonProcessWrapper):
 					# Shouldn't fail unless process already terminated (which can happen since 
 					# if we didn't use SUSPENDED there's an inherent race here)
 					if win32process.GetExitCodeProcess(self.__hProcess)==win32con.STILL_ACTIVE:
-						log.warn('Failed to associate process %s with new job: %s (this may prevent automatic cleanup of child processes)' %(self, e))
+						log.warning('Failed to associate process %s with new job: %s (this may prevent automatic cleanup of child processes)' %(self, e))
 					
 					# force use of TerminateProcess not TerminateJobObject if this failed
 					self.__job = None
@@ -245,7 +245,7 @@ class ProcessWrapper(CommonProcessWrapper):
 					if self.__stdin: win32file.CloseHandle(self.__stdin)
 				except Exception as e: # pragma: no cover
 					# these failed sometimes with 'handle is invalid', probably due to interference of stdin writer thread
-					log.warn('Could not close process and thread handles for process %s: %s', self.pid, e) 
+					log.warning('Could not close process and thread handles for process %s: %s', self.pid, e) 
 				self.__stdin = self.__hThread = self.__hProcess = None
 				self._outQueue = None
 				self.exitStatus = exitStatus

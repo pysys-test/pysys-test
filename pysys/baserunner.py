@@ -437,7 +437,7 @@ class BaseRunner(ProcessUser):
 								if visitor.visitTestOutputFile(testObj, path) is True: break # don't invoke remaining visitors if this one dealt with it
 						
 					except Exception as ex:
-						log.warn("Failed to collect test output file %s: ", path, exc_info=1)
+						log.warning("Failed to collect test output file %s: ", path, exc_info=1)
 						if not hasattr(self, '_collectErrorAlreadyReported'):
 							self.runnerErrors.append('Failed to collect test output from test %s (and maybe others): %s'%(testObj, ex))
 							self._collectErrorAlreadyReported = True
@@ -595,7 +595,7 @@ class BaseRunner(ProcessUser):
 			try: writer.setup(numTests=self.cycle * len(self.descriptors), cycles=self.cycle, xargs=self.xargs, threads=self.threads, 
 				testoutdir=self.outsubdir, runner=self)
 			except Exception: 
-				log.warn("caught %s setting up %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+				log.warning("caught %s setting up %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 				raise # better to fail obviously than to stagger on, but fail to record/update the expected output files, which user might not notice
 		
 		if self.printLogs is None: self.printLogs = self.__printLogsDefault # default value, unless overridden by cmdline or writer.setup
@@ -660,7 +660,7 @@ class BaseRunner(ProcessUser):
 						sys.stderr.write("Keyboard interrupt detected while running cycleComplete... \n")
 						self.handleKbrdInt()
 					except:
-						log.warn("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+						log.warning("caught %s: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			
 			
 			# wait for the threads to complete if more than one thread	
@@ -680,7 +680,7 @@ class BaseRunner(ProcessUser):
 			for perfreporter in self.performanceReporters:
 					try: perfreporter.cleanup()
 					except Exception as ex: 
-						log.warn("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+						log.warning("Caught %s performing performance reporter cleanup: %s", sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						fatalerrors.append('Failed to cleanup performance reporter %s: %s'%(repr(perfreporter), ex))
 			
 			# perform cleanup on the test writers - this also takes care of logging summary results
@@ -689,7 +689,7 @@ class BaseRunner(ProcessUser):
 					try: 
 						writer.cleanup()
 					except Exception as ex: 
-						log.warn("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+						log.warning("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 						# might stop results being completely displayed to user
 						fatalerrors.append('Writer %s failed during cleanup: %s'%(repr(writer), ex))
 				del self.writers[:]
@@ -697,7 +697,7 @@ class BaseRunner(ProcessUser):
 			try:
 				self.processCoverageData()
 			except Exception as ex: 
-				log.warn("Caught %s processing coverage data %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+				log.warning("Caught %s processing coverage data %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to process coverage data: %s'%ex)
 
 		finally:
@@ -705,18 +705,18 @@ class BaseRunner(ProcessUser):
 			try:
 				self.cleanup()
 			except Exception as ex:
-				log.warn("Caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				log.warning("Caught %s performing runner cleanup: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				fatalerrors.append('Failed to cleanup runner: %s'%(ex))
 
 		pysys.utils.allocport.logPortAllocationStats()
 
 		if self.__pythonWarnings:
-			log.warn('Python reported %d warnings during execution of tests; is is recommended to do a test run with -Werror and fix them if possible, or filter them out if not (see Python\'s warnings module for details)', self.__pythonWarnings)
+			log.warning('Python reported %d warnings during execution of tests; is is recommended to do a test run with -Werror and fix them if possible, or filter them out if not (see Python\'s warnings module for details)', self.__pythonWarnings)
 
 		fatalerrors = self.runnerErrors+fatalerrors
 
 		if self._initialEnviron != os.environ:
-			log.warn('os.environ has changed while tests were running: \n%s', 
+			log.warning('os.environ has changed while tests were running: \n%s', 
 				''.join(difflib.unified_diff(
 					['%s=%s\n'%(k,v) for (k,v) in sorted(self._initialEnviron.items())], 
 					['%s=%s\n'%(k,v) for (k,v) in sorted(os.environ.items())], 
@@ -836,7 +836,7 @@ class BaseRunner(ProcessUser):
 					writer.processResult(testObj, cycle=cycle,
 										  testStart=testStart, testTime=testDurationSecs, runLogOutput=bufferedoutput)
 				except Exception as ex: 
-					log.warn("caught %s processing %s test result by %s: %s", sys.exc_info()[0], descriptor.id, writer, sys.exc_info()[1], exc_info=1)
+					log.warning("caught %s processing %s test result by %s: %s", sys.exc_info()[0], descriptor.id, writer, sys.exc_info()[1], exc_info=1)
 					errors.append('Failed to record test result using writer %s: %s'%(repr(writer), ex))
 			
 			# store the result
@@ -887,7 +887,7 @@ class BaseRunner(ProcessUser):
 		:param exc_info: The tuple of values as created from sys.exc_info()
 		 
 		"""
-		log.warn("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
+		log.warning("caught %s from executing test container: %s", exc_info[0], exc_info[1], exc_info=exc_info)
 		self.runnerErrors.append("caught %s from executing test container: %s"%(exc_info[0], exc_info[1]))
 
 
@@ -909,16 +909,16 @@ class BaseRunner(ProcessUser):
 						try: 
 							writer.cleanup()
 						except Exception as ex: 
-							log.warn("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
+							log.warning("Writer %s failed during cleanup - %s: %s", writer, sys.exc_info()[0].__name__, sys.exc_info()[1], exc_info=1)
 					del self.writers[:]
 				
 				try:
 					self.cycleComplete()
 					self.cleanup()
 				except Exception: 
-					log.warn("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+					log.warning("caught %s cleaning up runner after interrupt: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 			except KeyboardInterrupt:
-				log.warn("Keyboard interrupted detected during cleanup; will exit immediately")
+				log.warning("Keyboard interrupted detected during cleanup; will exit immediately")
 			sys.exit(100) # keyboard interrupt
 
 		try:
@@ -957,11 +957,11 @@ class BaseRunner(ProcessUser):
 		badchars = re.sub('[-\\w_.~]+','', descriptor.idWithoutMode)
 		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
 		if badchars: 
-			log.warn('Unsupported characters "%s" found in test id "%s" - please use alphanumeric characters, dot and underscore for test ids', 
+			log.warning('Unsupported characters "%s" found in test id "%s" - please use alphanumeric characters, dot and underscore for test ids', 
 				''.join(set(c for c in badchars)), descriptor.idWithoutMode)
 		else:
 			badchars = re.sub('[-\\w_.~]+','', getattr(descriptor, 'mode', None) or '')
-			if badchars: log.warn('Unsupported characters "%s" found in test mode "%s" - please use just alphanumeric characters, dot and underscore for modes', 
+			if badchars: log.warning('Unsupported characters "%s" found in test mode "%s" - please use just alphanumeric characters, dot and underscore for modes', 
 				''.join(set(c for c in badchars)), descriptor.mode)
 
 		title = descriptor.title.replace('\n','').strip()
@@ -1165,7 +1165,7 @@ class TestContainer(object):
 					if hasattr(writer, 'processTestStarting'):
 						writer.processTestStarting(testObj=self.testObj, cycle=self.cycle)
 				except Exception: 
-					log.warn("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
+					log.warning("caught %s calling processTestStarting on %s: %s", sys.exc_info()[0], writer, sys.exc_info()[1], exc_info=1)
 
 			# execute the test if we can
 			try:
@@ -1181,10 +1181,10 @@ class TestContainer(object):
 				elif len(exc_info) > 0:
 					self.testObj.addOutcome(BLOCKED, 'Failed to set up test: %s'%exc_info[0][1], abortOnError=False)
 					for info in exc_info:
-						log.warn("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
+						log.warning("caught %s while setting up test %s: %s", info[0], self.descriptor.id, info[1], exc_info=info)
 						
 				elif self.kbrdInt:
-					log.warn("test interrupt from keyboard")
+					log.warning("test interrupt from keyboard")
 					self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 			
 				else:
@@ -1198,7 +1198,7 @@ class TestContainer(object):
 					except AbortExecution as e:
 						del self.testObj.outcome[:]
 						self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)
-						log.warn('Aborted test due to %s outcome'%e.outcome) # nb: this could be due to SKIPPED
+						log.warning('Aborted test due to %s outcome'%e.outcome) # nb: this could be due to SKIPPED
 
 					if self.detectCore(self.outsubdir):
 						self.testObj.addOutcome(DUMPEDCORE, 'Core detected in output subdirectory', abortOnError=False)
@@ -1208,7 +1208,7 @@ class TestContainer(object):
 				self.testObj.addOutcome(BLOCKED, 'Test interrupt from keyboard', abortOnError=False)
 
 			except Exception:
-				log.warn("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				log.warning("caught %s while running test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, '%s: %s'%(sys.exc_info()[0].__name__, sys.exc_info()[1]), abortOnError=False)
 
 			# call the cleanup method to tear down the test
@@ -1222,7 +1222,7 @@ class TestContainer(object):
 			except UserError as ex: # will already have been logged with stack trace
 				self.testObj.addOutcome(BLOCKED, str(ex), abortOnError=False)
 			except Exception as ex:
-				log.warn("caught %s while cleaning up test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
+				log.warning("caught %s while cleaning up test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
 
 			# in case these got overwritten by a naughty test, restore before printing the final summary

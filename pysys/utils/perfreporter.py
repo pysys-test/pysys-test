@@ -253,7 +253,7 @@ class CSVPerformanceReporter(object):
 				self.__previousResultKeys[resultKey] = (testobj.descriptor.id, testobj.testCycle, d)
 
 		if testobj.getOutcome().isFailure():
-			testobj.log.warn('   Performance result "%s" will not be recorded as test has failed', resultKey)
+			testobj.log.warning('   Performance result "%s" will not be recorded as test has failed', resultKey)
 			return
 
 

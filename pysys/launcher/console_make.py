@@ -125,7 +125,7 @@ class %s(%s):
 			elif option in ("-a", "--type"):
 				self.type = value
 				if self.type not in ["auto", "manual"]:
-					log.warn("Unsupported test type - valid types are auto and manual")
+					log.warning("Unsupported test type - valid types are auto and manual")
 					sys.exit(1)	
 
 			elif option in ("-d", "--dir"):
