@@ -472,7 +472,7 @@ class _XMLProjectParser(object):
 		# class, to avoid introducing tricky module import order problems, given 
 		# that the project itself needs loading very early
 		def classConstructor(*args, **kwargs):
-			module = import_module(mod, sys.path)
+			module = import_module(mod)
 			cls = getattr(module, classname)
 			return cls(*args, **kwargs) # invoke the constructor for this class
 		return classConstructor, optionsDict
