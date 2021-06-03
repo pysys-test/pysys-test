@@ -1569,7 +1569,7 @@ class BaseTest(ProcessUser):
 			)
 		msg = 'Python doctest for %s'%(os.path.basename(pythonFile))
 		try:
-			msg += ': '+self.getExprFromFile(output, '\d+ passed.*\d+ failed') # appears whether it succeeds or fails
+			msg += ': '+self.getExprFromFile(output, r'\d+ passed.*\d+ failed') # appears whether it succeeds or fails
 		except Exception: 
 			msg += ': failed to execute correctly'
 		try:

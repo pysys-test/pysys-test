@@ -20,7 +20,7 @@ class PySysTest(BaseTest):
 		reasonFailedEvalAssert = self.getOutcomeReason()
 		self.addOutcome(PASSED, override=True)
 
-		self.assertThat('actual == expected', actual="prefix f\oo bar suffix", expected=r'f\oobar')
+		self.assertThat('actual == expected', actual=r"prefix f\oo bar suffix", expected=r'f\oobar')
 		reasonFailedAssert = self.getOutcomeReason()
 		self.addOutcome(PASSED, override=True)
 

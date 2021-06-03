@@ -82,7 +82,7 @@ testid2,0,   my result key2  , foobarval2, unitval,fAlse,,-1,-1,,#resultDetails:
 		self.log.info('Parsed performance file: %s', repr(f2))
 		
 		self.assertDiff('parsed_perf_genuine_data.txt', 'parsed_perf_genuine_data.txt', replace=[
-			('hostname=".*startTime="\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d', 'hostname...startTime')])
+			(r'hostname=".*startTime="\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d', 'hostname...startTime')])
 		self.assertDiff('parsed_perf_contrived_data.txt', 'parsed_perf_contrived_data.txt')
 		
 		# now test the aggregation logic

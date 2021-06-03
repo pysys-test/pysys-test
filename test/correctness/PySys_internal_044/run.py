@@ -18,11 +18,11 @@ class PySysTest(BaseTest):
 		self.assertDiff(file1='file1.txt', file2='file1_with_whitespace.txt')
 		
 		# diff with an ignores
-		self.assertDiff(file1='file2.txt', filedir1=self.input, file2='ref_file.txt', ignores=['\(on my Vespa 300 GTS ...\)'])
+		self.assertDiff(file1='file2.txt', filedir1=self.input, file2='ref_file.txt', ignores=[r'\(on my Vespa 300 GTS ...\)'])
 		self.assertDiff(file1='file2.txt', filedir1=self.input, file2='ref_file.txt', ignores=['Vespa'])
 		
 		self.copy(self.input+'/file2.txt', 'file2.txt')
-		self.assertDiff(file1='file2.txt', file2='ref_file.txt', ignores=['\(on my Vespa 250 GTS ...\)', 'somenonexistentexpression'])
+		self.assertDiff(file1='file2.txt', file2='ref_file.txt', ignores=[r'\(on my Vespa 250 GTS ...\)', 'somenonexistentexpression'])
 		self.checkForFailedOutcome()
 	
 		# diff with some includes

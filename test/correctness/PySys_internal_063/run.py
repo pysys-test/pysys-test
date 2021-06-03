@@ -16,9 +16,9 @@ class PySysTest(BaseTest):
 		result = self.logFileContents('does not exist.txt')#
 		assert not result
 		
-		result = self.logFileContents('f1.txt', includes=['.*2\d.*', '.*3\d.*'], excludes=['\d1'])
+		result = self.logFileContents('f1.txt', includes=[r'.*2\d.*', r'.*3\d.*'], excludes=[r'\d1'])
 		assert result
-		self.logFileContents(self.output+'/f2.txt', maxLines=2, tail=True, excludes=['\d5'])
+		self.logFileContents(self.output+'/f2.txt', maxLines=2, tail=True, excludes=[r'\d5'])
 		self.waitForGrep('run.log', expr='Contents of .*f2.txt', abortOnError=True, ignores=[' DEBUG '])
 
 		self.logFileContents(self.output+'/f1.txt', mappers=[pysys.mappers.IncludeLinesBetween('.*018', '.*020')])

@@ -209,7 +209,7 @@ class CSVPerformanceReporter(object):
 		# check for correct format for result key
 		if '  ' in resultKey:
 			raise Exception ('Invalid resultKey - contains double space "  ": %s' % resultKey)
-		if re.compile('.*\d{4}[-/]\d{2}[-/]\d{2}\ \d{2}[:/]\d{2}[:/]\d{2}.*').match(resultKey) != None :
+		if re.compile(r'.*\d{4}[-/]\d{2}[-/]\d{2}\ \d{2}[:/]\d{2}[:/]\d{2}.*').match(resultKey) != None :
 			raise Exception ('Invalid resultKey - contains what appears to be a date time - which would imply alteration of the result key in each run: %s' % resultKey)
 		if '\n' in resultKey:
 			raise Exception ('Invalid resultKey - contains a new line: %s' % resultKey)
