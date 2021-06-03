@@ -1,4 +1,6 @@
 import os, sys
+import warnings
+
 import pysys
 from pysys.constants import IS_WINDOWS, FAILED
 from pysys.utils.filecopy import filecopy
@@ -27,7 +29,10 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 			environs['PYTHONCOERCECLOCALE'] = '0'
 
 	environs = processowner.createEnvirons(overrides=environs, command=sys.executable)
-	
+
+	# Error on warnings, to keep everything clean
+	environs.setdefault("PYTHONWARNINGS", "error")
+
 	if defaultproject:
 		createProjectConfig(os.path.join(processowner.output, kwargs.get('workingDir', '.')))
 	
@@ -57,4 +62,8 @@ class PySysTestPlugin:
 	
 	def pysys(self, stdouterr, *args, **kwargs):
 		runPySys(self.testObj, stdouterr, *args, **kwargs)
-	
+
+class PySysRunnerPlugin:
+	def setup(self, runner):
+		if not sys.warnoptions:
+			warnings.simplefilter("error") 	# Error on warnings (in this, the parent pysys process), to keep everything clean
