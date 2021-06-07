@@ -290,13 +290,13 @@ can also be run against a mocked database for quick local development.
 Using modes is fairly straightforward. First edit the ``pysystest.xml`` files for tests that 
 need to run in multiple modes, and add a list of the supported modes::
 
-   <classification>
-	<groups>...</groups>
-	<modes inherit="true">
-		<mode>MockDatabase_Firefox</mode>
-		<mode>MyDatabase2.0_Chrome</mode>
-	</modes>
-   </classification>
+		<classification>
+		<groups>...</groups>
+		<modes inherit="true">
+			<mode>MockDatabase_Firefox</mode>
+			<mode>MyDatabase2.0_Chrome</mode>
+		</modes>
+	</classification>
 
 When naming modes, TitleCase is recommended, and dot and underscore characters 
 may be used; typically dot is useful for version numbers and underscore is 
@@ -350,13 +350,17 @@ testcases.
 Your main test run (perhaps in a CI job) probably wants to run tests in all 
 modes::
 
-  pysys run --mode ALL --threads auto
+  pysys run --mode ALL
+
+(In practice you would use ``--ci`` which does the above and also sets some other useful defaults). 
 
 You can also specify specifies modes to run in, or to run everything except 
-specified modes::
+specified modes, or even use regular expressions for even more flexibility::
 
   pysys run --mode MyMode1,MyMode2
   pysys run --mode !MyMode3,!MyMode4
+  pysys run --mode MyMode.*
+
 
 After successfully getting all your tests passing in their primary mode, it could 
 be useful to run them in every mode other than the primary one::

@@ -111,6 +111,18 @@ PySys 1.6.2 is under development.
 	  is useful when checking log files for unexpected errors and warnings. 
 	- Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
 	  pool of TCP ports. 
+	- pysys.py improvements:
+	
+	  - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 
+	    a desired subset of modes.	    
+	  - ``pysys print --mode MODES`` now accepts the same mode specifiers (including regular expressions as above) 
+	    as ``pysys run``::
+	    
+	      pysys print -m MyDatabase2.0_FireFox,MyDatabase2.0_Chrome
+	      pysys print -m MyDatabase2.0_.*
+	      pysys print -m !MyOtherDatabase
+	    
+	    Also, ``pysys print`` includes the ``~MODE`` suffix after the test id if a ``--mode`` filter was specified. 
 
 Fixes:
 

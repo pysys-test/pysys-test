@@ -52,6 +52,9 @@ def loadDescriptors(dir=None):
 	loader = Project.getInstance().descriptorLoaderClass(Project.getInstance())
 	return loader.loadDescriptors(dir)
 
+MODE_CHARS = '-\\w_.~' # internal API, subject to change at any time
+
+
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[], expandmodes=True):
 	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
 	
@@ -110,6 +113,12 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 		
 		modeincludesnone = ((MODES_ALL in modeincludes or MODES_PRIMARY in modeincludes or '' in modeincludes) and 
 					(MODES_PRIMARY not in modeexcludes and '' not in modeexcludes))
+
+		NON_MODE_CHARS = '[^'+MODE_CHARS+']'
+		def isregex(m): return re.search(NON_MODE_CHARS, m)
+
+		regexmodeincludes = [re.compile(m, flags=re.IGNORECASE) for m in modeincludes if isregex(m)]
+		regexmodeexcludes = [re.compile(m, flags=re.IGNORECASE) for m in modeexcludes if isregex(m)]
 		
 		for d in descriptors:
 			if not d.modes:
@@ -141,26 +150,32 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 					
 					# excludes 
 					if isprimary and MODES_PRIMARY in modeexcludes: continue
-					if m in modeexcludes: continue
+					if m in modeexcludes or any(regex.match(m) for regex in regexmodeexcludes): continue
+					
 					
 					# includes
 					if not (MODES_ALL in modeincludes or 
 						m in modeincludes or 
+						any(regex.match(m) for regex in regexmodeincludes) or
 						(isprimary and MODES_PRIMARY in modeincludes)
 						): 
 						continue
 					
 					thisdescriptorlist.append(d._createDescriptorForMode(m))
-
+	
 		for m in [MODES_ALL, MODES_PRIMARY]:
 			if m.lower() in allmodes: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
 		
 		# don't permit the user to specify a non existent mode by mistake
 		for m in modeincludes+modeexcludes:
 			if (not m) or m.upper() in [MODES_ALL, MODES_PRIMARY]: continue
-			if allmodes.get(m.lower(),None) != m:
-				raise UserError('Unknown mode "%s": the available modes for descriptors in this directory are: %s'%(
-					m, ', '.join(sorted(allmodes.values() or ['<none>']))))
+			if isregex(m):
+				if any(re.search(m, x, flags=re.IGNORECASE) for x in allmodes): continue
+			else:
+				if allmodes.get(m.lower(),None) == m: continue
+			
+			raise UserError('Unknown mode (or mode regex) "%s"; the available modes for descriptors in this directory are: %s'%(
+				m, ', '.join(sorted(allmodes.values() or ['<none>']))))
 		
 	# first check for duplicate ids
 	ids = {}
@@ -322,7 +337,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 			else:
 				index = index + 1
 	
-	# expand based on modes (unless we're printing in which case expandmodes=False)
+	# expand based on modes (unless we're printing without any mode filters in which case expandmodes=False)
 	if supportMultipleModesPerRun and expandmodes: 
 		expandedtests = []
 		for t in tests:

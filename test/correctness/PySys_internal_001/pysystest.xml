@@ -17,6 +17,7 @@ Also checks getting boolean values works.
     <groups>
       <group>project</group>
     </groups>
+    <modes><mode>a!b</mode></modes>
   </classification>
 
   <data>

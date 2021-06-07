@@ -27,7 +27,7 @@ from pysys import log
 
 from pysys import __version__
 from pysys.constants import *
-from pysys.launcher import createDescriptors
+from pysys.launcher import createDescriptors, MODE_CHARS
 from pysys.exceptions import UserError
 from pysys.xml.project import Project
 
@@ -40,7 +40,7 @@ class ConsolePrintHelper(object):
 		self.modes = False # print list of available modes
 		self.requirements = False
 		self.json = False
-		self.modefilter = None # select based on mode
+		self.modefilter = [] # select based on mode
 		self.type = None
 		self.trace = None
 		self.includes = []
@@ -73,7 +73,8 @@ class ConsolePrintHelper(object):
 		print("    selection/filtering options:")
 		print("       -G | --grep      STRING     print only tests whose title or id contains the specified regex")
 		print("                                   (matched case insensitively)")
-		print("       -m | --mode                 print only tests that run in the specifies mode")
+		print("       -m | --mode      STRING     print only tests that run in the specified mode(s)")
+		print("                                   (use ! for excludes e.g. -m MyMode1,MyMode2,Other.* or -m !MyMode3)")
 		print("       -a | --type      STRING     print only tests of supplied type (auto or manual, default all)")
 		print("       -t | --trace     STRING     print only tests which cover requirement id ") 
 		print("       -i | --include   STRING     print only tests in included group (can be specified multiple times)")
@@ -119,8 +120,7 @@ class ConsolePrintHelper(object):
 				self.requirements = True
 				
 			elif option in ("-m", "--mode"):
-				self.modefilter = value
-				if ',' in value or '!' in value: raise UserError('Only one mode can be specified when printing tests')
+				self.modefilter = [x.strip() for x in value.split(',')]
 
 			elif option in ("-a", "--type"):
 				self.type = value
@@ -154,7 +154,7 @@ class ConsolePrintHelper(object):
 			Project.findAndLoadProject()
 	
 			# nb: mode filtering happens later
-			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, expandmodes=False)
+			descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, expandmodes=True if self.modefilter else False, modeincludes=self.modefilter)
 			
 			if self.grep:
 				regex = re.compile(self.grep, flags=re.IGNORECASE)
@@ -219,9 +219,11 @@ class ConsolePrintHelper(object):
 			maxsize = maxsize + 2
 			
 			supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)
+			if self.modefilter and not supportMultipleModesPerRun:
+				self.modefilter = ','.join(self.modefilter)
+				descriptors = [d for d in descriptors if self.modefilter in d.modes]
 
 			for descriptor in descriptors:
-				if self.modefilter and self.modefilter not in descriptor.modes: continue
 				padding = " " * (maxsize - len(descriptor.id))
 				if not self.full:
 					print("%s%s| %s" % (descriptor.id, padding, descriptor.title))

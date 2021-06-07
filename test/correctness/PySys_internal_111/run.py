@@ -39,8 +39,9 @@ class PySysTest(BaseTest):
 	]
 	
 	PRINT_SUBTESTS = [ # name, args, exectedoutput
-		('print-test-with-modes', ['print', '-m', 'mode3'], 'Test_WithModes'),
-		('print-test-with-modes-none', ['print', '--mode', ''], 'Test_WithModes,Test_WithNoModes'),
+		('print-test-with-modes', ['print', '-m', 'mode3'], 'Test_WithModes~mode3'),
+		('print-test-with-regex-modes', ['print', '-m', '.Ode[23]'], 'Test_WithModes~mode2,Test_WithModes~mode3'),
+		('print-test-with-modes-none', ['print', '--mode', ''], 'Test_WithNoModes'),
 		('print-test-spec-with-modes', ['print', 'Test_WithModes~mode2', 'Test_WithModes~mode3'], 'Test_WithModes~mode2,Test_WithModes~mode3'),
 	
 	]
@@ -70,42 +71,47 @@ class PySysTest(BaseTest):
 		# failure cases
 		runPySys(self, 'error-run-specific-test-with-mode-exclusion', 
 			['run', '-m', '!mode1,!mode2,!mode3', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('error-run-specific-test-with-mode-exclusion.err', 
-			expr='Test "Test_WithModes" cannot be selected with the specified mode[(]s[)].')
+		self.assertThatGrep('error-run-specific-test-with-mode-exclusion.err', 'ERROR: .*', 
+			expected='ERROR: Test "Test_WithModes" cannot be selected with the specified mode(s).')
 
 		runPySys(self, 'error-run-mode-with-range', 
 			['run', 'SomeId1:2~MyMode'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('error-run-mode-with-range.err', 
-			expr='A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
+		self.assertThatGrep('error-run-mode-with-range.err', 'ERROR: .*', 
+			expected='ERROR: A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
 
 		runPySys(self, 'error-run-nonexistent-mode', 
 			['run', '--mode', 'MyNonExistentMode', 'MyTest'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('error-run-nonexistent-mode.err', 
-			expr='ERROR: Unknown mode "MyNonExistentMode": the available modes for descriptors in this directory are: mode1, mode2, mode3')
+		self.assertThatGrep('error-run-nonexistent-mode.err', 'ERROR: .*', 
+			expected='ERROR: Unknown mode (or mode regex) "MyNonExistentMode"; the available modes for descriptors in this directory are: mode1, mode2, mode3')
+
+		runPySys(self, 'error-run-nonexistent-regex-mode', 
+			['run', '--mode', 'MyNon.*ExistentMode', 'MyTest'], workingDir='test', expectedExitStatus=10)
+		self.assertThatGrep('error-run-nonexistent-regex-mode.err', 'ERROR: .*', 
+			expected='ERROR: Unknown mode (or mode regex) "MyNon.*ExistentMode"; the available modes for descriptors in this directory are: mode1, mode2, mode3')
 
 		runPySys(self, 'error-run-wrong-case', 
 			['run', '--mode', 'mOde1', 'Test_WithModes'], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('error-run-wrong-case.err', 
-			expr='ERROR: Unknown mode "mOde1": the available modes for descriptors in this directory are: mode1, mode2, mode3')
+		self.assertThatGrep('error-run-wrong-case.err', 'ERROR: .*', 
+			expected='ERROR: Unknown mode (or mode regex) "mOde1"; the available modes for descriptors in this directory are: mode1, mode2, mode3')
 
 		runPySys(self, 'error-run-nonexistent-spec-mode', 
 			['run', 'Test_WithModes~NonExistentMode', ], workingDir='test', expectedExitStatus=10)
-		self.assertGrep('error-run-nonexistent-spec-mode.err', 
-			expr='ERROR: Unknown mode "NonExistentMode": the available modes for this test are: mode1, mode2, mode3')
+		self.assertThatGrep('error-run-nonexistent-spec-mode.err', 'ERROR: .*', 
+			expected='ERROR: Unknown mode "NonExistentMode": the available modes for this test are: mode1, mode2, mode3')
 		
 		
 	def validate(self):
 		for subid, args, expectedids in self.RUN_SUBTESTS:
 			self.log.info('%s:', subid)
 			actualids = self.getExprFromFile(subid+'.out', expr='Id *: *([^ \n]+)', returnAll=True)
-			self.assertThat('%r == %r', expectedids, ','.join(actualids))
+			self.assertThat('expected == actual', expected=expectedids, actual=','.join(actualids), subid=subid)
 			self.assertLineCount(subid+'.out', expr='Test final outcome: *PASSED', condition='==%d'%len(actualids))
 			self.log.info('')
 
 		for subid, args, expectedids in self.PRINT_SUBTESTS:
 			self.log.info('%s:', subid)
 			actualids = self.getExprFromFile(subid+'.out', expr='(.[^| ]+) *|', returnAll=True)
-			self.assertThat('%r == %r', expectedids, ','.join(actualids))
+			self.assertThat('expected == actual', expected=expectedids, actual=','.join(actualids), subid=subid)
 			self.log.info('')
 			
 		# test output dirs must be unique; mode gets added somewhere different for relative vs absolue outdirs

@@ -141,14 +141,13 @@ Selection and filtering options
 -------------------------------
    -i, --include   STRING      set the test groups to include (can be specified multiple times)
    -e, --exclude   STRING      set the test groups to exclude (can be specified multiple times)
-   -G, --grep      STRING      run only tests whose title or id contains the specified regex
-                               (matched case insensitively)
+   -G, --grep      STRING      run only tests whose title or id contains the specified regex (case insensitive)
    -m, --mode, --modeinclude ALL,PRIMARY,!PRIMARY,MyMode1,!MyMode2,...
                                run tests in the specifies mode(s):
-                                 - use PRIMARY to select the test's
-                                   first/main mode (this is the default)
+                                 - use PRIMARY to select the test's first/main mode (this is the default)
                                  - use ALL to select all modes
                                  - use !MODE as an alias for modeexclude
+                                 - regular expressions can be used
    --modeexclude MyMode1,MyMode2,...
                                run tests excluding specified mode(s)
    -a, --type      STRING      set the test type to run (auto or manual, default is both)"
