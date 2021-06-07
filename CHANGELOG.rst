@@ -113,6 +113,8 @@ PySys 1.6.2 is under development.
 	  pool of TCP ports. 
 	- Added ``key`` field to `pysys.process.user.STDOUTERR_TUPLE` to make it easier to create log file paths that match 
 	  a process's stdout/stderr files. 
+	- Added ``enableCoverageForPySys`` option to `pysys.writer.coverage.PythonCoverageWriter` which is useful when 
+	  testing custom PySys plugins. 
 	- pysys.py improvements:
 	
 	  - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 

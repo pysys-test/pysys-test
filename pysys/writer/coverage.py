@@ -52,7 +52,7 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 
 	.. versionadded:: 1.6.0
 
-	The following property can be set in the project configuration for this writer (and see also 
+	The following properties can be set in the project configuration for this writer (and see also 
 	`pysys.writer.testoutput.CollectTestOutputWriter` for inherited properties such as ``destArchive`` which produces 
 	a .zip of the destDir):		
 	"""
@@ -63,7 +63,7 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 	outputPattern = u'.coverage.python.@TESTID@_@FILENAME@.@FILENAME_EXT@.@UNIQUE@' 
 	publishArtifactDirCategory = u'PythonCoverageDir'
 	publishArtifactArchiveCategory = u'PythonCoverageArchive'
-
+	
 	pythonCoverageArgs = u''
 	"""
 	A string of command line arguments used to customize the ``coverage run`` and ``coverage html`` commands. 
@@ -73,6 +73,16 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 	
 		<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
 	"""
+
+	enableCoverageForPySys = False
+	"""
+	Set this to True to enable measuring coverage for this process (i.e. PySys), rather than only child Python processes. 
+	This is useful for testing PySys plugins. 
+	
+	.. versionadded:: 1.6.2
+	"""
+
+	__selfCoverage = None
 
 	def isEnabled(self, record=False, **kwargs): 
 		if not (self.runner.getBoolProperty('pythonCoverage', default=self.runner.getBoolProperty('codeCoverage')) and self.destDir):
@@ -88,10 +98,30 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 		else:
 			return True
 
+	def setup(self, *args, **kwargs):
+		super(PythonCoverageWriter, self).setup(*args, **kwargs)
+		import coverage
+		if self.enableCoverageForPySys:
+			args = self.getCoverageArgsList()
+			assert len(args)==1 and args[0].startswith('--rcfile='), 'enableCoverageForPySys can only be used if pythonCoverageArgs is set to "--rcfile=XXXX"'
+			cov = coverage.Coverage(config_file=args[0][args[0].find('=')+1:], data_file=self.destDir+'/.coverage.pysys_parent')
+			log.debug('Enabling Python coverage for this process: %s', cov)
+
+			# These lines avoid unhelpful warnings, and also match what coverage.process_startup() does
+			cov._warn_preimported_source = False
+			cov._warn_unimported_source = False
+			cov._warn_no_data = False
+			cov.start()
+			self.__selfCoverage = cov
+
 	def getCoverageArgsList(self): # also used by startPython()
 		return shlex.split(self.pythonCoverageArgs.replace(u'\\',u'\\\\')) # need to escape windows \ else it gets removed; do this the same on all platforms for consistency
 
 	def cleanup(self, **kwargs):
+		if self.__selfCoverage is not None:
+			self.__selfCoverage.stop()
+			self.__selfCoverage.save()
+	
 		coverageDestDir = self.destDir
 		assert os.path.isabs(coverageDestDir) # The base class is responsible for absolutizing this config property
 		coverageDestDir = os.path.normpath(fromLongPathSafe(coverageDestDir))

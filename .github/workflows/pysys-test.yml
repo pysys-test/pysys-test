@@ -159,12 +159,8 @@ jobs:
         working-directory: test
         id: pysys
         run: |
-          python -m coverage run --rcfile ./pysys-extensions/python_coveragerc ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
-
-          # upload Python code coverage - since we're measuring PySys itself, include both 
-          # top-level .coverage file and the files collected by PySys from its PySys subprocesses
+          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
           # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
-          mv .coverage ./__coverage_python.main/.coverage.toplevel
           rm ./__coverage_python.main/coverage.xml
           
           cd __coverage_python.main
