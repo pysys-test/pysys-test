@@ -401,6 +401,8 @@ def runTest(args):
 		module = importlib.import_module('.'.join(cls[:-1]))
 		runner = getattr(module, cls[-1])(*args)
 		runner.start()
+		if not Project.getInstance().getProperty('supportMultipleModesPerRun', True):
+			sys.stderr.write('\nWarning: the project property supportMultipleModesPerRun=false is deprecated and will be removed soon so please update your tests to use the modern supportMultipleModesPerRun=true behaviour instead.\n')
 	
 		for cycledict in runner.results.values():
 			for outcome in OUTCOMES:
