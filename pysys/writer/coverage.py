@@ -102,8 +102,12 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 		super(PythonCoverageWriter, self).setup(*args, **kwargs)
 		import coverage
 		if self.enableCoverageForPySys:
+			if sys.version_info[0] == 2: 
+				log.warning('Ignoring enableCoverageForPySys option - not supported by Python 2')
+				return
 			args = self.getCoverageArgsList()
 			assert len(args)==1 and args[0].startswith('--rcfile='), 'enableCoverageForPySys can only be used if pythonCoverageArgs is set to "--rcfile=XXXX"'
+			mkdir(self.destDir)
 			cov = coverage.Coverage(config_file=args[0][args[0].find('=')+1:], data_file=self.destDir+'/.coverage.pysys_parent')
 			log.debug('Enabling Python coverage for this process: %s', cov)
 
