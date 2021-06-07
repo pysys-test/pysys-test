@@ -111,6 +111,8 @@ PySys 1.6.2 is under development.
 	  is useful when checking log files for unexpected errors and warnings. 
 	- Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
 	  pool of TCP ports. 
+	- Added ``key`` field to `pysys.process.user.STDOUTERR_TUPLE` to make it easier to create log file paths that match 
+	  a process's stdout/stderr files. 
 	- pysys.py improvements:
 	
 	  - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 

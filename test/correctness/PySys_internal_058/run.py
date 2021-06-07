@@ -12,6 +12,8 @@ class PySysTest(BaseTest):
 		self.assertThat('%r.endswith("key.1.out")', os.path.basename(x[0]))
 		self.assertThat('%r.endswith("key.1.err")', os.path.basename(x[1]))
 
+		self.assertThat('expected == actual', actual__eval='os.path.basename(x.key)', expected='key.1')
+
 		x = self.allocateUniqueStdOutErr('key')
 		self.assertThat('%r.endswith("key.2.out")', os.path.basename(x[0]))
 		self.assertThat('%r.endswith("key.2.err")', os.path.basename(x[1]))
@@ -20,6 +22,5 @@ class PySysTest(BaseTest):
 		self.assertThat('%r.endswith("keyb.out")', os.path.basename(x[0]))
 		self.assertThat('%r.endswith("keyb.err")', os.path.basename(x[1]))
 
-				
 	def validate(self):
 		pass

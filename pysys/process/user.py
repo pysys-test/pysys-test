@@ -44,10 +44,26 @@ if IS_WINDOWS:
 else:
 	import fcntl
 
-STDOUTERR_TUPLE = collections.namedtuple('stdouterr', ['stdout', 'stderr'])
-"""
-Returned by `ProcessUser.allocateUniqueStdOutErr` to hold a pair of ``(stdout,stderr)`` names.
-"""
+class STDOUTERR_TUPLE(collections.namedtuple('stdouterr', ['stdout', 'stderr'])):
+	"""
+	Returned by `ProcessUser.allocateUniqueStdOutErr` to hold a pair of ``(stdout,stderr)`` names.
+	"""
+	
+	__slots__ = () # to save memory as per the python docs
+	
+	@property
+	def key(self): 
+		"""
+		Returns the key (the prefix without the ``.out`` or ``.err``), to which you can append your 
+		own extension. For example to create a log file with the same base name as the stdout/err files::
+		
+			self.startProcess(..., arguments=['--logfile', stdouterr.key+'.log'], ...)
+		
+		.. versionadded: 1.6.1
+		"""
+		assert self.stdout.endswith('.out')
+		return self.stdout[:-4]
+
 
 class ProcessUser(object):
 	"""
