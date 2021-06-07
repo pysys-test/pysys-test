@@ -20,7 +20,7 @@ PySys 1.6.2 is under development.
 	- Added support for Python 3.9.
 	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
 	  PySys.
-	- Documentation for `ProjectConfiguration` and `TestDescriptors` is much improved. 
+	- Documentation for :doc:`ProjectConfiguration` and :doc:`TestDescriptors` is much improved. 
 	- Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails, for both 
 	  primitive values and list/dict values. 
 	- Process management:
