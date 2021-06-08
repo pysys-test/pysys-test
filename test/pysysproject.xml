@@ -65,7 +65,7 @@
 		<writer classname="pysys.writer.coverage.PythonCoverageWriter">
 			<property name="destDir" value="__coverage_python.${outDirName}"/>
 			<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/pysys-extensions/python_coveragerc"/>
-			<property name="enableCoverageForPySys" value="true"/>
+			<property name="includeCoverageFromPySysProcess" value="true"/>
 		</writer>
 
 		<!-- The ConsoleSummaryResultsWriter displays a summary of non-passed outcomes at the end of the test run, 

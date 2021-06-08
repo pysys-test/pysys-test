@@ -74,7 +74,7 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 		<property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
 	"""
 
-	enableCoverageForPySys = False
+	includeCoverageFromPySysProcess = False
 	"""
 	Set this to True to enable measuring coverage for this process (i.e. PySys), rather than only child Python processes. 
 	This is useful for testing PySys plugins. 
@@ -101,12 +101,12 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 	def setup(self, *args, **kwargs):
 		super(PythonCoverageWriter, self).setup(*args, **kwargs)
 		import coverage
-		if self.enableCoverageForPySys:
+		if self.includeCoverageFromPySysProcess:
 			if sys.version_info[0] == 2: 
-				log.warning('Ignoring enableCoverageForPySys option - not supported by Python 2')
+				log.warning('Ignoring includeCoverageFromPySysProcess option - not supported by Python 2')
 				return
 			args = self.getCoverageArgsList()
-			assert len(args)==1 and args[0].startswith('--rcfile='), 'enableCoverageForPySys can only be used if pythonCoverageArgs is set to "--rcfile=XXXX"'
+			assert len(args)==1 and args[0].startswith('--rcfile='), 'includeCoverageFromPySysProcess can only be used if pythonCoverageArgs is set to "--rcfile=XXXX"'
 			mkdir(self.destDir)
 			cov = coverage.Coverage(config_file=args[0][args[0].find('=')+1:], data_file=self.destDir+'/.coverage.pysys_parent')
 			log.debug('Enabling Python coverage for this process: %s', cov)
