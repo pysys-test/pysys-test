@@ -248,7 +248,7 @@ class JoinLines(object):
 	>>> _mapperUnitTest( JoinLines(startAt='startat.*', stopBefore='stopbefore.*'), 'startat START|  stack1|  stack2 | stopbefore NEXT LINE|d|startat2|stopbefore2')
 	'startat START / stack1 / stack2| stopbefore NEXT LINE|d|startat2|stopbefore2|'
 
-	.. versionadded:: 1.6.2
+	.. versionadded:: 1.7.0
 	"""
 	def __init__(self, startAt=None, continueWhile=None, stopAfter=None, stopBefore=None, combiner=None):
 		assert startAt is not None
@@ -423,7 +423,7 @@ def SortLines(key=None):
 
 		As this mapper is stateful, do not use a single instance of it in multiple tests (or multiple threads). 
 
-		.. versionadded:: 1.6.2
+		.. versionadded:: 1.7.0
 
 		:param callable[str]->str key: A callable that returns the sort key to use for each line, in case you want 
 			something other than the default lexicographic sorting. 
@@ -523,7 +523,7 @@ def applyMappers(iterator, mappers):
 	
 	:rtype: Iterable[str]
 	
-	.. versionadded:: 1.6.2
+	.. versionadded:: 1.7.0
 	"""
 	if len(mappers)==0: # optimize for common case of zero mappers
 		for x in iterator: 

@@ -1422,7 +1422,7 @@ class BaseTest(ProcessUser):
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 			
-			Added in PySys 1.6.2.
+			Added in PySys 1.7.0.
 
 		:param abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. 

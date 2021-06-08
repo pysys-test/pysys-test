@@ -1620,7 +1620,7 @@ class ProcessUser(object):
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 
-			Added in PySys 1.6.2. 
+			Added in PySys 1.7.0. 
 
 		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
 		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'.
@@ -1643,7 +1643,7 @@ class ProcessUser(object):
 			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
 
 		:param bool stripWhitespace: By default blank lines are removed; set this to False to disable that behaviour. 
-			Added in PySys 1.6.2. 
+			Added in PySys 1.7.0. 
 
 		:return: True if anything was logged, False if not.
 		

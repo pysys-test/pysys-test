@@ -79,7 +79,7 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 	Set this to True to enable measuring coverage for this process (i.e. PySys), rather than only child Python processes. 
 	This is useful for testing PySys plugins. 
 	
-	.. versionadded:: 1.6.2
+	.. versionadded:: 1.7.0
 	"""
 
 	__selfCoverage = None
