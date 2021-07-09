@@ -64,7 +64,7 @@ log = logging.getLogger('pysys.process')
 class Process(object):
 	"""Represents a process that PySys has started (or can start).
 	
-	Instances of a platform-specific implementation of this interface are returned 
+	A platform-specific implementation subclass of this interface is returned 
 	by `pysys.process.user.ProcessUser.startProcess`.
 	
 	:ivar str ~.command:  The full path to the executable.

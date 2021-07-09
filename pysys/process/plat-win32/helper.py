@@ -32,7 +32,7 @@ else:
 from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.process.commonwrapper import CommonProcessWrapper, _stringToUnicode
+from pysys.process import Process, _stringToUnicode
 
 # check for new lines on end of a string
 EXPR = re.compile(".*\n$")
@@ -43,8 +43,8 @@ try:
 except Exception: # pragma: no cover
 	IS_PRE_WINDOWS_8 = False
 	
-class ProcessWrapper(CommonProcessWrapper):
-	"""Windows Process wrapper for process execution and management. 
+class ProcessImpl(Process):
+	"""Windows Process wrapper/implementation for process execution and management. 
 	
 	The process wrapper provides the ability to start and stop an external process, setting 
 	the process environment, working directory and state i.e. a foreground process in which case 
@@ -84,7 +84,7 @@ class ProcessWrapper(CommonProcessWrapper):
 
 		"""
 		
-		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
+		Process.__init__(self, command, arguments, environs, workingDir, 
 			state, timeout, stdout, stderr, displayName, **kwargs)
 
 		self.disableKillingChildProcesses = self.info.get('__pysys.disableKillingChildProcesses', False) # currently undocumented, just an emergency escape hatch for now
@@ -232,8 +232,7 @@ class ProcessWrapper(CommonProcessWrapper):
 
 
 	def setExitStatus(self):
-		"""Method to set the exit status of the process.
-		
+		"""Tests whether the process has terminated yet, and updates and returns the exit status if it has. 
 		"""
 		with self.__lock:
 			if self.exitStatus is not None: return self.exitStatus
@@ -280,4 +279,5 @@ class ProcessWrapper(CommonProcessWrapper):
 			self.wait(timeout=timeout)
 		except Exception as ex: # pragma: no cover
 			raise ProcessError("Error stopping process: %s"%ex)
-		
+
+ProcessWrapper = ProcessImpl # old name for compatibility

@@ -49,10 +49,10 @@ from pysys import log
 from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.process.commonwrapper import CommonProcessWrapper, _stringToUnicode
+from pysys.process import Process, _stringToUnicode
 
 
-class ProcessWrapper(CommonProcessWrapper):
+class ProcessImpl(Process):
 	"""Unix process wrapper for process execution and management. 
 	
 	The unix process wrapper provides the ability to start and stop an external process, setting 
@@ -98,7 +98,7 @@ class ProcessWrapper(CommonProcessWrapper):
 		:param displayName: Display name for this process
 
 		"""
-		CommonProcessWrapper.__init__(self, command, arguments, environs, workingDir, 
+		Process.__init__(self, command, arguments, environs, workingDir, 
 			state, timeout, stdout, stderr, displayName, **kwargs)
 
 		self.disableKillingChildProcesses = self.info.get('__pysys.disableKillingChildProcesses', False) # currently undocumented, just an emergency escape hatch for now
@@ -180,10 +180,7 @@ class ProcessWrapper(CommonProcessWrapper):
 
 
 	def setExitStatus(self):
-		"""Method to set the exit status of the process.
-		
-		Returns the new value
-		
+		"""Tests whether the process has terminated yet, and updates and returns the exit status if it has. 
 		"""
 		with self.__lock:
 			if self.exitStatus is not None: return self.exitStatus
@@ -246,3 +243,5 @@ class ProcessWrapper(CommonProcessWrapper):
 			self.wait(timeout=timeout)
 		except Exception as ex:
 			raise ProcessError("Error stopping process: %s"%ex)
+
+ProcessWrapper = ProcessImpl # old name for compatibility
