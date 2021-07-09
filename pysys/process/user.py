@@ -32,7 +32,7 @@ from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter, stripANSIEscapeCodes
 from pysys.xml.project import Project
-from pysys.process.helper import ProcessWrapper
+from pysys.process.helper import ProcessImpl
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, deletefile, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
@@ -274,7 +274,7 @@ class ProcessUser(object):
 	def startProcess(self, command, arguments, environs=None, workingDir=None, state=None, 
 			timeout=TIMEOUTS['WaitForProcess'], stdout=None, stderr=None, displayName=None, 
 			abortOnError=None, expectedExitStatus='==0', ignoreExitStatus=None, onError=None, quiet=False, stdouterr=None, 
-			background=False, info={}):
+			background=False, info={}, processFactory=pysys.process.helper.ProcessImpl):
 		"""Start a process running in the foreground or background, and return 
 		the `pysys.process.Process` object.
 		
@@ -306,6 +306,8 @@ class ProcessUser(object):
 		.. versionchanged:: 1.6.0
 			Added onError parameter and default behaviour of logging stderr/out when there's a failure.
 			Added info parameter. 
+		.. versionchanged:: 1.7.0
+			Added processFactory parameter.
 
 		:param str command: The path to the executable to be launched (should include the full path)
 		:param list[str] arguments: A list of arguments to pass to the command. Any non-string values in the list are 
@@ -388,7 +390,20 @@ class ProcessUser(object):
 			a field on the returned Process instance. This is useful for keeping track of things like server port 
 			numbers and log file paths. 
 
-		:return: The process wrapper object.
+		:param callable[kwargs] processFactory: A callable (such as a class constructor) that returns an instance or 
+			subclass of `pysys.process.helper.ProcessImpl`. This can be used either to provide a custom process subclass 
+			with extra features, or to make modifications to the arguments or environment that were specified by the code 
+			that invoked ``startProcess()``. 
+			
+			The signature must consist of a ``**kwargs`` parameter, the members of which will be populated by 
+			the parameters listed in the constructor of `pysys.process.Process`, and can be modified by the factory. For 
+			example::
+			
+				def myProcessFactory(**kwargs):
+					kwargs['arguments'] = kwargs['arguments'][0]+['my_extra_arg']+kwargs['arguments'][1:]
+					return pysys.process.helper.ProcessImpl(**kwargs)
+
+		:return: The process object.
 		:rtype: pysys.process.Process
 
 		"""
@@ -426,7 +441,10 @@ class ProcessUser(object):
 			environs = self.getDefaultEnvirons(command=command)
 		
 		startTime = time.time()
-		process = ProcessWrapper(command, arguments, environs, workingDir, state, timeout, stdout, stderr, 
+		
+		# pass everything as a named parameter, which makes life easier for custom factory methods
+		process = processFactory(command=command, arguments=arguments, environs=environs, workingDir=workingDir, 
+			state=state, timeout=timeout, stdout=stdout, stderr=stderr, 
 			displayName=displayName, expectedExitStatus=expectedExitStatus, info=info)
 		
 		def handleErrorAndGetOutcomeSuffix(process):

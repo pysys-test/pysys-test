@@ -35,6 +35,10 @@ PySys 1.7.0 is under development.
 		  defaults as described in the latest macOS documentation. 
 		- Added improved debug logging to `BaseTest.startProcess()` including a full command line for manually re-running 
 		  troublesome commands, and expansion of PATH environment variables to show the individual components. 
+		- Added a ``processFactory`` argument to `BaseTest.startProcess()` which can be used either to have ``startProcess()`` 
+			return a custom process subclass with extra features, or to make modifications to the arguments or environment 
+			that were specified by the code that invoked ``startProcess()`` (if you're using some wrapper method that 
+			starts a process rather than calling ``startProcess()`` directly). 
 		  
 	- Additions to the line mappers functionality:
 	

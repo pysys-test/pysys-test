@@ -1,3 +1,4 @@
+import pysys
 from pysys.constants import *
 from pysys.utils.pycompat import PY2
 from pysys.basetest import BaseTest
@@ -34,6 +35,19 @@ class PySysTest(BaseTest):
 		# do a couple of wait for signals in the files
 		self.waitForGrep('counter.out', expr='Count is 1', timeout=4)
 		self.waitForGrep('counter.err', expr='Process id of test executable', timeout=4)	
+
+		def myProcessFactory(**kwargs):
+			kwargs['arguments'].append(3)
+			return pysys.process.helper.ProcessImpl(**kwargs)
+			
+		self.hprocess = self.startProcess(command=sys.executable,
+						  arguments = [script, "2"],
+						  environs = os.environ,
+						  workingDir = self.output,
+						  stdouterr="custom-processFactory",
+						  ignoreExitStatus=True,
+						  processFactory=myProcessFactory,
+						  state=FOREGROUND)
 
 		
 	def validate(self):
