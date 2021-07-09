@@ -723,7 +723,8 @@ class BaseRunner(ProcessUser):
 					'original os.environ', 
 					'changed to'
 				)))
-			fatalerrors.append('Some test has changed the global os.environ of this PySys process; this is extremely unsafe while tests are running')
+			if not self.project.getProperty('_ignoreEnvironChangeDuringTestExecution', False): # keep this undocumented as don't really want people using it
+				fatalerrors.append('Some test has changed the global os.environ of this PySys process; this is extremely unsafe while tests are running - environment changes are only permitted during runner setup')
 		if self._initialCwd != os.getcwd():
 			fatalerrors.append('Some test has changed the working directory of this PySys process (e.g. with os.chdir()) to "%s"; this is extremely unsafe while tests are running'%os.getcwd())
 
@@ -1225,11 +1226,23 @@ class TestContainer(object):
 				log.warning("caught %s while cleaning up test: %s", sys.exc_info()[0], sys.exc_info()[1], exc_info=1)
 				self.testObj.addOutcome(BLOCKED, 'Test cleanup failed: %s (%s)'%(sys.exc_info()[1], sys.exc_info()[0]), abortOnError=False)
 
-			# in case these got overwritten by a naughty test, restore before printing the final summary
+			# in case the thread log handlers got overwritten by a naughty test, restore before printing the final summary
 			pysysLogHandler.setLogHandlersForCurrentThread(logHandlers)
 			
+			# the following checks are to give a clear and early indication of a serious cock-up
 			if self.runner._initialEnviron != os.environ:
-				self.testObj.addOutcome(BLOCKED, 'The global os.environ of this PySys process has changed while this test was running; this is extremely unsafe', override=True)
+			
+				log.warning('os.environ has changed while this test was running: \n%s', 
+					''.join(difflib.unified_diff(
+						['%s=%s\n'%(k,v) for (k,v) in sorted(self.runner._initialEnviron.items())], 
+						['%s=%s\n'%(k,v) for (k,v) in sorted(os.environ.items())], 
+						'original os.environ', 
+						'changed to'
+					)))
+				if not self.runner.project.getProperty('_ignoreEnvironChangeDuringTestExecution', False): # keep this undocumented as don't really want people using it
+					self.testObj.addOutcome(BLOCKED, 'The global os.environ of this PySys process has changed while this test was running; this is extremely unsafe - environment changes are only permitted during runner setup', override=True)
+				# Can't reset _initialEnviron here (to make other tests pass) as it's possible the bug was not in this test but in some other test that's still executing, in which case we'd allow it to pass
+				
 			if self.runner._initialCwd != os.getcwd():
 				self.testObj.addOutcome(BLOCKED, 'The working directory of this PySys process was changed to "%s" while this test was running (os.chdir()); this is extremely unsafe'%os.getcwd(), override=True)
 
