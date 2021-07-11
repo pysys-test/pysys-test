@@ -20,6 +20,12 @@
          "dir2-mode",
          "dir3-mode"
       ],
+      "modesToParameters": {
+         "root-mode1": {},
+         "root-mode2": {},
+         "dir2-mode": {},
+         "dir3-mode": {}
+      },
       "primaryMode": "root-mode1",
       "requirements": [
          "root-req1",
@@ -61,6 +67,12 @@
          "testcase-mode1",
          "testcase-mode2"
       ],
+      "modesToParameters": {
+         "root-mode1": {},
+         "root-mode2": {},
+         "testcase-mode1": {},
+         "testcase-mode2": {}
+      },
       "primaryMode": "root-mode1",
       "requirements": [
          "root-req1",
@@ -99,6 +111,10 @@
          "root-mode1",
          "root-mode2"
       ],
+      "modesToParameters": {
+         "root-mode1": {},
+         "root-mode2": {}
+      },
       "primaryMode": "root-mode1",
       "requirements": [
          "root-req1",
@@ -132,6 +148,9 @@
       "modes": [
          "TestSpecificMode"
       ],
+      "modesToParameters": {
+         "TestSpecificMode": {}
+      },
       "primaryMode": "TestSpecificMode",
       "requirements": [
          "root-req1",

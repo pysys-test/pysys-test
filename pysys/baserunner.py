@@ -955,14 +955,14 @@ class BaseRunner(ProcessUser):
 		
 		log.info("Id:    %s", descriptor.id, extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 
-		badchars = re.sub('[-\\w_.~]+','', descriptor.idWithoutMode)
+		badchars = re.sub('[%s]+'%pysys.launcher.TEST_ID_CHARS,'', descriptor.idWithoutMode)
 		# encourage only underscores, but actually permit . and - too, for compatibility, matching what the launcher does
 		if badchars: 
 			log.warning('Unsupported characters "%s" found in test id "%s" - please use alphanumeric characters, dot and underscore for test ids', 
 				''.join(set(c for c in badchars)), descriptor.idWithoutMode)
 		else:
-			badchars = re.sub('[-\\w_.~]+','', getattr(descriptor, 'mode', None) or '')
-			if badchars: log.warning('Unsupported characters "%s" found in test mode "%s" - please use just alphanumeric characters, dot and underscore for modes', 
+			badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', getattr(descriptor, 'mode', None) or '')
+			if badchars: log.warning('Unsupported characters "%s" found in test mode "%s" - please use just alphanumeric characters, dot, underscore and equals for modes', 
 				''.join(set(c for c in badchars)), descriptor.mode)
 
 		title = descriptor.title.replace('\n','').strip()
