@@ -290,7 +290,7 @@ can also be run against a mocked database for quick local development.
 Using modes is fairly straightforward. First edit the ``pysystest.xml`` files for tests that 
 need to run in multiple modes, and add a list of the supported modes::
 
-		<classification>
+	<classification>
 		<groups>...</groups>
 		<modes inherit="true">
 			<mode>MockDatabase_Firefox</mode>
