@@ -151,6 +151,11 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 			workingDir=coverageDestDir, stdouterr=coverageDestDir+'/python-coverage-html', 
 			disableCoverage=True, onError=lambda process: self.runner.getExprFromFile(process.stdout, '.+', returnNoneIfMissing=True) 
 				or self.runner.logFileContents(process.stderr, maxLines=0))
+		
+		htmlcov = os.path.join(coverageDestDir, 'htmlcov', 'index.html')
+		if os.path.exists(htmlcov):
+			log.info('Python coverage HTML: %s', htmlcov)
+
 
 		# to avoid confusion, remove any zero byte out/err files from the above
 		for p in os.listdir(coverageDestDir):
