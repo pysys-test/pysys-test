@@ -16,6 +16,7 @@
 		<modes>
 			<mode subtest="subtest1" iterations="100" maxHours="-10"/> <!-- this maxHours should override the earlier one in the parent dir -->
 			<mode subtest="subtest2" iterations="1000" maxHours="-100"/>
+			<mode subtest="subtest2" iterations="1000" maxHours="-100"/> <!-- exact dups are ignored -->
 		</modes>
 		
   </classification>
