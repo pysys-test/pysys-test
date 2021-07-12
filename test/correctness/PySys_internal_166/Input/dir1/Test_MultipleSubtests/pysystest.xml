@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest>
+    
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose
+
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+  
+		<modes inherit="true"/>
+		
+		<modes>
+			<mode subtest="subtest1" iterations="100" maxHours="-10"/> <!-- this maxHours should override the earlier one in the parent dir -->
+			<mode subtest="subtest2" iterations="1000" maxHours="-100"/>
+		</modes>
+		
+  </classification>
+
+</pysystest>
