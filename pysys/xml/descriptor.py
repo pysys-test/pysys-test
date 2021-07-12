@@ -233,7 +233,7 @@ class TestDescriptor(object):
 
 		s=s+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
 		
-		longestmode = max(len(m) for m in self.modes)
+		longestmode = max(len(m) for m in self.modes) if self.modes else 0
 		def modeToString(m):
 			x = u"'%s'"%m if u' ' in m else m
 			x = (u"%-"+str(longestmode+1)+"s")%x
@@ -258,7 +258,7 @@ class TestDescriptor(object):
 		s=s+"Test reference:    %s\n" % self.reference
 		s=s+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		if self.userData:
-			s=s+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,self.__userDataValueTosing(v)) for k,v in (self.userData.items()))
+			s=s+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,self.__userDataValueToString(v)) for k,v in (self.userData.items()))
 		s=s+""
 		return s
 	
