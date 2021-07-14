@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,6 +17,11 @@
 
 import os
 import sys
+
+if sys.version_info[0] < 3:
+	sys.stderr.write('This version of PySys requires Python 3; if you need Python 2 support, you must use an older version of PySys such as v1.6.1\n')
+	sys.exit(100)
+
 import pysys
 import logging
 

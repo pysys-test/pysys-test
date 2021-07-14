@@ -76,8 +76,7 @@ Project Links
 Installation
 ============
 
-PySys can be installed into Python 3.9 (recommended), 3.5/3.6/3.7/3.8 or Python 2.7 
-(though note that Python 2.7 itself is out of support from the Python team so is not recommended). 
+PySys can be installed into Python 3.9 (recommended), 3.5/3.6/3.7/3.8. 
 
 The best way to install PySys is using the standard ``pip`` installer which 
 downloads and install the binary package for the current PySys 
