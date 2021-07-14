@@ -20,7 +20,7 @@
          "dir2-mode",
          "dir3-mode"
       ],
-      "modesToParameters": {
+      "modeParameters": {
          "root-mode1": {},
          "root-mode2": {},
          "dir2-mode": {},
@@ -67,7 +67,7 @@
          "testcase-mode1",
          "testcase-mode2"
       ],
-      "modesToParameters": {
+      "modeParameters": {
          "root-mode1": {},
          "root-mode2": {},
          "testcase-mode1": {},
@@ -111,7 +111,7 @@
          "root-mode1",
          "root-mode2"
       ],
-      "modesToParameters": {
+      "modeParameters": {
          "root-mode1": {},
          "root-mode2": {}
       },
@@ -148,7 +148,7 @@
       "modes": [
          "TestSpecificMode"
       ],
-      "modesToParameters": {
+      "modeParameters": {
          "TestSpecificMode": {}
       },
       "primaryMode": "TestSpecificMode",

@@ -35,6 +35,35 @@ from pysys.utils.pycompat import PY2, isstring, openfile, makeReadOnlyDict
 
 log = logging.getLogger('pysys.xml.descriptor')
 
+class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
+	"""Represents a mode that a test can run in, and optionally a dict of parameters that define that mode. 
+	
+	See the ``mode`` parameter/field in `TestDescriptor`. 
+	
+	This class is immutable, so create a new instance if you want to change something. 
+
+	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
+	
+	:ivar dict[str,obj] ~.params: A dictionary of parameters associated with this mode. The parameters are available to 
+		the test (as ``self.descriptor.mode.params``) and also assigned as instance fields on the test class when in 
+		runs in this mode. 
+
+	.. versionadded:: 10.7.0
+
+	"""
+	__slots__ = ['mode', 'params']
+	
+	def __new__(cls,s,params=None):
+		self = str.__new__(cls,s)
+		self.params = params
+		return self
+
+	def __setattr__(self, attr, value):
+		if attr in self.__slots__ and getattr(self, attr, None) is None: 
+			object.__setattr__(self, attr, value)
+		else:
+			raise TypeError('Cannot modify immutable instance by setting %s'%(attr))
+
 class TestDescriptor(object):
 	"""Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory 
 	subtree (``pysysdirconfig.xml``); see :doc:`../TestDescriptors`. 
@@ -69,15 +98,12 @@ class TestDescriptor(object):
 	
 	:ivar list[str] ~.groups: A list of the user defined groups the testcase belongs to.
 	
-	:ivar list[str] ~.modes: A list of the user defined modes the testcase can be run in.
+	:ivar list[TestMode] ~.modes: A list of the user defined modes the testcase can be run in. 
 
-	:ivar dict[str,dict[str,str]] ~.modesToParameters: A dictionary who keys are modes, and values are the parameter 
-		dictionaries for each mode. The keys of this dict must match the ``modes=`` argument. 
-	
 	:ivar str ~.primaryMode: Specifies the primary mode for this test id (which may be None 
 		if this test has no modes). Usually this is the first mode in the list. 
 	
-	:ivar str ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
+	:ivar TestMode ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
 		the descriptor has no modes. This field is only present after the 
 		raw descriptors have been expanded into multiple mode-specific 
 		descriptors, and only if supportMultipleModesPerRun=True. 
@@ -111,7 +137,7 @@ class TestDescriptor(object):
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
 		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', 'executionOrderHintsByMode', \
-		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', 'modesToParameters'
+		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', 
 
 	def __init__(self, file, id, 
 		type="auto", state="runnable", title=u'(no title)', purpose=u'', groups=[], modes=[], 
@@ -134,8 +160,7 @@ class TestDescriptor(object):
 		self.purpose = purpose
 		# copy groups/modes so we can safely mutate them later if desired
 		self.groups = list(groups)
-		self.modes = list(modes)
-		self.modesToParameters = {m: ({} if modesToParameters is None or not modesToParameters.get(m) else modesToParameters[m]) for m in modes}
+		self.modes = [m if hasattr(m, 'params') else TestMode(m) for m in modes] # note that custom DescriptorLoader might still put (non-TestMode) str objects in here
 		
 		self.classname = classname
 		assert classname, 'Test descriptors cannot set the classname to nothing'
@@ -192,7 +217,7 @@ class TestDescriptor(object):
 		d['purpose'] = self.purpose
 		d['groups'] = self.groups
 		d['modes'] = self.modes
-		d['modesToParameters'] = self.modesToParameters
+		d['modeParameters'] = {str(m):m.params for m in self.modes}
 		d['primaryMode'] = self.primaryMode
 		if hasattr(self, 'mode'): d['mode'] = self.mode # only if supportMultipleModesPerRun=true
 		d['requirements'] = self.traceability
@@ -237,14 +262,14 @@ class TestDescriptor(object):
 		def modeToString(m):
 			x = u"'%s'"%m if u' ' in m else m
 			x = (u"%-"+str(longestmode+1)+"s")%x
-			if self.modesToParameters[m]:
-				x += u'{%s}'%', '.join(u'%s=%r'%(k,v) for (k,v) in self.modesToParameters[m].items())
+			if m.params:
+				x += u'{%s}'%', '.join(u'%s=%r'%(k,v) for (k,v) in m.params.items())
 			return x.strip()
 		
 		if getattr(self, 'mode',None): # multi mode per run
 			s=s+"Test mode:         %s\n" % modeToString(self.mode)
 		else: # print available modes instead
-			modeDelim = u'\n --> ' if any(self.modesToParameters.values()) else u', '
+			modeDelim = u'\n --> ' if any(m.params for m in self.modes) else u', '
 			s=s+("Test modes:        %s%s\n") % (modeDelim if '\n' in modeDelim else '', modeDelim.join(modeToString(x) for x in self.modes) or u'<none>')
 
 		s=s+"Test order hint:   %s\n" % (
@@ -359,7 +384,7 @@ class _XMLDescriptorParser(object):
 
 	DEFAULT_DESCRIPTOR = TestDescriptor(
 		file=None, id=u'', type="auto", state="runnable", 
-		title='', purpose='', groups=[], modesToParameters={}, 
+		title='', purpose='', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, isDirConfig=True)
@@ -377,10 +402,9 @@ class _XMLDescriptorParser(object):
 				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
 		
 		# some elements that are mandatory for an individual test and not used for dir config
-		modesToParameters = self.getModesToParameters()
 		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
-										self.getGroups(), modesToParameters.keys(), 
+										self.getGroups(), self.getModes(), 
 										self.project.expandProperties(self.getClassDetails()[0]),
 										self.project.expandProperties(self.getClassDetails()[1]),
 										self.project.expandProperties(self.getTestInput()),
@@ -391,8 +415,7 @@ class _XMLDescriptorParser(object):
 										skippedReason=self.getSkippedReason(), 
 										testDir=self.dirname,
 										userData=self.getUserData(),
-										isDirConfig=not self.istest, 
-										modesToParameters=modesToParameters)
+										isDirConfig=not self.istest)
 
 
 	def unlink(self):
@@ -494,15 +517,15 @@ class _XMLDescriptorParser(object):
 		return groupList
 	
 				
-	def getModesToParameters(self):
-		result = self.defaults.modesToParameters # by default we inherit (unless there are multiple <modes> elements in the file)
+	def getModes(self):
+		result = self.defaults.modes # by default we inherit (unless there are multiple <modes> elements in the file)
 		classificationNodeList = self.root.getElementsByTagName('classification')
 		if not classificationNodeList: return result
 
 		modesNodes = classificationNodeList[0].getElementsByTagName('modes')
 		if not modesNodes: return result
 		
-		result = {}
+		result = {} # key=mode name value=params
 		for modesNode in modesNodes:
 			prevModesForCombining = None if not result else result
 
@@ -510,8 +533,7 @@ class _XMLDescriptorParser(object):
 			if (modesNode.getAttribute('inherit') or ('false' if len(modesNodes) > 1 else 'true')).lower()!='true': 
 				result = {}
 			else:
-				# copy the defaults before mutating
-				result = self.defaults.modesToParameters.copy()
+				result = {m:m.params for m in self.defaults.modes}
 			
 			for node in modesNode.getElementsByTagName('mode'):
 				if not node.hasAttributes():
@@ -577,7 +599,7 @@ class _XMLDescriptorParser(object):
 							params.update(paramsB) # newer "B" params take precedence if any keys as the same
 							result[modeA+'_'+modeB] = params
 
-		return result
+		return [TestMode(k, params=v) for (k,v) in result.items()]
 
 				
 	def getClassDetails(self):
