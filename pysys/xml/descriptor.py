@@ -69,17 +69,19 @@ class TestDescriptor(object):
 	
 	:ivar list[str] ~.groups: A list of the user defined groups the testcase belongs to.
 	
-	:ivar list[TestMode] ~.modes: A list of the user defined modes the testcase can be run in. 
+	:ivar list[TestMode|str] ~.modes: A list of the user defined modes the testcase can be run in. Usually these will be 
+		`TestMode` instances, but older tests with custom TestLoaders may add simple strings here instead. 
 
-	:ivar str ~.primaryMode: Specifies the primary mode for this test id (which may be None 
+	:ivar TestMode|str ~.primaryMode: Specifies the primary mode for this test id (which may be None 
 		if this test has no modes). Usually this is the first mode in the list. 
 	
-	:ivar TestMode ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
+	:ivar TestMode|str ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
 		the descriptor has no modes. This field is only present after the 
 		raw descriptors have been expanded into multiple mode-specific 
 		descriptors, and only if supportMultipleModesPerRun=True. 
 		Note that after a descriptor is created from the on-disk file, the `mode` attribute is not set until 
 		the later phase when multi-mode descriptors are cloned and expanded based on the selected modes. 
+		You can use ``descriptor.mode.params`` to get the parameter dictionary for this mode. 
 	
 	:ivar str ~.classname: The Python classname to be executed for this testcase.
 	
@@ -116,7 +118,7 @@ class TestDescriptor(object):
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, 
 		testDir=None, 
-		isDirConfig=False, userData=None, modesToParameters=None):
+		isDirConfig=False, userData=None):
 		if skippedReason: state = 'skipped'
 		if state=='skipped' and not skippedReason: skippedReason = '<unknown skipped reason>'
 		self.isDirConfig = isDirConfig
@@ -131,7 +133,7 @@ class TestDescriptor(object):
 		self.purpose = purpose
 		# copy groups/modes so we can safely mutate them later if desired
 		self.groups = list(groups)
-		self.modes = [m if hasattr(m, 'params') else TestMode(m) for m in modes] # note that custom DescriptorLoader might still put (non-TestMode) str objects in here
+		self.modes = list(modes)
 		
 		self.classname = classname
 		assert classname, 'Test descriptors cannot set the classname to nothing'
@@ -169,8 +171,8 @@ class TestDescriptor(object):
 		"""
 		assert mode, 'Mode must be specified'
 		assert not hasattr(self, 'mode'), 'Cannot create a mode descriptor from a descriptor that already has its mode set'
-		newdescr = copy.deepcopy(self)
-		newdescr.mode = mode
+		newdescr = copy.deepcopy(self) # nb: the mode can't be deep copied accurately but of course it's not set yet so no problem!
+		newdescr.mode = mode # we assume the passed in mode is the TestMode object (not just a str) if TestMode is what's in the descriptor
 		newdescr.id = self.id+'~'+mode
 		newdescr._defaultSortKey = self._defaultSortKey+'~'+mode
 		return newdescr
@@ -233,14 +235,14 @@ class TestDescriptor(object):
 		def modeToString(m):
 			x = u"'%s'"%m if u' ' in m else m
 			x = (u"%-"+str(longestmode+1)+"s")%x
-			if m.params:
+			if getattr(m, 'params', None):
 				x += u'{%s}'%', '.join(u'%s=%r'%(k,v) for (k,v) in m.params.items())
 			return x.strip()
 		
 		if getattr(self, 'mode',None): # multi mode per run
 			s=s+"Test mode:         %s\n" % modeToString(self.mode)
 		else: # print available modes instead
-			modeDelim = u'\n --> ' if any(m.params for m in self.modes) else u', '
+			modeDelim = u'\n --> ' if any(getattr(m, 'params', None) for m in self.modes) else u', '
 			s=s+("Test modes:        %s%s\n") % (modeDelim if '\n' in modeDelim else '', modeDelim.join(modeToString(x) for x in self.modes) or u'<none>')
 
 		s=s+"Test order hint:   %s\n" % (
@@ -301,20 +303,24 @@ exists for compatibility reasons only.
 class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
 	"""Represents a mode that a test can run in, and optionally a dict of parameters that define that mode. 
 	
-	See the ``mode`` parameter/field in `TestDescriptor`. 
+	To create one::
+	
+		mode = TestMode('MyMode', {'param1': 'value1'})
+	
+	See the ``mode`` parameter/field in `TestDescriptor` where this class is used. 
 	
 	This class is immutable, so create a new instance if you want to change something. 
 
 	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
 	
 	:ivar dict[str,obj] ~.params: A dictionary of parameters associated with this mode. The parameters are available to 
-		the test (as ``self.descriptor.mode.params``) and also assigned as instance fields on the test class when in 
+		the test (as ``self.descriptor.mode.params``) and also assigned as instance fields on the test class when it 
 		runs in this mode. 
 
 	.. versionadded:: 10.7.0
 
 	"""
-	__slots__ = ['mode', 'params']
+	__slots__ = ['params']
 	
 	def __new__(cls,s,params=None):
 		self = str.__new__(cls,s)

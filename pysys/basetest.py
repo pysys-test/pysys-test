@@ -58,6 +58,7 @@ class BaseTest(ProcessUser):
 		self.runner = runner
 		if runner.supportMultipleModesPerRun:
 			self.mode = descriptor.mode
+			if self.mode is not None and getattr(self.mode, 'params', None): self.setKeywordArgs(self.mode.params)
 		else:
 			self.mode = runner.mode 
 		self.setKeywordArgs(self.descriptor.userData)

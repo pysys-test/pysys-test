@@ -240,11 +240,12 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 						testspecid, testspecmode = t.split('~')
 						index = findMatchingIndex(testspecid)
 						# first match the id, then the mode
-						if testspecmode not in descriptors[index].modes:
+						matchingmode = next((m for m in descriptors[index].modes if m == testspecmode), None)
+						if matchingmode is None:
 							raise UserError('Unknown mode "%s": the available modes for this test are: %s'%(
 								testspecmode, ', '.join(sorted(descriptors[index].modes or ['<none>']))))
 
-						matches = [descriptors[index]._createDescriptorForMode(testspecmode)]
+						matches = [descriptors[index]._createDescriptorForMode(matchingmode)]
 						# note test id+mode combinations selected explicitly like this way are included regardless of what modes are enabled/disabled
 
 					else: # normal case where it's not a mode

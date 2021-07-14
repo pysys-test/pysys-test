@@ -768,6 +768,7 @@ class BaseRunner(ProcessUser):
 		
 		self.__remainingTests -= 1
 		
+		assert container.testObj is not None, 'Fatal error creating test object for %s'%container.descriptor.id # shouldn't happen unless something went very badly wrong
 		self.reportTestOutcome(
 			testObj=container.testObj,
 			cycle=container.cycle,
