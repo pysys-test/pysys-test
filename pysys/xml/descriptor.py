@@ -35,35 +35,6 @@ from pysys.utils.pycompat import PY2, isstring, openfile, makeReadOnlyDict
 
 log = logging.getLogger('pysys.xml.descriptor')
 
-class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
-	"""Represents a mode that a test can run in, and optionally a dict of parameters that define that mode. 
-	
-	See the ``mode`` parameter/field in `TestDescriptor`. 
-	
-	This class is immutable, so create a new instance if you want to change something. 
-
-	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
-	
-	:ivar dict[str,obj] ~.params: A dictionary of parameters associated with this mode. The parameters are available to 
-		the test (as ``self.descriptor.mode.params``) and also assigned as instance fields on the test class when in 
-		runs in this mode. 
-
-	.. versionadded:: 10.7.0
-
-	"""
-	__slots__ = ['mode', 'params']
-	
-	def __new__(cls,s,params=None):
-		self = str.__new__(cls,s)
-		self.params = params
-		return self
-
-	def __setattr__(self, attr, value):
-		if attr in self.__slots__ and getattr(self, attr, None) is None: 
-			object.__setattr__(self, attr, value)
-		else:
-			raise TypeError('Cannot modify immutable instance by setting %s'%(attr))
-
 class TestDescriptor(object):
 	"""Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory 
 	subtree (``pysysdirconfig.xml``); see :doc:`../TestDescriptors`. 
@@ -325,6 +296,37 @@ exists for compatibility reasons only.
 
 :meta private:
 """
+
+
+class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
+	"""Represents a mode that a test can run in, and optionally a dict of parameters that define that mode. 
+	
+	See the ``mode`` parameter/field in `TestDescriptor`. 
+	
+	This class is immutable, so create a new instance if you want to change something. 
+
+	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
+	
+	:ivar dict[str,obj] ~.params: A dictionary of parameters associated with this mode. The parameters are available to 
+		the test (as ``self.descriptor.mode.params``) and also assigned as instance fields on the test class when in 
+		runs in this mode. 
+
+	.. versionadded:: 10.7.0
+
+	"""
+	__slots__ = ['mode', 'params']
+	
+	def __new__(cls,s,params=None):
+		self = str.__new__(cls,s)
+		self.params = params
+		return self
+
+	def __setattr__(self, attr, value):
+		if attr in self.__slots__ and getattr(self, attr, None) is None: 
+			object.__setattr__(self, attr, value)
+		else:
+			raise TypeError('Cannot modify immutable instance by setting %s'%(attr))
+
 
 class _XMLDescriptorParser(object):
 	'''DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. 
