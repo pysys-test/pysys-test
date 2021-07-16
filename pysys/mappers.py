@@ -443,7 +443,7 @@ def SortLines(key=None):
 		def mapperGenerator(it):
 			for l in sorted(it, key=key):
 				if not l.endswith('\n'): l += '\n' # need uniform newlines in output since it's possible there aren't uniform newlines in input (if file doesn't end in a newline)
-				yield l # = yield from
+				yield l
 		return mapperGenerator
 
 class IncludeLinesMatching(object):
@@ -526,8 +526,7 @@ def applyMappers(iterator, mappers):
 	.. versionadded:: 1.7.0
 	"""
 	if len(mappers)==0: # optimize for common case of zero mappers
-		for x in iterator: 
-			yield x # from python 3 this could be a "yield from"
+		yield from iterator
 
 	# strip out any noop (None) mappers
 	if None in mappers: mappers = [m for m in mappers if m]
@@ -550,8 +549,7 @@ def applyMappers(iterator, mappers):
 						yield l
 			m = generatorFunctionForSimpleMapper
 		
-		for l in applyMappers(m(iterator), mappers[1:]):
-			yield l # = yield from
+		yield from applyMappers(m(iterator), mappers[1:])
 
 	else: # simple, fast implementation for the non-generators case
 		for originalline in iterator:
