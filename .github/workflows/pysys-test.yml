@@ -36,31 +36,19 @@ jobs:
             python-version: 3.8
             doc-and-deploy: true
           
-          - test-run-id: mac-py2.7
+          - test-run-id: mac-py3.7
             os: macos-latest
-            python-version: 2.7
-
-          - test-run-id: win-py3.7
-            os: windows-latest
             python-version: 3.7
 
-          # --- Additional testing combinations
+          - test-run-id: win-py3.6
+            os: windows-latest
+            python-version: 3.5
 
-          - test-run-id: lnx-py2.7
-            os: ubuntu-latest
-            python-version: 2.7
+          # --- Additional testing combinations
 
           #- test-run-id: mac-py3.7
           #  os: macos-latest
           #  python-version: 3.7
-
-          #- test-run-id: win-py2.7
-          #  os: windows-latest
-          #  python-version: 2.7
-
-          #- test-run-id: lnx-py3.5
-          #  os: ubuntu-latest
-          #  python-version: 3.5
 
           #- test-run-id: lnx-py3.6
           #  os: ubuntu-latest
