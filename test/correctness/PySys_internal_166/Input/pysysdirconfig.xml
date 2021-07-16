@@ -3,7 +3,7 @@
   <classification>
     <modes>
       <mode myParamA="param1a" myparamB="param1b">rootmode1_</mode> <!-- trailing _ will be stripped off when combining modes -->
-      <mode myParamA="param2a" myparamB="param2b">rootmode2</mode>
+      <mode mode="rootmode2" myParamA="param2a" myparamB="param2b"/> <!-- attribute is equivalent to the mode form -->
     </modes>
   </classification>
 

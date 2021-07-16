@@ -550,10 +550,12 @@ class _XMLDescriptorParser(object):
 				else:
 					params = collections.OrderedDict() if PY2 else {}
 					for param, paramvalue in node.attributes.items():
+						if param == 'mode': continue 
 						assert not param.startswith('_'), 'Parameter names cannot start with _'
 						params[param] = paramvalue
 			
-				modeString = self.getText(node)
+				modeString = node.getAttribute('mode') or self.getText(node)
+
 				if not modeString:
 					if not params: continue # simply ignore <mode> as it's sometimes included in templates etc
 
