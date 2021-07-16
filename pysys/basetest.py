@@ -470,8 +470,8 @@ class BaseTest(ProcessUser):
 			) for k in sorted(formatparams.keys())])
 		try:
 			result = bool(pysys.internal.safe_eval.safe_eval(toeval, extraNamespace={'self':self}))
-		except Exception as e:
-			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" due to %s - %s'%(toeval, e.__class__.__name__, e), abortOnError=abortOnError)
+		except Exception as e: # the exception already contains everything it needs
+			self.addOutcome(BLOCKED, str(e), abortOnError=abortOnError)
 			return False
 		
 		if result:
@@ -603,9 +603,9 @@ class BaseTest(ProcessUser):
 					namespace = dict(inspect.currentframe().f_back.f_locals)
 					if sys.version_info[0:2] >= (3, 6): # only do this if we have ordered kwargs, else it'd be non-deterministic
 						namespace.update(namedvalues) # also add in any named values we already have
-					v = pysys.internal.safe_eval.safe_eval(v, extraNamespace=namespace)
+					v = pysys.internal.safe_eval.safe_eval(v, extraNamespace=namespace, errorMessage='Failed to evaluate named parameter %s=(%s): {error}'%(k+EVAL_SUFFIX, v))
 				except Exception as ex:
-					self.addOutcome(BLOCKED, 'Failed to evaluate named parameter %s=(%s): %r'%(k+EVAL_SUFFIX, v, ex), abortOnError=abortOnError)
+					self.addOutcome(BLOCKED, '%s'%ex, abortOnError=abortOnError)
 					return False
 			else:
 				displayvalues.append(k)
@@ -628,10 +628,10 @@ class BaseTest(ProcessUser):
 		try:
 			namespace = dict(namedvalues)
 			namespace['self'] = self
-			result = bool(pysys.internal.safe_eval.safe_eval(conditionstring, extraNamespace=namespace))
+			result = bool(pysys.internal.safe_eval.safe_eval(conditionstring, extraNamespace=namespace, errorMessage='Failed to evaluate (%s)%s - {error}'%(conditionstring, displayvalues)))
 
 		except Exception as e:
-			self.addOutcome(BLOCKED, 'Failed to evaluate (%s)%s - %s: %s'%(conditionstring, displayvalues, e.__class__.__name__, e), abortOnError=abortOnError)
+			self.addOutcome(BLOCKED, str(e), abortOnError=abortOnError)
 			return False
 		
 		assertMessage = assertMessage or ('Assert that (%s)%s'%(conditionstring, displayvalues))

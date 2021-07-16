@@ -231,10 +231,11 @@ class _XMLProjectParser(object):
 				props.pop('os', None) # remove this to avoid hiding the os.path module
 				props['properties'] = self.properties
 				try:
-					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props)
+					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props, 
+						errorMessage='Failed to evaluate Python eval() string "{expr}" during property expansion due to {error}')
 					return str(v)
 				except Exception as ex:
-					raise UserError(errorprefix+'error in Python eval() string "%s": %s'%(m, ex))
+					raise UserError(str(ex))
 
 			if m in self.properties:
 				return self.properties[m]
@@ -624,7 +625,7 @@ class Project(object):
 				props.pop('os', None) # remove this to avoid hiding the os.path module
 				props['properties'] = self.properties
 				try:
-					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props)
+					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props, errorMessage='{error}')
 					return str(v)
 				except Exception as ex:
 					raise Exception('Error resolving ${%s} eval() string: %s'%(m, ex))
