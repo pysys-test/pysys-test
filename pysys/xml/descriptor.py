@@ -538,7 +538,8 @@ class _XMLDescriptorParser(object):
 			prevModesForCombining = None if not result else result
 
 			# by default we inherit, but to avoid confusion when defining multiple mode matrices we only allow explicit inherits 
-			if (modesNode.getAttribute('inherit') or ('false' if len(modesNodes) > 1 else 'true')).lower()!='true': 
+			defaultinherit = len(modesNodes) > 1
+			if (modesNode.getAttribute('inherit') or str(defaultinherit)).lower()!='true': 
 				result = {}
 			else:
 				result = {m:m.params for m in self.defaults.modes}
