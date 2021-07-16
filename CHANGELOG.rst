@@ -17,8 +17,11 @@ What's new in 1.7.0
 
 PySys 1.7.0 is under development. 
 
-  - Removed support for Python 2, which is now end-of-life. 
-	- Added support for Python 3.9.
+	- Changes to supported Python versions:
+	
+		- Removed support for Python 2 and 3.5, which are now end-of-life. 
+		- Added support for Python 3.9.
+	
 	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
 	  PySys.
 	- Documentation for :doc:`ProjectConfiguration` and :doc:`TestDescriptors` is much improved. 

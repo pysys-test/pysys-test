@@ -40,7 +40,7 @@ jobs:
             os: macos-latest
             python-version: 3.7
 
-          - test-run-id: win-py3.5
+          - test-run-id: win-py3.6
             os: windows-latest
             python-version: 3.5
 
@@ -49,10 +49,6 @@ jobs:
           #- test-run-id: mac-py3.7
           #  os: macos-latest
           #  python-version: 3.7
-
-          #- test-run-id: lnx-py3.5
-          #  os: ubuntu-latest
-          #  python-version: 3.5
 
           #- test-run-id: lnx-py3.6
           #  os: ubuntu-latest
