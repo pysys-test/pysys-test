@@ -35,6 +35,10 @@
 		      that should be dynamically removed/ignored from this list, or else False. This is useful for selectively 
 		      excluding some inherited modes, or for excluding modes on certain platforms. Note that no test descriptor 
 		      is generated for excluded modes, so there will be no result reported (not even SKIPPED) for excluded modes. 
+		      
+		      This string is evaluated from a Python namespace that includes standard modules such as os/sys/math/re, 
+		      as well as the 'pysys' module and the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``; 
+		      (see pysys.utils.safeeval.safeEval for more details). 
 		-->
 		<modes inherit="true" primary="CompressionNone">
 			<!-- The mode name can be specified with a mode= attribute or in the text of the mode element. -->
