@@ -11,7 +11,14 @@
 
   <classification>
   
-		<modes inherit="true"/>
+		<modes inherit="true"
+			exclude="
+				mode.startswith('MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=') and 
+				mode == 'MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=' and 
+				mode.params['browser']=='Firefox' and
+				project.myProjectProp=='myValue' and IS_WINDOWS in [True,False]
+			"
+		/> <!-- demonstrate we can exclude using mode string, params, and make use of project props and constants -->
 		
 		<modes>
 			<mode subtest="subtest1" iterations="100" maxHours="-10"/> <!-- this maxHours should override the earlier one in the parent dir -->
