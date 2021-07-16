@@ -600,7 +600,7 @@ class _XMLDescriptorParser(object):
 			exclude = modesNode.getAttribute('exclude')
 			if exclude:
 				project = pysys.xml.project.Project.getInstance()
-				result = {m: params for m,params in result.items() if not pysys.internal.safe_eval.safe_eval(exclude, 
+				result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(exclude, 
 						extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
 			
 			primary = modesNode.getAttribute('primary')

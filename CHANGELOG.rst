@@ -121,6 +121,9 @@ PySys 1.7.0 is under development.
 	  pool of TCP ports. 
 	- Added ``key`` field to `pysys.process.user.STDOUTERR_TUPLE` to make it easier to create log file paths that match 
 	  a process's stdout/stderr files. 
+	- Added `pysys.utils.safeeval.safeEval` for cases where you want to evaluate a Python eval string from a test 
+	  plugin, for example "expected >= value". The string is evaluated in a minimal namespace unpolluted by the 
+	  current module/test, but including access to standard Python modules such as ``os/sys/math`` and PySys constants. 
 	- Added ``includeCoverageFromPySysProcess`` option to `pysys.writer.coverage.PythonCoverageWriter` which is useful 
 	  for measuring code coverage when testing custom PySys plugins. 
 	- pysys.py improvements:

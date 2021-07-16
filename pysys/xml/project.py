@@ -231,7 +231,7 @@ class _XMLProjectParser(object):
 				props.pop('os', None) # remove this to avoid hiding the os.path module
 				props['properties'] = self.properties
 				try:
-					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props, 
+					v = pysys.utils.safeeval.safeEval(m[5:], extraNamespace=props, 
 						errorMessage='Failed to evaluate Python eval() string "{expr}" during property expansion due to {error}')
 					return str(v)
 				except Exception as ex:
@@ -625,7 +625,7 @@ class Project(object):
 				props.pop('os', None) # remove this to avoid hiding the os.path module
 				props['properties'] = self.properties
 				try:
-					v = pysys.internal.safe_eval.safe_eval(m[5:], extraNamespace=props, errorMessage='{error}')
+					v = pysys.utils.safeeval.safeEval(m[5:], extraNamespace=props, errorMessage='{error}')
 					return str(v)
 				except Exception as ex:
 					raise Exception('Error resolving ${%s} eval() string: %s'%(m, ex))
@@ -733,4 +733,4 @@ class Project(object):
 			traceback.print_exc()
 			sys.exit(1)
 
-import pysys.internal.safe_eval # down here to break circular dependency
+import pysys.utils.safeeval # down here to break circular dependency

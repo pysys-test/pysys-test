@@ -36,7 +36,7 @@ from pysys.process.helper import ProcessImpl
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, deletefile, pathexists, toLongPathSafe, fromLongPathSafe
 from pysys.utils.pycompat import *
-import pysys.internal.safe_eval
+import pysys.utils.safeeval
 from pysys.mappers import applyMappers
 
 if IS_WINDOWS:
@@ -462,7 +462,7 @@ class ProcessUser(object):
 		try:
 			process.start()
 			if state == FOREGROUND:
-				correctExitStatus = pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
+				correctExitStatus = pysys.utils.safeeval.safeEval('%d %s'%(process.exitStatus, expectedExitStatus), extraNamespace={'self':self})
 				
 				logmethod = log.info if correctExitStatus else log.warning
 				if quiet: logmethod = log.debug
@@ -586,7 +586,7 @@ class ProcessUser(object):
 
 		# allows setting TEMP to output dir to avoid contamination/filling up of system location; set to blank to do nothing
 		if self.project.getProperty('defaultEnvironsTempDir',''):
-			tempDir = pysys.internal.safe_eval.safe_eval(self.project.defaultEnvironsTempDir, extraNamespace={'self':self})
+			tempDir = pysys.utils.safeeval.safeEval(self.project.defaultEnvironsTempDir, extraNamespace={'self':self})
 			
 			self.mkdir(tempDir)
 			if IS_WINDOWS: # pragma: no cover
@@ -807,7 +807,7 @@ class ProcessUser(object):
 
 		else:
 			if checkExitStatus:
-				if not pysys.internal.safe_eval.safe_eval('%d %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
+				if not pysys.utils.safeeval.safeEval('%d %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
 					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
 
 					self.addOutcome(BLOCKED, 
@@ -867,7 +867,7 @@ class ProcessUser(object):
 			failures = []
 			for process in includes:
 				if process.state!=BACKGROUND or process in excludes: continue
-				if not pysys.internal.safe_eval.safe_eval('%s %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
+				if not pysys.utils.safeeval.safeEval('%s %s'%(process.exitStatus, process.expectedExitStatus), extraNamespace={'self':self}):
 					self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)
 
 					failures.append('%s returned exit status %s (expected %s)'%(process, process.exitStatus, process.expectedExitStatus))
@@ -1179,7 +1179,7 @@ class ProcessUser(object):
 			if pathexists(f):
 				matches = getmatches(f, expr, encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers)
 
-				if pysys.internal.safe_eval.safe_eval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
+				if pysys.utils.safeeval.safeEval("%d %s" % (len(matches), condition), extraNamespace={'self':self}):
 					timetaken = time.time()-timetaken
 					# Old-style/non-verbose behaviour is to log only after complete, 
 					# new/verbose style does the main logging at INFO when starting, and only logs on completion if it took a long time

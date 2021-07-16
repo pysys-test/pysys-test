@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2020 M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2021 M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@ import pysys
 import importlib
 from importlib import import_module
 
-def safe_eval(expr, extraNamespace={}, errorMessage='Failed to evaluate "{expr}" due to {error}'):
+def safeEval(expr, extraNamespace={}, errorMessage='Failed to evaluate "{expr}" due to {error}'):
 	"""
 	Executes eval(...) on the specified string expression, using a controlled globals()/locals() environment to 
 	ensure we do not break compatibility between PySys versions, and that a sensible set of PySys constants and 
@@ -60,6 +60,8 @@ def safe_eval(expr, extraNamespace={}, errorMessage='Failed to evaluate "{expr}"
 	
 	:param str errorMessage: The string used for the raised exception message if an exception is thrown by eval, 
 		where ``{expr}`` will be replaced with the actual expression and ``{error}`` with the error message. 
+		
+	.. versionadded:: 1.7.0
 	"""
 	env = globals()
 	if extraNamespace:
