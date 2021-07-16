@@ -26,6 +26,7 @@ import os.path, logging, xml.dom.minidom
 import collections
 import copy
 import locale
+import inspect
 
 import pysys
 from pysys.constants import *
@@ -486,7 +487,7 @@ class _XMLDescriptorParser(object):
 		else:
 			try:
 				title = descriptionNodeList[0].getElementsByTagName('title')[0]
-				return title.childNodes[0].data.strip()
+				return title.childNodes[0].data.replace('\n',' ').replace('\r',' ').replace('  ', ' ').strip()
 			except Exception:
 				return self.defaults.title
 				
@@ -502,7 +503,7 @@ class _XMLDescriptorParser(object):
 		else:
 			try:
 				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
-				return purpose.childNodes[0].data.strip()
+				return inspect.cleandoc(purpose.childNodes[0].data.strip().replace('\t','  '))
 			except Exception:
 				return self.defaults.purpose
 			
