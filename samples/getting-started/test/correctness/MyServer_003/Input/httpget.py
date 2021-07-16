@@ -9,7 +9,7 @@ url, acceptencoding, auth = sys.argv[1:]
 request = urllib.request.Request(url)
 if acceptencoding:
 	request.add_header('Accept-encoding', acceptencoding)
-assert auth == 'AuthNone', 'Support for testing other auth types is not yet implemented'
+assert auth == 'None', 'Support for testing other auth types is not yet implemented ("%s")'%auth
 
 with urllib.request.urlopen(request) as r:
 	body = r.read()

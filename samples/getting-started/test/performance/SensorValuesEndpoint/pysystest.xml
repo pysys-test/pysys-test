@@ -18,7 +18,7 @@
 		
 		<modes inherit="true">
 			<!-- For now we run this test in just one mode, but could add additional modes if desired. -->
-			<mode>CompressionGZip</mode>
+			<mode mode="CompressionGZip"/>
 		</modes>
 	</classification>
 

@@ -17,15 +17,27 @@
 			<group>myServerSensorValues</group>
 		</groups>
 		
-		<modes inherit="true">
-		<!-- This test will be executed for each of the following modes, in this case controlling the compression 
-			of results from the server and whether authentication is used. The test can use self.mode to find out which 
-			mode it is executing. Keep these strings short but self-describing. 
+		<modes inherit="true" primary="CompressionNone">
+			<!-- This test will be executed for each of the following modes, in this case controlling the compression 
+				of results from the server and whether authentication is used. The test can use self.mode to find out which 
+				mode it is executing and/or self.mode.params to access any parameters; parameters are also assigned 
+				as fields on the test object. Keep mode strings short but self-describing. 
+				
+				By default first mode listed is the primary one, but optionally this can be overridden using primary="mode". 
+			-->
+			<mode mode="CompressionNone" compressionType=""/>
+			<mode mode="CompressionGZip" compressionType="gzip"/>
+		</modes>
+		
+		<!-- If multiple modes nodes are present, new modes are created for all combinations -->
+		
+		<modes exclude="mode.params['auth'] == 'OS' and sys.platform != 'MyFunkyOS'" modeNamePattern="Auth={auth}">
+			<!-- Modes can be dynamically excluded with a Python eval string. -->
+			<!-- Instead of explicitly providing the mode= attribute, you can let PySys pick one 
+				automatically based on the params, or provide your own with the modeNamePattern= attribute. -->
 			
-			The first mode listed is the primary one. 
-		-->
-		<mode>CompressionNone_AuthNone</mode>
-		<mode>CompressionGZip_AuthNone</mode>
+			<mode auth="None"/>
+			<mode auth="OS"/>
 		</modes>
 	</classification>
 
