@@ -1,10 +1,10 @@
 Test id:           Test_EmptyModesElement
+ --> SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast=        {browser='Firefox', database='SQLite', timeoutSecs='60', myParamA='param1a', myparamB='param1b', testKind='SoakTest', maxHours='5', fast=''}
  --> MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue  {browser='Firefox', database='mySQL', timeoutSecs='60', myParamA='param1a', myparamB='param1b', testKind='SmokeTest', maxHours='1.5', fast='tRue'}
  --> MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=         {browser='Firefox', database='mySQL', timeoutSecs='60', myParamA='param1a', myparamB='param1b', testKind='SoakTest', maxHours='5', fast=''}
  --> MySQL_Firefox_rootmode2_SmokeTest_maxHours=1.5_fast=tRue  {browser='Firefox', database='mySQL', timeoutSecs='60', myParamA='param2a', myparamB='param2b', testKind='SmokeTest', maxHours='1.5', fast='tRue'}
  --> MySQL_Firefox_rootmode2_SoakTest_maxHours=5_fast=         {browser='Firefox', database='mySQL', timeoutSecs='60', myParamA='param2a', myparamB='param2b', testKind='SoakTest', maxHours='5', fast=''}
  --> SQLite_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue {browser='Firefox', database='SQLite', timeoutSecs='60', myParamA='param1a', myparamB='param1b', testKind='SmokeTest', maxHours='1.5', fast='tRue'}
- --> SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast=        {browser='Firefox', database='SQLite', timeoutSecs='60', myParamA='param1a', myparamB='param1b', testKind='SoakTest', maxHours='5', fast=''}
  --> SQLite_Firefox_rootmode2_SmokeTest_maxHours=1.5_fast=tRue {browser='Firefox', database='SQLite', timeoutSecs='60', myParamA='param2a', myparamB='param2b', testKind='SmokeTest', maxHours='1.5', fast='tRue'}
  --> SQLite_Firefox_rootmode2_SoakTest_maxHours=5_fast=        {browser='Firefox', database='SQLite', timeoutSecs='60', myParamA='param2a', myparamB='param2b', testKind='SoakTest', maxHours='5', fast=''}
  --> MySQL_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue   {browser='Chrome', database='MySQL', timeoutSecs='120', myParamA='param1a', myparamB='param1b', testKind='SmokeTest', maxHours='1.5', fast='tRue'}

@@ -538,7 +538,7 @@ class _XMLDescriptorParser(object):
 			prevModesForCombining = None if not result else result
 
 			# by default we inherit, but to avoid confusion when defining multiple mode matrices we only allow explicit inherits 
-			defaultinherit = len(modesNodes) > 1
+			defaultinherit = len(modesNodes) <= 1
 			if (modesNode.getAttribute('inherit') or str(defaultinherit)).lower()!='true': 
 				result = {}
 			else:
@@ -594,6 +594,11 @@ class _XMLDescriptorParser(object):
 				for mode, params in result.items():
 					if sorted(params.keys()) != expectedparams:
 						raise UserError('The same mode parameter keys must be given for each mode under <modes>, but found %s != %s in "%s"'%(sorted(params.keys()), expectedparams, self.file))
+			
+			primary = modesNode.getAttribute('primary')
+			if primary: # put the primary first if explicitly configured
+				if primary not in result: raise UserError('Cannot find the specified primary mode "%s" in [%s] while loading "%s"'%(primary, ', '.join(result.keys()), self.file)) 
+				result = {m: result[m] for m in sorted(result.keys(), key=lambda m: m != primary)}
 			
 			if prevModesForCombining is not None:
 				if not result or not prevModesForCombining:
