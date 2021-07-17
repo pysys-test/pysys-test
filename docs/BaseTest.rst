@@ -47,9 +47,12 @@ can be accessed via instance attributes on ``self``:
 	
 		self.copy(self.input+'/serverconfig.xml', self.output, mappers=[lambda line: line.replace('@PORT@', str(myport))])
 	
-	Do *not* use this field as a way to locate other resources that are in directories above Input/ (since this will 
-	fail when the input directory is empty and using a version control system (e.g. git) that doesn't commit empty 
-	directories). For location other test resources the recommended approach is to use ``self.project.testRootDir``, 
+	When storing large text files in the input directory it is recommended to use compression; see 
+	`pysys.basetest.BaseTest.unpackArchive` for details of how to decompress input files. 
+	
+	Do *not* use the ``self.input`` field as a way to locate other resources that are in directories above Input/ (since 
+	this will fail when the input directory is empty and using a version control system (e.g. git) that doesn't commit 
+	empty directories). For other test resource locations the recommended approach is to use ``self.project.testRootDir``, 
 	define a specific project property for the directory (if widely used), or if that's not practical then use 
 	``self.descriptor.testDir`` to get the test directory. 
 
@@ -75,7 +78,7 @@ can be accessed via instance attributes on ``self``:
 - ``self.testCycle`` *(int)*: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
   The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
 
-- ``self.descriptor`` (`pysys.config.descriptor.TestDescriptor`): The descriptor contains 
+- ``self.descriptor`` (`pysys.xml.descriptor.TestDescriptor`): The descriptor contains 
   information about this testcase such as the test id, groups and test type, and typically comes from the 
   test's ``pysystest.xml`` file. 
 
@@ -83,7 +86,7 @@ can be accessed via instance attributes on ``self``:
   responsible for orchestrating all the tests in this project. The runner is where any cross-test state can be held, 
   for example if you want to have multiple tests share use of a single server, VM, or other resource. 
 
-- ``self.project`` (`pysys.config.project.Project`): A reference to the singleton project instance containing the 
+- ``self.project`` (`pysys.xml.project.Project`): A reference to the singleton project instance containing the 
   configuration of this PySys test project as defined by ``pysysproject.xml``. 
   The project can be used to access information such as the project properties which are shared across all tests 
   (e.g. for hosts and credentials). 
