@@ -207,6 +207,7 @@ The helper methods for common file I/O operations are:
 
 .. autosummary::
 	copy
+	unpackArchive
 	mkdir
 	deleteDir
 	deleteFile
