@@ -294,4 +294,4 @@ field to access this. If this is not possible, use Project.getInstance().
 
 This is set by the console_XXX modules when the project is loaded. 
 """
-from pysys.xml.project import Project # retained for compatibility when using 'from constants import *'
+from pysys.config.project import Project # retained for compatibility when using 'from constants import *'

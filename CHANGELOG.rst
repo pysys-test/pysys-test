@@ -174,6 +174,10 @@ Migration notes:
 	  Although this should not immediately break existing applications, to avoid future breaking changes you should 
 	  update the signature of those methods if you override them to accept ``testobj`` and also any artibrary 
 	  ``**kwargs`` that may be added in future. 
+	- The ``pysys.xml`` package has been renamed to `pysys.config` to provide a more logical home for test descriptors 
+	  and project configuration. Aliases exist so you nothing should break unless you're explicitly referencing 
+	  or adding to the ``pysys/xml/templates`` directory. However it is recommended to find/rename your framework 
+	  extensions to use the new name as the ``pysys.xml`` module name is deprecated. 
 
 
 More powerful test modes

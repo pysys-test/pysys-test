@@ -16,9 +16,5 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
-"""
-Test/directory descriptors (``pysystest.xml``/``pysysdirconfig.xml``) and project configuration (``pysysproject.xml``)."""
-
-__all__ = [ "descriptor",
-			"project",
-			"manual" ]
+# Exists for compatibility with Pysys <= 1.6.1 before the xml module was renamed to config
+__all__ = [ "descriptor", "project", "manual" ]

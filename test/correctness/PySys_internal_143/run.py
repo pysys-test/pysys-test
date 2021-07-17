@@ -14,7 +14,7 @@ class PySysTest(BaseTest):
 		self.copy(self.input+'/MyTest', self.output+'/MyTest')
 		runPySys(self, self.output+'/print-without-dirconfig', ['print', '--json'], workingDir=self.output, defaultproject=True)
 		
-		self.copy(os.path.dirname(pysys.__file__)+'/xml/templates/dirconfig/default.xml', self.output+'/pysysdirconfig.xml')
+		self.copy(os.path.dirname(pysys.__file__)+'/config/templates/dirconfig/default.xml', self.output+'/pysysdirconfig.xml')
 		runPySys(self, self.output+'/print-with-dirconfig', ['print', '--json'], workingDir=self.output)
 			
 	def validate(self):

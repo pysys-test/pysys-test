@@ -71,7 +71,8 @@ __all__  = [
 	"unit",
 	"utils",
 	"writer",
-	"xml"
+	"xml", 
+	"config",
 ]
 """The public submodules of PySys."""
 
