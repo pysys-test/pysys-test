@@ -2060,28 +2060,21 @@ class ProcessUser(object):
 		if srcIsDir:
 			destexists = os.path.isdir(dest)
 			if not destexists: self.mkdir(dest)
-			scandir = getattr(os, 'scandir', None)
-			for e in (os.listdir(src) if scandir is None else scandir(src)):
-				if scandir is None: # for python2 support
-					path = os.path.join(src, e)
-					isdir = os.path.isdir(path)
-					islink = os.path.islink(path)
-				else:
-					isdir = e.is_dir()
-					islink = e.is_symlink()
+			with os.scandir(src) as iterator:
+				for e in iterator:
 					path = e.path
-				
-				if ignoreIf is not None and ignoreIf(path): continue
-				
-				if islink and symlinks:
-					linkdest = dest+os.sep+os.path.basename(path)
-					os.symlink(os.readlink(path), linkdest)
-					shutil.copystat(path, linkdest, **({} if PY2 else {'follow_symlinks':False}))
-					continue
-				
-				self.copy(path, dest+os.sep+os.path.basename(path), 
-					# must pass all other arguments through
-					mappers=mappers, encoding=encoding, symlinks=symlinks, ignoreIf=ignoreIf, skipMappersIf=skipMappersIf, overwrite=overwrite)
+					
+					if ignoreIf is not None and ignoreIf(path): continue
+					
+					if e.is_symlink() and symlinks:
+						linkdest = dest+os.sep+os.path.basename(path)
+						os.symlink(os.readlink(path), linkdest)
+						shutil.copystat(path, linkdest, **({} if PY2 else {'follow_symlinks':False}))
+						continue
+					
+					self.copy(path, dest+os.sep+os.path.basename(path), 
+						# must pass all other arguments through
+						mappers=mappers, encoding=encoding, symlinks=symlinks, ignoreIf=ignoreIf, skipMappersIf=skipMappersIf, overwrite=overwrite)
 				
 			return dest
 
