@@ -430,13 +430,17 @@ class BaseRunner(ProcessUser):
 				for file in filenames:
 					path = os.path.join(dirpath, file)
 
-					size = os.path.getsize(path)
+					size = None
 					try:
+						size = os.path.getsize(path)
 						if size > 0: # for efficiency, ignore zero byte files
 							for visitor in self.__testOutputVisitorWriters:
 								if visitor.visitTestOutputFile(testObj, path) is True: break # don't invoke remaining visitors if this one dealt with it
 						
 					except Exception as ex:
+						if not os.path.exists(path): continue
+						if size is None: raise # shouldn't happen given the above exists check; the rest of this error handler assumes a problem wiuth the visitor/collection
+						
 						log.warning("Failed to collect test output file %s: ", path, exc_info=1)
 						if not hasattr(self, '_collectErrorAlreadyReported'):
 							self.runnerErrors.append('Failed to collect test output from test %s (and maybe others): %s'%(testObj, ex))
