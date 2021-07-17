@@ -130,7 +130,7 @@ PySys 1.7.0 is under development.
 	  to provide different runDetails based on some feature of the test object or mode. 
 	- Added `BaseTest.pollWait` which should be used instead of ``time.sleep`` when polling for something to happen 
 	  without any log messages (or the existing `BaseTest.wait` for longer polls where you do want logging). 
-	- ``pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
+	- `pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
 	  so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
 	  occasional failures of the process monitoring. 
 	- The unwieldy `BaseTest.getExprFromFile` is superceded (though not actually deprecated) by the simpler functions 
