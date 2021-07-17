@@ -315,10 +315,10 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
 	
 	:ivar dict[str,obj] ~.params: A dictionary of parameters associated with this mode. The parameters are available to 
-		the test (as ``self.descriptor.mode.params``) and also assigned as instance fields on the test class when it 
+		the test (as ``self.mode.params``) and also assigned as instance fields on the test class when it 
 		runs in this mode. 
 
-	.. versionadded:: 10.7.0
+	.. versionadded:: 1.7.0
 
 	"""
 	__slots__ = ['params']

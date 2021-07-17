@@ -48,8 +48,9 @@ def safeEval(expr, extraNamespace={}, errorMessage='Failed to evaluate "{expr}" 
 	The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale`` 
 	standard Python modules, as well as the ``pysys`` module and the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``. 
 	
-	If necessary, symbols for additional modules can be imported dynamically using ``import_module``, e.g. 
-	``safe_eval("import_module('difflib').get_close_matches('app', ['apple', 'orange', 'applic']")``.
+	If necessary, symbols for additional modules can be imported dynamically using ``import_module``:: 
+	
+		x = safeEval("import_module('difflib').get_close_matches('app', ['apple', 'orange', 'applic']")
 	
 	If an error occurs, an exception is raised that includes the expression in its message. 
 	
