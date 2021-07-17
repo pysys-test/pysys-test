@@ -430,7 +430,7 @@ class BaseProcessMonitor(object):
 		Waits for the termination to complete if possible, but does not throw an exception if it fails. 
 		
 		:param float timeout: Overrides the maximum time we will wait for the monitor to stop. By default this is 
-		L{constants.TIMEOUTS}C{['WaitForProcessStop']}
+			``['WaitForProcessStop']`` from `constants.TIMEOUTS`. 
 		
 		"""
 		self.thread.stop()
