@@ -12,15 +12,19 @@ Change Log
 
 
 -------------------
-What's new in 1.7.0
+What's new in 2.0
 -------------------
 
-PySys 1.7.0 is under development. 
+PySys 2.0 is under development. 
 
 	- Changes to supported Python versions:
 	
 		- Removed support for Python 2 and 3.5, which are now end-of-life. 
 		- Added support for Python 3.9.
+	
+	- PySys releases now use a simpler 2-digit semantic version, so this release is v2.0 compared to the previous 
+	  v1.6.1. The first digit changes when there are changes that are likely to require changes to some users' existing 
+	  tests.
 	
 	- Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
 	  PySys.
@@ -398,7 +402,7 @@ New and improved result writers
   of file (e.g. code coverage) and then do something with it during the runner cleanup phase when all tests have 
   completed.  
 
-- Moved Python code coverage generation out to ``pysys.writer.testoutput.PythonCoverageWriter`` (as of 1.7.0, 
+- Moved Python code coverage generation out to ``pysys.writer.testoutput.PythonCoverageWriter`` (as of 2.0, 
   it's now in `pysys.writer.coverage.PythonCoverageWriter`) as an example of how to use a plugin to add 
   code coverage support without subclassing the runner. Existing projects use this behind the scenes, but new projects 
   should add the writer to their configuration explicitly if they need it (see sample project). 
@@ -809,7 +813,7 @@ Be sure to remove use of the following deprecated items at your earliest conveni
             <property name="pythonCoverageArgs" value="--rcfile=${testRootDir}/python_coveragerc"/>
         </writer>
    
-  (if using 1.7.0+, use `pysys.writer.coverage.PythonCoverageWriter` instead of 
+  (if using 2.0+, use `pysys.writer.coverage.PythonCoverageWriter` instead of 
   ``pysys.writer.testoutput.PythonCoverageWriter``. 
 
 Finally there are also some fixes, cleanup, and better error checking that *could* require changes (typically to 

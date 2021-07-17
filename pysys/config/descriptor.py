@@ -316,7 +316,7 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 		the test (as ``self.mode.params``) and also assigned as instance fields on the test class when it 
 		runs in this mode. 
 
-	.. versionadded:: 1.7.0
+	.. versionadded:: 2.0
 
 	"""
 	__slots__ = ['params']

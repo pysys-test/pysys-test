@@ -307,7 +307,7 @@ class ProcessUser(object):
 		.. versionchanged:: 1.6.0
 			Added onError parameter and default behaviour of logging stderr/out when there's a failure.
 			Added info parameter. 
-		.. versionchanged:: 1.7.0
+		.. versionchanged:: 2.0
 			Added processFactory parameter.
 
 		:param str command: The path to the executable to be launched (should include the full path)
@@ -1548,7 +1548,7 @@ class ProcessUser(object):
 
 			myKey = self.grep('test.txt', r'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
 
-		.. versionadded: 1.7.0
+		.. versionadded: 2.0
 
 		:param str path: file to search (located in the output dir unless an absolute path is specified)
 
@@ -1604,7 +1604,7 @@ class ProcessUser(object):
 
 			myKey = self.grepOrNone('test.txt', r'myKey="(.*)"') or 'mydefault' # on a file containing 'myKey="foobar"' would return "foobar"
 
-		.. versionadded: 1.7.0
+		.. versionadded: 2.0
 
 		:param str path: file to search (located in the output dir unless an absolute path is specified)
 
@@ -1654,7 +1654,7 @@ class ProcessUser(object):
 
 			myKey = self.grepAll('test.txt', r'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return ["foobar"]
 
-		.. versionadded: 1.7.0
+		.. versionadded: 2.0
 
 		:param str path: file to search (located in the output dir unless an absolute path is specified)
 
@@ -1817,7 +1817,7 @@ class ProcessUser(object):
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 
-			Added in PySys 1.7.0. 
+			Added in PySys 2.0. 
 
 		:param int maxLines: Upper limit on the number of lines from the file that will be logged. Set to zero for unlimited
 		:param bool tail: Prints the _last_ 'maxLines' in the file rather than the first 'maxLines'.
@@ -1840,7 +1840,7 @@ class ProcessUser(object):
 			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
 
 		:param bool stripWhitespace: By default blank lines are removed; set this to False to disable that behaviour. 
-			Added in PySys 1.7.0. 
+			Added in PySys 2.0. 
 
 		:return: True if anything was logged, False if not.
 		

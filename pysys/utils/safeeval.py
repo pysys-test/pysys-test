@@ -62,7 +62,7 @@ def safeEval(expr, extraNamespace={}, errorMessage='Failed to evaluate "{expr}" 
 	:param str errorMessage: The string used for the raised exception message if an exception is thrown by eval, 
 		where ``{expr}`` will be replaced with the actual expression and ``{error}`` with the error message. 
 		
-	.. versionadded:: 1.7.0
+	.. versionadded:: 2.0
 	"""
 	env = globals()
 	if extraNamespace:

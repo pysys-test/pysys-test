@@ -107,7 +107,7 @@ is usually not relevant for testing purposes.
 
 See also `pysys.basetest.BaseTest.getDefaultFileEncoding()`.
 
-.. versionadded:: 1.7.0
+.. versionadded:: 2.0
 """
 
 ENVSEPERATOR = os.pathsep

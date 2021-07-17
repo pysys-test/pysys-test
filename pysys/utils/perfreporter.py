@@ -138,7 +138,7 @@ class CSVPerformanceReporter(object):
 
 		:param testobj: the test case instance registering the value
 
-		.. versionchanged:: 1.7.0 Added testobj parameter. 
+		.. versionchanged:: 2.0 Added testobj parameter. 
 		
 		"""
 		return collections.OrderedDict(self.runner.runDetails)
@@ -190,7 +190,7 @@ class CSVPerformanceReporter(object):
 		
 		try:
 			runDetails = self.getRunDetails(testobj)
-		except Exception: # for pre-1.7.0 signature
+		except Exception: # for pre-2.0 signature
 			runDetails = self.getRunDetails()
 		
 		return '# '+CSVPerformanceFile.toCSVLine(CSVPerformanceFile.COLUMNS+[CSVPerformanceFile.RUN_DETAILS, runDetails])+'\n'
@@ -306,7 +306,7 @@ class CSVPerformanceReporter(object):
 		def callGetRunHeader():
 			try:
 				return self.getRunHeader(testobj)
-			except Exception: # for pre-1.7.0 signature
+			except Exception: # for pre-2.0 signature
 				return self.getRunHeader()
 		
 		if not os.path.exists(path):
