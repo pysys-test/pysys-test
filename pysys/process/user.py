@@ -1543,6 +1543,10 @@ class ProcessUser(object):
 		
 			authInfoDict = self.grep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
 
+		For extracting a single value you can use an unnamed group using ``(expr)`` syntax, in which case that group is returned::
+
+			myKey = self.grep('test.txt', r'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return "foobar"
+
 		.. versionadded: 1.7.0
 
 		:param str path: file to search (located in the output dir unless an absolute path is specified)
@@ -1575,9 +1579,7 @@ class ProcessUser(object):
 		:return: A str containing the matching expression, or if the expr contains any ``(?P<groupName>...)`` named groups 
 			a dict[str,str] is returned where the keys are the groupNames. 
 		"""
-		# NB: we use groups=[0] as unnamed groups are quite easy to get wrong especially when there are multiple groups, 
-		# and using named groups is a better path to encourage people to use
-		return self.getExprFromFile(path=path, expr=expr, groups=[0], returnAll=False, returnNoneIfMissing=False, 
+		return self.getExprFromFile(path=path, expr=expr, returnAll=False, returnNoneIfMissing=False, 
 			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def grepOrNone(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
@@ -1596,6 +1598,10 @@ class ProcessUser(object):
 			authInfoDict = self.grepOrNone('myserver.log', 
 					expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.')
 				) or {'username':'myuser', 'authSecs': '0.0'}
+
+		For extracting a single value you can use an unnamed group using ``(expr)`` syntax, in which case that group is returned::
+
+			myKey = self.grepOrNone('test.txt', r'myKey="(.*)"') or 'mydefault' # on a file containing 'myKey="foobar"' would return "foobar"
 
 		.. versionadded: 1.7.0
 
@@ -1630,7 +1636,7 @@ class ProcessUser(object):
 			or if the expr contains any ``(?P<groupName>...)`` named groups 
 			a dict[str,str] is returned where the keys are the groupNames. 
 		"""
-		return self.getExprFromFile(path=path, expr=expr, groups=[0], returnAll=False, returnNoneIfMissing=True, 
+		return self.getExprFromFile(path=path, expr=expr, returnAll=False, returnNoneIfMissing=True, 
 			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def grepAll(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
@@ -1642,6 +1648,10 @@ class ProcessUser(object):
 		in which case each item in the returned list is a dictionary is returned providing access to the individual elements::
 		
 			authInfoDictList = self.grepAll('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+
+		For extracting a single value you can use an unnamed group using ``(expr)`` syntax, in which case that group is returned::
+
+			myKey = self.grepAll('test.txt', r'myKey="(.*)"') # on a file containing 'myKey="foobar"' would return ["foobar"]
 
 		.. versionadded: 1.7.0
 
@@ -1675,7 +1685,7 @@ class ProcessUser(object):
 		:return: A list where each item is a str containing the matching expression, or if the expr contains any 
 			``(?P<groupName>...)`` named groups each item is a dict[str,str] where the keys are the groupNames. 
 		"""
-		return self.getExprFromFile(path=path, expr=expr, groups=[0], returnAll=True, returnNoneIfMissing=False, 
+		return self.getExprFromFile(path=path, expr=expr, returnAll=True, returnNoneIfMissing=False, 
 			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0, mappers=[]):

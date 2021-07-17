@@ -1023,8 +1023,8 @@ class BaseTest(ProcessUser):
 		:return: True if the assertion succeeds, False if a failure outcome was appended (and abortOnError=False). 
 
 		"""
-		def getExprFromFile(file, expr):
-			e = self.getExprFromFile(file, expr, encoding=encoding, reFlags=reFlags, mappers=mappers)
+		def grep(file, expr):
+			e = self.grep(file, expr, encoding=encoding, reFlags=reFlags, mappers=mappers)
 			# in case it has named parameters
 			if isinstance(e, dict) and len(e)==1: return next(iter(e.values()))
 			return e

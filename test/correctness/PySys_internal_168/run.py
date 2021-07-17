@@ -16,8 +16,8 @@ class PySysTest(BaseTest):
 			expected="1 with expression")
 
 		self.assertThat('actual == expected', 
-			actual__eval="self.grep('test.txt', '[0-9] with (e.pression)')", # unnamed group is ignored
-			expected="1 with expression")
+			actual__eval="self.grep('test.txt', '[0-9] with (e.pression)')", # one unnamed group is allowed
+			expected="expression")
 
 		self.assertThat('actual == expected', 
 			actual__eval="self.grep('test.txt', '(?P<num>[0-9]) with (e.pression)')", # unnamed group is ignored
