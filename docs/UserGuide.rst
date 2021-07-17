@@ -336,17 +336,19 @@ getting-started sample):
 
 .. code-block:: xml
 	
-	<modes inherit="true" primary="CompressionNone">
-		<mode mode="CompressionNone" compressionType=""     someOtherParam="True"/>
-		<mode mode="CompressionGZip" compressionType="gzip" someOtherParam="False"/>
-	</modes>
-	
-	<!-- If multiple modes nodes are present, new modes are created for all combinations -->
-	
-	<modes modeNamePattern="Auth={auth}" exclude="mode.params['auth'] == 'OS' and sys.platform != 'MyFunkyOS'">
-		<mode auth="None"/>
-		<mode auth="OS"/>
-	</modes>
+	<classification>
+		<modes inherit="true" primary="CompressionNone">
+			<mode mode="CompressionNone" compressionType=""     someOtherParam="True"/>
+			<mode mode="CompressionGZip" compressionType="gzip" someOtherParam="False"/>
+		</modes>
+		
+		<!-- If multiple modes nodes are present, new modes are created for all combinations -->
+		
+		<modes modeNamePattern="Auth={auth}" exclude="mode.params['auth'] == 'OS' and sys.platform != 'MyFunkyOS'">
+			<mode auth="None"/>
+			<mode auth="OS"/>
+		</modes>
+	</classification>
 
 This will create the following modes::
 
