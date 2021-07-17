@@ -46,6 +46,12 @@ can be accessed via instance attributes on ``self``:
   Here is an example of copying a configuration file template from the input directory::
 	
 		self.copy(self.input+'/serverconfig.xml', self.output, mappers=[lambda line: line.replace('@PORT@', str(myport))])
+	
+	Do *not* use this field as a way to locate other resources that are in directories above Input/ (since this will 
+	fail when the input directory is empty and using a version control system (e.g. git) that doesn't commit empty 
+	directories). For location other test resources the recommended approach is to use ``self.project.testRootDir``, 
+	define a specific project property for the directory (if widely used), or if that's not practical then use 
+	``self.descriptor.testDir`` to get the test directory. 
 
 - ``self.output`` *(str)*: Full path to the output directory of the testcase, which is the only location to which the 
   test should write output files, temporary files and logs. The output directory is automatically created and 
