@@ -60,7 +60,7 @@ class BaseRunner(ProcessUser):
 	any resources that are shared across multiple testcases.
 
 	Selection of the tests (and modes) to be run is performed through the ``pysys.py run`` launch script, which locates 
-	and creates a set of `pysys.xml.descriptor.TestDescriptor` objects based on the command line arguments supplied by 
+	and creates a set of `pysys.config.descriptor.TestDescriptor` objects based on the command line arguments supplied by 
 	the user, and passes it to the runner. 
 	After executing any custom `setup` logic the runner's `start` method is responsible for iterating through the 
 	descriptor list and for each entry importing and creating an instance of the `BaseTest <pysys.basetest.BaseTest>` subclass 
@@ -139,7 +139,7 @@ class BaseRunner(ProcessUser):
 		
 		Note that it is not permitted to try to change this dictionary after setup has completed. 
 	
-	:ivar pysys.xml.project.Project ~.project: A reference to the singleton project instance containing the 
+	:ivar pysys.config.project.Project ~.project: A reference to the singleton project instance containing the 
 		configuration of this PySys test project as defined by ``pysysproject.xml``. 
 		The project can be used to access information such as the project properties which are shared across all tests 
 		(e.g. for hosts and credentials). 
@@ -156,7 +156,7 @@ class BaseRunner(ProcessUser):
 
 	:ivar int ~.threads: The number of worker threads to execute the requested testcases.
 
-	:ivar list[pysys.xml.descriptor.TestDescriptor] ~.descriptors: A list of all the `pysys.xml.descriptor.TestDescriptor` test 
+	:ivar list[pysys.config.descriptor.TestDescriptor] ~.descriptors: A list of all the `pysys.config.descriptor.TestDescriptor` test 
 		descriptors that are selected for execution by the runner. 
 
 	:ivar dict(str,str|bool) ~.xargs: A dictionary of additional ``-Xkey=value`` user-defined arguments. These are also 

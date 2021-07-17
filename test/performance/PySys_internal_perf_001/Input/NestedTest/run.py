@@ -1,7 +1,7 @@
 from pysys.constants import *
 from pysys.basetest import BaseTest
 from pysys.exceptions import *
-from pysys.xml.descriptor import DescriptorLoader
+from pysys.config.descriptor import DescriptorLoader
 import io, time
 
 SMALL_DESCRIPTOR_TEMPLATE = u"""<?xml version="1.0" encoding="utf-8"?>

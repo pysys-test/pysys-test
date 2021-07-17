@@ -33,16 +33,16 @@ except NameError:
 
 from pysys.constants import *
 from pysys.exceptions import UserError
-from pysys.xml.project import Project
+from pysys.config.project import Project
 
 def loadDescriptors(dir=None):
 	"""Load descriptor objects representing a set of tests to run for 
 	the current project, returning the list.
 	
-	:meta private: Deprecated and since 1.5.1 also hidden; use `pysys.xml.descriptor.DescriptorLoader` instead.
+	:meta private: Deprecated and since 1.5.1 also hidden; use `pysys.config.descriptor.DescriptorLoader` instead.
 	
 	:param dir: The parent directory to search for runnable tests
-	:return: List of L{pysys.xml.descriptor.TestDescriptor} objects. 
+	:return: List of L{pysys.config.descriptor.TestDescriptor} objects. 
 		Caller must sort this list to ensure deterministic behaviour. 
 	:rtype: list
 	:raises UserError: Raised if no testcases can be found.
@@ -70,7 +70,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	:param modeexcludes: A list specifying the modes to be excluded. 
 	:param expandmodes: Set to False to disable expanding a test with multiple
 		modes into separate descriptors for each one (used for pysys print). 
-	:return: List of L{pysys.xml.descriptor.TestDescriptor} objects
+	:return: List of L{pysys.config.descriptor.TestDescriptor} objects
 	:rtype: list
 	:raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
 	

@@ -3,7 +3,7 @@ from pysys.constants import *
 from pysys.basetest import BaseTest
 import os, sys, re
 from pysys.utils.filecopy import filecopy
-from pysys.xml.project import createProjectConfig
+from pysys.config.project import createProjectConfig
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
 	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test

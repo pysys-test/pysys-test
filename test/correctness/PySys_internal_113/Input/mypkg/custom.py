@@ -1,7 +1,7 @@
 import os
 from pysys.basetest import BaseTest
 from pysys.baserunner import BaseRunner
-from pysys.xml.descriptor import DescriptorLoader, TestDescriptor
+from pysys.config.descriptor import DescriptorLoader, TestDescriptor
 from pysys.constants import PASSED
 
 class MyTestClass(BaseTest):

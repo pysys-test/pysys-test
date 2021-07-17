@@ -16,8 +16,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-The `TestDescriptor <pysys.xml.descriptor.TestDescriptor>` class holds metadata for each testcase 
-(``pysystest.xml``) or directory (``pysysdirconfig.xml``), and the `DescriptorLoader <pysys.xml.descriptor.DescriptorLoader>` 
+The `TestDescriptor <pysys.config.descriptor.TestDescriptor>` class holds metadata for each testcase 
+(``pysystest.xml``) or directory (``pysysdirconfig.xml``), and the `DescriptorLoader <pysys.config.descriptor.DescriptorLoader>` 
 class allows customization of the test discovery process. 
 """
 
@@ -34,7 +34,7 @@ from pysys.exceptions import UserError
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
 from pysys.utils.pycompat import PY2, isstring, openfile, makeReadOnlyDict
 
-log = logging.getLogger('pysys.xml.descriptor')
+log = logging.getLogger('pysys.config.descriptor')
 
 class TestDescriptor(object):
 	"""Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory 
@@ -616,7 +616,7 @@ class _XMLDescriptorParser(object):
 
 			exclude = modesNode.getAttribute('exclude')
 			if exclude:
-				project = pysys.xml.project.Project.getInstance()
+				project = pysys.config.project.Project.getInstance()
 				result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(exclude, 
 						extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
 
@@ -750,7 +750,7 @@ class DescriptorLoader(object):
 	files on disk, and allowing for different database modes on different 
 	platforms. 
 
-	:ivar pysys.xml.project.Project ~.project: The `pysys.xml.project.Project` instance. 
+	:ivar pysys.config.project.Project ~.project: The `pysys.config.project.Project` instance. 
 	
 	"""
 	def __init__(self, project, **kwargs): 
@@ -778,7 +778,7 @@ class DescriptorLoader(object):
 		
 		:param dir: The parent directory to search for runnable tests. 
 		
-		:return: List of L{pysys.xml.descriptor.TestDescriptor} objects 
+		:return: List of L{pysys.config.descriptor.TestDescriptor} objects 
 			which could be selected for execution. 
 			
 			If a test can be run in multiple modes there must be a single descriptor 

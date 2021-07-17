@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-The `Project <pysys.xml.project.Project>` class holds the ``pysysproject.xml`` project configuration, including all 
+The `Project <pysys.config.project.Project>` class holds the ``pysysproject.xml`` project configuration, including all 
 user-defined project properties. 
 
 """
@@ -37,7 +37,7 @@ from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.exceptions import UserError
 
-log = logging.getLogger('pysys.xml.project')
+log = logging.getLogger('pysys.config.project')
 
 class _XMLProjectParser(object):
 	"""
@@ -291,7 +291,7 @@ class _XMLProjectParser(object):
 
 	def getDescriptorLoaderClass(self):
 		nodeList = self.root.getElementsByTagName('descriptor-loader')
-		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.xml.descriptor.DescriptorLoader')
+		cls, optionsDict = self._parseClassAndConfigDict(nodeList[0] if nodeList else None, 'pysys.config.descriptor.DescriptorLoader')
 		
 		if optionsDict: raise UserError('Unexpected descriptor-loader attribute(s): '+', '.join(list(optionsDict.keys())))
 		

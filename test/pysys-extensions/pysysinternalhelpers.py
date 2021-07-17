@@ -4,7 +4,7 @@ import warnings
 import pysys
 from pysys.constants import IS_WINDOWS, FAILED
 from pysys.utils.filecopy import filecopy
-from pysys.xml.project import createProjectConfig
+from pysys.config.project import createProjectConfig
 
 def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError=True, environs=None, projectfile=None, defaultproject=False, expectedExitStatus='==0', **kwargs):
 	"""

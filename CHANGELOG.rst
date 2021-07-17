@@ -648,7 +648,7 @@ Miscellaneous test API improvements
 - Added `BaseTest.disableLogging()` for cases where you need to pause logging (e.g. while repeatedly polling) to avoid 
   cluttering the run log.  
 
-- Added `pysys.xml.project.Project.getProperty()` which is a convenient and safe way to get a project property 
+- Added `pysys.config.project.Project.getProperty()` which is a convenient and safe way to get a project property 
   of bool/int/float/list[str] type. Also added `pysys.baserunner.BaseRunner.getXArg()` which does the same thing for 
   ``-Xkey=value`` arguments.
 
@@ -851,10 +851,10 @@ the following list and consult it only if you get new test failures after upgrad
 - Made it an error to change project properties after the project has been loaded. This was never intended, as projects 
   are immutable. In the unlikely event you do this, change to storing user-defined cross-test/global state in your 
   runner class instead. 
-- Project properties whose name clashes with one of the pre-defined fields of `pysys.xml.project.Project` 
+- Project properties whose name clashes with one of the pre-defined fields of `pysys.config.project.Project` 
   (e.g. "properties" or "root") will no longer override those fields - which would most likely not work correctly 
   anyway. If you need to get a property whose name clashes with a built-in member, use 
-  `pysys.xml.project.Project.properties`.
+  `pysys.config.project.Project.properties`.
 - PySys now checks that its working directory (``os.chdir()``) and environment (``os.environ``) have not been modified 
   during execution of tests (after `pysys.baserunner.BaseRunner.setup()'). Sometimes test authors do this by mistake 
   and it's extremely dangerous as it causes behaviour changes (and potentially file system race conditions) in 
@@ -873,9 +873,9 @@ the following list and consult it only if you get new test failures after upgrad
 - There is no longer a default writer so if you choose delete the <writers> element from your project you won't 
   have any writers. 
 - Removed undocumented ``TEST_TEMPLATE`` constant from ``pysys.basetest`` and ``DESCRIPTOR_TEMPLATE`` 
-  from `pysys.xml.descriptor` (they're now constants on `pysys.launcher.console_make.ConsoleMakeTestHelper` if you 
+  from `pysys.config.descriptor` (they're now constants on `pysys.launcher.console_make.ConsoleMakeTestHelper` if you 
   really need them, but this is unlikely and they are not part of the public PySys API). 
-- Removed deprecated and unused constant ``DTD`` from `pysys.xml.project` and `pysys.xml.descriptor`. 
+- Removed deprecated and unused constant ``DTD`` from `pysys.config.project` and `pysys.config.descriptor`. 
 - Removed deprecated method ``purgeDirectory()`` from `pysys.baserunner.BaseRunner` 
   and `pysys.writer.outcomes.JUnitXMLResultsWriter`. Use `pysys.utils.fileutils.deletedir` instead. 
 - Removed deprecated classes ``ThreadedStreamHandler`` and ``ThreadedFileHandler`` from the 
@@ -1057,7 +1057,7 @@ Advanced pysystest.xml additions:
         <user-data name="myThing" value="foobar"/>
      </data>
      
-  Any user-defined data is available as a string in the ``userData`` field of `self.descriptor <pysys.xml.descriptor.TestDescriptor>`, 
+  Any user-defined data is available as a string in the ``userData`` field of `self.descriptor <pysys.config.descriptor.TestDescriptor>`, 
   and each named value will be set as a variable on the `BaseTest` class. If a static (non-instance) variable of the same name 
   exists on the test class at construction then the ``<user-data>`` will override it, but its type will be coerced 
   automatically to an int/float/bool to match the type of the variable. A ``pysys.py run -Xname=value`` argument can be 
@@ -1145,10 +1145,10 @@ expected.
      documentation) as there are functions in Python's standard library module ``shutil`` that do the same thing. 
    - ``pysys.utils.threadpool`` is also deprecated and hidden from the public API as it was never really 
      intended for general purpose use and Python 3 contains similar functionality. 
-   - The ``DTD`` constants in `pysys.xml.project` and `pysys.xml.descriptor`.
-   - ``pysys.xml.descriptor.XMLDescriptorParser`` (replaced by `pysys.xml.descriptor.DescriptorLoader`)
-   - ``pysys.xml.descriptor.XMLDescriptorContainer`` (replaced by `pysys.xml.descriptor.TestDescriptor`)
-   - ``pysys.xml.descriptor.XMLDescriptorCreator`` and ``DESCRIPTOR_TEMPLATE`` (create descriptors manually if needed) 
+   - The ``DTD`` constants in `pysys.config.project` and `pysys.config.descriptor`.
+   - ``pysys.config.descriptor.XMLDescriptorParser`` (replaced by `pysys.config.descriptor.DescriptorLoader`)
+   - ``pysys.config.descriptor.XMLDescriptorContainer`` (replaced by `pysys.config.descriptor.TestDescriptor`)
+   - ``pysys.config.descriptor.XMLDescriptorCreator`` and ``DESCRIPTOR_TEMPLATE`` (create descriptors manually if needed) 
 
 1.4.0 to 1.5.0
 --------------
@@ -1305,7 +1305,7 @@ Improvements to the XML descriptors that provide information about tests:
   
   The ``pysysdirconfig.xml`` file can contain any option that's valid in 
   a ``pysystest.xml`` file except the ``description/title/purpose``. a sample 
-  ``pysysdirconfig.xml`` file is provided in ``pysys/xml/templates/dirconfig``. 
+  ``pysysdirconfig.xml`` file is provided in ``pysys/config/templates/dirconfig``. 
   
   See the PySys User Guide for more information. 
 
@@ -1366,7 +1366,7 @@ Improvements to the XML descriptors that provide information about tests:
   of descriptor settings such as the supported modes for each testcase, and 
   also provides a way to make PySys capable of finding and running non-PySys 
   tests (by programmatically creating PySys TestDescriptor objects for them).
-  See the `pysys.xml.descriptor.DescriptorLoader` class for more details. 
+  See the `pysys.config.descriptor.DescriptorLoader` class for more details. 
 
 Improvements to the ``pysys.py`` command line tool:
 
@@ -1520,7 +1520,7 @@ major release it is possible that some users might need to make changes:
   colon to separate the test id and titles. This makes it easier to copy and 
   paste test ids from ``pysys print`` into the command line. 
 
-- Several fields in the `pysys.xml.descriptor.TestDescriptor` (aka ``XMLDescriptorContainer``) class 
+- Several fields in the `pysys.config.descriptor.TestDescriptor` (aka ``XMLDescriptorContainer``) class 
   that used to contain absolute paths now contain paths relative to 
   the newly introduced `testDir` member. These are: `module`, `output`, 
   `input`, `reference`. The values of `BaseTest.output/input/reference` 

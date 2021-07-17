@@ -288,7 +288,7 @@ class PrintLogs(Enum):
 PROJECT = None
 """:meta private: Hide this since 1.5.1 since we don't want people to use it. 
 
-Holds the L{pysys.xml.project.Project} instance containing settings for this PySys project.
+Holds the L{pysys.config.project.Project} instance containing settings for this PySys project.
 Instead of using this constant, use `pysys.basetest.BaseTest.project` (or`pysys.process.user.ProcessUser.project`) 
 field to access this. If this is not possible, use Project.getInstance().
 

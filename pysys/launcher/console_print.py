@@ -29,7 +29,7 @@ from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors, MODE_CHARS
 from pysys.exceptions import UserError
-from pysys.xml.project import Project
+from pysys.config.project import Project
 
 class ConsolePrintHelper(object):
 	def __init__(self, workingDir, name=""):

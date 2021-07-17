@@ -170,7 +170,7 @@ class BaseTest(ProcessUser):
 		
 		All process monitors are automatically stopped on completion of 
 		the test by L{BaseTest.cleanup}, but you may also wish to explicitly stop 
-		your process monitors by calling ``pysys.process.monitor.BaseProcessMonitor.stop` before you begin 
+		your process monitors by calling `pysys.process.monitor.BaseProcessMonitor.stop` before you begin 
 		shutting down processes at the end of a test to avoid unwanted spikes 
 		and noise in the last few samples of the data. 
 		
@@ -226,7 +226,7 @@ class BaseTest(ProcessUser):
 	def stopProcessMonitor(self, monitor):
 		"""Request a process monitor to stop.
 
-		This method is deprecated - just call ``pysys.process.monitor.BaseProcessMonitor.stop` directly instead. 
+		This method is deprecated - just call `pysys.process.monitor.BaseProcessMonitor.stop` directly instead. 
 		
 		Waits for the monitor to fully stop if possible, but does not throw an exception if it fails. 
 

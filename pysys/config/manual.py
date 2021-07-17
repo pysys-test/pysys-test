@@ -26,7 +26,7 @@ import os.path, logging, xml.dom.minidom
 
 from pysys.constants import *
 
-log = logging.getLogger('pysys.xml.manual')
+log = logging.getLogger('pysys.config.manual')
 
 DTD='''
 <!ELEMENT pysysmanualtest (step)+ >

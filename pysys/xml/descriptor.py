@@ -16,5 +16,5 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import sys
-import pysys.config.descriptor
+from pysys.config.descriptor import *
 sys.modules[__name__] = sys.modules['pysys.config.descriptor']

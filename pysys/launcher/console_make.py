@@ -28,7 +28,7 @@ from pysys import log
 from pysys import __version__
 from pysys.constants import *
 from pysys.launcher import createDescriptors
-from pysys.xml.project import Project
+from pysys.config.project import Project
 from pysys.exceptions import UserError
 from pysys.utils.pycompat import openfile, PY2
 from pysys.utils.fileutils import toLongPathSafe

@@ -29,7 +29,7 @@ implementations of PySys classes described in this API reference:
 	- `pysys.baserunner.BaseRunner` to customize orchestration of all the tests in a test run. 
 	- `pysys.writer` classes to customize how test outcomes are recorded.
 	- `pysys.utils.perfreporter.CSVPerformanceReporter` to customize how numeric performance results are reported.
-	- `pysys.xml.descriptor.DescriptorLoader` to customize how PySys find and runs tests (e.g. to support running tests 
+	- `pysys.config.descriptor.DescriptorLoader` to customize how PySys find and runs tests (e.g. to support running tests 
 	  from other frameworks within PySys). 
 	- `pysys.utils.logutils.BaseLogFormatter` for advanced customization of log message format.
 

@@ -75,7 +75,7 @@ can be accessed via instance attributes on ``self``:
 - ``self.testCycle`` *(int)*: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
   The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
 
-- ``self.descriptor`` (`pysys.xml.descriptor.TestDescriptor`): The descriptor contains 
+- ``self.descriptor`` (`pysys.config.descriptor.TestDescriptor`): The descriptor contains 
   information about this testcase such as the test id, groups and test type, and typically comes from the 
   test's ``pysystest.xml`` file. 
 
@@ -83,7 +83,7 @@ can be accessed via instance attributes on ``self``:
   responsible for orchestrating all the tests in this project. The runner is where any cross-test state can be held, 
   for example if you want to have multiple tests share use of a single server, VM, or other resource. 
 
-- ``self.project`` (`pysys.xml.project.Project`): A reference to the singleton project instance containing the 
+- ``self.project`` (`pysys.config.project.Project`): A reference to the singleton project instance containing the 
   configuration of this PySys test project as defined by ``pysysproject.xml``. 
   The project can be used to access information such as the project properties which are shared across all tests 
   (e.g. for hosts and credentials). 

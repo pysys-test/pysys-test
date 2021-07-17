@@ -33,7 +33,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe
 from pysys.exceptions import UserError
-from pysys.xml.project import Project
+from pysys.config.project import Project
 
 class ConsoleLaunchHelper(object):
 	def __init__(self, workingDir, name=""):

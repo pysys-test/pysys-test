@@ -4,7 +4,7 @@ from pysys.basetest import BaseTest
 import os, sys, re, shutil
 from pysys.utils.pycompat import PY2
 from pysys.utils.fileutils import *
-from pysys.xml.project import createProjectConfig
+from pysys.config.project import createProjectConfig
 
 class PySysTest(BaseTest):
 

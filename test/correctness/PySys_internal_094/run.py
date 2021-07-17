@@ -1,7 +1,7 @@
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.xml.project import createProjectConfig
+from pysys.config.project import createProjectConfig
 import os, sys, re, shutil
 
 if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:

@@ -26,7 +26,7 @@ from pysys import log
 
 from pysys import __version__
 from pysys.constants import *
-from pysys.xml.project import getProjectConfigTemplates, createProjectConfig
+from pysys.config.project import getProjectConfigTemplates, createProjectConfig
 from pysys.exceptions import UserError
 
 

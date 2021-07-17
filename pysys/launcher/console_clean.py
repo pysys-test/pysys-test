@@ -28,7 +28,7 @@ from pysys.constants import *
 from pysys.launcher import createDescriptors
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import deletedir
-from pysys.xml.project import Project
+from pysys.config.project import Project
 
 class ConsoleCleanTestHelper(object):
 	def __init__(self, workingDir, name=""):

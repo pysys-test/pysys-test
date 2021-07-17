@@ -221,13 +221,13 @@ properties to specify which file is loaded, so it would be possible to customize
 	<property file="${myProjectPropertiesFile}" pathMustExist="true"/>
 
 To use projects properties in your testcase, just access the attributes on 
-`self.project <pysys.xml.project.Project>` from either a test instance or a runner::
+`self.project <pysys.config.project.Project>` from either a test instance or a runner::
 
 	def execute(self):
 		username, password = self.project.myCredentials.split(':')
 		self.log.info('Using username=%s and password=%s', username, password)
 
-Project properties are always be of string type, but `pysys.xml.project.Project.getProperty()` can be used to 
+Project properties are always be of string type, but `pysys.config.project.Project.getProperty()` can be used to 
 convert the value to other types when needed. 
 
 Thread-safety
@@ -332,7 +332,7 @@ and so there's a single place to edit the modes list if you need to change them
 later. 
 
 For advanced cases it is also possible to create a custom 
-`pysys.xml.descriptor.DescriptorLoader` subclass that dynamically 
+`pysys.config.descriptor.DescriptorLoader` subclass that dynamically 
 adds modes from Python code, perhaps based on the groups specified in each descriptor 
 or runtime information such as the current operating system.  
 
@@ -386,7 +386,7 @@ let PySys generate a default mode by taking each parameter concatenated with ``_
 boolean values are additionally qualified with ``paramName=`` to make the meaning clear. 
 
 You can find the mode that this test is running in using `self.mode <BaseTest>`, which returns an instance of 
-`pysys.xml.descriptor.TestMode` that subclasses a ``str`` of the mode name, as well as the parameters 
+`pysys.config.descriptor.TestMode` that subclasses a ``str`` of the mode name, as well as the parameters 
 via a ``params`` field. This is useful if there is a chance of naming conflicts with other fields in the test 
 class, but if your parameter names are distinctive enough to avoid collisions, you can also safely use the fact 
 that PySys will set a ``self.param`` value on the test object (with automatic conversion to number/boolean if a 
@@ -610,4 +610,4 @@ following:
 
 For really advanced cases, you can programmatically set the 
 ``executionOrderHint`` on each descriptor by providing a custom 
-`pysys.xml.descriptor.DescriptorLoader` or in the constructor of a custom `pysys.baserunner.BaseRunner` class. 
+`pysys.config.descriptor.DescriptorLoader` or in the constructor of a custom `pysys.baserunner.BaseRunner` class. 

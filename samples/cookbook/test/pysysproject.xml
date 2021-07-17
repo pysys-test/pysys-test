@@ -35,7 +35,7 @@
 		environment variables. 
 
 		Project properties can be used as substitution variables within the project file, and 
-		are set as attributes on the `pysys.xml.project.Project` class for use by tests - so in the example below, 
+		are set as attributes on the `pysys.config.project.Project` class for use by tests - so in the example below, 
 		the ``appHome`` property would be available to tests as ``self.project.appHome``
 
 		If a property value contains any properties or environment variables that do not exist, 

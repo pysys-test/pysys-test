@@ -30,7 +30,7 @@ try:
 except Exception:
 	pass 
 
-from pysys.xml.manual import *
+from pysys.config.manual import *
 
 
 class ManualTester(object):  # pragma: no cover

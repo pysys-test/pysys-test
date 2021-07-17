@@ -28,7 +28,7 @@ import math
 import json
 
 from pysys import log
-from pysys.xml.project import Project
+from pysys.config.project import Project
 from pysys.constants import *
 from pysys.exceptions import *
 

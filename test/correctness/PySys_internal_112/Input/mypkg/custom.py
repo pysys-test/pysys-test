@@ -1,5 +1,5 @@
 from pysys.baserunner import BaseRunner
-from pysys.xml.descriptor import DescriptorLoader
+from pysys.config.descriptor import DescriptorLoader
 
 class CustomDescriptorLoader(DescriptorLoader):
 	def loadDescriptors(self, dir, **kwargs):
