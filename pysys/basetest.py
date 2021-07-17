@@ -145,10 +145,11 @@ class BaseTest(ProcessUser):
 				threads, self.__backgroundThreads = list(self.__backgroundThreads), []
 			for th in threads: th.stop()
 			for th in threads: th.join(abortOnError=False)
-		
+
+			# this should be a no-op since the background threads will have been stopped and joined above
 			for monitor in self.monitorList:
 				if monitor.running(): monitor.stop()
-	
+		
 			while len(self.resources) > 0:
 				self.resources.pop()
 		finally:
@@ -169,7 +170,7 @@ class BaseTest(ProcessUser):
 		
 		All process monitors are automatically stopped on completion of 
 		the test by L{BaseTest.cleanup}, but you may also wish to explicitly stop 
-		your process monitors using L{stopProcessMonitor} before you begin 
+		your process monitors by calling ``pysys.process.monitor.BaseProcessMonitor.stop` before you begin 
 		shutting down processes at the end of a test to avoid unwanted spikes 
 		and noise in the last few samples of the data. 
 		
@@ -224,8 +225,10 @@ class BaseTest(ProcessUser):
 	
 	def stopProcessMonitor(self, monitor):
 		"""Request a process monitor to stop.
+
+		This method is deprecated - just call ``pysys.process.monitor.BaseProcessMonitor.stop` directly instead. 
 		
-		Does not wait for it to finish stopping. 
+		Waits for the monitor to fully stop if possible, but does not throw an exception if it fails. 
 
 		All process monitors are automatically stopped and joined during cleanup, 
 		however you may wish to explicitly stop your process monitors 

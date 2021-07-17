@@ -424,13 +424,17 @@ class BaseProcessMonitor(object):
 		return self.thread.is_alive()
 
 	
-	def stop(self):
+	def stop(self, timeout=None):
 		"""Request the process monitor thread to terminate.
 		
-		Does not wait for the termination to complete. 
+		Waits for the termination to complete if possible, but does not throw an exception if it fails. 
+		
+		:param float timeout: Overrides the maximum time we will wait for the monitor to stop. By default this is 
+		L{constants.TIMEOUTS}C{['WaitForProcessStop']}
 		
 		"""
 		self.thread.stop()
+		self.thread.join(timeout=timeout, abortOnError=False)
 
 	# for implementation by subclasses
 
