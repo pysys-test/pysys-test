@@ -128,14 +128,17 @@ class CSVPerformanceReporter(object):
 			'/s': PerformanceUnit.PER_SECOND
 			}
 		
-		self.__runDetails = self.getRunDetails()
 		self.__summaryFilesWritten = set()
 		
-	def getRunDetails(self):
+	def getRunDetails(self, testobj=None, **kwargs):
 		"""Return an dictionary of information about this test run (e.g. hostname, start time, etc).
 		
-		This method is deprecated; customization of the run details should be performed by changing 
+		Overriding this method is discouraged; customization of the run details should usually be performed by changing 
 		the ``runner.runDetails`` dictionary from the `pysys.baserunner.BaseRunner.setup()` method. 
+
+		:param testobj: the test case instance registering the value
+
+		.. versionchanged:: 1.7.0 Added testobj parameter. 
 		
 		"""
 		return collections.OrderedDict(self.runner.runDetails)
@@ -155,7 +158,7 @@ class CSVPerformanceReporter(object):
 			if 'e' in valtostr: valtostr = '%f'%value
 			return valtostr
 
-	def getRunSummaryFile(self, testobj):
+	def getRunSummaryFile(self, testobj, **kwargs):
 		"""Return the fully substituted location of the file to which summary performance results will be written.
 
 		This may include the following substitutions: ``@OUTDIR@`` (=${outDirName}, the basename of the output directory for this run,
@@ -182,9 +185,15 @@ class CSVPerformanceReporter(object):
 		summaryfile = os.path.normpath(os.path.join(self.runner.output+'/..', summaryfile))
 		return summaryfile
 
-	def getRunHeader(self):
+	def getRunHeader(self, testobj=None, **kwargs):
 		"""Return the header string to the CSV file."""
-		return '# '+CSVPerformanceFile.toCSVLine(CSVPerformanceFile.COLUMNS+[CSVPerformanceFile.RUN_DETAILS, self.__runDetails])+'\n'
+		
+		try:
+			runDetails = self.getRunDetails(testobj)
+		except Exception: # for pre-1.7.0 signature
+			runDetails = self.getRunDetails()
+		
+		return '# '+CSVPerformanceFile.toCSVLine(CSVPerformanceFile.COLUMNS+[CSVPerformanceFile.RUN_DETAILS, runDetails])+'\n'
 
 	def cleanup(self):
 		"""Called when PySys has finished executing tests."""
@@ -293,9 +302,16 @@ class CSVPerformanceReporter(object):
 		# generate a file in the test output directory for convenience/triaging, plus add to the global summary
 		path = testobj.output+'/performance_results.csv'
 		encoding = None if PY2 else 'utf-8'
+		
+		def callGetRunHeader():
+			try:
+				return self.getRunHeader(testobj)
+			except Exception: # for pre-1.7.0 signature
+				return self.getRunHeader()
+		
 		if not os.path.exists(path):
 			with openfile(path, 'w', encoding=encoding) as f:
-				f.write(self.getRunHeader())
+				f.write(callGetRunHeader())
 		with openfile(path, 'a', encoding=encoding) as f:
 			f.write(formatted)
 		
@@ -307,7 +323,7 @@ class CSVPerformanceReporter(object):
 			with openfile(path, 'a', encoding=encoding) as f:
 				if not alreadyexists: 
 					testobj.log.info('Creating performance summary log file at: %s', os.path.normpath(path))
-					f.write(self.getRunHeader())
+					f.write(callGetRunHeader())
 				f.write(formatted)
 			self.__summaryFilesWritten.add(path)
 	

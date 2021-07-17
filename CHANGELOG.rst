@@ -126,6 +126,8 @@ PySys 1.7.0 is under development.
 	  current module/test, but including access to standard Python modules such as ``os/sys/math`` and PySys constants. 
 	- Added ``includeCoverageFromPySysProcess`` option to `pysys.writer.coverage.PythonCoverageWriter` which is useful 
 	  for measuring code coverage when testing custom PySys plugins. 
+	- Added ``testobj`` argumet to `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` in case you wish 
+	  to provide different runDetails based on some feature of the test object or mode. 
 	- pysys.py improvements:
 	
 	  - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 
@@ -159,6 +161,12 @@ Migration notes:
 	  ``importlib.import_module()`` instead. 
 	- The deprecated ``supportMultipleModesPerRun`` project property can no longer be used - please change your tests to 
 	  use the modern modes approach instead. 
+	- If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signature for 
+	  `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and 
+	  `pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter. 
+	  Although this should not immediately break existing applications, to avoid future breaking changes you should 
+	  update the signature of those methods if you override them to accept ``testobj`` and also any artibrary 
+	  ``**kwargs`` that may be added in future. 
 
 
 More powerful test modes

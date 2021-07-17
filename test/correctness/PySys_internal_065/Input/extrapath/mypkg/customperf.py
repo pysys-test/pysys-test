@@ -6,10 +6,11 @@ class CustomPerfReporter(CSVPerformanceReporter):
 		super(CustomPerfReporter, self).__init__(project, summaryfile, testoutdir, runner, **kwargs)
 		assert self.runner is not None
 	
-	def getRunHeader(self):
+	def getRunHeader(self, testobj, **kwargs): # new signature with testobj
+		assert testobj
 		return '<custom reporter>\n'+super(CustomPerfReporter, self).getRunHeader()
 
-	def getRunDetails(self):
+	def getRunDetails(self): # deprecated legacy signature without testobj
 		d = super(CustomPerfReporter, self).getRunDetails()
 		# a typical use of run details overriding would be to add detailed information 
 		# about what we're testing, e.g. a build or version number
