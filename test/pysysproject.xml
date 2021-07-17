@@ -2,11 +2,11 @@
 <pysysproject>
 
 	<!-- It doesn't matter enormously whether this is kept up to date -->
-	<requires-pysys>1.6.1</requires-pysys>
+	<requires-pysys>2.0</requires-pysys>
 
 
-	<!-- Unlike the samples, we do need to run these with all PySys versions including 2.7 -->
-	<requires-python>2.7.0</requires-python>
+	<!-- Unlike the samples, we do need to run these with all PySys versions we support -->
+	<requires-python>3.6</requires-python>
 
 	<!-- 
 		The following standard project properties are always defined and can be accessed through ${prop} syntax:

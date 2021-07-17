@@ -500,7 +500,7 @@ def createProjectConfig(targetdir, templatepath=None):
 		with openfile(os.path.abspath(targetdir+'/'+DEFAULT_PROJECTFILE[0]), 'w', encoding='ascii') as target:
 			for l in src:
 				l = l.replace('@PYTHON_VERSION@', '%s.%s.%s'%sys.version_info[0:3])
-				l = l.replace('@PYSYS_VERSION@', '.'.join(__version__.split('.')[0:3]))
+				l = l.replace('@PYSYS_VERSION@', '.'.join(__version__.split('.')[0:2]))
 				target.write(l)
 
 class Project(object):
