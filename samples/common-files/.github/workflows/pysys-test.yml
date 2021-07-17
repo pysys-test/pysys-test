@@ -37,7 +37,7 @@ jobs:
         id: deps
         run: |
           python -m pip install --upgrade pip
-          pip install pysys==1.7.0
+          pip install pysys==2.0
 
           # Use older version of coverage as 5.0 requires an SQLite version that doesn't work on this macos image currently
           pip install coverage==4.5.4
