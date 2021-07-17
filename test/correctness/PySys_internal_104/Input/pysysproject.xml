@@ -1,6 +1,4 @@
 <?xml version="1.0" standalone="yes"?>
 <pysysproject>
 
-    <property name="supportMultipleModesPerRun" value="false"/>
-    
 </pysysproject>

@@ -152,8 +152,7 @@ class BaseRunner(ProcessUser):
 
 	:ivar int ~.cycle: The number of times each test should be cycled; this corresponds to the ``--cycle`` command line argument. 
 
-	:ivar str ~.mode: Legacy parameter used only if ``supportMultipleModesPerRun=False``; specifies the single mode 
-		tests will be run with. Ignored unless you have a legacy project. 
+	:ivar str ~.mode: No longer used. 
 
 	:ivar int ~.threads: The number of worker threads to execute the requested testcases.
 
@@ -208,9 +207,11 @@ class BaseRunner(ProcessUser):
 		self.descriptors = descriptors
 		self.xargs = xargs
 		self.validateOnly = False
-		self.supportMultipleModesPerRun = self.project.getProperty('supportMultipleModesPerRun', True)
-		if not self.supportMultipleModesPerRun:
-			self.mode = mode
+		self.supportMultipleModesPerRun = True
+		if not self.project.getProperty('supportMultipleModesPerRun', True): 
+			raise UserError('The deprecated project property supportMultipleModesPerRun=false is no longer supported, please update your tests')
+
+		assert not mode, 'Passing mode= to the runner is no longer supported'
 
 		self.__resultWritingLock = threading.Lock() 
 		self.runnerErrors = [] # list of strings
@@ -1065,7 +1066,7 @@ class TestContainer(object):
 					# don't need to add mode to this path as it's already in the id
 				else:
 					self.outsubdir = os.path.join(self.descriptor.testDir, self.descriptor.output, self.runner.outsubdir)
-					if self.runner.supportMultipleModesPerRun and self.descriptor.mode:
+					if self.descriptor.mode:
 						self.outsubdir += '~'+self.descriptor.mode
 
 				# In python2, ensure self.output is a byte string not a unicode string even when --outdir abspath is specified
@@ -1181,9 +1182,6 @@ class TestContainer(object):
 				elif self.descriptor.state != 'runnable':
 					self.testObj.addOutcome(SKIPPED, 'Not runnable', abortOnError=False)
 							
-				elif self.runner.supportMultipleModesPerRun==False and self.runner.mode and self.runner.mode not in self.descriptor.modes:
-					self.testObj.addOutcome(SKIPPED, "Unable to run test in %s mode"%self.runner.mode, abortOnError=False)
-				
 				elif len(exc_info) > 0:
 					self.testObj.addOutcome(BLOCKED, 'Failed to set up test: %s'%exc_info[0][1], abortOnError=False)
 					for info in exc_info:

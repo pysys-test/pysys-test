@@ -66,13 +66,10 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	:param excludes: A list of test groups to exclude in the returned set
 	:param trace: A list of requirements to indicate tests to include in the returned set
 	:param dir: The parent directory to search for runnable tests
-	:param modeincludes: A list specifying the modes to be included; 
-		must contain at most one entry unless supportMultipleModesPerRun=True. 
-	:param modeexcludes: A list specifying the modes to be excluded; 
-		only supported if supportMultipleModesPerRun=True. 
+	:param modeincludes: A list specifying the modes to be included. 
+	:param modeexcludes: A list specifying the modes to be excluded. 
 	:param expandmodes: Set to False to disable expanding a test with multiple
-		modes into separate descriptors for each one (used for pysys print) 
-		if supportMultipleModesPerRun=True. 
+		modes into separate descriptors for each one (used for pysys print). 
 	:return: List of L{pysys.xml.descriptor.TestDescriptor} objects
 	:rtype: list
 	:raises UserError: Raised if no testcases can be found or are returned by the requested input parameters
@@ -84,98 +81,92 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	# must sort by id for range matching and dup detection to work deterministically
 	descriptors.sort(key=lambda d: [d.id, d.file])
 	
-	supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)
-	
 	# as a convenience support !mode syntax in the includes
 	modeexcludes = modeexcludes+[x[1:] for x in modeincludes if x.startswith('!')]
 	modeincludes = [x for x in modeincludes if not x.startswith('!')]
 	for x in modeexcludes: 
 		if x.startswith('!'): raise UserError('Cannot use ! in a mode exclusion: "%s"'%x)
 	
-	if not supportMultipleModesPerRun: 
-		if len(modeincludes)>1: raise UserError('Cannot specify multiple modes unless supportMultipleModesPerRun=True')
-		if modeexcludes: raise UserError('Cannot specify mode exclusions unless supportMultipleModesPerRun=True')
-	else: 
-		# populate modedescriptors data structure for supportMultipleModesPerRun=True
-		MODES_ALL = 'ALL'
-		MODES_PRIMARY = 'PRIMARY'
-		assert MODES_ALL not in modeexcludes, "Cannot exclude all modes, that doesn't make sense"
-		if not modeincludes: # pick a useful default
-			if modeexcludes:
-				modeincludes = [MODES_ALL]
-			else:
-				modeincludes = [MODES_PRIMARY]
+	# populate modedescriptors data structure
+	MODES_ALL = 'ALL'
+	MODES_PRIMARY = 'PRIMARY'
+	assert MODES_ALL not in modeexcludes, "Cannot exclude all modes, that doesn't make sense"
+	if not modeincludes: # pick a useful default
+		if modeexcludes:
+			modeincludes = [MODES_ALL]
+		else:
+			modeincludes = [MODES_PRIMARY]
 
-		modedescriptors = {} # populate this with testid:[descriptors list]
-		
-		allmodes = {} # populate this as we go; could have used a set, but instead use a dict so we can check or capitalization mismatches easily at the same time; 
-		#the key is a lowercase version of mode name, value is the canonical capitalized name
-		
-		modeincludesnone = ((MODES_ALL in modeincludes or MODES_PRIMARY in modeincludes or '' in modeincludes) and 
-					(MODES_PRIMARY not in modeexcludes and '' not in modeexcludes))
-
-		NON_MODE_CHARS = '[^'+MODE_CHARS+']'
-		def isregex(m): return re.search(NON_MODE_CHARS, m)
-
-		regexmodeincludes = [re.compile(m, flags=re.IGNORECASE) for m in modeincludes if isregex(m)]
-		regexmodeexcludes = [re.compile(m, flags=re.IGNORECASE) for m in modeexcludes if isregex(m)]
-		
-		for d in descriptors:
-			if not d.modes:
-				# for tests that have no modes, there is only one descriptor and it's treated as the primary mode; 
-				# user can also specify '' to indicate no mode
-				if modeincludesnone:
-					d.mode = None
-					modedescriptors[d.id] = [d]
-				else:
-					modedescriptors[d.id] = []
-			else:
-				thisdescriptorlist = []
-				modedescriptors[d.id] = thisdescriptorlist # even if it ends up being empty
-				
-				# create a copy of the descriptor for each selected mode
-				for m in d.modes: 
-					try:
-						canonicalmodecapitalization = allmodes[m.lower()]
-					except KeyError:
-						allmodes[m.lower()] = m
-					else:
-						if m != canonicalmodecapitalization:
-							# this is useful to detect early; it's almost certain to lead to buggy tests 
-							# since people would be comparing self.mode to a string that might have different capitalization
-							raise UserError('Cannot have multiple modes with same name but different capitalization: "%s" and "%s"'%(m, canonicalmodecapitalization))
-					
-					# apply modes filter
-					isprimary = m==d.primaryMode
-					
-					# excludes 
-					if isprimary and MODES_PRIMARY in modeexcludes: continue
-					if m in modeexcludes or any(regex.match(m) for regex in regexmodeexcludes): continue
-					
-					
-					# includes
-					if not (MODES_ALL in modeincludes or 
-						m in modeincludes or 
-						any(regex.match(m) for regex in regexmodeincludes) or
-						(isprimary and MODES_PRIMARY in modeincludes)
-						): 
-						continue
-					
-					thisdescriptorlist.append(d._createDescriptorForMode(m))
+	modedescriptors = {} # populate this with testid:[descriptors list]
 	
-		for m in [MODES_ALL, MODES_PRIMARY]:
-			if m.lower() in allmodes: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
-		
-		# don't permit the user to specify a non existent mode by mistake
-		for m in modeincludes+modeexcludes:
-			if (not m) or m.upper() in [MODES_ALL, MODES_PRIMARY]: continue
-			if isregex(m):
-				if any(re.search(m, x, flags=re.IGNORECASE) for x in allmodes): continue
+	allmodes = {} # populate this as we go; could have used a set, but instead use a dict so we can check or capitalization mismatches easily at the same time; 
+	#the key is a lowercase version of mode name, value is the canonical capitalized name
+	
+	modeincludesnone = ((MODES_ALL in modeincludes or MODES_PRIMARY in modeincludes or '' in modeincludes) and 
+				(MODES_PRIMARY not in modeexcludes and '' not in modeexcludes))
+
+	NON_MODE_CHARS = '[^'+MODE_CHARS+']'
+	def isregex(m): return re.search(NON_MODE_CHARS, m)
+
+	regexmodeincludes = [re.compile(m, flags=re.IGNORECASE) for m in modeincludes if isregex(m)]
+	regexmodeexcludes = [re.compile(m, flags=re.IGNORECASE) for m in modeexcludes if isregex(m)]
+	
+	for d in descriptors:
+		if not d.modes:
+			# for tests that have no modes, there is only one descriptor and it's treated as the primary mode; 
+			# user can also specify '' to indicate no mode
+			if modeincludesnone:
+				d.mode = None
+				modedescriptors[d.id] = [d]
 			else:
-				if allmodes.get(m.lower(),None) == m: continue
+				modedescriptors[d.id] = []
+		else:
+			thisdescriptorlist = []
+			modedescriptors[d.id] = thisdescriptorlist # even if it ends up being empty
 			
-			raise UserError('Unknown mode (or mode regex) "%s"; the available modes for descriptors in this directory are: %s'%(
-				m, ', '.join(sorted(allmodes.values() or ['<none>']))))
+			# create a copy of the descriptor for each selected mode
+			for m in d.modes: 
+				try:
+					canonicalmodecapitalization = allmodes[m.lower()]
+				except KeyError:
+					allmodes[m.lower()] = m
+				else:
+					if m != canonicalmodecapitalization:
+						# this is useful to detect early; it's almost certain to lead to buggy tests 
+						# since people would be comparing self.mode to a string that might have different capitalization
+						raise UserError('Cannot have multiple modes with same name but different capitalization: "%s" and "%s"'%(m, canonicalmodecapitalization))
+				
+				# apply modes filter
+				isprimary = m==d.primaryMode
+				
+				# excludes 
+				if isprimary and MODES_PRIMARY in modeexcludes: continue
+				if m in modeexcludes or any(regex.match(m) for regex in regexmodeexcludes): continue
+				
+				
+				# includes
+				if not (MODES_ALL in modeincludes or 
+					m in modeincludes or 
+					any(regex.match(m) for regex in regexmodeincludes) or
+					(isprimary and MODES_PRIMARY in modeincludes)
+					): 
+					continue
+				
+				thisdescriptorlist.append(d._createDescriptorForMode(m))
+
+	for m in [MODES_ALL, MODES_PRIMARY]:
+		if m.lower() in allmodes: raise UserError('The mode name "%s" is reserved, please select another mode name'%m)
+	
+	# don't permit the user to specify a non existent mode by mistake
+	for m in modeincludes+modeexcludes:
+		if (not m) or m.upper() in [MODES_ALL, MODES_PRIMARY]: continue
+		if isregex(m):
+			if any(re.search(m, x, flags=re.IGNORECASE) for x in allmodes): continue
+		else:
+			if allmodes.get(m.lower(),None) == m: continue
+		
+		raise UserError('Unknown mode (or mode regex) "%s"; the available modes for descriptors in this directory are: %s'%(
+			m, ', '.join(sorted(allmodes.values() or ['<none>']))))
 		
 	# first check for duplicate ids
 	ids = {}
@@ -251,7 +242,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 					else: # normal case where it's not a mode
 						index = findMatchingIndex(t)
 						matches = descriptors[index:index+1]
-						if supportMultipleModesPerRun and not modedescriptors[matches[0].id]:
+						if not modedescriptors[matches[0].id]:
 							# if user explicitly specified an individual test and excluded all modes it can run in, 
 							# we shouldn't silently skip/exclude it as they clearly made a mistake
 							raise UserError('Test "%s" cannot be selected with the specified mode(s).'%matches[0].id)
@@ -339,7 +330,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				index = index + 1
 	
 	# expand based on modes (unless we're printing without any mode filters in which case expandmodes=False)
-	if supportMultipleModesPerRun and expandmodes: 
+	if expandmodes: 
 		expandedtests = []
 		for t in tests:
 			if hasattr(t, 'mode'): 
@@ -352,7 +343,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 	# combine execution order hints from descriptors with global project configuration; 
 	# we only need to do this if there are any executionOrderHints defined (may be pure group hints not for modes) 
 	# or if there are any tests with multiple modes (since then the secondary hint mode delta applies)
-	if (supportMultipleModesPerRun and len(allmodes)>0) or project.executionOrderHints:
+	if (len(allmodes)>0) or project.executionOrderHints:
 		def calculateNewHint(d, mode):
 			hint = d.executionOrderHint
 			for hintdelta, hintmatcher in project.executionOrderHints:

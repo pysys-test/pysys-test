@@ -197,8 +197,7 @@ e.g.
 		if '--ci' in args:
 			# to ensure identical behaviour, set these as if on the command line
 			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
-			# by CI writers and/or the command line; note that setting --mode=ALL would be incorrect if 
-			# supportMultipleModesPerRun=false but that's a legacy options so we raise an exception later if this happened)
+			# by CI writers and/or the command line)
 			args = ['--purge', '--record', '-j0', '--type=auto', '--mode=ALL',  '-XcodeCoverage']+args
 			printLogsDefault = PrintLogs.FAILURES
 
@@ -375,8 +374,6 @@ e.g.
 		Project.findAndLoadProject(outdir=self.outsubdir)
 		
 		if defaultAbortOnError is not None: setattr(Project.getInstance(), 'defaultAbortOnError', defaultAbortOnError)
-		if '--ci' in args and not Project.getInstance().getProperty('supportMultipleModesPerRun', True): 
-			raise UserError('Cannot use --ci option with a legacy supportMultipleModesPerRun=false project')
 		
 		descriptors = createDescriptors(self.arguments, self.type, self.includes, self.excludes, self.trace, self.workingDir, 
 			modeincludes=self.modeinclude, modeexcludes=self.modeexclude, expandmodes=True)
@@ -389,8 +386,7 @@ e.g.
 			regex = re.compile(self.grep, flags=re.IGNORECASE)
 			descriptors = [d for d in descriptors if (regex.search(d.id) or regex.search(d.title))]
 		
-		runnermode = self.modeinclude[0] if len(self.modeinclude)==1 else None # used when supportMultipleModesPerRun=False
-		return self.record, self.purge, self.cycle, runnermode, self.threads, self.outsubdir, descriptors, self.userOptions
+		return self.record, self.purge, self.cycle, None, self.threads, self.outsubdir, descriptors, self.userOptions
 
 def runTest(args):
 	try:
@@ -401,8 +397,6 @@ def runTest(args):
 		module = importlib.import_module('.'.join(cls[:-1]))
 		runner = getattr(module, cls[-1])(*args)
 		runner.start()
-		if not Project.getInstance().getProperty('supportMultipleModesPerRun', True):
-			sys.stderr.write('\nWarning: the project property supportMultipleModesPerRun=false is deprecated and will be removed soon so please update your tests to use the modern supportMultipleModesPerRun=true behaviour instead.\n')
 	
 		for cycledict in runner.results.values():
 			for outcome in OUTCOMES:

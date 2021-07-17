@@ -218,11 +218,6 @@ class ConsolePrintHelper(object):
 				if len(descriptor.id) > maxsize: maxsize = len(descriptor.id)
 			maxsize = maxsize + 2
 			
-			supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)
-			if self.modefilter and not supportMultipleModesPerRun:
-				self.modefilter = ','.join(self.modefilter)
-				descriptors = [d for d in descriptors if self.modefilter in d.modes]
-
 			for descriptor in descriptors:
 				padding = " " * (maxsize - len(descriptor.id))
 				if not self.full:

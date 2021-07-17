@@ -34,7 +34,10 @@
          "dir3-req"
       ],
       "executionOrderHint": [
-         -5.2
+         -5.2,
+         94.8,
+         194.8,
+         294.8
       ],
       "classname": "PySysTest-dir3",
       "module": "run_dir3.py",
@@ -81,7 +84,10 @@
          "testcase-req2"
       ],
       "executionOrderHint": [
-         9.9
+         9.9,
+         109.9,
+         209.9,
+         309.9
       ],
       "classname": "PySysTest-testcase",
       "module": "run_testcase.py",
@@ -121,7 +127,8 @@
          "root-req2"
       ],
       "executionOrderHint": [
-         -4.1
+         -4.1,
+         95.9
       ],
       "classname": "PySysTest-root",
       "module": "run_root.py",

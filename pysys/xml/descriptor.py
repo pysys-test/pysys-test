@@ -50,8 +50,7 @@ class TestDescriptor(object):
 	
 	:ivar str ~.id: The testcase identifier, or the id prefix if this is a 
 		directory config descriptor rather than a testcase descriptor. 
-		Includes a mode suffix if this is a multi-mode test and 
-		supportMultipleModesPerRun=True.
+		Includes a mode suffix if this is a multi-mode test.
 	
 	:ivar str ~.idWithoutMode: The raw testcase identifier with no mode suffix. 
 	
@@ -78,8 +77,7 @@ class TestDescriptor(object):
 	
 	:ivar TestMode|str ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
 		the descriptor has no modes. This field is only present after the 
-		raw descriptors have been expanded into multiple mode-specific 
-		descriptors, and only if supportMultipleModesPerRun=True. 
+		raw descriptors have been expanded into multiple mode-specific descriptors. 
 		Note that after a descriptor is created from the on-disk file, the `mode` attribute is not set until 
 		the later phase when multi-mode descriptors are cloned and expanded based on the selected modes. 
 		You can use ``descriptor.mode.params`` to get the parameter dictionary for this mode. 
@@ -161,7 +159,7 @@ class TestDescriptor(object):
 		if self.file: self._defaultSortKey = self.file.lower()+'/'+self.id
 		
 		# NB: self.mode is set after construction and 
-		# cloning for each supported mode when supportMultipleModesPerRun=true
+		# cloning for each supported mode 
 		
 		self.userData = collections.OrderedDict() if userData is None else userData
 	
@@ -193,7 +191,7 @@ class TestDescriptor(object):
 		d['modes'] = self.modes
 		d['modeParameters'] = {str(m):m.params for m in self.modes}
 		d['primaryMode'] = self.primaryMode
-		if hasattr(self, 'mode'): d['mode'] = self.mode # only if supportMultipleModesPerRun=true
+		if hasattr(self, 'mode'): d['mode'] = self.mode 
 		d['requirements'] = self.traceability
 		
 		# this is always a list with at least one item, or more if there are multiple modes

@@ -56,11 +56,8 @@ class BaseTest(ProcessUser):
 		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir)
 		self.reference = os.path.join(descriptor.testDir, descriptor.reference)
 		self.runner = runner
-		if runner.supportMultipleModesPerRun:
-			self.mode = descriptor.mode
-			if self.mode is not None and getattr(self.mode, 'params', None): self.setKeywordArgs(self.mode.params)
-		else:
-			self.mode = runner.mode 
+		self.mode = descriptor.mode
+		if self.mode is not None and getattr(self.mode, 'params', None): self.setKeywordArgs(self.mode.params)
 		self.setKeywordArgs(self.descriptor.userData)
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []

@@ -99,7 +99,6 @@ class ConsoleCleanTestHelper(object):
 			Project.findAndLoadProject(outdir=self.outsubdir)
 
 			descriptors = createDescriptors(self.arguments, None, [], [], None, self.workingDir, expandmodes=False)
-			supportMultipleModesPerRun = Project.getInstance().getProperty('supportMultipleModesPerRun', True)
 
 			for descriptor in descriptors:
 				if self.all:
@@ -123,7 +122,7 @@ class ConsoleCleanTestHelper(object):
 					if os.path.isabs(self.outsubdir): # must delete only the selected testcase
 						pathToDelete += "/"+descriptor.id
 						
-					if supportMultipleModesPerRun and mode:
+					if mode:
 						pathToDelete += '~'+mode
 
 					if os.path.exists(pathToDelete):

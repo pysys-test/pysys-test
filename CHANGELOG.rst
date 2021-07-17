@@ -157,6 +157,8 @@ Migration notes:
 	  mappers. This is also now more clearly documented. 
 	- Removed undocumented internal module ``pysys.utils.loader``; no-one should be using this; if you are, use Python's 
 	  ``importlib.import_module()`` instead. 
+	- The deprecated ``supportMultipleModesPerRun`` project property can no longer be used - please change your tests to 
+	  use the modern modes approach instead. 
 
 
 More powerful test modes
