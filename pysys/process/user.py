@@ -25,13 +25,14 @@ import time, collections, inspect, locale, fnmatch, sys
 import threading
 import shutil
 import contextlib
+import importlib
 
 from pysys import log, process_lock
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.filegrep import getmatches
 from pysys.utils.logutils import BaseLogFormatter, stripANSIEscapeCodes
-from pysys.config.project import Project
+from pysys.xml.project import Project
 from pysys.process.helper import ProcessImpl
 from pysys.utils.allocport import TCPPortOwner
 from pysys.utils.fileutils import mkdir, deletedir, deletefile, pathexists, toLongPathSafe, fromLongPathSafe
@@ -88,7 +89,7 @@ class ProcessUser(object):
 	:ivar str ~.input: Full path to the directory containing input files (e.g. ``testdir/Input``)
 	:ivar str ~.output: Full path to the directory that output files should be written to (e.g. ``testdir/Output/<platformname>``)
 	:ivar logging.Logger ~.log: The Python ``Logger`` instance that should be used to record progress and status information. 
-	:ivar pysys.config.project.Project ~.project: A reference to the singleton project instance containing the 
+	:ivar pysys.xml.project.Project ~.project: A reference to the singleton project instance containing the 
 		configuration of this PySys test project as defined by ``pysysproject.xml``. 
 		The project can be used to access information such as the project properties which are shared across all tests 
 		(e.g. for hosts and credentials). 
@@ -112,7 +113,7 @@ class ProcessUser(object):
 		"""The logger instance that should be used to log from this class. """
 		
 		self.project = Project.getInstance()
-		"""The L{pysys.config.project.Project} instance containing settings for this PySys project."""
+		"""The L{pysys.xml.project.Project} instance containing settings for this PySys project."""
 
 		if self.project is None:
 			assert 'doctest' in sys.argv[0], 'Project was not loaded yet' # allow it only during doctest-ing
@@ -220,7 +221,7 @@ class ProcessUser(object):
 		on this object (typically as a result of specifying -X on the command 
 		line), or else from the project configuration. 
 		
-		See also `pysys.baserunner.getXArg()` and `pysys.config.project.Project.getProperty()`. 
+		See also `pysys.baserunner.getXArg()` and `pysys.xml.project.Project.getProperty()`. 
 		
 		:param propertyName: The name of a property set on the command line 
 			or project configuration.
@@ -2107,6 +2108,68 @@ class ProcessUser(object):
 		finally:
 			pysys.internal.initlogging.pysysLogHandler.setLogHandlersForCurrentThread(saved)
 	
+	def unpackArchive(self, archive, dest=None, autoCleanup=True):
+		"""
+		Unpacks the specified file(s) from an archive (e.g. zip/tar.gz/gz/tar.xz/xz) to a directory.
+		
+		It is a good idea to store large textual Input/ assets (such as log files, which usually compress very well) 
+		as compressed archives to reduce disk space in your version control system. 
+		
+		By default this method will automatically delete the extracted file/dir during test cleanup so it doesn't sit 
+		around on disk (or in CI uploaded failure archives) consuming space; if the file/dir is mutated by the test you 
+		may wish to disable this so you can manually inspect them by setting ``autoCleanup=False``. 
+
+		For example::
+			
+			unpacked = self.unpackArchive('mybigfile.log.xz')
+			# do something with "unpacked"...
+			
+		Note that ``.xz`` (for single files) and ``.tar.xz`` (for multiple files) are recommended for optimal compression, and 
+		these (and also ``.gz`` are very significantly better than zip, which performs poorly when compressing 
+		multiple similar text files into one archive. Don't use more than one single archive per testcase (if possible) 
+		to ensure you benefit from similarities between the various files. 
+		
+		Files are decompressed in binary mode, so if you require platform-native line endings you should use `copy` to 
+		post-process them after decompressing. 
+		
+		:param str archive: The path of the archive to unpack, by default from the test input directory. Alternatively 
+			you could provide an absolute path using ``self.project.testRootDir`` or similar if an archive is shared across 
+			multiple test cases. 
+		:param str dest: The directory in which the contents of the archive will be written; by default this is the test 
+			output directory for archive types that are always single-file, and a subdirectory named after the archive if not. 
+			This dir will be created if needed. 
+		:param bool autoCleanup: Automatically deletes the unpackaged file/directory during test cleanup to save 
+			disk space (even if the test fails). 
+		
+		:return: The full path to the decompressed file or directory. 
+		
+		"""
+		self.log.info('Unpacking archive from %s to %s%s', archive, dest or '<test output dir>', ' (with auto-delete during test cleanup)' if autoCleanup else '')
+		dest = toLongPathSafe(os.path.join(self.output, dest or self.output)).rstrip('/\\')
+		self.mkdir(dest)
+		archive = os.path.join(self.input, archive)
+		
+		archivebasename = os.path.basename(archive).lower()
+		
+		if '.tar.' not in archivebasename:
+			# shutil can't do individual non-tar'd files
+
+			for ext, module in [('.xz', 'lzma'), ('.gz', 'gzip')]:
+				if archivebasename.endswith(ext):
+					dest = os.path.join(dest, os.path.basename(archive)[:-len(ext)])
+					module = importlib.import_module(module) # some compression modules are not available on all systems, so only do this on demand
+					with module.open(archive) as src, open(dest, 'wb') as decompressed:
+						shutil.copyfileobj(src, decompressed)
+						if autoCleanup: self.addCleanupFunction(lambda: self.deleteFile(dest, ignore_errors=True))
+					return dest
+		
+		# don't unpack multiple files to the output dir directly as then we can't delete them
+		if os.path.samefile(dest, toLongPathSafe(self.output)): dest = os.path.join(dest, os.path.basename(archive)[:os.path.basename(archive).find('.')])
+		if autoCleanup: self.addCleanupFunction(lambda: self.deleteDir(dest, ignore_errors=True))
+		# this takes care of multi-file archives such as tar.XXX/zip etc
+		shutil.unpack_archive(archive, dest)
+		return dest
+
 	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
 		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
 		

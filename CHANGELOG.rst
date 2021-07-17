@@ -134,7 +134,11 @@ PySys 1.7.0 is under development.
 	  so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
 	  occasional failures of the process monitoring. 
 	- The unwieldy `BaseTest.getExprFromFile` is superceded (though not actually deprecated) by the simpler functions 
-		`BaseTest.grep`, `BaseTest.grepOrNone` and `BaseTest.grepAll` which provide the same capability but more memorably. 
+	  `BaseTest.grep`, `BaseTest.grepOrNone` and `BaseTest.grepAll` which provide the same capability but more memorably. 
+	- Added `BaseTest.unpackArchive` to make it easy to store large Input/ assets such as log files compressed 
+	  (``.xz/.tar.xz`` recommended for efficiency, but several other archive types also supported). The unpacked files 
+	  are automatically deleted during test cleanup to avoid consuming unnecessary disk space (especially if the test 
+	  fails). 
 	- pysys.py improvements:
 	
 	  - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 
