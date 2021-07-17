@@ -1261,9 +1261,12 @@ class ProcessUser(object):
 		Cleanup functions should have no arguments, and are invoked in reverse order with the most recently added first (LIFO), and
 		before the automatic termination of any remaining processes associated with this object.
 		
-		e.g.::
+		Typical cleanup tasks are to cleanly shutdown processes (which is sometimes necessary to obtain code coverage 
+		information), and to (attempt to) delete large files/directories created by the test::
 		
 			self.addCleanupFunction(lambda: self.cleanlyShutdownMyProcess(params))
+			self.addCleanupFunction(lambda: self.deleteDir('my-large-dir'), ignoreErrors=True)
+			self.addCleanupFunction(lambda: self.deleteFile('my-large-file.log'), ignoreErrors=True)
 		
 		:param Callable[] fn: The cleanup function. 
 		:param bool ignoreErrors: By default, errors from cleanup functions will result in a test failure; set this to 
@@ -1276,7 +1279,8 @@ class ProcessUser(object):
 
 
 	def cleanup(self):
-		""" Tear down function that frees resources managed by this object. 
+		""" Tear down function that frees resources managed by this object, for example terminating processes it has 
+		started. 
 
 		Should be called exactly once by the owner of this object when is no longer needed. 
 		
