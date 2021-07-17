@@ -157,8 +157,10 @@ Fixes:
 	- Fixed `BaseTest.assertLineCount` bug in which ``reFlags`` parameter was not honoured. 
 	- Fixed numerous Python warnings. 
 
-Migration notes:
+Migration notes (aside from the removal of Python 2 and 3.5 support, these are largely minor edge cases that will not 
+affect many users):
 
+  - The minimum supported Python version is now 3.6. 
 	- It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
 	  ``locale.getpreferredencoding()``, to avoid thread-safety issues. 
 	- When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
