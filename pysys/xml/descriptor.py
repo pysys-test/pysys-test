@@ -598,12 +598,6 @@ class _XMLDescriptorParser(object):
 					if sorted(params.keys()) != expectedparams:
 						raise UserError('The same mode parameter keys must be given for each mode under <modes>, but found %s != %s in "%s"'%(sorted(params.keys()), expectedparams, self.file))
 
-			exclude = modesNode.getAttribute('exclude')
-			if exclude:
-				project = pysys.xml.project.Project.getInstance()
-				result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(exclude, 
-						extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
-			
 			primary = modesNode.getAttribute('primary')
 			if primary: # put the primary first if explicitly configured
 				if primary not in result: raise UserError('Cannot find the specified primary mode "%s" in [%s] while loading "%s"'%(primary, ', '.join(result.keys()), self.file)) 
@@ -621,6 +615,12 @@ class _XMLDescriptorParser(object):
 							params = dict(paramsA)
 							params.update(paramsB) # newer "B" params take precedence if any keys as the same
 							result[modeA+'_'+modeB] = params
+
+			exclude = modesNode.getAttribute('exclude')
+			if exclude:
+				project = pysys.xml.project.Project.getInstance()
+				result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(exclude, 
+						extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
 
 		return [TestMode(k, params=v) for (k,v) in result.items()]
 

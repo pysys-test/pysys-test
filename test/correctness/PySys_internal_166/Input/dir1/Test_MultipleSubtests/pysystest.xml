@@ -20,7 +20,8 @@
 			"
 		/> <!-- demonstrate we can exclude using mode string, params, and make use of project props and constants -->
 		
-		<modes>
+		<!-- excludes operate on the combined mode up to this point -->
+		<modes exclude="mode == 'SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10'">
 			<mode subtest="subtest1" iterations="100" maxHours="-10"/> <!-- this maxHours should override the earlier one in the parent dir -->
 			<mode subtest="subtest2" iterations="1000" maxHours="-100"/>
 			<mode subtest="subtest2" iterations="1000" maxHours="-100"/> <!-- exact dups are ignored -->
