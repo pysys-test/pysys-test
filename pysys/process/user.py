@@ -2114,7 +2114,7 @@ class ProcessUser(object):
 	
 	def unpackArchive(self, archive, dest=None, autoCleanup=True):
 		"""
-		Unpacks the specified file(s) from an archive (e.g. zip/tar.gz/gz/tar.xz/xz) to a directory.
+		Unpacks the specified file(s) from an archive to a directory. Supports archive format such as zip/tar.gz/gz/tar.xz/xz. 
 		
 		It is a good idea to store large textual Input/ assets (such as log files, which usually compress very well) 
 		as compressed archives to reduce disk space in your version control system. 
@@ -2129,7 +2129,7 @@ class ProcessUser(object):
 			# do something with "unpacked"...
 			
 		Note that ``.xz`` (for single files) and ``.tar.xz`` (for multiple files) are recommended for optimal compression, and 
-		these (and also ``.gz`` are very significantly better than zip, which performs poorly when compressing 
+		these (and ``.gz``) are *significantly* better than zip, which performs poorly when compressing 
 		multiple similar text files into one archive. Don't use more than one single archive per testcase (if possible) 
 		to ensure you benefit from similarities between the various files. 
 		
