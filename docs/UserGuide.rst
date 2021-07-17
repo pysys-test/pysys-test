@@ -230,6 +230,23 @@ To use projects properties in your testcase, just access the attributes on
 Project properties are always be of string type, but `pysys.xml.project.Project.getProperty()` can be used to 
 convert the value to other types when needed. 
 
+Thread-safety
+-------------
+As your testsuite grows, the ability to run tests in parallel will be increasingly important, so make sure your 
+tests and any shared plugin code do not manipulate shared data structures or files in a way that could cause 
+race conditions.
+
+Most Python library functions are safe to use, but you should avoid calling ``locale.getpreferredencoding()`` 
+(use `pysys.constants.PREFERRED_ENCODING` instead) and ``shutil.make_archive`` which are not. 
+
+It is also important not to change to the working directory of the PySys process or its environment (``os.environ``) 
+while tests are executing. Any setup that might involve changing the environment - including initialization of 
+some libraries (e.g. Matplotlib) must be performed before tests start in the ``setup`` of a runner plugin (or runner), 
+so that everything is stable ready for tests to be executed. 
+
+To avoid dangerous and hard-to-debug race conditions, PySys has built-in checking for changes to the working directory 
+and os.environ and the test run will fail if either is detected. 
+
 Producing code coverage reports
 -------------------------------
 PySys can be extended to produce code coverage reports for any language, by creating a writer plugin. 
