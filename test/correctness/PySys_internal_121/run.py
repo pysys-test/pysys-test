@@ -25,6 +25,7 @@ pythonCoverage
 codeCoverage
 waitForSignal
 logFileContentsDefaultExcludes
+getExprFromFile
 pysys
 		""".strip().split('\n')
 

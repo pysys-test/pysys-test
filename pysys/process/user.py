@@ -1528,9 +1528,160 @@ class ProcessUser(object):
 		"""
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
 
+	def grep(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
+		"""Returns the first occurrence of a regular expression in the specified file, or raises an exception if not found. 
+
+		See also `grepOrNone` and `grepAll` or no-error-on-missing and return-all behaviour. 
+
+		If you want to use a grep to set the outcome of the test, use `pysys.basetest.BaseTest.assertThatGrep` or 
+		`pysys.basetest.BaseTest.assertGrep` instead. The documentation for assertGrep also 
+		provides some helpful examples of regular expressions that could also be used with this method, and tips for 
+		escaping in regular expressions. 
+
+		If you have a complex expression with multiple values to extract, you can use ``(?P<groupName>...)`` named groups 
+		in which case a dictionary is returned providing access to the individual elements::
+		
+			authInfoDict = self.grep('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+
+		.. versionadded: 1.7.0
+
+		:param str path: file to search (located in the output dir unless an absolute path is specified)
+
+		:param str expr: the regular expression, optionally containing named groups. 
+		
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
+			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
+
+		:param str encoding: The encoding to use to open the file. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
+
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+			Added in PySys 1.6.0.
+
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
+		:return: A str containing the matching expression, or if the expr contains any ``(?P<groupName>...)`` named groups 
+			a dict[str,str] is returned where the keys are the groupNames. 
+		"""
+		# NB: we use groups=[0] as unnamed groups are quite easy to get wrong especially when there are multiple groups, 
+		# and using named groups is a better path to encourage people to use
+		return self.getExprFromFile(path=path, expr=expr, groups=[0], returnAll=False, returnNoneIfMissing=False, 
+			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
+
+	def grepOrNone(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
+		"""Returns the first occurrence of a regular expression in the specified file, or None if not found. 
+
+		See also `grep` and `grepAll` for error-on-missing and return-all behaviour. 
+
+		If you want to use a grep to set the outcome of the test, use `pysys.basetest.BaseTest.assertThatGrep` or 
+		`pysys.basetest.BaseTest.assertGrep` instead. The documentation for assertGrep also 
+		provides some helpful examples of regular expressions that could also be used with this method, and tips for 
+		escaping in regular expressions. 
+
+		If you have a complex expression with multiple values to extract, you can use ``(?P<groupName>...)`` named groups 
+		in which case a dictionary is returned providing access to the individual elements::
+		
+			authInfoDict = self.grepOrNone('myserver.log', 
+					expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.')
+				) or {'username':'myuser', 'authSecs': '0.0'}
+
+		.. versionadded: 1.7.0
+
+		:param str path: file to search (located in the output dir unless an absolute path is specified)
+
+		:param str expr: the regular expression, optionally containing named groups. 
+		
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
+			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
+
+		:param str encoding: The encoding to use to open the file. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
+
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+			Added in PySys 1.6.0.
+
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
+		:return: A str containing the matching expression, None if there are no matches, 
+			or if the expr contains any ``(?P<groupName>...)`` named groups 
+			a dict[str,str] is returned where the keys are the groupNames. 
+		"""
+		return self.getExprFromFile(path=path, expr=expr, groups=[0], returnAll=False, returnNoneIfMissing=True, 
+			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
+
+	def grepAll(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
+		"""Returns a list of all the occurrences of a regular expression in the specified file. 
+
+		See also `grep` and `grepOrNone` for return-first-only behaviour. 
+
+		If you have a complex expression with multiple values to extract, you can use ``(?P<groupName>...)`` named groups 
+		in which case each item in the returned list is a dictionary is returned providing access to the individual elements::
+		
+			authInfoDictList = self.grepAll('myserver.log', expr=r'Successfully authenticated user "(?P<username>[^"]*)" in (?P<authSecs>[^ ]+) seconds\.'))
+
+		.. versionadded: 1.7.0
+
+		:param str path: file to search (located in the output dir unless an absolute path is specified)
+
+		:param str expr: the regular expression, optionally containing named groups. 
+		
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
+			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
+
+		:param str encoding: The encoding to use to open the file. 
+			The default value is None which indicates that the decision will be delegated 
+			to the L{getDefaultFileEncoding()} method. 
+
+		:param List[callable[str]->str] mappers: A list of filter functions that will be used to pre-process each 
+			line from the file (returning None if the line is to be filtered out). This provides a very powerful 
+			capability for filtering the file, for example `pysys.mappers.IncludeLinesBetween` 
+			provides the ability to filter in/out sections of a file. 
+			
+			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
+			
+			Added in PySys 1.6.0.
+
+		:param int reFlags: Zero or more flags controlling how the behaviour of regular expression matching, 
+			combined together using the ``|`` operator, for example ``reFlags=re.VERBOSE | re.IGNORECASE``. 
+			
+			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
+			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
+
+		:return: A list where each item is a str containing the matching expression, or if the expr contains any 
+			``(?P<groupName>...)`` named groups each item is a dict[str,str] where the keys are the groupNames. 
+		"""
+		return self.getExprFromFile(path=path, expr=expr, groups=[0], returnAll=True, returnNoneIfMissing=False, 
+			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0, mappers=[]):
 		""" Searches for a regular expression in the specified file, and returns it. 
+		
+		Use of this function is discouraged - consider using `grep` / `grepOrNone` / `grepAll` instead. 
 
 		If the regex contains unnamed groups using ``(expr)`` syntax, the specified group is returned. 
 		If the expression is not found, an exception is raised,
@@ -1598,7 +1749,6 @@ class ProcessUser(object):
 			
 			If returnAll=True, the return value is a list of all the match values, with types as above. 
 		"""
-		
 		namedGroupsMode = False
 		compiled = re.compile(expr, flags=reFlags)
 		namedGroupsMode = compiled.groupindex

@@ -201,7 +201,9 @@ The helper methods for common file I/O operations are:
 	mkdir
 	deleteDir
 	deleteFile
-	getExprFromFile
+	grep
+	grepOrNone
+	grepAll
 	logFileContents
 	write_text
 	getDefaultFileEncoding

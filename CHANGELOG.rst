@@ -133,6 +133,8 @@ PySys 1.7.0 is under development.
 	- ``pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
 	  so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
 	  occasional failures of the process monitoring. 
+	- The unwieldy `BaseTest.getExprFromFile` is superceded (though not actually deprecated) by the simpler functions 
+		`BaseTest.grep`, `BaseTest.grepOrNone` and `BaseTest.grepAll` which provide the same capability but more memorably. 
 	- pysys.py improvements:
 	
 	  - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 

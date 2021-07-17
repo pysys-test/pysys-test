@@ -1028,7 +1028,7 @@ class BaseTest(ProcessUser):
 			# in case it has named parameters
 			if isinstance(e, dict) and len(e)==1: return next(iter(e.values()))
 			return e
-		return self.assertThat(conditionstring, value__eval='getExprFromFile(%r, %r)'%(file, grepRegex), 
+		return self.assertThat(conditionstring, value__eval='grep(%r, %r)'%(file, grepRegex), 
 			**kwargsForAssertThat)
 
 	def assertGrep(self, file, _expr=None, _unused=None, contains=True, ignores=None, literal=False, encoding=None, 
@@ -1038,7 +1038,8 @@ class BaseTest(ProcessUser):
 		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
 		use `assertThatGrep` instead of this function, as assertThatGrep can produce better messages on failure, and 
 		also allows for more powerful matching using a full Python expression 
-		(e.g. numeric range checks, pre-processing strings to normalize case, etc). 
+		(e.g. numeric range checks, pre-processing strings to normalize case, etc). If you need to extract a string for 
+		further processing without updating the test outcome, consider using `grep` instead. 
 
 		The assertGrep method is good for checking in a log to confirm that something happened, or to check that 
 		there are no error messages. 
