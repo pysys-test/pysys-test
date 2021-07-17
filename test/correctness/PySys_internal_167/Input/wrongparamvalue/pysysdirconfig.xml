@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+
+  <classification>
+  
+		<modes>
+			<mode paramName="inheritedValue">MyMode</mode>
+		</modes>
+		
+  </classification>
+
+</pysysdirconfig>

@@ -42,7 +42,7 @@ jobs:
 
           - test-run-id: win-py3.6
             os: windows-latest
-            python-version: 3.5
+            python-version: 3.6
 
           # --- Additional testing combinations
 

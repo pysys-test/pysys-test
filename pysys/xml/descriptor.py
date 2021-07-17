@@ -26,12 +26,13 @@ import os.path, logging, xml.dom.minidom
 import collections
 import copy
 import locale
+import inspect
 
 import pysys
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.utils.fileutils import toLongPathSafe, fromLongPathSafe, pathexists
-from pysys.utils.pycompat import PY2, isstring, openfile
+from pysys.utils.pycompat import PY2, isstring, openfile, makeReadOnlyDict
 
 log = logging.getLogger('pysys.xml.descriptor')
 
@@ -69,17 +70,19 @@ class TestDescriptor(object):
 	
 	:ivar list[str] ~.groups: A list of the user defined groups the testcase belongs to.
 	
-	:ivar list[str] ~.modes: A list of the user defined modes the testcase can be run in.
-	
-	:ivar str ~.primaryMode: Specifies the primary mode for this test id (which may be None 
+	:ivar list[TestMode|str] ~.modes: A list of the user defined modes the testcase can be run in. Usually these will be 
+		`TestMode` instances, but older tests with custom TestLoaders may add simple strings here instead. 
+
+	:ivar TestMode|str ~.primaryMode: Specifies the primary mode for this test id (which may be None 
 		if this test has no modes). Usually this is the first mode in the list. 
 	
-	:ivar str ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
+	:ivar TestMode|str ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
 		the descriptor has no modes. This field is only present after the 
 		raw descriptors have been expanded into multiple mode-specific 
 		descriptors, and only if supportMultipleModesPerRun=True. 
 		Note that after a descriptor is created from the on-disk file, the `mode` attribute is not set until 
-		the later phase when multi-mode descripors are cloned and expanded based on the selected modes. 
+		the later phase when multi-mode descriptors are cloned and expanded based on the selected modes. 
+		You can use ``descriptor.mode.params`` to get the parameter dictionary for this mode. 
 	
 	:ivar str ~.classname: The Python classname to be executed for this testcase.
 	
@@ -101,14 +104,14 @@ class TestDescriptor(object):
 	:ivar bool ~.isDirConfig: True if this is a directory configuration, or False if 
 		it's a normal testcase. 
 	
-	:ivar dict(str,obj) ~.userData: A dictionary that can be used for storing user-defined data 
+	:ivar dict[str,obj] ~.userData: A dictionary that can be used for storing user-defined data 
 		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements, e.g. 
 		``<data><user-data name="key" value="val ${projectProperty}"</user-data></data>``.
 	"""
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
 		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', 'executionOrderHintsByMode', \
-		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData'
+		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', 
 
 	def __init__(self, file, id, 
 		type="auto", state="runnable", title=u'(no title)', purpose=u'', groups=[], modes=[], 
@@ -169,8 +172,8 @@ class TestDescriptor(object):
 		"""
 		assert mode, 'Mode must be specified'
 		assert not hasattr(self, 'mode'), 'Cannot create a mode descriptor from a descriptor that already has its mode set'
-		newdescr = copy.deepcopy(self)
-		newdescr.mode = mode
+		newdescr = copy.deepcopy(self) # nb: the mode can't be deep copied accurately but of course it's not set yet so no problem!
+		newdescr.mode = mode # we assume the passed in mode is the TestMode object (not just a str) if TestMode is what's in the descriptor
 		newdescr.id = self.id+'~'+mode
 		newdescr._defaultSortKey = self._defaultSortKey+'~'+mode
 		return newdescr
@@ -188,6 +191,7 @@ class TestDescriptor(object):
 		d['purpose'] = self.purpose
 		d['groups'] = self.groups
 		d['modes'] = self.modes
+		d['modeParameters'] = {str(m):m.params for m in self.modes}
 		d['primaryMode'] = self.primaryMode
 		if hasattr(self, 'mode'): d['mode'] = self.mode # only if supportMultipleModesPerRun=true
 		d['requirements'] = self.traceability
@@ -212,39 +216,50 @@ class TestDescriptor(object):
 		:rtype: string
 		"""
 		
-		str=    "Test id:           %s\n" % self.id
+		s=    "Test id:           %s\n" % self.id
 		reltestdir = self.testDir if not self.isDirConfig else '' # relative to current dir is most useful
 		if reltestdir.lower().replace('\\','/').startswith(os.getcwd().lower().replace('\\','/')): reltestdir = reltestdir[len(os.getcwd())+1:]
-		str=str+"Test directory:    %s\n" % reltestdir # use OS slashes to facilitate copy+paste
-		str=str+"Test type:         %s\n" % self.type
-		str=str+"Test state:        %s\n" % self.state
-		if self.skippedReason: str=str+"Test skip reason:  %s\n" % self.skippedReason
-		str=str+"Test title:        %s\n" % self.title
-		str=str+"Test purpose:      "
+		s=s+"Test directory:    %s\n" % reltestdir # use OS slashes to facilitate copy+paste
+		s=s+"Test type:         %s\n" % self.type
+		s=s+"Test state:        %s\n" % self.state
+		if self.skippedReason: s=s+"Test skip reason:  %s\n" % self.skippedReason
+		s=s+"Test title:        %s\n" % self.title
+		s=s+"Test purpose:      "
 		purpose = self.purpose.split('\n') if self.purpose is not None else ['']
 		for index in range(0, len(purpose)):
-			if index == 0: str=str+"%s\n" % purpose[index]
-			if index != 0: str=str+"                   %s\n" % purpose[index] 
+			if index == 0: s=s+"%s\n" % purpose[index]
+			if index != 0: s=s+"                   %s\n" % purpose[index] 
 
-		str=str+"Test order hint:   %s\n" % (
+		s=s+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
+		
+		longestmode = max(len(m) for m in self.modes) if self.modes else 0
+		def modeToString(m):
+			x = u"'%s'"%m if u' ' in m else m
+			x = (u"%-"+str(longestmode+1)+"s")%x
+			if getattr(m, 'params', None):
+				x += u'{%s}'%', '.join(u'%s=%r'%(k,v) for (k,v) in m.params.items())
+			return x.strip()
+		
+		if getattr(self, 'mode',None): # multi mode per run
+			s=s+"Test mode:         %s\n" % modeToString(self.mode)
+		else: # print available modes instead
+			modeDelim = u'\n --> ' if any(getattr(m, 'params', None) for m in self.modes) else u', '
+			s=s+("Test modes:        %s%s\n") % (modeDelim if '\n' in modeDelim else '', modeDelim.join(modeToString(x) for x in self.modes) or u'<none>')
+
+		s=s+"Test order hint:   %s\n" % (
 			u', '.join('%s'%hint for hint in self.executionOrderHintsByMode) # for multi-mode tests
 			if hasattr(self, 'executionOrderHintsByMode') else self.executionOrderHint)	
 
-		str=str+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
-		if getattr(self, 'mode',None): # multi mode per run
-			str=str+"Test mode:         %s\n" % self.mode
-		else: # print available modes instead
-			str=str+"Test modes:        %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.modes) or u'<none>')
-		str=str+"Test classname:    %s\n" % self.classname
-		str=str+"Test module:       %s\n" % self.module
-		str=str+"Test input:        %s\n" % self.input
-		str=str+"Test output:       %s\n" % self.output
-		str=str+"Test reference:    %s\n" % self.reference
-		str=str+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
+		s=s+"Test classname:    %s\n" % self.classname
+		s=s+"Test module:       %s\n" % self.module
+		s=s+"Test input:        %s\n" % self.input
+		s=s+"Test output:       %s\n" % self.output
+		s=s+"Test reference:    %s\n" % self.reference
+		s=s+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		if self.userData:
-			str=str+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,self.__userDataValueToString(v)) for k,v in (self.userData.items()))
-		str=str+""
-		return str
+			s=s+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,self.__userDataValueToString(v)) for k,v in (self.userData.items()))
+		s=s+""
+		return s
 	
 	@staticmethod
 	def __userDataValueToString(v):
@@ -284,6 +299,41 @@ exists for compatibility reasons only.
 
 :meta private:
 """
+
+
+class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
+	"""Represents a mode that a test can run in, and optionally a dict of parameters that define that mode. 
+	
+	To create one::
+	
+		mode = TestMode('MyMode', {'param1': 'value1'})
+	
+	See the ``mode`` parameter/field in `TestDescriptor` where this class is used. 
+	
+	This class is immutable, so create a new instance if you want to change something. 
+
+	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
+	
+	:ivar dict[str,obj] ~.params: A dictionary of parameters associated with this mode. The parameters are available to 
+		the test (as ``self.mode.params``) and also assigned as instance fields on the test class when it 
+		runs in this mode. 
+
+	.. versionadded:: 1.7.0
+
+	"""
+	__slots__ = ['params']
+	
+	def __new__(cls,s,params=None):
+		self = str.__new__(cls,s)
+		self.params = params
+		return self
+
+	def __setattr__(self, attr, value):
+		if attr in self.__slots__ and getattr(self, attr, None) is None: 
+			object.__setattr__(self, attr, value)
+		else:
+			raise TypeError('Cannot modify immutable instance by setting %s'%(attr))
+
 
 class _XMLDescriptorParser(object):
 	'''DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. 
@@ -363,7 +413,7 @@ class _XMLDescriptorParser(object):
 		# some elements that are mandatory for an individual test and not used for dir config
 		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
-										self.getGroups(), self.getModes(),
+										self.getGroups(), self.getModes(), 
 										self.project.expandProperties(self.getClassDetails()[0]),
 										self.project.expandProperties(self.getClassDetails()[1]),
 										self.project.expandProperties(self.getTestInput()),
@@ -437,7 +487,7 @@ class _XMLDescriptorParser(object):
 		else:
 			try:
 				title = descriptionNodeList[0].getElementsByTagName('title')[0]
-				return title.childNodes[0].data.strip()
+				return title.childNodes[0].data.replace('\n',' ').replace('\r',' ').replace('  ', ' ').strip()
 			except Exception:
 				return self.defaults.title
 				
@@ -453,7 +503,7 @@ class _XMLDescriptorParser(object):
 		else:
 			try:
 				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
-				return purpose.childNodes[0].data.strip()
+				return inspect.cleandoc(purpose.childNodes[0].data.strip().replace('\t','  '))
 			except Exception:
 				return self.defaults.purpose
 			
@@ -477,22 +527,102 @@ class _XMLDescriptorParser(object):
 	
 				
 	def getModes(self):
-		'''Return a list of the mode names, contained in the character data of the mode elements.'''
+		result = self.defaults.modes # by default we inherit (unless there are multiple <modes> elements in the file)
 		classificationNodeList = self.root.getElementsByTagName('classification')
+		if not classificationNodeList: return result
+
+		modesNodes = classificationNodeList[0].getElementsByTagName('modes')
+		if not modesNodes: return result
 		
-		modeList = []
-		try:
-			modes = classificationNodeList[0].getElementsByTagName('modes')[0]
-			for node in modes.getElementsByTagName('mode'):
-				if self.getText(node): modeList.append(self.getText(node))
+		result = {} # key=mode name value=params
+		for modesNode in modesNodes:
+			prevModesForCombining = None if not result else result
 
-			if (modes.getAttribute('inherit') or 'true').lower()!='true':
-				return modeList
+			# by default we inherit, but to avoid confusion when defining multiple mode matrices we only allow explicit inherits 
+			defaultinherit = len(modesNodes) <= 1
+			if (modesNode.getAttribute('inherit') or str(defaultinherit)).lower()!='true': 
+				result = {}
+			else:
+				result = {m:m.params for m in self.defaults.modes}
+			
+			for node in modesNode.getElementsByTagName('mode'):
+				if not node.hasAttributes():
+					params = {}
+				else:
+					params = collections.OrderedDict() if PY2 else {}
+					for param, paramvalue in node.attributes.items():
+						if param == 'mode': continue 
+						assert not param.startswith('_'), 'Parameter names cannot start with _'
+						params[param] = paramvalue
+			
+				modeString = node.getAttribute('mode') or self.getText(node)
 
-		except Exception:
-			pass
-		modeList = [x for x in self.defaults.modes if x not in modeList]+modeList
-		return modeList
+				if not modeString:
+					if not params: continue # simply ignore <mode> as it's sometimes included in templates etc
+
+					modeNamePattern = modesNode.getAttribute('modeNamePattern')
+					if modeNamePattern:
+						try:
+							modeString = modeNamePattern.format(**params)
+						except Exception as ex:
+							raise UserError('Failed to populate modeNamePattern "%s" with parameters %s: %s in "%s"'%(modeNamePattern, params, ex, self.file))
+					else:
+						modeString = '_'.join(
+							'%s=%s'%(k, v) if re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE) else v # include the key for numeric and boolean values
+							for (k,v) in params.items())
+				
+					# Eliminate dodgy characters
+					badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
+					if badchars: 
+						log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
+							''.join(set(c for c in badchars)), modeString, self.file)
+					modeString = re.sub('[^%s]'%pysys.launcher.MODE_CHARS,'', modeString)
+					
+					if not modeString: raise UserError('Invalid mode: cannot be empty in \"%s\"'%self.file)
+					
+					# Enforce naming convention of initial caps
+					modeString = modeString[0].upper()+modeString[1:]
+
+				modeString = modeString.strip().strip('_') # avoid leading/trailing _'s and whitespace, since we'll add them when composing modes
+				
+				if modeString in result:
+					if result[modeString] != params: raise UserError('Cannot redefine mode "%s" with parameters %s different to previous parameters %s in "%s"'%(modeString, params, result[modeString], self.file))
+				else:
+					result[modeString] = params
+			# end of for <mode>
+
+			# check that params are the same in each one to avoid mistakes
+			if result:
+				expectedparams = sorted(next(iter(result.values())).keys())
+				for mode, params in result.items():
+					if sorted(params.keys()) != expectedparams:
+						raise UserError('The same mode parameter keys must be given for each mode under <modes>, but found %s != %s in "%s"'%(sorted(params.keys()), expectedparams, self.file))
+
+			exclude = modesNode.getAttribute('exclude')
+			if exclude:
+				project = pysys.xml.project.Project.getInstance()
+				result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(exclude, 
+						extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
+			
+			primary = modesNode.getAttribute('primary')
+			if primary: # put the primary first if explicitly configured
+				if primary not in result: raise UserError('Cannot find the specified primary mode "%s" in [%s] while loading "%s"'%(primary, ', '.join(result.keys()), self.file)) 
+				result = {m: result[m] for m in sorted(result.keys(), key=lambda m: m != primary)}
+			
+			if prevModesForCombining is not None:
+				if not result or not prevModesForCombining:
+					result = prevModesForCombining or result
+				else:
+					# create the cross-product of these two mode matrices, i.e. result = prevModesForCombining * result
+					newModes = result
+					result = {}
+					for modeA, paramsA in prevModesForCombining.items():
+						for modeB, paramsB in newModes.items():
+							params = dict(paramsA)
+							params.update(paramsB) # newer "B" params take precedence if any keys as the same
+							result[modeA+'_'+modeB] = params
+
+		return [TestMode(k, params=v) for (k,v) in result.items()]
 
 				
 	def getClassDetails(self):

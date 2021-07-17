@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+  <classification>
+  
+    <modes modeNamePattern="{database}_{browser}"> <!-- pattern can be used to avoid duplicating these strings; also allows params that aren't mentioned in the mode name -->
+			<!-- Can specify multiple params in a single modes element if we want control over the exact combinations rather than expanding the full matrix -->
+			<mode browser="Firefox" database="mySQL"  timeoutSecs="60"/> <!-- initial letter of mode will be auto-capitalized for consistency -->
+			<mode browser="Firefox" database="SQLite" timeoutSecs="60"/>
+			<mode browser="Chrome"  database="MySQL"  timeoutSecs="120"/>
+    </modes>
+
+    <modes inherit="tRue"> <!-- This will inherit any modes from the directory parent. In a file with multiple modes elements, inherit is false by default. -->
+			<!-- Could add extra ones or not, as we see fit -->
+    </modes>
+
+		<modes> <!-- Empty modes nodes are ignored -->
+		</modes>
+
+		<modes inherit="fAlse"> <!-- Empty modes nodes are ignored -->
+		</modes>
+
+		<modes> <!-- Empty mode nodes are ignored -->
+			<mode></mode>
+		</modes>
+
+    <modes> <!-- default pattern will be param=value except for numbers/booleans/blanks -->
+			<mode testKind="SmokeTest" maxHours="1.5" fast="tRue"/>
+			<mode testKind="SoakTest" maxHours="5" fast=""/>
+    </modes>
+    
+  </classification>
+</pysysdirconfig>

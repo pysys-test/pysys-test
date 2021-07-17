@@ -121,6 +121,9 @@ PySys 1.7.0 is under development.
 	  pool of TCP ports. 
 	- Added ``key`` field to `pysys.process.user.STDOUTERR_TUPLE` to make it easier to create log file paths that match 
 	  a process's stdout/stderr files. 
+	- Added `pysys.utils.safeeval.safeEval` for cases where you want to evaluate a Python eval string from a test 
+	  plugin, for example "expected >= value". The string is evaluated in a minimal namespace unpolluted by the 
+	  current module/test, but including access to standard Python modules such as ``os/sys/math`` and PySys constants. 
 	- Added ``includeCoverageFromPySysProcess`` option to `pysys.writer.coverage.PythonCoverageWriter` which is useful 
 	  for measuring code coverage when testing custom PySys plugins. 
 	- pysys.py improvements:
@@ -155,6 +158,52 @@ Migration notes:
 	- Removed undocumented internal module ``pysys.utils.loader``; no-one should be using this; if you are, use Python's 
 	  ``importlib.import_module()`` instead. 
 
+
+More powerful test modes
+------------------------
+This PySys release adds some big usability improvements for defining and using modes:
+
+- Each mode can now define any number of 'parameters' to avoid the need to parse/unpack from the mode string itself; 
+  these can then be accessed as field on the test object or from a ``self.mode.params`` dictionary. 
+  The mode name can be automatically generated from the parameters via a pattern, or provided explicitly. 
+  Note that for optimal readability with parameters the recommended way to specify a mode is now 
+  ``<mode mode="MyMode" ... />`` rather than ``<mode>MyMode</mode>``. 
+- Multi-dimensional modes can be easily created by specifying multiple ``<modes>`` elements, which generates new 
+  modes containing every combination of the modes from each ``<modes>`` element. 
+- The primary mode can be explicitly specified as an attribute, so you don't have to rely on making it the first 
+  (which is especially useful when changing the primary mode when you're using inherited modes). 
+- A new ``exclude=`` parameter allows inherited modes to be excluded in tests where you don't want them (without 
+  having to set inherit=false and re-define all the parent ones), and also to implement dynamic logic to exclude 
+  modes, for example based on the current operating system, or project properties. You can use any valid Python 
+  expression; see `pysys.utils.safeeval.safeEval` for details. 
+
+Here's an example which demonstrates some of the new functionality:
+
+.. code-block:: xml
+	
+	<classification>
+		<modes inherit="true" primary="CompressionNone">
+			<mode mode="CompressionNone" compressionType=""     someOtherParam="True"/>
+			<mode mode="CompressionGZip" compressionType="gzip" someOtherParam="False"/>
+		</modes>
+		
+		<!-- If multiple modes nodes are present, new modes are created for all combinations -->
+		
+		<modes modeNamePattern="Auth={auth}" exclude="mode.params['auth'] == 'OS' and sys.platform != 'MyFunkyOS'">
+			<mode auth="None"/>
+			<mode auth="OS"/>
+		</modes>
+	</classification>
+
+Assuming you're running on (the fictional) "MyFunkyOS" (to avoid triggering the exclude) this multi-dimensional 
+configuration will create the following modes::
+
+	CompressionNone_Auth=None
+	CompressionGZip_Auth=None
+	CompressionNone_Auth=OS
+	CompressionGZip_Auth=OS
+
+For more details see :doc:`TestDescriptors`, :doc:`UserGuide` and the Getting Started sample. 
 
 -------------------
 What's new in 1.6.1

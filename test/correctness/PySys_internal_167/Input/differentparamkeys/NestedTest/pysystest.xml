@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest>
+    
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose
+
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+  
+		<modes>
+			<mode param1="foo"/>
+			<mode param1="baz" param2="bar"/>
+		</modes>
+		
+  </classification>
+
+</pysystest>

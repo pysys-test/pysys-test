@@ -35,7 +35,7 @@ from pysys.manual.ui import ManualTester
 from pysys.process.user import ProcessUser
 from pysys.utils.pycompat import *
 from pysys.utils.fileutils import pathexists
-import pysys.internal.safe_eval
+import pysys.utils.safeeval
 
 # be sure to import all utility modules that we want to be available to tests that do an "import pysys" (e.g. pysys.mappers.XXX)
 import pysys.mappers
@@ -58,6 +58,7 @@ class BaseTest(ProcessUser):
 		self.runner = runner
 		if runner.supportMultipleModesPerRun:
 			self.mode = descriptor.mode
+			if self.mode is not None and getattr(self.mode, 'params', None): self.setKeywordArgs(self.mode.params)
 		else:
 			self.mode = runner.mode 
 		self.setKeywordArgs(self.descriptor.userData)
@@ -468,9 +469,9 @@ class BaseTest(ProcessUser):
 			str(formatparams[k]).replace(self.output.replace('\\','\\\\'), '<outputdir>') 
 			) for k in sorted(formatparams.keys())])
 		try:
-			result = bool(pysys.internal.safe_eval.safe_eval(toeval, extraNamespace={'self':self}))
-		except Exception as e:
-			self.addOutcome(BLOCKED, 'Failed to evaluate "%s" due to %s - %s'%(toeval, e.__class__.__name__, e), abortOnError=abortOnError)
+			result = bool(pysys.utils.safeeval.safeEval(toeval, extraNamespace={'self':self}))
+		except Exception as e: # the exception already contains everything it needs
+			self.addOutcome(BLOCKED, str(e), abortOnError=abortOnError)
 			return False
 		
 		if result:
@@ -602,9 +603,9 @@ class BaseTest(ProcessUser):
 					namespace = dict(inspect.currentframe().f_back.f_locals)
 					if sys.version_info[0:2] >= (3, 6): # only do this if we have ordered kwargs, else it'd be non-deterministic
 						namespace.update(namedvalues) # also add in any named values we already have
-					v = pysys.internal.safe_eval.safe_eval(v, extraNamespace=namespace)
+					v = pysys.utils.safeeval.safeEval(v, extraNamespace=namespace, errorMessage='Failed to evaluate named parameter %s=(%s): {error}'%(k+EVAL_SUFFIX, v))
 				except Exception as ex:
-					self.addOutcome(BLOCKED, 'Failed to evaluate named parameter %s=(%s): %r'%(k+EVAL_SUFFIX, v, ex), abortOnError=abortOnError)
+					self.addOutcome(BLOCKED, '%s'%ex, abortOnError=abortOnError)
 					return False
 			else:
 				displayvalues.append(k)
@@ -627,10 +628,10 @@ class BaseTest(ProcessUser):
 		try:
 			namespace = dict(namedvalues)
 			namespace['self'] = self
-			result = bool(pysys.internal.safe_eval.safe_eval(conditionstring, extraNamespace=namespace))
+			result = bool(pysys.utils.safeeval.safeEval(conditionstring, extraNamespace=namespace, errorMessage='Failed to evaluate (%s)%s - {error}'%(conditionstring, displayvalues)))
 
 		except Exception as e:
-			self.addOutcome(BLOCKED, 'Failed to evaluate (%s)%s - %s: %s'%(conditionstring, displayvalues, e.__class__.__name__, e), abortOnError=abortOnError)
+			self.addOutcome(BLOCKED, str(e), abortOnError=abortOnError)
 			return False
 		
 		assertMessage = assertMessage or ('Assert that (%s)%s'%(conditionstring, displayvalues))
@@ -1462,7 +1463,7 @@ class BaseTest(ProcessUser):
 			msg = assertMessage or ('Line count on %s for %s%s '%(file, quotestring(expr), condition))
 			self.addOutcome(BLOCKED, '%s failed due to %s: %s'%(msg, sys.exc_info()[0], sys.exc_info()[1]), abortOnError=abortOnError)
 		else:
-			if (pysys.internal.safe_eval.safe_eval("%d %s" % (numberLines, condition), extraNamespace={'self':self})):
+			if (pysys.utils.safeeval.safeEval("%d %s" % (numberLines, condition), extraNamespace={'self':self})):
 				msg = assertMessage or ('Line count on input file %s' % file)
 				self.addOutcome(PASSED, msg)
 				return True

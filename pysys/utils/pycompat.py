@@ -23,6 +23,7 @@ Compatibility utilities to allow PySys to support both Python 2 and 3.
 """
 
 import sys, os, io, locale
+import copy
 import logging
 __log = logging.getLogger('pysys.pycompat')
 
@@ -131,10 +132,23 @@ if PY2:
 	"""
 	
 	def makeReadOnlyDict(input): return input
-	# We can just make do without the additional safety in Python2
+	# We can just make do without the additional safety in Python2, not least because input might be an OrderedDict
 
 else:
 	from enum import Enum
 
-	from types import MappingProxyType as makeReadOnlyDict
-	# May replace this with frozenmap once available
+	# Rather than types.MappingProxyType, subclass dict so it's copyable
+	class makeReadOnlyDict(dict):
+			def __readonly__(self, *args, **kwargs):
+					raise RuntimeError("Cannot modify read-only dict %r"%self)
+			__setitem__ = __readonly__
+			__delitem__ = __readonly__
+			pop = __readonly__
+			popitem = __readonly__
+			clear = __readonly__
+			update = __readonly__
+			setdefault = __readonly__
+			del __readonly__
+			
+			def __copy__(self): return dict(self)
+			def __deepcopy__(self, memo): return copy.deepcopy(dict(self))

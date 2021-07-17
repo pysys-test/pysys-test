@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest>
+    
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose
+
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+  
+		<modes inherit="false">
+			<mode subtest="subtest1!!!!" iterations="100"/> <!-- invalid chars will be stripped out -->
+			<mode subtest="subtest2" iterations="1000"/>
+		</modes>
+		
+  </classification>
+
+</pysystest>

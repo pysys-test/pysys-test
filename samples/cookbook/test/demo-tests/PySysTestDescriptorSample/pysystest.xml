@@ -34,11 +34,34 @@
 			<group>disableCoverage</group>
 		</groups>
 
-		<!-- Specify modes supported by all tests under this directory. Like test ids, mode names are usually TitleCase.
-		These modes are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. -->
-		<modes inherit="true">
-			<mode>CompressionNone_AuthNone</mode>
-			<mode>CompressionGZip_AuthNone</mode>
+		<!-- Specify modes supported by this test. Like test ids, mode names are usually TitleCase.
+		
+		Optional attributes are:
+		   inherit=  Specifies whether modes from parent pysysdirconfig.xml files are automatically added to this list. 
+		      For clarity this attribute should usually be specified, but if not the default is inherit=true unless 
+		      there are multiple modes elements in which case it is false. 
+		   primary=  Specifies which mode from this list (including any inherited modes) is the primary one that executes 
+		      by default, and before any other modes. If not specified, the first mode is the primary one. 
+		   exclude=  Specifies a Python eval string using "mode" (or "mode.params") which can return True for any modes 
+		      that should be dynamically removed/ignored from this list, or else False. This is useful for selectively 
+		      excluding some inherited modes, or for excluding modes on certain platforms. Note that no test descriptor 
+		      is generated for excluded modes, so there will be no result reported (not even SKIPPED) for excluded modes. 
+		      
+		      This string is evaluated from a Python namespace that includes standard modules such as os/sys/math/re, 
+		      as well as the 'pysys' module and the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``; 
+		      (see pysys.utils.safeeval.safeEval for more details). 
+		-->
+		<modes inherit="true" primary="CompressionNone">
+			<!-- The mode name can be specified with a mode= attribute or in the text of the mode element. -->
+			<mode mode="CompressionNone" compressionType=""/>
+			<mode mode="CompressionGZip" compressionType="gzip"/>
+		</modes>
+		
+		<!-- If multiple modes nodes are present, new modes are created for all combinations -->
+		
+		<modes modeNamePattern="Auth={auth}" exclude="mode.params['auth'] == 'OS' and sys.platform != 'MyFunkyOS'">
+			<mode auth="None"/>
+			<mode auth="OS"/>  <!-- This mode will always be excluded since MyFunkyOS doesn't exist. -->
 		</modes>
 	</classification>
 

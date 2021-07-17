@@ -71,7 +71,7 @@ class PySysTest(BaseTest):
 		# Sample descriptors
 		self.assertDiff(self.copy('pysys-print-descriptor-samples.out', 'descriptor-samples.txt', mappers=[
 			lambda line: line if line.startswith(
-				tuple('Test id,Test state,Test skip reason,Test groups,Test modes,Test module,Test input,Test output,Test reference,Test traceability,Test user data'.split(','))
+				tuple('Test id,Test state,Test skip reason,Test groups,Test modes,Test module,Test input,Test output,Test reference,Test traceability,Test user data, -->'.split(','))
 			) else None,
 			pysys.mappers.RegexReplace(' [^ ]+pysys-extensions', ' <rootdir>/pysys-extensions')]))
 		

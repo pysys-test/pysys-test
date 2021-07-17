@@ -16,7 +16,7 @@
 			<group>dirConfigSample</group>
 		</groups>
 		<modes inherit="true">
-			<mode>CompressionNone_AuthBasic</mode>
+			<mode mode="CompressionNone_Auth=Basic" compressionType="" auth="AuthBasic"/>
 		</modes>
 	</classification>
 

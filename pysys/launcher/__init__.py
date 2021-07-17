@@ -52,8 +52,8 @@ def loadDescriptors(dir=None):
 	loader = Project.getInstance().descriptorLoaderClass(Project.getInstance())
 	return loader.loadDescriptors(dir)
 
-MODE_CHARS = '-\\w_.~' # internal API, subject to change at any time
-
+TEST_ID_CHARS = r'-_.\w' # internal API, subject to change at any time, do not use
+MODE_CHARS = TEST_ID_CHARS+'~=' # internal API, subject to change at any time, do not use
 
 def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, modeincludes=[], modeexcludes=[], expandmodes=True):
 	"""Create a list of descriptor objects representing a set of tests to run, filtering by various parameters, returning the list.
@@ -235,16 +235,17 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				index = index1 = index2 = None
 				t = t.rstrip('/\\')
 
-				if re.search('^[\w_.~-]*$', t): # single test id (not a range or regex)
+				if re.search(r'^[%s]*$'%MODE_CHARS, t): # single test id (not a range or regex)
 					if '~' in t:
 						testspecid, testspecmode = t.split('~')
 						index = findMatchingIndex(testspecid)
 						# first match the id, then the mode
-						if testspecmode not in descriptors[index].modes:
+						matchingmode = next((m for m in descriptors[index].modes if m == testspecmode), None)
+						if matchingmode is None:
 							raise UserError('Unknown mode "%s": the available modes for this test are: %s'%(
 								testspecmode, ', '.join(sorted(descriptors[index].modes or ['<none>']))))
 
-						matches = [descriptors[index]._createDescriptorForMode(testspecmode)]
+						matches = [descriptors[index]._createDescriptorForMode(matchingmode)]
 						# note test id+mode combinations selected explicitly like this way are included regardless of what modes are enabled/disabled
 
 					else: # normal case where it's not a mode
@@ -257,15 +258,15 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				elif '~' in t:
 					# The utility of this would be close to zero and lots more to implement/test, so not worth it
 					raise UserError('A ~MODE test mode selector can only be use with a test id, not a range or regular expression')
-				elif re.search('^:[\w_.-]*', t):
+				elif re.search('^:[%s]*'%TEST_ID_CHARS, t):
 					index = findMatchingIndex(t.split(':')[1])
 					matches = descriptors[:index+1]
 
-				elif re.search('^[\w_.-]*:$', t):
+				elif re.search('^[%s]*:$'%TEST_ID_CHARS, t):
 					index = findMatchingIndex(t.split(':')[0])
 					matches = descriptors[index:]
 
-				elif re.search('^[\w_.-]*:[\w_.-]*$', t):
+				elif re.search('^[%s]*:[%s]*$'%(TEST_ID_CHARS,TEST_ID_CHARS), t):
 					index1 = findMatchingIndex(t.split(':')[0])
 					index2 = findMatchingIndex(t.split(':')[1])
 					if index1 > index2:
