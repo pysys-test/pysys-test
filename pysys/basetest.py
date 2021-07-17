@@ -340,9 +340,9 @@ class BaseTest(ProcessUser):
 						self.addOutcome(TIMEDOUT, 'Manual tester timed out')
 						self.manualTester.stop()
 						return
-					time.sleep(1)
+					self.pollWait(1)
 			else:
-				time.sleep(1)
+				self.pollWait(1)
 		else:
 			self.addOutcome(BLOCKED, 'Manual tester failed')
 
@@ -353,7 +353,7 @@ class BaseTest(ProcessUser):
 		"""
 		if self.manualTester and self.manualTester.running():
 			self.manualTester.stop()
-			time.sleep(1)
+			self.pollWait(1)
 		else:
 			self.addOutcome(BLOCKED, 'Manual tester could not be stopped')
 
@@ -370,7 +370,7 @@ class BaseTest(ProcessUser):
 					self.addOutcome(TIMEDOUT, 'Timed out waiting for manual tester')
 					self.manualTester.stop()
 					return
-				time.sleep(1)
+				self.pollWait(1)
 
 
 	# test timing methods. These allow control flow of the test to be set
@@ -383,11 +383,13 @@ class BaseTest(ProcessUser):
 		if the timings or machine load changes, so wherever possible use a method like `waitForGrep` to 
 		wait for something specific instead. 
 		
+		See also `pollWait` which should be used when performing repeated polling to wait for a condition without logging. 
+		
 		:param interval: The time interval in seconds to wait. 
 		
 		"""
 		log.info('Waiting for %0.1f seconds'%interval)
-		time.sleep(interval)
+		self.pollWait(interval)
 
 
 	# test validation methods.

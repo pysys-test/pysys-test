@@ -126,8 +126,10 @@ PySys 1.7.0 is under development.
 	  current module/test, but including access to standard Python modules such as ``os/sys/math`` and PySys constants. 
 	- Added ``includeCoverageFromPySysProcess`` option to `pysys.writer.coverage.PythonCoverageWriter` which is useful 
 	  for measuring code coverage when testing custom PySys plugins. 
-	- Added ``testobj`` argumet to `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` in case you wish 
+	- Added ``testobj`` argument to `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` in case you wish 
 	  to provide different runDetails based on some feature of the test object or mode. 
+	- Added `BaseTest.pollWait` which should be used instead of ``time.sleep`` when polling for something to happen 
+	  without any log messages (or the existing `BaseTest.wait` for longer polls where you do want logging). 
 	- pysys.py improvements:
 	
 	  - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 

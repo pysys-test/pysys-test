@@ -816,6 +816,24 @@ class ProcessUser(object):
 
 		return process.exitStatus
 
+	def pollWait(self, secs):
+		"""
+		Sleeps the current thread for the specified number of seconds, between polling/checking for some condition 
+		to be met. 
+		
+		Unlike `pysys.basetest.BaseTest.wait` (which should be used for larger waits inside tests), pollWait does not 
+		log anything. 
+		
+		Use this method instead of ``time.sleep`` as it provides PySys the chance to abort test execution early when 
+		requested. 
+		
+		:param float secs: The time to sleep for, typically a few hundred milliseconds. Do not use this method for 
+			really long waits. 
+		"""
+		assert secs > 0, secs
+		if secs > 5: self.log.debug('pollWait %s secs', secs)
+		time.sleep(secs)
+
 	def waitForBackgroundProcesses(self, includes=[], excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
 		"""Wait for any running background processes to terminate, then check that all background processes 
 		completed with the expected exit status.
@@ -973,7 +991,7 @@ class ProcessUser(object):
 					# MacOS gives an error if we try to connect to the same socket again after connection refused
 					s.close()
 					s = None
-				time.sleep(0.15)
+				self.pollWait(0.15)
 		finally:
 			if s is not None: s.close()
 
@@ -1012,7 +1030,7 @@ class ProcessUser(object):
 						log.warning(msg)
 					break
 					
-			time.sleep(0.01)
+			self.pollWait(0.01)
 			if pathexists(f):
 				log.debug("Wait for '%s' file creation completed successfully", file)
 				return
@@ -1230,7 +1248,7 @@ class ProcessUser(object):
 					log.warning(msg)
 				break
 
-			time.sleep(poll)
+			self.pollWait(poll)
 		if namedGroupsMode:
 			return {} if not matches else matches[0].groupdict()
 		return matches

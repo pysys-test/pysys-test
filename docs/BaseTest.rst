@@ -187,6 +187,7 @@ of which the most commonly used is `waitForGrep`.
 	waitProcess
 	waitForSocket
 	wait
+	pollWait
 
 Do not use `wait` unless there is no alternative, since it makes tests both slower and more fragile than they ought to be. 
 
