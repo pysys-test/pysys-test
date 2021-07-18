@@ -181,7 +181,7 @@ class %s(%s):
 				else:
 					descriptor_fp.write("""<?xml version="1.0" encoding="utf-8"?>
 <pysystest>
-	<description category="" title=""/> <!-- TODO: always provide a title to summarize what area the test covers -->
+	<description title=""/> <!-- TODO: always provide a title to summarize what area the test covers -->
 
 	<groups inherit="true" groups=""/>
 
