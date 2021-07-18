@@ -30,7 +30,23 @@ Highlights from this release are:
 
 New test structure and descriptors
 ----------------------------------
-There is now a leaner, simpler recommended structure for newly created tests:
+Previously, every PySys test had (and was defined by) a ``pysystest.xml`` file. In practice having this test metadata 
+separated from the implementation in a different file made tests harder to navigate. Now, a PySys test is defined 
+by any file named ``pysystest.*`` (case insensitive), but it must contain a ``<pysystest>`` descriptor somewhere in the 
+file (typically within a comment). 
+
+You can continue to use ``pysystest.xml`` files if you wish, but the recommended structure for new tests is to unite 
+the Python and XML descriptor content in a single file named ``pysystest.py``. 
+
+This approach can also be used for other languages, for example a file named ``PySysTest.java` would be identified 
+as a PySys test, and provided it contains a ``<pysystest>`` descriptor in a comment, and that a Python class is 
+identified to execute it in that descriptor (or a parent ``pysysdirconfig.xml``) it will be work just like any other 
+PySys test with no additional files needed. The testDir (from which the output dir etc are calculated) will be the 
+directory containing the ``pysystest.*`` file. If your ``pysystest.*`` file uses an encoding other than UTF-8 and you 
+have non-ASCII characters in your descriptor XML, simply update the ``encoding=`` in the ``<?xml ..>`` XML declaration 
+and it will be parsed with the correct encoding for the parent file. 
+
+There is now a leaner, simpler recommended structure for newly created test descriptors:
 
 - The ``<classification>`` element is no longer required - ``<modes>`` and ``<groups>`` can be placed directly under 
   the root element. 
@@ -42,7 +58,7 @@ There is now a leaner, simpler recommended structure for newly created tests:
   about the test's purpose as a comment in the ``.py`` file itself.
 - Instead of specifying groups in separate ``<group>`` elements you can now specify them in a single string using 
   ``<groups groups="my-group1, my-group2"/>``.  
-- Providing a test title is now mandatory in new tests. 
+- Providing a test title is now mandatory in new tests (to encourage good practice). 
 
 Version changes
 ---------------
@@ -193,7 +209,7 @@ Test descriptor features
   own ``run.py``). You can now implement this pattern a lot more easily by specifying a fully qualified 
   ``classname`` and ``module`` in the ``pysystest.xml`` descriptor, which will lookup the specified classname 
   in the PYTHONPATH using Python's module importing mechanism. 
-- Change the creation of new tests (and the loading of test descriptors) to include the ``.py`` suffix in the 
+- Changed the creation of new tests (and the loading of test descriptors) to include the ``.py`` suffix in the 
   ``module=`` filename, to make it more explicit what is going on. As before, specifying this suffix is optional 
   so there is no need to update existing tests. 
 - Added support for specifying project properties and descriptor user-data values using multi-line XML text 
@@ -282,6 +298,7 @@ affect many users):
     and project configuration. Aliases exist so you nothing should break unless you're explicitly referencing 
     or adding to the ``pysys/xml/templates`` directory. However it is recommended to find/rename your framework 
     extensions to use the new name as the ``pysys.xml`` module name is deprecated. 
+  - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
 
 
 -------------------

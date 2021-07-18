@@ -217,8 +217,8 @@ LOOKUP[FALSE] = "FALSE"
 
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_PROJECTFILE = ['pysysproject.xml']
-DEFAULT_DESCRIPTOR = ['pysystest.xml'] # can be customized with the pysysTestDescriptorFileNames project property
-DEFAULT_MODULE = 'run.py'
+DEFAULT_DESCRIPTOR = ['pysystest.xml'] # deprecated, do not use this. For customization use the pysysTestDescriptorFileNames project property. 
+DEFAULT_MODULE = 'run.py' # deprecated, do not use this. 
 DEFAULT_GROUP = ""
 DEFAULT_TESTCLASS = 'PySysTest'
 DEFAULT_INPUT = 'Input'

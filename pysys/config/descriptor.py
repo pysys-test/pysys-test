@@ -361,8 +361,22 @@ class _XMLDescriptorParser(object):
 			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
 		self.project = project
 		
+		if istest and not xmlfile.endswith('.xml'):
+			# Find it within a file of another type e.g. pysystest.py
+			# Open in binary mode since we don't know the encoding - we'll rely on the XML header to tell us if it's anything unusual
+			with open(xmlfile, 'rb') as xmlhandle:
+				contents = xmlhandle.read()
+			match = re.search(b'(<[?]xml[^>]*>\\s*<pysystest.*>.*</pysystest>)', contents, flags=re.DOTALL)
+			if not match: raise UserError("No <pysystest> XML descriptor was found in file \"%s\""%(xmlfile))
+			xmlcontents = match.group(0)
+		else:
+			xmlcontents = None
+		
 		try:
-			self.doc = xml.dom.minidom.parse(xmlfile)
+			if xmlcontents:
+				self.doc = xml.dom.minidom.parseString(xmlcontents)
+			else:
+				self.doc = xml.dom.minidom.parse(xmlfile)
 		except Exception as ex:
 			raise UserError("Invalid XML in descriptor '%s': %s" % (xmlfile, ex))
 		else:
@@ -392,7 +406,7 @@ class _XMLDescriptorParser(object):
 	DEFAULT_DESCRIPTOR = TestDescriptor(
 		file=None, id=u'', type="auto", state="runnable", 
 		title='', purpose='', groups=[], modes=[], 
-		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
+		classname=DEFAULT_TESTCLASS, module=None,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, isDirConfig=True)
 	"""
@@ -407,13 +421,18 @@ class _XMLDescriptorParser(object):
 		for attrName, attrValue in self.root.attributes.items():
 			if attrName not in ['state', 'type']:
 				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
+		cls, pymodule = self.getClassDetails()
 		
+		if not pymodule: # default setting
+			pymodule = os.path.basename(self.file) if self.file.endswith('.py') else DEFAULT_MODULE # else run.py
+		
+		[self.defaults.classname, self.defaults.module]
 		# some elements that are mandatory for an individual test and not used for dir config
 		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
 										self.getGroups(), self.getModes(), 
-										self.project.expandProperties(self.getClassDetails()[0]),
-										self.project.expandProperties(self.getClassDetails()[1]),
+										self.project.expandProperties(cls),
+										self.project.expandProperties(pymodule),
 										self.project.expandProperties(self.getTestInput()),
 										self.project.expandProperties(self.getTestOutput()),
 										self.project.expandProperties(self.getTestReference()),
@@ -815,7 +834,11 @@ class DescriptorLoader(object):
 		descriptors = []
 		ignoreSet = set(OSWALK_IGNORES+[DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE])
 		
-		descriptorSet = set([s.strip() for s in project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')])
+		if project.properties.get('pysysTestDescriptorFileNames') or DEFAULT_DESCRIPTOR != ['pysystest.xml']:
+			# compatibility mode
+			descriptorSet = set([s.strip() for s in project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')])
+		else:
+			descriptorSet = None
 		
 		assert project.projectFile != None
 		log = logging.getLogger('pysys.launcher')
@@ -876,7 +899,10 @@ class DescriptorLoader(object):
 				del dirs[:]
 				continue
 
-			intersection = descriptorSet & set(files)
+			if descriptorSet is None: 
+				intersection = [f for f in files if f.lower().startswith('pysystest.')]
+			else: # compatibility mode
+				intersection = descriptorSet & set(files)
 			if intersection: 
 				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
 				# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
@@ -891,7 +917,7 @@ class DescriptorLoader(object):
 					raise # no stack trace needed, will already include descriptorfile name
 				except Exception as e:
 					log.info('Failed to read descriptor: ', exc_info=True)
-					raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
+					raise Exception("Error reading XML descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
 
 				# if this is a test dir, it never makes sense to look at sub directories
 				del dirs[:]
@@ -948,8 +974,8 @@ class DescriptorLoader(object):
 		return False
 
 	def _parseTestDescriptor(self, descriptorfile, parentDirDefaults=None, isDirConfig=False, **kwargs):
-		""" Parses a single descriptor file (typically an XML file) for a testcase or directory configuration 
-		and returns the resulting descriptor. 
+		""" Parses a single descriptor file (typically an XML file, or a file of another type containing XML) for a 
+		testcase or directory configuration and returns the resulting descriptor. 
 		
 		:param descriptorfile: The absolute path of the descriptor file. 
 		:param parentDirDefaults: A L{TestDescriptor} instance containing 
