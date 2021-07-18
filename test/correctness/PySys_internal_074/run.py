@@ -20,6 +20,9 @@ class PySysTest(BaseTest):
 		exitcode = runPySys(self, 'makeproject-alreadyexists', ['makeproject', '--dir', 'fakeprojroot'], expectedExitStatus='!=0')
 
 		runPySys(self, 'make', ['make', 'mynewtest'])
+		self.copy('mynewtest/pysystest.xml', 'mynewtest/pysystest.xml', mappers=[
+			pysys.mappers.RegexReplace('title=""', 'title="MyTitle"')
+		])
 		runPySys(self, 'run', ['run','mynewtest'])
 			
 	def validate(self):

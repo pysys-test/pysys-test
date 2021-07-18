@@ -28,6 +28,22 @@ Highlights from this release are:
 - There are a few breaking changes (see Migration Notes below) but in practice these are likely to affect few 
   users. 
 
+New test structure and descriptors
+----------------------------------
+There is now a leaner, simpler recommended structure for newly created tests:
+
+- The ``<classification>`` element is no longer required - ``<modes>`` and ``<groups>`` can be placed directly under 
+  the root element. 
+- ``<requirement id="..."/>`` elements can now be placed directly under the root element, without the need for 
+  enclosing ``<tracability><requirements>...`` elements. 
+- The test title can be specified as an attribute on the ``<description title="..."/>`` element instead of a separate 
+  ``<title>`` element, is more concise and avoids some XML escaping issues. 
+- The ``<purpose>`` element is now optional in the descriptor; it's often better to put detailed multi-line information 
+  about the test's purpose as a comment in the ``.py`` file itself.
+- Instead of specifying groups in separate ``<group>`` elements you can now specify them in a single string using 
+  ``<groups groups="my-group1, my-group2"/>``.  
+- Providing a test title is now mandatory in new tests. 
+
 Version changes
 ---------------
 - Removed support for Python 2 and 3.5, which are now end-of-life. 

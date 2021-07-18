@@ -84,7 +84,7 @@ class %s(%s):
 		</requirements>
 	</traceability>
 </pysystest>
-''' 
+''' # deprecated, only used by legacy subclassers of this class
 
 	def __init__(self, name=""):
 		self.name = name
@@ -174,9 +174,25 @@ class %s(%s):
 			log.info("Created directory %s " % os.path.join(self.testdir, self.testId, output))
 			os.makedirs(os.path.join(self.testdir, self.testId, reference))
 			log.info("Created directory %s " % os.path.join(self.testdir, self.testId, reference))
-			descriptor_fp = openfile(os.path.join(self.testdir, self.testId, descriptor), "w", encoding=None if PY2 else 'utf-8')
-			descriptor_fp.write(self.DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
-			descriptor_fp.close()
+			with openfile(os.path.join(self.testdir, self.testId, descriptor), "w", encoding='utf-8') as descriptor_fp:
+				if self.type != 'auto' or group or testclass != DEFAULT_TESTCLASS or module != DEFAULT_MODULE:
+					# legacy mode for existing subclassers
+					descriptor_fp.write(self.DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
+				else:
+					descriptor_fp.write("""<?xml version="1.0" encoding="utf-8"?>
+<pysystest>
+	<description category="" title=""/> <!-- TODO: always provide a title to summarize what area the test covers -->
+
+	<groups inherit="true" groups=""/>
+
+	<modes inherit="true">
+	</modes>
+
+	<!-- To skip the test, uncomment this (and provide a reason): <skipped reason=""/> -->
+	<!-- To provide a bug/story/requirement id for requirements tracing, uncomment this: <requirement id=""/> -->
+</pysystest>
+""")
+
 			log.info("Created descriptor %s " % os.path.join(self.testdir, self.testId, descriptor))
 			if not module.endswith('.py'): module += '.py'
 			testclass_fp = openfile(os.path.join(self.testdir, self.testId, module), "w")

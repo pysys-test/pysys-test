@@ -15,6 +15,14 @@ class PySysTest(BaseTest):
 		createProjectConfig(self.output)
 		runPySys(self, 'make1', ['make', 'mynewtest1'])
 		runPySys(self, 'make2', ['make', 'mynewtest2'])
+		
+		self.copy('mynewtest1/pysystest.xml', 'mynewtest1/pysystest.xml', mappers=[
+			pysys.mappers.RegexReplace('title=""', 'title="MyTitle"')
+		])
+		self.copy('mynewtest2/pysystest.xml', 'mynewtest2/pysystest.xml', mappers=[
+			pysys.mappers.RegexReplace('title=""', 'title="MyTitle"')
+		])
+		
 		runPySys(self, 'run1', ['run', '-o', 'cleaned'])
 		runPySys(self, 'run2', ['run', '-o', 'notcleaned'])
 		runPySys(self, 'clean', ['clean', '-o', 'cleaned', '--all', 'mynewtest1'])

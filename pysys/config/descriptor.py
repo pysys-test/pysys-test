@@ -93,7 +93,7 @@ class TestDescriptor(object):
 	
 	:ivar str ~.reference: The path to the reference directory of the testcase. Relative to testDir, or an absolute path.
 	
-	:ivar list ~.traceability: A list of the requirements covered by the testcase.
+	:ivar list ~.traceability: A list of the requirements covered by the testcase, typically keywords or bug/story ids.
 	
 	:ivar float ~.executionOrderHint: A float priority value used to determine the 
 		order in which testcases will be run; higher values are executed before 
@@ -112,7 +112,7 @@ class TestDescriptor(object):
 		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', 
 
 	def __init__(self, file, id, 
-		type="auto", state="runnable", title=u'(no title)', purpose=u'', groups=[], modes=[], 
+		type="auto", state="runnable", title=u'', purpose=u'', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE, 
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, 
@@ -475,20 +475,25 @@ class _XMLDescriptorParser(object):
 		return self.defaults.skippedReason
 
 	def getTitle(self):
-		'''Return the test titlecharacter data of the description element.'''
+		'''Return the test title character data of the description element.'''
 		descriptionNodeList = self.root.getElementsByTagName('description')
 		if descriptionNodeList == []:
-			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
+			raise UserError("Test titles are mandatory (and useful to everyone!) but no <description title=\"...\"> was provided yet in \"%s\""%self.file)
 		
-		if descriptionNodeList[0].getElementsByTagName('title') == []:
-			raise UserError("No <title> child element of <description> supplied in XML descriptor \"%s\""%self.file)
-		else:
-			try:
-				title = descriptionNodeList[0].getElementsByTagName('title')[0]
-				return title.childNodes[0].data.replace('\n',' ').replace('\r',' ').replace('  ', ' ').strip()
-			except Exception:
-				return self.defaults.title
-				
+		if descriptionNodeList[0].hasAttribute('title'): # new-style test
+			title = descriptionNodeList[0].getAttribute('title').strip().replace('  ', ' ')
+			if not title: raise UserError('Test titles are mandatory (and useful to everyone!) but no title="..." was provided yet in "%s"'%self.file)
+			cat = descriptionNodeList[0].getAttribute('category')
+			if cat: title = f'{cat.strip()} - {title}'
+			
+			return title
+		
+		try:
+			title = descriptionNodeList[0].getElementsByTagName('title')[0].childNodes[0].data
+			title = title.replace('\n',' ').replace('\r',' ').replace('  ', ' ').strip()
+			return title
+		except Exception:
+			return self.getID() # fall back to using the test ID as the title - we tolerate empty titles here to avoid breaking old tests
 				
 	def getPurpose(self):
 		'''Return the test purpose character data of the description element.'''
@@ -497,7 +502,7 @@ class _XMLDescriptorParser(object):
 			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
 		
 		if descriptionNodeList[0].getElementsByTagName('purpose') == []:
-			raise UserError("No <purpose> child element of <description> supplied in XML descriptor \"%s\""%self.file)
+			return self.defaults.purpose # no error; setting this is optional
 		else:
 			try:
 				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
@@ -508,32 +513,37 @@ class _XMLDescriptorParser(object):
 				
 	def getGroups(self):
 		'''Return a list of the group names, contained in the character data of the group elements.'''
-		classificationNodeList = self.root.getElementsByTagName('classification')
+
 		groupList = []
-		try:
-			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
+		groups = self.root.getElementsByTagName('groups')
+		if groups:
+			groups = groups[0]
+			if groups.parentNode.tagName not in ['pysystest', 'pysysdirconfig', 'classification']: 
+				raise UserError("<groups> element found under <%s> but must be under the root node (or the <classification> node), in XML descriptor \"%s\""%(groups.parentNode.tagName, self.file))
+
+			if groups.getAttribute('groups'):
+				groupList.extend(g.strip() for g in groups.getAttribute('groups').split(',') if g.strip())
+
 			for node in groups.getElementsByTagName('group'):
-				if self.getText(node): groupList.append(self.getText(node))
+				g = self.getText(node)
+				if g and g.strip():
+					groupList.append(g.strip())
 
 			if (groups.getAttribute('inherit') or 'true').lower()!='true':
-				return groupList
-		except Exception:
-			pass
-			
+				return groupList # don't inherit
+		
 		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
 		return groupList
 	
 				
 	def getModes(self):
-		result = self.defaults.modes # by default we inherit (unless there are multiple <modes> elements in the file)
-		classificationNodeList = self.root.getElementsByTagName('classification')
-		if not classificationNodeList: return result
-
-		modesNodes = classificationNodeList[0].getElementsByTagName('modes')
-		if not modesNodes: return result
+		modesNodes = self.root.getElementsByTagName('modes')
+		if not modesNodes: return self.defaults.modes # by default we inherit (unless there are multiple <modes> elements in the file)
 		
 		result = {} # key=mode name value=params
-		for modesNode in modesNodes:
+		for modesNode in self.root.getElementsByTagName('modes'):
+			if modesNode.parentNode.tagName not in ['pysystest', 'pysysdirconfig', 'classification']: 
+				raise UserError("<modes> element found under <%s> but must be under the root node (or the <classification> node), in XML descriptor \"%s\""%(modesNode.parentNode.tagName, self.file))
 			prevModesForCombining = None if not result else result
 
 			# by default we inherit, but to avoid confusion when defining multiple mode matrices we only allow explicit inherits 
@@ -704,13 +714,12 @@ class _XMLDescriptorParser(object):
 	def getRequirements(self):
 		'''Return a list of the requirement ids, contained in the character data of the requirement elements.'''
 		reqList = []			
-		try:
-			traceabilityNodeList = self.root.getElementsByTagName('traceability')
-			requirements = traceabilityNodeList[0].getElementsByTagName('requirements')[0]
-			for node in requirements.getElementsByTagName('requirement'):
-				if node.getAttribute('id'): reqList.append(node.getAttribute('id'))
-		except Exception:
-			pass
+		for node in self.root.getElementsByTagName('requirement'):
+			if (node.getAttribute('id') or '').strip(): reqList.append(node.getAttribute('id').strip())
+
+		# these used to always be below <traceability><requirements>..., but now we allow them directly under the root node 
+		# (or anywhere the user wants)
+
 		reqList = [x for x in self.defaults.traceability if x not in reqList]+reqList
 		return reqList
 
