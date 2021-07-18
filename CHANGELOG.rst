@@ -32,11 +32,13 @@ New test structure and descriptors
 ----------------------------------
 Previously, every PySys test had (and was defined by) a ``pysystest.xml`` file. In practice having this test metadata 
 separated from the implementation in a different file made tests harder to navigate. Now, a PySys test is defined 
-by any file named ``pysystest.*`` (case insensitive), but it must contain a ``<pysystest>`` descriptor somewhere in the 
-file (typically within a comment). 
+by any file named ``pysystest.*`` (case insensitive), but it must contain a ``<pysystest>`` XML descriptor somewhere in 
+the file (typically within a comment). 
 
 You can continue to use ``pysystest.xml`` files if you wish, but the recommended structure for new tests is to unite 
-the Python and XML descriptor content in a single file named ``pysystest.py``. 
+the Python and XML descriptor content in a single file named ``pysystest.py``. It is still essential to have a 
+dedicated directory for each test, so there is somewhere unique to put the ``Output/`` files and any input resources 
+needed by the test. 
 
 This approach can also be used for other languages, for example a file named ``PySysTest.java` would be identified 
 as a PySys test, and provided it contains a ``<pysystest>`` descriptor in a comment, and that a Python class is 
