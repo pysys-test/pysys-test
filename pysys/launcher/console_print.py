@@ -86,7 +86,7 @@ class ConsolePrintHelper(object):
 		print("   tests in the group will not be run. The following syntax is used to select a test set;")
 		print("")
 		print("       test1    - a single testcase with id test1")
-		print("       :test2   - upto testcase with id test2")
+		print("       :test2   - up to testcase with id test2")
 		print("       test1:   - from testcase with id test1 onwards")
 		print("       id1:id2  - all tests between tests with ids test1 and test2")
 		print("")
