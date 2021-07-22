@@ -212,6 +212,16 @@ class DefaultTestMaker(object):
 
 		return self.testId
 
+	def copy(self, source, dest): 
+		"""
+		Copies the specified source file/dir to the specified dest file/dir. 
+		
+		Can be overridden if any advanced post-processing is required. 
+		"""
+		if os.path.isdir(source):
+			shutil.copytree(source, dest)
+		else:
+			shutil.copy2(source, dest)
 
 	def makeTest(self):
 		"""
@@ -244,11 +254,8 @@ class DefaultTestMaker(object):
 			target = dest+os.sep+os.path.basename(c)
 			if os.path.exists(target):
 				raise Exception('Cannot copy to %s as it already exists'%target)
-			if os.path.isdir(c):
-				shutil.copytree(c, target)
-			else:
-				shutil.copy2(c, target)
-				print("  Created %s"%target)
+			self.copy(c, target)
+			print("  Created %s"%target)
 		
 		return dest
 
