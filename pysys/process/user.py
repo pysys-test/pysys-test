@@ -1900,7 +1900,7 @@ class ProcessUser(object):
 
 		path = os.path.normpath(path)
 		if path.startswith(self.output): path = path[len(self.output)+1:]
-		self.log.info(u'Contents of %s%s: ', path, ' (filtered)' if includes or excludes else '', extra=logextra)
+		self.log.info(u'Contents of %s%s: ', fromLongPathSafe(path), ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
 			logFunction(l)
 		self.log.info('  -----', extra=logextra)
