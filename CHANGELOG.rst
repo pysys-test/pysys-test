@@ -185,25 +185,6 @@ Line mapper/text manipulation improvements
   results in a `BaseTest.assertDiff`. 
 - Added `pysys.mappers.applyMappers` which makes it easy to add mapper functionality to your own methods. 
 - Added a ``mappers=`` argument to `BaseTest.logFileContents` and `BaseTest.assertLineCount`.
-- Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails, for both 
-  primitive values and list/dict values. 
-
-- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
-  its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
-  refer to the old name). 
-- Added `BaseTest.deleteFile()` which provides a simple and safe way to delete a file similar to the 
-  `BaseTest.deleteDir()` method. 
-- Added a ``quiet=True/False`` option to `BaseTest.waitForGrep` to disable the INFO-level logging. 
-- Changed `pysys.writer.outcomes.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
-  attribute, and changed the failure node to be::
-  
-    <failure message="OUTCOME: Outcome reason" type="OUTCOME"/>
-    
-  (where OUTCOME could be FAILED, BLOCKED, etc) instead of::
-  
-    <failure message="OUTCOME">Outcome reason</failure>
-  
-  This may produce better error indicators in CI systems and IDEs that parse these files. 
 
 Test descriptor features
 ------------------------
@@ -245,6 +226,18 @@ The most significant are:
     fails). 
   - Added `pysys.constants.PREFERRED_ENCODING` which should be used in testcases instead of 
     ``locale.getpreferredencoding()`` to avoid thread-safety issues. 
+  - Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails, for both 
+    primitive values and list/dict values. 
+  - Changed `pysys.writer.outcomes.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
+    attribute, and changed the failure node to be::
+    
+      <failure message="OUTCOME: Outcome reason" type="OUTCOME"/>
+      
+    (where OUTCOME could be FAILED, BLOCKED, etc) instead of::
+  
+      <failure message="OUTCOME">Outcome reason</failure>
+  
+    This may produce better error indicators in CI systems and IDEs that parse these files. 
 
 Additional improvements which will be of use to some users:
 
@@ -269,6 +262,12 @@ Additional improvements which will be of use to some users:
   - `pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
     so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
     occasional failures of the process monitoring. 
+  - Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
+    its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
+    refer to the old name). 
+  - Added `BaseTest.deleteFile()` which provides a simple and safe way to delete a file similar to the 
+    `BaseTest.deleteDir()` method. 
+  - Added a ``quiet=True/False`` option to `BaseTest.waitForGrep` to disable the INFO-level logging. 
 
 Fixes
 -----
