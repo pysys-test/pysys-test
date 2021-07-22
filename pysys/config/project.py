@@ -36,6 +36,7 @@ from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.exceptions import UserError
+import pysys.config.descriptor
 
 log = logging.getLogger('pysys.config.project')
 
@@ -584,6 +585,11 @@ class Project(object):
 		
 		self.projectHelp = parser.getProjectHelp()
 		self.projectHelp = parser.expandProperties(self.projectHelp, default=None, name='project-help')
+		
+		self._defaultDirConfig = None # this field is not public API
+		for e in parser.root.getElementsByTagName('pysysdirconfig'): # expecting 0 or 1
+			self._defaultDirConfig = pysys.config.descriptor._XMLDescriptorParser.parse(self.projectFile, istest=False, 
+				project=self, xmlRootElement=e)
 		
 		# set the data attributes
 		parser.unlink()

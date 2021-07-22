@@ -350,16 +350,22 @@ class _XMLDescriptorParser(object):
 	
 	'''
 
-	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None):
+	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None):
 		assert project
 		self.file = xmlfile
 		self.dirname = os.path.dirname(xmlfile)
 		self.istest = istest
-		self.defaults = self.DEFAULT_DESCRIPTOR if parentDirDefaults is None else parentDirDefaults
+		self.defaults = (project._defaultDirConfig or self.DEFAULT_DESCRIPTOR) if parentDirDefaults is None else parentDirDefaults
 		roottag = 'pysystest' if istest else 'pysysdirconfig'
 		if not os.path.exists(xmlfile):
 			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
 		self.project = project
+		
+		if xmlRootElement: # used when parsing from project XML rather than directly from a standalone file
+			self.doc = None
+			self.root = xmlRootElement
+			assert xmlRootElement.tagName == 'pysysdirconfig', xmlRootElement.tagName
+			return
 		
 		if istest and not xmlfile.endswith('.xml'):
 			# Find it within a file of another type e.g. pysystest.py
@@ -386,7 +392,7 @@ class _XMLDescriptorParser(object):
 				self.root = self.doc.getElementsByTagName(roottag)[0]
 
 	@staticmethod
-	def parse(xmlfile, istest=True, parentDirDefaults=None, project=None):
+	def parse(xmlfile, istest=True, parentDirDefaults=None, project=None, **kwargs):
 		"""
 		Parses the test/dir descriptor in the specified path and returns the 
 		TestDescriptor object. 
@@ -397,7 +403,7 @@ class _XMLDescriptorParser(object):
 			specifying default values to be filtered in from the parent 
 			directory.
 		"""
-		p = _XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults, project=project)
+		p = _XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults, project=project, **kwargs)
 		try:
 			return p.getContainer()
 		finally:

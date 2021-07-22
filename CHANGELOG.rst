@@ -227,6 +227,10 @@ Test descriptor features
       
       ${testRootDir}/foo/bosh
     </property>
+- Top-level ``pysysdirconfig.xml`` directory configuration can now also be specified in the ``pysysproject.xml`` file 
+  by adding a ``<pysysdirconfig>`` element under the ``<pysysproject>``. This allows all the ``pysysdirconfig`` options 
+  such as your preferred Input/Reference/Output directory names to be specified in ``pysysproject.xml`` files and 
+  ``makeproject`` templates. 
 
 BaseTest API improvements
 -------------------------

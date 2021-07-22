@@ -18,7 +18,7 @@ class PySysTest(BaseTest):
 	def validate(self):
 		# check none of the dir descriptors affected anything if the project root dir was not a parent 
 		# of the test dir
-		self.assertGrep('print-moved-root.out', expr='Test groups:.*root-group', contains=False)
+		self.assertGrep('print-moved-root.out', expr='Test groups:.*root-group2', contains=False)
 		self.assertGrep('print-moved-root.out', expr='Test groups:.*dir2-group', contains=False)
 
 		self.logFileContents('print-full.out', maxLines=0)

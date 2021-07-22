@@ -329,7 +329,25 @@
 		<execution-order hint="-20.0" forMode="MyMode_.*"/>
 		<execution-order hint="+10.5" forGroup="performance" forMode="MyMode"/>
 	</execution-order>
+
+	<!-- 
+	Test descriptor defaults
+	~~~~~~~~~~~~~~~~~~~~~~~~
 	
+	A project file can contain a ``pysysdirconfig`` element to configure directory-level defaults that will apply to 
+	all test descriptors. See the :doc:`TestDescriptors` documentation for more information about the available options. 
+	-->
+	<pysysdirconfig>
+		<data>
+			<!-- Could use this to override the default directory names for input, reference, and output for all tests 
+			in your project. 
+			-->
+			<input path="Input"/>
+			<reference path="Reference"/>
+			<output path="Output"/>
+		</data>
+	</pysysdirconfig>
+
 	<!--
 	PySys run.log and console formatters
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

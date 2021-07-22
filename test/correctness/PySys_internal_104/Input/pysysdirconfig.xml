@@ -2,7 +2,6 @@
 <pysysdirconfig>
   <classification>
     <groups>
-      <group>root-group1</group>
       <group>root-group2</group>
     </groups>
     <modes>
