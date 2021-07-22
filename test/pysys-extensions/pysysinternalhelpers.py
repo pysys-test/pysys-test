@@ -40,7 +40,7 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 		environs['PYSYS_PROJECTFILE'] = os.path.join(processowner.input, projectfile)
 	else:
 		# ensure there's a project file else it'll use the parent one and potentially compete to overwrite the junit reports etc
-		if 'makeproject' not in args:
+		if 'makeproject' not in args and 'make' not in args:
 			assert os.path.exists(os.path.join(processowner.output, kwargs.get('workingDir', processowner.output), 'pysysproject.xml')) or os.path.exists(processowner.output+'/pysysproject.xml')
 	
 	# since we might be running this from not an installation

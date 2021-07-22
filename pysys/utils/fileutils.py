@@ -66,7 +66,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	
 	"""
 	if (not IS_WINDOWS) or (not path): return path
-	if path[0] != path[0].upper(): path = path[0].upper()+path[1:]
+	if path[0] != path[0].upper() and os.path.isabs(path): path = path[0].upper()+path[1:]
 	if onlyIfNeeded and len(path)<255: return path
 	if path.startswith(u'\\\\?\\'): 
 		if u'/' in path: return path.replace(u'/',u'\\')

@@ -26,7 +26,7 @@ from pysys.constants import *
 from pysys.launcher.console_clean import ConsoleCleanTestHelper, cleanTest
 from pysys.launcher.console_print import ConsolePrintHelper, printTest
 from pysys.launcher.console_makeproject import makeProject
-from pysys.launcher.console_make import ConsoleMakeTestHelper, makeTest
+from pysys.launcher.console_make import *
 from pysys.launcher.console_run import ConsoleLaunchHelper, runTest
 
 

@@ -22,7 +22,7 @@ Highlights from this release are:
 - Removal of Python 2 and 3.5 support, and addition of Python 3.9. 
 - Some big extensions to the concept of "modes", allowing for more powerful configuration and use, including 
   multi-dimensional modes. 
-- Some useful improvements to the `pysys.mappers` API, for transforming tetx files during copy and grep operations. 
+- Some useful improvements to the `pysys.mappers` API, for transforming text files during copy and grep operations. 
 - More powerful configuration options available for project and test descriptor configuration files. 
 - A slew of minor features, many based on end-user requests. Also some bug fixes. 
 - There are a few breaking changes (see Migration Notes below) but in practice these are likely to affect few 
@@ -61,6 +61,10 @@ There is now a leaner, simpler recommended structure for newly created test desc
 - Instead of specifying groups in separate ``<group>`` elements you can now specify them in a single string using 
   ``<groups groups="my-group1, my-group2"/>``.  
 - Providing a test title is now mandatory in new tests (to encourage good practice). 
+
+New template-based test maker
+-----------------------------
+TODO: add doc for DefaultTestMaker, also mention deprecation of the old one
 
 Version changes
 ---------------
@@ -144,6 +148,10 @@ Project configuration features
 - Added automatic normalization of slashes and ``..`` sequences in project property values for which 
   ``pathMustExist=true``. 
 - Added a pre-defined project property ``${/}`` which is resolved to forward or back slash character for this OS. 
+- Added a pre-defined project property ``${username}`` which is resolved to the user running PySys. 
+- Added a pre-defined project property ``${pysysTemplatesDir}`` which is the path to the directory where PySys stores 
+  its default ``test/`` template for creating new tests; you may wish to reference this when defining the files to 
+  copy into your own test templates. 
 - Added support for executing Python eval() strings when resolving project properties. Other project properties 
   are available as Python variables when the eval string is executed (and also in a ``properties`` dict, in case of 
   any name that is not a valid Python identifier). For more details on how eval() strings are evaluated within 
@@ -279,11 +287,13 @@ Fixes
     normalizing paths before calling mkdir. 
   - Fixed `BaseTest.assertLineCount` bug in which ``reFlags`` parameter was not honoured. 
   - Fixed numerous Python warnings. 
+  - Fixed bug in which `pysys.utils.fileutils.toLongPathSafe` and `pysys.utils.fileutils.mkdir` would incorrectly 
+    capitalize the first letter when passed a relative path. 
 
 Migration notes
 ---------------
 Aside from the removal of Python 2 and 3.5 support, these are largely minor edge cases that will not 
-affect many users):
+affect many users:
 
   - The minimum supported Python version is now 3.6. 
   - It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 

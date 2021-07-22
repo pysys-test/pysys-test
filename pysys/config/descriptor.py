@@ -109,7 +109,7 @@ class TestDescriptor(object):
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
 		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', 'executionOrderHintsByMode', \
-		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', 
+		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', '_makeTestTemplates', 
 
 	def __init__(self, file, id, 
 		type="auto", state="runnable", title=u'', purpose=u'', groups=[], modes=[], 
@@ -432,9 +432,10 @@ class _XMLDescriptorParser(object):
 		if pymodule is None: # default setting (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
 			pymodule = os.path.basename(self.file) if self.file.endswith('.py') else DEFAULT_MODULE # else run.py
 		
-		[self.defaults.classname, self.defaults.module]
+		
+		
 		# some elements that are mandatory for an individual test and not used for dir config
-		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
+		t = TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
 										self.getGroups(), self.getModes(), 
 										self.project.expandProperties(cls),
@@ -448,6 +449,41 @@ class _XMLDescriptorParser(object):
 										testDir=self.dirname,
 										userData=self.getUserData(),
 										isDirConfig=not self.istest)
+		
+		if not self.istest:
+			# _makeTestTemplates is not an official/public part of the descriptor spec, so don't have it in the constructor signature
+			t._makeTestTemplates = self._parseTestMakerTemplates()
+		
+		return t
+
+	def _parseTestMakerTemplates(self): # not public API, do not use
+		templates = []
+
+		for e in self.root.getElementsByTagName('maker-template'):
+			t = {
+				'name': e.getAttribute('name'),
+				'description': e.getAttribute('description'),
+				'copy':   [x for x in (e.getAttribute('copy') or '').split(',') if x.strip()],
+				'mkdir': [self.project.expandProperties(x).strip() for x in (e.getAttribute('mkdir') or '').split(',') if self.project.expandProperties(x).strip()],
+				'isTest': (e.getAttribute('isTest') or '').lower() != 'false',
+				'replace': [],
+				'source': self.file,
+			}
+			
+			# NB: further validation and expansion happens in console_make
+			
+			if not t['name']: raise UserError("A name=... attribute is required for each maker-template in \"%s\""%self.file)
+			if not t['description']: raise UserError("A description=... attribute is required for each maker-template, in \"%s\""%self.file)
+			
+			for r in e.getElementsByTagName('replace'):
+				r1, r2 = r.getAttribute('regex'), r.getAttribute('with')
+				if not r1 or not r2: raise UserError("Each make-test-template <replace> element requires both a regex= and a with= attribute, in \"%s\""%self.file)
+				t['replace'].append( (r1, r2) )
+			templates.append(t)
+
+		# NB: we don't combine with defaults here, that happens in the make launcher
+
+		return templates
 
 
 	def unlink(self):
@@ -508,8 +544,6 @@ class _XMLDescriptorParser(object):
 		if descriptionNodeList[0].hasAttribute('title'): # new-style test
 			title = descriptionNodeList[0].getAttribute('title').strip().replace('  ', ' ')
 			if not title: raise UserError('Test titles are mandatory (and useful to everyone!) but no title="..." was provided yet in "%s"'%self.file)
-			cat = descriptionNodeList[0].getAttribute('category')
-			if cat: title = f'{cat.strip()} - {title}'
 			
 			return title
 		
@@ -868,6 +902,7 @@ class DescriptorLoader(object):
 			# dirs. We deliberately use project dir not current working dir since 
 			# we don't want descriptors to be loaded differently depending on where the 
 			# tests are run from (i.e. should be independent of cwd). 
+			# see also console_make.py which needs similar logic
 			dirconfigs = {}
 
 			# load any descriptors between the project dir up to (but not including) the dir we'll be walking

@@ -4,7 +4,7 @@
 	<requires-python>@PYTHON_VERSION@</requires-python>
 	
 	<!-- Pre-defined properties include: ${testRootDir}, ${outDirName}, ${os}, ${osfamily}, ${startDate}, ${startTime}, 
-		${hostname}, ${/}, ${eval:*}, ${env:*}. 
+		${hostname}, ${username}, ${/}, ${eval:*}, ${env:*}. 
 	-->
 	
 	<!-- Property identifying the home directory of the application build being tested. -->

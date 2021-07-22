@@ -22,6 +22,8 @@ from __future__ import print_function
 import os.path, stat, getopt, logging, traceback, sys
 import json
 import importlib
+import glob
+import shutil
 
 from pysys import log
 
@@ -31,13 +33,230 @@ from pysys.launcher import createDescriptors
 from pysys.config.project import Project
 from pysys.exceptions import UserError
 from pysys.utils.pycompat import openfile, PY2
-from pysys.utils.fileutils import toLongPathSafe
+from pysys.utils.fileutils import toLongPathSafe, pathexists, mkdir
 
-class ConsoleMakeTestHelper(object):
+class DefaultTestMaker(object):
 	"""
-	The default implementation of ``pysys.py make``.
+	The default implementation of ``pysys.py make``, which creates tests and other assets using templates configurable 
+	on a per-directory basis using ``pysysdirconfig.xml``.
 	
-	A custom subclass can be specified in the project if required. 
+	A subclass can be specified in the project if further customization is required using::
+	
+		<maker classname="myorg.MyTestMaker"/>
+
+	"""
+	
+	__PYSYS_DEFAULT_TEMPLATES = [
+	{
+		'name': 'pysys-default-test',
+		'description': 'a default empty PySys test',
+		'isTest':True,
+		'copy': [
+			'${pysysTemplatesDir}/test/*',
+		],
+		'mkdir': [],
+		'replace':[
+			['@@CURRENT_USER@@', '${username}'],
+			['@@CURRENT_DATE@@', '${startDate}'], # also allow @TEST_ID@ e.g. testid
+		], 
+	},
+	{
+		'name': 'pysys-dir-config',
+		'description': 'a pysysdirconfig.xml file for customizing the defaults for tests under this directory',
+		'isTest':False,
+		'copy': [
+			'${pysysTemplatesDir}/dirconfig/pysysdirconfig.xml',
+		],
+		'mkdir': [],
+		'replace':[], 
+	},
+	]
+
+	def __init__(self, name="make", **kwargs):
+		self.name = name
+		self.parentDir = os.getcwd()
+
+	def getTemplates(self):
+		project = Project.getInstance()
+		projectroot = os.path.normpath(os.path.dirname(project.projectFile))
+		dir = self.parentDir
+
+		DIR_CONFIG_DESCRIPTOR = 'pysysdirconfig.xml'
+		if not project.projectFile or not dir.startswith(projectroot):
+			log.debug('Project file does not exist under "%s" so processing of %s files is disabled', dir, DIR_CONFIG_DESCRIPTOR)
+			return None
+ 
+		from pysys.config.descriptor import _XMLDescriptorParser # uses a non-public API, so please don't copy this into your own test maker
+
+		# load any descriptors between the project dir up to (AND including) the dir we'll be walking
+		searchdirsuffix = dir[len(projectroot)+1:].split(os.sep) if len(dir)>len(projectroot) else []
+		
+		DEFAULT_DESCRIPTOR = _XMLDescriptorParser.DEFAULT_DESCRIPTOR
+		
+		def expandAndValidateTemplate(t, defaults):
+			if defaults is None: defaults = DEFAULT_DESCRIPTOR
+
+			if t['name'].lower().replace('_','').replace(' ','') != t['name']: raise UserError( # enforce this to make them easy to type on cmd line, and consistent
+				"Invalid template name \"%s\" - must be lowercase and use hyphens not underscores/spaces for separating words, in \"%s\""%(t['name'], source))
+		
+			source = t.get('source', None)
+			if t['isTest']: 
+				t['mkdir'].append(defaults.output)
+				t['mkdir'].append(defaults.input)
+				t['mkdir'].append(defaults.reference)
+			
+			t['copy'] = [os.path.normpath(os.path.join(os.path.dirname(source) if source else '', project.expandProperties(x).strip())) for x in t['copy']]
+			copy = []
+			for c in t['copy']:
+				globbed = glob.glob(c)
+				if not globbed:
+					raise UserError('Cannot find any matching items for "%s" in maker template "%s" of %s'%(c, t['name'], source))
+				for c in globbed:
+					if not os.path.exists(c):
+						raise UserError('Cannot find file or directory "%s" in maker template "%s" of %s'%(c, t['name'], source))
+					copy.append(c)
+			t['copy'] = copy
+			
+			t['replace'] = [(r1, project.expandProperties(r2)) for (r1,r2) in t['replace']]
+			
+			return t
+		
+		# start with the built-ins
+		templates = [expandAndValidateTemplate(t, project._defaultDirConfig) for t in self.__PYSYS_DEFAULT_TEMPLATES]
+		
+		parentDirDefaults = None
+		for i in range(len(searchdirsuffix)+1): # up to AND including dir
+			if i == 0:
+				currentdir = projectroot
+			else:
+				currentdir = projectroot+os.sep+os.sep.join(searchdirsuffix[:i])
+			
+			if pathexists(currentdir+os.sep+DIR_CONFIG_DESCRIPTOR):
+				parentDirDefaults = _XMLDescriptorParser.parse(currentdir+os.sep+DIR_CONFIG_DESCRIPTOR, parentDirDefaults=parentDirDefaults, istest=False, project=project)
+				newtemplates = [expandAndValidateTemplate(t, parentDirDefaults) for t in parentDirDefaults._makeTestTemplates]
+				log.debug('Loaded directory configuration descriptor from %s: \n%s', currentdir, parentDirDefaults)
+				
+				# Add in existing templates from higher levels, but de-dup'd, giving priority to the latest defined template, and also putting the latest ones at the top of the list 
+				# for increased prominence
+				for deftmpl in templates:
+					if not any(tmpl['name'] == deftmpl['name'] for tmpl in newtemplates):
+						newtemplates.append(deftmpl) 
+				templates = newtemplates
+
+		log.debug('Loaded templates: \n%s', json.dumps(templates, indent='  '))
+		return templates
+		
+	supportedArgs = ('ht:', ['help', 'template:'])
+
+	def printOptions(self):
+		#######                                                                                                                        |
+		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
+		print("\nUsage: %s %s [option]+ [-t TEMPLATE_NAME] [TESTID | -n]" % (_PYSYS_SCRIPT_NAME, self.name))
+		print("   where [option] includes:")
+		print("       -h | --help                 print this message")
+		# TODO: add -n - autogenerates. 
+		print("")
+		print("   and where TESTID is the id of the new test which should consist of letters, numbers and underscores, ")
+		print("   for example: MyApp_perf_001 (numeric style) or InvalidFooBarProducesError ('test that XXX' long string style).")
+
+
+	def printUsage(self):
+		""" Print help info and exit. """
+		#######                                                                                                                        |
+		print("\nPySys System Test Framework (version %s): Makes PySys tests (and other assets) using configurable templates" % __version__) 
+		self.printOptions()
+		
+		templates = self.getTemplates()
+		if templates:
+			print("")
+			print("Available templates - and what they produce:")
+			maxLength = max(len(t['name']) for t in templates)
+			for t in templates:
+				print(f"   {t['name']:<{maxLength}} - {t['description']}")
+		
+		sys.exit()
+
+	def parseArg(self, option, value):
+		if option in ['-t', '--template']:
+			self.template = value
+			return True
+		return False
+
+	def parseArgs(self, args):
+		""" Parse the command line arguments after ``pysys make``. 
+		"""
+		try:
+			optlist, arguments = getopt.gnu_getopt(args, self.supportedArgs[0], self.supportedArgs[1])
+		except Exception:
+			sys.stderr.write("Error parsing command line arguments: %s\n" % (sys.exc_info()[1]))
+			sys.stderr.flush()
+			self.printUsage()
+			
+		self.template = None
+		self.testId = None
+
+		for option, value in optlist:
+			if option in ("-h", "--help"):
+				self.printUsage()
+
+			elif not self.parseArg(option, value):
+				sys.stderr.write("Unknown option: %s\n"%option)
+				sys.exit(1)
+
+
+		if arguments == []:
+			print("A valid string test id must be supplied")
+			self.printUsage(1)
+		else:
+			self.testId = arguments[-1]
+
+		return self.testId
+
+
+	def makeTest(self):
+		"""
+		Uses the previously parsed arguments to create a new test (or related asset) on disk. 
+		
+		Can be overridden if additional post-processing steps are required for some templates. 
+		"""
+		templates = self.getTemplates()
+		if self.template:
+			tmp = [t for t in templates if t['name'] == self.template]
+			if len(tmp) != 1: 
+				raise UserError('Cannot find a template named "%s"; available templates for this project and directory are: %s'%(self.template, ', '.join(t['name'] for t in templates)))
+			tmp = tmp[0]
+		else:
+			tmp = templates[0] # pick the default
+		
+		log.debug('Using template: \n%s', json.dumps(tmp, indent='  '))
+		dest = self.testId
+		print("Creating %s using template %s ..." % (dest, tmp['name']))
+		# TODO: make sure we don't overwrite existing pysysdirconfig.xml etc
+		assert tmp['isTest'] # not implemented for other asset types yet
+		
+		if os.path.exists(dest): raise UserError('Cannot create %s as it already exists'%dest)
+
+		# TODO: implement replace (for files but not dirs)
+		mkdir(dest)
+		for d in tmp['mkdir']:	
+			mkdir(dest+os.sep+d)
+		for c in tmp['copy']:
+			target = dest+os.sep+os.path.basename(c)
+			if os.path.exists(target):
+				raise Exception('Cannot copy to %s as it already exists'%target)
+			if os.path.isdir(c):
+				shutil.copytree(c, target)
+			else:
+				shutil.copy2(c, target)
+				print("  Created %s"%target)
+		
+		return dest
+
+class LegacyConsoleMakeTestHelper(object):
+	"""
+	The legacy and deprecated implementation of ``pysys.py make`` - used only by existing custom subclasses.
+	
+	Also known by its alias ``ConsoleMakeTestHelper``. 
 	"""
 
 	TEST_TEMPLATE = '''import pysys
@@ -175,24 +394,7 @@ class %s(%s):
 			os.makedirs(os.path.join(self.testdir, self.testId, reference))
 			log.info("Created directory %s " % os.path.join(self.testdir, self.testId, reference))
 			with openfile(os.path.join(self.testdir, self.testId, descriptor), "w", encoding='utf-8') as descriptor_fp:
-				if self.type != 'auto' or group or testclass != DEFAULT_TESTCLASS or module != DEFAULT_MODULE:
-					# legacy mode for existing subclassers
-					descriptor_fp.write(self.DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
-				else:
-					descriptor_fp.write("""<?xml version="1.0" encoding="utf-8"?>
-<pysystest>
-	<description title=""/> <!-- TODO: always provide a title to summarize what area the test covers -->
-
-	<groups inherit="true" groups=""/>
-
-	<modes inherit="true">
-	</modes>
-
-	<!-- To skip the test, uncomment this (and provide a reason): <skipped reason=""/> -->
-	<!-- To provide a bug/story/requirement id for requirements tracing, uncomment this: <requirement id=""/> -->
-</pysystest>
-""")
-
+				descriptor_fp.write(self.DESCRIPTOR_TEMPLATE %(self.type, group, testclass, module))
 			log.info("Created descriptor %s " % os.path.join(self.testdir, self.testId, descriptor))
 			if not module.endswith('.py'): module += '.py'
 			testclass_fp = openfile(os.path.join(self.testdir, self.testId, module), "w")
@@ -203,6 +405,9 @@ class %s(%s):
 			testclass_fp.close()
 			log.info("Created test class module %s " % os.path.join(self.testdir, self.testId, module))	
 
+ConsoleMakeTestHelper = LegacyConsoleMakeTestHelper
+
+
 def makeTest(args):
 	Project.findAndLoadProject()
 
@@ -210,6 +415,11 @@ def makeTest(args):
 	module = importlib.import_module('.'.join(cls[:-1]))
 	maker = getattr(module, cls[-1])("make")
 
-	maker.parseArgs(args)
-	maker.makeTest()
+	try:
+		maker.parseArgs(args)
+		maker.makeTest()
+	except UserError as e:
+		sys.stdout.flush()
+		sys.stderr.write("ERROR: %s\n" % e)
+		sys.exit(10)
 

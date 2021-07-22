@@ -225,7 +225,7 @@ DEFAULT_INPUT = 'Input'
 DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
 DEFAULT_RUNNER = 'pysys.baserunner.BaseRunner'
-DEFAULT_MAKER = 'pysys.launcher.console.ConsoleMakeTestHelper'
+DEFAULT_MAKER = 'pysys.launcher.console.DefaultTestMaker'
 DEFAULT_STYLESHEET = None # deprecated
 DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_OUTDIR = 'win' if PLATFORM=='win32' else PLATFORM # this constant is not currently public API

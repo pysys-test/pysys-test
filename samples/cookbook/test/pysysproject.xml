@@ -26,6 +26,7 @@
 			* ``${startDate}``   - The date that this test run was started, in a form that can be used in filenames. 
 			* ``${startTime}``   - The (local) time that this test run was started, in a form that can be used in filenames. 
 			* ``${hostname}``    - The (non-qualified) name of the host this is running on, suitable for including in filenames. 
+			* ``${username}``    - The (lowercase) username of the account executing PySys. 
 			* ``${/}``           - The backslash or forward-slash character used on this OS. 
  		
  		Python expressions can be evaluated using ``${eval: ...}`` (with access to other project properties 
