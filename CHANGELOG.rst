@@ -185,6 +185,8 @@ Line mapper/text manipulation improvements
   results in a `BaseTest.assertDiff`. 
 - Added `pysys.mappers.applyMappers` which makes it easy to add mapper functionality to your own methods. 
 - Added a ``mappers=`` argument to `BaseTest.logFileContents` and `BaseTest.assertLineCount`.
+- Added a ``startAfter=`` argument to `pysys.mappers.IncludeLinesBetween`, as an alternative to the 
+  existing ``startAt=``. 
 
 Test descriptor features
 ------------------------

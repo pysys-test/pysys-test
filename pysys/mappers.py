@@ -134,6 +134,9 @@ class IncludeLinesBetween(object):
 	
 	:param str|callable[str]->bool startAt: If it matches then the current line and subsequent lines are included 
 		(not filtered out). If not specified, lines from the start of the file onwards are matched. 
+
+	:param str|callable[str]->bool startAfter: If it matches then the subsequent lines are included 
+		(not filtered out). If not specified, lines from the start of the file onwards are matched. 
 		
 	:param str|callable[str]->bool stopAfter: If it matches then lines after the current one are filtered out 
 		(unless/until a line matching startAt is found). Includes the stop line. 
@@ -148,6 +151,9 @@ class IncludeLinesBetween(object):
 	>>> _mapperUnitTest( IncludeLinesBetween(startAt='start.*'), 'a|start line|b|c').replace('\\n','')
 	'start line|b|c'
 
+	>>> _mapperUnitTest( IncludeLinesBetween(startAfter='start.*'), 'a|start line|b|c').replace('\\n','')
+	'b|c'
+
 	>>> _mapperUnitTest( IncludeLinesBetween(startAt=lambda l: l.startswith('start')), 'a|start line|b|c').replace('\\n','')
 	'start line|b|c'
 
@@ -157,16 +163,22 @@ class IncludeLinesBetween(object):
 	>>> _mapperUnitTest( IncludeLinesBetween(stopBefore='stopbefore.*'), 'a|b|stopbefore|c')
 	'a\\n|b\\n'
 
+	.. versionchanged:: 2.0 Added startAfter
+
 	"""
-	def __init__(self, startAt=None, stopAfter=None, stopBefore=None):
+	def __init__(self, startAt=None, stopAfter=None, startAfter=None, stopBefore=None):
 		self.__str = 'IncludeLinesBetween(%s)'%', '.join('%s=%s'%(k, repr(v)) for (k,v) in {
 			'startAt':startAt,
+			'startAfter':startAfter,
 			'stopAfter':stopAfter,
 			'stopBefore':stopBefore,
 		}.items() if v is not None)
 	
 		if startAt is not None and not callable(startAt): self.startAt = _createRegexMatchFunction(startAt)
 		else: self.startAt = startAt
+
+		if startAfter is not None and not callable(startAfter): self.startAfter = _createRegexMatchFunction(startAfter)
+		else: self.startAfter = startAfter
 			
 		if stopAfter is not None and not callable(stopAfter): self.stopAfter = _createRegexMatchFunction(stopAfter)
 		else: self.stopAfter = stopAfter or (lambda line: False)
@@ -174,13 +186,13 @@ class IncludeLinesBetween(object):
 		if stopBefore is not None and not callable(stopBefore): self.stopBefore = _createRegexMatchFunction(stopBefore)
 		else: self.stopBefore = stopBefore or (lambda line: False)
 		
-		self.__including = self.startAt is None
+		self.__including = self.startAt is None and self.startAfter is None
 
 	def __repr__(self): return self.__str
 
 	def fileStarted(self, srcPath, destPath, srcFile, destFile):
 		# reset every time we start a new file
-		self.__including = self.startAt is None
+		self.__including = self.startAt is None and self.startAfter is None
 
 	def __call__(self, line):
 		if self.__including:
@@ -194,6 +206,9 @@ class IncludeLinesBetween(object):
 			if self.startAt is not None and self.startAt(line):
 				self.__including = True
 				return line
+			if self.startAfter is not None and self.startAfter(line):
+				self.__including = True
+				return None
 		return None
 
 
@@ -257,7 +272,7 @@ class JoinLines(object):
 		
 		self.__str = 'JoinLines(%s)'%', '.join('%s=%s'%(k, repr(v)) for (k,v) in {
 			'startAt':startAt,
-			'stopAfter':stopAfter,
+			'continueWhile':continueWhile,
 			'stopAfter':stopAfter,
 			'stopBefore':stopBefore,
 			'combiner':combiner,
