@@ -203,6 +203,41 @@ def deletefile(path, retries=1, ignore_errors=False):
 		log.debug('Retrying file deletion of "%s" %d times after %s', path, retries, ex)
 		deletefile(path, retries = retries-1, ignore_errors=ignore_errors)
 
+def listDirContents(path):
+	"""
+	Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable 
+	for diffing. 
+	
+	The contents are returned in a normalized form suitable for diffing: relative to the scanned path, with forward 
+	slashes on all platforms, a trailing slash for directories, and sorted to ensure deterministic results. 
+	Symbolic links are not searched. 
+	
+	For example this can be used with `pysys.basetest.BaseTest.assertDiff` like this::
+	
+		self.assertDiff(
+			self.write_text('MyDir-contents.txt', 
+				'\n'.join(pysys.utils.fileutils.listDirContents(self.output+'/MyDir'))))
+	
+	:param str path: The absolute path to search.
+	:return: A list of strings with the relative paths found, e.g. ``["mysubdir/myfile.txt", "mysubdir/mysubsubdir/"]``. 
+	
+	.. versionadded: 2.0
+	"""
+	assert os.path.isabs(path), 'Must specify an absolute path: %r'%path
+	path = toLongPathSafe(path)
+	stripchars = len(path)+1
+	
+	def listRecursively(d):
+		result = []
+		with os.scandir(d) as it:
+			items = sorted((x for x in it), key=lambda x: (x.is_dir(follow_symlinks=False), x.name))
+			for x in items:
+				yield (x.path[stripchars:].replace('\\', '/')+('/' if x.is_dir(follow_symlinks=False) else ''))
+				if x.is_dir(follow_symlinks=False):
+					yield from listRecursively(x.path)
+
+	return list(listRecursively(path))
+
 def loadProperties(path, encoding='utf-8-sig'):
 	"""
 	Reads keys and values from the specified ``.properties`` file. 
