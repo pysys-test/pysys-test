@@ -236,8 +236,10 @@ The most significant are:
     fails). 
   - Added `pysys.constants.PREFERRED_ENCODING` which should be used in testcases instead of 
     ``locale.getpreferredencoding()`` to avoid thread-safety issues. 
-  - Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` fails, for both 
-    primitive values and list/dict values. 
+  - Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` or 
+    `BaseTest.assertThatGrep` fail, for both primitive values and list/dict values.
+  - Added `pysys.utils.fileutils.listDirContents` for creating a normalized list of the files/directories contained 
+    recursively within a specified directory. This is useful as input for assertions. 
   - Changed `pysys.writer.outcomes.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
     attribute, and changed the failure node to be::
     
