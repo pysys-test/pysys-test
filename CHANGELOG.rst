@@ -314,7 +314,9 @@ affect many users:
   - The ``pysys.xml`` package has been renamed to `pysys.config` to provide a more logical home for test descriptors 
     and project configuration. Aliases exist so you nothing should break unless you're explicitly referencing 
     or adding to the ``pysys/xml/templates`` directory. However it is recommended to find/rename your framework 
-    extensions to use the new name as the ``pysys.xml`` module name is deprecated. 
+    extensions to use the new name as the ``pysys.xml`` module name is deprecated and will be removed in a future 
+    release. 
+  - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. 
   - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
 
 

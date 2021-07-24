@@ -17,6 +17,8 @@
 
 """
 Unpacking one or more compressed files. 
+
+Deprecated - use `pysys.basetest.BaseTest.unpackArchive` instead. 
 """
 
 from __future__ import print_function
