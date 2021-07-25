@@ -21,7 +21,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.copy(self.input, 'tests')
 		self.pysys.pysys('make-invalid-char', ['make', 'MyTest-WithHyphen'], workingDir=self.output+'/tests', expectedExitStatus='!=0')
 		self.logFileContents('make-invalid-char.err')
-		self.pysys.pysys('make-invalid-char-override', ['make', 'MyTest-WithHyphenOverride'], workingDir=self.output+'/tests', environs={'PYSYS_MAKE_SKIP_VALIDATION':'true'})
+		self.pysys.pysys('make-invalid-char-override', ['make', 'MyTest-WithHyphenOverride', '--skipValidation'], workingDir=self.output+'/tests')
 		self.pysys.pysys('make-suffix-no-prefixes', ['make'], workingDir=self.output+'/tests', expectedExitStatus='!=0')
 		
 		self.mkdir('tests/MyPrefix_04')
@@ -40,13 +40,13 @@ class PySysTest(pysys.basetest.BaseTest):
 		
 	def validate(self):
 		self.assertThatGrep('make-invalid-char.err', '.*',
-			expected='Test id "MyTest-WithHyphen" was rejected by validator: Test ids containing - are not permitted (if needed, set environment PYSYS_MAKE_SKIP_VALIDATION=true to disable checking)')
+			expected='Test id "MyTest-WithHyphen" was rejected by validator: Test ids containing - are not permitted (if needed, use --skipValidation to disable checking)')
 
 		self.assertThatGrep('make-suffix-no-prefixes.err', '.*', 
 			expected='Please specify the test id to be created.')
 
 		self.assertThatGrep('make-invalid-numeric-suffix.err', '.*', 
-			expected='Test id "MyPrefix_05" was rejected by validator: This test id conflicts with an existing test (if needed, set environment PYSYS_MAKE_SKIP_VALIDATION=true to disable checking)')
+			expected='Test id "MyPrefix_05" was rejected by validator: This test id conflicts with an existing test (if needed, use --skipValidation to disable checking)')
 
 		self.assertThatGrep('make-multiple-prefixes.err', '.*', 
 			expected='When using numeric test ids you should use the same prefix for all tests in each directory, but multiple prefixes were found: MyOtherPrefix_, MyPrefix_')

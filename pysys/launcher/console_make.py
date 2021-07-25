@@ -65,6 +65,7 @@ class DefaultTestMaker(object):
 		self.name = name
 		self.parentDir = os.getcwd()
 		self.project = Project.getInstance()
+		self.skipValidation = False
 
 	def getTemplates(self):
 		project = self.project
@@ -145,14 +146,16 @@ class DefaultTestMaker(object):
 		log.debug('Loaded templates: \n%s', json.dumps(templates, indent='  '))
 		return templates
 		
-	supportedArgs = ('ht:', ['help', 'template='])
+	supportedArgs = ('ht:s', ['help', 'template=', 'skipValidation'])
 
 	def printOptions(self, **kwargs):
 		#######                                                                                                                        |
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
-		print("\nUsage: %s %s [option]+ [TEST_DIR_NAME]" % (_PYSYS_SCRIPT_NAME, self.name))
+		print("\nUsage: %s %s [options]* [TEST_DIR_NAME]" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes:")
 		print("       -t | --template=NAME        use the named template (default is to use the first)")
+		if self.__class__ != DefaultTestMaker: # we know there is no validation anyway in this class, so only show this option for subclasses
+			print("       -s | --skipValidation       skip the usual (typically remote) validation of the proposed test id")
 		print("       -h | --help                 print this message")
 
 
@@ -170,7 +173,7 @@ class DefaultTestMaker(object):
 	def printUsage(self, **kwargs):
 		""" Print help info and exit. """
 		#######                                                                                                                        |
-		print("\nPySys System Test Framework (version %s): Makes PySys tests (and other assets) using configurable templates" % __version__) 
+		print("\nPySys System Test Framework (version %s): Makes PySys tests using configurable templates" % __version__) 
 		self.printOptions()
 		print("")
 		print("TEST_DIR_NAME is the test directory to be created, which should consist of letters, numbers and underscores, ")
@@ -185,6 +188,9 @@ class DefaultTestMaker(object):
 		if option in ['-t', '--template']:
 			self.template = value
 			return True
+		if option in ['-s', '--skipValidation']:
+			self.skipValidation = True
+			return True
 		return False
 
 	def validateTestId(self, prefix, numericSuffix, **kwargs):
@@ -192,11 +198,13 @@ class DefaultTestMaker(object):
 		This method can be overridden to provide customized validation of a proposed new test directory name, for example 
 		to prevent clashes with existing tests committed to version control.
 		
+		The default implementation of this method does nothing. 
+		
 		If validation fails, an exception should be thrown. The method can propose a new numericSuffix 
 		that will be used instead (only if auto-generating the test id) by raising an 
 		`ProposeNewTestIdNumericSuffixException` exception. 
 		
-		Set the environment variable ``PYSYS_MAKE_SKIP_VALIDATION=true`` to disable this checking, for example when 
+		The command line option ``--skipValidation`` can be used to disable this checking, for example when 
 		disconnected from the network. 
 		
 		:param str prefix: The proposed test id, excluding any numeric suffix.
@@ -222,8 +230,6 @@ class DefaultTestMaker(object):
 		self.template = None
 		self.dest = None
 		
-		skipValidation = os.getenv('PYSYS_MAKE_SKIP_VALIDATION','').lower()=='true'
-
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage()
@@ -233,7 +239,8 @@ class DefaultTestMaker(object):
 				sys.stderr.write("Unknown option: %s\n"%option)
 				sys.exit(1)
 
-		if skipValidation: print('No test id validation will be performed as PYSYS_MAKE_SKIP_VALIDATION=true')
+		skipValidation = getattr(self, 'skipValidation', False)
+		if skipValidation: print('No test id validation will be performed')
 
 		splitNumericSuffix = re.compile('([^_].+_)([0-9][0-9]+)$')
 
@@ -248,7 +255,7 @@ class DefaultTestMaker(object):
 					else:
 						self.validateTestId(os.path.basename(self.dest), '')
 			except Exception as ex:
-				sys.stderr.write(f'Test id "{self.dest}" was rejected by validator: {ex} (if needed, set environment PYSYS_MAKE_SKIP_VALIDATION=true to disable checking)\n')
+				sys.stderr.write(f'Test id "{self.dest}" was rejected by validator: {ex} (if needed, use --skipValidation to disable checking)\n')
 				sys.exit(1)
 
 		else:
@@ -273,7 +280,7 @@ class DefaultTestMaker(object):
 					except ProposeNewTestIdNumericSuffixException as ex:
 						newNum = int(ex.newNumericSuffix)
 					except Exception as ex:
-						sys.stderr.write(f'Auto-generated id "{self.dest}" was rejected by validator: {ex} (if needed, set environment PYSYS_MAKE_SKIP_VALIDATION=true to disable checking)\n')
+						sys.stderr.write(f'Auto-generated id "{self.dest}" was rejected by validator: {ex} (if needed, use --skipValidation to disable checking)\n')
 						sys.exit(1)
 
 					self.dest = prefix+f'{int(newNum):0{pad}}'
