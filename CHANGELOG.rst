@@ -104,6 +104,9 @@ templates for the current directory using ``--help``.
 
 It is possible to subclass the `pysys.launcher.console_make.DefaultTestMaker` responsible for this logic if needed. 
 
+By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
+just set the new ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
+
 Version changes
 ---------------
 - Removed support for Python 2 and 3.5, which are now end-of-life. 

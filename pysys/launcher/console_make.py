@@ -240,7 +240,7 @@ class DefaultTestMaker(object):
 					self.replaceInFile(p.path, replace)
 
 	def replaceInFile(self, file, replace):
-		if not replace: return
+		if (not replace) and not file.endswith('.py'): return
 	
 		# we don't know what encoding the file is in (or even if it's a text file), so read/write using bytes
 		with open(file, 'rb') as f:
@@ -248,6 +248,11 @@ class DefaultTestMaker(object):
 
 		for regex, repl in replace:
 			contents = re.sub(regex, repl, contents)
+		
+		if file.endswith('.py') and self.project.getProperty('pythonIndentationSpacesPerTab', ''):
+			spaces = self.project.getProperty('pythonIndentationSpacesPerTab', '')
+			if spaces.lower() == 'true': spaces = '    '
+			contents = re.sub(b'\n(\t+)', lambda m: len(m.group(1))*spaces.encode('ascii'), contents)
 
 		with open(file, 'wb') as f:
 			f.write(contents)

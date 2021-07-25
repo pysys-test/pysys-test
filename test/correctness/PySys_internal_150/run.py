@@ -86,6 +86,8 @@ class PySysTest(BaseTest):
 		# this shows we replaced the user of the original committed test (mememe) with the "current" user
 		self.assertThatGrep('NewTest_ExistingTest/pysystest.xml', 'This test was created by username="([^"]*)"', expected='pysystestuser')
 		self.assertThatGrep('NewTest_ExistingTest/pysystest.xml', 'This test was created .* on date="(.*)"', 'value != "1999-12-31"')
+
+		self.assertThatGrep('NewTest_Default/run.py', '(.*)pass', expected=2*4*' ') # converted spaces to tabs
 		
 		self.logFileContents('pysys-run-help.out', tail=True)
 		self.logFileContents('pysys-run-tests.out', tail=False)	

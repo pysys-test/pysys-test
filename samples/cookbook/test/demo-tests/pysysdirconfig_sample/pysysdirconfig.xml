@@ -40,6 +40,10 @@
 	      @@DATE@@ -> @{DATE} (the current date)
 	      @@USERNAME@@ -> @{USERNAME} (the currently logged in user)
 	      @@DIR_NAME@@ -> @{DIR_NAME} (the basename of the directory being created, typically the test id)
+	
+	By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
+	just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
+
 	-->
 	<maker-template name="perf-test" description="a simple performance test using MyPerfTool" 
 		copy="${pysysTemplatesDir}/test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
