@@ -429,7 +429,7 @@ class _XMLDescriptorParser(object):
 				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
 		cls, pymodule = self.getClassDetails()
 		
-		if pymodule is None: # default setting (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
+		if pymodule is None and self.istest: # default setting (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
 			pymodule = os.path.basename(self.file) if self.file.endswith('.py') else DEFAULT_MODULE # else run.py
 		
 		

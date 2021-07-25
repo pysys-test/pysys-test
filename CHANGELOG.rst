@@ -22,7 +22,8 @@ Highlights from this release are:
 - Removal of Python 2 and 3.5 support, and addition of Python 3.9. 
 - Some big extensions to the concept of "modes", allowing for more powerful configuration and use, including 
   multi-dimensional modes. 
-- A new template-based test maker, allowing easy configuration of how new tests are created on a per-directory basis. 
+- A new template-based test maker, allowing easy configuration of how new tests are created on a per-directory basis, 
+  and auto-generation of numeric test ids. 
 - Some useful improvements to the `pysys.mappers` API, for transforming text files during copy and grep operations. 
 - More powerful configuration options available for project and test descriptor configuration files. 
 - A slew of minor features, many based on end-user requests. Also some bug fixes. 
@@ -102,10 +103,18 @@ When creating tests using ``pysys make``, by default the first template (from th
 is selected, but you can also specify any other template by name using the ``-t`` option, and get a list of available 
 templates for the current directory using ``--help``. 
 
+If you are using numeric suffixes (and assuming you don't have different prefixes in the same directory - not 
+recommended!) you can now omit the test id argument and PySys will automatically pick one by incrementing the largest 
+existing numeric id. 
+
 It is possible to subclass the `pysys.launcher.console_make.DefaultTestMaker` responsible for this logic if needed. 
+The main reason to do that is to provide a `pysys.launcher.console_make.DefaultTestMaker.validateTestId` method 
+to check that new test ids do not conflict with others used by others in a remote version control system (to avoid 
+merge conflicts). 
 
 By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
 just set the new ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
+
 
 Version changes
 ---------------

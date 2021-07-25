@@ -118,8 +118,10 @@ class DefaultTestMaker(object):
 			
 			return t
 		
-		# start with the built-ins
+		# start with the built-ins and project
 		templates = [expandAndValidateTemplate(t, project._defaultDirConfig) for t in self.__PYSYS_DEFAULT_TEMPLATES]
+		if project._defaultDirConfig:
+			templates = [expandAndValidateTemplate(t, project._defaultDirConfig) for t in project._defaultDirConfig._makeTestTemplates]+templates
 		
 		parentDirDefaults = None
 		for i in range(len(searchdirsuffix)+1): # up to AND including dir
@@ -145,16 +147,13 @@ class DefaultTestMaker(object):
 		
 	supportedArgs = ('ht:', ['help', 'template='])
 
-	def printOptions(self):
+	def printOptions(self, **kwargs):
 		#######                                                                                                                        |
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
-		print("\nUsage: %s %s [option]+ TEST_DIR_NAME" % (_PYSYS_SCRIPT_NAME, self.name))
+		print("\nUsage: %s %s [option]+ [TEST_DIR_NAME]" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes:")
 		print("       -t | --template=NAME        use the named template (default is to use the first)")
 		print("       -h | --help                 print this message")
-		print("")
-		print("TEST_DIR_NAME is the test directory to be created, which should consist of letters, numbers and underscores, ")
-		print("e.g. MyApp_perf_001 ('numeric' style) or InvalidFooBarProducesError ('test that XXX' long string style).")
 
 
 	def printAvailableTemplates(self):
@@ -168,11 +167,18 @@ class DefaultTestMaker(object):
 			print("")
 			print("   (more customized templates for new tests in this project/directory can be configured using pysysdirconfig)")
 
-	def printUsage(self):
+	def printUsage(self, **kwargs):
 		""" Print help info and exit. """
 		#######                                                                                                                        |
 		print("\nPySys System Test Framework (version %s): Makes PySys tests (and other assets) using configurable templates" % __version__) 
 		self.printOptions()
+		print("")
+		print("TEST_DIR_NAME is the test directory to be created, which should consist of letters, numbers and underscores, ")
+		print("e.g. MyApp_perf_001 ('numeric' style) or InvalidFooBarProducesError ('test that XXX' long string style).")
+		print("")
+		print("If TEST_DIR_NAME is not specified and existing tests follow the pattern PREFIX_NUMBER PySys will ")
+		print("auto-generate a numeric test id using a free number. ")
+
 		self.printAvailableTemplates()
 
 	def parseArg(self, option, value):
@@ -180,6 +186,27 @@ class DefaultTestMaker(object):
 			self.template = value
 			return True
 		return False
+
+	def validateTestId(self, prefix, numericSuffix, **kwargs):
+		"""
+		This method can be overridden to provide customized validation of a proposed new test directory name, for example 
+		to prevent clashes with existing tests committed to version control.
+		
+		If validation fails, an exception should be thrown. The method can propose a new numericSuffix 
+		that will be used instead (only if auto-generating the test id) by raising an 
+		`ProposeNewTestIdNumericSuffixException` exception. 
+		
+		Set the environment variable ``PYSYS_MAKE_SKIP_VALIDATION=true`` to disable this checking, for example when 
+		disconnected from the network. 
+		
+		:param str prefix: The proposed test id, excluding any numeric suffix.
+		:param str numericSuffix: The numeric suffix (including padding), if any, or '' if this is not a numeric test id. 
+		
+		:raises ProposeNewTestIdNumericSuffixException: If an alternative numeric suffix would be acceptable. This is used 
+			when auto-generating test ids. 
+		:raises Exception: If the specific test id is not acceptable. 
+		"""
+		pass
 
 	def parseArgs(self, args):
 		""" Parse the command line arguments after ``pysys make``. 
@@ -194,6 +221,8 @@ class DefaultTestMaker(object):
 			
 		self.template = None
 		self.dest = None
+		
+		skipValidation = os.getenv('PYSYS_MAKE_SKIP_VALIDATION','').lower()=='true'
 
 		for option, value in optlist:
 			if option in ("-h", "--help"):
@@ -204,17 +233,59 @@ class DefaultTestMaker(object):
 				sys.stderr.write("Unknown option: %s\n"%option)
 				sys.exit(1)
 
+		if skipValidation: print('No test id validation will be performed as PYSYS_MAKE_SKIP_VALIDATION=true')
 
-		if len(arguments) != 1:
-			sys.stderr.write("Please specify the test id/destination name")
+		splitNumericSuffix = re.compile('([^_].+_)([0-9][0-9]+)$')
+
+		if len(arguments) == 1:
+			self.dest = arguments[0]
+			
+			try:
+				if not skipValidation:
+					match = splitNumericSuffix.match(os.path.basename(self.dest))
+					if match:
+						self.validateTestId(match.group(1), match.group(2))
+					else:
+						self.validateTestId(os.path.basename(self.dest), '')
+			except Exception as ex:
+				sys.stderr.write(f'Test id "{self.dest}" was rejected by validator: {ex} (if needed, set environment PYSYS_MAKE_SKIP_VALIDATION=true to disable checking)\n')
+				sys.exit(1)
+
+		else:
+			if len(arguments) == 0: # try to auto-generate
+				with os.scandir(self.parentDir) as it:
+					existingtests = [splitNumericSuffix.match(x.name) for x in it if x.is_dir()]
+				existingtests = sorted([x for x in existingtests if x], key=lambda x: int(x.group(2)))
+				existingprefixes = sorted(list(set([x.group(1) for x in existingtests])))
+				if existingprefixes: # if not, fall back to main error handler
+					if len(existingprefixes) > 1:
+						sys.stderr.write("When using numeric test ids you should use the same prefix for all tests in each directory, but multiple prefixes were found: %s\n"%', '.join(existingprefixes))
+						sys.exit(1)
+					prefix, highestNum = existingprefixes[0], existingtests[-1].group(2)
+					newNum = int(highestNum)+1
+					pad = len(highestNum)
+					
+					self.dest = prefix+f'{int(newNum):0{pad}}'
+					
+					try:
+						if not skipValidation:
+							self.validateTestId(prefix, f'{newNum:0{pad}}')
+					except ProposeNewTestIdNumericSuffixException as ex:
+						newNum = int(ex.newNumericSuffix)
+					except Exception as ex:
+						sys.stderr.write(f'Auto-generated id "{self.dest}" was rejected by validator: {ex} (if needed, set environment PYSYS_MAKE_SKIP_VALIDATION=true to disable checking)\n')
+						sys.exit(1)
+
+					self.dest = prefix+f'{int(newNum):0{pad}}'
+					return
+					
+			# if we didn't auto-generate a numeric one, fall back to error handler
+				
+			sys.stderr.write("Please specify the test id to be created.\n")
 			self.printUsage()
 			sys.exit(1)
-		else:
-			self.dest = arguments[0]
 
-		return self.dest
-
-	def copy(self, source, dest, replace): 
+	def copy(self, source, dest, replace, **kwargs): 
 		"""
 		Copies the specified source file/dir to the specified dest file/dir. 
 		
@@ -309,7 +380,7 @@ class DefaultTestMaker(object):
 			if os.path.exists(target):
 				raise Exception('Cannot copy to %s as it already exists'%target)
 			self.copy(c, target, replace)
-			print("  Copied %s%s"%(os.path.basename(c), os.sep if os.path.isdir(target) else ''))
+			print("  Copied %s%s"%(os.path.basename(c), os.sep+'*' if os.path.isdir(target) else ''))
 
 		for d in tmp['mkdir']:	
 			if os.path.isabs(d):
@@ -318,6 +389,19 @@ class DefaultTestMaker(object):
 				mkdir(dest+os.sep+d)
 
 		return dest
+
+class ProposeNewTestIdNumericSuffixException(Exception):
+	"""
+	This exception should be thrown by `DefaultTestMaker.validateTestId` if the specific test id cannot be used but 
+	the validator can propose an acceptable numeric suffix to use instead, typically with a higher number to avoid 
+	conflicts with tests committed to version control elsewhere. 
+	
+	:param str reason: The error message to use if not auto-generating a new id. 
+	:param int newNumericSuffix: The new numeric suffix 
+	"""
+	def __init__(self, reason, newNumericSuffix):
+		super().__init__(reason)
+		self.newNumericSuffix = newNumericSuffix
 
 class LegacyConsoleMakeTestHelper(object):
 	"""

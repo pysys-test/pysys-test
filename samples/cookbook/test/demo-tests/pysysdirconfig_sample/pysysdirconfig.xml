@@ -26,8 +26,9 @@
 	    when running "pysys make -h". 
 	  - copy: A comma-separated list of files and directories to be copied into the test directory, supporting ``*`` 
 	    globs. Either specify a path relative to the directory containing this XML file, or an absolute path using 
-	    project properties. To use files from the default PySys template use "${pysysTemplatesDir}/default-test/*".
-	    You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file, 
+	    project properties. To use files from the default PySys template use "${pysysTemplatesDir}/test/*".
+	    You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file
+	    (with a ``.pysysignore`` file to stop them being treated as test cases), 
 	    or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
 	  - mkdir: By default empty directories are created for the configured input, output and reference directories.  
 	    Specify this attribute to define explicitly which empty directories should be created. 
