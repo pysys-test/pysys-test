@@ -11,8 +11,13 @@ class PySysTest(BaseTest):
 
 	def execute(self):
 		if sys.version_info[0:2] < tuple([3,6]): self.skipTest('Samples work on Python 3.6+ only')
-		
+
 		sampledir = self.project.testRootDir+'/../samples/cookbook'
+
+		self.pysys.pysys('make-help', ['make', '-h'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
+		self.pysys.pysys('make-default', ['make', self.output+'/NewTest_Default'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
+		self.pysys.pysys('make-existing-foobar', ['make', '--template=foobar-test', self.output+'/NewTest_ExistingTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
+
 		def pysys(name, args, **kwargs):
 			if args[0] == 'run': args = args+['-o', self.output+'/'+name]
 			runPySys(self, name, args, workingDir=sampledir+'/test', 
@@ -75,7 +80,16 @@ class PySysTest(BaseTest):
 			) else None,
 			pysys.mappers.RegexReplace(' [^ ]+pysys-extensions', ' <rootdir>/pysys-extensions')]))
 		
+		# Test making
+		self.assertDiff(self.write_text('NewTest_Default-files.txt', '\n'.join(pysys.utils.fileutils.listDirContents(self.output+'/NewTest_Default'))))
+		self.assertDiff(self.write_text('NewTest_ExistingTest-files.txt', '\n'.join(pysys.utils.fileutils.listDirContents(self.output+'/NewTest_ExistingTest'))))
+		# this shows we replaced the user of the original committed test (mememe) with the "current" user
+		self.assertThatGrep('NewTest_ExistingTest/pysystest.xml', 'This test was created by username="([^"]*)"', expected='pysystestuser')
+		self.assertThatGrep('NewTest_ExistingTest/pysystest.xml', 'This test was created .* on date="(.*)"', 'value != "1999-12-31"')
+		
 		self.logFileContents('pysys-run-help.out', tail=True)
 		self.logFileContents('pysys-run-tests.out', tail=False)	
 		self.logFileContents('pysys-run-tests.out', tail=True, maxLines=50)
 		self.logFileContents('pysys-print.out', tail=True, maxLines=0)
+
+		self.logFileContents('make-help.out', tail=True, maxLines=0)

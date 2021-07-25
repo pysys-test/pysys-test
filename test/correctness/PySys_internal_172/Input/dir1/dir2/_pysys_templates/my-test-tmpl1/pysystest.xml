@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysystest>
-	<description title="My category - My title TODO"/>
+	<description title="Special character £"/>
+
+	<!--
+	Creation date is "@@DATE@@"
+	User is "@@USERNAME@@"
+	Test ID is "@@DIR_NAME@@"
+	-->
 
 	<groups inherit="true" groups=""/>
 

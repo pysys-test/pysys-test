@@ -336,7 +336,9 @@
 	~~~~~~~~~~~~~~~~~~~~~~~~
 	
 	A project file can contain a ``pysysdirconfig`` element to configure directory-level defaults that will apply to 
-	all test descriptors. See the :doc:`TestDescriptors` documentation for more information about the available options. 
+	all test descriptors. See the :doc:`TestDescriptors` documentation for more information about the available options, 
+	including how to customize how new tests are created using maker templates. 
+	
 	-->
 	<pysysdirconfig>
 		<data>

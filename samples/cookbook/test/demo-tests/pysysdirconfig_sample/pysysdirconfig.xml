@@ -1,11 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysysdirconfig>
-	<!-- This file provides default configuration for all tests under this directory. -->
+	<!-- This file provides default configuration for all tests under this directory. 
+	
+	Settings are also inherited from pysysdirconfig.xml files in parent directories 
+	(and the pysysdirconfig element from pysysproject.xml if present). 
+	-->
 
 	<!-- Specify a prefix to be added to the id of all tests under this directory.
 	This is in addition to any defined by individual tests. 
 	-->
 	<id-prefix>MyServer.Performance.</id-prefix>
+	
+	<!-- Specify the templates that can be used by "pysys make" when creating new tests. You may wish to provide 
+	project or directory-specific template(s) to simplify creating new tests for different purposes, and to encourage 
+	test creators to follow best practices (rather than just copying from a random test which may not be a good example). 
+	
+	Run "pysys make -h" to see which templates are available for creating tests under the current directory. 
+	
+	The first template (in the lowest-level pysysdirconfig.xml file) is used by default. 
+	
+	Each template is defined by:
+	
+	  - name: A short name used to select this template on the command line ("lowercase-with-hyphens" naming convention).
+	  - description: A brief summary describing what kind of test is created by this template. This text is displayed 
+	    when running "pysys make -h". 
+	  - copy: A comma-separated list of files and directories to be copied into the test directory, supporting ``*`` 
+	    globs. Either specify a path relative to the directory containing this XML file, or an absolute path using 
+	    project properties. To use files from the default PySys template use "${pysysTemplatesDir}/test/*".
+	    You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file, 
+	    or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
+	  - mkdir: By default empty directories are created for the configured input, output and reference directories.  
+	    Specify this attribute to define explicitly which empty directories should be created. 
+	  - replace: Specify any dynamic substitutions, which will be applied in all copied files. It is recommended to 
+	    use only ASCII-characters (but if any non-ASCII characters are provided they will be substituted as UTF-8). 
+	    The replacement "with" expressions can include project properties using ``${propname}`` syntax, or 
+	    the special strings ``@{DIR_NAME}``, ``@{USERNAME}``, ``@{DATE}``. If no replace elements are explicitly 
+	    provided, the following default replacements are used:
+	    
+	      @@DATE@@ -> @{DATE} (the current date)
+	      @@USERNAME@@ -> @{USERNAME} (the currently logged in user)
+	      @@DIR_NAME@@ -> @{DIR_NAME} (the basename of the directory being created, typically the test id)
+	-->
+	<maker-template name="perf-test" description="a simple performance test using MyPerfTool" 
+		copy="${pysysTemplatesDir}/test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+	
+	<maker-template name="foobar-test" description="an advanced test based on the simple foobar test" 
+		copy="./PySysDirConfigSample/*" 
+		mkdir="ExtraDir1, ExtraDir2"
+	>
+		<replace regex='date="\d\d\d\d-\d\d-\d\d"' with='date="@{DATE}"'/>
+		<replace regex='title="[^"]*"' with='title="Foobar - My new test title TODO"'/>
+		<replace regex='username="[^"]*"' with='username="@{USERNAME}"'/>
+		<replace regex='@@DIR_NAME@@' with='@{DIR_NAME}'/>
+	</maker-template>
 
 	<classification>
 		<!-- Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 

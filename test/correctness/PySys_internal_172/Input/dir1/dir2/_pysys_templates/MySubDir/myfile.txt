@@ -1,0 +1,2 @@
+This file is to check that a latin-1 encoded file is not corrupted by the replacement: title="Special character £"
+Substituted dirname=@@DIR_NAME@@, username=@@USERNAME@@. 

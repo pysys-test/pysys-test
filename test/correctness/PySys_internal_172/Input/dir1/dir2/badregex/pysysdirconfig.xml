@@ -1,0 +1,6 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+	<maker-template name="bad-tmpl" description="bad regex" copy="../_pysys_templates/my-test-tmpl1/*">
+		<replace regex="***bad regex" with="xxx"/>
+	</maker-template>
+</pysysdirconfig>

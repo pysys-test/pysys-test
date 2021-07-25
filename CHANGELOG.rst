@@ -22,6 +22,7 @@ Highlights from this release are:
 - Removal of Python 2 and 3.5 support, and addition of Python 3.9. 
 - Some big extensions to the concept of "modes", allowing for more powerful configuration and use, including 
   multi-dimensional modes. 
+- A new template-based test maker, allowing easy configuration of how new tests are created on a per-directory basis. 
 - Some useful improvements to the `pysys.mappers` API, for transforming text files during copy and grep operations. 
 - More powerful configuration options available for project and test descriptor configuration files. 
 - A slew of minor features, many based on end-user requests. Also some bug fixes. 
@@ -64,7 +65,44 @@ There is now a leaner, simpler recommended structure for newly created test desc
 
 New template-based test maker
 -----------------------------
-TODO: add doc for DefaultTestMaker, also mention deprecation of the old one
+There's now an easy way to create new tests specific to your project, or even multiple templates for individual 
+directories within your project. This helps to encourage teams to follow the latest best practice by ensuring new 
+tests are copying known good patterns, and also saves looking up how to do common things when creating new tests. 
+
+The ``pysys make`` command line comes with a ``pysys-default-test`` template for creating a simple PySys test, you can 
+add your own by adding ``<maker-template>`` elements to ``pysysdirconfig.xml`` in any directory under your project, 
+or to a ``<pysysdirconfig>`` element in your ``pysysproject.xml`` file. Here are a couple of examples (taken from 
+the cookbook sample)::
+
+	<pysysdirconfig>
+	
+		<maker-template name="perf-test" description="a simple performance test using MyPerfTool" 
+			copy="${pysysTemplatesDir}/test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+		
+		<maker-template name="foobar-test" description="an advanced test based on the simple foobar test" 
+			copy="./PySysDirConfigSample/*" 
+			mkdir="ExtraDir1, ExtraDir2"
+		>
+			<replace regex='date="\d\d\d\d-\d\d-\d\d"' with='date="@{DATE}"'/>
+			<replace regex='title="[^"]*"' with='title="Foobar - My new test title TODO"'/>
+			<replace regex='username="[^"]*"' with='username="@{USERNAME}"'/>
+			<replace regex='@@DIR_NAME@@' with='@{DIR_NAME}'/>
+		</maker-template>
+
+	</pysysdirconfig>
+	
+You can copy files from an absolute location such as somewhere under your project's ``${testRootDir}``, from the 
+PySys default template (if you just want to add files) using ``${pysysTemplatesDir}/test/*``, or from a path relative 
+to the XML file where the template is defined. This could be a ``_pysys_templates/`` directory alongside this XML file, 
+or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
+
+See :doc:`TestDescriptors` for more information about how to configure templates. 
+
+When creating tests using ``pysys make``, by default the first template (from the more specific ``pysysdirconfig.xml``) 
+is selected, but you can also specify any other template by name using the ``-t`` option, and get a list of available 
+templates for the current directory using ``--help``. 
+
+It is possible to subclass the `pysys.launcher.console_make.DefaultTestMaker` responsible for this logic if needed. 
 
 Version changes
 ---------------
@@ -313,6 +351,9 @@ affect many users:
     Although this should not immediately break existing applications, to avoid future breaking changes you should 
     update the signature of those methods if you override them to accept ``testobj`` and also any artibrary 
     ``**kwargs`` that may be added in future. 
+
+Deprecations:
+
   - The ``pysys.xml`` package has been renamed to `pysys.config` to provide a more logical home for test descriptors 
     and project configuration. Aliases exist so you nothing should break unless you're explicitly referencing 
     or adding to the ``pysys/xml/templates`` directory. However it is recommended to find/rename your framework 
@@ -320,6 +361,7 @@ affect many users:
     release. 
   - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. 
   - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
+  - The ``ConsoleMakeTestHelper`` class is now deprecated in favour of `pysys.launcher.console_maker.DefaultTestMaker`. 
 
 
 -------------------

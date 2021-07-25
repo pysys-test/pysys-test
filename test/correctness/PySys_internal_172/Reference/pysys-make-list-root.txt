@@ -1,3 +1,3 @@
    mytmpl-root-dir    - something from the root dir config
    pysys-default-test - a default empty PySys test
-   pysys-dir-config   - a pysysdirconfig.xml file for customizing the defaults for tests under this directory
+

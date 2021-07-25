@@ -38,7 +38,9 @@ from pysys.utils.fileutils import toLongPathSafe, pathexists, mkdir
 class DefaultTestMaker(object):
 	"""
 	The default implementation of ``pysys.py make``, which creates tests and other assets using templates configurable 
-	on a per-directory basis using ``pysysdirconfig.xml``.
+	on a per-directory basis using ``<maker-template>`` configuration in ``pysysdirconfig.xml`` (and project) files.
+	
+	See :doc:`../TestDescriptors` for information about how to configure templates. 
 	
 	A subclass can be specified in the project if further customization is required using::
 	
@@ -54,30 +56,18 @@ class DefaultTestMaker(object):
 		'copy': [
 			'${pysysTemplatesDir}/test/*',
 		],
-		'mkdir': [],
-		'replace':[
-			['@@CURRENT_USER@@', '${username}'],
-			['@@CURRENT_DATE@@', '${startDate}'], # also allow @TEST_ID@ e.g. testid
-		], 
-	},
-	{
-		'name': 'pysys-dir-config',
-		'description': 'a pysysdirconfig.xml file for customizing the defaults for tests under this directory',
-		'isTest':False,
-		'copy': [
-			'${pysysTemplatesDir}/dirconfig/pysysdirconfig.xml',
-		],
-		'mkdir': [],
-		'replace':[], 
+		'mkdir': None, # means create the defaults - Input/Output/Reference
+		'replace':[],  # empty means use defaults
 	},
 	]
 
 	def __init__(self, name="make", **kwargs):
 		self.name = name
 		self.parentDir = os.getcwd()
+		self.project = Project.getInstance()
 
 	def getTemplates(self):
-		project = Project.getInstance()
+		project = self.project
 		projectroot = os.path.normpath(os.path.dirname(project.projectFile))
 		dir = self.parentDir
 
@@ -94,30 +84,37 @@ class DefaultTestMaker(object):
 		DEFAULT_DESCRIPTOR = _XMLDescriptorParser.DEFAULT_DESCRIPTOR
 		
 		def expandAndValidateTemplate(t, defaults):
+			source = t.get('source', '<unknown source>')
 			if defaults is None: defaults = DEFAULT_DESCRIPTOR
 
 			if t['name'].lower().replace('_','').replace(' ','') != t['name']: raise UserError( # enforce this to make them easy to type on cmd line, and consistent
 				"Invalid template name \"%s\" - must be lowercase and use hyphens not underscores/spaces for separating words, in \"%s\""%(t['name'], source))
 		
 			source = t.get('source', None)
-			if t['isTest']: 
-				t['mkdir'].append(defaults.output)
-				t['mkdir'].append(defaults.input)
-				t['mkdir'].append(defaults.reference)
+			if t['mkdir'] is None: 
+				t['mkdir'] = [
+					defaults.output,
+					defaults.input, 
+					defaults.reference
+				]
+			
+			t['testOutputDir'] = defaults.output
 			
 			t['copy'] = [os.path.normpath(os.path.join(os.path.dirname(source) if source else '', project.expandProperties(x).strip())) for x in t['copy']]
 			copy = []
 			for c in t['copy']:
 				globbed = glob.glob(c)
 				if not globbed:
-					raise UserError('Cannot find any matching items for "%s" in maker template "%s" of %s'%(c, t['name'], source))
-				for c in globbed:
-					if not os.path.exists(c):
-						raise UserError('Cannot find file or directory "%s" in maker template "%s" of %s'%(c, t['name'], source))
-					copy.append(c)
+					raise UserError('Cannot find any file or directory "%s" in maker template "%s" of "%s"'%(c, t['name'], source))
+				copy.extend(globbed)
 			t['copy'] = copy
 			
 			t['replace'] = [(r1, project.expandProperties(r2)) for (r1,r2) in t['replace']]
+			for r1, r2 in t['replace']:
+				try:
+					re.compile(r1)
+				except Exception as ex:
+					raise UserError('Invalid replacement regular expression "%s" in maker template "%s" of "%s": %s'%(r1, t['name'], source, ex))
 			
 			return t
 		
@@ -146,26 +143,21 @@ class DefaultTestMaker(object):
 		log.debug('Loaded templates: \n%s', json.dumps(templates, indent='  '))
 		return templates
 		
-	supportedArgs = ('ht:', ['help', 'template:'])
+	supportedArgs = ('ht:', ['help', 'template='])
 
 	def printOptions(self):
 		#######                                                                                                                        |
 		_PYSYS_SCRIPT_NAME = os.path.basename(sys.argv[0]) if '__main__' not in sys.argv[0] else 'pysys.py'
-		print("\nUsage: %s %s [option]+ [-t TEMPLATE_NAME] [TESTID | -n]" % (_PYSYS_SCRIPT_NAME, self.name))
+		print("\nUsage: %s %s [option]+ TEST_DIR_NAME" % (_PYSYS_SCRIPT_NAME, self.name))
 		print("   where [option] includes:")
+		print("       -t | --template=NAME        use the named template (default is to use the first)")
 		print("       -h | --help                 print this message")
-		# TODO: add -n - autogenerates. 
 		print("")
-		print("   and where TESTID is the id of the new test which should consist of letters, numbers and underscores, ")
-		print("   for example: MyApp_perf_001 (numeric style) or InvalidFooBarProducesError ('test that XXX' long string style).")
+		print("TEST_DIR_NAME is the test directory to be created, which should consist of letters, numbers and underscores, ")
+		print("e.g. MyApp_perf_001 ('numeric' style) or InvalidFooBarProducesError ('test that XXX' long string style).")
 
 
-	def printUsage(self):
-		""" Print help info and exit. """
-		#######                                                                                                                        |
-		print("\nPySys System Test Framework (version %s): Makes PySys tests (and other assets) using configurable templates" % __version__) 
-		self.printOptions()
-		
+	def printAvailableTemplates(self):
 		templates = self.getTemplates()
 		if templates:
 			print("")
@@ -173,8 +165,15 @@ class DefaultTestMaker(object):
 			maxLength = max(len(t['name']) for t in templates)
 			for t in templates:
 				print(f"   {t['name']:<{maxLength}} - {t['description']}")
-		
-		sys.exit()
+			print("")
+			print("   (more customized templates for new tests in this project/directory can be configured using pysysdirconfig)")
+
+	def printUsage(self):
+		""" Print help info and exit. """
+		#######                                                                                                                        |
+		print("\nPySys System Test Framework (version %s): Makes PySys tests (and other assets) using configurable templates" % __version__) 
+		self.printOptions()
+		self.printAvailableTemplates()
 
 	def parseArg(self, option, value):
 		if option in ['-t', '--template']:
@@ -191,41 +190,71 @@ class DefaultTestMaker(object):
 			sys.stderr.write("Error parsing command line arguments: %s\n" % (sys.exc_info()[1]))
 			sys.stderr.flush()
 			self.printUsage()
+			sys.exit(1)
 			
 		self.template = None
-		self.testId = None
+		self.dest = None
 
 		for option, value in optlist:
 			if option in ("-h", "--help"):
 				self.printUsage()
+				sys.exit(0)
 
 			elif not self.parseArg(option, value):
 				sys.stderr.write("Unknown option: %s\n"%option)
 				sys.exit(1)
 
 
-		if arguments == []:
-			print("A valid string test id must be supplied")
-			self.printUsage(1)
+		if len(arguments) != 1:
+			sys.stderr.write("Please specify the test id/destination name")
+			self.printUsage()
+			sys.exit(1)
 		else:
-			self.testId = arguments[-1]
+			self.dest = arguments[0]
 
-		return self.testId
+		return self.dest
 
-	def copy(self, source, dest): 
+	def copy(self, source, dest, replace): 
 		"""
 		Copies the specified source file/dir to the specified dest file/dir. 
 		
 		Can be overridden if any advanced post-processing is required. 
 		"""
 		if os.path.isdir(source):
+			if os.path.basename(source) in ['__pycache__']: return # definitely not worth copying these!
 			shutil.copytree(source, dest)
+			self.replaceInDir(dest, replace)
 		else:
-			shutil.copy2(source, dest)
+			shutil.copy(source, dest)
+			self.replaceInFile(dest, replace)
+			
+			# executable permission may be important, so copy it
+			shutil.copystat(source, dest, follow_symlinks=False)
+	
+	def replaceInDir(self, dir, replace):
+		with os.scandir(dir) as it:
+			for p in it:
+				if p.is_dir():
+					self.replaceInDir(p.path, replace)
+				else:
+					self.replaceInFile(p.path, replace)
+
+	def replaceInFile(self, file, replace):
+		if not replace: return
+	
+		# we don't know what encoding the file is in (or even if it's a text file), so read/write using bytes
+		with open(file, 'rb') as f:
+			contents = f.read()
+
+		for regex, repl in replace:
+			contents = re.sub(regex, repl, contents)
+
+		with open(file, 'wb') as f:
+			f.write(contents)
 
 	def makeTest(self):
 		"""
-		Uses the previously parsed arguments to create a new test (or related asset) on disk. 
+		Uses the previously parsed arguments to create a new test (or related asset) on disk in ``self.dest``. 
 		
 		Can be overridden if additional post-processing steps are required for some templates. 
 		"""
@@ -239,24 +268,50 @@ class DefaultTestMaker(object):
 			tmp = templates[0] # pick the default
 		
 		log.debug('Using template: \n%s', json.dumps(tmp, indent='  '))
-		dest = self.testId
+		dest = self.dest
 		print("Creating %s using template %s ..." % (dest, tmp['name']))
-		# TODO: make sure we don't overwrite existing pysysdirconfig.xml etc
 		assert tmp['isTest'] # not implemented for other asset types yet
 		
 		if os.path.exists(dest): raise UserError('Cannot create %s as it already exists'%dest)
 
-		# TODO: implement replace (for files but not dirs)
 		mkdir(dest)
-		for d in tmp['mkdir']:	
-			mkdir(dest+os.sep+d)
+
+		if not tmp['replace']:
+			# use defaults unless user explicitly defines one or more, to save user having to keep redefining the standard ones
+			tmp['replace'] = [
+				['@@DATE@@', '@{DATE}'], 
+				['@@USERNAME@@', '@{USERNAME}'], 
+				['@@DIR_NAME@@', '@{DIR_NAME}'], 
+			]
+			
+		replace = [
+			(re.compile(r1.encode('ascii')), 
+				r2 # in addition to ${...] project properties, add some that are especially useful here
+					.replace('@{DATE}', self.project.startDate)
+					.replace('@{USERNAME}', self.project.username)
+					.replace('@{DIR_NAME}', os.path.basename(dest))
+					.replace('\\', '\\\\') # to avoid confusing regex replace into thinking it's an escape sequence
+				.encode('utf-8') # non-ascii chars are unlikely, but a reasonable default is to use utf-8 to match typical XML
+			)
+			for (r1,r2) in tmp['replace']]
+		log.debug('Using replacements: %s', replace)
+			
 		for c in tmp['copy']:
 			target = dest+os.sep+os.path.basename(c)
+			if os.path.basename(c) == tmp['testOutputDir']:
+				log.debug("  Not copying dir %s"%target)
+				continue
 			if os.path.exists(target):
 				raise Exception('Cannot copy to %s as it already exists'%target)
-			self.copy(c, target)
-			print("  Created %s"%target)
-		
+			self.copy(c, target, replace)
+			print("  Copied %s%s"%(os.path.basename(c), os.sep if os.path.isdir(target) else ''))
+
+		for d in tmp['mkdir']:	
+			if os.path.isabs(d):
+				log.debug('Skipping creation of absolute directory: %s', d)
+			else:
+				mkdir(dest+os.sep+d)
+
 		return dest
 
 class LegacyConsoleMakeTestHelper(object):

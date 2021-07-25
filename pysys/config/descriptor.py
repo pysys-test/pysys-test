@@ -464,7 +464,8 @@ class _XMLDescriptorParser(object):
 				'name': e.getAttribute('name'),
 				'description': e.getAttribute('description'),
 				'copy':   [x for x in (e.getAttribute('copy') or '').split(',') if x.strip()],
-				'mkdir': [self.project.expandProperties(x).strip() for x in (e.getAttribute('mkdir') or '').split(',') if self.project.expandProperties(x).strip()],
+				'mkdir': None if not e.hasAttribute('mkdir') else
+					[self.project.expandProperties(x).strip() for x in (e.getAttribute('mkdir') or '').split(',') if self.project.expandProperties(x).strip()],
 				'isTest': (e.getAttribute('isTest') or '').lower() != 'false',
 				'replace': [],
 				'source': self.file,

@@ -30,6 +30,8 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 
 	environs = processowner.createEnvirons(overrides=environs, command=sys.executable)
 
+	environs.setdefault("PYSYS_USERNAME", "pysystestuser")
+
 	# Error on warnings, to keep everything clean
 	environs.setdefault("PYTHONWARNINGS", "error")
 
