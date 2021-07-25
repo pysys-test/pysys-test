@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<pysystest type="auto">
+<pysystest>
 		
 	<description> 
 		<title>Demo of getting project properties</title>		

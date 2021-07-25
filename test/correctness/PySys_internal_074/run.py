@@ -20,7 +20,10 @@ class PySysTest(BaseTest):
 		exitcode = runPySys(self, 'makeproject-alreadyexists', ['makeproject', '--dir', 'fakeprojroot'], expectedExitStatus='!=0')
 
 		runPySys(self, 'make', ['make', 'mynewtest'])
+		runPySys(self, 'run-before-setting-title', ['run','mynewtest', '-o', self.output+'/run-before-setting-title'], expectedExitStatus='!=0')
+
 		self.copy('mynewtest/pysystest.xml', 'mynewtest/pysystest.xml', mappers=[
+			pysys.mappers.RegexReplace(' TODO', '')
 		])
 		runPySys(self, 'run', ['run','mynewtest'])
 			
@@ -36,6 +39,9 @@ class PySysTest(BaseTest):
 		# check for correct default outcome for new tests
 		self.assertGrep('run.out', expr='Test final outcome *:.*NOT VERIFIED') 
 		self.assertGrep('run.out', expr='mynewtest') 
+
+		self.assertThatGrep('run-before-setting-title.out', 'Test final outcome *: *(.*)', expected='BLOCKED') 
+		self.assertThatGrep('run-before-setting-title.out', 'Test outcome reason*: *(.*)', expected='Test title is still TODO') 
 		
 		# makeproject checks
 		self.assertGrep('makeproject-alreadyexists.out', expr='Cannot create as project file already exists: .+')

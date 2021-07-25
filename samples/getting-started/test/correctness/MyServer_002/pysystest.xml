@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<pysystest type="auto">
+<pysystest>
 	
 	<description> 
 		<title>MyServer startup: arg parsing (+ demo of PySys process starting, and use of a test plugin)</title>		

@@ -83,8 +83,6 @@ unnecessary elements optional, to allow descriptors to be shorter:
   ``<input-dir/output-dir/reference-dir>...<.../>``.
 - ``<requirement id="..."/>`` elements can now be placed directly under the root element, without the need for 
   enclosing ``<tracability><requirements>...`` elements. 
-- The test title can be specified as an attribute on the ``<description title="..."/>`` element instead of a separate 
-  ``<title>`` element, is more concise and avoids some XML escaping issues. 
 - The ``<purpose>`` element is now optional; it's sometimes clearer to put detailed multi-line information 
   about the test's purpose as a comment in the ``.py`` file itself.
 

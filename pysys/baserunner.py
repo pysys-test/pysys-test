@@ -1199,6 +1199,10 @@ class TestContainer(object):
 							self.testObj.execute()
 						log.debug('--- test validate')
 						self.testObj.validate()
+						
+						if self.descriptor.title.endswith('My title TODO'):
+							self.testObj.addOutcome(BLOCKED, 'Test title is still TODO', abortOnError=False)
+
 					except AbortExecution as e:
 						del self.testObj.outcome[:]
 						self.testObj.addOutcome(e.outcome, e.value, abortOnError=False, callRecord=e.callRecord)

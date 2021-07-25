@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysystest>
-	<description title="My category - My title TODO"/>
+	<title>My category TODO - My title TODO</title>
+	
+	<purpose></purpose>
 
 	<groups inherit="true" groups=""/>
 
