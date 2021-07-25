@@ -214,14 +214,16 @@ def listDirContents(path):
 	
 	For example this can be used with `pysys.basetest.BaseTest.assertDiff` like this::
 	
-		self.assertDiff(
-			self.write_text('MyDir-contents.txt', 
-				'\n'.join(pysys.utils.fileutils.listDirContents(self.output+'/MyDir'))))
+	  self.assertDiff(
+	    self.write_text('MyDir-contents.txt', '\\n'.join(
+	      pysys.utils.fileutils.listDirContents(self.output+'/MyDir')
+	  )))
+	  
 	
 	:param str path: The absolute path to search.
 	:return: A list of strings with the relative paths found, e.g. ``["mysubdir/myfile.txt", "mysubdir/mysubsubdir/"]``. 
 	
-	.. versionadded: 2.0
+	.. versionadded:: 2.0
 	"""
 	assert os.path.isabs(path), 'Must specify an absolute path: %r'%path
 	path = toLongPathSafe(path)
