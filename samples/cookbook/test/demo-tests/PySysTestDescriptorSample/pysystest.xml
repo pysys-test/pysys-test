@@ -13,7 +13,7 @@
 	<!-- Test titles should be concise but give a clear idea of what is in scope for this testcase. 
 
 	Good titles make it easy to find the test you need even when you have 100s/1000s of tests. 
-	Tests can be sorted by title so try to use common prefixes (e.g. ``Category - Title``) to group related tests 
+	Tests can be sorted by title so try to use common prefixes (e.g. ``Category: Title``) to group related tests 
 	together, and run ``pysys print -s=title`` to see how your title looks alongside the existing titles. 
 	
 	Titles need to be human readable at-a-glance, so don't put ids (e.g. bug tracking numbers) in the title; 
@@ -21,7 +21,7 @@
 	
 	The title can also be specified without XML as: __pysystest_title__ = """ ... """ 
 	-->
-	<title>My foobar tool - Argument parsing success and error cases</title>
+	<title>My foobar tool: Argument parsing success and error cases</title>
 
 	<!-- The purpose can also be specified without XML as: __pysystest_purpose__ = """ ... """
 	-->
