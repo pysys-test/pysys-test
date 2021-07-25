@@ -1769,6 +1769,8 @@ class ProcessUser(object):
 		namedGroupsMode = compiled.groupindex
 		
 		path = os.path.join(self.output, path)
+		
+		assert not os.path.isdir(path), 'Cannot grep directory: %s'%path
 
 		with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
 			matches = []
