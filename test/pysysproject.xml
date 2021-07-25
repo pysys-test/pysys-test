@@ -76,6 +76,11 @@
 			<property name="showTestTitle" value="true"/>
 		</writer>
 	</writers>
+	
+	<pysysdirconfig>
+		<maker-template name="pysys-in-pysys" description="a test that runs its own PySys project in the input directory" 
+			copy="./_pysys_templates/pysys-in-pysys/*"/>
+	</pysysdirconfig>
 
 	<default-file-encodings>
 		<default-file-encoding pattern="run.log" encoding="utf-8"/>
