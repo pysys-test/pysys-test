@@ -270,34 +270,12 @@ class TestDescriptor(object):
 	
 	def __repr__(self): return str(self)
 
-class _XMLDescriptorCreator(object):
-	'''Helper class to create a test descriptor template. DEPRECATED. 
-	
-	:meta private: If we want an API for this, having a writeToFile method on TestDescriptor would be a better way 
-	  to go.
-	'''
-		
-	def __init__(self, file, type="auto", group=DEFAULT_GROUP, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
-		'''Class constructor.'''
-		self.file=file
-		self.type = type
-		self.group = group
-		self.testclass = testclass
-		self.module = module
-	
-	def writeXML(self):
-		'''Write a test descriptor template to file.'''
-		fp = openfile(self.file, 'w')
-		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.group, self.testclass, self.module))
-		fp.close
-		
 XMLDescriptorContainer = TestDescriptor
 """ XMLDescriptorContainer is an alias for the TestDescriptor class, which 
 exists for compatibility reasons only. 
 
 :meta private:
 """
-
 
 class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
 	"""Represents a mode that a test can run in, and optionally a dict of parameters that define that mode. 
