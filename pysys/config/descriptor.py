@@ -538,7 +538,7 @@ class _XMLDescriptorParser(object):
 		'''Return the test title character data of the description element.'''
 		# PySys 1.6.1 gave an error if <description> was missing, but a default if <title> was missing, and permitted empty string. So don't be too picky. 
 
-		result = self.getElementTextOrDefault('title') or self.findNonXMLTextValue('title')
+		result = self.getElementTextOrDefault('title', optionalParents=['description']) or self.findNonXMLTextValue('title')
 		if not result and self.istest: result = self.getID() # falling back to the ID is better than nothing
 		
 		result = result.replace('\n',' ').replace('\r',' ').replace('\t', ' ').strip()
@@ -549,7 +549,7 @@ class _XMLDescriptorParser(object):
 	def getPurpose(self):
 		'''Return the test purpose character data of the description element.'''
 		
-		result = self.getElementTextOrDefault('purpose') or self.findNonXMLTextValue('purpose')
+		result = self.getElementTextOrDefault('purpose', optionalParents=['description']) or self.findNonXMLTextValue('purpose')
 		if result is None: result = self.defaults.purpose
 		
 		if not result: return result
@@ -560,9 +560,8 @@ class _XMLDescriptorParser(object):
 		'''Return a list of the group names, contained in the character data of the group elements.'''
 
 		groupList = []
-		groups = self.root.getElementsByTagName('groups')
+		groups = self.getSingleElement('groups', optionalParents=['classification'])
 		if groups:
-			groups = groups[0]
 			if groups.parentNode.tagName not in ['pysystest', 'pysysdirconfig', 'classification']: 
 				raise UserError("<groups> element found under <%s> but must be under the root node (or the <classification> node), in XML descriptor \"%s\""%(groups.parentNode.tagName, self.file))
 
@@ -586,7 +585,7 @@ class _XMLDescriptorParser(object):
 		if not modesNodes: return self.defaults.modes # by default we inherit (unless there are multiple <modes> elements in the file)
 		
 		result = {} # key=mode name value=params
-		for modesNode in self.root.getElementsByTagName('modes'):
+		for modesNode in modesNodes:
 			if modesNode.parentNode.tagName not in ['pysystest', 'pysysdirconfig', 'classification']: 
 				raise UserError("<modes> element found under <%s> but must be under the root node (or the <classification> node), in XML descriptor \"%s\""%(modesNode.parentNode.tagName, self.file))
 			prevModesForCombining = None if not result else result
@@ -680,16 +679,16 @@ class _XMLDescriptorParser(object):
 				
 	def getClassDetails(self):
 		'''Return the test class attributes (name, module, searchpath), contained in the class element.'''
-		try:
-			dataNodeList = self.root.getElementsByTagName('data')
-			el = dataNodeList[0].getElementsByTagName('class')[0]
+		el = self.getSingleElement('class', optionalParents=['data'])
+		if el:
 			return [el.getAttribute('name'), el.getAttribute('module')]
-		except Exception:
-			return [self.defaults.classname, self.defaults.module]
+		return [self.defaults.classname, self.defaults.module]
 
 	def getExecutionOrderHint(self):
+		e = self.getSingleElement('execution-order')
+
 		r = None
-		for e in self.root.getElementsByTagName('execution-order'):
+		if e:
 			r = e.getAttribute('hint')
 			if r:
 				try:
@@ -700,18 +699,9 @@ class _XMLDescriptorParser(object):
 			return self.defaults.executionOrderHint
 		else:
 			return r
-			
-	def getTestInput(self):
-		'''Return the test input path, contained in the input element.'''
-		try:
-			dataNodeList = self.root.getElementsByTagName('data')
-			input = dataNodeList[0].getElementsByTagName('input')[0]
-			return input.getAttribute('path')
-		except Exception:
-			return self.defaults.input
+
 
 	def getUserData(self):
-		'''Return the userData from the user-data element.'''
 		# start with parent defaults, add children
 		result = collections.OrderedDict(self.defaults.userData)
 		for data in self.root.getElementsByTagName('data'):
@@ -736,25 +726,27 @@ class _XMLDescriptorParser(object):
 				
 		return result
 
+			
+	def getTestInput(self):
+		node = self.getSingleElement('input', optionalParents=['data']) or self.getSingleElement('input-dir', optionalParents=['data'])
+		if node:
+			x = node.getAttribute('path') or self.getText(node)
+			if x: return x
+		return self.defaults.input
+		
 	def getTestOutput(self):
-		'''Return the test output path, contained in the output element.'''
-		try:
-			dataNodeList = self.root.getElementsByTagName('data')
-			output = dataNodeList[0].getElementsByTagName('output')[0]
-			return output.getAttribute('path')
-		except Exception:
-			return self.defaults.output
-
+		node = self.getSingleElement('output', optionalParents=['data']) or self.getSingleElement('output-dir', optionalParents=['data'])
+		if node:
+			x = node.getAttribute('path') or self.getText(node)
+			if x: return x
+		return self.defaults.output
 
 	def getTestReference(self):
-		'''Return the test reference path, contained in the reference element.'''
-		try:
-			dataNodeList = self.root.getElementsByTagName('data')
-			ref = dataNodeList[0].getElementsByTagName('reference')[0]
-			return ref.getAttribute('path')
-		except Exception:
-			return self.defaults.reference
-
+		node = self.getSingleElement('reference', optionalParents=['data']) or self.getSingleElement('reference-dir', optionalParents=['data'])
+		if node:
+			x = node.getAttribute('path') or self.getText(node)
+			if x: return x
+		return self.defaults.reference
 
 	def getRequirements(self):
 		'''Return a list of the requirement ids, contained in the character data of the requirement elements.'''
@@ -779,7 +771,7 @@ class _XMLDescriptorParser(object):
 				t += n.data
 		return t.strip()
 
-	def getSingleElement(self, tagName, parent=None):
+	def getSingleElement(self, tagName, parent=None, optionalParents=[]):
 		"""Utility method that finds a single child element of the specified name and 
 		strips leading/trailing whitespace from it. Returns None if not found. """
 		t = u''
@@ -788,13 +780,15 @@ class _XMLDescriptorParser(object):
 		if len(nodes) == 0: return None
 		if len(nodes) > 1: 
 			raise UserError('Expected one element <%s> but found more than one in %s' % (tagName, self.file))
+		if nodes[0].parentNode.tagName not in ['pysystest', 'pysysdirconfig']+optionalParents: 
+				raise UserError("Element <%s> is not permitted under <%s> of \"%s\""%(tagName, nodes[0].parentNode.tagName, self.file))
 		return nodes[0]
 
-	def getElementTextOrDefault(self, tagName, default=None, parent=None):
+	def getElementTextOrDefault(self, tagName, default=None, parent=None, optionalParents=[]):
 		"""Utility method that finds a single child element of the specified name and 
 		strips leading/trailing whitespace from it. Returns an empty string if none. """
 		t = u''
-		node = self.getSingleElement(tagName, parent=parent)
+		node = self.getSingleElement(tagName, parent=parent, optionalParents=optionalParents)
 		if node is None: return default
 		return self.getText(node)
 

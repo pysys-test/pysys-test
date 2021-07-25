@@ -60,7 +60,7 @@ the XML section like this::
 		is to check that comparison operators < and > work correctly. 
 		"""
 
-This style makes the crucial "test" more visually prominent to encourage developers to fill it out and keep it up to 
+This style makes the crucial "title" more visually prominent to encourage developers to fill it out and keep it up to 
 date, and also avoids the painful escaping required inside XML when using characters such as ``<``/``>``. However 
 although the above is designed to look like regular Python, for efficiency reasons PySys does not invoke the Python 
 parser so you must only use string literals (no dynamic expressions), you cannot use the backslash ``\`` character 
@@ -69,16 +69,21 @@ in these strings, and any non-ASCII characters must be encoded as UTF-8.
 There is now a leaner recommended structure for newly created test descriptors which makes several 
 unnecessary elements optional, to allow descriptors to be shorter:
 
+- Instead of specifying groups in separate ``<group>`` elements you can now specify them in a single string using 
+  ``<groups groups="my-group1, my-group2"/>``.  
+- The ``<description>`` element is no longer required - ``<title>`` and ``<purpose>`` can be placed directly under 
+  the root element - or (as recommended above) using ``_pysystest_title__ = `` in the ``.py`` file. 
 - The ``<classification>`` element is no longer required - ``<modes>`` and ``<groups>`` can be placed directly under 
   the root element. 
+- The ``<data>`` element is no longer required except as a parent for ``<user-data>``. Default directories can be 
+  specified with ``<input/output/reference path=...>`` or using the slightly clearer names 
+  ``<input-dir/output-dir/reference-dir>...<.../>``.
 - ``<requirement id="..."/>`` elements can now be placed directly under the root element, without the need for 
   enclosing ``<tracability><requirements>...`` elements. 
 - The test title can be specified as an attribute on the ``<description title="..."/>`` element instead of a separate 
   ``<title>`` element, is more concise and avoids some XML escaping issues. 
-- The ``<purpose>`` element is now optional in the descriptor; it's often better to put detailed multi-line information 
+- The ``<purpose>`` element is now optional; it's sometimes clearer to put detailed multi-line information 
   about the test's purpose as a comment in the ``.py`` file itself.
-- Instead of specifying groups in separate ``<group>`` elements you can now specify them in a single string using 
-  ``<groups groups="my-group1, my-group2"/>``.  
 
 New template-based test maker
 -----------------------------
