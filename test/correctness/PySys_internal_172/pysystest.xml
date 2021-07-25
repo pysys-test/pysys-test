@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysystest>
-	<description title="pysys.py - make test custom templates and pysysdirconfig inheritance"/>
+	<title>pysys.py - make test custom templates and pysysdirconfig inheritance</title>
 
 	<groups inherit="true" groups=""/>
 

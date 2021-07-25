@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysystest>
-	<description title="Test loading - Descriptors embedded in a pysystest.py file, multiple encodings"/>
+	<title>Test loading - Descriptors embedded in a pysystest.py file, multiple encodings</title>
 
 	<groups inherit="true" groups=""/>
 

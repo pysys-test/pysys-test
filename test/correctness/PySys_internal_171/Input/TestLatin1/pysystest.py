@@ -3,7 +3,7 @@
 """
 <?xml version="1.0" encoding="latin-1"?>
 <pysystest type="auto">
-	<description title="My latin-1 encoded descriptor '£'"/>
+	<title>My latin-1 encoded descriptor '£'</title>
 
 	<!-- To skip the test, uncomment this (and provide a reason): <skipped reason=""/> -->
 	<!-- To provide a bug/story/requirement id for requirements tracing, uncomment this: <requirement id=""/> -->

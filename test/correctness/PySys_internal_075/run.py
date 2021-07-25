@@ -17,10 +17,10 @@ class PySysTest(BaseTest):
 		runPySys(self, 'make2', ['make', 'mynewtest2'])
 		
 		self.copy('mynewtest1/pysystest.xml', 'mynewtest1/pysystest.xml', mappers=[
-			pysys.mappers.RegexReplace('title=""', 'title="MyTitle"')
+			#pysys.mappers.RegexReplace('title=""', 'title="MyTitle"')
 		])
 		self.copy('mynewtest2/pysystest.xml', 'mynewtest2/pysystest.xml', mappers=[
-			pysys.mappers.RegexReplace('title=""', 'title="MyTitle"')
+			#pysys.mappers.RegexReplace('title=""', 'title="MyTitle"')
 		])
 		
 		runPySys(self, 'run1', ['run', '-o', 'cleaned'])

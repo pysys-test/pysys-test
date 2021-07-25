@@ -1,7 +1,7 @@
 """
 <?xml version="1.0" encoding="utf-8"?>
 <pysystest type="auto">
-	<description title="My UTF-8 encoded descriptor '£'"/>
+	<title>My UTF-8 encoded descriptor '£'</title>
 
 	<!-- To skip the test, uncomment this (and provide a reason): <skipped reason=""/> -->
 	<!-- To provide a bug/story/requirement id for requirements tracing, uncomment this: <requirement id=""/> -->

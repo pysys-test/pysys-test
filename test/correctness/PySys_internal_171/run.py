@@ -16,4 +16,5 @@ class PySysTest(BaseTest):
 		self.assertThat('titles == expected', titles=titles, expected=[
 			"My latin-1 encoded descriptor '\u00a3'",
 			"My UTF-8 encoded descriptor '\u00a3'",
+			"My UTF-8 encoded descriptor '\u00a3' <>",
 		])

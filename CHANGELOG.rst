@@ -50,7 +50,24 @@ directory containing the ``pysystest.*`` file. If your ``pysystest.*`` file uses
 have non-ASCII characters in your descriptor XML, simply update the ``encoding=`` in the ``<?xml ..>`` XML declaration 
 and it will be parsed with the correct encoding for the parent file. 
 
-There is now a leaner, simpler recommended structure for newly created test descriptors:
+You must always have a ``<pysystest>`` descriptor embedded somewhere in the ``pysystest.*`` file, however for a few 
+of the most important settings which consist of a simple string, you can provide them more conveniently outside of 
+the XML section like this::
+
+	__pysystest_title__ = """ My test title """
+	
+	__pysystest_purpose__ = """ The purpose of this test 
+		is to check that comparison operators < and > work correctly. 
+		"""
+
+This style makes the crucial "test" more visually prominent to encourage developers to fill it out and keep it up to 
+date, and also avoids the painful escaping required inside XML when using characters such as ``<``/``>``. However 
+although the above is designed to look like regular Python, for efficiency reasons PySys does not invoke the Python 
+parser so you must only use string literals (no dynamic expressions), you cannot use the backslash ``\`` character 
+in these strings, and any non-ASCII characters must be encoded as UTF-8. 
+
+There is now a leaner recommended structure for newly created test descriptors which makes several 
+unnecessary elements optional, to allow descriptors to be shorter:
 
 - The ``<classification>`` element is no longer required - ``<modes>`` and ``<groups>`` can be placed directly under 
   the root element. 
@@ -62,7 +79,6 @@ There is now a leaner, simpler recommended structure for newly created test desc
   about the test's purpose as a comment in the ``.py`` file itself.
 - Instead of specifying groups in separate ``<group>`` elements you can now specify them in a single string using 
   ``<groups groups="my-group1, my-group2"/>``.  
-- Providing a test title is now mandatory in new tests (to encourage good practice). 
 
 New template-based test maker
 -----------------------------

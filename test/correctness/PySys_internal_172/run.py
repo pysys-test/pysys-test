@@ -48,7 +48,7 @@ class PySysTest(BaseTest):
 
 		# Check replacements haven't broken encoding of existing files
 		POUND_SIGN = chr(163)
-		self.assertThatGrep('MyNewTest/pysystest.xml', 'title="(.*)"', expected='Special character '+POUND_SIGN, encoding='utf-8')
+		self.assertThatGrep('MyNewTest/pysystest.xml', '<title>(.*)</title>', expected='Special character '+POUND_SIGN, encoding='utf-8')
 		self.assertThatGrep('MyNewTest/MySubDir/myfile.txt', 'title="(.*)"', expected='Special character '+POUND_SIGN, encoding='latin-1')
 
 		self.assertThatGrep('MyNewTest/pysystest.xml', 'Creation date is "(.*)"', 're.match(expected, value)', expected=r'\d\d\d\d-\d\d-\d\d$', encoding='utf-8')

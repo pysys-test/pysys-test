@@ -349,12 +349,13 @@ class _XMLDescriptorParser(object):
 			# Find it within a file of another type e.g. pysystest.py
 			# Open in binary mode since we don't know the encoding - we'll rely on the XML header to tell us if it's anything unusual
 			with open(xmlfile, 'rb') as xmlhandle:
-				contents = xmlhandle.read()
-			match = re.search(b'(<[?]xml[^>]*>\\s*<pysystest.*>.*</pysystest>)', contents, flags=re.DOTALL)
+				self.nonXMLContents = xmlhandle.read()
+			match = re.search(b'(<[?]xml[^>]*>\\s*<pysystest.*>.*</pysystest>)', self.nonXMLContents, flags=re.DOTALL)
 			if not match: raise UserError("No <pysystest> XML descriptor was found in file \"%s\""%(xmlfile))
 			xmlcontents = match.group(0)
 		else:
 			xmlcontents = None
+			self.nonXMLContents = None
 		
 		try:
 			if xmlcontents:
@@ -514,40 +515,46 @@ class _XMLDescriptorParser(object):
 			return r
 		return self.defaults.skippedReason
 
+	def findNonXMLTextValue(self, name):
+		"""
+		Attempts to read a string literal value in non-XML form using __pysystest_<name>__ syntax, 
+		for example from a pysystest.py python file. This avoids messy CDATA escaping needed in XML for common characters 
+		such as < and >. 
+		
+		Returns None if not found. 
+		"""
+		if self.nonXMLContents is None: return None
+
+		# Find it within a file of another type e.g. pysystest.py
+		name = '__pysystest_%s__'%name
+		match = re.search(b'(^|\\n)[ \\t]*%s *= *"+([^"]+)"'%name.encode('ascii'), self.nonXMLContents, flags=re.DOTALL) # must be at the start of a line
+		if not match: return None
+		x = match.group(2).decode('utf-8')
+		if '\\' in x: raise UserError("%s must be a simple string literal with no backslash escape sequences; cannot parse \"%s\""%(name, self.file))
+		return x
+		
+
 	def getTitle(self):
 		'''Return the test title character data of the description element.'''
-		descriptionNodeList = self.root.getElementsByTagName('description')
-		if descriptionNodeList == []:
-			raise UserError("Test titles are mandatory (and useful to everyone!) but no <description title=\"...\"> was provided yet in \"%s\""%self.file)
+		# PySys 1.6.1 gave an error if <description> was missing, but a default if <title> was missing, and permitted empty string. So don't be too picky. 
+
+		result = self.getElementTextOrDefault('title') or self.findNonXMLTextValue('title')
+		if not result and self.istest: result = self.getID() # falling back to the ID is better than nothing
 		
-		if descriptionNodeList[0].hasAttribute('title'): # new-style test
-			title = descriptionNodeList[0].getAttribute('title').strip().replace('  ', ' ')
-			if not title: raise UserError('Test titles are mandatory (and useful to everyone!) but no title="..." was provided yet in "%s"'%self.file)
-			
-			return title
-		
-		try:
-			title = descriptionNodeList[0].getElementsByTagName('title')[0].childNodes[0].data
-			title = title.replace('\n',' ').replace('\r',' ').replace('  ', ' ').strip()
-			return title
-		except Exception:
-			return self.getID() # fall back to using the test ID as the title - we tolerate empty titles here to avoid breaking old tests
+		result = result.replace('\n',' ').replace('\r',' ').replace('\t', ' ').strip()
+		if '  ' in result: result = re.sub('  +', ' ', result)
+		return result
+
 				
 	def getPurpose(self):
 		'''Return the test purpose character data of the description element.'''
-		descriptionNodeList = self.root.getElementsByTagName('description')
-		if descriptionNodeList == []:
-			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
 		
-		if descriptionNodeList[0].getElementsByTagName('purpose') == []:
-			return self.defaults.purpose # no error; setting this is optional
-		else:
-			try:
-				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
-				return inspect.cleandoc(purpose.childNodes[0].data.strip().replace('\t','  '))
-			except Exception:
-				return self.defaults.purpose
-			
+		result = self.getElementTextOrDefault('purpose') or self.findNonXMLTextValue('purpose')
+		if result is None: result = self.defaults.purpose
+		
+		if not result: return result
+		return inspect.cleandoc(result.replace('\r','').replace('\t', '  ')).strip()
+
 				
 	def getGroups(self):
 		'''Return a list of the group names, contained in the character data of the group elements.'''
@@ -768,10 +775,28 @@ class _XMLDescriptorParser(object):
 		t = u''
 		if not element: return t
 		for n in element.childNodes:
-			if (n.nodeType == element.TEXT_NODE) and n.data:
+			if (n.nodeType in [element.TEXT_NODE, element.CDATA_SECTION_NODE]) and n.data:
 				t += n.data
 		return t.strip()
 
+	def getSingleElement(self, tagName, parent=None):
+		"""Utility method that finds a single child element of the specified name and 
+		strips leading/trailing whitespace from it. Returns None if not found. """
+		t = u''
+		if not parent: parent = self.root
+		nodes = parent.getElementsByTagName(tagName)
+		if len(nodes) == 0: return None
+		if len(nodes) > 1: 
+			raise UserError('Expected one element <%s> but found more than one in %s' % (tagName, self.file))
+		return nodes[0]
+
+	def getElementTextOrDefault(self, tagName, default=None, parent=None):
+		"""Utility method that finds a single child element of the specified name and 
+		strips leading/trailing whitespace from it. Returns an empty string if none. """
+		t = u''
+		node = self.getSingleElement(tagName, parent=parent)
+		if node is None: return default
+		return self.getText(node)
 
 class DescriptorLoader(object):
 	"""
