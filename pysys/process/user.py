@@ -2301,6 +2301,7 @@ class ProcessUser(object):
 		else:
 			renameDestAtEnd = False
 		assert src != dest, 'Source and destination directory cannot be the same'
+		assert not dest.startswith(src+os.sep), f'Cannot copy to a destination under the source directory (source={src}, dest={dest})'
 
 		if overwrite is None: overwrite = not srcIsDir
 

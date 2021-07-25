@@ -7,6 +7,14 @@ class PySysTest(pysys.basetest.BaseTest):
 	def execute(self):
 		self.write_text('output-raw.txt', 'Hello world\nTimestamp: 1234\nHello foo!')
 		
+		try:
+			self.copy(self.descriptor.testDir, self.output)
+		except Exception as ex:
+			self.assertThat('message.startswith(expected)', message=str(ex), expected='Cannot copy to a destination under the source directory')
+		else:
+			raise Exception('Should have prevented recursive copy!')
+
+		
 		# this is the example from the docstring
 		self.copy('output-raw.txt', 'output-processed.txt', encoding='utf-8', 
 			mappers=[
