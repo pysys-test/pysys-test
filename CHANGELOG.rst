@@ -66,6 +66,9 @@ although the above is designed to look like regular Python, for efficiency reaso
 parser so you must only use string literals (no dynamic expressions), you cannot use the backslash ``\`` character 
 in these strings, and any non-ASCII characters must be encoded as UTF-8. 
 
+New descriptor attributes were added to record the ``authors`` who have worked on the test, and the original 
+``created`` date, both of which are useful to have available when looking into test failures. 
+
 There is now a leaner recommended structure for newly created test descriptors which makes several 
 unnecessary elements optional, to allow descriptors to be shorter:
 

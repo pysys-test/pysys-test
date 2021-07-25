@@ -95,6 +95,10 @@ class TestDescriptor(object):
 	
 	:ivar list ~.traceability: A list of the requirements covered by the testcase, typically keywords or bug/story ids.
 	
+	:ivar list[str] ~.authors: A list of the names or user ids of people who contributed to the test. 
+
+	:ivar str ~.created: The date when the test was created in yyyy-mm-dd format. 
+	
 	:ivar float ~.executionOrderHint: A float priority value used to determine the 
 		order in which testcases will be run; higher values are executed before 
 		low values. The default is 0.0. 
@@ -109,6 +113,7 @@ class TestDescriptor(object):
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
 		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', 'executionOrderHintsByMode', \
+		'authors', 'created', \
 		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', '_makeTestTemplates', 
 
 	def __init__(self, file, id, 
@@ -116,6 +121,7 @@ class TestDescriptor(object):
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE, 
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, 
+		authors=[], created=None,
 		testDir=None, 
 		isDirConfig=False, userData=None):
 		if skippedReason: state = 'skipped'
@@ -133,6 +139,12 @@ class TestDescriptor(object):
 		# copy groups/modes so we can safely mutate them later if desired
 		self.groups = list(groups)
 		self.modes = list(modes)
+		
+		self.authors = authors
+		self.created = created
+		if created and not re.match('[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', created):
+			raise UserError('Invalid created date "%s", must be yyyy-mm-dd format, in file "%s"'%(created, file))
+
 		
 		self.classname = classname
 		assert classname, 'Test descriptors cannot set the classname to nothing'
@@ -188,6 +200,8 @@ class TestDescriptor(object):
 		d['title'] = self.title
 		d['purpose'] = self.purpose
 		d['groups'] = self.groups
+		d['authors'] = self.authors
+		d['created'] = self.created
 		d['modes'] = self.modes
 		d['modeParameters'] = {str(m):m.params for m in self.modes}
 		d['primaryMode'] = self.primaryMode
@@ -213,20 +227,27 @@ class TestDescriptor(object):
 		:return: The string represention
 		:rtype: string
 		"""
+		# Some of these are only worth printing when there's actually something to show, and for legacy things like 
+		# type/state, when a non-default value is selected
 		
 		s=    "Test id:           %s\n" % self.id
 		reltestdir = self.testDir if not self.isDirConfig else '' # relative to current dir is most useful
 		if reltestdir.lower().replace('\\','/').startswith(os.getcwd().lower().replace('\\','/')): reltestdir = reltestdir[len(os.getcwd())+1:]
 		s=s+"Test directory:    %s\n" % reltestdir # use OS slashes to facilitate copy+paste
-		s=s+"Test type:         %s\n" % self.type
-		s=s+"Test state:        %s\n" % self.state
+		if self.type != 'auto': s=s+"Test type:         %s\n" % self.type
+		if self.state != 'runnable':
+			s=s+"Test state:        %s\n" % self.state
 		if self.skippedReason: s=s+"Test skip reason:  %s\n" % self.skippedReason
 		s=s+"Test title:        %s\n" % self.title
-		s=s+"Test purpose:      "
-		purpose = self.purpose.split('\n') if self.purpose is not None else ['']
-		for index in range(0, len(purpose)):
-			if index == 0: s=s+"%s\n" % purpose[index]
-			if index != 0: s=s+"                   %s\n" % purpose[index] 
+		if self.purpose:
+			s=s+"Test purpose:      "
+			purpose = self.purpose.split('\n')
+			for index in range(0, len(purpose)):
+				if index == 0: s=s+"%s\n" % purpose[index]
+				if index != 0: s=s+"                   %s\n" % purpose[index] 
+
+		if self.created or self.authors:
+			s=s+"Test created:      %s; authors: %s\n" % (self.created or '?', ', '.join(self.authors))
 
 		s=s+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
 		
@@ -248,8 +269,7 @@ class TestDescriptor(object):
 			u', '.join('%s'%hint for hint in self.executionOrderHintsByMode) # for multi-mode tests
 			if hasattr(self, 'executionOrderHintsByMode') else self.executionOrderHint)	
 
-		s=s+"Test classname:    %s\n" % self.classname
-		s=s+"Test module:       %s\n" % self.module
+		s=s+"Test classname:    %s; module: %s\n" % (self.classname, self.module)
 		s=s+"Test input:        %s\n" % self.input
 		s=s+"Test output:       %s\n" % self.output
 		s=s+"Test reference:    %s\n" % self.reference
@@ -338,6 +358,8 @@ class _XMLDescriptorParser(object):
 		if not os.path.exists(xmlfile):
 			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
 		self.project = project
+
+		self.nonXMLContents = None
 		
 		if xmlRootElement: # used when parsing from project XML rather than directly from a standalone file
 			self.doc = None
@@ -355,7 +377,6 @@ class _XMLDescriptorParser(object):
 			xmlcontents = match.group(0)
 		else:
 			xmlcontents = None
-			self.nonXMLContents = None
 		
 		try:
 			if xmlcontents:
@@ -404,7 +425,7 @@ class _XMLDescriptorParser(object):
 		'''Create and return an instance of TestDescriptor for the contents of the descriptor.'''
 		
 		for attrName, attrValue in self.root.attributes.items():
-			if attrName not in ['state', 'type']:
+			if attrName not in ['state', 'type', 'authors', 'created']:
 				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
 		cls, pymodule = self.getClassDetails()
 		
@@ -427,6 +448,8 @@ class _XMLDescriptorParser(object):
 										skippedReason=self.getSkippedReason(), 
 										testDir=self.dirname,
 										userData=self.getUserData(),
+										authors=[x.strip() for x in (self.root.getAttribute('authors') or self.findNonXMLTextValue('authors') or '').split(',') if x.strip()],
+										created=self.root.getAttribute('created') or self.findNonXMLTextValue('created') or None,
 										isDirConfig=not self.istest)
 		
 		if not self.istest:

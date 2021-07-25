@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<pysystest type="manual" state="deprecated">
+<pysystest type="manual" state="deprecated"
+	authors=' author1 , , author 2 '
+	created="1999-12-31"
+>
   <description> 
     <title>Nested testcase</title>    
     <purpose><![CDATA[Nested purpose]]>

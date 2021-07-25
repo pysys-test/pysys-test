@@ -348,14 +348,12 @@
 	
 	-->
 	<pysysdirconfig>
-		<data>
-			<!-- Could use this to override the default directory names for input, reference, and output for all tests 
-			in your project. 
-			-->
-			<input path="Input"/>
-			<reference path="Reference"/>
-			<output path="Output"/>
-		</data>
+		<!-- Could use this to override the default directory names for input, reference, and output for all tests 
+		in your project. The following are the recommended values for modern projects (PySys 2.0+).
+		-->
+		<output-dir>Output</output-dir>
+		<input-dir>Input</input-dir>
+		<reference-dir>Reference</reference-dir>
 	</pysysdirconfig>
 
 	<!--
