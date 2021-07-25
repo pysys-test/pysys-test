@@ -54,7 +54,7 @@ class DefaultTestMaker(object):
 		'description': 'a default empty PySys test',
 		'isTest':True,
 		'copy': [
-			'${pysysTemplatesDir}/test/*',
+			'${pysysTemplatesDir}/default-test/*',
 		],
 		'mkdir': None, # means create the defaults - Input/Output/Reference
 		'replace':[],  # empty means use defaults

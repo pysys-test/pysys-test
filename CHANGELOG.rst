@@ -77,7 +77,7 @@ the cookbook sample)::
 	<pysysdirconfig>
 	
 		<maker-template name="perf-test" description="a simple performance test using MyPerfTool" 
-			copy="${pysysTemplatesDir}/test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+			copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
 		
 		<maker-template name="foobar-test" description="an advanced test based on the simple foobar test" 
 			copy="./PySysDirConfigSample/*" 
@@ -92,7 +92,7 @@ the cookbook sample)::
 	</pysysdirconfig>
 	
 You can copy files from an absolute location such as somewhere under your project's ``${testRootDir}``, from the 
-PySys default template (if you just want to add files) using ``${pysysTemplatesDir}/test/*``, or from a path relative 
+PySys default template (if you just want to add files) using ``${pysysTemplatesDir}/default-test/*``, or from a path relative 
 to the XML file where the template is defined. This could be a ``_pysys_templates/`` directory alongside this XML file, 
 or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
 

@@ -26,7 +26,7 @@
 	    when running "pysys make -h". 
 	  - copy: A comma-separated list of files and directories to be copied into the test directory, supporting ``*`` 
 	    globs. Either specify a path relative to the directory containing this XML file, or an absolute path using 
-	    project properties. To use files from the default PySys template use "${pysysTemplatesDir}/test/*".
+	    project properties. To use files from the default PySys template use "${pysysTemplatesDir}/default-test/*".
 	    You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file, 
 	    or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
 	  - mkdir: By default empty directories are created for the configured input, output and reference directories.  
@@ -46,7 +46,7 @@
 
 	-->
 	<maker-template name="perf-test" description="a simple performance test using MyPerfTool" 
-		copy="${pysysTemplatesDir}/test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+		copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
 	
 	<maker-template name="foobar-test" description="an advanced test based on the simple foobar test" 
 		copy="./PySysDirConfigSample/*" 
