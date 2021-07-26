@@ -27,6 +27,7 @@ import collections
 import copy
 import locale
 import inspect
+import json
 
 import pysys
 from pysys.constants import *
@@ -351,12 +352,14 @@ class _XMLDescriptorParser(object):
 	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None):
 		assert project
 		self.file = xmlfile
+		if len(xmlfile) < 256: self.file = fromLongPathSafe(self.file)# used for error messages etc
+		
 		self.dirname = os.path.dirname(xmlfile)
 		self.istest = istest
 		self.defaults = (project._defaultDirConfig or self.DEFAULT_DESCRIPTOR) if parentDirDefaults is None else parentDirDefaults
 		roottag = 'pysystest' if istest else 'pysysdirconfig'
 		if not os.path.exists(xmlfile):
-			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
+			raise UserError("Unable to find supplied descriptor \"%s\"" % self.file)
 		self.project = project
 
 		self.nonXMLContents = None
@@ -373,7 +376,7 @@ class _XMLDescriptorParser(object):
 			with open(xmlfile, 'rb') as xmlhandle:
 				self.nonXMLContents = xmlhandle.read()
 			match = re.search(b'(<[?]xml[^>]*>\\s*<pysystest.*>.*</pysystest>)', self.nonXMLContents, flags=re.DOTALL)
-			if not match: raise UserError("No <pysystest> XML descriptor was found in file \"%s\""%(xmlfile))
+			if not match: raise UserError("No <pysystest> XML descriptor was found in file \"%s\""%(self.file))
 			xmlcontents = match.group(0)
 		else:
 			xmlcontents = None
@@ -384,10 +387,10 @@ class _XMLDescriptorParser(object):
 			else:
 				self.doc = xml.dom.minidom.parse(xmlfile)
 		except Exception as ex:
-			raise UserError("Invalid XML in descriptor '%s': %s" % (xmlfile, ex))
+			raise UserError("Invalid XML in descriptor '%s': %s" % (self.file, ex))
 		else:
 			if self.doc.getElementsByTagName(roottag) == []:
-				raise UserError("No <%s> element supplied in XML descriptor '%s'"%(roottag, xmlfile))
+				raise UserError("No <%s> element supplied in XML descriptor '%s'"%(roottag, self.file))
 			else:
 				self.root = self.doc.getElementsByTagName(roottag)[0]
 
@@ -604,98 +607,108 @@ class _XMLDescriptorParser(object):
 	
 				
 	def getModes(self):
-		modesNodes = self.root.getElementsByTagName('modes')
-		if not modesNodes: return self.defaults.modes # by default we inherit (unless there are multiple <modes> elements in the file)
+		modesNode = self.getSingleElement('modes', optionalParents=['classification'])
+		if not modesNode: return self.defaults.modes # by default we inherit
 		
-		result = {} # key=mode name value=params
-		for modesNode in modesNodes:
-			if modesNode.parentNode.tagName not in ['pysystest', 'pysysdirconfig', 'classification']: 
-				raise UserError("<modes> element found under <%s> but must be under the root node (or the <classification> node), in XML descriptor \"%s\""%(modesNode.parentNode.tagName, self.file))
-			prevModesForCombining = None if not result else result
-
-			# by default we inherit, but to avoid confusion when defining multiple mode matrices we only allow explicit inherits 
-			defaultinherit = len(modesNodes) <= 1
-			if (modesNode.getAttribute('inherit') or str(defaultinherit)).lower()!='true': 
+		excluder = modesNode.getAttribute('excluder')
+		
+		text = self.getText(modesNode)
+		if not text: # TODO: rework this to fall through to the following logic
+			# pre 2.0 XML approach
+			if (modesNode.getAttribute('inherit') or str(True)).lower()!='true': 
 				result = {}
 			else:
 				result = {m:m.params for m in self.defaults.modes}
-			
 			for node in modesNode.getElementsByTagName('mode'):
-				if not node.hasAttributes():
-					params = {}
-				else:
-					params = collections.OrderedDict() if PY2 else {}
-					for param, paramvalue in node.attributes.items():
-						if param == 'mode': continue 
-						assert not param.startswith('_'), 'Parameter names cannot start with _'
-						params[param] = paramvalue
+				params = {}
+				for param, paramvalue in node.attributes.items():
+					if param == 'mode': continue 
+					assert not param.startswith('_'), 'Parameter names cannot start with _'
+					params[param] = paramvalue
 			
 				modeString = node.getAttribute('mode') or self.getText(node)
-
-				if not modeString:
-					if not params: continue # simply ignore <mode> as it's sometimes included in templates etc
-
-					modeNamePattern = modesNode.getAttribute('modeNamePattern')
-					if modeNamePattern:
-						try:
-							modeString = modeNamePattern.format(**params)
-						except Exception as ex:
-							raise UserError('Failed to populate modeNamePattern "%s" with parameters %s: %s in "%s"'%(modeNamePattern, params, ex, self.file))
-					else:
-						modeString = '_'.join(
-							'%s=%s'%(k, v) if re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE) else v # include the key for numeric and boolean values
-							for (k,v) in params.items())
-				
-					# Eliminate dodgy characters
-					badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
-					if badchars: 
-						log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
-							''.join(set(c for c in badchars)), modeString, self.file)
-					modeString = re.sub('[^%s]'%pysys.launcher.MODE_CHARS,'', modeString)
-					
-					if not modeString: raise UserError('Invalid mode: cannot be empty in \"%s\"'%self.file)
-					
-					# Enforce naming convention of initial caps
-					modeString = modeString[0].upper()+modeString[1:]
-
-				modeString = modeString.strip().strip('_') # avoid leading/trailing _'s and whitespace, since we'll add them when composing modes
-				
-				if modeString in result:
-					if result[modeString] != params: raise UserError('Cannot redefine mode "%s" with parameters %s different to previous parameters %s in "%s"'%(modeString, params, result[modeString], self.file))
-				else:
+				if modeString: 
 					result[modeString] = params
-			# end of for <mode>
+		else: # PySys >=2.0 JSON approach
+			try:
+				config = json.loads(text)
+				if not config: return []
+				if not isinstance(config[0], list): config = [config] # allow a simple one-dimensional list of modes
+				assert isinstance(config, list), 'Expecting a [...] list of {"mode-name": {... } } dicts'
+				assert not modesNode.getAttribute('inherit'), 'inherit attribute cannot be used with the modern JSON-based modes configuration'
 
-			# check that params are the same in each one to avoid mistakes
-			if result:
-				expectedparams = sorted(next(iter(result.values())).keys())
-				for mode, params in result.items():
-					if sorted(params.keys()) != expectedparams:
-						raise UserError('The same mode parameter keys must be given for each mode under <modes>, but found %s != %s in "%s"'%(sorted(params.keys()), expectedparams, self.file))
+				result = {} # key=mode name value=params
+				for dimension in config:
+					prevModesForCombining = None if not result else result
 
-			primary = modesNode.getAttribute('primary')
-			if primary: # put the primary first if explicitly configured
-				if primary not in result: raise UserError('Cannot find the specified primary mode "%s" in [%s] while loading "%s"'%(primary, ', '.join(result.keys()), self.file)) 
-				result = {m: result[m] for m in sorted(result.keys(), key=lambda m: m != primary)}
-			
-			if prevModesForCombining is not None:
-				if not result or not prevModesForCombining:
-					result = prevModesForCombining or result
-				else:
-					# create the cross-product of these two mode matrices, i.e. result = prevModesForCombining * result
-					newModes = result
 					result = {}
-					for modeA, paramsA in prevModesForCombining.items():
-						for modeB, paramsB in newModes.items():
-							params = dict(paramsA)
-							params.update(paramsB) # newer "B" params take precedence if any keys as the same
-							result[modeA+'_'+modeB] = params
+					for mode in dimension:
+						if mode == 'inherit':
+							for mode in self.defaults.modes:
+								result[mode] = mode.params
+							continue
+						assert isinstance(mode, dict), 'Expecting {...} in each mode dimension but found %r'%mode
+						
+						# else it's a dict of params
+						for param in mode: assert not param.startswith('_'), 'Invalid parameter name "%s"; mode parameterscannot start with _'%(param)
 
-			exclude = modesNode.getAttribute('exclude')
-			if exclude:
-				project = pysys.config.project.Project.getInstance()
-				result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(exclude, 
-						extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
+						modeString = mode.pop('mode', None)
+						if not modeString:
+							if not mode: continue # nothing we can do with an empty one, just ignore
+
+							modeString = '_'.join(
+								'%s=%s'%(k, v) if (not isinstance(v, str) or re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE)) else v # include the key for numeric and boolean values
+								for (k,v) in mode.items())
+						
+						# Eliminate dodgy characters
+						badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
+						if badchars: 
+							log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
+								''.join(set(c for c in badchars)), modeString, self.file)
+						modeString = re.sub('[^%s]'%pysys.launcher.MODE_CHARS,'', modeString)
+						
+						if not modeString: raise UserError('Invalid mode: cannot be empty in \"%s\"'%self.file)
+						
+						modeString = modeString.strip().strip('_') # avoid leading/trailing _'s and whitespace, since we'll add them when composing modes
+
+						# Enforce consistent naming convention of initial caps
+						modeString = modeString[0].upper()+modeString[1:]
+
+						if modeString in result:
+							assert result[modeString] == mode, 'Cannot redefine mode "%s" with parameters %s different to previous parameters %s in "%s"'%(modeString, mode, result[modeString], self.file)
+						else:
+							result[modeString] = mode
+					# end for mode
+
+					# check that params are the same in each one to avoid mistakes
+					if result:
+						expectedparams = sorted(next(iter(result.values())).keys())
+						for mode, params in result.items():
+							if sorted(params.keys()) != expectedparams:
+								raise UserError('The same mode parameter keys must be given for each mode under <modes>, but found %s != %s in "%s"'%(sorted(params.keys()), expectedparams, self.file))
+
+					if prevModesForCombining is not None:
+						if not result or not prevModesForCombining:
+							result = prevModesForCombining or result
+						else:
+							# create the cross-product of these two mode matrices, i.e. result = prevModesForCombining * result
+							newModes = result
+							result = {}
+							for modeA, paramsA in prevModesForCombining.items():
+								for modeB, paramsB in newModes.items():
+									params = dict(paramsA)
+									params.update(paramsB) # newer "B" params take precedence if any keys as the same
+									result[modeA+'_'+modeB] = params
+									
+			except Exception as ex:
+				raise
+				raise UserError("Invalid modes configuration in %s: %s"%(self.file, ex))
+
+		# perform exclusions globally, using the specified Python lambda
+		if excluder:
+			project = pysys.config.project.Project.getInstance()
+			result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(f'( {excluder} )(mode)', 
+					extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
 
 		return [TestMode(k, params=v) for (k,v) in result.items()]
 
