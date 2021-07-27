@@ -7,13 +7,13 @@ import urllib.request, sys, gzip
 url, acceptencoding, auth = sys.argv[1:]
 
 request = urllib.request.Request(url)
-if acceptencoding:
+if acceptencoding != 'None':
 	request.add_header('Accept-encoding', acceptencoding)
 assert auth == 'None', 'Support for testing other auth types is not yet implemented ("%s")'%auth
 
 with urllib.request.urlopen(request) as r:
 	body = r.read()
-	assert r.headers.get('Content-encoding','') == acceptencoding, 'Got unexpected encoding: %r'%r.headers.get('Content-encoding')
+	assert r.headers.get('Content-encoding','None') == acceptencoding, 'Got unexpected encoding %r, expected %r'%(r.headers.get('Content-encoding'), acceptencoding)
 	if r.headers.get('Content-encoding','') == 'gzip':
 		body = gzip.decompress(body)
 
