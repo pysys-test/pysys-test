@@ -11,8 +11,11 @@
 
   <classification>
   
-		<modes modeNamePattern="!!!"> <!-- only characters that will be stripped -->
-			<mode param1="x" param2="y"/>
+		<modes>
+			[
+				{'mode':"MyMode"},
+				{'mode':"MyMode"}
+			]
 		</modes>
 		
   </classification>

@@ -624,17 +624,8 @@ class _XMLDescriptorParser(object):
 				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
 				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode)
 
-				if modeString in current:
-					assert current[modeString] == params, 'Cannot redefine mode "%s" with parameters %s different to previous parameters %s'%(modeString, params, current[modeString])
-				else:
-					current[modeString] = mode
+				current[modeString] = mode
 			# end for mode
-
-			# check that params are the same in each one to avoid mistakes
-			if current:
-				expectedparams = sorted(next(iter(current.values())).keys())
-				for mode, params in current.items():
-					assert sorted(params.keys()) == expectedparams, 'The same mode parameter keys must be given for each mode under <modes>, but found %s != %s'%(sorted(params.keys()), expectedparams)
 
 			if prevModesForCombining is not None:
 				if not current or not prevModesForCombining:
@@ -704,11 +695,12 @@ class _XMLDescriptorParser(object):
 						'INHERITED_MODES': [{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
 						'project': self.project})
 			
-			assert isinstance(modes, list), 'Expecting a list of modes, got a %s %r'%(modes.__class__.__name__, modes)
+			assert isinstance(modes, list), 'Expecting a list of modes, got a %s: %r'%(modes.__class__.__name__, modes)
 			assert not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'
 			
 			result = []
 			already = set()
+			expectedparams = None
 			for m in modes:
 				modeString, params = self.splitModeNameAndParams(m)
 			
@@ -723,7 +715,7 @@ class _XMLDescriptorParser(object):
 				
 				assert modeString, 'Invalid mode: cannot be empty'
 				assert '__' not in modeString, 'Invalid mode "%s" cannot contain double underscore'%modeString
-				
+
 				# Enforce consistent naming convention of initial caps
 				modeString = modeString[0].upper()+modeString[1:]
 			
@@ -731,6 +723,12 @@ class _XMLDescriptorParser(object):
 				already.add(modeString)
 				for p in params:
 					assert not p.startswith('_'), 'Illegal mode parameter name - cannot start with underscore: %s'%p
+
+
+			# check that params are the same in each one to avoid mistakes
+				if expectedparams is None: expectedparams = sorted(params.keys())
+				assert sorted(params.keys()) == expectedparams, f'The same mode parameter keys must be given for every mode in the list, but found {sorted(params.keys())} parameters for "{modeString}" different to {expectedparams}'
+
 				result.append(TestMode(modeString, params))
 			return result
 

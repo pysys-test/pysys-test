@@ -3,8 +3,8 @@
 
   <classification>
   
-		<modes>
-			<mode paramName="inheritedValue">MyMode</mode>
+		<modes inherit="false">
+			[]
 		</modes>
 		
   </classification>
