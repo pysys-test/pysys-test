@@ -113,7 +113,7 @@ the cookbook sample)::
 		</maker-template>
 
 	</pysysdirconfig>
-	
+
 You can copy files from an absolute location such as somewhere under your project's ``${testRootDir}``, from the 
 PySys default template (if you just want to add files) using ``${pysysTemplatesDir}/default-test/*``, or from a path relative 
 to the XML file where the template is defined. This could be a ``_pysys_templates/`` directory alongside this XML file, 
@@ -158,49 +158,44 @@ More powerful test modes
 ------------------------
 This PySys release adds some big usability improvements for defining and using modes:
 
-- Each mode can now define any number of 'parameters' to avoid the need to parse/unpack from the mode string itself; 
-  these can then be accessed as field on the test object or from a ``self.mode.params`` dictionary. 
-  The mode name can be automatically generated from the parameters via a pattern, or provided explicitly. 
-  Note that for optimal readability with parameters the recommended way to specify a mode is now 
-  ``<mode mode="MyMode" ... />`` rather than ``<mode>MyMode</mode>``. 
-- Multi-dimensional modes can be easily created by specifying multiple ``<modes>`` elements, which generates new 
-  modes containing every combination of the modes from each ``<modes>`` element. 
-- The primary mode can be explicitly specified as an attribute, so you don't have to rely on making it the first 
-  (which is especially useful when changing the primary mode when you're using inherited modes). 
-- A new ``exclude=`` parameter allows inherited modes to be excluded in tests where you don't want them (without 
-  having to set inherit=false and re-define all the parent ones), and also to implement dynamic logic to exclude 
-  modes, for example based on the current operating system, or project properties. You can use any valid Python 
-  expression; see `pysys.utils.safeeval.safeEval` for details. 
-
-Here's an example which demonstrates some of the new functionality:
+A more powerful and flexible configuration format is now provided for defining modes, which uses a Python 
+eval string to provide the list of modes. Each mode can now define any number of 'parameters' to avoid the need to 
+parse/unpack from the mode string itself; these can then be accessed from a ``self.mode.params`` dictionary. 
+The mode name can be automatically generated from the parameters, or provided explicitly. 
 
 .. code-block:: xml
 	
-	<classification>
-		<modes inherit="true" primary="CompressionNone">
-			<mode mode="CompressionNone" compressionType=""     someOtherParam="True"/>
-			<mode mode="CompressionGZip" compressionType="gzip" someOtherParam="False"/>
+		<modes>
+			INHERITED_MODES+[
+				{'mode':'CompressionGZip', 'compressionType':'gzip'},
+			]
 		</modes>
-		
-		<!-- If multiple modes nodes are present, new modes are created for all combinations -->
-		
-		<modes modeNamePattern="Auth={auth}" exclude="mode.params['auth'] == 'OS' and sys.platform != 'MyFunkyOS'">
-			<mode auth="None"/>
-			<mode auth="OS"/>
-		</modes>
-	</classification>
 
-Assuming you're running on (the fictional) "MyFunkyOS" (to avoid triggering the exclude) this multi-dimensional 
-configuration will create the following modes::
+There is also a helper function provided to combine multiple mode "dimensions" together, for example every combination 
+of your supported databases and your supported web browsers. This allows for some quite sophisticated logic to 
+generate the mode list such as:
 
-	CompressionNone_Auth=None
-	CompressionGZip_Auth=None
-	CompressionNone_Auth=OS
-	CompressionGZip_Auth=OS
+.. code-block:: xml
+	
+	<modes>
+		[mode for mode in 
+			combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				INHERITED_MODES+[
+						{'mode':'CompressionNone', 'compressionType':None},
+						{'mode':'CompressionGZip', 'compressionType':'gzip'},
+				], 
+				[
+					{'auth':None}, # Mode name is optional
+					{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
+				]) 
+			# This is a Python list comprehension syntax for filtering the items in the list
+			if mode['auth'] != 'OS' or sys.platform == 'MyFunkyOS'
+		]
+	</modes>
 
 For more details see :doc:`TestDescriptors`, :doc:`UserGuide` and the Getting Started sample. 
 
-There are also improvements to pysys.py's mode support:
+There are also improvements to pysys.py's command line mode support:
 
 - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 
   a desired subset of modes.    
@@ -395,6 +390,8 @@ Deprecations:
     release. 
   - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. 
   - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
+  - The old ``<mode>`` elements are deprecated in favour of the new Python eval string syntax 
+    (support for these they won't be removed any time soon, but are discouraged for new tests). 
   - The ``ConsoleMakeTestHelper`` class is now deprecated in favour of `pysys.launcher.console_maker.DefaultTestMaker`. 
 
 

@@ -305,17 +305,16 @@ or a set of tests that should be run against various different database but
 can also be run against a mocked database for quick local development. 
 
 Using modes is fairly straightforward. First edit the ``pysystest.xml`` files for tests that 
-need to run in multiple modes, and add a list of the supported modes:
+need to run in multiple modes, and add a list of the supported modes by providing a Python 
+code snippet that will be evaluated when the test descriptors are loaded:
 
 .. code-block:: xml
 	
-	<classification>
-		<groups>...</groups>
-		<modes inherit="true">
-			<mode mode="MockDatabase"/>
-			<mode mode="MyRealDatabase2.0"/>
+		<modes>
+			INHERITED_MODES+[
+				{'mode':'CompressionGZip', 'compressionType':'gzip'},
+			]
 		</modes>
-	</classification>
 
 When naming modes, TitleCase is recommended, and dot, underscore and equals characters 
 may be used; typically dot is useful for version numbers and underscore is 
@@ -326,90 +325,74 @@ result in test bugs.
 
 In large projects you may wish to configure modes in a ``pysysdirconfig.xml`` 
 file in a parent directory rather than in ``pysystest.xml``, which will by 
-default be inherited by all nested testcases (unless ``inherit="false"`` is 
-specified in the ``<modes>`` element or using multi-dimensional modes as below), 
-and so there's a single place to edit the modes list if you need to change them 
-later. 
-
-For advanced cases it is also possible to create a custom 
-`pysys.config.descriptor.DescriptorLoader` subclass that dynamically 
-adds modes from Python code, perhaps based on the groups specified in each descriptor 
-or runtime information such as the current operating system.  
+default be inherited by all nested testcases (unless an explicit ``<modes>`` 
+configuration is provided), and so there's a single place to edit the modes 
+list if you need to change them later. 
 
 The first mode listed is designated the "primary" mode which means it's the 
 one that is used by default when running your tests without a ``--mode`` 
 argument. It's best to choose either the fastest mode or else the one that 
-is most likely to show up interesting issues as the primary mode. It is also 
-possible to override the primary mode using the attribute "primary=".
+is most likely to show up interesting issues as the primary mode.
 
-Sometimes your modes will have multiple dimensions, such as database and web browser, 
-or HTTP compression and authentication type.
-You can either add separate ``<mode>`` elements for each combination you want, or 
-you can add a ``<modes>`` element for each dimension and PySys will combine all the 
-modes from each one. When using multi-dimensional modes you usually will want to 
-also specify parameters for each mode to make it easy to access the data from 
-your testcase. Here is an example of multi-dimensional modes (taken from the 
-getting-started sample):
+Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
+type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
+Rather than writing out every combination manually, you can use the helper function ``combineModeDimensions`` to 
+automatically generate the combinations, passing it each dimension (e.g. each compression type) as a separate list. 
+
+Here is an example of multi-dimensional modes (taken from the getting-started sample):
 
 .. code-block:: xml
 	
-	<classification>
-		<modes inherit="true" primary="CompressionNone">
-			<mode mode="CompressionNone" compressionType=""     someOtherParam="True"/>
-			<mode mode="CompressionGZip" compressionType="gzip" someOtherParam="False"/>
-		</modes>
-		
-		<!-- If multiple modes nodes are present, new modes are created for all combinations -->
-		
-		<modes modeNamePattern="Auth={auth}" exclude="mode.params['auth'] == 'OS' and sys.platform != 'MyFunkyOS'">
-			<mode auth="None"/>
-			<mode auth="OS"/>
-		</modes>
-	</classification>
+	<modes>
+		[mode for mode in 
+			combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+				INHERITED_MODES+[
+						{'mode':'CompressionNone', 'compressionType':None},
+						{'mode':'CompressionGZip', 'compressionType':'gzip'},
+				], 
+				[
+					{'auth':None}, # Mode name is optional
+					{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
+				]) 
+			# This is a Python list comprehension syntax for filtering the items in the list
+			if mode['auth'] != 'OS' or sys.platform == 'MyFunkyOS'
+		]
+	</modes>
 
 This will create the following modes::
 
 	CompressionNone_Auth=None
 	CompressionGZip_Auth=None
-	CompressionNone_Auth=OS
-	CompressionGZip_Auth=OS
-
-However the ``exclude=`` attribute will prevent the Auth=OS modes from being added on some 
-operation systems (in this example, on all real operating systems). You can use any Python eval 
-string for the exclude; see `pysys.utils.safeeval.safeEval` for details on the constants and modules 
-you can use. 
+	CompressionNone_OS
+	CompressionGZip_OS
 
 When creating multi-dimensional modes you can explicitly specify the name of each mode using ``mode=``, but 
-if you want to avoid repeating the value of your parameters you can also specify a ``modeNamePattern=`` 
-attribute containing ``{param}`` strings to be expanded with the values of any parameters. Alternatively you can 
-let PySys generate a default mode by taking each parameter concatenated with ``_``; parameters with numeric or 
-boolean values are additionally qualified with ``paramName=`` to make the meaning clear. 
+if you want to avoid repeating the value of your parameters you can let PySys generate a default mode, which 
+it does by taking each parameter concatenated with ``_``; parameters with non-string values (e.g. ``None`` in 
+the above example) are additionally qualified with ``paramName=`` to make the meaning clear. 
+
+The above example also shows how a Python list comprehension can be used to filter prevent the Auth=OS modes 
+from being added on some operation systems (in this example, on all non-fitionaloperating systems). 
+
+See `pysys.utils.safeeval.safeEval` for details on the constants and modules you can use in the modes 
+configuration. 
 
 You can find the mode that this test is running in using `self.mode <BaseTest>`, which returns an instance of 
 `pysys.config.descriptor.TestMode` that subclasses a ``str`` of the mode name, as well as the parameters 
-via a ``params`` field. This is useful if there is a chance of naming conflicts with other fields in the test 
-class, but if your parameter names are distinctive enough to avoid collisions, you can also safely use the fact 
-that PySys will set a ``self.param`` value on the test object (with automatic conversion to number/boolean if a 
-static field of that name and type already exists on the test class). 
+via a ``params`` field. 
 
-To ensure typos and inconsistencies in individual test descriptor modes do 
-no go unnoticed, it is best to provide constants for the possible mode values 
-and/or do validation and unpacking of modes in a test plugin like this::
+Here's an example showing how a test plugin might use modes configuration to configure the test object 
+during test setup::
 
 	class MyTestPlugin(object):
 		def setup(self, testObj):
-			# Validate mode parameter
-			assert testObj.compressionType in ['', 'gzip'], testObj.compressionType
-			# Or to guarantee no naming conflicts, could do:
-			assert testObj.mode.params.compressionType in ['', 'gzip'], testObj.mode.params.compressionType
-			
 			# This is a convenient pattern for specifying the method or class 
 			# constructor to call for each mode, and to get an exception if an 
 			# invalid mode is specified
 			dbHelperFactory = {
 				'MockDatabase': MockDB,
 				'MyDatabase2.0': lambda: self.startMyDatabase('2.0')
-			}[testObj.databaseMode]
+			}[testObj.mode.params['database']]
 			...
 			# Call the supplied method to start/configure the database
 			testObj.db = dbHelperFactory() 

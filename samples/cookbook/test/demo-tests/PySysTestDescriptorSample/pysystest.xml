@@ -56,7 +56,7 @@
 	A simple example is:
 		<modes>
 			INHERITED_MODES+[
-				{'mode':'CompressionGZip'}
+				{'mode':'CompressionGZip', 'compressionType':'gzip'},
 			]
 		</modes>
 	
@@ -69,9 +69,10 @@
 	The first listed mode is the "primary" mode, which is the one that is used by default when executing tests with 
 	no ``-m`` argument. 
 	
-	It's often useful to combine multiple 'dimensions', for example all the combinations of a list of web browsers with 
-	a list of databases, or compression methods and authentication types. Rather than writing out every combination 
-	manually, you can use the helper function ``combineModeDimensions`` to automatically generate the combinations. 
+	Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
+	type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
+	Rather than writing out every combination manually, you can use the helper function ``combineModeDimensions`` to 
+	automatically generate the combinations, passing it each dimension (e.g. each compression type) as a separate list. 
 
 	Modes can be used to define similar subtests that share the same test class logic, for example testing your 
 	application's output when given various different input test vectors. For this common use case, if you already (or 
@@ -90,7 +91,7 @@
 				], 
 				[
 					{'auth':None}, # Mode name is optional
-					{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS isn't a real OS
+					{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
 				]) 
 			# This is a Python list comprehension syntax for filtering the items in the list
 			if mode['auth'] != 'OS' or sys.platform == 'MyFunkyOS'

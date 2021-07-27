@@ -103,7 +103,7 @@
 				], 
 				[
 					{'auth':None}, # Mode name is optional
-					{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS isn't a real OS
+					{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
 				]) 
 			# This is a Python list comprehension syntax for filtering the items in the list
 			if mode['auth'] != 'OS' or sys.platform == 'MyFunkyOS'
