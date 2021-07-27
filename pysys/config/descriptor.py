@@ -605,112 +605,132 @@ class _XMLDescriptorParser(object):
 		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
 		return groupList
 	
-				
+		
+	@staticmethod 
+	def combineModeDimensions(*dimensions):
+		"""
+		Returns a list containing the product of the specified mode dimensions.
+		
+		Each input is a list of dicts. 
+		"""
+		if len(dimensions) == 1: return dimensions[0]
+		
+		current = {} # key=mode name value=params
+		for dimension in dimensions:
+			prevModesForCombining = None if not current else current
+
+			current = {}
+			for mode in dimension:
+				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
+				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode)
+
+				if modeString in current:
+					assert current[modeString] == params, 'Cannot redefine mode "%s" with parameters %s different to previous parameters %s'%(modeString, params, current[modeString])
+				else:
+					current[modeString] = mode
+			# end for mode
+
+			# check that params are the same in each one to avoid mistakes
+			if current:
+				expectedparams = sorted(next(iter(current.values())).keys())
+				for mode, params in current.items():
+					assert sorted(params.keys()) == expectedparams, 'The same mode parameter keys must be given for each mode under <modes>, but found %s != %s'%(sorted(params.keys()), expectedparams)
+
+			if prevModesForCombining is not None:
+				if not current or not prevModesForCombining:
+					current = prevModesForCombining or current
+				else:
+					newModes = current
+					current = {}
+					for modeA, paramsA in prevModesForCombining.items():
+						for modeB, paramsB in newModes.items():
+							params = dict(paramsA)
+							params.update(paramsB) # newer "B" params take precedence if any keys as the same
+							current[modeA.strip('_')+'_'+modeB.strip('_')] = params
+		return [{**{'mode':modeString}, **params} for modeString, params in current.items()]
+
+
+	@staticmethod 
+	def splitModeNameAndParams(mode):
+		"""
+		Returns (modename, params). Auto-generates a mode name if one is not already provided. 
+		"""
+		assert isinstance(mode, dict), 'Expecting mode dict but got %r'%mode
+		modeString = mode.pop('mode', None)
+		if modeString: return modeString, mode
+
+		# Auto-generate mode string
+		
+		assert len(mode) != 0, 'Must provide a name and/or params for every mode dictionary'
+		modeString = '_'.join(
+			'%s=%s'%(k, v) if (not isinstance(v, str) or re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE)) else v # include the key for numeric and boolean values
+			for (k,v) in mode.items())
+		
+		modeString = modeString.strip('_') # avoid leading/trailing _'s
+
+		# Enforce consistent naming convention of initial caps
+		modeString = modeString[0].upper()+modeString[1:]
+
+		assert modeString, 'Mode name cannot be empty'
+		return modeString, mode
+		
 	def getModes(self):
 		modesNode = self.getSingleElement('modes', optionalParents=['classification'])
 		if not modesNode: return self.defaults.modes # by default we inherit
 		
-		excluder = modesNode.getAttribute('excluder')
-		
 		text = self.getText(modesNode)
-		if not text: # TODO: rework this to fall through to the following logic
+		if not text: # TODO: maybe this should just duplicate what we had before
 			# pre 2.0 XML approach
-			if (modesNode.getAttribute('inherit') or str(True)).lower()!='true': 
-				result = {}
-			else:
+			if (modesNode.getAttribute('inherit') or 'true').lower()=='true': 
 				result = {m:m.params for m in self.defaults.modes}
+			else:
+				result = {}
 			for node in modesNode.getElementsByTagName('mode'):
-				params = {}
-				for param, paramvalue in node.attributes.items():
-					if param == 'mode': continue 
-					assert not param.startswith('_'), 'Parameter names cannot start with _'
-					params[param] = paramvalue
-			
 				modeString = node.getAttribute('mode') or self.getText(node)
 				if modeString: 
-					result[modeString] = params
+					result[modeString] = {}
+			return [TestMode(k, params=v) for (k,v) in result.items()]
+
 		else: # PySys >=2.0 JSON approach
 			try:
-				config = json.loads(text)
-				if not config: return []
-				if not isinstance(config[0], list): config = [config] # allow a simple one-dimensional list of modes
-				assert isinstance(config, list), 'Expecting a [...] list of {"mode-name": {... } } dicts'
-				assert not modesNode.getAttribute('inherit'), 'inherit attribute cannot be used with the modern JSON-based modes configuration'
-
-				result = {} # key=mode name value=params
-				for dimension in config:
-					prevModesForCombining = None if not result else result
-
-					result = {}
-					for mode in dimension:
-						if mode == 'inherit':
-							for mode in self.defaults.modes:
-								result[mode] = mode.params
-							continue
-						assert isinstance(mode, dict), 'Expecting {...} in each mode dimension but found %r'%mode
-						
-						# else it's a dict of params
-						for param in mode: assert not param.startswith('_'), 'Invalid parameter name "%s"; mode parameterscannot start with _'%(param)
-
-						modeString = mode.pop('mode', None)
-						if not modeString:
-							if not mode: continue # nothing we can do with an empty one, just ignore
-
-							modeString = '_'.join(
-								'%s=%s'%(k, v) if (not isinstance(v, str) or re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE)) else v # include the key for numeric and boolean values
-								for (k,v) in mode.items())
-						
-						# Eliminate dodgy characters
-						badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
-						if badchars: 
-							log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
-								''.join(set(c for c in badchars)), modeString, self.file)
+				
+				modes = pysys.utils.safeeval.safeEval(text, 
+						extraNamespace={
+							'combineModeDimensions':self.combineModeDimensions, 
+							'INHERITED_MODES': [{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
+							'project': self.project})
+				
+				assert isinstance(modes, list), 'Expecting a list of modes, got a %s %r'%(modes.__class__.__name__, modes)
+				
+				result = []
+				already = set()
+				for m in modes:
+					modeString, params = self.splitModeNameAndParams(m)
+				
+					# Eliminate dodgy characters
+					badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
+					if badchars: 
+						log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
+							''.join(set(c for c in badchars)), modeString, self.file)
 						modeString = re.sub('[^%s]'%pysys.launcher.MODE_CHARS,'', modeString)
-						
-						if not modeString: raise UserError('Invalid mode: cannot be empty in \"%s\"'%self.file)
-						
-						modeString = modeString.strip().strip('_') # avoid leading/trailing _'s and whitespace, since we'll add them when composing modes
 
-						# Enforce consistent naming convention of initial caps
-						modeString = modeString[0].upper()+modeString[1:]
+					modeString = modeString.strip().strip('_') # avoid leading/trailing _'s and whitespace, since we'll add them when composing modes
+					
+					assert modeString, 'Invalid mode: cannot be empty'
+					assert '__' not in modeString, 'Invalid mode "%s" cannot contain double underscore'%modeString
+					
+					# Enforce consistent naming convention of initial caps
+					modeString = modeString[0].upper()+modeString[1:]
+				
+					assert modeString not in already, 'Duplicate mode "%s"'%modeString
+					already.add(modeString)
+					for p in params:
+						assert not p.startswith('_'), 'Illegal mode parameter name - cannot start with underscore: %s'%p
+					result.append(TestMode(modeString, params))
+				return result
 
-						if modeString in result:
-							assert result[modeString] == mode, 'Cannot redefine mode "%s" with parameters %s different to previous parameters %s in "%s"'%(modeString, mode, result[modeString], self.file)
-						else:
-							result[modeString] = mode
-					# end for mode
-
-					# check that params are the same in each one to avoid mistakes
-					if result:
-						expectedparams = sorted(next(iter(result.values())).keys())
-						for mode, params in result.items():
-							if sorted(params.keys()) != expectedparams:
-								raise UserError('The same mode parameter keys must be given for each mode under <modes>, but found %s != %s in "%s"'%(sorted(params.keys()), expectedparams, self.file))
-
-					if prevModesForCombining is not None:
-						if not result or not prevModesForCombining:
-							result = prevModesForCombining or result
-						else:
-							# create the cross-product of these two mode matrices, i.e. result = prevModesForCombining * result
-							newModes = result
-							result = {}
-							for modeA, paramsA in prevModesForCombining.items():
-								for modeB, paramsB in newModes.items():
-									params = dict(paramsA)
-									params.update(paramsB) # newer "B" params take precedence if any keys as the same
-									result[modeA+'_'+modeB] = params
-									
 			except Exception as ex:
-				raise
 				raise UserError("Invalid modes configuration in %s: %s"%(self.file, ex))
-
-		# perform exclusions globally, using the specified Python lambda
-		if excluder:
-			project = pysys.config.project.Project.getInstance()
-			result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(f'( {excluder} )(mode)', 
-					extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
-
-		return [TestMode(k, params=v) for (k,v) in result.items()]
 
 				
 	def getClassDetails(self):

@@ -11,7 +11,8 @@ class PySysTest(BaseTest):
 		self.log.info('Mode=%s class=%s and params=%s', self.mode, self.mode.__class__.__name__, self.mode.params)
 		self.log.info('Test field browser=%r'%self.browser)
 		self.log.info('Test field maxHours=%r'%self.maxHours)
-		
+		self.log.info('Test field iterations=%r'%self.iterations)
+	
 		self.addOutcome(PASSED, 'All ok')
 
 	def validate(self):
