@@ -380,6 +380,8 @@ affect many users:
     Although this should not immediately break existing applications, to avoid future breaking changes you should 
     update the signature of those methods if you override them to accept ``testobj`` and also any artibrary 
     ``**kwargs`` that may be added in future. 
+  - The ``--json`` output mode of ``pysys.py print`` now has a dict representing the modes and their parameters 
+    instead of a simple list. 
 
 Deprecations:
 

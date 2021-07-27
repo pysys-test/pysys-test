@@ -16,13 +16,7 @@
       ],
       "authors": [],
       "created": null,
-      "modes": [
-         "root-mode1",
-         "root-mode2",
-         "dir2-mode",
-         "dir3-mode"
-      ],
-      "modeParameters": {
+      "modes": {
          "root-mode1": {},
          "root-mode2": {},
          "dir2-mode": {},
@@ -71,13 +65,7 @@
          "author 2"
       ],
       "created": "1999-12-31",
-      "modes": [
-         "root-mode1",
-         "root-mode2",
-         "testcase-mode1",
-         "testcase-mode2"
-      ],
-      "modeParameters": {
+      "modes": {
          "root-mode1": {},
          "root-mode2": {},
          "testcase-mode1": {},
@@ -122,11 +110,7 @@
       ],
       "authors": [],
       "created": null,
-      "modes": [
-         "root-mode1",
-         "root-mode2"
-      ],
-      "modeParameters": {
+      "modes": {
          "root-mode1": {},
          "root-mode2": {}
       },
@@ -163,10 +147,7 @@
       ],
       "authors": [],
       "created": null,
-      "modes": [
-         "TestSpecificMode"
-      ],
-      "modeParameters": {
+      "modes": {
          "TestSpecificMode": {}
       },
       "primaryMode": "TestSpecificMode",

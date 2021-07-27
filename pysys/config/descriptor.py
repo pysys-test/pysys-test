@@ -203,8 +203,7 @@ class TestDescriptor(object):
 		d['groups'] = self.groups
 		d['authors'] = self.authors
 		d['created'] = self.created
-		d['modes'] = self.modes
-		d['modeParameters'] = {str(m):m.params for m in self.modes}
+		d['modes'] = {str(m):m.params for m in self.modes}
 		d['primaryMode'] = self.primaryMode
 		if hasattr(self, 'mode'): d['mode'] = self.mode 
 		d['requirements'] = self.traceability
