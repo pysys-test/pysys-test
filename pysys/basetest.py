@@ -57,7 +57,8 @@ class BaseTest(ProcessUser):
 		self.reference = os.path.join(descriptor.testDir, descriptor.reference)
 		self.runner = runner
 		self.mode = descriptor.mode
-		if self.mode is not None and getattr(self.mode, 'params', None): self.setKeywordArgs(self.mode.params)
+		# NB: we don't set self.mode.params as keyword arguments since it'd be easy to overwrite a class/instance 
+		# variable unintentionally with unpredictable results; accessing explicitly with self.mode is fine 
 		self.setKeywordArgs(self.descriptor.userData)
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []

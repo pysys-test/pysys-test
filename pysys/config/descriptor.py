@@ -681,56 +681,61 @@ class _XMLDescriptorParser(object):
 		text = self.getText(modesNode)
 		if not text: # TODO: maybe this should just duplicate what we had before
 			# pre 2.0 XML approach
-			if (modesNode.getAttribute('inherit') or 'true').lower()=='true': 
-				result = {m:m.params for m in self.defaults.modes}
-			else:
-				result = {}
+			
+			result = {}
 			for node in modesNode.getElementsByTagName('mode'):
 				modeString = node.getAttribute('mode') or self.getText(node)
 				if modeString: 
 					result[modeString] = {}
-			return [TestMode(k, params=v) for (k,v) in result.items()]
+			
+			if (modesNode.getAttribute('inherit') or 'true').lower() == 'true':
+				# This logic is intended to preserve primary inherited modes; it's a bit weird, but keeping it the same for compatibility
+				inherited = [x for x in self.defaults.modes if x not in result]
+			else: 
+				inherited = []
 
-		else: # PySys >=2.0 JSON approach
-			try:
-				
-				modes = pysys.utils.safeeval.safeEval(text, 
-						extraNamespace={
-							'combineModeDimensions':self.combineModeDimensions, 
-							'INHERITED_MODES': [{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
-							'project': self.project})
-				
-				assert isinstance(modes, list), 'Expecting a list of modes, got a %s %r'%(modes.__class__.__name__, modes)
-				
-				result = []
-				already = set()
-				for m in modes:
-					modeString, params = self.splitModeNameAndParams(m)
-				
-					# Eliminate dodgy characters
-					badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
-					if badchars: 
-						log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
-							''.join(set(c for c in badchars)), modeString, self.file)
-						modeString = re.sub('[^%s]'%pysys.launcher.MODE_CHARS,'', modeString)
+			return inherited+[TestMode(k, params=v) for (k,v) in result.items()]
+			
+		# The modern PySys 2.0+ approach with a Python eval string
+		try:
+			modes = pysys.utils.safeeval.safeEval(text, 
+					extraNamespace={
+						'combineModeDimensions':self.combineModeDimensions, 
+						'INHERITED_MODES': [{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
+						'project': self.project})
+			
+			assert isinstance(modes, list), 'Expecting a list of modes, got a %s %r'%(modes.__class__.__name__, modes)
+			assert not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'
+			
+			result = []
+			already = set()
+			for m in modes:
+				modeString, params = self.splitModeNameAndParams(m)
+			
+				# Eliminate dodgy characters
+				badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
+				if badchars: 
+					log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
+						''.join(set(c for c in badchars)), modeString, self.file)
+					modeString = re.sub('[^%s]'%pysys.launcher.MODE_CHARS,'', modeString)
 
-					modeString = modeString.strip().strip('_') # avoid leading/trailing _'s and whitespace, since we'll add them when composing modes
-					
-					assert modeString, 'Invalid mode: cannot be empty'
-					assert '__' not in modeString, 'Invalid mode "%s" cannot contain double underscore'%modeString
-					
-					# Enforce consistent naming convention of initial caps
-					modeString = modeString[0].upper()+modeString[1:]
+				modeString = modeString.strip().strip('_') # avoid leading/trailing _'s and whitespace, since we'll add them when composing modes
 				
-					assert modeString not in already, 'Duplicate mode "%s"'%modeString
-					already.add(modeString)
-					for p in params:
-						assert not p.startswith('_'), 'Illegal mode parameter name - cannot start with underscore: %s'%p
-					result.append(TestMode(modeString, params))
-				return result
+				assert modeString, 'Invalid mode: cannot be empty'
+				assert '__' not in modeString, 'Invalid mode "%s" cannot contain double underscore'%modeString
+				
+				# Enforce consistent naming convention of initial caps
+				modeString = modeString[0].upper()+modeString[1:]
+			
+				assert modeString not in already, 'Duplicate mode "%s"'%modeString
+				already.add(modeString)
+				for p in params:
+					assert not p.startswith('_'), 'Illegal mode parameter name - cannot start with underscore: %s'%p
+				result.append(TestMode(modeString, params))
+			return result
 
-			except Exception as ex:
-				raise UserError("Invalid modes configuration in %s: %s"%(self.file, ex))
+		except Exception as ex:
+			raise UserError("Invalid modes configuration in %s: %s"%(self.file, ex))
 
 				
 	def getClassDetails(self):

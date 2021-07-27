@@ -3,19 +3,11 @@ from pysys.constants import *
 
 class PySysTest(pysys.basetest.BaseTest):
 
-	compressionType = None 
-	""" This test can be run in multiple modes. The self.mode string indicates which one we're executing, but 
-	usually it's easier to use the fact that any parameters defined on the mode are set on the test object 
-	(and also available as self.mode.params). So compressionType will be set on the test object based on which 
-	mode we're running under. """
-	
-	auth = None
-
 	def execute(self):
 		server = self.myserver.startServer(name="my_server")
 		
 		self.startPython([self.input+'/httpget.py', 
-			f'http://127.0.0.1:{server.info["port"]}/sensorValues', self.compressionType, self.auth], stdouterr='sensorValues')
+			f'http://127.0.0.1:{server.info["port"]}/sensorValues', self.mode.params['compressionType'], self.mode.params['auth']], stdouterr='sensorValues')
 
 	def validate(self):	
 		self.logFileContents('sensorValues.out', maxLines=0) 

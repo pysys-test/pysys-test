@@ -2,7 +2,7 @@
 <pysystest>
 	
 	<description> 
-		<title>Demo of pysysdirconfig.xml</title>		
+		<title>Demo of pysysdirconfig.xml (test that adds to inherited directory modes)</title>		
 		<purpose><![CDATA[
 		]]></purpose>
 	</description>
@@ -17,8 +17,10 @@
 		<groups inherit="true">
 			<group>dirConfigSample</group>
 		</groups>
-		<modes inherit="true">
-			<mode mode="CompressionNone_Auth=Basic" compressionType="" auth="AuthBasic"/>
+		<modes>
+			INHERITED_MODES+[
+				{'mode':'CompressionNone_Auth=Basic', 'compressionType':None, 'auth':'AuthBasic'}
+			]
 		</modes>
 	</classification>
 

@@ -15,10 +15,11 @@
 		<groups inherit="true">
 			<group></group>
 		</groups>
-		
-		<modes inherit="true">
-			<!-- For now we run this test in just one mode, but could add additional modes if desired. -->
-			<mode mode="CompressionGZip"/>
+
+		<modes>
+			INHERITED_MODES+[
+				{'mode':'CompressionGZip', 'compressionType':'gzip'},
+			]
 		</modes>
 	</classification>
 

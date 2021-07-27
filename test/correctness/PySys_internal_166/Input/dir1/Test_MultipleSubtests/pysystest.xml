@@ -19,7 +19,7 @@
 			INHERITED_MODES, 
 			[
 				<!-- this maxHours should override the earlier one in the parent dir -->
-				{"subtest":"subtest1", "iterations":"100", "maxHours":"-10"},
+				{"subtest":"subtest1", "iterations":"100", "maxHours":-10},
 				{"subtest":"subtest2", "iterations": 1000, "maxHours":-10},
 				{"subtest":"subtest2", "iterations": 1000, "maxHours":-10} <!-- exact dups are ignored -->
 			])

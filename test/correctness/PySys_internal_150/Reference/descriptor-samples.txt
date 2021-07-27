@@ -3,9 +3,9 @@ Test state:        skipped
 Test skip reason:  These tests are skipped until bug XYZ is fixed
 Test groups:       performance, disableCoverage, dirConfigSample
 Test modes:        
- --> CompressionNone_Auth=None  {compressionType='', auth='None'}
- --> CompressionGZip_Auth=None  {compressionType='gzip', auth='None'}
- --> CompressionNone_Auth=Basic {compressionType='', auth='AuthBasic'}
+ --> CompressionNone_Auth=None  {compressionType=None, auth=None}
+ --> CompressionGZip_Auth=None  {compressionType='gzip', auth=None}
+ --> CompressionNone_Auth=Basic {compressionType=None, auth='AuthBasic'}
 Test classname:    PySysTest; module: <rootdir>/pysys-extensions/MySharedTestClass.py
 Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
@@ -18,8 +18,8 @@ Test skip reason:  This test is skipped until bug XYZ is fixed
 Test created:      1999-12-31; authors: userid1, userid2, Joe Bloggs
 Test groups:       performance, disableCoverage
 Test modes:        
- --> CompressionNone_Auth=None {compressionType='', auth='None'}
- --> CompressionGZip_Auth=None {compressionType='gzip', auth='None'}
+ --> CompressionNone_Auth=None {compressionType=None, auth=None}
+ --> CompressionGZip_Auth=None {compressionType='gzip', auth=None}
 Test classname:    PySysTest; module: <rootdir>/pysys-extensions/MySharedTestClass.py
 Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput

@@ -33,5 +33,5 @@ class PySysTest(BaseTest):
 			self.assertThatGrep(f, 'Test field browser=(.*)', expected="'Firefox'")
 		
 			# should be set from the params and also coersed to a float based on the type of the existing instance field:
-			self.assertThatGrep(f, 'Test field maxHours=(.*)', expected='-10.0') 
+			self.assertThatGrep(f, 'Test field maxHours=(.*)', expected='-10') 
 		self.assertGrep('pysys-run-allmodes.out', 'Test field iterations=1000') # in SOME modes, this is a number (others a string)
