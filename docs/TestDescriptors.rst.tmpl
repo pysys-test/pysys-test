@@ -1,15 +1,52 @@
 Test Descriptors
 ================
 
-Each PySys test has a descriptor containing metadata about the test such as its title, the modes it can run in, 
-and the test groups it is part of. This information is all stored in a 
+Each PySys test has a file named ``pysystest.*`` which contains the test descriptor information such as the title, 
+whether it is skipped, modes it runs in, etc. This information is all stored in a 
 `TestDescriptor <pysys.config.descriptor.TestDescriptor>` instance, which can be accessed within each test using 
 ``self.descriptor``. 
+
+It is possible to configure the descriptor values in an XML file (``pysystest.xml``) separate to your Python 
+(e.g. ``run.py``) but it is recommended in modern PySys projects to put the descriptor information and your test code 
+into a single file, typically called ``pysystest.py``. 
+
+Sample pysystest.py
+-------------------
+
+Each descriptor value is populated with a ``__pysys_KEY__ = VALUE`` line. 
+
+.. code-block:: python
+@PYSYSTESTPYTHON@
+
+The descriptor values go at the start of the file, and are designed to look like ordinary Python string constants, but 
+for reasons of efficiency they are actually parsed out using a simpler mechanism well before the files are parsed and 
+imported by Python itself. So you are limited to a subset of the possible Python syntax::
+
+   __pysys_KEY__ = r""" Use this raw string format for multi-line values, and for anything where you might need 
+      to include a \ character or nested ' or " quotes. """
+      
+   __pysys_KEY__ = "Use this for single-line values where you don't need any backslash sequences."
+   
+   __pysys_KEY__ = True/False/-10.5 # simple primitive literals of these types are supported
+
+Any complex data structures must be wrapped in strings, and note that single-quoted strings aren't supported. 
+All descriptor values are read using UTF-8 (sticking to ASCII characters is recommended). 
+
+It is mandatory to provide a ``__pysys_title__`` value, but everything else is optional. For ease of readability and 
+performance it is best to use ``#`` to comment out any items where you aren't setting a (non-default) value. 
+
+A nice feature of the way these values are parsed is that it is completely possible to use the same syntax for 
+descriptors in non-Python files, for example ``pysystest.cs`` for C#/ECMAScript (either embedded within a C# comment 
+or as fields of your C# class). 
+
+Each PySys test has a descriptor containing metadata about the test such as its title, the modes it can run in, 
+and the test groups it is part of. 
 
 Sample pysystest.xml
 --------------------
 
-The following sample illustrates all the possible configuration options for a test's ``pysystest.xml`` file. 
+The following sample illustrates all the possible configuration options for a test's ``pysystest.*`` file when 
+using standalone XML, i.e. ``pysystest.xml``. 
 
 This is intended as a reference, and to provide somewhere to copy snippets from as needed. Do not copy the whole thing 
 into your own tests as this example contains many fields that are only used for advanced cases. Instead use 

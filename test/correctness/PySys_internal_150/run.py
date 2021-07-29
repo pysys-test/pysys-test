@@ -31,7 +31,8 @@ class PySysTest(BaseTest):
 		pysys('pysys-run-tests', runcmd.split(' '), ignoreExitStatus=True)
 		
 		pysys('pysys-print', ['print'], background=True)
-		pysys('pysys-print-descriptor-samples', ['print', '--full', 'PySysDirConfigSample', 'PySysTestDescriptorSample'], background=True)
+		pysys('pysys-print-descriptor-samples', ['print', '--full', 'PySysDirConfigSample', 'PySysTestXMLDescriptorSample', 'PySysTestPythonDescriptorSample'], background=True)
+		pysys('pysys-print-descriptor-samples-json', ['print', '--json', 'PySysDirConfigSample', 'PySysTestXMLDescriptorSample', 'PySysTestPythonDescriptorSample'], background=True)
 		pysys('pysys-run-help', ['run', '-h'], background=True)
 		self.waitForBackgroundProcesses()
 		
@@ -75,9 +76,11 @@ class PySysTest(BaseTest):
 
 		# Sample descriptors
 		self.assertDiff(self.copy('pysys-print-descriptor-samples.out', 'descriptor-samples.txt', mappers=[
-			lambda line: line if line.startswith(
-				tuple('Test id,Test state,Test skip reason,Test groups,Test created,Test modes,Test module,Test classname,Test input,Test output,Test reference,Test traceability,Test user data, -->'.split(','))
-			) else None,
+			lambda line: line.replace(os.sep, '/'),
+			# if (':' in line or '=' in line or '-->' in line) else None,
+			#lambda line: line if line.startswith(
+			#	tuple('Test id,Test state,Test skip reason,Test groups,Test created,Test modes,Test module,Test classname,Test input,Test output,Test reference,Test traceability,Test user data, -->'.split(','))
+			#) else None,
 			pysys.mappers.RegexReplace(' [^ ]+pysys-extensions', ' <rootdir>/pysys-extensions')]))
 		
 		# Test making

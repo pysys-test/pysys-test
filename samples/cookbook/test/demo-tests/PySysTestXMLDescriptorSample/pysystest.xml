@@ -3,13 +3,6 @@
 	authors="userid1, userid2, Joe Bloggs" created="1999-12-31"
 >
 	
-	<!-- Note that the most commonly used options can also be specified outside of the XML descriptor by adding 
-		__pysystest_XXX__ = """ ... """ on any blank line of your pysystest.* file, for example:
-		
-			__pysystest_authors__ = "userid1, userid2, Joe Bloggs"
-			__pysystest_created__ = "1999-12-31"
-	-->
-	
 	<!-- Test titles should be concise but give a clear idea of what is in scope for this testcase. 
 
 	Good titles make it easy to find the test you need even when you have 100s/1000s of tests. 
@@ -21,7 +14,7 @@
 	
 	The title can also be specified without XML as: __pysystest_title__ = """ ... """ 
 	-->
-	<title>My foobar tool: Argument parsing success and error cases</title>
+	<title>My foobar tool - Argument parsing success and error cases</title>
 
 	<!-- The purpose can also be specified without XML as: __pysystest_purpose__ = """ ... """
 	-->

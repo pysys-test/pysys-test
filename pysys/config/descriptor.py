@@ -17,7 +17,7 @@
 
 """
 The `TestDescriptor <pysys.config.descriptor.TestDescriptor>` class holds metadata for each testcase 
-(``pysystest.xml``) or directory (``pysysdirconfig.xml``), and the `DescriptorLoader <pysys.config.descriptor.DescriptorLoader>` 
+(``pysystest.*``) or directory (``pysysdirconfig.xml``), and the `DescriptorLoader <pysys.config.descriptor.DescriptorLoader>` 
 class allows customization of the test discovery process. 
 """
 
@@ -38,7 +38,7 @@ from pysys.utils.pycompat import PY2, isstring, openfile, makeReadOnlyDict
 log = logging.getLogger('pysys.config.descriptor')
 
 class TestDescriptor(object):
-	"""Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory 
+	"""Descriptor metadata for an individual testcase (``pysystest.*``) or defaults for tests under a directory 
 	subtree (``pysysdirconfig.xml``); see :doc:`../TestDescriptors`. 
 	
 	The `DescriptorLoader` class is responsible for determining the available 
@@ -472,27 +472,32 @@ class _XMLDescriptorParser(object):
 			
 			# Open in binary mode since we don't know the encoding - we'll rely on the XML header to tell us if it's anything unusual
 			with open(xmlfile, 'rb') as xmlhandle:
-				# must be at the start of a line, i.e. not after a comment
-				# we do allow raw strings
-				for m in re.finditer(
-						('(?:^|\\n)[ \\t]*%s *= *(?:(?P<rawstring>r)?('%(self.KV_PATTERN%'(?P<key>[^ =]+)')
-							+'|'.join([
-								'(?P<value1>(-?[0-9][0-9.-]+|[Tt]rue|[Ff]alse))', # number/boolean literal, would be a shame for it to have to be quoted
-								'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
-								'"(?P<value3>[^"]*)"',
-							])
-							+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
-							).encode('ascii'), 
-						xmlhandle.read(), flags=re.DOTALL): 
-					k = m.group('key').decode('ascii', errors='replace')
-					if k in self.kvDict: raise UserError('Duplicate key "{self.KV_PATTERN % k}__" in "{self.file}"')
-					value = m.group('value1') or m.group('value2') or m.group('value3')
-					if value is None:
-						raise UserError(f'Cannot parse the value for {self.KV_PATTERN % k} in {self.file}; after the "=" you should use r"""...""", "..." or a numeric/boolean literal')
-					if (not m.group('rawstring')) and b'\\' in value: raise UserError(f'Cannot use backslash escape sequences for {self.KV_PATTERN % k} value (unless using a raw r"""...""" string); cannot parse "{self.file}"')
-					if k != 'xml_descriptor': # we keep xml descriptors as bytes so we can use the correct encoding
-						value = value.decode('utf-8', errors='replace')
-					self.kvDict[k] = value
+				filecontents = xmlhandle.read()
+			# must be at the start of a line, i.e. not after a comment
+			# we do allow raw strings
+			for m in re.finditer(
+					(f'(?:^|\\n)[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
+						+'|'.join([
+							'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse))', # number/boolean literal, would be a shame for it to have to be quoted
+							'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
+							'"(?P<value3>[^"]*)"',
+						])
+						+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
+						).encode('ascii'), 
+					filecontents, flags=re.DOTALL): 
+				k = m.group('key').decode('ascii', errors='replace')
+				if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
+				k = k.rstrip('_')
+				
+				if k in self.kvDict: raise UserError('Duplicate key "{self.KV_PATTERN % k}__" in "{self.file}"')
+				value = m.group('value1') or m.group('value2') or m.group('value3')
+				if value is None:
+					raise UserError(f'Cannot parse the value for {self.KV_PATTERN % k} in {self.file}; after the "=" you should use r"""...""", "..." or a numeric/boolean literal')
+				if (not m.group('rawstring')) and b'\\' in value: raise UserError(f'Cannot use backslash escape sequences for {self.KV_PATTERN % k} value (unless using a raw r"""...""" string); cannot parse "{self.file}"')
+				if k != 'xml_descriptor': # we keep xml descriptors as bytes so we can use the correct encoding
+					value = value.decode('utf-8', errors='replace')
+				self.kvDict[k] = value
+
 			if 'title' not in self.kvDict and 'xml_descriptor' not in self.kvDict: raise UserError(f'Cannot find mandatory {self.KV_PATTERN % "title"} specifier for this test in {self.file}')
 			xmlcontents = self.kvDict.pop('xml_descriptor', '').strip() # not likely to be used for .py files, but might be nice for some others
 		else:
@@ -521,7 +526,7 @@ class _XMLDescriptorParser(object):
 		Parses the test/dir descriptor in the specified path and returns the 
 		TestDescriptor object. 
 		
-		:param istest: True if this is a pysystest.xml file, false if it is 
+		:param istest: True if this is a ``pysystest.*`` file, false if it is 
 			a descritor giving defaults for a directory of testcases.  
 			:param parentDirDefaults: Optional TestDescriptor instance 
 			specifying default values to be filtered in from the parent 
@@ -747,6 +752,7 @@ class _XMLDescriptorParser(object):
 		
 	def getModes(self):
 		text = self.kvDict.pop('modes', None)
+		modesNode = None
 		if not text: 
 			modesNode = self.getSingleElement('modes', optionalParents=['classification'])
 			if modesNode:
@@ -755,7 +761,7 @@ class _XMLDescriptorParser(object):
 				return self.defaults.modes # by default we inherit
 
 		if not text: 
-			# pre 2.0 XML approach
+			# pre-2.0 XML approach
 			result = {}
 			for node in modesNode.getElementsByTagName('mode'):
 				modeString = node.getAttribute('mode') or self.getText(node)
@@ -775,14 +781,13 @@ class _XMLDescriptorParser(object):
 			modesLambda = text
 			if isinstance(modesLambda, str): # eventually kvDict may be able to contain non-string values direct from Python
 				# use an empty namespace since if we were parsing this as real python, all import statements would be appearing later
-				modesLambda = pysys.utils.safeeval.safeEval(text, extraNamespace={}, emptyNamespace=True)
+				modesLambda = pysys.utils.safeeval.safeEval(text.strip(), extraNamespace={}, emptyNamespace=True)
 			assert callable(modesLambda), 'Expecting callable (e.g. lambda helper: []) but got %r'%modesLambda
 			helper = TestModesConfigHelper(inheritedModes=[{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], project=self.project)
-			modes = modesLambda(helper) # assumes 
-			
+			modes = modesLambda(helper) # assumes it's a callable accepting a single parameter
 			
 			assert isinstance(modes, list), 'Expecting a list of modes, got a %s: %r'%(modes.__class__.__name__, modes)
-			assert not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'
+			assert not modesNode or not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'
 			
 			result = []
 			already = set()
@@ -858,7 +863,7 @@ class _XMLDescriptorParser(object):
 		
 		newitems = self.kvDict.pop('user_data', {})
 		if isinstance(newitems, str): 
-				newitems = pysys.utils.safeeval.safeEval(newitems, 
+				newitems = pysys.utils.safeeval.safeEval(newitems.strip(), 
 						extraNamespace={
 							'project': self.project})
 
