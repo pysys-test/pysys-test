@@ -332,21 +332,26 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 
 
 class _XMLDescriptorParser(object):
-	'''DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. 
+	'''NOT PUBLIC API - use L{DescriptorLoader.parseTestDescriptor} instead. 
 	
 	:meta private:
 	
 	Helper class to parse an XML test descriptor - either for a testcase, 
 	or for defaults for a (sub-)directory of testcases.
 
-	The class uses the minidom DOM (Document Object Model) non validating
+	If the file is/contains XML the class uses the minidom DOM (Document Object Model) non-validating
 	parser to provide accessor methods to return element attributes	and character
 	data from the test descriptor file. The class is instantiated with the filename
 	of the test descriptor. It is the responsibility of the user of the class to
 	call the unlink() method of the class on completion in order to free the memory
 	used in the parsing.
 	
+	If not, it uses __pysys_XXX__ dunders (Python-style but also designed to work fine in other languages whether in 
+	comments e.g. /* ... */  or even as string literals, provided there are no backslash escapes to worry about)
+	
 	'''
+
+	KV_PATTERN = '__pysys_%s__'
 
 	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None):
 		assert project
@@ -361,7 +366,7 @@ class _XMLDescriptorParser(object):
 			raise UserError("Unable to find supplied descriptor \"%s\"" % self.file)
 		self.project = project
 
-		self.nonXMLContents = None
+		self.kvDict = {}
 		
 		if xmlRootElement: # used when parsing from project XML rather than directly from a standalone file
 			self.doc = None
@@ -371,20 +376,44 @@ class _XMLDescriptorParser(object):
 		
 		if istest and not xmlfile.endswith('.xml'):
 			# Find it within a file of another type e.g. pysystest.py
+			
 			# Open in binary mode since we don't know the encoding - we'll rely on the XML header to tell us if it's anything unusual
 			with open(xmlfile, 'rb') as xmlhandle:
-				self.nonXMLContents = xmlhandle.read()
-			match = re.search(b'(<[?]xml[^>]*>\\s*<pysystest.*>.*</pysystest>)', self.nonXMLContents, flags=re.DOTALL)
-			if not match: raise UserError("No <pysystest> XML descriptor was found in file \"%s\""%(self.file))
-			xmlcontents = match.group(0)
+				# must be at the start of a line, i.e. not after a comment
+				# we do allow raw strings
+				for m in re.finditer(
+						('(?:^|\\n)[ \\t]*%s *= *(?:(?P<rawstring>r)?('%(self.KV_PATTERN%'(?P<key>[^ =]+)')
+							+'|'.join([
+								'(?P<value1>(-?[0-9][0-9.-]+|[Tt]rue|[Ff]alse))', # number/boolean literal, would be a shame for it to have to be quoted
+								'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
+								'"(?P<value3>[^"]*)"',
+							])
+							+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
+							).encode('ascii'), 
+						xmlhandle.read(), flags=re.DOTALL): 
+					k = m.group('key').decode('ascii', errors='replace')
+					if k in self.kvDict: raise UserError('Duplicate key "{self.KV_PATTERN % k}__" in "{self.file}"')
+					value = m.group('value1') or m.group('value2') or m.group('value3')
+					if value is None:
+						raise UserError(f'Cannot parse the value for {self.KV_PATTERN % k} in {self.file}; after the "=" you should use r"""...""", "..." or a numeric/boolean literal')
+					if (not m.group('rawstring')) and b'\\' in value: raise UserError(f'Cannot use backslash escape sequences for {self.KV_PATTERN % k} value (unless using a raw r"""...""" string); cannot parse "{self.file}"')
+					if k != 'xml_descriptor': # we keep xml descriptors as bytes so we can use the correct encoding
+						value = value.decode('utf-8', errors='replace')
+					self.kvDict[k] = value
+			if 'title' not in self.kvDict and 'xml_descriptor' not in self.kvDict: raise UserError(f'Cannot find mandatory {self.KV_PATTERN % "title"} specifier for this test in {self.file}')
+			xmlcontents = self.kvDict.pop('xml_descriptor', '').strip() # not likely to be used for .py files, but might be nice for some others
 		else:
 			xmlcontents = None
 		
 		try:
 			if xmlcontents:
 				self.doc = xml.dom.minidom.parseString(xmlcontents)
-			else:
+			elif xmlcontents == None:
 				self.doc = xml.dom.minidom.parse(xmlfile)
+			else:
+				self.doc = self.root = None
+				return
+				
 		except Exception as ex:
 			raise UserError("Invalid XML in descriptor '%s': %s" % (self.file, ex))
 		else:
@@ -414,7 +443,7 @@ class _XMLDescriptorParser(object):
 	DEFAULT_DESCRIPTOR = TestDescriptor(
 		file=None, id=u'', type="auto", state="runnable", 
 		title='', purpose='', groups=[], modes=[], 
-		classname=DEFAULT_TESTCLASS, module=None,
+		classname=DEFAULT_TESTCLASS, module='<auto>',
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, isDirConfig=True)
 	"""
@@ -425,13 +454,14 @@ class _XMLDescriptorParser(object):
 
 	def getContainer(self):
 		'''Create and return an instance of TestDescriptor for the contents of the descriptor.'''
-		
-		for attrName, attrValue in self.root.attributes.items():
-			if attrName not in ['state', 'type', 'authors', 'created']:
-				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
+
+		if self.root:
+			for attrName, attrValue in self.root.attributes.items():
+				if attrName not in ['state', 'type', 'authors', 'created']:
+					raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
 		cls, pymodule = self.getClassDetails()
 		
-		if pymodule is None and self.istest: # default setting (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
+		if pymodule == '<auto>' and self.istest: # default setting means auto-detect (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
 			pymodule = os.path.basename(self.file) if self.file.endswith('.py') else DEFAULT_MODULE # else run.py
 		
 		
@@ -450,9 +480,14 @@ class _XMLDescriptorParser(object):
 										skippedReason=self.getSkippedReason(), 
 										testDir=self.dirname,
 										userData=self.getUserData(),
-										authors=[x.strip() for x in (self.root.getAttribute('authors') or self.findNonXMLTextValue('authors') or '').split(',') if x.strip()],
-										created=self.root.getAttribute('created') or self.findNonXMLTextValue('created') or None,
+										authors=[x.strip() for x in 
+											(self.kvDict.pop('authors', None) or (self.root.getAttribute('authors') if self.root else '') 
+											).split(',') if x.strip()],
+										created=self.kvDict.pop('created', None) or (self.root.getAttribute('created') if self.root else None) or None,
 										isDirConfig=not self.istest)
+		
+		if self.kvDict: # should all have been popped during parsing
+			raise UserError(f'Unknown {self.KV_PATTERN % "KEY"} key(s) in test descriptor "{self.file}": {", ".join(self.kvDict.keys())}')
 		
 		if not self.istest:
 			# _makeTestTemplates is not an official/public part of the descriptor spec, so don't have it in the constructor signature
@@ -503,9 +538,7 @@ class _XMLDescriptorParser(object):
 	
 	def getID(self):
 		'''Return the id of the test, or for a pysysdirconfig, the id prefix.'''
-		id = self.defaults.id
-		for e in self.root.getElementsByTagName('id-prefix'):
-			id = id+self.getText(e)
+		id = self.defaults.id + self.kvDict.pop('id-prefix','')+self.getElementTextOrDefault('id-prefix', default='')
 		
 		for c in u'\\/:~#<>':
 			# reserve a few characters that we might need for other purposes; _ and . can be used however
@@ -516,90 +549,80 @@ class _XMLDescriptorParser(object):
 		
 		return id
 
-
 	def getType(self):
-		'''Return the type attribute of the test element.'''
+		'''Return the type attribute of the test element - mostly just legacy now.'''
+		if not self.root: return self.defaults.type
 		type = self.root.getAttribute("type") or self.defaults.type
 		if type not in ["auto", "manual"]:
 			raise UserError("The type attribute of the test element should be \"auto\" or \"manual\" in \"%s\""%self.file)
 		return type
 
-
 	def getState(self):
-		'''Return the state attribute of the test element.'''
+		'''Return the state attribute of the test element - mostly just legacy now.'''
+		if not self.root: return self.defaults.state
 		state = self.root.getAttribute("state")	 or self.defaults.state
 		if state not in ["runnable", "deprecated", "skipped"]: 
 			raise UserError("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\" in \"%s\""%self.file)
 		return state 
 
 	def getSkippedReason(self):
-		for e in self.root.getElementsByTagName('skipped'):
-			r = (e.getAttribute('reason') or '').strip() 
-			# make this mandatory, to encourage good practice
-			if not r: raise UserError('Missing reason= attribute in <skipped> element of "%s"'%self.file)
-			return r
+		r = self.kvDict.pop('skipped_reason', None)
+		if r is not None:
+				if not r: raise UserError('Missing value for skipped reason in "{self.file}"')
+				return r
+
+		if self.root:
+			for e in self.root.getElementsByTagName('skipped'):
+				r = (e.getAttribute('reason') or '').strip() 
+				# make this mandatory, to encourage good practice
+				if not r: raise UserError('Missing reason= attribute in <skipped> element of "{self.file}"')
+				return r
+
 		return self.defaults.skippedReason
 
-	def findNonXMLTextValue(self, name):
-		"""
-		Attempts to read a string literal value in non-XML form using __pysystest_<name>__ syntax, 
-		for example from a pysystest.py python file. This avoids messy CDATA escaping needed in XML for common characters 
-		such as < and >. 
-		
-		Returns None if not found. 
-		"""
-		if self.nonXMLContents is None: return None
-
-		# Find it within a file of another type e.g. pysystest.py
-		name = '__pysystest_%s__'%name
-		match = re.search(b'(^|\\n)[ \\t]*%s *= *"+([^"]+)"'%name.encode('ascii'), self.nonXMLContents, flags=re.DOTALL) # must be at the start of a line
-		if not match: return None
-		x = match.group(2).decode('utf-8')
-		if '\\' in x: raise UserError("%s must be a simple string literal with no backslash escape sequences; cannot parse \"%s\""%(name, self.file))
-		return x
-		
-
 	def getTitle(self):
-		'''Return the test title character data of the description element.'''
 		# PySys 1.6.1 gave an error if <description> was missing, but a default if <title> was missing, and permitted empty string. So don't be too picky. 
 
-		result = self.getElementTextOrDefault('title', optionalParents=['description']) or self.findNonXMLTextValue('title')
+		result = self.kvDict.pop('title', None) or self.getElementTextOrDefault('title', optionalParents=['description'])
 		if not result and self.istest: result = self.getID() # falling back to the ID is better than nothing
 		
 		result = result.replace('\n',' ').replace('\r',' ').replace('\t', ' ').strip()
 		if '  ' in result: result = re.sub('  +', ' ', result)
 		return result
-
 				
 	def getPurpose(self):
-		'''Return the test purpose character data of the description element.'''
-		
-		result = self.getElementTextOrDefault('purpose', optionalParents=['description']) or self.findNonXMLTextValue('purpose')
+		result = self.kvDict.pop('purpose', None) or self.getElementTextOrDefault('purpose', optionalParents=['description'])
 		if result is None: result = self.defaults.purpose
 		
 		if not result: return result
 		return inspect.cleandoc(result.replace('\r','').replace('\t', '  ')).strip()
-
 				
 	def getGroups(self):
-		'''Return a list of the group names, contained in the character data of the group elements.'''
-
 		groupList = []
-		groups = self.getSingleElement('groups', optionalParents=['classification'])
-		if groups:
-			if groups.parentNode.tagName not in ['pysystest', 'pysysdirconfig', 'classification']: 
-				raise UserError("<groups> element found under <%s> but must be under the root node (or the <classification> node), in XML descriptor \"%s\""%(groups.parentNode.tagName, self.file))
+		
+		groups = self.kvDict.pop('groups', None)
+		if isinstance(groups, str):
+			groups = groups.replace(' ','').split(';')
+			if len(groups) != 2 or groups[1].lower() not in ['inherit=true', 'inherit=false']:
+				raise UserError(f'Groups must be in the form "my-group1, mygroup2, ...; inherit=true/false" (the inherit= specifier is mandatory) in descriptor "{self.file}"')
+			groupList = [g for g in groups[0].split(',') if g]
+			if groups[1].lower() == 'inherit=false': return groupList
+		else:
+			groups = self.getSingleElement('groups', optionalParents=['classification'])
+			if groups:
+				if groups.parentNode.tagName not in ['pysystest', 'pysysdirconfig', 'classification']: 
+					raise UserError("<groups> element found under <%s> but must be under the root node (or the <classification> node), in XML descriptor \"%s\""%(groups.parentNode.tagName, self.file))
 
-			if groups.getAttribute('groups'):
-				groupList.extend(g.strip() for g in groups.getAttribute('groups').split(',') if g.strip())
+				if groups.getAttribute('groups'):
+					groupList.extend(g.strip() for g in groups.getAttribute('groups').split(',') if g.strip())
 
-			for node in groups.getElementsByTagName('group'):
-				g = self.getText(node)
-				if g and g.strip():
-					groupList.append(g.strip())
+				for node in groups.getElementsByTagName('group'):
+					g = self.getText(node)
+					if g and g.strip():
+						groupList.append(g.strip())
 
-			if (groups.getAttribute('inherit') or 'true').lower()!='true':
-				return groupList # don't inherit
+				if (groups.getAttribute('inherit') or 'true').lower()!='true':
+					return groupList # don't inherit
 		
 		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
 		return groupList
@@ -665,13 +688,16 @@ class _XMLDescriptorParser(object):
 		return modeString, mode
 		
 	def getModes(self):
-		modesNode = self.getSingleElement('modes', optionalParents=['classification'])
-		if not modesNode: return self.defaults.modes # by default we inherit
-		
-		text = self.getText(modesNode)
-		if not text: # TODO: maybe this should just duplicate what we had before
+		text = self.kvDict.pop('modes', None)
+		if not text: 
+			modesNode = self.getSingleElement('modes', optionalParents=['classification'])
+			if modesNode:
+				text = self.getText(modesNode)
+			else: # if we have neither kvText text nor mode
+				return self.defaults.modes # by default we inherit
+
+		if not text: 
 			# pre 2.0 XML approach
-			
 			result = {}
 			for node in modesNode.getElementsByTagName('mode'):
 				modeString = node.getAttribute('mode') or self.getText(node)
@@ -688,11 +714,12 @@ class _XMLDescriptorParser(object):
 			
 		# The modern PySys 2.0+ approach with a Python eval string
 		try:
-			modes = pysys.utils.safeeval.safeEval(text, 
-					extraNamespace={
-						'combineModeDimensions':self.combineModeDimensions, 
-						'INHERITED_MODES': [{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
-						'project': self.project})
+			if isinstance(text, str): # eventually kvDict may be able to contain non-string values direct from Python
+				modes = pysys.utils.safeeval.safeEval(text, 
+						extraNamespace={
+							'combineModeDimensions':self.combineModeDimensions, 
+							'INHERITED_MODES': [{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
+							'project': self.project})
 			
 			assert isinstance(modes, list), 'Expecting a list of modes, got a %s: %r'%(modes.__class__.__name__, modes)
 			assert not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'
@@ -736,23 +763,30 @@ class _XMLDescriptorParser(object):
 
 				
 	def getClassDetails(self):
-		'''Return the test class attributes (name, module, searchpath), contained in the class element.'''
+		'''Return the Python test class attributes (name, module, searchpath), contained in the class element.'''
+		classname, module = self.kvDict.pop('python_class', None), self.kvDict.pop('python_module', None)		
+		
 		el = self.getSingleElement('class', optionalParents=['data'])
 		if el:
-			return [el.getAttribute('name'), el.getAttribute('module')]
-		return [self.defaults.classname, self.defaults.module]
+			classname = classname or el.getAttribute('name')
+			module = module or el.getAttribute('module')
+		# nb: None/empty means look it up in PYHONPATH, '<auto>' is a sentinel value meaning auto-detect based on descriptor extension
+		return [classname or self.defaults.classname, self.defaults.module if module == '<auto>' else module]
 
 	def getExecutionOrderHint(self):
-		e = self.getSingleElement('execution-order')
+		r = self.kvDict.pop('execution_order_hint', None)
+		if r is None:
+			e = self.getSingleElement('execution-order')
 
-		r = None
-		if e:
-			r = e.getAttribute('hint')
-			if r:
-				try:
-					r = float(r)
-				except Exception:
-					raise UserError('Invalid float value specified for execution-order hint in "%s"'%self.file)
+			r = None
+			if e:
+				r = e.getAttribute('hint')
+				
+		if r:
+			try:
+				r = float(r)
+			except Exception:
+				raise UserError('Invalid float value specified for execution order hint in "%s"'%self.file)
 		if r is None or r == '': 
 			return self.defaults.executionOrderHint
 		else:
@@ -760,32 +794,48 @@ class _XMLDescriptorParser(object):
 
 
 	def getUserData(self):
-		# start with parent defaults, add children
-		result = collections.OrderedDict(self.defaults.userData)
-		for data in self.root.getElementsByTagName('data'):
-			for e in data.getElementsByTagName('user-data'):
-				key = e.getAttribute('name').strip()
-				assert key, 'name= must be specified'
-				assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # prevent names that we reserve for use by the basetest/processuser
-				
-				# NB: we don't use inspect.cleandoc here since it'd probably slow down descriptor loading and in 99% 
-				# of for multi-line strings we will be stripping whitespace anyway so not a good use of time
-				value = e.getAttribute('value')
-				if not value and e.childNodes:
-					value = '\n'.join(n.data for n in e.childNodes 
-						if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data)
-				if value is None: value = ''
-				try:
-					value = self.project.expandProperties(value)
-				except Exception as ex: # pragma: no cover
-					raise UserError('Failed to resolve user-data value for "%s" in XML descriptor "%s": %s' % (key, self.file, ex))
+		
+		newitems = self.kvDict.pop('user_data', {})
+		if isinstance(newitems, str): 
+				newitems = pysys.utils.safeeval.safeEval(newitems, 
+						extraNamespace={
+							'project': self.project})
 
-				result[key] = value
-				
+		if not newitems:
+			data = self.getSingleElement('data')
+			if data:
+				for e in data.getElementsByTagName('user-data'):
+					key = e.getAttribute('name').strip()
+					
+					# NB: we don't use inspect.cleandoc here since it'd probably slow down descriptor loading and in 99% 
+					# of for multi-line strings we will be stripping whitespace anyway so not a good use of time
+					value = e.getAttribute('value')
+					if not value and e.childNodes:
+						value = '\n'.join(n.data for n in e.childNodes 
+							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data)
+					if value is None: value = ''
+					try:
+						value = self.project.expandProperties(value)
+					except Exception as ex: # pragma: no cover
+						raise UserError('Failed to resolve user-data value for "%s" in XML descriptor "%s": %s' % (key, self.file, ex))
+
+					newitems[key] = value
+		
+		for key in newitems:
+			assert key, 'name must be specified for user data'
+			assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # prevent names that we reserve for use by the basetest/processuser
+
+		# start with parent defaults, add children
+		result = dict(self.defaults.userData)
+		result.update(newitems)
+		
 		return result
 
 			
 	def getTestInput(self):
+		value = self.kvDict.pop('input_dir', None)
+		if value: return value
+		
 		node = self.getSingleElement('input', optionalParents=['data']) or self.getSingleElement('input-dir', optionalParents=['data'])
 		if node:
 			x = node.getAttribute('path') or self.getText(node)
@@ -793,6 +843,9 @@ class _XMLDescriptorParser(object):
 		return self.defaults.input
 		
 	def getTestOutput(self):
+		value = self.kvDict.pop('output_dir', None)
+		if value: return value
+
 		node = self.getSingleElement('output', optionalParents=['data']) or self.getSingleElement('output-dir', optionalParents=['data'])
 		if node:
 			x = node.getAttribute('path') or self.getText(node)
@@ -800,6 +853,9 @@ class _XMLDescriptorParser(object):
 		return self.defaults.output
 
 	def getTestReference(self):
+		value = self.kvDict.pop('reference_dir', None)
+		if value: return value
+
 		node = self.getSingleElement('reference', optionalParents=['data']) or self.getSingleElement('reference-dir', optionalParents=['data'])
 		if node:
 			x = node.getAttribute('path') or self.getText(node)
@@ -808,9 +864,11 @@ class _XMLDescriptorParser(object):
 
 	def getRequirements(self):
 		'''Return a list of the requirement ids, contained in the character data of the requirement elements.'''
-		reqList = []			
-		for node in self.root.getElementsByTagName('requirement'):
-			if (node.getAttribute('id') or '').strip(): reqList.append(node.getAttribute('id').strip())
+		reqList = [x.strip() for x in self.kvDict.pop('traceability_ids', '').split(',') if x.strip()]
+		
+		if self.root:
+			for node in self.root.getElementsByTagName('requirement'):
+				if (node.getAttribute('id') or '').strip(): reqList.append(node.getAttribute('id').strip())
 
 		# these used to always be below <traceability><requirements>..., but now we allow them directly under the root node 
 		# (or anywhere the user wants)
@@ -832,6 +890,7 @@ class _XMLDescriptorParser(object):
 	def getSingleElement(self, tagName, parent=None, optionalParents=[]):
 		"""Utility method that finds a single child element of the specified name and 
 		strips leading/trailing whitespace from it. Returns None if not found. """
+		if not self.root: return None
 		t = u''
 		if not parent: parent = self.root
 		nodes = parent.getElementsByTagName(tagName)

@@ -1,14 +1,4 @@
-"""
-<?xml version="1.0" standalone="yes"?>
-<pysystest>
-
-	<description> 
-		<title>pysys.py - make with validator</title>    
-	</description>
-
-<groups groups=""/>
-</pysystest>
-"""
+__pysys_title__ = r"""pysys.py - make with validator"""
 
 import pysys
 from pysys.constants import *

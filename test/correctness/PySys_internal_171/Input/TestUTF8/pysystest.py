@@ -1,4 +1,4 @@
-"""
+__pysys_xml_descriptor__ = """
 <?xml version="1.0" encoding="utf-8"?>
 <pysystest type="auto">
 	<title>My UTF-8 encoded descriptor '£'</title>
