@@ -443,7 +443,7 @@ class _XMLDescriptorParser(object):
 	DEFAULT_DESCRIPTOR = TestDescriptor(
 		file=None, id=u'', type="auto", state="runnable", 
 		title='', purpose='', groups=[], modes=[], 
-		classname=DEFAULT_TESTCLASS, module='<auto>',
+		classname=DEFAULT_TESTCLASS, module=None,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, isDirConfig=True)
 	"""
@@ -461,7 +461,7 @@ class _XMLDescriptorParser(object):
 					raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
 		cls, pymodule = self.getClassDetails()
 		
-		if pymodule == '<auto>' and self.istest: # default setting means auto-detect (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
+		if pymodule is None and self.istest: # default setting means auto-detect (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
 			pymodule = os.path.basename(self.file) if self.file.endswith('.py') else DEFAULT_MODULE # else run.py
 		
 		
@@ -770,8 +770,8 @@ class _XMLDescriptorParser(object):
 		if el:
 			classname = classname or el.getAttribute('name')
 			module = module or el.getAttribute('module')
-		# nb: None/empty means look it up in PYHONPATH, '<auto>' is a sentinel value meaning auto-detect based on descriptor extension
-		return [classname or self.defaults.classname, self.defaults.module if module == '<auto>' else module]
+		# nb: empty means look it up in PYHONPATH, None is a sentinel value meaning auto, based on descriptor extension
+		return [classname or self.defaults.classname, self.defaults.module if module is None else module]
 
 	def getExecutionOrderHint(self):
 		r = self.kvDict.pop('execution_order_hint', None)
