@@ -104,7 +104,7 @@ Some additional improvements that will benefit advanced users are:
 
 - PySys plugins sometimes provide a test class that can directly used by multiple tests (without each having their 
   own ``run.py``). You can now implement this pattern a lot more easily by specifying a fully qualified 
-  ``classname`` and setting the ``module`` to the special string ``"PYTHONPATH"`` in the ``pysystest.xml`` descriptor, 
+  ``classname`` and setting the ``module`` to the special string ``"PYTHONPATH"`` in the ``pysystest.*`` descriptor, 
   which will lookup the specified classname in the PYTHONPATH using Python's module importing mechanism. 
 - Changed the creation of new tests (and the loading of test descriptors) to include the ``.py`` suffix in the 
   ``module=`` filename, to make it more explicit what is going on. As before, specifying this suffix is optional 
@@ -797,7 +797,7 @@ pysys.py and project configuration improvements
   (https://no-color.org/). The ``PYSYS_COLOR`` variable take precedence if set. 
 
 - Code coverage can now be disabled automatically for tests where it is not wanted (e.g. performance tests) by adding 
-  the ``disableCoverage`` group to the ``pysystest.xml`` descriptor, or the ``pysysdirconfig.xml`` for a whole 
+  the ``disableCoverage`` group to the ``pysystest.*`` descriptor, or the ``pysysdirconfig.xml`` for a whole 
   directory. This is equivalent to setting the ``self.disableCoverage`` attribute on the base test. 
 
 - `Python code coverage <pysys.writer.coverage.PythonCoverageWriter>` now produces an XML ``coverage.xml`` report 

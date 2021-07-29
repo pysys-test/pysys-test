@@ -28,9 +28,13 @@ ensuring that the rest of `execute() <BaseTest.execute>` and
 `validate() <BaseTest.validate>` do not get executed. 
 
 Alternatively if the test should be skipped regardless of platform/mode etc, 
-it is best to specify that statically in your `pysystest.xml` file::
+it is best to specify that statically in your `pysystest.*` file::
 
-	<skipped reason="Skipped until bug #12345 is fixed"/>
+	__pysys_skipped_reason__   = "Skipped until bug XYZ is fixed" 
+
+Or::
+
+	<skipped reason="Skipped until bug XYZ is fixed"/>
 
 Checking for error messages in log files
 -----------------------------------------
@@ -308,13 +312,13 @@ Using modes is fairly straightforward. First edit the ``pysystest.*`` file for a
 need to run in multiple modes, and add a list of the supported modes by providing a Python 
 lambda that will be evaluated when the test descriptors are loaded:
 
-.. code-block:: xml
+.. code-block:: python
 	
-		<modes>
+	__pysys_modes__            = r""" 
 			lambda helper: helper.inheritedModes+[
 				{'mode':'CompressionGZip', 'compressionType':'gzip'},
 			]
-		</modes>
+		"""
 
 The ``helper`` is an instance of `pysys.config.descriptor.TestModesConfigHelper` which provides 
 access to the list of inherited modes (and more). 
@@ -326,7 +330,7 @@ in the example described later in this section). PySys will give an error if you
 capitalization for the same mode in different places, as this would likely result in test bugs. 
 
 In large projects you may wish to configure modes in a ``pysysdirconfig.xml`` 
-file in a parent directory rather than in ``pysystest.xml``, which will by 
+file in a parent directory rather than in ``pysystest.*``, which will by 
 default be inherited by all nested testcases (unless an explicit ``<modes>`` 
 configuration is provided), and so there's a single place to edit the modes 
 list if you need to change them later. 
@@ -343,25 +347,26 @@ automatically generate the combinations, passing it each dimension (e.g. each co
 
 Here is an example of multi-dimensional modes (taken from the getting-started sample):
 
-.. code-block:: xml
+.. code-block:: python
 	
-	<modes>
-		lambda helper: [
-			mode for mode in 
-				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
-					helper.inheritedModes,
-					[
-							{'mode':'CompressionNone', 'compressionType':None},
-							{'mode':'CompressionGZip', 'compressionType':'gzip'},
-					], 
-					[
-						{'auth':None}, # Mode name is optional
-						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
-					]) 
-			# This is a Python list comprehension syntax for filtering the items in the list
-			if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
-		]
-	</modes>
+	__pysys_modes__            = r""" 
+
+			lambda helper: [
+				mode for mode in 
+					helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+						helper.inheritedModes,
+						[
+								{'mode':'CompressionNone', 'compressionType':None},
+								{'mode':'CompressionGZip', 'compressionType':'gzip'},
+						], 
+						[
+							{'auth':None}, # Mode name is optional
+							{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
+						]) 
+				# This is a Python list comprehension syntax for filtering the items in the list
+				if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
+			]
+	"""
 
 This will create the following modes::
 
@@ -441,7 +446,7 @@ Test ids and structuring large projects
 ---------------------------------------
 Each test has a unique ``id`` which is used in various places such as when 
 reporting passed/failed outcomes. By default the id is just the name of the 
-directory containing the ``pysystest.xml`` file. 
+directory containing the ``pysystest.*`` file. 
 
 You can choose a suitable naming convention for your tests. For example, 
 you might wish to differentiate with just a numeric suffix such as::
@@ -551,7 +556,7 @@ something has gone wrong, and perhaps to prioritize running fast unit and
 correctness tests before commencing on longer running performance or soak tests. 
 
 By default, PySys runs tests based on the sorting them by the full path of 
-the `pysystest.xml` files. If you have tests with multiple modes, PySys will 
+the `pysystest.*` files. If you have tests with multiple modes, PySys will 
 run all tests in their primary mode first, then any/all tests which list a 
 second mode, followed by 3rd, 4th, etc. 
 
@@ -560,14 +565,14 @@ Every test descriptor is assigned an execution order hint, which is a positive
 or negative floating point number which defaults to 0.0, and is used to sort 
 the descriptors before execution. Higher execution order hints mean later 
 execution. If two tests have the same hint, PySys falls back on using the 
-path of the `pysystest.xml` file to determine a canonical order. 
+path of the ``pysystest.*`` file to determine a canonical order. 
 
 The hint for each test is generated by adding together hint components from the 
 following:
 
-  - A test-specific hint from the ``pysystest.xml`` file's 
+  - A test-specific hint from the ``pysystest.*`` file's ``__pysys_execution_order_hint__ = `` or 
     ``<execution-order hint="..."/>``. If the hint is 
-    blank (the default), the test inherits any hint specified in a 
+    not specified (the default), the test inherits any hint specified in a 
     ``pysysdirconfig.xml`` file in an ancestor folder, or 0.0 if there aren't 
     any. Note that hints from ``pysysdirconfig.xml`` files are not added 
     together; instead, the most specific wins. 
@@ -594,4 +599,5 @@ following:
 
 For really advanced cases, you can programmatically set the 
 ``executionOrderHint`` on each descriptor by providing a custom 
-`pysys.config.descriptor.DescriptorLoader` or in the constructor of a custom `pysys.baserunner.BaseRunner` class. 
+`pysys.config.descriptor.DescriptorLoader` or in the constructor of a 
+custom `pysys.baserunner.BaseRunner` class. 

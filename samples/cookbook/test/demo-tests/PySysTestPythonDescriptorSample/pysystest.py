@@ -29,7 +29,7 @@ __pysys_created__ = "2021-07-25"
 __pysys_traceability_ids__ = "Bug123, UserStory-456, UserRequirement_1a, UserRequirement_2c, Performance" 
 
 # Comment/uncomment this to mark this test as skipped, which will stop it from executing.
-__pysys_skipped_reason__   = "This test is skipped until bug XYZ is fixed" 
+__pysys_skipped_reason__   = "Skipped until bug XYZ is fixed" 
 
 # Specify the groups that this test will be tagged with, allowing them to be selected for inclusion/exclusion in test 
 # runs. Groups are usually named in camelCase. These groups are separated by commas, followed by a semi-colon and 
