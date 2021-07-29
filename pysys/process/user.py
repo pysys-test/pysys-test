@@ -1514,7 +1514,7 @@ class ProcessUser(object):
 		stack=[]
 		from pysys.basetest import BaseTest
 		if isinstance(self, BaseTest):
-			testmodule = os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] if self.descriptor.module else None
+			testmodule = os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] if self.descriptor.module != 'PYTHONPATH' else None
 			for record in inspect.stack():
 				info = inspect.getframeinfo(record[0])
 				if (self.__skipFrame(info.filename, ProcessUser) ): continue

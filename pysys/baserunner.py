@@ -1123,12 +1123,13 @@ class TestContainer(object):
 				BaseTest._currentTestCycle = (self.cycle+1) if (self.runner.cycle > 1) else 0 # backwards compatible way of passing cycle to BaseTest constructor; safe because of global_lock
 				try:
 					outsubdir = self.outsubdir
-					if not self.descriptor.module: # get a shared test class from the sys.path
+					if self.descriptor.module == 'PYTHONPATH': # get a shared test class from the sys.path
 						classname = self.descriptor.classname.split('.')
 						assert len(classname)>1, 'Please specify a fully qualified classname (e.g. mymodule.classname): %s'%self.descriptor.classname
 						module_name, classname = '.'.join(classname[:-1]), classname[-1]
 						clazz = getattr(importlib.import_module(module_name), classname)
 					else:
+						assert self.descriptor.module, repr(self.descriptor.module)
 						runpypath = os.path.join(self.descriptor.testDir, self.descriptor.module)
 						with open(toLongPathSafe(runpypath), 'rb') as runpyfile:
 							runpycode = compile(runpyfile.read(), runpypath, 'exec')

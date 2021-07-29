@@ -267,8 +267,8 @@ Test descriptor features
 ------------------------
 - PySys plugins sometimes provide a test class that can directly used by multiple tests (without each having their 
   own ``run.py``). You can now implement this pattern a lot more easily by specifying a fully qualified 
-  ``classname`` and ``module`` in the ``pysystest.xml`` descriptor, which will lookup the specified classname 
-  in the PYTHONPATH using Python's module importing mechanism. 
+  ``classname`` and setting the ``module`` to the special string ``"PYTHONPATH"`` in the ``pysystest.xml`` descriptor, 
+  which will lookup the specified classname in the PYTHONPATH using Python's module importing mechanism. 
 - Changed the creation of new tests (and the loading of test descriptors) to include the ``.py`` suffix in the 
   ``module=`` filename, to make it more explicit what is going on. As before, specifying this suffix is optional 
   so there is no need to update existing tests. 

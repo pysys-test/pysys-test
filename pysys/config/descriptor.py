@@ -151,7 +151,7 @@ class TestDescriptor(object):
 		assert classname, 'Test descriptors cannot set the classname to nothing'
 
 		if not module: self.module = None
-		elif module.endswith('.py'): self.module = module
+		elif module.endswith('.py') or module == 'PYTHONPATH': self.module = module
 		else: self.module = module+'.py'
 		
 		self.input = input
@@ -770,8 +770,9 @@ class _XMLDescriptorParser(object):
 		if el:
 			classname = classname or el.getAttribute('name')
 			module = module or el.getAttribute('module')
-		# nb: empty means look it up in PYHONPATH, None is a sentinel value meaning auto, based on descriptor extension
-		return [classname or self.defaults.classname, self.defaults.module if module is None else module]
+		# nb: empty means look it up in PYTHONPATH, None is a sentinel value meaning auto, based on descriptor extension
+		if module == '': module = 'PYTHONPATH' # probably this is what was intended
+		return [classname or self.defaults.classname, module or self.defaults.module]
 
 	def getExecutionOrderHint(self):
 		r = self.kvDict.pop('execution_order_hint', None)
@@ -1073,7 +1074,7 @@ class DescriptorLoader(object):
 					raise # no stack trace needed, will already include descriptorfile name
 				except Exception as e:
 					log.info('Failed to read descriptor: ', exc_info=True)
-					raise Exception("Error reading XML descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
+					raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
 
 				# if this is a test dir, it never makes sense to look at sub directories
 				del dirs[:]

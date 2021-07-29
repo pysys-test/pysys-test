@@ -10,7 +10,7 @@
   </description>
   
   <data>
-    <class name="mypkg.mytest.MyTest"/>
+    <class name="mypkg.mytest.MyTest" module="PYTHONPATH"/>
   </data>
   
 </pysystest>
