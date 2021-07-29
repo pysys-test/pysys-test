@@ -133,7 +133,7 @@ __pysys_user_data__        = r"""
 	"""
 
 # It is also possible to provide the descriptor values using XML embedded in this file as follows. Note that parsing 
-# XML is relatively slow, so add this value if you have a good reason. 
+# XML is relatively slow, so add this value only if you have a good reason. 
 __pysys_xml_descriptor__ = r"""
 	<?xml version="1.0" encoding="utf-8"?>
 	<pysystest>

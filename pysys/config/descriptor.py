@@ -684,7 +684,7 @@ class _XMLDescriptorParser(object):
 		result = self.kvDict.pop('title', None) or self.getElementTextOrDefault('title', optionalParents=['description'])
 		if not result and self.istest: result = self.getID() # falling back to the ID is better than nothing
 		
-		result = result.replace('\n',' ').replace('\r',' ').replace('\t', ' ').strip()
+		result = result.replace('\n',' ').replace('\r',' ').replace('\t', ' ').strip().rstrip('.')
 		if '  ' in result: result = re.sub('  +', ' ', result)
 		return result
 				
@@ -880,10 +880,6 @@ class _XMLDescriptorParser(object):
 						value = '\n'.join(n.data for n in e.childNodes 
 							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data)
 					if value is None: value = ''
-					try:
-						value = self.project.expandProperties(value)
-					except Exception as ex: # pragma: no cover
-						raise UserError('Failed to resolve user-data value for "%s" in XML descriptor "%s": %s' % (key, self.file, ex))
 
 					newitems[key] = value
 		

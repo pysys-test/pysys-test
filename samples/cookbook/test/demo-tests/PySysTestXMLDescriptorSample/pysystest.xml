@@ -122,8 +122,8 @@
 		<!-- The ability to add user-defined data to the test descriptor is mostly useful when using a 
 		shared Python class for lots of tests. 
 		
-		Project properties (but not other user-data values) can be substituted into the value using ${...}, 
-		and ${eval: xxx} syntax can be used to evaluate some Python code (with project properties as Python variables). 
+		Project properties (but not other user-data values) can be specified using ${...}, but only if the Python code 
+		that's reading the user-data explicitly expands the properties (it's not automatic). 
 		-->
 		<user-data name="myTestDescriptorData" value="foobar"/>
 		
