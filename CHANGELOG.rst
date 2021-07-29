@@ -394,7 +394,7 @@ Deprecations:
     release. 
   - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. 
   - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
-  - The old ``<mode>`` elements are deprecated in favour of the new Python eval string syntax 
+  - The old ``<mode>`` elements are deprecated in favour of the new Python lambda syntax 
     (support for these they won't be removed any time soon, but are discouraged for new tests). 
   - The ``ConsoleMakeTestHelper`` class is now deprecated in favour of `pysys.launcher.console_maker.DefaultTestMaker`. 
 
