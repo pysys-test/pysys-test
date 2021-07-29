@@ -77,7 +77,7 @@ so the same mechanism can be used for non-Python languages, for example a file n
 identified as a PySys test. It just needs to contain at least a ``__pysys_title__ = ...``, and there would need to be 
 an associated Python class for executing it (could be defined in the same file or in a parent ``pysysdirconfig.xml``). 
 
-It is also possible to embed an entire XML descriptor inside a ``pysystest.py`` using ``__pysys_xml_descriptor__ = `` 
+It is also possible to embed an entire XML descriptor inside a ``pysystest.py`` using ``__pysys_xml_descriptor__ =`` 
 which may be useful for migrating towards the new approach. However note that parsing XML is really quite slow, so 
 avoiding use of XML is an advantage, particularly as your project grows. 
 
