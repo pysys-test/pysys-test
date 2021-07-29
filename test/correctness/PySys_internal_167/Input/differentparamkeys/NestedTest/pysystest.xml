@@ -12,7 +12,7 @@
   <classification>
   
 		<modes>
-			[
+			lambda helper: [
 				{'param1':"foo"},
 				{'param1':"baz", 'param2':"bar"}
 			]

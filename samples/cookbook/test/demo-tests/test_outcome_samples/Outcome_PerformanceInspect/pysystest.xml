@@ -18,7 +18,7 @@
 	</groups>
 	
 	<modes>
-		INHERITED_MODES+[
+		lambda helper: helper.inheritedModes+[
 		# For now we run this test in just one mode, but could add additional modes if desired.
 		{'mode':'CompressionGZip'}
 		]

@@ -4,7 +4,7 @@
   <classification>
   
 		<modes>
-			{
+			lambda helper: {
 			
 			! # line 3
 		</modes>

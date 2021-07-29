@@ -4,7 +4,7 @@
   <classification>
   
 		<modes inherit="false">
-			[]
+			lambda helper: []
 		</modes>
 		
   </classification>

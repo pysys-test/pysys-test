@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysysdirconfig>
-    <modes>combineModeDimensions(
+    <modes>lambda helper: helper.combineModeDimensions(
 			[
 				<!-- automatic mode strings, including numbers.
 					Initial letter of mode will be auto-capitalized 
@@ -9,7 +9,7 @@
 				{"database":"SQLite", "browser":"Firefox"},
 				{"database":"MySQL",  "browser":"Chrome"},
 			], 
-			INHERITED_MODES,
+			helper.inheritedModes,
 			<!-- Empty dimensions are ignored -->
 			[],
 

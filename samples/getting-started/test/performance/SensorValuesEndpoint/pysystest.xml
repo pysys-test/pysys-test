@@ -17,7 +17,7 @@
 		</groups>
 
 		<modes>
-			INHERITED_MODES+[
+			lambda helper: helper.inheritedModes+[
 				{'mode':'CompressionGZip', 'compressionType':'gzip'},
 			]
 		</modes>

@@ -27,7 +27,7 @@ import collections
 import copy
 import locale
 import inspect
-import json
+import importlib
 
 import pysys
 from pysys.constants import *
@@ -297,8 +297,101 @@ exists for compatibility reasons only.
 :meta private:
 """
 
+class TestModesConfigHelper:
+	"""
+	A helper class that is passed to the lambda which defines test modes in a pysystest configuration. It provides access to 
+	the list of inherited modes, to project properties and also a helper function for combining multiple mode lists into 
+	one. 
+	
+	:ivar list[dict[str,obj]] ~.inheritedModes: A list of the inherited modes, each defined by a dictionary containing a ``mode`` 
+		key and any number of additional parameters. 
+	:ivar ~.constants: A reference to `pysys.constants` which can be used to access constants such as ``IS_WINDOWS`` for 
+		platform-dependent mode configuration. 
+	:ivar callable[str] import_module: A reference to the Python ``importlib.import_module`` function that can be used 
+		if you need to access functions from additional modules such as ``sys``, ``re``, etc. 
+	:ivar pysys.config.project.Project ~.project: The project configuration, from which you can read properties. 
+
+	"""
+	def __init__(self, inheritedModes, project):
+		self.inheritedModes = inheritedModes
+		self.project = project
+		self.constants = pysys.constants
+		self.import_module = importlib.import_module
+
+	def combineModeDimensions(self, *dimensions):
+		"""
+		Generates a single flat mode list containing all combinations that can be generated the specified mode lists. 
+		
+		For example::
+		
+			lambda modes: modes.combineModeDimensions([
+				{'mode': 'MySQL',   'db': 'MySQL',  'dbTimeoutSecs':60}, 
+				{'mode': 'SQLite',  'db': 'SQLite', 'dbTimeoutSecs':120},
+				{'mode': 'Mock',    'db': 'Mock',   'dbTimeoutSecs':30},
+			], [
+				{'browser':'Chrome'}, # if mode is not explicitly specified it is auto-generated from the parameter(s)
+				{'browser':'Firefox'},
+			])
+		
+		... would generate modes named::
+			MySQL_Chrome
+			MySQL_Firefox
+			SQLite_Chrome
+			SQLite_Firefox
+			Mock_Chrome
+			Mock_Firefox
+		
+		A common use case is to combine inherited modes from the parent pysysdirconfigs with a list of modes specific to 
+		this test::
+		
+			lambda modes: modes.combineModeDimensions(modes.inherited, [
+				{'mode': 'subtest-integers', 'dataType': 'int'}, 
+				{'mode': 'subtest-strings',  'dataType': 'str'}, 
+				{'mode': 'subtest-booleans', 'dataType': 'bool'}, 
+			])
+
+		This is a good way to use modes for the concept of subtests, since even if you don't initially have any inherited 
+		modes, if in future you add some then everything will automatically work correctly. 
+
+		For efficiency reasons, don't call this method if you are just using the inherited modes. 
+		
+		:param list[dict[str,obj]] dimensions: Each argument passed to this function is a list of modes, each mode defined 
+			by a dict which may contain a ``mode`` key plus any number of parameters. 
+		:return: A list[dict[str,obj]] containing the flattened list of modes consisting of all combinations of the 
+			passed in 
+		"""
+		if len(dimensions) == 1: return dimensions[0]
+		
+		current = {} # key=mode name value=params
+		for dimension in dimensions:
+			prevModesForCombining = None if not current else current
+
+			current = {}
+			for mode in dimension:
+				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
+				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode)
+
+				current[modeString] = mode
+			# end for mode
+
+			if prevModesForCombining is not None:
+				if not current or not prevModesForCombining:
+					current = prevModesForCombining or current
+				else:
+					newModes = current
+					current = {}
+					for modeA, paramsA in prevModesForCombining.items():
+						for modeB, paramsB in newModes.items():
+							params = dict(paramsA)
+							params.update(paramsB) # newer "B" params take precedence if any keys as the same
+							current[modeA.strip('_')+'_'+modeB.strip('_')] = params
+		return [{**{'mode':modeString}, **params} for modeString, params in current.items()]
+
+	
+
 class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
-	"""Represents a mode that a test can run in, and optionally a dict of parameters that define that mode. 
+	"""Represents a mode that a test can run in in a `TestDescriptor`, and optionally a dict of parameters that define 
+	that mode. 
 	
 	To create one::
 	
@@ -629,41 +722,6 @@ class _XMLDescriptorParser(object):
 	
 		
 	@staticmethod 
-	def combineModeDimensions(*dimensions):
-		"""
-		Returns a list containing the product of the specified mode dimensions.
-		
-		Each input is a list of dicts. 
-		"""
-		if len(dimensions) == 1: return dimensions[0]
-		
-		current = {} # key=mode name value=params
-		for dimension in dimensions:
-			prevModesForCombining = None if not current else current
-
-			current = {}
-			for mode in dimension:
-				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
-				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode)
-
-				current[modeString] = mode
-			# end for mode
-
-			if prevModesForCombining is not None:
-				if not current or not prevModesForCombining:
-					current = prevModesForCombining or current
-				else:
-					newModes = current
-					current = {}
-					for modeA, paramsA in prevModesForCombining.items():
-						for modeB, paramsB in newModes.items():
-							params = dict(paramsA)
-							params.update(paramsB) # newer "B" params take precedence if any keys as the same
-							current[modeA.strip('_')+'_'+modeB.strip('_')] = params
-		return [{**{'mode':modeString}, **params} for modeString, params in current.items()]
-
-
-	@staticmethod 
 	def splitModeNameAndParams(mode):
 		"""
 		Returns (modename, params). Auto-generates a mode name if one is not already provided. 
@@ -714,12 +772,14 @@ class _XMLDescriptorParser(object):
 			
 		# The modern PySys 2.0+ approach with a Python eval string
 		try:
-			if isinstance(text, str): # eventually kvDict may be able to contain non-string values direct from Python
-				modes = pysys.utils.safeeval.safeEval(text, 
-						extraNamespace={
-							'combineModeDimensions':self.combineModeDimensions, 
-							'INHERITED_MODES': [{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
-							'project': self.project})
+			modesLambda = text
+			if isinstance(modesLambda, str): # eventually kvDict may be able to contain non-string values direct from Python
+				# use an empty namespace since if we were parsing this as real python, all import statements would be appearing later
+				modesLambda = pysys.utils.safeeval.safeEval(text, extraNamespace={}, emptyNamespace=True)
+			assert callable(modesLambda), 'Expecting callable (e.g. lambda helper: []) but got %r'%modesLambda
+			helper = TestModesConfigHelper(inheritedModes=[{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], project=self.project)
+			modes = modesLambda(helper) # assumes 
+			
 			
 			assert isinstance(modes, list), 'Expecting a list of modes, got a %s: %r'%(modes.__class__.__name__, modes)
 			assert not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'

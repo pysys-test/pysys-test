@@ -159,14 +159,14 @@ More powerful test modes
 This PySys release adds some big usability improvements for defining and using modes:
 
 A more powerful and flexible configuration format is now provided for defining modes, which uses a Python 
-eval string to provide the list of modes. Each mode can now define any number of 'parameters' to avoid the need to 
+lambda to provide the list of modes. Each mode can now define any number of 'parameters' to avoid the need to 
 parse/unpack from the mode string itself; these can then be accessed from a ``self.mode.params`` dictionary. 
 The mode name can be automatically generated from the parameters, or provided explicitly. 
 
 .. code-block:: xml
 	
 		<modes>
-			INHERITED_MODES+[
+			lambda helper: helper.inheritedModes+[
 				{'mode':'CompressionGZip', 'compressionType':'gzip'},
 			]
 		</modes>
@@ -178,18 +178,20 @@ generate the mode list such as:
 .. code-block:: xml
 	
 	<modes>
-		[mode for mode in 
-			combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
-				INHERITED_MODES+[
-						{'mode':'CompressionNone', 'compressionType':None},
-						{'mode':'CompressionGZip', 'compressionType':'gzip'},
-				], 
-				[
-					{'auth':None}, # Mode name is optional
-					{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
-				]) 
+		lambda helper: [
+			mode for mode in 
+				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+					helper.inheritedModes,
+					[
+							{'mode':'CompressionNone', 'compressionType':None},
+							{'mode':'CompressionGZip', 'compressionType':'gzip'},
+					], 
+					[
+						{'auth':None}, # Mode name is optional
+						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
+					]) 
 			# This is a Python list comprehension syntax for filtering the items in the list
-			if mode['auth'] != 'OS' or sys.platform == 'MyFunkyOS'
+			if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
 		]
 	</modes>
 

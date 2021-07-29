@@ -4,7 +4,7 @@
   <classification>
   
 		<modes>
-			[
+			lambda helper: [
 			{'mode':'MyMode', '__paramName':'value1'}, 
 			]
 		</modes>
