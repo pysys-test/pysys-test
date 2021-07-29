@@ -61,7 +61,7 @@ def safeEval(expr, errorMessage='Failed to evaluate "{expr}" due to {error}', em
 		where ``{expr}`` will be replaced with the actual expression and ``{error}`` with the error message. 
 		
 	:param bool emptyNamespace: By default a default namespace is provided including the symbols described above such as 
-	``os.path``, ``pysys``, etc. Set this to True to start with a completely empty namespace with no symbols defined. 
+		``os.path``, ``pysys``, etc. Set this to True to start with a completely empty namespace with no symbols defined. 
 
 	:param dict[str,obj] extraNamespace: A dict of string names and Python object values to be included in the globals 
 		environment used to evaluate this string. 
