@@ -79,17 +79,6 @@ It is also possible to embed an entire XML descriptor inside a ``pysystest.py`` 
 which may be useful for migrating towards the new approach. However note that parsing XML is really quite slow, so 
 avoiding use of XML is an advantage, particularly as your project grows. 
 
-If you prefer to keep your project using the old ``pysystest.xml`` and ``run.py`` structure, just add this to your 
-pysysdirconfig to tell ``pysys make`` to use the XML template::
-
-	<pysysdirconfig>
-
-		<maker-template name="pysys-xml-test" description="an old-style test with pysystest.xml and run.py" 
-			copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
-
-	</pysysdirconfig>
-
-
 Other project and test configuration improvements
 -------------------------------------------------
 For those still using XML is now a leaner recommended structure for test descriptors which makes several 
@@ -414,6 +403,16 @@ Deprecations:
     (support for these they won't be removed any time soon, but are discouraged for new tests). 
   - The ``ConsoleMakeTestHelper`` class is now deprecated in favour of `pysys.launcher.console_maker.DefaultTestMaker`. 
 
+By default ``pysys make`` will generate tests with a new-style ``pysystest.py`` file, but if you prefer to keep your 
+project using the old ``pysystest.xml`` and ``run.py`` structure, just add this to your pysysdirconfig to tell 
+``pysys make`` to use an XML-based test template::
+
+	<pysysdirconfig>
+
+		<maker-template name="pysys-xml-test" description="an old-style test with pysystest.xml and run.py" 
+			copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
+
+	</pysysdirconfig>
 
 -------------------
 What's new in 1.6.1
