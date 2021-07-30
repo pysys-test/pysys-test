@@ -25,7 +25,7 @@ Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-
 Test id:           PySysTestPythonDescriptorSample
 Test directory:    demo-tests/PySysTestPythonDescriptorSample
 Test state:        skipped
-Test skip reason:  This test is skipped until bug XYZ is fixed
+Test skip reason:  Skipped until bug XYZ is fixed
 Test title:        My foobar tool - Argument parsing success and error cases
 Test purpose:      The purpose of this test is to check that 
                    argument parsing addresses these criteria:
