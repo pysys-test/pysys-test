@@ -231,8 +231,8 @@ class TestDescriptor(object):
 		# type/state, when a non-default value is selected
 		
 		s=    "Test id:           %s\n" % self.id
-		reltestdir = self.testDir if not self.isDirConfig else '' # relative to current dir is most useful
-		if reltestdir.lower().replace('\\','/').startswith(os.getcwd().lower().replace('\\','/')): reltestdir = reltestdir[len(os.getcwd())+1:]
+		reltestdir = fromLongPathSafe(self.testDir) if not self.isDirConfig else '' # relative to current dir is most useful
+		if reltestdir.lower().replace('\\','/').startswith(os.getcwd().lower().replace('\\','/')+'/'): reltestdir = reltestdir[len(os.getcwd())+1:]
 		s=s+"Test directory:    %s\n" % reltestdir # use OS slashes to facilitate copy+paste
 		if self.type != 'auto': s=s+"Test type:         %s\n" % self.type
 		if self.state != 'runnable':
