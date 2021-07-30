@@ -32,7 +32,6 @@ Highlights from this release are:
 - There are a few breaking changes (see Migration Notes below) but in practice these are likely to affect few 
   users. 
 
-
 Version and documentation changes
 ---------------------------------
 - Removed support for Python 2 and 3.5, which are now end-of-life. 
@@ -45,7 +44,6 @@ Version and documentation changes
 - Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
   PySys.
 - Documentation for :doc:`ProjectConfiguration` and :doc:`TestDescriptors` is much improved. 
-
 
 New test structure and descriptors
 ----------------------------------
@@ -80,6 +78,17 @@ an associated Python class for executing it (could be defined in the same file o
 It is also possible to embed an entire XML descriptor inside a ``pysystest.py`` using ``__pysys_xml_descriptor__ =`` 
 which may be useful for migrating towards the new approach. However note that parsing XML is really quite slow, so 
 avoiding use of XML is an advantage, particularly as your project grows. 
+
+If you prefer to keep your project using the old ``pysystest.xml`` and ``run.py`` structure, just add this to your 
+pysysdirconfig to tell ``pysys make`` to use the XML template::
+
+	<pysysdirconfig>
+
+		<maker-template name="pysys-xml-test" description="an old-style test with pysystest.xml and run.py" 
+			copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
+
+	</pysysdirconfig>
+
 
 Other project and test configuration improvements
 -------------------------------------------------

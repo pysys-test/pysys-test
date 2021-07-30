@@ -42,7 +42,7 @@ class PySysTest(BaseTest):
 		self.pysys.pysys('make-default', ['make', self.output+'/NewTest_Default'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
 		self.pysys.pysys('make-existing-foobar', ['make', '--template=foobar-test', self.output+'/NewTest_ExistingTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
 		self.pysys.pysys('make-perf-test', ['make', '--template=perf-test', self.output+'/NewTest_PerfTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
-
+		self.pysys.pysys('make-pysys-xml-test', ['make', '--template=pysys-xml-test', self.output+'/NewTest_XML'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
 
 	def validate(self):	
 		outdir = self.output+'/pysys-run-tests'
@@ -91,6 +91,11 @@ class PySysTest(BaseTest):
 
 		# check that the new test got our standard descriptor
 		self.assertThatGrep('NewTest_Default/pysystest.py', '__pysys_authors__ *= "([^"]+)"', expected='pysystestuser')
+
+		# check the legacy one works ok too
+		self.assertThatGrep('NewTest_XML/pysystest.xml', 'authors="([^"]+)"', expected='pysystestuser')
+		self.assertThatGrep('NewTest_XML/pysystest.xml', 'created="([^"]+)"', 're.match(expected, value)', expected=r'\d\d\d\d-\d\d-\d\d')
+		self.assertGrep('NewTest_XML/run.py', 'PySysTest')
 		
 		self.logFileContents('pysys-run-help.out', tail=True)
 		self.logFileContents('pysys-run-tests.out', tail=False)	
