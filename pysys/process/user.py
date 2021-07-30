@@ -2355,5 +2355,6 @@ class ProcessUser(object):
 		if renameDestAtEnd:
 			os.remove(src)
 			os.rename(dest, src)
+			return src
 		return dest
 		
