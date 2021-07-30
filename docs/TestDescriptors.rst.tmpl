@@ -18,7 +18,9 @@ Each descriptor value is populated with a ``__pysys_KEY__ = VALUE`` line.
 .. code-block:: python
 @PYSYSTESTPYTHON@
 
-The descriptor values go at the start of the file, and are designed to look like ordinary Python string constants, but 
+For more information about the modes helper shown above, see `pysys.config.descriptor.TestModesConfigHelper`. 
+
+All descriptor values go at the start of the file, and are designed to look like ordinary Python string constants, but 
 for reasons of efficiency they are actually parsed out using a simpler mechanism well before the files are parsed and 
 imported by Python itself. So you are limited to a subset of the possible Python syntax::
 
