@@ -308,16 +308,23 @@ class TestModesConfigHelper:
 		key and any number of additional parameters. 
 	:ivar ~.constants: A reference to `pysys.constants` which can be used to access constants such as ``IS_WINDOWS`` for 
 		platform-dependent mode configuration. 
+	:ivar ~.pysys: A reference to the `pysys` module. 
 	:ivar callable[str] import_module: A reference to the Python ``importlib.import_module`` function that can be used 
 		if you need to access functions from additional modules such as ``sys``, ``re``, etc. 
 	:ivar pysys.config.project.Project ~.project: The project configuration, from which you can read properties. 
+	:ivar str ~.testDir: The test directory, i.e. the directory containing the ``pysystest.*`` file where this modes 
+		configuration is defined. This is not available when defining modes in ``pysysdirconfig``, but only when the mode 
+		configuration is directly in the ``pysystest.*`` file. 
 
 	"""
-	def __init__(self, inheritedModes, project):
+	def __init__(self, inheritedModes, project, testDir):
 		self.inheritedModes = inheritedModes
 		self.project = project
 		self.constants = pysys.constants
 		self.import_module = importlib.import_module
+		self.pysys = pysys
+		self.os = os
+		self.testDir = testDir
 
 	def combineModeDimensions(self, *dimensions):
 		"""
@@ -784,7 +791,11 @@ class _XMLDescriptorParser(object):
 				# use an empty namespace since if we were parsing this as real python, all import statements would be appearing later
 				modesLambda = pysys.utils.safeeval.safeEval(text.strip(), extraNamespace={}, emptyNamespace=True)
 			assert callable(modesLambda), 'Expecting callable (e.g. lambda helper: []) but got %r'%modesLambda
-			helper = TestModesConfigHelper(inheritedModes=[{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], project=self.project)
+			helper = TestModesConfigHelper(
+				inheritedModes=[{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
+				project=self.project, 
+				testDir=os.path.dirname(self.file) if self.istest else None
+				)
 			modes = modesLambda(helper) # assumes it's a callable accepting a single parameter
 			
 			assert isinstance(modes, list), 'Expecting a list of modes, got a %s: %r'%(modes.__class__.__name__, modes)
