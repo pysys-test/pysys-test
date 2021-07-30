@@ -864,8 +864,7 @@ class _XMLDescriptorParser(object):
 		newitems = self.kvDict.pop('user_data', {})
 		if isinstance(newitems, str): 
 				newitems = pysys.utils.safeeval.safeEval(newitems.strip(), 
-						extraNamespace={
-							'project': self.project})
+						extraNamespace={}, emptyNamespace=True)
 
 		if not newitems:
 			data = self.getSingleElement('data')
