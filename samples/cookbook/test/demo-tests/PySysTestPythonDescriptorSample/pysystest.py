@@ -97,11 +97,11 @@ __pysys_modes__            = r"""
 # Comment this out to inherit from parent pysysdirconfig.xml files. 
 __pysys_execution_order_hint__ = +100.0
 	
-# By default the test class uses the pysystest.py module, but it is possible to use a different path for the test 
+# By default the test class uses this pysystest.py module, but it is possible to use a different path for the test 
 # (even an absolute path). If you want to use a single Python class for lots of tests, set the module 
 # to the special string "PYTHONPATH" and make sure it's available on the project's <pythonpath>. 
 __pysys_python_class__     = "PySysTest"
-__pysys_python_module__    = "${testRootDir}/pysys-extensions/MySharedTestClass.py"
+__pysys_python_module__    = "${testRootDir}/pysys-extensions/MySharedTestClass.py" # or "PYTHONPATH"
 
 # You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute 
 # paths if needed). These can also be specified using the older names <output/input/reference> with a path= attribute. 
@@ -121,7 +121,7 @@ __pysys_user_data__        = r"""
 
 		# For long values such as paths if the value is to be converted to a list, newline and/or comma can be used as 
 		# delimiters, however it is up to the Python code that's processing the user data to handle. 
-		# Similarly, you cna use project property syntax (e.g. ${propName} or ${eval: xxx}) if the the code that reads 
+		# Similarly, you can use project property syntax (e.g. ${propName} or ${eval: xxx}) if the the code that reads 
 		# the user data expands them (but this does not happen automatically). 
 		'myTestDescriptorPath': '''
 			foo/foo-${os_myThirdPartyLibraryVersion}
