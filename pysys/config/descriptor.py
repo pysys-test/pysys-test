@@ -1133,6 +1133,7 @@ class DescriptorLoader(object):
 			else: # compatibility mode
 				intersection = descriptorSet & set(files)
 			if intersection: 
+				if len(intersection) > 1: raise Exception('Only one test should be present per directory but found %s in %s'%(intersection, root))
 				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
 				# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
 				# as it proliferates to all strings in each test

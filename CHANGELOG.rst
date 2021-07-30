@@ -374,6 +374,8 @@ affect many users:
   - The minimum supported Python version is now 3.6. 
   - It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
     ``locale.getpreferredencoding()``, to avoid thread-safety issues. 
+  - It is now an error to have multiple test descriptor filenames in a single directory, for example ``pysystest.py`` 
+    and ``pysystest.xml``. 
   - When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
     character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
     mappers. This is also now more clearly documented. 
