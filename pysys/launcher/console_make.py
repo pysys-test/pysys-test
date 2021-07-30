@@ -330,7 +330,7 @@ class DefaultTestMaker(object):
 		if file.endswith('.py') and self.project.getProperty('pythonIndentationSpacesPerTab', ''):
 			spaces = self.project.getProperty('pythonIndentationSpacesPerTab', '')
 			if spaces.lower() == 'true': spaces = '    '
-			contents = re.sub(b'\n(\t+)', lambda m: len(m.group(1))*spaces.encode('ascii'), contents)
+			contents = re.sub(b'^(\\t+)', lambda m: len(m.group(1))*spaces.encode('ascii'), contents, flags=re.MULTILINE)
 
 		with open(file, 'wb') as f:
 			f.write(contents)
