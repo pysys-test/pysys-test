@@ -65,5 +65,5 @@ Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
 Test reference:    MyReference
 Test traceability: UserRequirement_1a, UserRequirement_2c, Performance, UserStory.XYZ-54321
-Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-1.2<nl>foo/bar, foo/baz<nl>foo/bosh'
+Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-${os_myThirdPartyLibraryVersion}<nl>foo/bar, foo/baz<nl>foo/bosh'
 
