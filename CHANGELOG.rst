@@ -226,7 +226,7 @@ generate the mode list such as:
 
 For more details see :doc:`TestDescriptors`, :doc:`UserGuide` and the Getting Started sample. 
 
-There are also improvements to pysys.py's command line mode support:
+There are also improvements to pysys.py's command line support for modes:
 
 - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 
   a desired subset of modes.    
@@ -362,6 +362,8 @@ Fixes
   - Fixed numerous Python warnings. 
   - Fixed bug in which `pysys.utils.fileutils.toLongPathSafe` and `pysys.utils.fileutils.mkdir` would incorrectly 
     capitalize the first letter when passed a relative path. 
+  - Improved the formatting of ``pysys print --full`` so it is easier to read. Most items with empty or default values 
+    are no longer shown, so you can focus on the information that's actually interesting. 
 
 Migration notes
 ---------------
@@ -384,8 +386,8 @@ affect many users:
     Although this should not immediately break existing applications, to avoid future breaking changes you should 
     update the signature of those methods if you override them to accept ``testobj`` and also any artibrary 
     ``**kwargs`` that may be added in future. 
-  - The ``--json`` output mode of ``pysys.py print`` now has a dict representing the modes and their parameters 
-    instead of a simple list. 
+  - The ``--json`` output of ``pysys.py print`` now has a dict representing the modes and their parameters 
+    for the ``modes`` value instead of a simple list. 
 
 Deprecations:
 

@@ -270,10 +270,11 @@ class TestDescriptor(object):
 			if hasattr(self, 'executionOrderHintsByMode') else self.executionOrderHint)	
 
 		s=s+"Test classname:    %s; module: %s\n" % (self.classname, self.module)
-		s=s+"Test input:        %s\n" % self.input
-		s=s+"Test output:       %s\n" % self.output
-		s=s+"Test reference:    %s\n" % self.reference
-		s=s+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
+		if self.input != DEFAULT_INPUT: s=s+"Test input:        %s\n" % self.input
+		if self.output != DEFAULT_OUTPUT: s=s+"Test output:       %s\n" % self.output
+		if self.reference != DEFAULT_REFERENCE: s=s+"Test reference:    %s\n" % self.reference
+		if self.traceability:
+			s=s+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		if self.userData:
 			s=s+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,self.__userDataValueToString(v)) for k,v in (self.userData.items()))
 		s=s+""

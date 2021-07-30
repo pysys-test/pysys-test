@@ -1,6 +1,4 @@
-==========================================
-		MyServer.Performance.PySysDirConfigSample
-==========================================
+================================================================================
 Test id:           MyServer.Performance.PySysDirConfigSample
 Test directory:    demo-tests/pysysdirconfig_sample/PySysDirConfigSample
 Test state:        skipped
@@ -19,9 +17,7 @@ Test reference:    MyReference
 Test traceability: UserRequirement_1a, UserRequirement_2c, Performance, UserStory.XYZ-54321
 Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-${os_myThirdPartyLibraryVersion}<nl>foo/bar, foo/baz<nl>foo/bosh'
 
-==========================================
-		PySysTestPythonDescriptorSample
-==========================================
+================================================================================
 Test id:           PySysTestPythonDescriptorSample
 Test directory:    demo-tests/PySysTestPythonDescriptorSample
 Test state:        skipped
@@ -44,9 +40,7 @@ Test reference:    MyReference
 Test traceability: Bug123, UserStory-456, UserRequirement_1a, UserRequirement_2c, Performance
 Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-${os_myThirdPartyLibraryVersion}<nl>foo/bar, foo/baz<nl>foo/bosh'
 
-==========================================
-		PySysTestXMLDescriptorSample
-==========================================
+================================================================================
 Test id:           PySysTestXMLDescriptorSample
 Test directory:    demo-tests/PySysTestXMLDescriptorSample
 Test state:        skipped
