@@ -365,11 +365,19 @@ class DefaultTestMaker(object):
 				['@@DATE@@', '@{DATE}'], 
 				['@@USERNAME@@', '@{USERNAME}'], 
 				['@@DIR_NAME@@', '@{DIR_NAME}'], 
+				['@@DEFAULT_DESCRIPTOR@@', '@{DEFAULT_DESCRIPTOR}'], 
 			]
-			
+		
+		with open(self.project.pysysTemplatesDir+'/default-test/pysystest.py', 'rb') as f:
+			DEFAULT_DESCRIPTOR = f.read()
+			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR[:DEFAULT_DESCRIPTOR.find(b'import')].rstrip().decode('ascii')
+			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR.replace('@@DATE@@', '@{DATE}')
+			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR.replace('@@USERNAME@@', '@{USERNAME}')
+		
 		replace = [
 			(re.compile(r1.encode('ascii')), 
 				r2 # in addition to ${...] project properties, add some that are especially useful here
+					.replace('@{DEFAULT_DESCRIPTOR}', DEFAULT_DESCRIPTOR)
 					.replace('@{DATE}', self.project.startDate)
 					.replace('@{USERNAME}', self.project.username)
 					.replace('@{DIR_NAME}', os.path.basename(dest))

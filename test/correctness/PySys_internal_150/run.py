@@ -41,6 +41,7 @@ class PySysTest(BaseTest):
 		self.pysys.pysys('make-help', ['make', '-h'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
 		self.pysys.pysys('make-default', ['make', self.output+'/NewTest_Default'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
 		self.pysys.pysys('make-existing-foobar', ['make', '--template=foobar-test', self.output+'/NewTest_ExistingTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
+		self.pysys.pysys('make-perf-test', ['make', '--template=perf-test', self.output+'/NewTest_PerfTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
 
 
 	def validate(self):	
@@ -86,7 +87,10 @@ class PySysTest(BaseTest):
 		self.assertThatGrep('NewTest_ExistingTest/pysystest.py', '__pysys_authors__ *= "([^"]+)"', expected='pysystestuser')
 		self.assertThatGrep('NewTest_ExistingTest/pysystest.py', '__pysys_created__ *= "([^"]+)"', 'value != "1999-12-31"')
 
-		self.assertThatGrep('NewTest_Default/pysystest.py', '(.*)pass', expected=2*4*' ') # converted spaces to tabs
+		self.assertThatGrep('NewTest_PerfTest/pysystest.py', '(.*)pass', expected=2*4*' ') # converted spaces to tabs
+
+		# check that the new test got our standard descriptor
+		self.assertThatGrep('NewTest_Default/pysystest.py', '__pysys_authors__ *= "([^"]+)"', expected='pysystestuser')
 		
 		self.logFileContents('pysys-run-help.out', tail=True)
 		self.logFileContents('pysys-run-tests.out', tail=False)	

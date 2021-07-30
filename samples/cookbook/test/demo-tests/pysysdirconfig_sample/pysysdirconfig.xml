@@ -35,21 +35,26 @@
 	  - replace: Specify any dynamic substitutions, which will be applied in all copied files. It is recommended to 
 	    use only ASCII-characters (but if any non-ASCII characters are provided they will be substituted as UTF-8). 
 	    The replacement "with" expressions can include project properties using ``${propname}`` syntax, or 
-	    the special strings ``@{DIR_NAME}``, ``@{USERNAME}``, ``@{DATE}``. If no replace elements are explicitly 
-	    provided, the following default replacements are used:
+	    the special strings ``@{DIR_NAME}``, ``@{USERNAME}``, ``@{DATE}``, ``@{DEFAULT_DESCRIPTOR}``. 
+	    If no replace elements are explicitly provided, the following default replacements are used:
 	    
 	      @@DATE@@ -> @{DATE} (the current date)
 	      @@USERNAME@@ -> @{USERNAME} (the currently logged in user)
 	      @@DIR_NAME@@ -> @{DIR_NAME} (the basename of the directory being created, typically the test id)
+	      @@DEFAULT_DESCRIPTOR@@ -> @{DEFAULT_DESCRIPTOR} (the __pysys_title__ and other descriptor lines from the 
+	               standard PySys default test template, after which you can add your customized Python test class)
 	
 	By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
 	just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
 
 	-->
-	<maker-template name="perf-test" description="a simple performance test using MyPerfTool" 
+	<maker-template name="my-test" description="a test with the Python code pre-customized to get things started" 
+		copy="./_pysys_templates/MyTemplateTest/*" />
+
+	<maker-template name="perf-test" description="a performance test include a configuration for my fictional performance tool" 
 		copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
-	
-	<maker-template name="foobar-test" description="an advanced test based on the simple Foobar test" 
+
+	<maker-template name="foobar-test" description="an advanced test based on the existing XXX test" 
 		copy="./PySysDirConfigSample/*" 
 		mkdir="ExtraDir1, ExtraDir2"
 	>

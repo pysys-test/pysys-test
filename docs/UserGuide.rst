@@ -49,18 +49,21 @@ or to a ``<pysysdirconfig>`` element in your ``pysysproject.xml`` file. Here are
 the cookbook sample)::
 
 	<pysysdirconfig>
-	
-		<maker-template name="perf-test" description="a simple performance test using MyPerfTool" 
-			copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
 		
-		<maker-template name="foobar-test" description="an advanced test based on the simple foobar test" 
+		<maker-template name="my-test" description="a test with the Python code pre-customized to get things started" 
+			copy="./_pysys_templates/MyTemplateTest/*" />
+
+		<maker-template name="perf-test" description="a performance test include a configuration for my fictional performance tool" 
+			copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+
+		<maker-template name="foobar-test" description="an advanced test based on the existing XXX test" 
 			copy="./PySysDirConfigSample/*" 
 			mkdir="ExtraDir1, ExtraDir2"
 		>
-			<replace regex='date="\d\d\d\d-\d\d-\d\d"' with='date="@{DATE}"'/>
-			<replace regex='title="[^"]*"' with='title="Foobar - My new test title TODO"'/>
-			<replace regex='username="[^"]*"' with='username="@{USERNAME}"'/>
-			<replace regex='@@DIR_NAME@@' with='@{DIR_NAME}'/>
+			<replace regex='__pysys_title__ *= r"""[^"]*"""' with='__pysys_title__   = r""" Foobar - My new @{DIR_NAME} test title TODO """'/>
+			<replace regex='__pysys_authors__ *= "[^"]*"'    with='__pysys_authors__ = "@{USERNAME}"'/>
+			<replace regex='__pysys_created__ *= "[^"]*"'    with='__pysys_created__ = "@{DATE}"'/>
+			<replace regex='@@DIR_NAME@@'                    with='@{DIR_NAME}'/>
 		</maker-template>
 
 	</pysysdirconfig>
