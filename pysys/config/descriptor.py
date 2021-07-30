@@ -476,7 +476,7 @@ class _XMLDescriptorParser(object):
 			# must be at the start of a line, i.e. not after a comment
 			# we do allow raw strings
 			for m in re.finditer(
-					(f'(?:^|\\n)[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
+					(f'^[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
 						+'|'.join([
 							'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse))', # number/boolean literal, would be a shame for it to have to be quoted
 							'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
@@ -484,7 +484,7 @@ class _XMLDescriptorParser(object):
 						])
 						+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
 						).encode('ascii'), 
-					filecontents, flags=re.DOTALL): 
+					filecontents, flags=re.DOTALL + re.MULTILINE): 
 				k = m.group('key').decode('ascii', errors='replace')
 				if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
 				k = k.rstrip('_')
