@@ -203,7 +203,7 @@ def deletefile(path, retries=1, ignore_errors=False):
 		log.debug('Retrying file deletion of "%s" %d times after %s', path, retries, ex)
 		deletefile(path, retries = retries-1, ignore_errors=ignore_errors)
 
-def listDirContents(path):
+def listDirContents(path, recurse=True):
 	"""
 	Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable 
 	for diffing. 
@@ -221,6 +221,7 @@ def listDirContents(path):
 	  
 	
 	:param str path: The absolute path to search.
+	:param bool recurse: Set this to False to just include the specified directory but not any children. 
 	:return: A list of strings with the relative paths found, e.g. ``["mysubdir/myfile.txt", "mysubdir/mysubsubdir/"]``. 
 	
 	.. versionadded:: 2.0
@@ -235,7 +236,7 @@ def listDirContents(path):
 			items = sorted((x for x in it), key=lambda x: (x.is_dir(follow_symlinks=False), x.name))
 			for x in items:
 				yield (x.path[stripchars:].replace('\\', '/')+('/' if x.is_dir(follow_symlinks=False) else ''))
-				if x.is_dir(follow_symlinks=False):
+				if recurse and x.is_dir(follow_symlinks=False):
 					yield from listRecursively(x.path)
 
 	return list(listRecursively(path))
