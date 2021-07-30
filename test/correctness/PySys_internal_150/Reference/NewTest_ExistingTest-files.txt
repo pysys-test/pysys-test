@@ -1,4 +1,3 @@
-pysystest.xml
-run.py
+pysystest.py
 ExtraDir1/
 ExtraDir2/

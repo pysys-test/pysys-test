@@ -77,20 +77,16 @@ class PySysTest(BaseTest):
 		# Sample descriptors
 		self.assertDiff(self.copy('pysys-print-descriptor-samples.out', 'descriptor-samples.txt', mappers=[
 			lambda line: line.replace(os.sep, '/'),
-			# if (':' in line or '=' in line or '-->' in line) else None,
-			#lambda line: line if line.startswith(
-			#	tuple('Test id,Test state,Test skip reason,Test groups,Test created,Test modes,Test module,Test classname,Test input,Test output,Test reference,Test traceability,Test user data, -->'.split(','))
-			#) else None,
 			pysys.mappers.RegexReplace(' [^ ]+pysys-extensions', ' <rootdir>/pysys-extensions')]))
 		
 		# Test making
 		self.assertDiff(self.write_text('NewTest_Default-files.txt', '\n'.join(pysys.utils.fileutils.listDirContents(self.output+'/NewTest_Default'))))
 		self.assertDiff(self.write_text('NewTest_ExistingTest-files.txt', '\n'.join(pysys.utils.fileutils.listDirContents(self.output+'/NewTest_ExistingTest'))))
 		# this shows we replaced the user of the original committed test (mememe) with the "current" user
-		self.assertThatGrep('NewTest_ExistingTest/pysystest.xml', 'This test was created by username="([^"]*)"', expected='pysystestuser')
-		self.assertThatGrep('NewTest_ExistingTest/pysystest.xml', 'This test was created .* on date="(.*)"', 'value != "1999-12-31"')
+		self.assertThatGrep('NewTest_ExistingTest/pysystest.py', '__pysys_authors__ *= "([^"]+)"', expected='pysystestuser')
+		self.assertThatGrep('NewTest_ExistingTest/pysystest.py', '__pysys_created__ *= "([^"]+)"', 'value != "1999-12-31"')
 
-		self.assertThatGrep('NewTest_Default/run.py', '(.*)pass', expected=2*4*' ') # converted spaces to tabs
+		self.assertThatGrep('NewTest_Default/pysystest.py', '(.*)pass', expected=2*4*' ') # converted spaces to tabs
 		
 		self.logFileContents('pysys-run-help.out', tail=True)
 		self.logFileContents('pysys-run-tests.out', tail=False)	

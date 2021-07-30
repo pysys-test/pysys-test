@@ -36,6 +36,55 @@ Or::
 
 	<skipped reason="Skipped until bug XYZ is fixed"/>
 
+Customizing pysys make
+----------------------
+You can define templates that pysys make will use to create new tests specific to your project, or even multiple 
+templates for individual directories within your project. This helps to encourage teams to follow the latest best 
+practice by ensuring new tests are copying known good patterns, and also saves looking up how to do common things when 
+creating new tests. 
+
+The ``pysys make`` command line comes with a ``pysys-default-test`` template for creating a simple PySys test, you can 
+add your own by adding ``<maker-template>`` elements to ``pysysdirconfig.xml`` in any directory under your project, 
+or to a ``<pysysdirconfig>`` element in your ``pysysproject.xml`` file. Here are a couple of examples (taken from 
+the cookbook sample)::
+
+	<pysysdirconfig>
+	
+		<maker-template name="perf-test" description="a simple performance test using MyPerfTool" 
+			copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+		
+		<maker-template name="foobar-test" description="an advanced test based on the simple foobar test" 
+			copy="./PySysDirConfigSample/*" 
+			mkdir="ExtraDir1, ExtraDir2"
+		>
+			<replace regex='date="\d\d\d\d-\d\d-\d\d"' with='date="@{DATE}"'/>
+			<replace regex='title="[^"]*"' with='title="Foobar - My new test title TODO"'/>
+			<replace regex='username="[^"]*"' with='username="@{USERNAME}"'/>
+			<replace regex='@@DIR_NAME@@' with='@{DIR_NAME}'/>
+		</maker-template>
+
+	</pysysdirconfig>
+
+You can copy files from an absolute location such as somewhere under your project's ``${testRootDir}``, from the 
+PySys default template (if you just want to add files) using ``${pysysTemplatesDir}/default-test/*``, or from a path 
+relative to the XML file where the template is defined. This could be a ``_pysys_templates/`` directory alongside this 
+XML file, or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more 
+generic, for exmaple replacing the title with a TODO as above). 
+
+See :doc:`TestDescriptors` for more information about how to configure templates in a ``pysysdirconfig.xml`` file. 
+
+When creating tests using ``pysys make``, by default the first template (from the more specific ``pysysdirconfig.xml``) 
+is selected, but you can also specify any other template by name using the ``-t`` option, and get a list of available 
+templates for the current directory using ``--help``. 
+
+It is possible to subclass the `pysys.launcher.console_make.DefaultTestMaker` responsible for this logic if needed. 
+The main reason to do that is to provide a `pysys.launcher.console_make.DefaultTestMaker.validateTestId` method 
+to check that new test ids do not conflict with others used by others in a remote version control system (to avoid 
+merge conflicts). 
+
+By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
+just set the new ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
+
 Checking for error messages in log files
 -----------------------------------------
 The `BaseTest.assertGrep()` method is an easy way to check that there are no error 

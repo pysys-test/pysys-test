@@ -1,5 +1,4 @@
 my-perf-config.xml
-pysystest.xml
-run.py
+pysystest.py
 MyOutput/
 MyReference/
