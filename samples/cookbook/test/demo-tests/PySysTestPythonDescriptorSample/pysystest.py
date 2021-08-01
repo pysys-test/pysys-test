@@ -26,10 +26,10 @@ __pysys_authors__ = "userid1, userid2, Joe Bloggs"
 __pysys_created__ = "2021-07-25"
 
 # Use this to list traceability ids for the requirements validated by this test, such as defect or user story ids.
-__pysys_traceability_ids__ = "BUG-1234, UserStory-456, UserRequirement_1a, UserRequirement_2c, Performance" 
+__pysys_traceability_ids__ = "Bug-1234, UserStory-456, UserRequirement_1a, UserRequirement_2c, Performance" 
 
 # Comment/uncomment this to mark this test as skipped, which will stop it from executing.
-__pysys_skipped_reason__   = "Skipped until BUG-1234 is fixed" 
+__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed" 
 
 # Specify the groups that this test will be tagged with, allowing them to be selected for inclusion/exclusion in test 
 # runs. Groups are usually named in camelCase. These groups are separated by commas, followed by a semi-colon and 

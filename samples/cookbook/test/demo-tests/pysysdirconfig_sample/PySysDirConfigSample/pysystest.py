@@ -9,7 +9,7 @@ __pysys_authors__ = "mememe"
 __pysys_created__ = "1999-12-31"
 
 __pysys_groups__           = "dirConfigSample; inherit=true"
-#__pysys_skipped_reason__   = "Skipped until BUG-1234 is fixed"
+#__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed"
 __pysys_modes__            = """ 
 	lambda helper: helper.inheritedModes+[
 				{'mode':'CompressionNone_Auth=Basic', 'compressionType':None, 'auth':'AuthBasic'}

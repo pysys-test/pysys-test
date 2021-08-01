@@ -30,11 +30,11 @@ ensuring that the rest of `execute() <BaseTest.execute>` and
 Alternatively if the test should be skipped regardless of platform/mode etc, 
 it is best to specify that statically in your `pysystest.*` file::
 
-	__pysys_skipped_reason__   = "Skipped until BUG-1234 is fixed" 
+	__pysys_skipped_reason__   = "Skipped until Bug-1234 is fixed" 
 
 Or::
 
-	<skipped reason="Skipped until BUG-1234 is fixed"/>
+	<skipped reason="Skipped until Bug-1234 is fixed"/>
 
 Customizing pysys make
 ----------------------

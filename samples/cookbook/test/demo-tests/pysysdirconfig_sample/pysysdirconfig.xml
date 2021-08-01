@@ -139,7 +139,7 @@
 	<execution-order hint="+100.0"/>
 
 	<!-- Comment/uncomment this to mark all tests under this directory as skipped. -->
-	<skipped reason="These tests are skipped until BUG-1234 is fixed"/>
+	<skipped reason="These tests are skipped until Bug-1234 is fixed"/>
 	
 	<!-- By convention the test class uses module="run.py" located in the test directory, but 
 	it is possible to use a different path (even an absolute path). If you want to use a single 
