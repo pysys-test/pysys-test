@@ -19,6 +19,8 @@
     <class name="PySysTest" module="run"/>
   </data>
   
+  <input-dir>Input</input-dir>
+  
   <traceability>
     <requirements>
       <requirement id=""/>     

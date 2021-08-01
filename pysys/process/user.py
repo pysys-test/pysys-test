@@ -2251,6 +2251,10 @@ class ProcessUser(object):
 			As a convenience to avoid repeating the same text in the src and destination, 
 			if the dest ends with a slash, or the src is a file and the dest is an existing directory, 
 			the dest is taken as a parent directory into which the src will be copied in retaining its current name. 
+			
+			It is best to avoid copies where the src dir already contains the dest (which would be recursive) such as 
+			copying the test dir (possibly configured as ``self.input``) to destination ``self.output``, however if this 
+			is attempted PySys will log a warning and copy everything else except the recursive part. 
 		
 		:param bool overwrite: If True, source files will be allowed to 
 			overwrite destination files, if False an exception will be raised if a destination file already exists. 
@@ -2294,14 +2298,14 @@ class ProcessUser(object):
 	
 		dest = toLongPathSafe(os.path.join(self.output, dest)).rstrip('/\\')
 		if origdest.endswith((os.sep, '/', '\\')) or (not srcIsDir and os.path.isdir(dest)): dest = toLongPathSafe(dest+os.sep+os.path.basename(src))
-	
+
+		self.log.debug('Copying %s to %s', src, dest)
 		if src == dest and not srcIsDir:
 			dest = src+'__pysys_copy.tmp'
 			renameDestAtEnd = True
 		else:
 			renameDestAtEnd = False
 		assert src != dest, 'Source and destination directory cannot be the same'
-		assert not dest.startswith(src+os.sep), f'Cannot copy to a destination under the source directory (source={src}, dest={dest})'
 
 		if overwrite is None: overwrite = not srcIsDir
 
@@ -2313,7 +2317,10 @@ class ProcessUser(object):
 					path = e.path
 					
 					if ignoreIf is not None and ignoreIf(path): continue
-					
+					if dest.lower().startswith(path.lower()+os.sep):
+						self.log.warning(f'Copy will ignore {dest[len(src):]} while copying from {src} to avoid recursive copy; it is best to avoid having a source path that is a parent dir of the destination')
+						continue
+
 					if e.is_symlink() and symlinks:
 						linkdest = dest+os.sep+os.path.basename(path)
 						os.symlink(os.readlink(path), linkdest)

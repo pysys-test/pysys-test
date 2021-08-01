@@ -52,9 +52,15 @@ class BaseTest(ProcessUser):
 	def __init__ (self, descriptor, outsubdir, runner):
 		ProcessUser.__init__(self)
 		self.descriptor = descriptor
+		self.input = os.path.join(descriptor.testDir, 
+			(
+				'Input' if os.path.exists(os.path.join(descriptor.testDir, 'Input')) else '.'
+			) if descriptor.input=='!Input_dir_if_present_else_testDir!' else descriptor.input
+			).rstrip('/\\.') # strip /. suffix if input is ''
 		self.input = os.path.join(descriptor.testDir, descriptor.input)
-		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir)
-		self.reference = os.path.join(descriptor.testDir, descriptor.reference)
+
+		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir)#.rstrip('/\\.')
+		self.reference = os.path.join(descriptor.testDir, descriptor.reference)#.rstrip('/\\.')
 		self.runner = runner
 		self.mode = descriptor.mode
 		# NB: we don't set self.mode.params as keyword arguments since it'd be easy to overwrite a class/instance 

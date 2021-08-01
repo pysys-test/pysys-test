@@ -18,7 +18,8 @@ class PySysTest(BaseTest):
 		self.pysys.pysys('run-before-setting-title', ['run','MyNewTest', '-o', self.output+'/run-before-setting-title'], expectedExitStatus='!=0')
 
 		self.copy('MyNewTest/pysystest.py', 'MyNewTest/pysystest.py', mappers=[
-			pysys.mappers.RegexReplace(' TODO', ' <todo>')
+			pysys.mappers.RegexReplace(' TODO', ' <todo>'),
+			pysys.mappers.RegexReplace(r'\t\tpass', r'\t\tself.log.info("Input dir = %s", self.input)'),
 		])
 		self.pysys.pysys('run-MyNewTest', ['run','MyNewTest', '-o', 'output-MyNewTest'])
 
@@ -34,7 +35,7 @@ class PySysTest(BaseTest):
 		self.assertGrep('makeproject.err', expr='.*', contains=False) # no errors
 		self.assertGrep('makeproject-custom.err', expr='.*', contains=False) # no errors
 
-		self.assertThat('os.path.isdir(%s)', repr(self.output+'/MyNewTest/Input'))
+		self.assertThat('not os.path.isdir(%s)', repr(self.output+'/MyNewTest/Input'))
 		self.assertThat('not os.path.isfile(%s)', repr(self.output+'/MyNewTest/pysystest.xml'))
 		self.assertThat('os.path.isfile(%s)', repr(self.output+'/MyNewTest/pysystest.py'))
 
@@ -44,6 +45,7 @@ class PySysTest(BaseTest):
 	
 		# check for correct default outcome for new tests
 		self.assertThatGrep('run-MyNewTest.out', 'Test final outcome *: *(.*)', expected='NOT VERIFIED') 
+		self.assertThatGrep('run-MyNewTest.out', r'Input dir = .*([/\\][^/\\\n]+)$', r'not value.endswith((".", "/", "\\"))') 
 
 		self.assertThatGrep('run-before-setting-title.out', 'Test final outcome *: *(.*)', expected='BLOCKED') 
 		self.assertThatGrep('run-before-setting-title.out', 'Test outcome reason*: *(.*)', expected='Test title is still TODO') 

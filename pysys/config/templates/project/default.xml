@@ -43,6 +43,11 @@
 		<default-file-encoding pattern="*.yaml" encoding="utf-8"/>
 	</default-file-encodings>	
 	
+	<pysysdirconfig>
+		<!-- Store input files alongside pysystest.py in the test directories (instead of a separate testDir/Input/ dir) -->
+		<input-dir>.</input-dir>
+	</pysysdirconfig>
+	
 	<!-- Add project-specific text to be appended to the "pysys run -h". -->
 	<project-help>
 	</project-help>

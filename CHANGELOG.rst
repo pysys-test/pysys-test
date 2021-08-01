@@ -21,7 +21,8 @@ Highlights from this release are:
 
 - Removal of Python 2 and 3.5 support, and addition of Python 3.9. 
 - A new standard test structure that avoids the use of XML by allowing descriptor values such as test title to be 
-  specified alongside your Python test class in a ``pysystest.py`` file. 
+  specified alongside your Python test class in a ``pysystest.py`` file, and changing the default ``self.input`` 
+  directory (for new projects) to be the main testDir instead of an ``Input/`` subdirectory. 
 - Some big extensions to the concept of "modes", allowing for more powerful configuration and use, including 
   multi-dimensional modes. 
 - A new template-based test maker, allowing easy configuration of how new tests are created on a per-directory basis, 
@@ -55,7 +56,6 @@ separated from the ``run.py`` in a different file made tests harder to navigate.
 	__pysys_title__   = r""" My foobar tool - Argument parsing success and error cases """
 	#                        ========================================================================================================================
 
-
 	__pysys_purpose__ = r""" The purpose of this test is to check that 
 		argument parsing addresses these criteria:
 			- Correctness
@@ -68,7 +68,7 @@ separated from the ``run.py`` in a different file made tests harder to navigate.
 For a full example of all the possible options (including more details on the subset of Python syntax PySys will 
 parse correctly) see :doc:`TestDescriptors`.  
 
-Note that the ``===`` characters acts not only as an underline but also provide a guide to help test authors know 
+Note that the ``=====`` characters act not only as an underline but also provide a guide to help test authors know 
 when their title string has exceeded 120 characters which should be avoided if possible to make pysys print output 
 easy to read. The character and length of this guide can be customized with project property 
 ``pysystestTemplateLineLengthGuide`` if desired. 
@@ -88,7 +88,12 @@ It is also possible to embed an entire XML descriptor inside a ``pysystest.py`` 
 which may be useful for some users. However note that parsing XML is really quite slow, so avoiding use of XML is an 
 advantage, particularly if your project may grow large. 
 
-It is fine to 
+See migration notes for more information about optionally switching to the new ``pysystest.py`` structure. 
+
+Newly created PySys projects now store ``self.input`` files in the top-level ``<testDir>/`` of each test instead of the 
+``<testDir>/Input/`` subdirectory, to make tests easier to navigate. Existing projects could be updated to follow the 
+same structure if desired, or could make use of a new ``<input-dir>`` value to use ``Input/`` for existing tests in the 
+project but not tests created from now on; see the migration notes below for more information. 
 
 Other project and test configuration improvements
 -------------------------------------------------
@@ -432,6 +437,29 @@ the ``pysystest.xml`` style. However for anyone who wants to switch entirely to 
 automatically converting ``pysystest.xml`` + ``run.py`` tests to ``pysystest.py`` (without losing 
 version control history) is provided as part of the cookbook sample 
 at: https://github.com/pysys-test/sample-cookbook/tree/main/util_scripts/pysystestxml_upgrader.py
+
+Existing projects are recommended to explicitly specify what directory they wish to use to store test input 
+by specifying one the following three ``<input-dir>`` configurations::
+
+	<pysysproject>
+	
+		<pysysdirconfig>
+			
+			<!-- The default for PySys projects created before 2.0 -->
+			<input-dir>Input</input-dir> 
+			
+			<!-- Recommended for new projects - input files are stored in the testDir alongside pysystest.py -->
+			<input-dir>.</input-dir> 
+			
+			<!-- Special option added in PySys 2.0 that auto-detects based on presence of an Input/ dir; useful for getting 
+				the new behaviour for new tests without the need to update or potentially create bugs in existing tests
+			-->
+			<input-dir>!Input_dir_if_present_else_testDir!</input-dir>
+
+		</pysysdirconfig>
+	
+	</pysysproject>
+
 
 -------------------
 What's new in 1.6.1

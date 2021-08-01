@@ -1,5 +1,4 @@
+mytemplateinput.txt
 pysystest.py
-Input/
-Input/mytemplateinput.txt
 MyOutput/
 MyReference/
