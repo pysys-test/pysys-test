@@ -75,7 +75,7 @@ Project Links
 Installation
 ============
 
-PySys can be installed into Python 3.9 (recommended), 3.5/3.6/3.7/3.8. 
+PySys can be installed into Python version 3.6 or later. 
 
 The best way to install PySys is using the standard ``pip`` installer which 
 downloads and install the binary package for the current PySys 
@@ -145,9 +145,8 @@ Then to create your first test, run::
 
 	> pysys.py make MyApplication_001
 
-This will create a ``MyApplication_001`` subdirectory with a ``pysystest.xml`` 
-file holding metadata about the test such as its title, and a ``run.py`` 
-where you can add the logic to ``execute`` your test, and to ``validate`` that 
+This will create a ``MyApplication_001`` subdirectory with a ``pysystest.py`` file "descriptor" metadata about the test 
+such as its title, and Python class where you can add the logic to ``execute`` your test, and to ``validate`` that 
 the results are as expected. 
 
 To run your testcases, simply execute::
