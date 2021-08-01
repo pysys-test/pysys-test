@@ -42,5 +42,7 @@ here: [![PySys tests](https://github.com/pysys-test/sample-cookbook/workflows/Py
     * PyUnitTest - PyUnit test execution from PySys
     * test_outcome_samples - Examples of some failing tests, so you can see how careful use of assertions leads to really 
       informative messages when there's a failure. 
+* A utility script for automatically converting ``pysystest.xml`` + ``run.py`` tests to the PySys 2.0 ``pysystest.py`` 
+  style (without losing version control history) is provided at ``util_scripts/pysystestxml_upgrader.py``.
 
 For more information on any PySys features demonstrated here, see the [PySys documentation](https://pysys-test.github.io/pysys-test).

@@ -68,23 +68,27 @@ separated from the ``run.py`` in a different file made tests harder to navigate.
 For a full example of all the possible options (including more details on the subset of Python syntax PySys will 
 parse correctly) see :doc:`TestDescriptors`.  
 
-Note that the ``===`` characters not only act as an underline but also provide a guide to help test authors know 
-when their title string has exceeded 120 characters. The character and length of this guide can be customized with 
-project property ``pysystestTemplateLineLengthGuide`` if desired. 
+Note that the ``===`` characters acts not only as an underline but also provide a guide to help test authors know 
+when their title string has exceeded 120 characters which should be avoided if possible to make pysys print output 
+easy to read. The character and length of this guide can be customized with project property 
+``pysystestTemplateLineLengthGuide`` if desired. 
 
 New descriptor values were added to record the ``authors`` who have worked on the test, and the original test 
 ``created`` date, both of which are useful to have available when looking into test failures. These are automatically 
 populated when using ``pysys make``, but would need to be manually updated if you create tests through other means 
 such as copying from an existing test. 
 
-Actually PySys will recognize any file named ``pysystest.*`` (case insensitive) as a test not just ``pysystest.py``, 
+Actually PySys will recognize *any* file named ``pysystest.*`` (case insensitive) as a test not just ``pysystest.py``, 
 so the same mechanism can be used for non-Python languages, for example a file named ``PySysTest.cs` would also be 
 identified as a PySys test. It just needs to contain at least a ``__pysys_title__ = ...``, and there would need to be 
-an associated Python class for executing it (could be defined in the same file or in a parent ``pysysdirconfig.xml``). 
+an associated Python class for executing it (could be configured in the same file or in a parent 
+``pysysdirconfig.xml``). 
 
 It is also possible to embed an entire XML descriptor inside a ``pysystest.py`` using ``__pysys_xml_descriptor__ =`` 
-which may be useful for migrating towards the new approach. However note that parsing XML is really quite slow, so 
-avoiding use of XML is an advantage, particularly as your project grows. 
+which may be useful for some users. However note that parsing XML is really quite slow, so avoiding use of XML is an 
+advantage, particularly if your project may grow large. 
+
+It is fine to 
 
 Other project and test configuration improvements
 -------------------------------------------------
@@ -422,6 +426,12 @@ project using the old ``pysystest.xml`` and ``run.py`` structure, just add this 
 			copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
 
 	</pysysdirconfig>
+
+Many users will prefer to use the new ``pysystest.py`` style for newly created tests alongside older tests using
+the ``pysystest.xml`` style. However for anyone who wants to switch entirely to the new style, a utility script for 
+automatically converting ``pysystest.xml`` + ``run.py`` tests to ``pysystest.py`` (without losing 
+version control history) is provided as part of the cookbook sample 
+at: https://github.com/pysys-test/sample-cookbook/tree/main/util_scripts/pysystestxml_upgrader.py
 
 -------------------
 What's new in 1.6.1
