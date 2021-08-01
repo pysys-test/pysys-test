@@ -107,7 +107,7 @@ class TestDescriptor(object):
 	:ivar bool ~.isDirConfig: True if this is a directory configuration, or False if 
 		it's a normal testcase. 
 	
-	:ivar dict[str,obj] ~.userData: A dictionary that can be used for storing user-defined data 
+	:ivar dict[str,obj] ~.userData: A Python dictionary that can be used for storing user-defined data 
 		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements, e.g. 
 		``<data><user-data name="key" value="val ${projectProperty}"</user-data></data>``.
 	"""

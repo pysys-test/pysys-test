@@ -42,7 +42,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.reportPerformanceResult(int(actualIterations.replace(',',''))/timeSecs, 
 			# Each performance result is identified by a short string that uniquely identifies it. Make sure this 
 			#   includes information about what mode it's running in and what this test does so that there's no need to 
-			#   cross-reference the run.py/pysystest.xml files to understand what it's doing. 
+			#   cross-reference the pysystest.* files to understand what it's doing. 
 			# The unit is usually one of the predefined strings - "/s" (=per second; biggerIsBetter=True) for rates, 
 			# or "ns" (=nanoseconds; biggerIsBetter=False) for small time values such as latencies; 
 			# alternatively pass an instance of PerformanceUnit instance if you want custom units.  

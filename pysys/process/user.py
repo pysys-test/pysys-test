@@ -95,7 +95,7 @@ class ProcessUser(object):
 		(e.g. for hosts and credentials). 
 	:ivar bool ~.disableCoverage: Set to True to disable all code coverage collection for processes 
 		started from this instance. This is automatically set for any tests marked with the "disableCoverage" group 
-		in their pysystest.xml file. 
+		in their ``pysystest.*`` file. 
 			
 		The built-in Python code coverage functionality in L{startPython} checks this 
 		flag. It is recommended that any other languages supporting code coverage 
