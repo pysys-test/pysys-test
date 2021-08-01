@@ -86,7 +86,7 @@ to check that new test ids do not conflict with others used by others in a remot
 merge conflicts). 
 
 By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
-just set the new ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
+just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
 
 Checking for error messages in log files
 -----------------------------------------
