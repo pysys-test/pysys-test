@@ -36,7 +36,6 @@ Key features include:
   testing your application.
 - A performance monitoring framework for recording and aggregating latency, 
   throughput and other performance metrics.
-
 - A pluggable "writers" framework for recording test outcomes in any format, 
   including a standard JUnit-compatible XML results writer and output archiver 
   in the box, and support for running tests under CI providers such as 
@@ -48,7 +47,7 @@ Key features include:
   classification groups.
 - Support for Windows, Linux, macOS and Solaris. 
 
-PySys was created by Moray Grieve. The current maintainer is Ben Spiller. 
+PySys was created by Moray Grieve. The maintainer is now Ben Spiller. 
 This is a community project so we welcome your contributions, whether 
 enhancement issues or GitHub pull requests! 
 
