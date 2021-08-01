@@ -1,5 +1,5 @@
 __pysys_title__   = r""" Category TODO - Test title (short, specific and sortable!) goes here TODO """ 
-                         @@LINE_LENGTH_GUIDE@@
+#                        @@LINE_LENGTH_GUIDE@@
 
 __pysys_purpose__ = r""" The purpose of this test is ... TODO.
 	

@@ -53,6 +53,8 @@ separated from the ``run.py`` in a different file made tests harder to navigate.
 ``pysystest.py``. There is a new Python-style syntax for specifying descriptor values within this file, for example::
 
 	__pysys_title__   = r""" My foobar tool - Argument parsing success and error cases """
+	#                        ========================================================================================================================
+
 
 	__pysys_purpose__ = r""" The purpose of this test is to check that 
 		argument parsing addresses these criteria:
@@ -61,9 +63,14 @@ separated from the ``run.py`` in a different file made tests harder to navigate.
 		"""
 
 	__pysys_groups__           = "performance, disableCoverage; inherit=true"
+	#__pysys_skipped_reason__  = "Skipped until Bug-1234 is fixed"
 
 For a full example of all the possible options (including more details on the subset of Python syntax PySys will 
 parse correctly) see :doc:`TestDescriptors`.  
+
+Note that the ``===`` characters not only act as an underline but also provide a guide to help test authors know 
+when their title string has exceeded 120 characters. The character and length of this guide can be customized with 
+project property ``pysystestTemplateLineLengthGuide`` if desired. 
 
 New descriptor values were added to record the ``authors`` who have worked on the test, and the original test 
 ``created`` date, both of which are useful to have available when looking into test failures. These are automatically 

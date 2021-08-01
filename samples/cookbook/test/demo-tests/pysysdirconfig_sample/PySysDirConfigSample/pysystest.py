@@ -1,5 +1,5 @@
 __pysys_title__   = r""" Demo of pysysdirconfig.xml (test that adds to inherited directory modes) """ 
-                         ###############################################################################
+#                        ===============================================================================
 
 __pysys_purpose__ = r""" The purpose of this test is ... TODO.
 	

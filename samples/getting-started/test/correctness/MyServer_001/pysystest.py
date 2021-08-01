@@ -1,5 +1,5 @@
 __pysys_title__   = r""" MyServer startup - basic sanity test (+ demo of PySys basics) """
-                         ########################################################################################################################
+#                        ========================================================================================================================
 
 __pysys_purpose__ = r""" To demonstrate that MyServer can startup and response to basic requests. 
 	

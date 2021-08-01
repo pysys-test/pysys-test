@@ -38,7 +38,7 @@ class PySysTest(BaseTest):
 		self.assertThat('not os.path.isfile(%s)', repr(self.output+'/MyNewTest/pysystest.xml'))
 		self.assertThat('os.path.isfile(%s)', repr(self.output+'/MyNewTest/pysystest.py'))
 
-		self.assertThatGrep('MyNewTest/pysystest.py', '     +(#+)$', 'len(value) == expected', expected=120)
+		self.assertThatGrep('MyNewTest/pysystest.py', '     +(=+)$', 'len(value) == expected', expected=120)
 
 		self.assertGrep('MyNewTest/pysystest.py', expr='@', contains=False) # no unsubstituted values
 	
