@@ -25,7 +25,7 @@
 	]]></purpose>
 
 	<!-- Comment/uncomment this to mark this test as skipped, which will stop it from executing. -->
-	<skipped reason="This test is skipped until bug XYZ is fixed"/>
+	<skipped reason="This test is skipped until BUG-1234 is fixed"/>
 	
 	<!-- Specify the groups that this test will be tagged with, allowing them to be selected 
 	for inclusion/exclusion in test runs. Groups are usually named in camelCase. 

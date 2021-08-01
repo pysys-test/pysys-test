@@ -12,7 +12,7 @@ Test classname:    PySysTest; module: pysystest.py
 ================================================================================
 Test id:           MyNewTestUncommented
 Test directory:    MyNewTestUncommented
-Test skip reason:  Skipped until Bug123 is fixed
+Test skip reason:  Skipped until BUG-1234 is fixed
 Test title:        Category TODO - Test title (short, specific and sortable!) goes here TODO
 Test purpose:      The purpose of this test is ... TODO.
 Test created:      <date waz here>; authors: pysystestuser
@@ -20,5 +20,5 @@ Test groups:       myGroup, disableCoverage, performance
 Test modes:        MyMode
 Test order hint:   0.0
 Test classname:    PySysTest; module: pysystest.py
-Test traceability: Bug123, UserStory-456
+Test traceability: BUG-1234, UserStory-456
 

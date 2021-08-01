@@ -1,7 +1,7 @@
 ================================================================================
 Test id:           MyServer.Performance.PySysDirConfigSample
 Test directory:    demo-tests/pysysdirconfig_sample/PySysDirConfigSample
-Test skip reason:  These tests are skipped until bug XYZ is fixed
+Test skip reason:  These tests are skipped until BUG-1234 is fixed
 Test title:        Demo of pysysdirconfig.xml (test that adds to inherited directory modes)
 Test purpose:      The purpose of this test is ... TODO.
 Test created:      1999-12-31; authors: mememe
@@ -21,7 +21,7 @@ Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-
 ================================================================================
 Test id:           PySysTestPythonDescriptorSample
 Test directory:    demo-tests/PySysTestPythonDescriptorSample
-Test skip reason:  Skipped until bug XYZ is fixed
+Test skip reason:  Skipped until BUG-1234 is fixed
 Test title:        My foobar tool - Argument parsing success and error cases
 Test purpose:      The purpose of this test is to check that 
                    argument parsing addresses these criteria:
@@ -37,13 +37,13 @@ Test classname:    PySysTest; module: <rootdir>/pysys-extensions/MySharedTestCla
 Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
 Test reference:    MyReference
-Test traceability: Bug123, UserStory-456, UserRequirement_1a, UserRequirement_2c, Performance
+Test traceability: BUG-1234, UserStory-456, UserRequirement_1a, UserRequirement_2c, Performance
 Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-${os_myThirdPartyLibraryVersion}<nl>foo/bar, foo/baz<nl>foo/bosh'
 
 ================================================================================
 Test id:           PySysTestXMLDescriptorSample
 Test directory:    demo-tests/PySysTestXMLDescriptorSample
-Test skip reason:  This test is skipped until bug XYZ is fixed
+Test skip reason:  This test is skipped until BUG-1234 is fixed
 Test title:        My foobar tool - Argument parsing success and error cases
 Test purpose:      This is a good place for a fuller description of what is in and 
                    out of scope for this particular testcase.
