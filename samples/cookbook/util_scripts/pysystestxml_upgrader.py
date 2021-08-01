@@ -34,7 +34,7 @@ IGNORED_COMMENTS = [
 ]
 
 LINE_LENGTH_GUIDE = '#' * 120
-DEFAULT_AUTHORS = "pysysuser"
+DEFAULT_AUTHORS = ""
 DEFAULT_CREATED = "1999-12-31"
 
 allwarnings = []
