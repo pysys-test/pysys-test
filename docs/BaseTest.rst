@@ -41,7 +41,9 @@ The input/output directories and other essential information about this test obj
 can be accessed via instance attributes on ``self``:
 
 - ``self.input`` *(str)*: Full path to the input directory of the testcase, which is where test-specific resources such as 
-  configuration files are stored. The directory is usually ``<testdir>/Input`` but the path can be customized in the testcase descriptor.  
+  configuration files are stored. The directory is the main ``<testDir>`` for projects created from PySys 2.0 onwards, 
+  or ``<testdir>/Input`` for projects created earlier. The path can be customized in the pysysdirconfig at a 
+  project, directory (or even testcase) level.  
   
   Here is an example of copying a configuration file template from the input directory::
 	
