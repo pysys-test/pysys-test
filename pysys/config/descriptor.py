@@ -341,7 +341,8 @@ class TestModesConfigHelper:
 				{'browser':'Firefox'},
 			])
 		
-		... would generate modes named::
+		would generate modes named::
+		
 			MySQL_Chrome
 			MySQL_Firefox
 			SQLite_Chrome

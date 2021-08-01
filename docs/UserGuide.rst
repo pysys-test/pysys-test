@@ -592,7 +592,7 @@ This serves several useful purposes:
 
 By default both modes and groups are inherited from ``pysysdirconfig.xml`` files 
 in parent directories, but inheriting can be disabled in an individual 
-descriptor by setting ``inherit="false"``, in case you have a few tests that only 
+descriptor by providing an explicit list of modes, in case you have a few tests that only 
 make sense in one mode. Alternatively, you could allow the tests to exist 
 in all modes but call ``self.skipTest <BaseTest.skipTest>`` at the start of the test `BaseTest.execute` method 
 if the test cannot execute in the current mode. 
