@@ -62,7 +62,7 @@ class PySysTest(pysys.basetest.BaseTest):
 			None,
 			123.4,
 		])
-		# Sorting and filtering can be used to remove anomolies that you don't care about and ensure tests are reliable.
+		# Sorting and filtering can be used to remove anomalies that you don't care about and ensure tests are reliable.
 		self.assertThat('measurements == expected', measurements=sorted(m for m in sensorValuesData.get('measurements') if m is not None), 
 			expected=[
 				10/3.0,
