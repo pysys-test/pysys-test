@@ -22,7 +22,7 @@ To run all tests - except the manual (non-auto ones) - with recording of the res
 the configured writers) and code coverage:
 
 	cd test
-	pysys.py run -j0 --record -XcodeCoverage --type=auto
+	pysys.py run -j0 --record -XcodeCoverage --exclude=manual
 
 Note that this project contains some tests that deliberately fail, so that you can see how failing test results are 
 recorded. 

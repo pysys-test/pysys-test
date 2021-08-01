@@ -1,3 +1,20 @@
+__pysys_title__   = r""" Demo of outcomes - INSPECT .svg charts from performance testing """
+                         ########################################################################################################################
+
+__pysys_purpose__ = r""" Demonstrates how the INSPECT outcome prevents output files being purged (even with the --purge flag), 
+	and how extra test artifacts can be collected based on filename using a writer (nb: this doesn't require 
+	an INSPECT outcome, and in fact is often used instead of INSPECT), and how performance results can be logged.
+	"""
+
+__pysys_authors__ = "pysysuser"
+__pysys_created__ = "1999-12-31"
+
+__pysys_groups__           = "performance, disableCoverage; inherit=true"
+__pysys_modes__            = r""" lambda helper: helper.inheritedModes+[
+	# For now we run this test in just one mode, but could add additional modes if desired.
+	{'mode':'CompressionGZip'}
+	] """
+
 import pysys
 from pysys.constants import *
 

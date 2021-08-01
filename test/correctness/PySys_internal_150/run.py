@@ -22,7 +22,7 @@ class PySysTest(BaseTest):
 				**kwargs)
 
 		# The command below is copied verbatim from the README.md
-		runcmd = 'run -j0 --record -XcodeCoverage --type=auto'
+		runcmd = 'run -j0 --record -XcodeCoverage --exclude=manual'
 		self.assertGrep(sampledir+'/README.md', runcmd)
 		pysys('pysys-run-tests', runcmd.split(' '), ignoreExitStatus=True)
 		

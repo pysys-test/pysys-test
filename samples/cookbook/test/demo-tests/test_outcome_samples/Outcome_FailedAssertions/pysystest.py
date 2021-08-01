@@ -1,13 +1,22 @@
+__pysys_title__   = r""" Demo of outcomes - FAILED assertions """
+                         ########################################################################################################################
+
+__pysys_purpose__ = r""" 
+	"""
+
+__pysys_authors__ = "pysysuser"
+__pysys_created__ = "1999-12-31"
+
 import pysys
 from pysys.constants import *
 
 class PySysTest(pysys.basetest.BaseTest):
-
 	def execute(self):
-		server = self.myserver.startServer(name="my_server")
+		port = self.getNextAvailableTCPPort()
+		server = self.startPython([self.input+"/my_server.py", str(port)], stdouterr='my_server', background=True)
 		
 		self.startPython([self.input+'/httpget.py', 
-			f'http://127.0.0.1:{server.info["port"]}/sensorValues', self.mode.params['compressionType'], self.mode.params['auth']], stdouterr='sensorValues')
+			f'http://127.0.0.1:{port}/sensorValues'], stdouterr='sensorValues')
 
 	def validate(self):	
 		self.logFileContents('sensorValues.out', maxLines=0) 
@@ -18,6 +27,9 @@ class PySysTest(pysys.basetest.BaseTest):
 		# assertGrep is good for checking errors aren't present, or positively for checking that an expression is 
 		# present but you don't care where.
 		self.assertGrep('my_server.out', r' (ERROR|FATAL|WARN) .*', contains=False)
+		self.assertGrep('my_server.out', r'Traceback \(most recent call last\)', contains=False, 
+			mappers=[pysys.mappers.JoinLines.PythonTraceback()])
+
 		self.assertGrep('sensorValues.out', r'"timestamp": ".+"') # contains some timestamp, don't care what or where
 
 		# Advanced: regular expression escaping can be tricky. Backslashes can be handled with r'...' strings, but 
@@ -33,7 +45,7 @@ class PySysTest(pysys.basetest.BaseTest):
 		# Advanced: for complex cases with multiple regex groups, a (?P<value>xxx) named group can be used to extract the desired one. 
 		self.assertThatGrep('sensorValues.out', r'"(sensorId|deviceId)": "(?P<value>[^"]*)"', 
 			'value.lower() in expected', expected=['abc1234', 'ghi987'])
-
+		
 		# assertLineCount is useful when you want to check how many times a line is present (rather than whether it's 
 		# present or not).
 		self.log.info('')

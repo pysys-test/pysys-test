@@ -1,3 +1,17 @@
+__pysys_title__   = r""" MyServer startup - basic sanity test (+ demo of PySys basics) """
+                         ########################################################################################################################
+
+__pysys_purpose__ = r""" To demonstrate that MyServer can startup and response to basic requests. 
+	
+	This also shows off some of the basic system testing capabilities of PySys itself.
+	"""
+
+__pysys_authors__ = "pysysuser"
+__pysys_created__ = "1999-12-31"
+
+__pysys_groups__  = "myServerBasicSanity; inherit=true"
+#__pysys_skipped_reason__ = "Skipped until Bug-1234 is fixed"
+
 import pysys
 from pysys.constants import *
 
