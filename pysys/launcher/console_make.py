@@ -366,6 +366,7 @@ class DefaultTestMaker(object):
 				['@@USERNAME@@', '@{USERNAME}'], 
 				['@@DIR_NAME@@', '@{DIR_NAME}'], 
 				['@@DEFAULT_DESCRIPTOR@@', '@{DEFAULT_DESCRIPTOR}'], 
+				['@@LINE_LENGTH_GUIDE@@', '@{LINE_LENGTH_GUIDE}'],
 			]
 		
 		with open(self.project.pysysTemplatesDir+'/default-test/pysystest.py', 'rb') as f:
@@ -373,18 +374,21 @@ class DefaultTestMaker(object):
 			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR[:DEFAULT_DESCRIPTOR.find(b'import')].rstrip().decode('ascii')
 			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR.replace('@@DATE@@', '@{DATE}')
 			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR.replace('@@USERNAME@@', '@{USERNAME}')
+			DEFAULT_DESCRIPTOR = DEFAULT_DESCRIPTOR.replace('@@LINE_LENGTH_GUIDE@@', '@{LINE_LENGTH_GUIDE}')
+		
 		
 		replace = [
 			(re.compile(r1.encode('ascii')), 
 				r2 # in addition to ${...] project properties, add some that are especially useful here
-					.replace('@{DEFAULT_DESCRIPTOR}', DEFAULT_DESCRIPTOR)
+					.replace('@{DEFAULT_DESCRIPTOR}', DEFAULT_DESCRIPTOR.replace('\\', '\\\\'))
 					.replace('@{DATE}', self.project.startDate)
 					.replace('@{USERNAME}', self.project.username)
 					.replace('@{DIR_NAME}', os.path.basename(dest))
-					.replace('\\', '\\\\') # to avoid confusing regex replace into thinking it's an escape sequence
+					.replace('@{LINE_LENGTH_GUIDE}', self.project.getProperty("pysystestTemplateLineLengthGuide", 120*"#"))
 				.encode('utf-8') # non-ascii chars are unlikely, but a reasonable default is to use utf-8 to match typical XML
 			)
 			for (r1,r2) in tmp['replace']]
+		
 		log.debug('Using replacements: %s', replace)
 			
 		for c in tmp['copy']:

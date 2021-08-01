@@ -43,6 +43,9 @@
 	      @@DIR_NAME@@ -> @{DIR_NAME} (the basename of the directory being created, typically the test id)
 	      @@DEFAULT_DESCRIPTOR@@ -> @{DEFAULT_DESCRIPTOR} (the __pysys_title__ and other descriptor lines from the 
 	               standard PySys default test template, after which you can add your customized Python test class)
+	      @@LINE_LENGTH_GUIDE@@ -> @{LINE_LENGTH_GUIDE} (120 # comment characters to indicate to the user when they are 
+	               exceeding the recommended maximum length for a test title; this string can be customized for different 
+	               lengths etc using the pysystestTemplateLineLengthGuide project property)
 	
 	By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
 	just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
@@ -139,7 +142,7 @@
 	<execution-order hint="+100.0"/>
 
 	<!-- Comment/uncomment this to mark all tests under this directory as skipped. -->
-	<skipped reason="These tests are skipped until Bug-1234 is fixed"/>
+	<skipped reason="These tests are skipped until BUG-1234 is fixed"/>
 	
 	<!-- By convention the test class uses module="run.py" located in the test directory, but 
 	it is possible to use a different path (even an absolute path). If you want to use a single 

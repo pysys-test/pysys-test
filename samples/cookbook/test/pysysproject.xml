@@ -119,6 +119,13 @@
 	<property name="pythonIndentationSpacesPerTab" value="    "/>
 
 	<!-- 
+	If you prefer a different length or style for the line length marker added under the __pysys_title__ in the 
+	default make test template, specify the string to use here. The following is an example for users who prefer 
+	to encourage a limit of 80 characters for the test title (rather than the default of 120), 
+	-->
+	<property name="pysystestTemplateLineLengthGuide" value="${eval: 80 * '#' }"/>
+
+	<!-- 
 	Configuring plugins
 	~~~~~~~~~~~~~~~~~~~
 	
