@@ -1,14 +1,4 @@
-"""
-<?xml version="1.0" standalone="yes"?>
-<pysystest>
-
-	<description> 
-		<title>My nested test</title>    
-	</description>
-
-<groups groups=""/>
-</pysystest>
-"""
+@@DEFAULT_DESCRIPTOR@@
 
 import pysys
 from pysys.constants import *
