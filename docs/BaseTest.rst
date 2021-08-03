@@ -74,8 +74,11 @@ can be accessed via instance attributes on ``self``:
   
 	self.log.info("Starting myserver on port %d", serverport)
 
-- ``self.mode`` *(str)*: The user-defined mode this test object is running. Tests can use this to modify how the test 
-  executed based upon the mode, for example to allow the test to run against either a mock or a real database.
+- ``self.mode`` (`pysys.config.descriptor.TestMode`): The user-defined mode this test object is running. Tests can use 
+	this to modify how the test executed based upon the mode, for example to allow the test to run against either a mock 
+	or a real database. TestMode subclasses str so you can include this in situation where you need the name of the mode 
+	such as when recording performance result, and you can also use the ``.params`` attribute to access any parameters 
+	defined on the mode. 
 
 - ``self.testCycle`` *(int)*: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
   The special value of 0 is used to indicate that this is not part of a multi-cycle run. 

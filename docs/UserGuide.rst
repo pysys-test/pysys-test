@@ -367,12 +367,12 @@ or a set of tests that should be run against various different database but
 can also be run against a mocked database for quick local development. 
 
 Using modes is fairly straightforward. First edit the ``pysystest.*`` file for a test that 
-need to run in multiple modes, and add a list of the supported modes by providing a Python 
-lambda that will be evaluated when the test descriptors are loaded:
+need to run in multiple modes, and add a list of the supported modes by providing a string 
+containing a Python lambda that will be evaluated when the test descriptors are loaded:
 
 .. code-block:: python
 	
-	__pysys_modes__            = r""" 
+	__pysys_modes__ = r""" 
 			lambda helper: helper.inheritedModes+[
 				{'mode':'CompressionGZip', 'compressionType':'gzip'},
 			]
@@ -400,14 +400,15 @@ is most likely to show up interesting issues as the primary mode.
 
 Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
 type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
-Rather than writing out every combination manually, you can use the function ``helper.combineModeDimensions`` to 
-automatically generate the combinations, passing it each dimension (e.g. each compression type) as a separate list. 
+Rather than writing out every combination manually, you can use the function 
+`pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions` to automatically generate the combinations, 
+passing it each dimension (e.g. each compression type) as a separate list. 
 
 Here is an example of multi-dimensional modes (taken from the getting-started sample):
 
 .. code-block:: python
 	
-	__pysys_modes__            = r""" 
+	__pysys_modes__ = r""" 
 
 			lambda helper: [
 				mode for mode in 
