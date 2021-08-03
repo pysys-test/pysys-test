@@ -7,7 +7,7 @@
 # together, and run ``pysys print -s=title`` to see how your title looks alongside the existing titles. 
 #
 # Titles need to be human readable at-a-glance, so don't put ids (e.g. bug tracking numbers) in the title; 
-# the "purpose" or "tracability_ids" are a better place for those details. 
+# the "purpose" or "traceability_ids" are a better place for those details. 
 #
 __pysys_title__   = r""" My foobar tool - Argument parsing success and error cases """
 

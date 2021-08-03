@@ -110,7 +110,7 @@ elements optional, to allow descriptors to be shorter:
   specified with ``<input/output/reference path=...>`` or using the slightly clearer names 
   ``<input-dir/output-dir/reference-dir>...<.../>``.
 - ``<requirement id="..."/>`` elements can now be placed directly under the root element, without the need for 
-  enclosing ``<tracability><requirements>...`` elements. 
+  enclosing ``<traceability><requirements>...`` elements. 
 - The ``<purpose>`` element is now optional; it's often clearer to put detailed multi-line information 
   about the test's purpose in the ``.py`` file alongside the test implementation.
 
