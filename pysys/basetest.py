@@ -1521,7 +1521,7 @@ class BaseTest(ProcessUser):
 			means putting general information near the start of the string and specifics (throughput/latency, sending/receiving)
 			towards the end of the string. It should be as concise as possible (given the above).
 
-		:param unit: Identifies the unit the the value is measured in, including whether bigger numbers are better or
+		:param unit: Identifies the unit the value is measured in, including whether bigger numbers are better or
 			worse (used to determine improvement or regression). Must be an instance of L{pysys.utils.perfreporter.PerformanceUnit}.
 			In most cases, use L{pysys.utils.perfreporter.PerformanceUnit.SECONDS} (e.g. for latency) or
 			L{pysys.utils.perfreporter.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be

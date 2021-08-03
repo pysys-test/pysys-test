@@ -38,7 +38,7 @@ Or::
 
 Customizing pysys make
 ----------------------
-You can define templates that pysys make will use to create new tests specific to your project, or even multiple 
+You can define templates that ``pysys make`` will use to create new tests specific to your project, or even multiple 
 templates for individual directories within your project. This helps to encourage teams to follow the latest best 
 practice by ensuring new tests are copying known good patterns, and also saves looking up how to do common things when 
 creating new tests. 
@@ -69,14 +69,20 @@ the cookbook sample)::
 	</pysysdirconfig>
 
 You can copy files from an absolute location such as somewhere under your project's ``${testRootDir}``, from the 
-PySys default template (if you just want to add files) using ``${pysysTemplatesDir}/default-test/*``, or from a path 
+PySys default template (if you just want to *add* files) using ``${pysysTemplatesDir}/default-test/*``, or from a path 
 relative to the XML file where the template is defined. This could be a ``_pysys_templates/`` directory alongside this 
 XML file, or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more 
 generic, for example replacing the title with a TODO as above). 
 
+If in doubt, for customizing the PySysTest class the best approach is to create a ``pysystest.py`` template test 
+containing ``@@DEFAULT_DESCRIPTOR@@`` to add the default PySys descriptor values (this means your template will 
+automatically benefit from any future changes to the default), in a ``_pysys_templates/<templatename>`` directory 
+where the ``_pysys_templates`` directory should contain a file named ``.pysysignore`` file (which avoids the template 
+being loaded as a real test). 
+
 See :doc:`TestDescriptors` for more information about how to configure templates in a ``pysysdirconfig.xml`` file. 
 
-When creating tests using ``pysys make``, by default the first template (from the more specific ``pysysdirconfig.xml``) 
+When creating tests using ``pysys make``, by default the first template (from the most specific ``pysysdirconfig.xml``) 
 is selected, but you can also specify any other template by name using the ``-t`` option, and get a list of available 
 templates for the current directory using ``--help``. 
 

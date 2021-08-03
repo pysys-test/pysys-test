@@ -89,7 +89,7 @@ class BaseRunner(ProcessUser):
 	assigned the actual value before the plugin's setup method is called. In addition to plugin properties, 
 	``pysys run -Xkey=value`` command line overrides can be accessed using the runner's `getXArg()` method. 
 	
-	Each runner plugin listed in the the project configuration 
+	Each runner plugin listed in the project configuration 
 	with ``<runner-plugin classname="..." alias="..."/>`` is instantiated once by the runner, and can be accessed using 
 	``self.<alias>`` on the runner object (if an alias is provided). If you are using a third party PySys runner 
 	plugin, consult the documentation for the third party test plugin class to find out what methods and fields are 

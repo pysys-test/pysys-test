@@ -121,7 +121,7 @@ __pysys_user_data__        = r"""
 
 		# For long values such as paths if the value is to be converted to a list, newline and/or comma can be used as 
 		# delimiters, however it is up to the Python code that's processing the user data to handle. 
-		# Similarly, you can use project property syntax (e.g. ${propName} or ${eval: xxx}) if the the code that reads 
+		# Similarly, you can use project property syntax (e.g. ${propName} or ${eval: xxx}) if the code that reads 
 		# the user data expands them (but this does not happen automatically). 
 		'myTestDescriptorPath': '''
 			foo/foo-${os_myThirdPartyLibraryVersion}

@@ -106,7 +106,7 @@ Additional variables that affect only the behaviour of a single method are docum
 There is also a field for each test plugin listed in the project configuration. Plugins provide additional 
 functionality such as methods for starting and working with a particular language or tool. A test plugin is 
 just a class with a method ``setup(self, testobj)`` (and no constructor arguments), that provides methods and 
-fields for use by tests. Each test plugin listed in the the project configuration 
+fields for use by tests. Each test plugin listed in the project configuration 
 with ``<test-plugin classname="..." alias="..."/>`` is instantiated for each 
 `BaseTest` instance, and can be accessed using ``self.<alias>`` on the test object. If you are using a third party 
 PySys test plugin, consult the documentation for the third party test plugin class to find out what methods and fields 

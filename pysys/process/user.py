@@ -511,7 +511,7 @@ class ProcessUser(object):
 		This environment contains a minimal PATH/LD_LIBRARY_PATH but does not 
 		attempt to replicate the full set of default environment variables 
 		on each OS, and in particular it does not include any that identify 
-		the the current username or home area. Additional environment 
+		the current username or home area. Additional environment 
 		variables can be added as needed with L{createEnvirons} overrides. If 
 		you don't care about minimizing the risk of your local environment 
 		affecting the test processes you start, just use C{environs=os.environ} 
