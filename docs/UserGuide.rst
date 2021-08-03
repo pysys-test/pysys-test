@@ -72,7 +72,7 @@ You can copy files from an absolute location such as somewhere under your projec
 PySys default template (if you just want to add files) using ``${pysysTemplatesDir}/default-test/*``, or from a path 
 relative to the XML file where the template is defined. This could be a ``_pysys_templates/`` directory alongside this 
 XML file, or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more 
-generic, for exmaple replacing the title with a TODO as above). 
+generic, for example replacing the title with a TODO as above). 
 
 See :doc:`TestDescriptors` for more information about how to configure templates in a ``pysysdirconfig.xml`` file. 
 
