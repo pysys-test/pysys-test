@@ -174,10 +174,16 @@ the cookbook sample)::
 
 	</pysysdirconfig>
 
-You can copy files from an absolute location such as somewhere under your project's ``${testRootDir}``, from the 
-PySys default template (if you just want to add files) using ``${pysysTemplatesDir}/default-test/*``, or from a path relative 
-to the XML file where the template is defined. This could be a ``_pysys_templates/`` directory alongside this XML file, 
-or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
+For customizing the PySysTest class the best approach is usually to create a ``pysystest.py`` template test 
+containing ``@@DEFAULT_DESCRIPTOR@@`` to include the default PySys descriptor values (this means your template will 
+automatically benefit from any future changes to the defaults), and put it in a ``_pysys_templates/<templatename>`` 
+directory alongside the ``pysystestdir.xml`` file. The ``_pysys_templates`` directory should contain a file 
+named ``.pysysignore`` file (which avoids the template being loaded as a real test). 
+
+other options are possible (as above) e.g. copying files from an absolute location such as under your project's 
+``${testRootDir}``, copying from PySys default templates directly (if you just want to *add* files) by 
+using ``${pysysTemplatesDir}/default-test/*``, or copying from a path relative to the XML file where the template is 
+defined containing a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
 
 See :doc:`TestDescriptors` for more information about how to configure templates in a ``pysysdirconfig.xml`` file. 
 
@@ -208,7 +214,7 @@ The mode name can be automatically generated from the parameters, or provided ex
 
 .. code-block:: python
 	
-	__pysys_modes__            = r""" 
+	__pysys_modes__ = r""" 
 			lambda helper: helper.inheritedModes+[
 				{'mode':'CompressionGZip', 'compressionType':'gzip'},
 			]
@@ -223,7 +229,7 @@ generate the mode list such as:
 
 .. code-block:: python
 	
-	__pysys_modes__            = r""" 
+	__pysys_modes__ = r""" 
 		lambda helper: [
 			mode for mode in 
 				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
@@ -392,6 +398,9 @@ affect many users:
     ``locale.getpreferredencoding()``, to avoid thread-safety issues. 
   - It is now an error to have multiple test descriptor filenames in a single directory, for example ``pysystest.py`` 
     and ``pysystest.xml``. 
+  - If a test's title ends with ``goes here TODO`` then the test will report a ``BLOCKED`` outcome, to encourage 
+    test authors to remember to fill it in. This could cause some existing tests to start blocking, though only if 
+    you have added a title ending with ``goes here TODO``. 
   - When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
     character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
     mappers. This is also now more clearly documented. 

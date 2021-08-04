@@ -68,17 +68,16 @@ the cookbook sample)::
 
 	</pysysdirconfig>
 
-You can copy files from an absolute location such as somewhere under your project's ``${testRootDir}``, from the 
-PySys default template (if you just want to *add* files) using ``${pysysTemplatesDir}/default-test/*``, or from a path 
-relative to the XML file where the template is defined. This could be a ``_pysys_templates/`` directory alongside this 
-XML file, or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more 
-generic, for example replacing the title with a TODO as above). 
+For customizing the PySysTest class the best approach is usually to create a ``pysystest.py`` template test 
+containing ``@@DEFAULT_DESCRIPTOR@@`` to include the default PySys descriptor values (this means your template will 
+automatically benefit from any future changes to the defaults), and put it in a ``_pysys_templates/<templatename>`` 
+directory alongside the ``pysystestdir.xml`` file. The ``_pysys_templates`` directory should contain a file 
+named ``.pysysignore`` file (which avoids the template being loaded as a real test). 
 
-If in doubt, for customizing the PySysTest class the best approach is to create a ``pysystest.py`` template test 
-containing ``@@DEFAULT_DESCRIPTOR@@`` to add the default PySys descriptor values (this means your template will 
-automatically benefit from any future changes to the default), in a ``_pysys_templates/<templatename>`` directory 
-where the ``_pysys_templates`` directory should contain a file named ``.pysysignore`` file (which avoids the template 
-being loaded as a real test). 
+other options are possible (as above) e.g. copying files from an absolute location such as under your project's 
+``${testRootDir}``, copying from PySys default templates directly (if you just want to *add* files) by 
+using ``${pysysTemplatesDir}/default-test/*``, or copying from a path relative to the XML file where the template is 
+defined containing a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
 
 See :doc:`TestDescriptors` for more information about how to configure templates in a ``pysysdirconfig.xml`` file. 
 
