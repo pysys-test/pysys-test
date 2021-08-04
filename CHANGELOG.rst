@@ -159,7 +159,7 @@ the cookbook sample)::
 		<maker-template name="my-test" description="a test with the Python code pre-customized to get things started" 
 			copy="./_pysys_templates/MyTemplateTest/*" />
 
-		<maker-template name="perf-test" description="a performance test include a configuration for my fictional performance tool" 
+		<maker-template name="perf-test" description="a performance test including configuration for my fictional performance tool" 
 			copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
 
 		<maker-template name="foobar-test" description="an advanced test based on the existing XXX test" 
