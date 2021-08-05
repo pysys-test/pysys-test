@@ -24,13 +24,8 @@ class PySysTest(BaseTest):
 		# The command below is copied verbatim from the README.md
 		runcmd = 'run -j0 --record -XcodeCoverage --exclude=manual'
 		self.assertGrep(sampledir+'/README.md', runcmd)
+		self.log.info('Running the cookbook sample: pysys %s'%runcmd)
 		pysys('pysys-run-tests', runcmd.split(' '), ignoreExitStatus=True)
-		
-		pysys('pysys-print', ['print'], background=True)
-		pysys('pysys-print-descriptor-samples', ['print', '--full', 'PySysDirConfigSample', 'PySysTestXMLDescriptorSample', 'PySysTestPythonDescriptorSample'], background=True)
-		pysys('pysys-print-descriptor-samples-json', ['print', '--json', 'PySysDirConfigSample', 'PySysTestXMLDescriptorSample', 'PySysTestPythonDescriptorSample'], background=True)
-		pysys('pysys-run-help', ['run', '-h'], background=True)
-		self.waitForBackgroundProcesses()
 		
 		# delete sample coverage files so we don't pick them up and use them for PySys itself
 		for root, dirs, files in os.walk(self.output):
@@ -38,11 +33,17 @@ class PySysTest(BaseTest):
 				if '.coverage' in f:
 					os.remove(root+os.sep+f)
 
-		self.pysys.pysys('make-help', ['make', '-h'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
-		self.pysys.pysys('make-default', ['make', self.output+'/NewTest_Default'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
-		self.pysys.pysys('make-existing-foobar', ['make', '--template=foobar-test', self.output+'/NewTest_ExistingTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
-		self.pysys.pysys('make-perf-test', ['make', '--template=perf-test', self.output+'/NewTest_PerfTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
-		self.pysys.pysys('make-pysys-xml-test', ['make', '--template=pysys-xml-test', self.output+'/NewTest_XML'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample')
+		self.pysys.pysys('pysys-print', ['print'], workingDir=sampledir+'/test', background=True)
+		self.pysys.pysys('pysys-print-descriptor-samples', ['print', '--full', 'PySysDirConfigSample', 'PySysTestXMLDescriptorSample', 'PySysTestPythonDescriptorSample'], workingDir=sampledir+'/test', background=True)
+		self.pysys.pysys('pysys-print-descriptor-samples-json', ['print', '--json', 'PySysDirConfigSample', 'PySysTestXMLDescriptorSample', 'PySysTestPythonDescriptorSample'], workingDir=sampledir+'/test', background=True)
+		self.pysys.pysys('pysys-run-help', ['run', '-h'], workingDir=sampledir+'/test', background=True)
+
+		self.pysys.pysys('make-help', ['make', '-h'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample', background=True)
+		self.pysys.pysys('make-default', ['make', self.output+'/NewTest_Default'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample', background=True)
+		self.pysys.pysys('make-existing-foobar', ['make', '--template=foobar-test', self.output+'/NewTest_ExistingTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample', background=True)
+		self.pysys.pysys('make-perf-test', ['make', '--template=perf-test', self.output+'/NewTest_PerfTest'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample', background=True)
+		self.pysys.pysys('make-pysys-xml-test', ['make', '--template=pysys-xml-test', self.output+'/NewTest_XML'], workingDir=sampledir+'/test/demo-tests/pysysdirconfig_sample', background=True)
+		self.waitForBackgroundProcesses()
 
 	def validate(self):	
 		outdir = self.output+'/pysys-run-tests'
