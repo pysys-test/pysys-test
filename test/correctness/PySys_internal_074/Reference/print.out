@@ -8,7 +8,6 @@ Test groups:       <none>
 Test modes:        <none>
 Test order hint:   0.0
 Test classname:    PySysTest; module: pysystest.py
-Test input:        .
 
 ================================================================================
 Test id:           MyNewTestUncommented
@@ -21,6 +20,5 @@ Test groups:       myGroup, disableCoverage, performance
 Test modes:        MyMode
 Test order hint:   0.0
 Test classname:    PySysTest; module: pysystest.py
-Test input:        .
 Test traceability: Bug-1234, UserStory-456
 
