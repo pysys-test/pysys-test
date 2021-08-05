@@ -354,9 +354,9 @@ class TestModesConfigHelper:
 		this test::
 		
 			lambda modes: modes.combineModeDimensions(modes.inherited, [
-				{'mode': 'subtest-integers', 'dataType': 'int'}, 
-				{'mode': 'subtest-strings',  'dataType': 'str'}, 
-				{'mode': 'subtest-booleans', 'dataType': 'bool'}, 
+				{'mode': 'IntegersSubtest', 'dataType': 'int'}, 
+				{'mode': 'StringSubtest',  'dataType': 'str'}, 
+				{'mode': 'BooleansSubtest', 'dataType': 'bool'}, 
 			])
 
 		This is a good way to use modes for the concept of subtests, since even if you don't initially have any inherited 
