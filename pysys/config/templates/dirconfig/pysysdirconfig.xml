@@ -18,7 +18,7 @@
 	Individual tests may override this, but usually will include the inherited modes. 
 	-->
 	<modes>
-		lambda helper: helper.combineModeDimensions(helper.inheritedModes, [{'mode': 'MyMode', 'param1':'MyParam'}])
+		<!-- lambda helper: helper.combineModeDimensions(helper.inheritedModes, [{'mode': 'MyMode', 'param1':'MyParam'}]) -->
 	</modes>
 
 	<!-- Specify as a floating point number an indicator of when to run the tests under 
