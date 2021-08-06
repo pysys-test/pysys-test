@@ -1,6 +1,6 @@
-from pysys.launcher.console_make import LegacyConsoleMakeTestHelper
+from pysys.launcher.console_make import ConsoleMakeTestHelper
 
-class MyLegacyMaker(LegacyConsoleMakeTestHelper):
+class MyLegacyMaker(ConsoleMakeTestHelper):
 	def makeTest(self, **kwargs):
 		kwargs['group'] = 'myGroup'
-		return LegacyConsoleMakeTestHelper.makeTest(self, **kwargs)
+		return ConsoleMakeTestHelper.makeTest(self, **kwargs)
