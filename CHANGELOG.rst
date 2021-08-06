@@ -420,6 +420,7 @@ affect many users:
   - On Windows the ``testDir`` (and input/output/reference dirs) no longer start with the ``\\?\`` long-path safe 
     prefix; instead this can be added for operations where it is needed (as several key PySys methods alreayd do, e.g. 
     ``self.copy``). It is recommended to avoid nesting tests so deeply that long path support is needed. 
+  - The deprecated ``pysys.process._stringToUnicode`` is now removed. 
 
 Deprecations:
 
@@ -432,6 +433,7 @@ Deprecations:
   - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
   - The old ``<mode>`` elements are deprecated in favour of the new Python lambda syntax 
     (support for these they won't be removed any time soon, but are discouraged for new tests). 
+  - The `pysys.utils.pycompat` module is now deprecated. 
   - The ``ConsoleMakeTestHelper`` class is now deprecated in favour of `pysys.launcher.console_maker.DefaultTestMaker`. 
 
 By default ``pysys make`` will generate tests with a new-style ``pysystest.py`` file, but if you prefer to keep your 

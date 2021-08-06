@@ -18,8 +18,9 @@
 
 
 """
-Compatibility utilities to allow PySys to support both Python 2 and 3. 
+Compatibility utilities for older Python versions. 
 
+This module is now deprecated. 
 """
 
 import sys, os, io, locale
@@ -35,8 +36,7 @@ binary_type = str if PY2 else bytes
 
 def isstring(s): 
 	""" Returns True if the specified object is a python string. 
-	On Python 2 this could be a unicode character string or a byte str, 
-	on python 3 this must be a character str. 
+	On python 3 this must be a character str. 
 	"""
 	return isinstance(s, string_types)
 
@@ -72,13 +72,9 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	
 	Specifically:
 	
-	On Python 3 this method returns a file stream yielding character strings 
+	On Python 3+ this method returns a file stream yielding character strings 
 	unless a binary mode was specified in which case a stream yielding 
 	bytes is returned. 
-	
-	On Python 2 this method returns a file stream yielding unicode 
-	character strings only if an encoding was explicitly specified; 
-	otherwise it returns a file stream yielding "str" bytes objects. 
 	
 	:param path: The path to open; must be an absolute path. 
 		Even on Windows this path can be long (e.g. more than the usual 256 
@@ -93,8 +89,7 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	
 	:param errors: Optional string that specifies how encoding/decoding errors 
 		are handled, such as 'strict', 'ignore', 'replace'; see documentation of 
-		io module for more details. The value of this attribute is ignored 
-		if using the python 2 open() built-in with bytes mode that does not support it. 
+		io module for more details. 
 	
 	:param kwargs: Any additional args to be passed to open() or io.open(). 
 	
@@ -117,38 +112,20 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 		return io.open(path, mode=mode, encoding=encoding, errors=errors, **kwargs)
 	return open(path, mode=mode, **kwargs)
 
-if PY2:
-	Enum = object
-	"""In Python 2 an enumeration can be simulated by just assigning 
-	constant values with a unique value (perhaps a string) as 
-	statics in a simple object, e.g. ::
-	
-		class MyEnum(Enum):
-			OPTION1 = 'MyEnum.OPTION1'
-			OPTION2 = 'MyEnum.OPTION2'
-			
-		val = getattr(MyEnum, 'option1'.upper(), None)
-		if val is None: raise Exception('Bad option: "%s"'%...)
-	"""
-	
-	def makeReadOnlyDict(input): return input
-	# We can just make do without the additional safety in Python2, not least because input might be an OrderedDict
+from enum import Enum
 
-else:
-	from enum import Enum
-
-	# Rather than types.MappingProxyType, subclass dict so it's copyable
-	class makeReadOnlyDict(dict):
-			def __readonly__(self, *args, **kwargs):
-					raise RuntimeError("Cannot modify read-only dict %r"%self)
-			__setitem__ = __readonly__
-			__delitem__ = __readonly__
-			pop = __readonly__
-			popitem = __readonly__
-			clear = __readonly__
-			update = __readonly__
-			setdefault = __readonly__
-			del __readonly__
-			
-			def __copy__(self): return dict(self)
-			def __deepcopy__(self, memo): return copy.deepcopy(dict(self))
+# Rather than types.MappingProxyType, subclass dict so it's copyable
+class makeReadOnlyDict(dict):
+		def __readonly__(self, *args, **kwargs):
+				raise RuntimeError("Cannot modify read-only dict %r"%self)
+		__setitem__ = __readonly__
+		__delitem__ = __readonly__
+		pop = __readonly__
+		popitem = __readonly__
+		clear = __readonly__
+		update = __readonly__
+		setdefault = __readonly__
+		del __readonly__
+		
+		def __copy__(self): return dict(self)
+		def __deepcopy__(self, memo): return copy.deepcopy(dict(self))

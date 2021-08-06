@@ -24,13 +24,6 @@ __all__ = [ "createDescriptors","console" ]
 
 import os.path, logging
 
-# if set is not available (>python 2.6) fall back to the sets module
-try:  
-	set  
-except NameError:  
-	import sets
-	from sets import Set as set
-
 from pysys.constants import *
 from pysys.exceptions import UserError
 from pysys.config.project import Project

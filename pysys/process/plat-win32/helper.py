@@ -32,7 +32,7 @@ else:
 from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.process import Process, _stringToUnicode
+from pysys.process import Process
 
 # check for new lines on end of a string
 EXPR = re.compile(".*\n$")
@@ -98,9 +98,8 @@ class ProcessImpl(Process):
 		
 		self.__lock = threading.Lock() # to protect access to the fields that get updated
 
-		# on Python 2, convert byte strings to unicode strings
-		self.stdout = u'nul' if (not self.stdout) else _stringToUnicode(self.stdout.replace('/',os.sep))
-		self.stderr = u'nul' if (not self.stderr) else _stringToUnicode(self.stderr.replace('/',os.sep))
+		self.stdout = u'nul' if (not self.stdout) else self.stdout.replace('/',os.sep)
+		self.stderr = u'nul' if (not self.stderr) else self.stderr.replace('/',os.sep)
 		
 
 		# these different field names are just retained for compatibility in case anyone is using them
@@ -140,10 +139,10 @@ class ProcessImpl(Process):
 	
 			# create pipes for the process to write to
 			hStdin_r, hStdin = win32pipe.CreatePipe(sAttrs, 0)
-			hStdout = win32file.CreateFile(_stringToUnicode(self.stdout), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+			hStdout = win32file.CreateFile(self.stdout, win32file.GENERIC_WRITE | win32file.GENERIC_READ,
 			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
 			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
-			hStderr = win32file.CreateFile(_stringToUnicode(self.stderr), win32file.GENERIC_WRITE | win32file.GENERIC_READ,
+			hStderr = win32file.CreateFile(self.stderr, win32file.GENERIC_WRITE | win32file.GENERIC_READ,
 			   win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
 			   sAttrs, win32file.CREATE_ALWAYS, win32file.FILE_ATTRIBUTE_NORMAL, None)
 			  

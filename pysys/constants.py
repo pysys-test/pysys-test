@@ -27,13 +27,6 @@ be referenced directly.
 
 import sys, re, os, os.path, socket, traceback, locale
 
-# if set is not available (>python 2.6) fall back to the sets module
-try:  
-	set  
-except NameError:  
-	import sets
-	from sets import Set as set
-
 from pysys import stdoutHandler
 from pysys.utils.pycompat import Enum
 

@@ -43,9 +43,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	working directory. 
 	
 	:param str path: A path. Must not be a relative path. Can be None/empty. Can 
-		contain ".." sequences. If possible, use a unicode character string. 
-		On Python 2, byte strings are permitted and converted using 
-		``PREFERRED_ENCODING``. Note that no normalization of ".." 
+		contain ".." sequences. Note that no normalization of ".." 
 		sequences and slashes is performed if the OS starts with ``\\?\`` already 
 		or is non-Windows so if in doubt run the path through ``os.path.normpath`` 
 		before calling this method on it (``\\?\`` paths with incorrect slashes or .. sequences 
@@ -59,10 +57,6 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	:return: The passed-in path, possibly with a ``\\?\`` prefix added, 
 		forward slashes converted to backslashes on Windows, and converted to 
 		a unicode string. Trailing slashes may be removed. 
-		Note that the conversion to unicode requires a lot of care on Python 2 
-		where byte strings are more common, since it is not possible to combine 
-		unicode and byte strings (if they have non-ascii characters), for example 
-		for a log statement. 
 	
 	"""
 	if (not IS_WINDOWS) or (not path): return path
@@ -114,8 +108,7 @@ def pathexists(path):
 	This method is safe to call on paths that may be over the Windows 256 
 	character limit. 
 	
-	:param path: If None or empty, returns True. Only Python 2, can be a 
-		unicode or byte string. 
+	:param path: If None or empty, returns True.
 	"""
 	return path and os.path.exists(toLongPathSafe(path))
 
@@ -251,7 +244,7 @@ def loadProperties(path, encoding='utf-8-sig'):
 	performed manually on the returned values. 
 	
 	:param str path: The absolute path to the properties file. 
-	:param str encoding: The encoding to use (unless running under Python 2 in which case byte strings are always returned). 
+	:param str encoding: The encoding to use. 
 		The default is UTF-8 (with optional Byte Order Mark). 
 	:return dict[str:str]: An ordered dictionary containing the keys and values from the file. 
 	"""

@@ -40,16 +40,13 @@ correct modules based on their current operation system.
 """
 
 import signal, time, copy, errno, threading, sys
-if sys.version_info[0] == 2:
-	import Queue
-else:
-	import queue as Queue
+import queue as Queue
 
 from pysys import log
 from pysys import process_lock
 from pysys.constants import *
 from pysys.exceptions import *
-from pysys.process import Process, _stringToUnicode
+from pysys.process import Process
 
 
 class ProcessImpl(Process):

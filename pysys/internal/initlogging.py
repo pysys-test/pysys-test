@@ -21,8 +21,7 @@ import sys, os, io, locale, logging, threading
 
 # must not import any pysys packages here, as this module's code needs to execute first
 
-PY2 = sys.version_info[0] == 2
-binary_type = str if PY2 else bytes
+binary_type = bytes
 
 _PREFERRED_ENCODING = locale.getpreferredencoding() # also exists in pysys.constants.
 
@@ -161,7 +160,7 @@ rootLogger = logging.getLogger('pysys')
 
 log = rootLogger
 
-stdoutHandler = logging.StreamHandler(_UnicodeSafeStreamWrapper(sys.stdout, writebytes=PY2))
+stdoutHandler = logging.StreamHandler(_UnicodeSafeStreamWrapper(sys.stdout, writebytes=False))
 """The handler that sends pysys.* log output from to stdout, 
 including buffered output from completed tests when running in parallel.
 

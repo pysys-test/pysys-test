@@ -1074,9 +1074,7 @@ class DescriptorLoader(object):
 
 		# although it's highly unlikely, if any test paths did slip outside the Windows 256 char limit, 
 		# it would be very dangerous to skip them (which is what os.walk does unless passed a \\?\ path), 
-		# so must use long-path-safe - but need to re-encode from unicode string back to bytestring in Python 2
-		i18n_reencode = PREFERRED_ENCODING if PY2 and isinstance(dir, str) else None
-		
+		# so must use long-path-safe
 		dir = toLongPathSafe(os.path.normpath(dir))
 		assert os.path.exists(dir), dir # sanity check
 		if project.projectFile:
@@ -1136,9 +1134,6 @@ class DescriptorLoader(object):
 			if intersection: 
 				if len(intersection) > 1: raise Exception('Only one test should be present per directory but found %s in %s'%(intersection, root))
 				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
-				# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
-				# as it proliferates to all strings in each test
-				if i18n_reencode is not None: descriptorfile = descriptorfile.encode(i18n_reencode) 
 
 				try:
 					parsed = self._parseTestDescriptor(descriptorfile, parentDirDefaults=parentconfig)

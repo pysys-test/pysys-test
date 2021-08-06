@@ -89,7 +89,7 @@ class PythonCoverageWriter(CollectTestOutputWriter):
 			return False
 		try:
 			import coverage
-			assert coverage.__file__ != __file__ or sys.version_info[0] == 2, __file__ # just to make sure we're not getting confused with our own pysys coverage module; ignore for python 2 as can't make it work
+			assert coverage.__file__ != __file__, __file__ # just to make sure we're not getting confused with our own pysys coverage module
 		except ImportError:
 			# don't log higher than debug because this user may just be doing a --ci run with -XcodeCoverage for some 
 			# other reason and may not even be intending to run with Python coverage

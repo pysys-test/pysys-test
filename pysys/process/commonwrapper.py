@@ -24,4 +24,3 @@ Deprecated module used before PySys 1.6.0.
 
 import pysys.process
 CommonProcessWrapper = pysys.process.Process
-_stringToUnicode = pysys.process._stringToUnicode

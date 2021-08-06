@@ -1974,9 +1974,8 @@ class ProcessUser(object):
 		
 			<default-file-encoding pattern="*.xml" encoding="utf-8"/>
 		
-		A return value of None indicates default behaviour, which on Python 3 is to 
-		use the default OS encoding, as specified by `pysys.constants.PREFERRED_ENCODING`, 
-		and on Python 2 is to use binary ``str`` objects with no character encoding or decoding applied. 
+		A return value of None indicates default behaviour, which is to 
+		use the default OS encoding, as specified by `pysys.constants.PREFERRED_ENCODING`. 
 		
 		:param file: The filename to be read or written. This may be an 
 			absolute path or a relative path.
@@ -2067,12 +2066,7 @@ class ProcessUser(object):
 			for newlines (do not use `os.linesep` as the file will be opened in 
 			text mode so platform line separators will be added automatically).
 			
-			On Python 3 this must be a character string. 
-			
-			On Python 2 this can be a character or byte string containing ASCII 
-			characters. If non-ASCII characters are used, it must be a unicode 
-			string if there is an encoding specified for this file/type, or 
-			else a byte string. 
+			This must be a character string. 
 		
 		:param encoding: The encoding to use to open the file. 
 			The default value is None which indicates that the decision will be delegated 

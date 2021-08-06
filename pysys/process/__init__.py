@@ -40,24 +40,11 @@ else:
 import os.path, time, threading, sys, locale
 import logging
 import shlex
-if sys.version_info[0] == 2:
-	import Queue
-else:
-	import queue as Queue
+import queue as Queue
 
 from pysys.constants import *
 from pysys.exceptions import *
 from pysys.utils.pycompat import *
-
-def _stringToUnicode(s):
-	""" Converts a unicode string or a utf-8 bit string into a unicode string. 
-	@deprecated: for internal use only, will be removed in future. 
-	"""
-	if not PY2: return s
-	if isinstance(s, unicode):
-		return s
-	else:
-		return unicode(s, "utf8")
 
 log = logging.getLogger('pysys.process')
 
@@ -70,8 +57,6 @@ class Process(object):
 	:ivar str ~.command:  The full path to the executable.
 	:ivar list[str] ~.arguments:  A list of arguments to the command.
 	:ivar dict(str,str) ~.environs:  A dictionary of environment variables (key, value) for the process context execution. 
-		Use unicode strings rather than byte strings if possible; on Python 2 byte strings are converted 
-		automatically to unicode using utf-8. 
 	:ivar str ~.workingDir:  The working directory for the process
 	:ivar ~.state: The state of the process.
 	:vartype state: `pysys.constants.FOREGROUND` or `pysys.constants.BACKGROUND`
@@ -102,7 +87,7 @@ class Process(object):
 		self.arguments = arguments
 		
 		self.environs = {}
-		for key in environs: self.environs[_stringToUnicode(key)] = _stringToUnicode(environs[key])
+		for key in environs: self.environs[key] = environs[key]
 		self.workingDir = os.path.normpath(workingDir)
 		self.state = state
 		self.timeout = timeout
