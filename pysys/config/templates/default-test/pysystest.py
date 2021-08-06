@@ -22,4 +22,3 @@ class PySysTest(pysys.basetest.BaseTest):
 
 	def validate(self):
 		pass
-	

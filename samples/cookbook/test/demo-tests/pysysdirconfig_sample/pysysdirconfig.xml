@@ -43,7 +43,7 @@
 	      @@DIR_NAME@@ -> @{DIR_NAME} (the basename of the directory being created, typically the test id)
 	      @@DEFAULT_DESCRIPTOR@@ -> @{DEFAULT_DESCRIPTOR} (the __pysys_title__ and other descriptor lines from the 
 	               standard PySys default test template, after which you can add your customized Python test class)
-	      @@LINE_LENGTH_GUIDE@@ -> @{LINE_LENGTH_GUIDE} (120 # comment characters to indicate to the user when they are 
+	      @@LINE_LENGTH_GUIDE@@ -> @{LINE_LENGTH_GUIDE} (80 underline characters to indicate to the user when they are 
 	               exceeding the recommended maximum length for a test title; this string can be customized for different 
 	               lengths etc using the pysystestTemplateLineLengthGuide project property)
 	

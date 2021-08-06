@@ -33,7 +33,7 @@ IGNORED_COMMENTS = [
 	r"""To provide a bug/story/requirement id for requirements tracing, uncomment this: <requirement id=""/>""",
 ]
 
-LINE_LENGTH_GUIDE = '#' * 120
+LINE_LENGTH_GUIDE = '=' * 80
 DEFAULT_AUTHORS = ""
 DEFAULT_CREATED = None
 
@@ -139,7 +139,7 @@ def xmlToPy(xmlpath):
 		return x.replace("\n","\n\t")
 	
 	py =  f'__pysys_title__   = r""" {d.pop("title", "")} """\n'
-	py += f'                         {LINE_LENGTH_GUIDE}\n\n'
+	py += f'#                        {LINE_LENGTH_GUIDE}\n\n'
 	py += f'__pysys_purpose__ = r""" {cleanIndentation(d.pop("purpose", ""))}\n\t"""\n\n'
 	
 	value = d.pop('id-prefix', None)

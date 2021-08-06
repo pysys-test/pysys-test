@@ -10,6 +10,8 @@
 # the "purpose" or "traceability_ids" are a better place for those details. 
 #
 __pysys_title__   = r""" My foobar tool - Argument parsing success and error cases """
+#                        ===============================================================================
+# The underlined line length guide comment (above) discourages excessively long titles.
 
 # The purpose is a good place for a fuller description of what is in and out of scope for this particular testcase.
 __pysys_purpose__ = r""" The purpose of this test is to check that 

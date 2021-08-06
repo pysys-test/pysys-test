@@ -384,7 +384,7 @@ class DefaultTestMaker(object):
 					.replace('@{DATE}', self.project.startDate)
 					.replace('@{USERNAME}', self.project.username)
 					.replace('@{DIR_NAME}', os.path.basename(dest))
-					.replace('@{LINE_LENGTH_GUIDE}', self.project.getProperty("pysystestTemplateLineLengthGuide", 120*"="))
+					.replace('@{LINE_LENGTH_GUIDE}', self.project.getProperty("pysystestTemplateLineLengthGuide", 80*"="))
 				.encode('utf-8') # non-ascii chars are unlikely, but a reasonable default is to use utf-8 to match typical XML
 			)
 			for (r1,r2) in tmp['replace']]

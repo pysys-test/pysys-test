@@ -69,7 +69,7 @@ For a full example of all the possible options (including more details on the su
 parse correctly) see :doc:`TestDescriptors`.  
 
 Note that the ``=====`` characters act not only as an underline but also provide a guide to help test authors know 
-when their title string has exceeded 120 characters which should be avoided if possible to make pysys print output 
+when their title string has exceeded 80 characters which should be avoided if possible to make pysys print output 
 easy to read. The character and length of this guide can be customized with project property 
 ``pysystestTemplateLineLengthGuide`` if desired. 
 
