@@ -15,10 +15,10 @@
 	<groups inherit="true" groups=""/>
 
 	<!-- Specify modes supported by all tests under this directory. Like test ids, mode names are usually TitleCase.
-	These modes are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. 
+	Individual tests may override this, but usually will include the inherited modes. 
 	-->
-	<modes inherit="true">
-		<!-- <mode mode="MyMode" param1="MyParam"/> -->
+	<modes>
+		lambda helper: helper.combineModeDimensions(helper.inheritedModes, [{'mode': 'MyMode', 'param1':'MyParam'}])
 	</modes>
 
 	<!-- Specify as a floating point number an indicator of when to run the tests under 
