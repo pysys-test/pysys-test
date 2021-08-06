@@ -387,6 +387,7 @@ Fixes
     capitalize the first letter when passed a relative path. 
   - Improved the formatting of ``pysys print --full`` so it is easier to read. Most items with empty or default values 
     are no longer shown, so you can focus on the information that's actually interesting. 
+  - Fixed bug in which ``--modes`` argument would not be honoured if running tests with ``--ci``. 
 
 Migration notes
 ---------------

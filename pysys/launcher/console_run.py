@@ -194,11 +194,13 @@ e.g.
 		
 
 		printLogsDefault = PrintLogs.ALL
-		if '--ci' in args:
+		ci ='--ci' in args
+		if ci:
 			# to ensure identical behaviour, set these as if on the command line
 			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
 			# by CI writers and/or the command line)
-			args = ['--purge', '--record', '-j0', '--type=auto', '--mode=ALL',  '-XcodeCoverage']+args
+			# Also we don't set --modes=ALL here to allow for it to be overridden explicitly if needed
+			args = ['--purge', '--record', '-j0', '--type=auto', '-XcodeCoverage']+args
 			printLogsDefault = PrintLogs.FAILURES
 
 		try:
@@ -213,7 +215,6 @@ e.g.
 		EXPR2 = re.compile("^[\w\.]*$")
 
 		printLogs = None
-		ci = False
 		defaultAbortOnError = None
 
 		logging.getLogger('pysys').setLevel(logging.INFO)
@@ -354,6 +355,9 @@ e.g.
 			else:
 				print("Unknown option: %s"%option)
 				sys.exit(1)
+
+		if ci and not self.modeinclude: # only set this if there is no explicit --mode arguments
+			self.modeinclude = ['ALL']
 
 		# log this once we've got the log levels setup
 		log.debug('PySys is installed at: %s; python from %s', os.path.dirname(pysys.__file__), sys.executable)
