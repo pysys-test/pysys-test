@@ -1,8 +1,8 @@
 [
    {
       "id": "rootprefix_dir3prefix_Test_SubdirMinimalDescriptor",
-      "testDir": "C:\\dev\\pysys-test\\test\\correctness\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor",
-      "xmlDescriptor": "C:\\dev\\pysys-test\\test\\correctness\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml",
+      "testDir": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml",
       "type": "manual",
       "state": "skipped",
       "skippedReason": "<unknown skipped reason>",
@@ -14,13 +14,9 @@
          "dir2-group",
          "dir3-group"
       ],
-      "modes": [
-         "root-mode1",
-         "root-mode2",
-         "dir2-mode",
-         "dir3-mode"
-      ],
-      "modeParameters": {
+      "authors": [],
+      "created": null,
+      "modes": {
          "root-mode1": {},
          "root-mode2": {},
          "dir2-mode": {},
@@ -51,8 +47,8 @@
    },
    {
       "id": "rootprefix_testprefix.Test_RootFullDescriptor",
-      "testDir": "C:\\dev\\pysys-test\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor",
-      "xmlDescriptor": "C:\\dev\\pysys-test\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml",
+      "testDir": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml",
       "type": "manual",
       "state": "deprecated",
       "skippedReason": null,
@@ -64,13 +60,12 @@
          "testcase-group1",
          "testcase-group2"
       ],
-      "modes": [
-         "root-mode1",
-         "root-mode2",
-         "testcase-mode1",
-         "testcase-mode2"
+      "authors": [
+         "author1",
+         "author 2"
       ],
-      "modeParameters": {
+      "created": "1999-12-31",
+      "modes": {
          "root-mode1": {},
          "root-mode2": {},
          "testcase-mode1": {},
@@ -102,8 +97,8 @@
    },
    {
       "id": "rootprefix_Test_RootMinimalDescriptor",
-      "testDir": "C:\\dev\\pysys-test\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor",
-      "xmlDescriptor": "C:\\dev\\pysys-test\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\pysystest.xml",
+      "testDir": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\pysystest.xml",
       "type": "auto",
       "state": "runnable",
       "skippedReason": null,
@@ -113,11 +108,9 @@
          "root-group1",
          "root-group2"
       ],
-      "modes": [
-         "root-mode1",
-         "root-mode2"
-      ],
-      "modeParameters": {
+      "authors": [],
+      "created": null,
+      "modes": {
          "root-mode1": {},
          "root-mode2": {}
       },
@@ -142,8 +135,8 @@
    },
    {
       "id": "rootprefix_Test_RootNoInheritDescriptor",
-      "testDir": "C:\\dev\\pysys-test\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor",
-      "xmlDescriptor": "C:\\dev\\pysys-test\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml",
+      "testDir": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor",
+      "xmlDescriptor": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml",
       "type": "auto",
       "state": "runnable",
       "skippedReason": null,
@@ -152,10 +145,9 @@
       "groups": [
          "TestSpecificGroup"
       ],
-      "modes": [
-         "TestSpecificMode"
-      ],
-      "modeParameters": {
+      "authors": [],
+      "created": null,
+      "modes": {
          "TestSpecificMode": {}
       },
       "primaryMode": "TestSpecificMode",

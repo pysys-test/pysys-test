@@ -1,0 +1,6 @@
+   mytmpl-dir2        - something from dir2
+   mytmpl-project2    - something from dir2, redefined from project
+   mytmpl-root-dir    - something from the root dir config
+   mytmpl-project     - something from the project
+   pysys-default-test - a default empty PySys test
+

@@ -36,7 +36,6 @@ Key features include:
   testing your application.
 - A performance monitoring framework for recording and aggregating latency, 
   throughput and other performance metrics.
-
 - A pluggable "writers" framework for recording test outcomes in any format, 
   including a standard JUnit-compatible XML results writer and output archiver 
   in the box, and support for running tests under CI providers such as 
@@ -48,7 +47,7 @@ Key features include:
   classification groups.
 - Support for Windows, Linux, macOS and Solaris. 
 
-PySys was created by Moray Grieve. The current maintainer is Ben Spiller. 
+PySys was created by Moray Grieve. The maintainer is now Ben Spiller. 
 This is a community project so we welcome your contributions, whether 
 enhancement issues or GitHub pull requests! 
 
@@ -76,7 +75,7 @@ Project Links
 Installation
 ============
 
-PySys can be installed into Python 3.9 (recommended), 3.5/3.6/3.7/3.8. 
+PySys can be installed into any Python version from 3.6 to 3.9. 
 
 The best way to install PySys is using the standard ``pip`` installer which 
 downloads and install the binary package for the current PySys 
@@ -146,9 +145,8 @@ Then to create your first test, run::
 
 	> pysys.py make MyApplication_001
 
-This will create a ``MyApplication_001`` subdirectory with a ``pysystest.xml`` 
-file holding metadata about the test such as its title, and a ``run.py`` 
-where you can add the logic to ``execute`` your test, and to ``validate`` that 
+This will create a ``MyApplication_001`` subdirectory with a ``pysystest.py`` file "descriptor" metadata about the test 
+such as its title, and Python class where you can add the logic to ``execute`` your test, and to ``validate`` that 
 the results are as expected. 
 
 To run your testcases, simply execute::

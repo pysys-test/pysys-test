@@ -17,7 +17,7 @@
 
 
 """
-Test/directory descriptors (``pysystest.xml``/``pysysdirconfig.xml``) and project configuration (``pysysproject.xml``)."""
+Test/directory descriptors (``pysystest.*``/``pysysdirconfig.xml``) and project configuration (``pysysproject.xml``)."""
 
 __all__ = [ "descriptor",
 			"project",

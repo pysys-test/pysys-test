@@ -86,7 +86,7 @@ class ConsolePrintHelper(object):
 		print("   tests in the group will not be run. The following syntax is used to select a test set;")
 		print("")
 		print("       test1    - a single testcase with id test1")
-		print("       :test2   - upto testcase with id test2")
+		print("       :test2   - up to testcase with id test2")
 		print("       test1:   - from testcase with id test1 onwards")
 		print("       id1:id2  - all tests between tests with ids test1 and test2")
 		print("")
@@ -186,7 +186,7 @@ class ConsolePrintHelper(object):
 							groups.append(group)
 				print("\nGroups defined: ")
 				for group in groups:
-					print("                 %s" % (group))
+					print("  %s" % (group))
 				exit = 1
 
 			if self.modes == True:
@@ -197,7 +197,7 @@ class ConsolePrintHelper(object):
 							modes.append(mode)
 				print("\nModes defined: ")
 				for mode in modes:
-					print("                 %s" % (mode))
+					print("  %s" % (mode))
 				exit = 1
 
 			if self.requirements == True:
@@ -206,9 +206,9 @@ class ConsolePrintHelper(object):
 					for requirement in descriptor.traceability:
 						if requirement not in requirements:
 							requirements.append(requirement)
-				print("\nRequirements covered: ")
+				print("\nTraceability requirement ids covered: ")
 				for requirement in requirements:
-					print("                 %s" % (requirement))
+					print("  %s" % (requirement))
 				exit = 1
 		
 			if exit: return
@@ -223,9 +223,7 @@ class ConsolePrintHelper(object):
 				if not self.full:
 					print("%s%s| %s" % (descriptor.id, padding, descriptor.title))
 				else:
-					print("==========================================")
-					print("		" + descriptor.id)
-					print("==========================================")
+					print("="*80)
 					print(descriptor)
 
 def printTest(args):

@@ -10,8 +10,8 @@
   </description>
 
   <classification>
-		<modes primary="SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast="> 
-			<!-- empty modes element - will just inherit everything. but can change the primary mode (in this case, an one inherited) using primary= -->
+		<modes> 
+			<!-- empty modes element - will just inherit everything -->
 		</modes>
   </classification>
 

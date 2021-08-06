@@ -17,7 +17,7 @@
 
 """
 The `TestDescriptor <pysys.config.descriptor.TestDescriptor>` class holds metadata for each testcase 
-(``pysystest.xml``) or directory (``pysysdirconfig.xml``), and the `DescriptorLoader <pysys.config.descriptor.DescriptorLoader>` 
+(``pysystest.*``) or directory (``pysysdirconfig.xml``), and the `DescriptorLoader <pysys.config.descriptor.DescriptorLoader>` 
 class allows customization of the test discovery process. 
 """
 
@@ -27,6 +27,7 @@ import collections
 import copy
 import locale
 import inspect
+import importlib
 
 import pysys
 from pysys.constants import *
@@ -37,7 +38,7 @@ from pysys.utils.pycompat import PY2, isstring, openfile, makeReadOnlyDict
 log = logging.getLogger('pysys.config.descriptor')
 
 class TestDescriptor(object):
-	"""Descriptor metadata for an individual testcase (``pysystest.xml``) or defaults for tests under a directory 
+	"""Descriptor metadata for an individual testcase (``pysystest.*``) or defaults for tests under a directory 
 	subtree (``pysysdirconfig.xml``); see :doc:`../TestDescriptors`. 
 	
 	The `DescriptorLoader` class is responsible for determining the available 
@@ -93,7 +94,11 @@ class TestDescriptor(object):
 	
 	:ivar str ~.reference: The path to the reference directory of the testcase. Relative to testDir, or an absolute path.
 	
-	:ivar list ~.traceability: A list of the requirements covered by the testcase.
+	:ivar list ~.traceability: A list of the requirements covered by the testcase, typically keywords or bug/story ids.
+	
+	:ivar list[str] ~.authors: A list of the names or user ids of people who contributed to the test. 
+
+	:ivar str ~.created: The date when the test was created in yyyy-mm-dd format. 
 	
 	:ivar float ~.executionOrderHint: A float priority value used to determine the 
 		order in which testcases will be run; higher values are executed before 
@@ -102,20 +107,22 @@ class TestDescriptor(object):
 	:ivar bool ~.isDirConfig: True if this is a directory configuration, or False if 
 		it's a normal testcase. 
 	
-	:ivar dict[str,obj] ~.userData: A dictionary that can be used for storing user-defined data 
+	:ivar dict[str,obj] ~.userData: A Python dictionary that can be used for storing user-defined data 
 		in the descriptor. In a pysystest.xml, this can be populated by one or more ``user-data`` elements, e.g. 
 		``<data><user-data name="key" value="val ${projectProperty}"</user-data></data>``.
 	"""
 
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
 		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', 'executionOrderHintsByMode', \
-		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', 
+		'authors', 'created', \
+		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', '_makeTestTemplates', 
 
 	def __init__(self, file, id, 
-		type="auto", state="runnable", title=u'(no title)', purpose=u'', groups=[], modes=[], 
+		type="auto", state="runnable", title=u'', purpose=u'', groups=[], modes=[], 
 		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE, 
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, 
+		authors=[], created=None,
 		testDir=None, 
 		isDirConfig=False, userData=None):
 		if skippedReason: state = 'skipped'
@@ -134,11 +141,17 @@ class TestDescriptor(object):
 		self.groups = list(groups)
 		self.modes = list(modes)
 		
+		self.authors = authors
+		self.created = created
+		if created and not re.match('[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', created):
+			raise UserError('Invalid created date "%s", must be yyyy-mm-dd format, in file "%s"'%(created, file))
+
+		
 		self.classname = classname
 		assert classname, 'Test descriptors cannot set the classname to nothing'
 
 		if not module: self.module = None
-		elif module.endswith('.py'): self.module = module
+		elif module.endswith('.py') or module == 'PYTHONPATH': self.module = module
 		else: self.module = module+'.py'
 		
 		self.input = input
@@ -188,8 +201,9 @@ class TestDescriptor(object):
 		d['title'] = self.title
 		d['purpose'] = self.purpose
 		d['groups'] = self.groups
-		d['modes'] = self.modes
-		d['modeParameters'] = {str(m):m.params for m in self.modes}
+		d['authors'] = self.authors
+		d['created'] = self.created
+		d['modes'] = {str(m):m.params for m in self.modes}
 		d['primaryMode'] = self.primaryMode
 		if hasattr(self, 'mode'): d['mode'] = self.mode 
 		d['requirements'] = self.traceability
@@ -213,20 +227,27 @@ class TestDescriptor(object):
 		:return: The string represention
 		:rtype: string
 		"""
+		# Some of these are only worth printing when there's actually something to show, and for legacy things like 
+		# type/state, when a non-default value is selected
 		
 		s=    "Test id:           %s\n" % self.id
-		reltestdir = self.testDir if not self.isDirConfig else '' # relative to current dir is most useful
-		if reltestdir.lower().replace('\\','/').startswith(os.getcwd().lower().replace('\\','/')): reltestdir = reltestdir[len(os.getcwd())+1:]
+		reltestdir = fromLongPathSafe(self.testDir) if not self.isDirConfig else '' # relative to current dir is most useful
+		if reltestdir.lower().replace('\\','/').startswith(os.getcwd().lower().replace('\\','/')+'/'): reltestdir = reltestdir[len(os.getcwd())+1:]
 		s=s+"Test directory:    %s\n" % reltestdir # use OS slashes to facilitate copy+paste
-		s=s+"Test type:         %s\n" % self.type
-		s=s+"Test state:        %s\n" % self.state
+		if self.type != 'auto': s=s+"Test type:         %s\n" % self.type
+		if self.state != 'runnable' and not self.skippedReason:
+			s=s+"Test state:        %s\n" % self.state
 		if self.skippedReason: s=s+"Test skip reason:  %s\n" % self.skippedReason
 		s=s+"Test title:        %s\n" % self.title
-		s=s+"Test purpose:      "
-		purpose = self.purpose.split('\n') if self.purpose is not None else ['']
-		for index in range(0, len(purpose)):
-			if index == 0: s=s+"%s\n" % purpose[index]
-			if index != 0: s=s+"                   %s\n" % purpose[index] 
+		if self.purpose:
+			s=s+"Test purpose:      "
+			purpose = self.purpose.split('\n')
+			for index in range(0, len(purpose)):
+				if index == 0: s=s+"%s\n" % purpose[index]
+				if index != 0: s=s+"                   %s\n" % purpose[index] 
+
+		if self.created or self.authors:
+			s=s+"Test created:      %s; authors: %s\n" % (self.created or '?', ', '.join(self.authors))
 
 		s=s+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
 		
@@ -248,12 +269,12 @@ class TestDescriptor(object):
 			u', '.join('%s'%hint for hint in self.executionOrderHintsByMode) # for multi-mode tests
 			if hasattr(self, 'executionOrderHintsByMode') else self.executionOrderHint)	
 
-		s=s+"Test classname:    %s\n" % self.classname
-		s=s+"Test module:       %s\n" % self.module
-		s=s+"Test input:        %s\n" % self.input
-		s=s+"Test output:       %s\n" % self.output
-		s=s+"Test reference:    %s\n" % self.reference
-		s=s+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
+		s=s+"Test classname:    %s; module: %s\n" % (self.classname, self.module)
+		if self.input not in [DEFAULT_INPUT, '.', '!Input_dir_if_present_else_testDir!']: s=s+"Test input:        %s\n" % self.input
+		if self.output != DEFAULT_OUTPUT: s=s+"Test output:       %s\n" % self.output
+		if self.reference != DEFAULT_REFERENCE: s=s+"Test reference:    %s\n" % self.reference
+		if self.traceability:
+			s=s+"Test traceability: %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.traceability) or u'<none>')
 		if self.userData:
 			s=s+"Test user data:    %s\n" % ', '.join('%s=%s'%(k,self.__userDataValueToString(v)) for k,v in (self.userData.items()))
 		s=s+""
@@ -270,27 +291,6 @@ class TestDescriptor(object):
 	
 	def __repr__(self): return str(self)
 
-class _XMLDescriptorCreator(object):
-	'''Helper class to create a test descriptor template. DEPRECATED. 
-	
-	:meta private: If we want an API for this, having a writeToFile method on TestDescriptor would be a better way 
-	  to go.
-	'''
-		
-	def __init__(self, file, type="auto", group=DEFAULT_GROUP, testclass=DEFAULT_TESTCLASS, module=DEFAULT_MODULE):
-		'''Class constructor.'''
-		self.file=file
-		self.type = type
-		self.group = group
-		self.testclass = testclass
-		self.module = module
-	
-	def writeXML(self):
-		'''Write a test descriptor template to file.'''
-		fp = openfile(self.file, 'w')
-		fp.writelines(DESCRIPTOR_TEMPLATE % (self.type, self.group, self.testclass, self.module))
-		fp.close
-		
 XMLDescriptorContainer = TestDescriptor
 """ XMLDescriptorContainer is an alias for the TestDescriptor class, which 
 exists for compatibility reasons only. 
@@ -298,9 +298,109 @@ exists for compatibility reasons only.
 :meta private:
 """
 
+class TestModesConfigHelper:
+	"""
+	A helper class that is passed to the lambda which defines test modes in a pysystest configuration. It provides access to 
+	the list of inherited modes, to project properties and also a helper function for combining multiple mode lists into 
+	one. 
+	
+	:ivar list[dict[str,obj]] ~.inheritedModes: A list of the inherited modes, each defined by a dictionary containing a ``mode`` 
+		key and any number of additional parameters. 
+	:ivar ~.constants: A reference to `pysys.constants` which can be used to access constants such as ``IS_WINDOWS`` for 
+		platform-dependent mode configuration. 
+	:ivar ~.pysys: A reference to the `pysys` module. 
+	:ivar callable[str] import_module: A reference to the Python ``importlib.import_module`` function that can be used 
+		if you need to access functions from additional modules such as ``sys``, ``re``, etc. 
+	:ivar pysys.config.project.Project ~.project: The project configuration, from which you can read properties. 
+	:ivar str ~.testDir: The test directory, i.e. the directory containing the ``pysystest.*`` file where this modes 
+		configuration is defined. This is not available when defining modes in ``pysysdirconfig``, but only when the mode 
+		configuration is directly in the ``pysystest.*`` file. 
+
+	"""
+	def __init__(self, inheritedModes, project, testDir):
+		self.inheritedModes = inheritedModes
+		self.project = project
+		self.constants = pysys.constants
+		self.import_module = importlib.import_module
+		self.pysys = pysys
+		self.os = os
+		self.testDir = testDir
+
+	def combineModeDimensions(self, *dimensions):
+		"""
+		Generates a single flat mode list containing all combinations that can be generated the specified mode lists. 
+		
+		For example::
+		
+			lambda modes: modes.combineModeDimensions([
+				{'mode': 'MySQL',   'db': 'MySQL',  'dbTimeoutSecs':60}, 
+				{'mode': 'SQLite',  'db': 'SQLite', 'dbTimeoutSecs':120},
+				{'mode': 'Mock',    'db': 'Mock',   'dbTimeoutSecs':30},
+			], [
+				{'browser':'Chrome'}, # if mode is not explicitly specified it is auto-generated from the parameter(s)
+				{'browser':'Firefox'},
+			])
+		
+		would generate modes named::
+		
+			MySQL_Chrome
+			MySQL_Firefox
+			SQLite_Chrome
+			SQLite_Firefox
+			Mock_Chrome
+			Mock_Firefox
+		
+		A common use case is to combine inherited modes from the parent pysysdirconfigs with a list of modes specific to 
+		this test::
+		
+			lambda modes: modes.combineModeDimensions(modes.inherited, [
+				{'mode': 'IntegersSubtest', 'dataType': 'int'}, 
+				{'mode': 'StringSubtest',  'dataType': 'str'}, 
+				{'mode': 'BooleansSubtest', 'dataType': 'bool'}, 
+			])
+
+		This is a good way to use modes for the concept of subtests, since even if you don't initially have any inherited 
+		modes, if in future you add some then everything will automatically work correctly. 
+
+		For efficiency reasons, don't call this method if you are just using the inherited modes. 
+		
+		:param list[dict[str,obj]] dimensions: Each argument passed to this function is a list of modes, each mode defined 
+			by a dict which may contain a ``mode`` key plus any number of parameters. 
+		:return: A list[dict[str,obj]] containing the flattened list of modes consisting of all combinations of the 
+			passed in 
+		"""
+		if len(dimensions) == 1: return dimensions[0]
+		
+		current = {} # key=mode name value=params
+		for dimension in dimensions:
+			prevModesForCombining = None if not current else current
+
+			current = {}
+			for mode in dimension:
+				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
+				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode)
+
+				current[modeString] = mode
+			# end for mode
+
+			if prevModesForCombining is not None:
+				if not current or not prevModesForCombining:
+					current = prevModesForCombining or current
+				else:
+					newModes = current
+					current = {}
+					for modeA, paramsA in prevModesForCombining.items():
+						for modeB, paramsB in newModes.items():
+							params = dict(paramsA)
+							params.update(paramsB) # newer "B" params take precedence if any keys as the same
+							current[modeA.strip('_')+'_'+modeB.strip('_')] = params
+		return [{**{'mode':modeString}, **params} for modeString, params in current.items()]
+
+	
 
 class TestMode(str): # subclasses string to retain compatibility for tests that don't use mode parameters
-	"""Represents a mode that a test can run in, and optionally a dict of parameters that define that mode. 
+	"""Represents a mode that a test can run in in a `TestDescriptor`, and optionally a dict of parameters that define 
+	that mode. 
 	
 	To create one::
 	
@@ -334,56 +434,114 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 
 
 class _XMLDescriptorParser(object):
-	'''DEPRECATED - use L{DescriptorLoader.parseTestDescriptor} instead. 
+	'''NOT PUBLIC API - use L{DescriptorLoader.parseTestDescriptor} instead. 
 	
 	:meta private:
 	
 	Helper class to parse an XML test descriptor - either for a testcase, 
 	or for defaults for a (sub-)directory of testcases.
 
-	The class uses the minidom DOM (Document Object Model) non validating
+	If the file is/contains XML the class uses the minidom DOM (Document Object Model) non-validating
 	parser to provide accessor methods to return element attributes	and character
 	data from the test descriptor file. The class is instantiated with the filename
 	of the test descriptor. It is the responsibility of the user of the class to
 	call the unlink() method of the class on completion in order to free the memory
 	used in the parsing.
 	
+	If not, it uses __pysys_XXX__ dunders (Python-style but also designed to work fine in other languages whether in 
+	comments e.g. /* ... */  or even as string literals, provided there are no backslash escapes to worry about)
+	
 	'''
 
-	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None):
+	KV_PATTERN = '__pysys_%s__'
+
+	def __init__(self, xmlfile, istest=True, parentDirDefaults=None, project=None, xmlRootElement=None):
 		assert project
 		self.file = xmlfile
+		if len(xmlfile) < 256: self.file = fromLongPathSafe(self.file)# used for error messages etc
+		
 		self.dirname = os.path.dirname(xmlfile)
 		self.istest = istest
-		self.defaults = self.DEFAULT_DESCRIPTOR if parentDirDefaults is None else parentDirDefaults
+		self.defaults = (project._defaultDirConfig or self.DEFAULT_DESCRIPTOR) if parentDirDefaults is None else parentDirDefaults
 		roottag = 'pysystest' if istest else 'pysysdirconfig'
 		if not os.path.exists(xmlfile):
-			raise UserError("Unable to find supplied descriptor \"%s\"" % xmlfile)
+			raise UserError("Unable to find supplied descriptor \"%s\"" % self.file)
 		self.project = project
+
+		self.kvDict = {}
+		
+		if xmlRootElement: # used when parsing from project XML rather than directly from a standalone file
+			self.doc = None
+			self.root = xmlRootElement
+			assert xmlRootElement.tagName == 'pysysdirconfig', xmlRootElement.tagName
+			return
+		
+		if istest and not xmlfile.endswith('.xml'):
+			# Find it within a file of another type e.g. pysystest.py
+			
+			# Open in binary mode since we don't know the encoding - we'll rely on the XML header to tell us if it's anything unusual
+			with open(xmlfile, 'rb') as xmlhandle:
+				filecontents = xmlhandle.read()
+			# must be at the start of a line, i.e. not after a comment
+			# we do allow raw strings
+			for m in re.finditer(
+					(f'^[ \\t]*{self.KV_PATTERN.rstrip("__")%"(?P<key>[^ =]+)"} *= *(?:(?P<rawstring>[r@])?(' # r for python raw strings, @ for C#
+						+'|'.join([
+							'(?P<value1>(-?[0-9+-][0-9.]+|[T]rue|[F]alse))', # number/boolean literal, would be a shame for it to have to be quoted
+							'"""(?P<value2>(?:[^"]|"{1,2}(?!"))*)"""',
+							'"(?P<value3>[^"]*)"',
+						])
+						+') *($|[;#\\n\\r]))?' # ensure there's no attempt to concatenate something else; we make the string matching part optional so we can give a nice error if it goes wrong
+						).encode('ascii'), 
+					filecontents, flags=re.DOTALL + re.MULTILINE): 
+				k = m.group('key').decode('ascii', errors='replace')
+				if not k.endswith('__'): raise UserError(f'Incorrect key format for "{self.KV_PATTERN.rstrip("_") % k}" in "{self.file}"')
+				k = k.rstrip('_')
+				
+				if k in self.kvDict: raise UserError('Duplicate key "{self.KV_PATTERN % k}__" in "{self.file}"')
+				value = m.group('value1') or m.group('value2') or m.group('value3')
+				if value is None:
+					raise UserError(f'Cannot parse the value for {self.KV_PATTERN % k} in {self.file}; after the "=" you should use r"""...""", "..." or a numeric/boolean literal')
+				if (not m.group('rawstring')) and b'\\' in value: raise UserError(f'Cannot use backslash escape sequences for {self.KV_PATTERN % k} value (unless using a raw r"""...""" string); cannot parse "{self.file}"')
+				if k != 'xml_descriptor': # we keep xml descriptors as bytes so we can use the correct encoding
+					value = value.decode('utf-8', errors='replace')
+				self.kvDict[k] = value
+
+			if 'title' not in self.kvDict and 'xml_descriptor' not in self.kvDict: raise UserError(f'Cannot find mandatory {self.KV_PATTERN % "title"} specifier for this test in {self.file}')
+			xmlcontents = self.kvDict.pop('xml_descriptor', '').strip() # not likely to be used for .py files, but might be nice for some others
+		else:
+			xmlcontents = None
 		
 		try:
-			self.doc = xml.dom.minidom.parse(xmlfile)
+			if xmlcontents:
+				self.doc = xml.dom.minidom.parseString(xmlcontents)
+			elif xmlcontents == None:
+				self.doc = xml.dom.minidom.parse(xmlfile)
+			else:
+				self.doc = self.root = None
+				return
+				
 		except Exception as ex:
-			raise UserError("Invalid XML in descriptor '%s': %s" % (xmlfile, ex))
+			raise UserError("Invalid XML in descriptor '%s': %s" % (self.file, ex))
 		else:
 			if self.doc.getElementsByTagName(roottag) == []:
-				raise UserError("No <%s> element supplied in XML descriptor '%s'"%(roottag, xmlfile))
+				raise UserError("No <%s> element supplied in XML descriptor '%s'"%(roottag, self.file))
 			else:
 				self.root = self.doc.getElementsByTagName(roottag)[0]
 
 	@staticmethod
-	def parse(xmlfile, istest=True, parentDirDefaults=None, project=None):
+	def parse(xmlfile, istest=True, parentDirDefaults=None, project=None, **kwargs):
 		"""
 		Parses the test/dir descriptor in the specified path and returns the 
 		TestDescriptor object. 
 		
-		:param istest: True if this is a pysystest.xml file, false if it is 
+		:param istest: True if this is a ``pysystest.*`` file, false if it is 
 			a descritor giving defaults for a directory of testcases.  
 			:param parentDirDefaults: Optional TestDescriptor instance 
 			specifying default values to be filtered in from the parent 
 			directory.
 		"""
-		p = _XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults, project=project)
+		p = _XMLDescriptorParser(xmlfile, istest=istest, parentDirDefaults=parentDirDefaults, project=project, **kwargs)
 		try:
 			return p.getContainer()
 		finally:
@@ -392,7 +550,7 @@ class _XMLDescriptorParser(object):
 	DEFAULT_DESCRIPTOR = TestDescriptor(
 		file=None, id=u'', type="auto", state="runnable", 
 		title='', purpose='', groups=[], modes=[], 
-		classname=DEFAULT_TESTCLASS, module=DEFAULT_MODULE,
+		classname=DEFAULT_TESTCLASS, module=None,
 		input=DEFAULT_INPUT, output=DEFAULT_OUTPUT, reference=DEFAULT_REFERENCE, 
 		traceability=[], executionOrderHint=0.0, skippedReason=None, isDirConfig=True)
 	"""
@@ -403,17 +561,24 @@ class _XMLDescriptorParser(object):
 
 	def getContainer(self):
 		'''Create and return an instance of TestDescriptor for the contents of the descriptor.'''
+
+		if self.root:
+			for attrName, attrValue in self.root.attributes.items():
+				if attrName not in ['state', 'type', 'authors', 'created']:
+					raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
+		cls, pymodule = self.getClassDetails()
 		
-		for attrName, attrValue in self.root.attributes.items():
-			if attrName not in ['state', 'type']:
-				raise UserError('Unknown attribute "%s" in XML descriptor "%s"'%(attrName, self.file))
+		if pymodule is None and self.istest: # default setting means auto-detect (nb: NOT the same as pymodule='' which means to use the PYTHONPATH)
+			pymodule = os.path.basename(self.file) if self.file.endswith('.py') else DEFAULT_MODULE # else run.py
+		
+		
 		
 		# some elements that are mandatory for an individual test and not used for dir config
-		return TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
+		t = TestDescriptor(self.getFile(), self.getID(), self.getType(), self.getState(),
 										self.getTitle() if self.istest else '', self.getPurpose() if self.istest else '',
 										self.getGroups(), self.getModes(), 
-										self.project.expandProperties(self.getClassDetails()[0]),
-										self.project.expandProperties(self.getClassDetails()[1]),
+										self.project.expandProperties(cls),
+										self.project.expandProperties(pymodule),
 										self.project.expandProperties(self.getTestInput()),
 										self.project.expandProperties(self.getTestOutput()),
 										self.project.expandProperties(self.getTestReference()),
@@ -422,7 +587,50 @@ class _XMLDescriptorParser(object):
 										skippedReason=self.getSkippedReason(), 
 										testDir=self.dirname,
 										userData=self.getUserData(),
+										authors=[x.strip() for x in 
+											(self.kvDict.pop('authors', None) or (self.root.getAttribute('authors') if self.root else '') 
+											).split(',') if x.strip()],
+										created=self.kvDict.pop('created', None) or (self.root.getAttribute('created') if self.root else None) or None,
 										isDirConfig=not self.istest)
+		
+		if self.kvDict: # should all have been popped during parsing
+			raise UserError(f'Unknown {self.KV_PATTERN % "KEY"} key(s) in test descriptor "{self.file}": {", ".join(self.kvDict.keys())}')
+		
+		if not self.istest:
+			# _makeTestTemplates is not an official/public part of the descriptor spec, so don't have it in the constructor signature
+			t._makeTestTemplates = self._parseTestMakerTemplates()
+		
+		return t
+
+	def _parseTestMakerTemplates(self): # not public API, do not use
+		templates = []
+
+		for e in self.root.getElementsByTagName('maker-template'):
+			t = {
+				'name': e.getAttribute('name'),
+				'description': e.getAttribute('description'),
+				'copy':   [x for x in (e.getAttribute('copy') or '').split(',') if x.strip()],
+				'mkdir': None if not e.hasAttribute('mkdir') else
+					[self.project.expandProperties(x).strip() for x in (e.getAttribute('mkdir') or '').split(',') if self.project.expandProperties(x).strip()],
+				'isTest': (e.getAttribute('isTest') or '').lower() != 'false',
+				'replace': [],
+				'source': self.file,
+			}
+			
+			# NB: further validation and expansion happens in console_make
+			
+			if not t['name']: raise UserError("A name=... attribute is required for each maker-template in \"%s\""%self.file)
+			if not t['description']: raise UserError("A description=... attribute is required for each maker-template, in \"%s\""%self.file)
+			
+			for r in e.getElementsByTagName('replace'):
+				r1, r2 = r.getAttribute('regex'), r.getAttribute('with')
+				if not r1 or not r2: raise UserError("Each make-test-template <replace> element requires both a regex= and a with= attribute, in \"%s\""%self.file)
+				t['replace'].append( (r1, r2) )
+			templates.append(t)
+
+		# NB: we don't combine with defaults here, that happens in the make launcher
+
+		return templates
 
 
 	def unlink(self):
@@ -437,9 +645,7 @@ class _XMLDescriptorParser(object):
 	
 	def getID(self):
 		'''Return the id of the test, or for a pysysdirconfig, the id prefix.'''
-		id = self.defaults.id
-		for e in self.root.getElementsByTagName('id-prefix'):
-			id = id+self.getText(e)
+		id = self.defaults.id + self.kvDict.pop('id-prefix','')+self.getElementTextOrDefault('id-prefix', default='')
 		
 		for c in u'\\/:~#<>':
 			# reserve a few characters that we might need for other purposes; _ and . can be used however
@@ -450,267 +656,297 @@ class _XMLDescriptorParser(object):
 		
 		return id
 
-
 	def getType(self):
-		'''Return the type attribute of the test element.'''
+		'''Return the type attribute of the test element - mostly just legacy now.'''
+		if not self.root: return self.defaults.type
 		type = self.root.getAttribute("type") or self.defaults.type
 		if type not in ["auto", "manual"]:
 			raise UserError("The type attribute of the test element should be \"auto\" or \"manual\" in \"%s\""%self.file)
 		return type
 
-
 	def getState(self):
-		'''Return the state attribute of the test element.'''
+		'''Return the state attribute of the test element - mostly just legacy now.'''
+		if not self.root: return self.defaults.state
 		state = self.root.getAttribute("state")	 or self.defaults.state
 		if state not in ["runnable", "deprecated", "skipped"]: 
 			raise UserError("The state attribute of the test element should be \"runnable\", \"deprecated\" or \"skipped\" in \"%s\""%self.file)
 		return state 
 
 	def getSkippedReason(self):
-		for e in self.root.getElementsByTagName('skipped'):
-			r = (e.getAttribute('reason') or '').strip() 
-			# make this mandatory, to encourage good practice
-			if not r: raise UserError('Missing reason= attribute in <skipped> element of "%s"'%self.file)
-			return r
+		r = self.kvDict.pop('skipped_reason', None)
+		if r is not None:
+				if not r: raise UserError('Missing value for skipped reason in "{self.file}"')
+				return r
+
+		if self.root:
+			for e in self.root.getElementsByTagName('skipped'):
+				r = (e.getAttribute('reason') or '').strip() 
+				# make this mandatory, to encourage good practice
+				if not r: raise UserError('Missing reason= attribute in <skipped> element of "{self.file}"')
+				return r
+
 		return self.defaults.skippedReason
 
 	def getTitle(self):
-		'''Return the test titlecharacter data of the description element.'''
-		descriptionNodeList = self.root.getElementsByTagName('description')
-		if descriptionNodeList == []:
-			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
+		# PySys 1.6.1 gave an error if <description> was missing, but a default if <title> was missing, and permitted empty string. So don't be too picky. 
+
+		result = self.kvDict.pop('title', None) or self.getElementTextOrDefault('title', optionalParents=['description'])
+		if not result and self.istest: result = self.getID() # falling back to the ID is better than nothing
 		
-		if descriptionNodeList[0].getElementsByTagName('title') == []:
-			raise UserError("No <title> child element of <description> supplied in XML descriptor \"%s\""%self.file)
-		else:
-			try:
-				title = descriptionNodeList[0].getElementsByTagName('title')[0]
-				return title.childNodes[0].data.replace('\n',' ').replace('\r',' ').replace('  ', ' ').strip()
-			except Exception:
-				return self.defaults.title
-				
+		result = result.replace('\n',' ').replace('\r',' ').replace('\t', ' ').strip().rstrip('.')
+		if '  ' in result: result = re.sub('  +', ' ', result)
+		return result
 				
 	def getPurpose(self):
-		'''Return the test purpose character data of the description element.'''
-		descriptionNodeList = self.root.getElementsByTagName('description')
-		if descriptionNodeList == []:
-			raise UserError("No <description> element supplied in XML descriptor \"%s\""%self.file)
+		result = self.kvDict.pop('purpose', None) or self.getElementTextOrDefault('purpose', optionalParents=['description'])
+		if result is None: result = self.defaults.purpose
 		
-		if descriptionNodeList[0].getElementsByTagName('purpose') == []:
-			raise UserError("No <purpose> child element of <description> supplied in XML descriptor \"%s\""%self.file)
-		else:
-			try:
-				purpose = descriptionNodeList[0].getElementsByTagName('purpose')[0]
-				return inspect.cleandoc(purpose.childNodes[0].data.strip().replace('\t','  '))
-			except Exception:
-				return self.defaults.purpose
-			
+		if not result: return result
+		return inspect.cleandoc(result.replace('\r','').replace('\t', '  ')).strip()
 				
 	def getGroups(self):
-		'''Return a list of the group names, contained in the character data of the group elements.'''
-		classificationNodeList = self.root.getElementsByTagName('classification')
 		groupList = []
-		try:
-			groups = classificationNodeList[0].getElementsByTagName('groups')[0]
-			for node in groups.getElementsByTagName('group'):
-				if self.getText(node): groupList.append(self.getText(node))
+		
+		groups = self.kvDict.pop('groups', None)
+		if isinstance(groups, str):
+			groups = groups.replace(' ','').split(';')
+			if len(groups) != 2 or groups[1].lower() not in ['inherit=true', 'inherit=false']:
+				raise UserError(f'Groups must be in the form "my-group1, mygroup2, ...; inherit=true/false" (the inherit= specifier is mandatory) in descriptor "{self.file}"')
+			groupList = [g for g in groups[0].split(',') if g]
+			if groups[1].lower() == 'inherit=false': return groupList
+		else:
+			groups = self.getSingleElement('groups', optionalParents=['classification'])
+			if groups:
+				if groups.parentNode.tagName not in ['pysystest', 'pysysdirconfig', 'classification']: 
+					raise UserError("<groups> element found under <%s> but must be under the root node (or the <classification> node), in XML descriptor \"%s\""%(groups.parentNode.tagName, self.file))
 
-			if (groups.getAttribute('inherit') or 'true').lower()!='true':
-				return groupList
-		except Exception:
-			pass
-			
+				if groups.getAttribute('groups'):
+					groupList.extend(g.strip() for g in groups.getAttribute('groups').split(',') if g.strip())
+
+				for node in groups.getElementsByTagName('group'):
+					g = self.getText(node)
+					if g and g.strip():
+						groupList.append(g.strip())
+
+				if (groups.getAttribute('inherit') or 'true').lower()!='true':
+					return groupList # don't inherit
+		
 		groupList = [x for x in self.defaults.groups if x not in groupList]+groupList
 		return groupList
 	
-				
-	def getModes(self):
-		result = self.defaults.modes # by default we inherit (unless there are multiple <modes> elements in the file)
-		classificationNodeList = self.root.getElementsByTagName('classification')
-		if not classificationNodeList: return result
-
-		modesNodes = classificationNodeList[0].getElementsByTagName('modes')
-		if not modesNodes: return result
 		
-		result = {} # key=mode name value=params
-		for modesNode in modesNodes:
-			prevModesForCombining = None if not result else result
+	@staticmethod 
+	def splitModeNameAndParams(mode):
+		"""
+		Returns (modename, params). Auto-generates a mode name if one is not already provided. 
+		"""
+		assert isinstance(mode, dict), 'Expecting mode dict but got %r'%mode
+		modeString = mode.pop('mode', None)
+		if modeString: return modeString, mode
 
-			# by default we inherit, but to avoid confusion when defining multiple mode matrices we only allow explicit inherits 
-			defaultinherit = len(modesNodes) <= 1
-			if (modesNode.getAttribute('inherit') or str(defaultinherit)).lower()!='true': 
-				result = {}
-			else:
-				result = {m:m.params for m in self.defaults.modes}
-			
+		# Auto-generate mode string
+		
+		assert len(mode) != 0, 'Must provide a name and/or params for every mode dictionary'
+		modeString = '_'.join(
+			'%s=%s'%(k, v) if (not isinstance(v, str) or re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE)) else v # include the key for numeric and boolean values
+			for (k,v) in mode.items())
+		
+		modeString = modeString.strip('_') # avoid leading/trailing _'s
+
+		# Enforce consistent naming convention of initial caps
+		modeString = modeString[0].upper()+modeString[1:]
+
+		assert modeString, 'Mode name cannot be empty'
+		return modeString, mode
+		
+	def getModes(self):
+		text = self.kvDict.pop('modes', None)
+		modesNode = None
+		if not text: 
+			modesNode = self.getSingleElement('modes', optionalParents=['classification'])
+			if modesNode:
+				text = self.getText(modesNode)
+			else: # if we have neither kvText text nor mode
+				return self.defaults.modes # by default we inherit
+
+		if not text: 
+			# pre-2.0 XML approach
+			result = {}
 			for node in modesNode.getElementsByTagName('mode'):
-				if not node.hasAttributes():
-					params = {}
-				else:
-					params = collections.OrderedDict() if PY2 else {}
-					for param, paramvalue in node.attributes.items():
-						if param == 'mode': continue 
-						assert not param.startswith('_'), 'Parameter names cannot start with _'
-						params[param] = paramvalue
-			
 				modeString = node.getAttribute('mode') or self.getText(node)
+				if modeString: 
+					result[modeString] = {}
+			
+			if (modesNode.getAttribute('inherit') or 'true').lower() == 'true':
+				# This logic is intended to preserve primary inherited modes; it's a bit weird, but keeping it the same for compatibility
+				inherited = [x for x in self.defaults.modes if x not in result]
+			else: 
+				inherited = []
 
-				if not modeString:
-					if not params: continue # simply ignore <mode> as it's sometimes included in templates etc
-
-					modeNamePattern = modesNode.getAttribute('modeNamePattern')
-					if modeNamePattern:
-						try:
-							modeString = modeNamePattern.format(**params)
-						except Exception as ex:
-							raise UserError('Failed to populate modeNamePattern "%s" with parameters %s: %s in "%s"'%(modeNamePattern, params, ex, self.file))
-					else:
-						modeString = '_'.join(
-							'%s=%s'%(k, v) if re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE) else v # include the key for numeric and boolean values
-							for (k,v) in params.items())
-				
-					# Eliminate dodgy characters
-					badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
-					if badchars: 
-						log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
-							''.join(set(c for c in badchars)), modeString, self.file)
+			return inherited+[TestMode(k, params=v) for (k,v) in result.items()]
+			
+		# The modern PySys 2.0+ approach with a Python eval string
+		try:
+			modesLambda = text
+			if isinstance(modesLambda, str): # eventually kvDict may be able to contain non-string values direct from Python
+				# use an empty namespace since if we were parsing this as real python, all import statements would be appearing later
+				modesLambda = pysys.utils.safeeval.safeEval(text.strip(), extraNamespace={}, emptyNamespace=True)
+			assert callable(modesLambda), 'Expecting callable (e.g. lambda helper: []) but got %r'%modesLambda
+			helper = TestModesConfigHelper(
+				inheritedModes=[{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
+				project=self.project, 
+				testDir=os.path.dirname(self.file) if self.istest else None
+				)
+			modes = modesLambda(helper) # assumes it's a callable accepting a single parameter
+			
+			assert isinstance(modes, list), 'Expecting a list of modes, got a %s: %r'%(modes.__class__.__name__, modes)
+			assert not modesNode or not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'
+			
+			result = []
+			already = set()
+			expectedparams = None
+			for m in modes:
+				modeString, params = self.splitModeNameAndParams(m)
+			
+				# Eliminate dodgy characters
+				badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
+				if badchars: 
+					log.debug('Unsupported characters "%s" found in test mode "%s" of %s; stripping them out', 
+						''.join(set(c for c in badchars)), modeString, self.file)
 					modeString = re.sub('[^%s]'%pysys.launcher.MODE_CHARS,'', modeString)
-					
-					if not modeString: raise UserError('Invalid mode: cannot be empty in \"%s\"'%self.file)
-					
-					# Enforce naming convention of initial caps
-					modeString = modeString[0].upper()+modeString[1:]
 
 				modeString = modeString.strip().strip('_') # avoid leading/trailing _'s and whitespace, since we'll add them when composing modes
 				
-				if modeString in result:
-					if result[modeString] != params: raise UserError('Cannot redefine mode "%s" with parameters %s different to previous parameters %s in "%s"'%(modeString, params, result[modeString], self.file))
-				else:
-					result[modeString] = params
-			# end of for <mode>
+				assert modeString, 'Invalid mode: cannot be empty'
+				assert '__' not in modeString, 'Invalid mode "%s" cannot contain double underscore'%modeString
+
+				# Enforce consistent naming convention of initial caps
+				modeString = modeString[0].upper()+modeString[1:]
+			
+				assert modeString not in already, 'Duplicate mode "%s"'%modeString
+				already.add(modeString)
+				for p in params:
+					assert not p.startswith('_'), 'Illegal mode parameter name - cannot start with underscore: %s'%p
+
 
 			# check that params are the same in each one to avoid mistakes
-			if result:
-				expectedparams = sorted(next(iter(result.values())).keys())
-				for mode, params in result.items():
-					if sorted(params.keys()) != expectedparams:
-						raise UserError('The same mode parameter keys must be given for each mode under <modes>, but found %s != %s in "%s"'%(sorted(params.keys()), expectedparams, self.file))
+				if expectedparams is None: expectedparams = sorted(params.keys())
+				assert sorted(params.keys()) == expectedparams, f'The same mode parameter keys must be given for every mode in the list, but found {sorted(params.keys())} parameters for "{modeString}" different to {expectedparams}'
 
-			primary = modesNode.getAttribute('primary')
-			if primary: # put the primary first if explicitly configured
-				if primary not in result: raise UserError('Cannot find the specified primary mode "%s" in [%s] while loading "%s"'%(primary, ', '.join(result.keys()), self.file)) 
-				result = {m: result[m] for m in sorted(result.keys(), key=lambda m: m != primary)}
-			
-			if prevModesForCombining is not None:
-				if not result or not prevModesForCombining:
-					result = prevModesForCombining or result
-				else:
-					# create the cross-product of these two mode matrices, i.e. result = prevModesForCombining * result
-					newModes = result
-					result = {}
-					for modeA, paramsA in prevModesForCombining.items():
-						for modeB, paramsB in newModes.items():
-							params = dict(paramsA)
-							params.update(paramsB) # newer "B" params take precedence if any keys as the same
-							result[modeA+'_'+modeB] = params
+				result.append(TestMode(modeString, params))
+			return result
 
-			exclude = modesNode.getAttribute('exclude')
-			if exclude:
-				project = pysys.config.project.Project.getInstance()
-				result = {m: params for m,params in result.items() if not pysys.utils.safeeval.safeEval(exclude, 
-						extraNamespace={'mode': TestMode(m, params=params), 'project': project})}
-
-		return [TestMode(k, params=v) for (k,v) in result.items()]
+		except Exception as ex:
+			raise UserError("Invalid modes configuration in %s: %s"%(self.file, ex))
 
 				
 	def getClassDetails(self):
-		'''Return the test class attributes (name, module, searchpath), contained in the class element.'''
-		try:
-			dataNodeList = self.root.getElementsByTagName('data')
-			el = dataNodeList[0].getElementsByTagName('class')[0]
-			return [el.getAttribute('name'), el.getAttribute('module')]
-		except Exception:
-			return [self.defaults.classname, self.defaults.module]
+		'''Return the Python test class attributes (name, module, searchpath), contained in the class element.'''
+		classname, module = self.kvDict.pop('python_class', None), self.kvDict.pop('python_module', None)		
+		
+		el = self.getSingleElement('class', optionalParents=['data'])
+		if el:
+			classname = classname or el.getAttribute('name')
+			module = module or el.getAttribute('module')
+		# nb: empty means look it up in PYTHONPATH, None is a sentinel value meaning auto, based on descriptor extension
+		if module == '': module = 'PYTHONPATH' # probably this is what was intended
+		return [classname or self.defaults.classname, module or self.defaults.module]
 
 	def getExecutionOrderHint(self):
-		r = None
-		for e in self.root.getElementsByTagName('execution-order'):
-			r = e.getAttribute('hint')
-			if r:
-				try:
-					r = float(r)
-				except Exception:
-					raise UserError('Invalid float value specified for execution-order hint in "%s"'%self.file)
+		r = self.kvDict.pop('execution_order_hint', None)
+		if r is None:
+			e = self.getSingleElement('execution-order')
+
+			r = None
+			if e:
+				r = e.getAttribute('hint')
+				
+		if r:
+			try:
+				r = float(r)
+			except Exception:
+				raise UserError('Invalid float value specified for execution order hint in "%s"'%self.file)
 		if r is None or r == '': 
 			return self.defaults.executionOrderHint
 		else:
 			return r
-			
-	def getTestInput(self):
-		'''Return the test input path, contained in the input element.'''
-		try:
-			dataNodeList = self.root.getElementsByTagName('data')
-			input = dataNodeList[0].getElementsByTagName('input')[0]
-			return input.getAttribute('path')
-		except Exception:
-			return self.defaults.input
+
 
 	def getUserData(self):
-		'''Return the userData from the user-data element.'''
-		# start with parent defaults, add children
-		result = collections.OrderedDict(self.defaults.userData)
-		for data in self.root.getElementsByTagName('data'):
-			for e in data.getElementsByTagName('user-data'):
-				key = e.getAttribute('name').strip()
-				assert key, 'name= must be specified'
-				assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # prevent names that we reserve for use by the basetest/processuser
-				
-				# NB: we don't use inspect.cleandoc here since it'd probably slow down descriptor loading and in 99% 
-				# of for multi-line strings we will be stripping whitespace anyway so not a good use of time
-				value = e.getAttribute('value')
-				if not value and e.childNodes:
-					value = '\n'.join(n.data for n in e.childNodes 
-						if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data)
-				if value is None: value = ''
-				try:
-					value = self.project.expandProperties(value)
-				except Exception as ex: # pragma: no cover
-					raise UserError('Failed to resolve user-data value for "%s" in XML descriptor "%s": %s' % (key, self.file, ex))
+		
+		newitems = self.kvDict.pop('user_data', {})
+		if isinstance(newitems, str): 
+				newitems = pysys.utils.safeeval.safeEval(newitems.strip(), 
+						extraNamespace={}, emptyNamespace=True)
 
-				result[key] = value
-				
+		if not newitems:
+			data = self.getSingleElement('data')
+			if data:
+				for e in data.getElementsByTagName('user-data'):
+					key = e.getAttribute('name').strip()
+					
+					# NB: we don't use inspect.cleandoc here since it'd probably slow down descriptor loading and in 99% 
+					# of for multi-line strings we will be stripping whitespace anyway so not a good use of time
+					value = e.getAttribute('value')
+					if not value and e.childNodes:
+						value = '\n'.join(n.data for n in e.childNodes 
+							if (n.nodeType in {n.TEXT_NODE,n.CDATA_SECTION_NODE}) and n.data)
+					if value is None: value = ''
+
+					newitems[key] = value
+		
+		for key in newitems:
+			assert key, 'name must be specified for user data'
+			assert key not in {'input', 'output', 'reference', 'descriptor', 'runner', 'log', 'project', 'lock'}, key # prevent names that we reserve for use by the basetest/processuser
+
+		# start with parent defaults, add children
+		result = dict(self.defaults.userData)
+		result.update(newitems)
+		
 		return result
 
+			
+	def getTestInput(self):
+		value = self.kvDict.pop('input_dir', None)
+		if value: return value
+		
+		node = self.getSingleElement('input', optionalParents=['data']) or self.getSingleElement('input-dir', optionalParents=['data'])
+		if node:
+			x = node.getAttribute('path') or self.getText(node)
+			if x: return x
+		return self.defaults.input
+		
 	def getTestOutput(self):
-		'''Return the test output path, contained in the output element.'''
-		try:
-			dataNodeList = self.root.getElementsByTagName('data')
-			output = dataNodeList[0].getElementsByTagName('output')[0]
-			return output.getAttribute('path')
-		except Exception:
-			return self.defaults.output
+		value = self.kvDict.pop('output_dir', None)
+		if value: return value
 
+		node = self.getSingleElement('output', optionalParents=['data']) or self.getSingleElement('output-dir', optionalParents=['data'])
+		if node:
+			x = node.getAttribute('path') or self.getText(node)
+			if x: return x
+		return self.defaults.output
 
 	def getTestReference(self):
-		'''Return the test reference path, contained in the reference element.'''
-		try:
-			dataNodeList = self.root.getElementsByTagName('data')
-			ref = dataNodeList[0].getElementsByTagName('reference')[0]
-			return ref.getAttribute('path')
-		except Exception:
-			return self.defaults.reference
+		value = self.kvDict.pop('reference_dir', None)
+		if value: return value
 
+		node = self.getSingleElement('reference', optionalParents=['data']) or self.getSingleElement('reference-dir', optionalParents=['data'])
+		if node:
+			x = node.getAttribute('path') or self.getText(node)
+			if x: return x
+		return self.defaults.reference
 
 	def getRequirements(self):
 		'''Return a list of the requirement ids, contained in the character data of the requirement elements.'''
-		reqList = []			
-		try:
-			traceabilityNodeList = self.root.getElementsByTagName('traceability')
-			requirements = traceabilityNodeList[0].getElementsByTagName('requirements')[0]
-			for node in requirements.getElementsByTagName('requirement'):
-				if node.getAttribute('id'): reqList.append(node.getAttribute('id'))
-		except Exception:
-			pass
+		reqList = [x.strip() for x in self.kvDict.pop('traceability_ids', '').split(',') if x.strip()]
+		
+		if self.root:
+			for node in self.root.getElementsByTagName('requirement'):
+				if (node.getAttribute('id') or '').strip(): reqList.append(node.getAttribute('id').strip())
+
+		# these used to always be below <traceability><requirements>..., but now we allow them directly under the root node 
+		# (or anywhere the user wants)
+
 		reqList = [x for x in self.defaults.traceability if x not in reqList]+reqList
 		return reqList
 
@@ -721,10 +957,31 @@ class _XMLDescriptorParser(object):
 		t = u''
 		if not element: return t
 		for n in element.childNodes:
-			if (n.nodeType == element.TEXT_NODE) and n.data:
+			if (n.nodeType in [element.TEXT_NODE, element.CDATA_SECTION_NODE]) and n.data:
 				t += n.data
 		return t.strip()
 
+	def getSingleElement(self, tagName, parent=None, optionalParents=[]):
+		"""Utility method that finds a single child element of the specified name and 
+		strips leading/trailing whitespace from it. Returns None if not found. """
+		if not self.root: return None
+		t = u''
+		if not parent: parent = self.root
+		nodes = parent.getElementsByTagName(tagName)
+		if len(nodes) == 0: return None
+		if len(nodes) > 1: 
+			raise UserError('Expected one element <%s> but found more than one in %s' % (tagName, self.file))
+		if nodes[0].parentNode.tagName not in ['pysystest', 'pysysdirconfig']+optionalParents: 
+				raise UserError("Element <%s> is not permitted under <%s> of \"%s\""%(tagName, nodes[0].parentNode.tagName, self.file))
+		return nodes[0]
+
+	def getElementTextOrDefault(self, tagName, default=None, parent=None, optionalParents=[]):
+		"""Utility method that finds a single child element of the specified name and 
+		strips leading/trailing whitespace from it. Returns an empty string if none. """
+		t = u''
+		node = self.getSingleElement(tagName, parent=parent, optionalParents=optionalParents)
+		if node is None: return default
+		return self.getText(node)
 
 class DescriptorLoader(object):
 	"""
@@ -806,7 +1063,11 @@ class DescriptorLoader(object):
 		descriptors = []
 		ignoreSet = set(OSWALK_IGNORES+[DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_REFERENCE])
 		
-		descriptorSet = set([s.strip() for s in project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')])
+		if project.properties.get('pysysTestDescriptorFileNames') or DEFAULT_DESCRIPTOR != ['pysystest.xml']:
+			# compatibility mode
+			descriptorSet = set([s.strip() for s in project.getProperty('pysysTestDescriptorFileNames', default=','.join(DEFAULT_DESCRIPTOR)).split(',')])
+		else:
+			descriptorSet = None
 		
 		assert project.projectFile != None
 		log = logging.getLogger('pysys.launcher')
@@ -830,6 +1091,7 @@ class DescriptorLoader(object):
 			# dirs. We deliberately use project dir not current working dir since 
 			# we don't want descriptors to be loaded differently depending on where the 
 			# tests are run from (i.e. should be independent of cwd). 
+			# see also console_make.py which needs similar logic
 			dirconfigs = {}
 
 			# load any descriptors between the project dir up to (but not including) the dir we'll be walking
@@ -867,8 +1129,12 @@ class DescriptorLoader(object):
 				del dirs[:]
 				continue
 
-			intersection = descriptorSet & set(files)
+			if descriptorSet is None: 
+				intersection = [f for f in files if f.lower().startswith('pysystest.')]
+			else: # compatibility mode
+				intersection = descriptorSet & set(files)
 			if intersection: 
+				if len(intersection) > 1: raise Exception('Only one test should be present per directory but found %s in %s'%(intersection, root))
 				descriptorfile = fromLongPathSafe(os.path.join(root, intersection.pop()))
 				# PY2 gets messed up if we start passing unicode rather than byte str objects here, 
 				# as it proliferates to all strings in each test
@@ -882,7 +1148,7 @@ class DescriptorLoader(object):
 					raise # no stack trace needed, will already include descriptorfile name
 				except Exception as e:
 					log.info('Failed to read descriptor: ', exc_info=True)
-					raise Exception("Error reading descriptor file '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
+					raise Exception("Error reading descriptor from '%s': %s - %s" % (descriptorfile, e.__class__.__name__, e))
 
 				# if this is a test dir, it never makes sense to look at sub directories
 				del dirs[:]
@@ -939,8 +1205,8 @@ class DescriptorLoader(object):
 		return False
 
 	def _parseTestDescriptor(self, descriptorfile, parentDirDefaults=None, isDirConfig=False, **kwargs):
-		""" Parses a single descriptor file (typically an XML file) for a testcase or directory configuration 
-		and returns the resulting descriptor. 
+		""" Parses a single descriptor file (typically an XML file, or a file of another type containing XML) for a 
+		testcase or directory configuration and returns the resulting descriptor. 
 		
 		:param descriptorfile: The absolute path of the descriptor file. 
 		:param parentDirDefaults: A L{TestDescriptor} instance containing 

@@ -22,7 +22,7 @@ To run all tests - except the manual (non-auto ones) - with recording of the res
 the configured writers) and code coverage:
 
 	cd test
-	pysys.py run -j0 --record -XcodeCoverage --type=auto
+	pysys.py run -j0 --record -XcodeCoverage --exclude=manual
 
 Note that this project contains some tests that deliberately fail, so that you can see how failing test results are 
 recorded. 
@@ -37,10 +37,12 @@ here: [![PySys tests](https://github.com/pysys-test/sample-cookbook/workflows/Py
 * pysys-extensions/myorg/ - a Python package containing some custom extensions using the PySys API. 
 * demo-tests/ - a directory of tests to demonstrate the functionality of the extensions and project configuration, and:
     * PySys manual (human-driven) tests
+    * PySysTestPythonDescriptorSample (+ the XML equivalent) and pysysdirconfig_sample - commented examples showing 
+		  everything you can do in a PySys test or directory XML descriptor
     * PyUnitTest - PyUnit test execution from PySys
-    * PySysTestDescriptorSample and pysysdirconfig_sample - commented examples showing everything you can 
-      in a PySys test or directory XML descriptor
     * test_outcome_samples - Examples of some failing tests, so you can see how careful use of assertions leads to really 
       informative messages when there's a failure. 
+* A utility script for automatically converting ``pysystest.xml`` + ``run.py`` tests to the PySys 2.0 ``pysystest.py`` 
+  style (without losing version control history) is provided at ``util_scripts/pysystestxml_upgrader.py``.
 
 For more information on any PySys features demonstrated here, see the [PySys documentation](https://pysys-test.github.io/pysys-test).

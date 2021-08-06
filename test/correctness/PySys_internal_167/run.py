@@ -1,28 +1,37 @@
 import pysys
 from pysys.constants import *
 from pysys.basetest import BaseTest
-from pysys.utils.perfreporter import CSVPerformanceFile
 import os, sys, math, shutil, json
-
-if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
-	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
-from pysysinternalhelpers import *
 
 class PySysTest(BaseTest):
 
 	def execute(self):
-		for subtest in ['badpattern', 'emptypattern', 'differentparamkeys', 'wrongparamvalue']:
-			runPySys(self, subtest, ['print', '--full'], expectedExitStatus='!=0', workingDir=self.input+'/'+subtest)
+		for subtest in os.listdir(self.input):
+			self.pysys.pysys(subtest, ['print', '--full'], expectedExitStatus='!=0', workingDir=self.input+'/'+subtest)
+			self.assertThatGrep(subtest+'.err', '.+', 'value.startswith(prefix) and expected in value', prefix='ERROR: Invalid modes configuration in ', expected=subtest)
+			self.log.info('')
 
 	def validate(self):
-		self.assertThatGrep('badpattern.err', '.+', 'value.startswith(expected)', 
-			expected="ERROR: Failed to populate modeNamePattern \"{param1}_{unknownparam}\" with parameters {'param1': 'x', 'param2': 'y'}: 'unknownparam' in \"")
+		self.assertThatGrep('differentparamkeys.err', '.+', 'expected in value', 
+			expected=": The same mode parameter keys must be given for every mode in the list, but found ['param1', 'param2'] parameters for \"Baz_bar\" different to ['param1']")
 
-		self.assertThatGrep('emptypattern.err', '.+', 'value.startswith(expected)', 
-			expected="ERROR: Invalid mode: cannot be empty in \"")
+		self.assertThatGrep('doubleunderscore.err', '.+', 'expected in value', 
+			expected=": Invalid mode \"a__b\" cannot contain double underscore")
 
-		self.assertThatGrep('differentparamkeys.err', '.+', 'value.startswith(expected)', 
-			expected="ERROR: The same mode parameter keys must be given for each mode under <modes>, but found ['param1', 'param2'] != ['param1'] in \"")
+		self.assertThatGrep('dupmode.err', '.+', 'expected in value', 
+			expected=': Duplicate mode "MyMode"')
 
-		self.assertThatGrep('wrongparamvalue.err', '.+', 'value.startswith(expected)', 
-			expected="ERROR: Cannot redefine mode \"MyMode\" with parameters {'paramName': 'wrongValue'} different to previous parameters {'paramName': 'inheritedValue'} in \"")
+		self.assertThatGrep('illegalparamkey.err', '.+', 'expected in value', 
+			expected=': Illegal mode parameter name - cannot start with underscore: __paramName')
+			
+		self.assertThatGrep('inherit.err', '.+', 'expected in value', 
+			expected=': Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes')
+			
+		self.assertThatGrep('nondict.err', '.+', 'expected in value', 
+			expected=': Expecting mode dict but got 12345')
+
+		self.assertThatGrep('nonlist.err', '.+', 'expected in value', 
+			expected=": Expecting a list of modes, got a dict: {'a': 'b'}")
+
+		self.assertThatGrep('syntaxerror.err', '.+', 'expected in value', 
+			expected='SyntaxError - invalid syntax (<string>, line 3)')

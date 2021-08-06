@@ -26,6 +26,7 @@ __all__ = ['Project'] # Project is the only member we expose/document from this 
 import os.path, logging, xml.dom.minidom, collections, codecs, time
 import platform
 import locale
+import getpass
 
 import pysys
 import pysys.utils.misc
@@ -36,6 +37,7 @@ from pysys.utils.logutils import ColorLogFormatter, BaseLogFormatter
 from pysys.utils.fileutils import mkdir, loadProperties
 from pysys.utils.pycompat import openfile, makeReadOnlyDict
 from pysys.exceptions import UserError
+import pysys.config.descriptor
 
 log = logging.getLogger('pysys.config.project')
 
@@ -53,6 +55,11 @@ class _XMLProjectParser(object):
 		# and we might want to substitute the date/time into property values
 		self.startTimestamp = time.time()
 		
+		try:
+			username = os.getenv('PYSYS_USERNAME') or getpass.getuser().lower() # getpass throws if no env var is set to help with this
+		except Exception as ex:
+			username = 'UNKNOWN_USER'
+		
 		self.properties = {
 			'testRootDir':self.dirname,
 			
@@ -65,6 +72,9 @@ class _XMLProjectParser(object):
 			'hostname':HOSTNAME.lower().split('.')[0],
 			'os':platform.system().lower(), # e.g. 'windows', 'linux', 'darwin'; a more modern alternative to OSFAMILY
 			'osfamily':OSFAMILY, # windows or unix
+			
+			'pysysTemplatesDir': os.path.dirname(__file__)+os.sep+'templates',
+			'username': username,
 			
 			'/': os.sep, # so people can write strings like foo${/}bar and get a forward or back-slash depending on platform
 
@@ -584,6 +594,11 @@ class Project(object):
 		
 		self.projectHelp = parser.getProjectHelp()
 		self.projectHelp = parser.expandProperties(self.projectHelp, default=None, name='project-help')
+		
+		self._defaultDirConfig = None # this field is not public API
+		for e in parser.root.getElementsByTagName('pysysdirconfig'): # expecting 0 or 1
+			self._defaultDirConfig = pysys.config.descriptor._XMLDescriptorParser.parse(self.projectFile, istest=False, 
+				project=self, xmlRootElement=e)
 		
 		# set the data attributes
 		parser.unlink()

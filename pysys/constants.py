@@ -217,15 +217,15 @@ LOOKUP[FALSE] = "FALSE"
 
 # set the default descriptor filename, input, output and reference directory names
 DEFAULT_PROJECTFILE = ['pysysproject.xml']
-DEFAULT_DESCRIPTOR = ['pysystest.xml'] # can be customized with the pysysTestDescriptorFileNames project property
-DEFAULT_MODULE = 'run.py'
+DEFAULT_DESCRIPTOR = ['pysystest.xml'] # deprecated, do not use this. For customization use the pysysTestDescriptorFileNames project property. 
+DEFAULT_MODULE = 'run.py' # deprecated, do not use this. 
 DEFAULT_GROUP = ""
 DEFAULT_TESTCLASS = 'PySysTest'
 DEFAULT_INPUT = 'Input'
 DEFAULT_OUTPUT = 'Output'
 DEFAULT_REFERENCE = 'Reference'
 DEFAULT_RUNNER = 'pysys.baserunner.BaseRunner'
-DEFAULT_MAKER = 'pysys.launcher.console.ConsoleMakeTestHelper'
+DEFAULT_MAKER = 'pysys.launcher.console.DefaultTestMaker'
 DEFAULT_STYLESHEET = None # deprecated
 DEFAULT_FORMAT = u'%(asctime)s %(levelname)-5s %(message)s'
 DEFAULT_OUTDIR = 'win' if PLATFORM=='win32' else PLATFORM # this constant is not currently public API

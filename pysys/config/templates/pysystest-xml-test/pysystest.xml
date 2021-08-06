@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest authors="@@USERNAME@@" created="@@DATE@@">
+	<title>My category TODO - My title TODO</title>
+	
+	<purpose></purpose>
+
+	<groups inherit="true" groups=""/>
+
+	<modes inherit="true">
+	</modes>
+
+	<!-- To skip the test, uncomment this (and provide a reason): <skipped reason=""/> -->
+	<!-- To provide a bug/story/requirement id for requirements tracing, uncomment this: <requirement id=""/> -->
+</pysystest>

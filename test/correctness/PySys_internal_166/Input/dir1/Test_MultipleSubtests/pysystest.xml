@@ -10,21 +10,30 @@
   </description>
 
   <classification>
-  
-		<modes inherit="true"
-			exclude="
-				mode.startswith('MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=') and 
-				mode == 'MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=' and 
-				mode.params['browser']=='Firefox' and
-				project.myProjectProp=='myValue' and IS_WINDOWS in [True,False]
-			"
-		/> <!-- demonstrate we can exclude using mode string, params, and make use of project props and constants -->
-		
-		<!-- excludes operate on the combined mode up to this point -->
-		<modes exclude="mode == 'SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10'">
-			<mode subtest="subtest1" iterations="100" maxHours="-10"/> <!-- this maxHours should override the earlier one in the parent dir -->
-			<mode subtest="subtest2" iterations="1000" maxHours="-100"/>
-			<mode subtest="subtest2" iterations="1000" maxHours="-100"/> <!-- exact dups are ignored -->
+
+		<!-- demonstrate we can exclude using mode string, params, and make use of project props and constants -->
+
+		<modes>
+		lambda helper: [mode for mode in 
+			helper.combineModeDimensions(
+				helper.inheritedModes, 
+				[
+					<!-- this maxHours should override the earlier one in the parent dir -->
+					{"subtest":"subtest1", "iterations":"100", "maxHours":-10},
+					{"subtest":"subtest2", "iterations": 1000, "maxHours":-10},
+					{"subtest":"subtest2", "iterations": 1000, "maxHours":-10} <!-- exact dups are ignored -->
+				]
+			)
+			<!-- using a python list comprehension for dynamic filtering of the modes -->
+			if not (mode['mode'].startswith('MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=')
+				and mode['mode'] == 'MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10' 
+				and mode['browser']=='Firefox' 
+				and helper.project.myProjectProp=='myValue' 
+				and helper.constants.IS_WINDOWS in [True,False]
+				and helper.pysys.utils.fileutils.listDirContents # check that we could call this is we wanted to
+				and helper.import_module('os').listdir(helper.testDir)
+				)
+		]
 		</modes>
 		
   </classification>

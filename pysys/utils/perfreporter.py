@@ -38,7 +38,7 @@ class PerformanceUnit(object):
 	to calculate the improvement or regression when results are compared), e.g. 
 	better for throughput numbers, worse for time taken or latency numbers. 
 	
-	For consistency, we recommend using the the pre-defined units where possible. 
+	For consistency, we recommend using the pre-defined units where possible. 
 	For throughput numbers or rates, that means using PER_SECOND. For latency 
 	measurements that means using SECONDS if long time periods of several 
 	seconds are expected, or NANO_SECONDS (=10**-9 seconds) if sub-second 
@@ -208,7 +208,7 @@ class CSVPerformanceReporter(object):
 		:param testobj: the test case instance registering the value
 		:param value: the value to be reported. This may be an int, float, or a character (unicode) string. 
 		:param resultKey: a unique string that fully identifies what was measured
-		:param unit: identifies the unit the the value is measured in
+		:param unit: identifies the unit the value is measured in
 		:param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression
 		:param resultDetails:  A dictionary of detailed information that should be recorded together with the result
 
@@ -275,7 +275,7 @@ class CSVPerformanceReporter(object):
 		:param testobj: the test case instance registering the value
 		:param value: the value to be reported
 		:param resultKey: a unique string that fully identifies what was measured
-		:param unit: identifies the unit the the value is measured in
+		:param unit: identifies the unit the value is measured in
 		:param toleranceStdDevs: indicates how many standard deviations away from the mean for a regression
 		:param resultDetails:  A dictionary of detailed information that should be recorded together with the result
 

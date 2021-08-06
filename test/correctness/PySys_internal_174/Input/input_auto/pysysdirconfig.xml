@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+
+	<id-prefix>input-auto.</id-prefix>
+
+	<input-dir>!Input_dir_if_present_else_testDir!</input-dir>
+
+</pysysdirconfig>

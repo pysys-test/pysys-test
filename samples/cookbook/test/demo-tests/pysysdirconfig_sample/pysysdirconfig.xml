@@ -1,58 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pysysdirconfig>
-	<!-- This file provides default configuration for all tests under this directory. -->
+	<!-- This file provides default configuration for all tests under this directory. 
+	
+	Settings are also inherited from pysysdirconfig.xml files in parent directories 
+	(and the pysysdirconfig element from pysysproject.xml if present). 
+	-->
 
 	<!-- Specify a prefix to be added to the id of all tests under this directory.
 	This is in addition to any defined by individual tests. 
 	-->
 	<id-prefix>MyServer.Performance.</id-prefix>
+	
+	<!-- Specify the templates that can be used by "pysys make" when creating new tests. You may wish to provide 
+	project or directory-specific template(s) to simplify creating new tests for different purposes, and to encourage 
+	test creators to follow best practices (rather than just copying from a random test which may not be a good example). 
+	
+	Run "pysys make -h" to see which templates are available for creating tests under the current directory. 
+	
+	The first template (in the lowest-level pysysdirconfig.xml file) is used by default. 
+	
+	Each template is defined by:
+	
+	  - name: A short name used to select this template on the command line ("lowercase-with-hyphens" naming convention).
+	  - description: A brief summary describing what kind of test is created by this template. This text is displayed 
+	    when running "pysys make -h". 
+	  - copy: A comma-separated list of files and directories to be copied into the test directory, supporting ``*`` 
+	    globs. Either specify a path relative to the directory containing this XML file, or an absolute path using 
+	    project properties. To use files from the default PySys template use "${pysysTemplatesDir}/test/*".
+	    You could store your directory-specific templates in a ``_pysys_templates/`` directory alongside this XML file
+	    (with a ``.pysysignore`` file to stop them being treated as test cases), 
+	    or you could use a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
+	  - mkdir: By default empty directories are created for the configured input, output and reference directories.  
+	    Specify this attribute to define explicitly which empty directories should be created. 
+	  - replace: Specify any dynamic substitutions, which will be applied in all copied files. It is recommended to 
+	    use only ASCII-characters (but if any non-ASCII characters are provided they will be substituted as UTF-8). 
+	    The replacement "with" expressions can include project properties using ``${propname}`` syntax, or 
+	    the special strings ``@{DIR_NAME}``, ``@{USERNAME}``, ``@{DATE}``, ``@{DEFAULT_DESCRIPTOR}``. 
+	    If no replace elements are explicitly provided, the following default replacements are used:
+	    
+	      @@DATE@@ -> @{DATE} (the current date)
+	      @@USERNAME@@ -> @{USERNAME} (the currently logged in user)
+	      @@DIR_NAME@@ -> @{DIR_NAME} (the basename of the directory being created, typically the test id)
+	      @@DEFAULT_DESCRIPTOR@@ -> @{DEFAULT_DESCRIPTOR} (the __pysys_title__ and other descriptor lines from the 
+	               standard PySys default test template, after which you can add your customized Python test class)
+	      @@LINE_LENGTH_GUIDE@@ -> @{LINE_LENGTH_GUIDE} (80 underline characters to indicate to the user when they are 
+	               exceeding the recommended maximum length for a test title; this string can be customized for different 
+	               lengths etc using the pysystestTemplateLineLengthGuide project property)
+	
+	By default PySys creates ``.py`` files with tabs for indentation (as in previous PySys releases). If you prefer spaces, 
+	just set the ``pythonIndentationSpacesPerTab`` project property to a string containing the required spaces per tab.
 
-	<classification>
-		<!-- Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 
-		for inclusion/exclusion in test runs. Groups are usually named in camelCase. 
-		These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. -->
-		-->
-		<groups inherit="true">
-			<group>performance</group>
-			
-			<!-- This group is used by code coverage writers to ensure coverage tools are disabled for tests that 
-			are performance-critical. 
-			-->
-			<group>disableCoverage</group>
-		</groups>
+	-->
+	<maker-template name="my-test" description="a test with the Python code pre-customized to get things started" 
+		copy="./_pysys_templates/MyTemplateTest/*" />
 
-		<!-- Specify modes supported by all tests under this directory. Like test ids, mode names are usually TitleCase.
-		
-		These modes are in addition to any defined by individual tests.
-		
-		Optional attributes are:
-		   inherit=  Specifies whether modes from parent pysysdirconfig.xml files are automatically added to this list. 
-		      For clarity this attribute should usually be specified, but if not the default is inherit=true unless 
-		      there are multiple modes elements in which case it is false. 
-		   primary=  Specifies which mode from this list (including any inherited modes) is the primary one that executes 
-		      by default, and before any other modes. If not specified, the first mode is the primary one. 
-		   exclude=  Specifies a Python eval string using "mode" (or "mode.params") which can return True for any modes 
-		      that should be dynamically removed/ignored from this list, or else False. This is useful for selectively 
-		      excluding some inherited modes, or for excluding modes on certain platforms. Note that no test descriptor 
-		      is generated for excluded modes, so there will be no result reported (not even SKIPPED) for excluded modes. 
-		      
-		      This string is evaluated from a Python namespace that includes standard modules such as os/sys/math/re, 
-		      as well as the 'pysys' module and the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``; 
-		      (see pysys.utils.safeeval.safeEval for more details). 
-		-->
-		<modes inherit="true" primary="CompressionNone">
-			<!-- The mode name can be specified with a mode= attribute or in the text of the mode element. -->
-			<mode mode="CompressionNone" compressionType=""/>
-			<mode mode="CompressionGZip" compressionType="gzip"/>
+	<maker-template name="perf-test" description="a performance test including configuration for my fictional performance tool" 
+		copy="${pysysTemplatesDir}/default-test/*, ./_pysys_templates/perf/my-perf-config.xml"/>
+
+	<maker-template name="foobar-test" description="an advanced test based on the existing XXX test" 
+		copy="./PySysDirConfigSample/*" 
+		mkdir="ExtraDir1, ExtraDir2"
+	>
+		<replace regex='__pysys_title__ *= r"""[^"]*"""' with='__pysys_title__   = r""" Foobar - My new @{DIR_NAME} test title TODO """'/>
+		<replace regex='__pysys_authors__ *= "[^"]*"'    with='__pysys_authors__ = "@{USERNAME}"'/>
+		<replace regex='__pysys_created__ *= "[^"]*"'    with='__pysys_created__ = "@{DATE}"'/>
+		<replace regex='@@DIR_NAME@@'                    with='@{DIR_NAME}'/>
+	</maker-template>
+
+	<maker-template name="pysys-xml-test" description="an old-style test with pysystest.xml and run.py" 
+		copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
+
+	<!-- Specify the groups that all tests under this directory will be tagged with, allowing them to be selected 
+	for inclusion/exclusion in test runs. Groups are usually named in camelCase. 
+	These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. 
+	
+	The disableCoverage group is a special group used by code coverage writers to ensure coverage tools are disabled for 
+	tests that are performance-critical. 
+	-->
+	<groups inherit="true" groups="performance, disableCoverage"/>
+
+	<!-- Specify the list of modes tests under this directory can be run in. 
+	
+	Like test ids, mode names are usually TitleCase, with multiple dimensions delimited by an ``_`` underscore, 
+	e.g. ``CompressionGZip_AuthNone``.
+	
+	Test modes are configured with a Python lambda that returns a list of modes, using a single parameter which is 
+	an instance of ``pysys.config.descriptor.TestModesConfigHelper`` providing access to the inherited modes (and other 
+	useful functions/fields). Each mode in the returned list is defined by a dictionary containing parameters to be set 
+	on the test object and/or a ``mode`` name. If the mode name is not explicitly provided, a default mode name is 
+	generated by concatenating the parameter values with ``_`` (with a ``paramName=`` prefix for any numeric/boolean 
+	values).
+	
+	In your Python lambda you can return a simple list of modes, or combine your own modes with inherited modes 
+	defined by parent pysysdirconfigs. You can also use the power of Python list comprehensions to exclude certain modes, 
+	perhaps based on dynamic information such as the operating system. Project properties can be accessed 
+	using ``helper.project.PROPERTY_NAME``. Avoid expensive operations such as reading the file system from your lambda 
+	if possible. 
+	
+	The first listed mode is the "primary" mode, which is the one that is used by default when executing tests with 
+	no ``-m`` argument. 
+	
+	It's often useful to combine multiple mode 'dimensions', for example all the combinations of a list of web browsers 
+	with a list of databases, or compression methods and authentication types. Rather than writing out every combination 
+	manually, you can use the function ``helper.combineModeDimensions`` to automatically generate all combinations. 
+	
+	A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
+
+	-->
+	<modes>
+		lambda helper: [
+			mode for mode in 
+				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+					helper.inheritedModes,
+					[
+							{'mode':'CompressionNone', 'compressionType':None},
+							{'mode':'CompressionGZip', 'compressionType':'gzip'},
+					], 
+					[
+						{'auth':None}, # Mode name is optional
+						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
+					]) 
+			# This is a Python list comprehension syntax for filtering the items in the list
+			if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
+		]
+	</modes>
+
+	<!--
+	NB: Older (pre-2.0) PySys projects used a more basic and limited syntax for specifying modes:
+	
+		<modes inherit="true">
+			<mode>CompressionNone</mode>
+			<mode>CompressionGZip</mode>
 		</modes>
-		
-		<!-- If multiple modes nodes are present, new modes are created for all combinations -->
-		
-		<modes modeNamePattern="Auth={auth}" exclude="mode.params['auth'] == 'OS' and sys.platform != 'MyFunkyOS'">
-			<mode auth="None"/>
-			<mode auth="OS"/>  <!-- This mode will always be excluded since MyFunkyOS doesn't exist. -->
-		</modes>
-	</classification>
+	-->
 
 	<!-- Specify as a floating point number an indicator of when to run the tests under 
 	this directory, relative to other tests/directories with a higher or lower hint. 
@@ -62,23 +142,23 @@
 	<execution-order hint="+100.0"/>
 
 	<!-- Comment/uncomment this to mark all tests under this directory as skipped. -->
-	<skipped reason="These tests are skipped until bug XYZ is fixed"/>
+	<skipped reason="These tests are skipped until Bug-1234 is fixed"/>
+	
+	<!-- By convention the test class uses module="run.py" located in the test directory, but 
+	it is possible to use a different path (even an absolute path). If you want to use a single 
+	Python class for lots of tests rather, omit the module= attribute and make sure it's available 
+	on the project's <pythonpath> . 
+	-->
+	<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
 
+	<!-- You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute 
+	paths if needed). These can also be specified using the older names output/input/reference with a path= attribute. 
+	-->
+	<output-dir>MyOutput</output-dir>
+	<input-dir>${testRootDir}/pysys-extensions/my_shared_input_files</input-dir>
+	<reference-dir>MyReference</reference-dir>
+	
 	<data>
-		<!-- By convention the test class uses module="run.py" located in the test directory, but 
-		it is possible to use a different path (even an absolute path). If you want to use a single 
-		Python class for lots of tests rather, omit the module= attribute and make sure it's available 
-		on the project's <pythonpath> . 
-		-->
-		<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>
-		
-		<!-- You can customize the Input/Output/Reference directory names if you wish (or even provide an absolute 
-		paths if needed). These can also be overridden by individual tests. 
-		-->
-		<output path="MyOutput"/>
-		<input path="${testRootDir}/pysys-extensions/my_shared_input_files"/>
-		<reference path="MyReference"/>
-		
 		<!-- The ability to add user-defined data to the test descriptor is mostly useful when using a 
 		shared Python class for lots of tests. 
 		
@@ -97,17 +177,19 @@
 		</user-data>
 	</data>
 
-	<traceability>
-		<requirements>
-			<!-- Specify traceability requirements implemented by the tests under this directory. 
-			This is in addition to any defined by individual tests. 
-			You can use this for whatever makes sense in your project; see examples below. 
-			-->
-			<requirement id="UserRequirement_1a"/> 
-			<requirement id="UserRequirement_2c"/> 
-			<requirement id="Performance"/>
-			<requirement id="UserStory.XYZ-54321"/>
-		</requirements>
-	</traceability>
+	<!-- Specify traceability requirements implemented by all tests under this directory. 
+	
+	You can use this for whatever makes sense in your project, but typically they would be defect or user story ids; 
+	see examples below. 
+	-->
+	<requirement id="UserRequirement_1a"/> 
+	<requirement id="UserRequirement_2c"/> 
+	<requirement id="Performance"/>
+	<requirement id="UserStory.XYZ-54321"/>
+
+	<!-- NB: Existing tests may nest some of the above elements under elements such as 
+	description/classification/data/traceability rather than directly under the pysystest node, but these extra 
+	elements are no longer required (or recommended). 
+	-->
 	
 </pysysdirconfig>

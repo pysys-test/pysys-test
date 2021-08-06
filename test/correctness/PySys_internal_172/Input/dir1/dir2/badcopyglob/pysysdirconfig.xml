@@ -1,0 +1,4 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+	<maker-template name="bad-tmpl" description="bad copy" copy="./non-existent*"/>
+</pysysdirconfig>

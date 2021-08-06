@@ -1,0 +1,3 @@
+pysystest.xml
+MyExtraDir1/
+MyExtraDir2/

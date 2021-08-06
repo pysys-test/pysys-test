@@ -42,7 +42,7 @@ class PySysTest(BaseTest):
 		self.assertThat('testFloatProperty == 456.78', testFloatProperty=self.testFloatProperty)
 		self.assertThat('testStringProperty == "123456"', testStringProperty=self.testStringProperty)
 		self.assertThat('testNoneProperty == "Hello"', testNoneProperty=self.testNoneProperty)
-		self.assertThat('testStringUserData == expected', testStringUserData=self.testStringUserData, expected='Hello Simon')
+		self.assertThat('testStringUserData == expected', testStringUserData=self.project.expandProperties(self.testStringUserData), expected='Hello Simon')
 		self.assertThat('testListProperty == expected', testListProperty=self.testListProperty, expected=['abc','def','g'])
 
 		# check coersion based on default value supplied
@@ -70,7 +70,7 @@ class PySysTest(BaseTest):
 
 		self.assertThat('testEval == expected', testEval=self.project.testEval, 
 			expected='Foo foo is what Simon says test')
-		self.assertThat('testEvalUserData == expected', testEvalUserData=self.testEvalUserData, 
+		self.assertThat('testEvalUserData == expected', testEvalUserData=self.project.expandProperties(self.testEvalUserData), 
 			expected='Foo foo is what Simon says test')
 			
 		#self.assertThat('throws1', testStringProperty__eval="self.project.getProperty('projectfloat', -1)")

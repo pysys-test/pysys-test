@@ -1,76 +1,36 @@
-==========================================
-		Test1
-==========================================
+================================================================================
 Test id:           Test1
 Test directory:    Test1
-Test type:         auto
-Test state:        runnable
 Test title:        Test
-Test purpose:      
 Test groups:       <none>
 Test modes:        <none>
 Test order hint:   1.0
-Test classname:    PySysTest
-Test module:       run.py
-Test input:        Input
-Test output:       Output
-Test reference:    Reference
-Test traceability: <none>
+Test classname:    PySysTest; module: run.py
 
-==========================================
-		Test2
-==========================================
+================================================================================
 Test id:           Test2
 Test directory:    Test2
-Test type:         auto
-Test state:        runnable
 Test title:        Test
-Test purpose:      
 Test groups:       Group_2a, Group_2b
 Test modes:        <none>
 Test order hint:   62.0
-Test classname:    PySysTest
-Test module:       run.py
-Test input:        Input
-Test output:       Output
-Test reference:    Reference
-Test traceability: <none>
+Test classname:    PySysTest; module: run.py
 
-==========================================
-		Test3
-==========================================
+================================================================================
 Test id:           Test3
 Test directory:    Test3
-Test type:         auto
-Test state:        runnable
 Test title:        Test
-Test purpose:      
 Test groups:       <none>
 Test modes:        Mode_3
 Test order hint:   -7.5
-Test classname:    PySysTest
-Test module:       run.py
-Test input:        Input
-Test output:       Output
-Test reference:    Reference
-Test traceability: <none>
+Test classname:    PySysTest; module: run.py
 
-==========================================
-		Test4
-==========================================
+================================================================================
 Test id:           Test4
 Test directory:    Test4
-Test type:         auto
-Test state:        runnable
 Test title:        Test
-Test purpose:      
 Test groups:       Group_4a, Group_4b
 Test modes:        Mode_4a, Mode_4b, Mode_4c
 Test order hint:   34.0, 1054.0, 2024.0
-Test classname:    PySysTest
-Test module:       run.py
-Test input:        Input
-Test output:       Output
-Test reference:    Reference
-Test traceability: <none>
+Test classname:    PySysTest; module: run.py
 

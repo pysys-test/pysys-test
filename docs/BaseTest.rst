@@ -41,7 +41,9 @@ The input/output directories and other essential information about this test obj
 can be accessed via instance attributes on ``self``:
 
 - ``self.input`` *(str)*: Full path to the input directory of the testcase, which is where test-specific resources such as 
-  configuration files are stored. The directory is usually ``<testdir>/Input`` but the path can be customized in the testcase descriptor.  
+  configuration files are stored. The directory is the main ``<testDir>`` for projects created from PySys 2.0 onwards, 
+  or ``<testdir>/Input`` for projects created earlier. The path can be customized in the pysysdirconfig at a 
+  project, directory (or even testcase) level.  
   
   Here is an example of copying a configuration file template from the input directory::
 	
@@ -72,8 +74,11 @@ can be accessed via instance attributes on ``self``:
   
 	self.log.info("Starting myserver on port %d", serverport)
 
-- ``self.mode`` *(str)*: The user-defined mode this test object is running. Tests can use this to modify how the test 
-  executed based upon the mode, for example to allow the test to run against either a mock or a real database.
+- ``self.mode`` (`pysys.config.descriptor.TestMode`): The user-defined mode this test object is running. Tests can use 
+	this to modify how the test executed based upon the mode, for example to allow the test to run against either a mock 
+	or a real database. TestMode subclasses str so you can include this in situation where you need the name of the mode 
+	such as when recording performance result, and you can also use the ``.params`` attribute to access any parameters 
+	defined on the mode. 
 
 - ``self.testCycle`` *(int)*: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
   The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
@@ -104,7 +109,7 @@ Additional variables that affect only the behaviour of a single method are docum
 There is also a field for each test plugin listed in the project configuration. Plugins provide additional 
 functionality such as methods for starting and working with a particular language or tool. A test plugin is 
 just a class with a method ``setup(self, testobj)`` (and no constructor arguments), that provides methods and 
-fields for use by tests. Each test plugin listed in the the project configuration 
+fields for use by tests. Each test plugin listed in the project configuration 
 with ``<test-plugin classname="..." alias="..."/>`` is instantiated for each 
 `BaseTest` instance, and can be accessed using ``self.<alias>`` on the test object. If you are using a third party 
 PySys test plugin, consult the documentation for the third party test plugin class to find out what methods and fields 

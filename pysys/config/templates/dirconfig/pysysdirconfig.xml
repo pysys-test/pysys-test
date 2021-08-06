@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+	<!-- This file provides default configuration for all tests under this directory. -->
+
+	<!-- Specify a prefix to be added to the id of all tests under this directory.
+	This is in addition to any defined by individual tests. 
+	Example: <id-prefix>MySubSystem.Performance.</id-prefix> 
+	-->
+	<id-prefix></id-prefix>
+
+	<!-- Specify the groups that all tests under this directory will be tagged with as a comma-separated list, 
+	allowing them to be selected for inclusion/exclusion in test runs. Groups are usually named in camelCase. 
+	These groups are in addition to any defined by individual tests, and (if inherit=true) any from parent pysysdirconfigs. -->
+	-->
+	<groups inherit="true" groups=""/>
+
+	<!-- Specify modes supported by all tests under this directory. Like test ids, mode names are usually TitleCase.
+	Individual tests may override this, but usually will include the inherited modes. 
+	-->
+	<modes>
+		<!-- lambda helper: helper.combineModeDimensions(helper.inheritedModes, [{'mode': 'MyMode', 'param1':'MyParam'}]) -->
+	</modes>
+
+	<!-- Specify as a floating point number an indicator of when to run the tests under 
+	this directory, relative to other tests/directories with a higher or lower hint. 
+	Empty string hint="" means inherit. The default priority is 0.0 so set the hint to a higher 
+	value to execute tests later, or a negative value to execute tests earlier. 
+	-->
+	<execution-order hint=""/>
+
+	<!-- Uncomment this to mark all tests under this directory as skipped. -->
+	<!-- <skipped reason=""/> -->
+
+	<!--
+	<input-dir>.</input-dir>
+	<reference-dir>Reference</reference-dir>
+	<output-dir>Output</output-dir>
+	-->
+	
+	<data>
+		<!-- <user-data name="myTestDescriptorData" value="foobar"/> -->
+	</data>
+
+	<traceability>
+		<requirements>
+		</requirements>
+	</traceability>
+	
+</pysysdirconfig>

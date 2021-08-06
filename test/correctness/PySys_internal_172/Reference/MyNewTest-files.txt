@@ -1,0 +1,10 @@
+pysystest.xml
+run.py
+CUSTOMIZED-Input-Dir2/
+MySubDir/
+MySubDir/myfile.txt
+Output/
+Reference/
+SubDir1/
+SubDir1/SubDir2/
+SubDir1/SubDir2/subfile.txt

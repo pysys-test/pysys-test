@@ -1,4 +1,7 @@
 <?xml version="1.0" standalone="yes"?>
 <pysysproject>
+	<pysysdirconfig>
+	    <groups groups="root-group1"/>
 
+	</pysysdirconfig>
 </pysysproject>

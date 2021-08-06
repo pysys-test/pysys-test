@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<pysysdirconfig>
+		<maker-template name="mytmpl-project" description="something from the project" copy="${pysysTemplatesDir}/*"/>
+		<maker-template name="mytmpl-project2" description="something from the project that SHOULD be redefined later" copy="${pysysTemplatesDir}/*"/>
+		
+		<data>
+			<input path="CUSTOMIZED-Input-Dir"/>
+		</data>
+	</pysysdirconfig>
+
+</pysysproject>

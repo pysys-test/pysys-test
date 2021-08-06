@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest>
+	<title>Special character £</title>
+
+	<!--
+	Creation date is "@@DATE@@"
+	User is "@@USERNAME@@"
+	Test ID is "@@DIR_NAME@@"
+	-->
+
+	<groups inherit="true" groups=""/>
+
+	<modes inherit="true">
+	</modes>
+
+	<!-- To skip the test, uncomment this (and provide a reason): <skipped reason=""/> -->
+	<!-- To provide a bug/story/requirement id for requirements tracing, uncomment this: <requirement id=""/> -->
+</pysystest>

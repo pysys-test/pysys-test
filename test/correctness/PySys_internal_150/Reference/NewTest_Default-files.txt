@@ -1,0 +1,4 @@
+mytemplateinput.txt
+pysystest.py
+MyOutput/
+MyReference/

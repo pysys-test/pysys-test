@@ -12,8 +12,10 @@
   <classification>
   
 		<modes>
-			<mode param1="foo"/>
-			<mode param1="baz" param2="bar"/>
+			lambda helper: [
+				{'param1':"foo"},
+				{'param1':"baz", 'param2':"bar"}
+			]
 		</modes>
 		
   </classification>

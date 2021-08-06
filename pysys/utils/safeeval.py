@@ -39,13 +39,14 @@ import pysys
 import importlib
 from importlib import import_module
 
-def safeEval(expr, extraNamespace={}, errorMessage='Failed to evaluate "{expr}" due to {error}'):
+def safeEval(expr, errorMessage='Failed to evaluate "{expr}" due to {error}', emptyNamespace=False, extraNamespace={}):
 	"""
 	Executes eval(...) on the specified string expression, using a controlled globals()/locals() environment to 
 	ensure we do not break compatibility between PySys versions, and that a sensible set of PySys constants and 
 	modules are available. 
 	
-	The global environment used for evaluation includes the ``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale`` 
+	Unless ``emptyNamespace=True``, the global environment used for evaluation includes the 
+	``os.path``, ``math``, ``sys``, ``re``, ``json``, and ``locale`` 
 	standard Python modules, as well as the ``pysys`` module and the contents of the `pysys.constants` module, e.g. ``IS_WINDOWS``. 
 	
 	If necessary, symbols for additional modules can be imported dynamically using ``import_module``:: 
@@ -56,15 +57,18 @@ def safeEval(expr, extraNamespace={}, errorMessage='Failed to evaluate "{expr}" 
 	
 	:param str expr: The string to be evaluated.
 	
-	:param dict[str,obj] extraNamespace: A dict of string names and Python object values to be included in the globals dict 
-		used to evaluate this string. 
-	
 	:param str errorMessage: The string used for the raised exception message if an exception is thrown by eval, 
 		where ``{expr}`` will be replaced with the actual expression and ``{error}`` with the error message. 
 		
+	:param bool emptyNamespace: By default a default namespace is provided including the symbols described above such as 
+		``os.path``, ``pysys``, etc. Set this to True to start with a completely empty namespace with no symbols defined. 
+
+	:param dict[str,obj] extraNamespace: A dict of string names and Python object values to be included in the globals 
+		environment used to evaluate this string. 
+		
 	.. versionadded:: 2.0
 	"""
-	env = globals()
+	env = {} if emptyNamespace else globals()
 	if extraNamespace:
 		env = dict(env)
 		for k,v in extraNamespace.items():

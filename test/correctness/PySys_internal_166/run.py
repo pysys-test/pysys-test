@@ -4,26 +4,22 @@ from pysys.basetest import BaseTest
 from pysys.utils.perfreporter import CSVPerformanceFile
 import os, sys, math, shutil, json
 
-if PROJECT.testRootDir+'/internal/utilities/extensions' not in sys.path:
-	sys.path.append(PROJECT.testRootDir+'/internal/utilities/extensions') # only do this in internal testcases; normally sys.path should not be changed from within a PySys test
-from pysysinternalhelpers import *
-
 class PySysTest(BaseTest):
 
 	def execute(self):
 		shutil.copyfile(self.input+'/pysysproject.xml', self.output+'/pysysproject.xml')
-		runPySys(self, self.output+'/print-json', ['print', '--json'], workingDir=self.input+'/dir1')
-		runPySys(self, self.output+'/print-full', ['print', '--full'], workingDir=self.input+'/dir1')
+		self.pysys.pysys(self.output+'/print-json', ['print', '--json'], workingDir=self.input+'/dir1')
+		self.pysys.pysys(self.output+'/print-full', ['print', '--full'], workingDir=self.input+'/dir1')
 
-		runPySys(self, self.output+'/pysys-run-modespec', ['run', 
+		self.pysys.pysys(self.output+'/pysys-run-modespec', ['run', 
 			'Test_MultipleSubtests~MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10',
 			'-o', self.output+'/pysys-output1'], workingDir=self.input+'/dir1')
 
-		runPySys(self, self.output+'/pysys-run-modearg', ['run', 
+		self.pysys.pysys(self.output+'/pysys-run-modearg', ['run', 
 			'Test_MultipleSubtests', '--mode', 'MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10',
 			'-o', self.output+'/pysys-output2'], workingDir=self.input+'/dir1')
 
-		runPySys(self, self.output+'/pysys-run-allmodes', ['run', 
+		self.pysys.pysys(self.output+'/pysys-run-allmodes', ['run', 
 			'Test_MultipleSubtests', '--mode', 'ALL',
 			'-o', self.output+'/pysys-output3'], workingDir=self.input+'/dir1')
 			
@@ -37,4 +33,5 @@ class PySysTest(BaseTest):
 			self.assertThatGrep(f, 'Test field browser=(.*)', expected="'Firefox'")
 		
 			# should be set from the params and also coersed to a float based on the type of the existing instance field:
-			self.assertThatGrep(f, 'Test field maxHours=(.*)', expected='-10.0') 
+			self.assertThatGrep(f, 'Test field maxHours=(.*)', expected='-10') 
+		self.assertGrep('pysys-run-allmodes.out', 'Test field iterations=1000') # in SOME modes, this is a number (others a string)

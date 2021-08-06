@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+
+  <classification>
+  
+		<modes>
+			lambda helper: [
+			{'mode':'MyMode', '__paramName':'value1'}, 
+			]
+		</modes>
+		
+  </classification>
+
+</pysysdirconfig>

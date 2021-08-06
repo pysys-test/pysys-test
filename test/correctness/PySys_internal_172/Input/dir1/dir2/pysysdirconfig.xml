@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+	<maker-template name="mytmpl-dir2" description="something from dir2" copy="./_pysys_templates/my-test-tmpl1/*, ./_pysys_templates/MySubDir"/>
+	<maker-template name="mytmpl-project2" description="something from dir2, redefined from project" copy="./_pysys_templates/my-test-tmpl1/pysystest.xml" mkdir="MyExtraDir1, MyExtraDir2">
+		<replace regex="..USERNAME.." with="\\@{USERNAME}\\"/>
+		<replace regex="..MY_DATE.." with="\\@{DATE}\\"/>
+	</maker-template>
+	
+	<data>
+		<input path="CUSTOMIZED-Input-Dir2"/>
+	</data>
+</pysysdirconfig>

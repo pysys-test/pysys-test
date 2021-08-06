@@ -52,12 +52,18 @@ class BaseTest(ProcessUser):
 	def __init__ (self, descriptor, outsubdir, runner):
 		ProcessUser.__init__(self)
 		self.descriptor = descriptor
-		self.input = os.path.join(descriptor.testDir, descriptor.input)
-		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir)
-		self.reference = os.path.join(descriptor.testDir, descriptor.reference)
+		self.input = os.path.join(descriptor.testDir, 
+			(
+				'Input' if os.path.exists(os.path.join(descriptor.testDir, 'Input')) else '.'
+			) if descriptor.input=='!Input_dir_if_present_else_testDir!' else descriptor.input
+			).rstrip('/\\.') # strip /. suffix if input is ''
+
+		self.output = os.path.join(descriptor.testDir, descriptor.output, outsubdir).rstrip('/\\.')
+		self.reference = os.path.join(descriptor.testDir, descriptor.reference).rstrip('/\\.')
 		self.runner = runner
 		self.mode = descriptor.mode
-		if self.mode is not None and getattr(self.mode, 'params', None): self.setKeywordArgs(self.mode.params)
+		# NB: we don't set self.mode.params as keyword arguments since it'd be easy to overwrite a class/instance 
+		# variable unintentionally with unpredictable results; accessing explicitly with self.mode is fine 
 		self.setKeywordArgs(self.descriptor.userData)
 		self.setKeywordArgs(runner.xargs)
 		self.monitorList = []
@@ -1515,7 +1521,7 @@ class BaseTest(ProcessUser):
 			means putting general information near the start of the string and specifics (throughput/latency, sending/receiving)
 			towards the end of the string. It should be as concise as possible (given the above).
 
-		:param unit: Identifies the unit the the value is measured in, including whether bigger numbers are better or
+		:param unit: Identifies the unit the value is measured in, including whether bigger numbers are better or
 			worse (used to determine improvement or regression). Must be an instance of L{pysys.utils.perfreporter.PerformanceUnit}.
 			In most cases, use L{pysys.utils.perfreporter.PerformanceUnit.SECONDS} (e.g. for latency) or
 			L{pysys.utils.perfreporter.PerformanceUnit.PER_SECOND} (e.g. for throughput); the string literals 's' and '/s' can be

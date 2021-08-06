@@ -1,27 +1,62 @@
+================================================================================
 Test id:           MyServer.Performance.PySysDirConfigSample
-Test state:        skipped
-Test skip reason:  These tests are skipped until bug XYZ is fixed
+Test directory:    demo-tests/pysysdirconfig_sample/PySysDirConfigSample
+Test skip reason:  These tests are skipped until Bug-1234 is fixed
+Test title:        Demo of pysysdirconfig.xml (test that adds to inherited directory modes)
+Test purpose:      The purpose of this test is ... TODO.
+Test created:      1999-12-31; authors: mememe
 Test groups:       performance, disableCoverage, dirConfigSample
 Test modes:        
- --> CompressionNone_Auth=None  {compressionType='', auth='None'}
- --> CompressionGZip_Auth=None  {compressionType='gzip', auth='None'}
- --> CompressionNone_Auth=Basic {compressionType='', auth='AuthBasic'}
-Test module:       <rootdir>/pysys-extensions/MySharedTestClass.py
+ --> CompressionNone_Auth=None  {compressionType=None, auth=None}
+ --> CompressionGZip_Auth=None  {compressionType='gzip', auth=None}
+ --> CompressionNone_Auth=Basic {compressionType=None, auth='AuthBasic'}
+Test order hint:   100.0, 200.0, 300.0
+Test classname:    PySysTest; module: <rootdir>/pysys-extensions/MySharedTestClass.py
 Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
 Test reference:    MyReference
 Test traceability: UserRequirement_1a, UserRequirement_2c, Performance, UserStory.XYZ-54321
-Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-1.2<nl>foo/bar, foo/baz<nl>foo/bosh'
-Test id:           PySysTestDescriptorSample
-Test state:        skipped
-Test skip reason:  This test is skipped until bug XYZ is fixed
+Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-${os_myThirdPartyLibraryVersion}<nl>foo/bar, foo/baz<nl>foo/bosh'
+
+================================================================================
+Test id:           PySysTestPythonDescriptorSample
+Test directory:    demo-tests/PySysTestPythonDescriptorSample
+Test skip reason:  Skipped until Bug-1234 is fixed
+Test title:        My foobar tool - Argument parsing success and error cases
+Test purpose:      The purpose of this test is to check that 
+                   argument parsing addresses these criteria:
+                     - Correctness
+                     - Clear error messages
+Test created:      2021-07-25; authors: userid1, userid2, Joe Bloggs
 Test groups:       performance, disableCoverage
 Test modes:        
- --> CompressionNone_Auth=None {compressionType='', auth='None'}
- --> CompressionGZip_Auth=None {compressionType='gzip', auth='None'}
-Test module:       <rootdir>/pysys-extensions/MySharedTestClass.py
+ --> CompressionNone_Auth=None {compressionType=None, auth=None}
+ --> CompressionGZip_Auth=None {compressionType='gzip', auth=None}
+Test order hint:   100.0, 200.0
+Test classname:    PySysTest; module: <rootdir>/pysys-extensions/MySharedTestClass.py
+Test input:        <rootdir>/pysys-extensions/my_shared_input_files
+Test output:       MyOutput
+Test reference:    MyReference
+Test traceability: Bug-1234, UserStory-456, UserRequirement_1a, UserRequirement_2c, Performance
+Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-${os_myThirdPartyLibraryVersion}<nl>foo/bar, foo/baz<nl>foo/bosh'
+
+================================================================================
+Test id:           PySysTestXMLDescriptorSample
+Test directory:    demo-tests/PySysTestXMLDescriptorSample
+Test skip reason:  This test is skipped until Bug-1234 is fixed
+Test title:        My foobar tool - Argument parsing success and error cases
+Test purpose:      This is a good place for a fuller description of what is in and 
+                   out of scope for this particular testcase.
+Test created:      1999-12-31; authors: userid1, userid2, Joe Bloggs
+Test groups:       performance, disableCoverage
+Test modes:        
+ --> CompressionNone_Auth=None {compressionType=None, auth=None}
+ --> CompressionGZip_Auth=None {compressionType='gzip', auth=None}
+Test order hint:   100.0, 200.0
+Test classname:    PySysTest; module: <rootdir>/pysys-extensions/MySharedTestClass.py
 Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
 Test reference:    MyReference
 Test traceability: UserRequirement_1a, UserRequirement_2c, Performance, UserStory.XYZ-54321
-Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-1.2<nl>foo/bar, foo/baz<nl>foo/bosh'
+Test user data:    myTestDescriptorData='foobar', myTestDescriptorPath='foo/foo-${os_myThirdPartyLibraryVersion}<nl>foo/bar, foo/baz<nl>foo/bosh'
+

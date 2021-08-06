@@ -36,8 +36,8 @@ class PySysTest(BaseTest):
 				if f.endswith('.xml') and f not in ['input.xml']:
 					self.assertGrep(p, '^  .*', contains=False) # check indentation is with tabs not spaces
 					self.assertGrep(p, '^<[?]xml version="1.0" encoding="utf-8"[?]>$') # proper XML header with encoding explicitly specified
-				if f == 'pysystest.xml':
-					self.assertGrep(p, '^<pysystest type="[^"]+">$')
+				if f == 'pysystest.xml' and 'ManualTester' not in p and 'PySysTestXMLDescriptorSample' not in p:
+					self.assertGrep(p, '^<pysystest>$')
 				if f == 'pysysproject.xml':
 					self.assertThatGrep(p, '<requires-python>(.*)</requires-python>', expected=pythonVersionForMin)	
 					self.assertThatGrep(p, '<requires-pysys>(.*)</requires-pysys>', 'value == pysysVersion', pysysVersion=pysysVersion)

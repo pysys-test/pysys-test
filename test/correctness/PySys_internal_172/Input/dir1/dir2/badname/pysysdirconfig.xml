@@ -1,0 +1,4 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+	<maker-template name="bADname" description="show that uppercase names are not permitted" copy="${pysysTemplatesDir}/*"/>
+</pysysdirconfig>

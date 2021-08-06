@@ -18,7 +18,9 @@ Run the sample tests
   <data>
     <class name="PySysTest" module="run"/>
   </data>
-  
+
+  <execution-order hint="-5"/> <!-- because this is a slower test, start it earlier-->
+
   <traceability>
     <requirements>
       <requirement id=""/>     

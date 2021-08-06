@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest>
+	<title>pysys.py - make test custom templates and pysysdirconfig inheritance</title>
+
+	<groups inherit="true" groups=""/>
+
+	<modes inherit="true">
+	</modes>
+
+	<!-- To skip the test, uncomment this (and provide a reason): <skipped reason=""/> -->
+	<!-- To provide a bug/story/requirement id for requirements tracing, uncomment this: <requirement id=""/> -->
+</pysystest>

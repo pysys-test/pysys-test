@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+
+  <classification>
+  
+		<modes>
+			lambda helper: [12345]
+		</modes>
+		
+  </classification>
+
+</pysysdirconfig>

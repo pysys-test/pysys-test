@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<some-perf-tool>
+	<!-- This sample file will be copied into new performance tests. The copy in this test was created on @@DATE@@. -->
+</some-perf-tool>

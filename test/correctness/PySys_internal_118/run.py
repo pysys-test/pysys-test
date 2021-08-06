@@ -6,7 +6,7 @@ class PySysTest(pysys.basetest.BaseTest):
 
 	def execute(self):
 		self.write_text('output-raw.txt', 'Hello world\nTimestamp: 1234\nHello foo!')
-		
+
 		# this is the example from the docstring
 		self.copy('output-raw.txt', 'output-processed.txt', encoding='utf-8', 
 			mappers=[

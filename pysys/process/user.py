@@ -95,7 +95,7 @@ class ProcessUser(object):
 		(e.g. for hosts and credentials). 
 	:ivar bool ~.disableCoverage: Set to True to disable all code coverage collection for processes 
 		started from this instance. This is automatically set for any tests marked with the "disableCoverage" group 
-		in their pysystest.xml file. 
+		in their ``pysystest.*`` file. 
 			
 		The built-in Python code coverage functionality in L{startPython} checks this 
 		flag. It is recommended that any other languages supporting code coverage 
@@ -511,7 +511,7 @@ class ProcessUser(object):
 		This environment contains a minimal PATH/LD_LIBRARY_PATH but does not 
 		attempt to replicate the full set of default environment variables 
 		on each OS, and in particular it does not include any that identify 
-		the the current username or home area. Additional environment 
+		the current username or home area. Additional environment 
 		variables can be added as needed with L{createEnvirons} overrides. If 
 		you don't care about minimizing the risk of your local environment 
 		affecting the test processes you start, just use C{environs=os.environ} 
@@ -1514,7 +1514,7 @@ class ProcessUser(object):
 		stack=[]
 		from pysys.basetest import BaseTest
 		if isinstance(self, BaseTest):
-			testmodule = os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] if self.descriptor.module else None
+			testmodule = os.path.splitext(os.path.join(self.descriptor.testDir, self.descriptor.module))[0] if self.descriptor.module != 'PYTHONPATH' else None
 			for record in inspect.stack():
 				info = inspect.getframeinfo(record[0])
 				if (self.__skipFrame(info.filename, ProcessUser) ): continue
@@ -1769,6 +1769,8 @@ class ProcessUser(object):
 		namedGroupsMode = compiled.groupindex
 		
 		path = os.path.join(self.output, path)
+		
+		assert not os.path.isdir(path), 'Cannot grep directory: %s'%path
 
 		with openfile(path, 'r', encoding=encoding or self.getDefaultFileEncoding(path)) as f:
 			matches = []
@@ -1900,7 +1902,7 @@ class ProcessUser(object):
 
 		path = os.path.normpath(path)
 		if path.startswith(self.output): path = path[len(self.output)+1:]
-		self.log.info(u'Contents of %s%s: ', path, ' (filtered)' if includes or excludes else '', extra=logextra)
+		self.log.info(u'Contents of %s%s: ', fromLongPathSafe(path), ' (filtered)' if includes or excludes else '', extra=logextra)
 		for l in tolog:
 			logFunction(l)
 		self.log.info('  -----', extra=logextra)
@@ -2249,6 +2251,10 @@ class ProcessUser(object):
 			As a convenience to avoid repeating the same text in the src and destination, 
 			if the dest ends with a slash, or the src is a file and the dest is an existing directory, 
 			the dest is taken as a parent directory into which the src will be copied in retaining its current name. 
+			
+			It is best to avoid copies where the src dir already contains the dest (which would be recursive) such as 
+			copying the test dir (possibly configured as ``self.input``) to destination ``self.output``, however if this 
+			is attempted PySys will log a warning and copy everything else except the recursive part. 
 		
 		:param bool overwrite: If True, source files will be allowed to 
 			overwrite destination files, if False an exception will be raised if a destination file already exists. 
@@ -2292,7 +2298,8 @@ class ProcessUser(object):
 	
 		dest = toLongPathSafe(os.path.join(self.output, dest)).rstrip('/\\')
 		if origdest.endswith((os.sep, '/', '\\')) or (not srcIsDir and os.path.isdir(dest)): dest = toLongPathSafe(dest+os.sep+os.path.basename(src))
-	
+
+		self.log.debug('Copying %s to %s', src, dest)
 		if src == dest and not srcIsDir:
 			dest = src+'__pysys_copy.tmp'
 			renameDestAtEnd = True
@@ -2310,7 +2317,10 @@ class ProcessUser(object):
 					path = e.path
 					
 					if ignoreIf is not None and ignoreIf(path): continue
-					
+					if dest.lower().startswith(path.lower()+os.sep):
+						self.log.warning(f'Copy will ignore {dest[len(src):]} while copying from {src} to avoid recursive copy; it is best to avoid having a source path that is a parent dir of the destination')
+						continue
+
 					if e.is_symlink() and symlinks:
 						linkdest = dest+os.sep+os.path.basename(path)
 						os.symlink(os.readlink(path), linkdest)
@@ -2352,5 +2362,6 @@ class ProcessUser(object):
 		if renameDestAtEnd:
 			os.remove(src)
 			os.rename(dest, src)
+			return src
 		return dest
 		

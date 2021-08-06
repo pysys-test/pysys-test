@@ -1,0 +1,3 @@
+pysystest.py
+ExtraDir1/
+ExtraDir2/

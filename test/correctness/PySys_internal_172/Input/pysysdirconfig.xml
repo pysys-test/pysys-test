@@ -1,0 +1,4 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysdirconfig>
+	<maker-template name="mytmpl-root-dir" description="something from the root dir config" copy="${pysysTemplatesDir}/*"/>
+</pysysdirconfig>
