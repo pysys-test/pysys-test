@@ -1,5 +1,5 @@
 __pysys_title__   = r""" MyServer responses - /sensorValues endpoint (+ demo of PySys assertions, and multiple modes) """
-#                        ========================================================================================================================
+#                        ===============================================================================
 
 __pysys_purpose__ = r""" To verify that responses from MyServer are correct on the /sensorValues REST endpoint. 
 	

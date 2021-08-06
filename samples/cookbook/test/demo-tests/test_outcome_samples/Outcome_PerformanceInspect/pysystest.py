@@ -1,5 +1,5 @@
 __pysys_title__   = r""" Demo of outcomes - INSPECT .svg charts from performance testing """
-#                        ========================================================================================================================
+#                        ===============================================================================
 
 __pysys_purpose__ = r""" Demonstrates how the INSPECT outcome prevents output files being purged (even with the --purge flag), 
 	and how extra test artifacts can be collected based on filename using a writer (nb: this doesn't require 

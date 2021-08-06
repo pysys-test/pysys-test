@@ -1,5 +1,5 @@
 __pysys_title__   = r""" MyServer performance - /sensorValues endpoint (+demo of perf reporting, and -X variable overriding) """
-#                        ========================================================================================================================
+#                        ===============================================================================
 
 __pysys_purpose__ = r""" To measure the throughout and a sample of the latencies at the sensorValues endpoint. 
 	

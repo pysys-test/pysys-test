@@ -37,8 +37,8 @@ here: [![PySys tests](https://github.com/pysys-test/sample-cookbook/workflows/Py
 * pysys-extensions/myorg/ - a Python package containing some custom extensions using the PySys API. 
 * demo-tests/ - a directory of tests to demonstrate the functionality of the extensions and project configuration, and:
     * PySys manual (human-driven) tests
-    * PySysTestPython/XMLDescriptorSample and pysysdirconfig_sample - commented examples showing everything you can 
-      in a PySys test or directory XML descriptor
+    * PySysTestPythonDescriptorSample (+ the XML equivalent) and pysysdirconfig_sample - commented examples showing 
+		  everything you can do in a PySys test or directory XML descriptor
     * PyUnitTest - PyUnit test execution from PySys
     * test_outcome_samples - Examples of some failing tests, so you can see how careful use of assertions leads to really 
       informative messages when there's a failure. 
