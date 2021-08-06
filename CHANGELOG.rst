@@ -264,8 +264,8 @@ Also, ``pysys print`` includes the ``~MODE`` suffix after the test id if a ``--m
 
 Project configuration features
 ------------------------------
-- Added automatic expansion of ``${...}`` project properties in a test/directory XML's 
-  ``input/output/reference`` elements.
+- Added automatic expansion of ``${...}`` project properties in a test/directory's 
+  ``input/output/reference`` configuration.
 - Added automatic normalization of slashes and ``..`` sequences in project property values for which 
   ``pathMustExist=true``. 
 - Added a pre-defined project property ``${/}`` which is resolved to forward or back slash character for this OS. 
