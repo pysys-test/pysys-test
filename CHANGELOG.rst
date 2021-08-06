@@ -417,6 +417,9 @@ affect many users:
     ``**kwargs`` that may be added in future. 
   - The ``--json`` output of ``pysys.py print`` now has a dict representing the modes and their parameters 
     for the ``modes`` value instead of a simple list. 
+  - On Windows the ``testDir`` (and input/output/reference dirs) no longer start with the ``\\?\`` long-path safe 
+    prefix; instead this can be added for operations where it is needed (as several key PySys methods alreayd do, e.g. 
+    ``self.copy``). It is recommended to avoid nesting tests so deeply that long path support is needed. 
 
 Deprecations:
 

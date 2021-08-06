@@ -1202,6 +1202,9 @@ class TestContainer(object):
 			
 				else:
 					try:
+						if IS_WINDOWS and len(self.testObj.output) > 259 - 40: log.warning('Test output directory is %d characters long; be careful of possible issues caused by the Windows 260-character MAX_PATH limit: %s', 
+							len(self.testObj.output), self.testObj.output)
+					
 						if not self.runner.validateOnly:
 							self.testObj.setup()
 							log.debug('--- test execute')
