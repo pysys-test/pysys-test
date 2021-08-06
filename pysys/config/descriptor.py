@@ -1,5 +1,5 @@
 #!/usr/bin/env pytho
-# PySys System Test Framework, Copyright (C) 2006-2020 M.B. Grieve
+# PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
