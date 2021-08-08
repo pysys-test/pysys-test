@@ -200,7 +200,7 @@ e.g.
 			# (printLogs we don't set here since we use the printLogsDefault mechanism to allow it to be overridden 
 			# by CI writers and/or the command line)
 			# Also we don't set --modes=ALL here to allow for it to be overridden explicitly if needed
-			args = ['--purge', '--record', '-j0', '--type=auto', '-XcodeCoverage']+args
+			args = ['--purge', '--record', '-j0', '--type=auto', '--exclude=manual', '-XcodeCoverage']+args
 			printLogsDefault = PrintLogs.FAILURES
 
 		try:

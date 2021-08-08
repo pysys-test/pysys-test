@@ -421,6 +421,8 @@ affect many users:
     prefix; instead this can be added for operations where it is needed (as several key PySys methods alreayd do, e.g. 
     ``self.copy``). It is recommended to avoid nesting tests so deeply that long path support is needed. 
   - The deprecated ``pysys.process._stringToUnicode`` is now removed. 
+  - The ``pysys run --ci`` flag now excludes tests tagged with group ``manual`` (in addition to excluding the 
+    ``manual`` test type, since pysystest.py descriptors use groups for this rather than test type). 
 
 Deprecations:
 
