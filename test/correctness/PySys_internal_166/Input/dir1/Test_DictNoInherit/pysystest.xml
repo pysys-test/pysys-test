@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest>
+    
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose
+
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+  
+		<modes>
+		lambda helper: {
+			'MyMode1': {'myParamA':'myValue1'},
+			'MyMode2': {'myParamA':'myValue2'},
+		}
+		</modes>
+		
+  </classification>
+
+</pysystest>
