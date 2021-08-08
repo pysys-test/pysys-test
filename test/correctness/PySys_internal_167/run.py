@@ -8,7 +8,8 @@ class PySysTest(BaseTest):
 	def execute(self):
 		for subtest in os.listdir(self.input):
 			self.pysys.pysys(subtest, ['print', '--full'], expectedExitStatus='!=0', workingDir=self.input+'/'+subtest)
-			self.assertThatGrep(subtest+'.err', '.+', 'value.startswith(prefix) and expected in value', prefix='ERROR: Invalid modes configuration in ', expected=subtest)
+			if subtest != 'syntaxerror':
+				self.assertThatGrep(subtest+'.err', '.+', 'value.startswith(prefix) and expected in value', prefix='ERROR: Invalid modes configuration in ', expected=subtest)
 			self.log.info('')
 
 	def validate(self):
@@ -33,5 +34,5 @@ class PySysTest(BaseTest):
 		self.assertThatGrep('nonlist.err', '.+', 'expected in value', 
 			expected=": Expecting a list of modes, got a dict: {'a': 'b'}")
 
-		self.assertThatGrep('syntaxerror.err', '.+', 'expected in value', 
+		self.assertThatGrep('syntaxerror.err', 'ERROR.+', 'expected in value', 
 			expected='SyntaxError - invalid syntax (<string>, line 3)')

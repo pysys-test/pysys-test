@@ -423,6 +423,11 @@ affect many users:
   - The deprecated ``pysys.process._stringToUnicode`` is now removed. 
   - The ``pysys run --ci`` flag now excludes tests tagged with group ``manual`` (in addition to excluding the 
     ``manual`` test type, since pysystest.py descriptors use groups for this rather than test type). 
+  - Removed the ``primaryMode`` attribute from `pysys.config.descriptor.TestDescriptor`, as this information is now 
+    stored in the `pysys.config.descriptor.TestMode` object. 
+  - If you created a custom `pysys.config.descriptor.DescriptorLoader` subclass to manipulate modes, you need to change 
+    it to work with `pysys.config.descriptor.TestMode` objects instead of strings, and to set at least one of them 
+    to be a primary mode. 
 
 Deprecations:
 

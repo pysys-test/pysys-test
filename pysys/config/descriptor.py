@@ -1,4 +1,4 @@
-#!/usr/bin/env pytho
+#!/usr/bin/env python
 # PySys System Test Framework, Copyright (C) 2006-2021 M.B. Grieve
 
 # This library is free software; you can redistribute it and/or
@@ -70,18 +70,16 @@ class TestDescriptor(object):
 	
 	:ivar list[str] ~.groups: A list of the user defined groups the testcase belongs to.
 	
-	:ivar list[TestMode|str] ~.modes: A list of the user defined modes the testcase can be run in. Usually these will be 
-		`TestMode` instances, but older tests with custom TestLoaders may add simple strings here instead. 
+	:ivar list[TestMode] ~.modes: A list of the user defined modes the testcase can be run in. 
 
-	:ivar TestMode|str ~.primaryMode: Specifies the primary mode for this test id (which may be None 
-		if this test has no modes). Usually this is the first mode in the list. 
-	
-	:ivar TestMode|str ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
+	:ivar TestMode ~.mode: Specifies which of the possible modes this descriptor represents or None if the 
 		the descriptor has no modes. This field is only present after the 
 		raw descriptors have been expanded into multiple mode-specific descriptors. 
 		Note that after a descriptor is created from the on-disk file, the `mode` attribute is not set until 
 		the later phase when multi-mode descriptors are cloned and expanded based on the selected modes. 
-		You can use ``descriptor.mode.params`` to get the parameter dictionary for this mode. 
+	
+		You can use ``descriptor.mode.params`` to get the parameter dictionary for this mode, 
+		and ``descriptor.mode.isPrimary`` to find out of this is a primary mode. 
 	
 	:ivar str ~.classname: The Python classname to be executed for this testcase.
 	
@@ -115,7 +113,7 @@ class TestDescriptor(object):
 	__slots__ = 'isDirConfig', 'file', 'testDir', 'id', 'type', 'state', 'title', 'purpose', 'groups', 'modes', 'mode', \
 		'classname', 'module', 'input', 'output', 'reference', 'traceability', 'executionOrderHint', 'executionOrderHintsByMode', \
 		'authors', 'created', \
-		'skippedReason', 'primaryMode', 'idWithoutMode', '_defaultSortKey', 'userData', '_makeTestTemplates', 
+		'skippedReason', 'idWithoutMode', '_defaultSortKey', 'userData', '_makeTestTemplates', 
 
 	def __init__(self, file, id, 
 		type="auto", state="runnable", title=u'', purpose=u'', groups=[], modes=[], 
@@ -139,8 +137,14 @@ class TestDescriptor(object):
 		self.purpose = purpose
 		# copy groups/modes so we can safely mutate them later if desired
 		self.groups = list(groups)
-		self.modes = list(modes)
+		if any(not isinstance(m, TestMode) for m in modes):
+			# simple strings were passed in; convert them
+			modes = [(m if isinstance(m, TestMode) else TestMode(m)) for m in modes]
 		
+		if modes and (not any(m.isPrimary for m in modes)):
+			modes = [TestMode(modes[0], isPrimary=True, params=modes[0].params)]+modes[1:]
+		self.modes = list(modes)
+
 		self.authors = authors
 		self.created = created
 		if created and not re.match('[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', created):
@@ -162,7 +166,6 @@ class TestDescriptor(object):
 		self.executionOrderHint = executionOrderHint
 		self.skippedReason = skippedReason
 		
-		self.primaryMode = None if not self.modes else self.modes[0]
 		self.idWithoutMode = self.id
 		
 		# for internal use only (we cache this to speed up sorting based on path), 
@@ -203,8 +206,13 @@ class TestDescriptor(object):
 		d['groups'] = self.groups
 		d['authors'] = self.authors
 		d['created'] = self.created
-		d['modes'] = {str(m):m.params for m in self.modes}
-		d['primaryMode'] = self.primaryMode
+		def modeParamsDict(m):
+			x = m.params
+			if m.isPrimary:
+				x = dict(x)
+				x['isPrimary'] = True
+			return x
+		d['modes'] = {str(m):modeParamsDict(m) for m in self.modes}
 		if hasattr(self, 'mode'): d['mode'] = self.mode 
 		d['requirements'] = self.traceability
 		
@@ -251,18 +259,25 @@ class TestDescriptor(object):
 
 		s=s+"Test groups:       %s\n" % (u', '.join((u"'%s'"%x if u' ' in x else x) for x in self.groups) or u'<none>')
 		
-		longestmode = max(len(m) for m in self.modes) if self.modes else 0
+		def modeNameToString(m):
+			x = "'%s'"%m if ' ' in m else m
+			return x
+
+		modeDelim = '\n --> ' if any(getattr(m, 'params', None) for m in self.modes) else ', '
+
+		longestmode = max(len(modeNameToString(m)) for m in self.modes) if self.modes else 0
 		def modeToString(m):
-			x = u"'%s'"%m if u' ' in m else m
-			x = (u"%-"+str(longestmode+1)+"s")%x
+			x = modeNameToString(m)
+			if modeDelim != ', ':
+				x = ("%-"+str(longestmode+1)+"s")%x
 			if getattr(m, 'params', None):
-				x += u'{%s}'%', '.join(u'%s=%r'%(k,v) for (k,v) in m.params.items())
+				x += '{%s}'%', '.join('%s=%r'%(k,v) for (k,v) in m.params.items())
+			if getattr(m, 'isPrimary', False) and len(self.modes)>1: x=x+' [PRIMARY]'
 			return x.strip()
 		
 		if getattr(self, 'mode',None): # multi mode per run
 			s=s+"Test mode:         %s\n" % modeToString(self.mode)
 		else: # print available modes instead
-			modeDelim = u'\n --> ' if any(getattr(m, 'params', None) for m in self.modes) else u', '
 			s=s+("Test modes:        %s%s\n") % (modeDelim if '\n' in modeDelim else '', modeDelim.join(modeToString(x) for x in self.modes) or u'<none>')
 
 		s=s+"Test order hint:   %s\n" % (
@@ -350,19 +365,26 @@ class TestModesConfigHelper:
 			Mock_Chrome
 			Mock_Firefox
 		
+		NB: By default the first mode in each dimension is designated a *primary* mode (one that executes by default 
+		when no ``--modes`` argument is specified), but this can be overridden by setting ``'isPrimary': True/False`` 
+		in the dict for any mode. When mode dimensions are combined, the primary modes are any where both/all mode 
+		dimensions were designated primary. So in the above case, where MySQL and Chrome are automatically set as 
+		primary modes, so the MySQL_Chrome mode would be the (only) primary mode returned from this function.
+		
 		A common use case is to combine inherited modes from the parent pysysdirconfigs with a list of modes specific to 
 		this test::
 		
 			lambda modes: modes.combineModeDimensions(modes.inherited, [
-				{'mode': 'IntegersSubtest', 'dataType': 'int'}, 
-				{'mode': 'StringSubtest',  'dataType': 'str'}, 
-				{'mode': 'BooleansSubtest', 'dataType': 'bool'}, 
+				{'mode': 'IntegersSubtest', 'dataType': 'int', 'isPrimary':True}, 
+				{'mode': 'StringSubtest',  'dataType': 'str', 'isPrimary':True}, 
+				{'mode': 'BooleansSubtest', 'dataType': 'bool', 'isPrimary':True}, 
 			])
 
-		This is a good way to use modes for the concept of subtests, since even if you don't initially have any inherited 
-		modes, if in future you add some then everything will automatically work correctly. 
+		This is a good way to use modes for the concept of parameterized subtests, since even if you don't initially have 
+		any inherited modes, if in future you add some then everything will automatically work correctly. Since you'd 
+		always want all of these to execute, designate each one as a primary mode. 
 
-		For efficiency reasons, don't call this method if you are just using the inherited modes. 
+		NB: For efficiency reasons, don't call this method if you are just using the inherited modes. 
 		
 		:param list[dict[str,obj]] dimensions: Each argument passed to this function is a list of modes, each mode defined 
 			by a dict which may contain a ``mode`` key plus any number of parameters. 
@@ -379,9 +401,12 @@ class TestModesConfigHelper:
 			for mode in dimension:
 				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
 				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode)
-
 				current[modeString] = mode
 			# end for mode
+			
+			# ensure at least one is primary in each dimension, else we'd lose the primary-ness when AND-ing them together
+			if current and not any(m.get('isPrimary', False) for m in current.values()): 
+				next(iter(current.values()))['isPrimary'] = True
 
 			if prevModesForCombining is not None:
 				if not current or not prevModesForCombining:
@@ -391,8 +416,11 @@ class TestModesConfigHelper:
 					current = {}
 					for modeA, paramsA in prevModesForCombining.items():
 						for modeB, paramsB in newModes.items():
+							isPrimary = paramsA.get('isPrimary', False) and paramsB.get('isPrimary', False)
 							params = dict(paramsA)
 							params.update(paramsB) # newer "B" params take precedence if any keys as the same
+							# for simplicity, just include it with params here
+							params['isPrimary'] = isPrimary
 							current[modeA.strip('_')+'_'+modeB.strip('_')] = params
 		return [{**{'mode':modeString}, **params} for modeString, params in current.items()]
 
@@ -415,24 +443,44 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 	:ivar dict[str,obj] ~.params: A dictionary of parameters associated with this mode. The parameters are available to 
 		the test (as ``self.mode.params``) and also assigned as instance fields on the test class when it 
 		runs in this mode. 
+		
+	:ivar bool ~.isPrimary: Indicates whether this is a primary mode, 
+		one that executes by default even when not explicity requested with a commnad line option such as ``--modes=ALL``)
 
 	.. versionadded:: 2.0
 
 	"""
-	__slots__ = ['params']
+	__slots__ = ['__params', '__isPrimary']
 	
-	def __new__(cls,s,params=None):
+	def __new__(cls,s,params=None, isPrimary=False):
 		self = str.__new__(cls,s)
-		self.params = params
+		if params is None: params = {}
+		self.__params = params
+		assert 'isPrimary' not in params, repr(params)
+		self.__isPrimary = isPrimary
 		return self
 
-	def __setattr__(self, attr, value):
-		if attr in self.__slots__ and getattr(self, attr, None) is None: 
-			object.__setattr__(self, attr, value)
-		else:
-			raise TypeError('Cannot modify immutable instance by setting %s'%(attr))
+	@property
+	def params(self):
+		return self.__params
 
-
+	@property
+	def isPrimary(self):
+		return self.__isPrimary
+	
+	def __repr__(self):
+		return str(self)+str(self.__params)+(' [PRIMARY]' if self.__isPrimary else '')
+		
+	def toDict(self):
+		"""
+		Returns a dictionary containing this mode's params, mode name and isPrimary value. 
+		"""
+		x = {'mode':str(self)}
+		if self.isPrimary: x['isPrimary'] = True
+		x.update(self.params)
+		return x
+		
+	
 class _XMLDescriptorParser(object):
 	'''NOT PUBLIC API - use L{DescriptorLoader.parseTestDescriptor} instead. 
 	
@@ -739,6 +787,8 @@ class _XMLDescriptorParser(object):
 	def splitModeNameAndParams(mode):
 		"""
 		Returns (modename, params). Auto-generates a mode name if one is not already provided. 
+		
+		The mode dict is mutated by this method. 
 		"""
 		assert isinstance(mode, dict), 'Expecting mode dict but got %r'%mode
 		modeString = mode.pop('mode', None)
@@ -749,7 +799,7 @@ class _XMLDescriptorParser(object):
 		assert len(mode) != 0, 'Must provide a name and/or params for every mode dictionary'
 		modeString = '_'.join(
 			'%s=%s'%(k, v) if (not isinstance(v, str) or re.match('^([-0-9.]+|true|false|)$', v, flags=re.IGNORECASE)) else v # include the key for numeric and boolean values
-			for (k,v) in mode.items())
+			for (k,v) in mode.items() if k != 'isPrimary')
 		
 		modeString = modeString.strip('_') # avoid leading/trailing _'s
 
@@ -783,7 +833,11 @@ class _XMLDescriptorParser(object):
 			else: 
 				inherited = []
 
-			return inherited+[TestMode(k, params=v) for (k,v) in result.items()]
+			result = inherited+[TestMode(k, params=v) for (k,v) in result.items()]
+			if result and not any(m.isPrimary for m in result): 
+				result[0] = TestMode(result[0], params=result[0].params, isPrimary=True)
+
+			return result
 			
 		# The modern PySys 2.0+ approach with a Python eval string
 		try:
@@ -793,7 +847,8 @@ class _XMLDescriptorParser(object):
 				modesLambda = pysys.utils.safeeval.safeEval(text.strip(), extraNamespace={}, emptyNamespace=True)
 			assert callable(modesLambda), 'Expecting callable (e.g. lambda helper: []) but got %r'%modesLambda
 			helper = TestModesConfigHelper(
-				inheritedModes=[{**mode.params, **{'mode':mode}} for mode in self.defaults.modes], 
+				# note that inheritedModes param dicts may be mutated (so good think we'd creating a new dict here for the default modes)
+				inheritedModes=[{**mode.params, **{'mode':mode, 'isPrimary':mode.isPrimary}} for mode in self.defaults.modes], 
 				project=self.project, 
 				testDir=os.path.dirname(self.file) if self.istest else None
 				)
@@ -807,6 +862,9 @@ class _XMLDescriptorParser(object):
 			expectedparams = None
 			for m in modes:
 				modeString, params = self.splitModeNameAndParams(m)
+				isPrimary = params.pop('isPrimary', False)
+				assert isPrimary in [True, False], 'isPrimary must be set to True or False, not %r'%isPrimary
+
 			
 				# Eliminate dodgy characters
 				badchars = re.sub('[%s]+'%pysys.launcher.MODE_CHARS,'', modeString)
@@ -829,14 +887,21 @@ class _XMLDescriptorParser(object):
 					assert not p.startswith('_'), 'Illegal mode parameter name - cannot start with underscore: %s'%p
 
 
-			# check that params are the same in each one to avoid mistakes
+				# check that params are the same in each one to avoid mistakes
 				if expectedparams is None: expectedparams = sorted(params.keys())
 				assert sorted(params.keys()) == expectedparams, f'The same mode parameter keys must be given for every mode in the list, but found {sorted(params.keys())} parameters for "{modeString}" different to {expectedparams}'
 
-				result.append(TestMode(modeString, params))
+				result.append(TestMode(modeString, isPrimary=isPrimary, params=params))
+
+			# ensure there's at least one primary mode
+			if result and not any(m.isPrimary for m in result): 
+				result[0] = TestMode(result[0], params=result[0].params, isPrimary=True)
+				
 			return result
 
 		except Exception as ex:
+			if not isinstance(ex, AssertionError):
+				traceback.print_exc()
 			raise UserError("Invalid modes configuration in %s: %s"%(self.file, ex))
 
 				
