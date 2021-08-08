@@ -386,7 +386,9 @@ class TestModesConfigHelper:
 				'MySQL':  {'db': 'MySQL',  'dbTimeoutSecs':60}, 
 				'SQLite': {'db': 'SQLite', 'dbTimeoutSecs':120},
 				'Mock':   {'db': 'Mock',   'dbTimeoutSecs':30},
-			], [
+			},
+			# can use dict or list format for each mode list, whichever is more convenient: 
+			[ 
 				{'browser':'Chrome'}, # if mode is not explicitly specified it is auto-generated from the parameter(s)
 				{'browser':'Firefox'},
 			])
@@ -401,30 +403,39 @@ class TestModesConfigHelper:
 			Mock_Firefox
 		
 		NB: By default the first mode in each dimension is designated a *primary* mode (one that executes by default 
-		when no ``--modes`` argument is specified), but this can be overridden by setting ``'isPrimary': True/False`` 
-		in the dict for any mode. When mode dimensions are combined, the primary modes are any where both/all mode 
-		dimensions were designated primary. So in the above case, where MySQL and Chrome are automatically set as 
-		primary modes, so the MySQL_Chrome mode would be the (only) primary mode returned from this function.
-		When mode dimensions are combined, a mode is primary if all the modes it is derived from 
-		were designated primary. When using modes for different execution environments/browsers etc you probably want only 
+		when no ``--modes`` or ``--ci`` argument is specified), but this can be overridden by setting ``'isPrimary': True/False`` 
+		in the dict for any mode. When mode dimensions are combined, the primary modes are AND-ed together, 
+		i.e. any where *all* mode dimensions were designated primary. 
+		So in the above case, since MySQL and Chrome are automatically set as 
+		primary modes, the MySQL_Chrome mode would be the (only) primary mode returned from this function.
+		When using modes for different execution environments/browsers etc you probably want only 
 		the first (typically fastest/simplest/most informative) mode to be primary; on the other hand if using modes to 
-		re-use the same PySysTest logic for against various input files/args you should usually set all of the modes to be 
+		re-use the same PySysTest logic for against various behavioural tests (different input files/args etc) 
+		you should usually set all of the modes to be 
 		primary so that all of them are executed in your test runs during local development. 
 
 		A common use case is to combine inherited modes from the parent pysysdirconfigs with a list of modes specific to 
 		this test::
 		
-			lambda modes: modes.combineModeDimensions(modes.inherited, [
-				{'mode': 'IntegersSubtest', 'dataType': 'int', 'isPrimary':True}, 
-				{'mode': 'StringSubtest',  'dataType': 'str', 'isPrimary':True}, 
-				{'mode': 'BooleansSubtest', 'dataType': 'bool', 'isPrimary':True}, 
-			])
+			lambda helper: helper.combineModeDimensions(
+				helper.inheritedModes,
+				
+				helper.makeAllPrimary(
+					{
+						'Usage':         {'cmd': ['--help'], 
+							'expectedExitStatus':'==0', 'expectedMessage':None}, 
+						'BadPort':       {'cmd': ['--port', '-1'],  
+							'expectedExitStatus':'!=0', 'expectedMessage':'Server failed: Invalid port number specified: -1'}, 
+						'SetPortTwice':  {'cmd': ['--port', '123', '--config', helper.testDir+'/myserverconfig.json'], 
+							'expectedExitStatus':'!=0', 'expectedMessage':'Server failed: Cannot specify port twice'}, 
+					}), 
+			)
 
 		This is a good way to use modes for the concept of parameterized subtests, since even if you don't initially have 
-		any inherited modes, if in future you add some then everything will automatically work correctly. Since you'd 
-		always want all of these to execute, designate each one as a primary mode. 
+		any inherited modes, if in future you add some then everything will automatically work correctly. 
 
-		NB: For efficiency reasons, don't call this method if you are just using the inherited modes. 
+		NB: For efficiency reasons, don't use the ``combineModeDimensions`` method in your configuration if you are 
+		*just* using the inherited modes unchanged. 
 		
 		:param list[dict[str,obj]]|dict[str,dict[str,obj]] dimensions: Each argument passed to this function is a list of 
 			modes, each mode defined by a dict which may contain a ``mode`` key plus any number of parameters. 
@@ -485,6 +496,8 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 
 	For convenience and compatibility, this TestMode subclasses a string holding the mode. 
 	
+	:ivar str ~.name: The name of the mode as a string. 
+
 	:ivar dict[str,obj] ~.params: A dictionary of parameters associated with this mode. The parameters are available to 
 		the test (as ``self.mode.params``) and also assigned as instance fields on the test class when it 
 		runs in this mode. 
@@ -495,10 +508,11 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 	.. versionadded:: 2.0
 
 	"""
-	__slots__ = ['__params', '__isPrimary']
+	__slots__ = ['__params', '__isPrimary', '__name']
 	
 	def __new__(cls,s,params=None, isPrimary=False):
 		self = str.__new__(cls,s)
+		self.__name = s
 		if params is None: params = {}
 		self.__params = params
 		assert 'isPrimary' not in params, repr(params)
@@ -513,18 +527,13 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 	def isPrimary(self):
 		return self.__isPrimary
 	
+	@property
+	def name(self):
+		return self.__name
+	
 	def __repr__(self):
-		return str(self)+str(self.__params)+(' [PRIMARY]' if self.__isPrimary else '')
-		
-	def toDict(self):
-		"""
-		Returns a dictionary containing this mode's params, mode name and isPrimary value. 
-		"""
-		x = {'mode':str(self)}
-		if self.isPrimary: x['isPrimary'] = True
-		x.update(self.params)
-		return x
-		
+		return self.__name+str(self.__params)+(' [PRIMARY]' if self.__isPrimary else '')
+			
 	
 class _XMLDescriptorParser(object):
 	'''NOT PUBLIC API - use L{DescriptorLoader.parseTestDescriptor} instead. 

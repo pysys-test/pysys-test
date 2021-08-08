@@ -361,24 +361,22 @@ Running tests in multiple modes
 -------------------------------
 One of the powerful features of PySys is the ability to run the same test 
 in multiple modes from a single execution. This could be useful for cases such 
-as a web test that needs to pass against multiple supported web browsers, 
-or a set of tests that should be run against various different database but 
+as a set of tests that should be run against various different databases but 
 can also be run against a mocked database for quick local development. 
 Another common use case is executing the same PySysTest class in different 
 modes to test different scenarios. 
 
-Using modes is fairly straightforward. First edit the ``pysystest.*`` file for a test that 
-need to run in multiple modes, and add a list of the supported modes by providing a string 
+To define some modes, first edit the ``pysystest.*`` file for your test, and provide a string 
 containing a Python lambda that will be evaluated when the test descriptors are loaded to 
 return a list of named modes that the test can run in:
 
 .. code-block:: python
 	
 	__pysys_modes__ = r""" 
-			lambda helper: helper.inheritedModes+[
-				{'mode':'CompressionGZip', 'compressionType':'gzip'},
-			]
-		"""
+		lambda helper: helper.inheritedModes+[
+			{'mode':'CompressionGZip', 'compressionType':'gzip'},
+		]
+	"""
 
 The ``helper`` is an instance of `pysys.config.descriptor.TestModesConfigHelper` which provides 
 access to the list of inherited modes (and more). 
@@ -405,10 +403,6 @@ However when using modes to validate different *behaviours/conditions* (e.g. tes
 out different command line options) using a single PySysTest class, then you should designate all your modes as 
 "primary" as you want *all of them* to execute by default in a quick local test run. 
 The `pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary` helper function can do this. 
-
-The first mode listed is designated the "primary" mode which means it's the 
-one that is used by default when running your tests without a ``--mode`` 
-argument. 
 
 Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
 type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
