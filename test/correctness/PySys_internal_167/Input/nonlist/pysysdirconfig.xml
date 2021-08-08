@@ -4,7 +4,7 @@
   <classification>
   
 		<modes>
-			lambda helper: {'a':'b'}
+			lambda helper: 'abcdef'
 		</modes>
 		
   </classification>

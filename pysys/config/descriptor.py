@@ -316,8 +316,8 @@ exists for compatibility reasons only.
 class TestModesConfigHelper:
 	"""
 	A helper class that is passed to the lambda which defines test modes in a pysystest configuration. It provides access to 
-	the list of inherited modes, to project properties and also a helper function for combining multiple mode lists into 
-	one. 
+	the list of inherited modes, to project properties and also helper functions for combining multiple mode lists into 
+	one and for configuring a collection of modes as primary modes. 
 	
 	:ivar list[dict[str,obj]] ~.inheritedModes: A list of the inherited modes, each defined by a dictionary containing a ``mode`` 
 		key and any number of additional parameters. 
@@ -341,16 +341,51 @@ class TestModesConfigHelper:
 		self.os = os
 		self.testDir = testDir
 
+	def makeAllPrimary(self, modes):
+		"""
+		Modifies the specified list (or dict) of modes so that all of them have isPrimary=True. 
+		
+		By default only the first mode in the mode list is "primary", so the test will only run in that one mode by 
+		default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
+		using modes to validate the same behaviour/conditions in different execution environments e.g. 
+		browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing 
+		out different command line options) using a single PySysTest class, then you should have all your modes as 
+		"primary" as you want all of them to execute by default in a quick local test run. 
+		
+		You would typically combine test-specific behaviour modes with any inherited execution environment modes like 
+		this::
+		
+			lambda modes: modes.combineModeDimensions(
+				helper.inheritedModes,
+				helper.makeAllPrimary(
+					{
+						'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
+						'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
+						'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
+					}, 
+			)
+		
+		:param list[dict[str,obj]]|dict[str,dict[str,obj]] modes: A list or dict of modes to be made primary.
+		:return: A list[dict[str,obj]] containing the modes, each with isPrimary set to true. 
+		
+		"""
+		if isinstance(modes, dict):
+			modes = [{**{'mode':k}, **v} for k, v in modes.items()]
+		for m in modes: m['isPrimary'] = True
+		return modes
+
 	def combineModeDimensions(self, *dimensions):
 		"""
 		Generates a single flat mode list containing all combinations that can be generated the specified mode lists. 
 		
 		For example::
 		
-			lambda modes: modes.combineModeDimensions([
-				{'mode': 'MySQL',   'db': 'MySQL',  'dbTimeoutSecs':60}, 
-				{'mode': 'SQLite',  'db': 'SQLite', 'dbTimeoutSecs':120},
-				{'mode': 'Mock',    'db': 'Mock',   'dbTimeoutSecs':30},
+			lambda helper: helper.combineModeDimensions(
+			helper.inheritedModes,
+			{
+				'MySQL':  {'db': 'MySQL',  'dbTimeoutSecs':60}, 
+				'SQLite': {'db': 'SQLite', 'dbTimeoutSecs':120},
+				'Mock':   {'db': 'Mock',   'dbTimeoutSecs':30},
 			], [
 				{'browser':'Chrome'}, # if mode is not explicitly specified it is auto-generated from the parameter(s)
 				{'browser':'Firefox'},
@@ -370,7 +405,12 @@ class TestModesConfigHelper:
 		in the dict for any mode. When mode dimensions are combined, the primary modes are any where both/all mode 
 		dimensions were designated primary. So in the above case, where MySQL and Chrome are automatically set as 
 		primary modes, so the MySQL_Chrome mode would be the (only) primary mode returned from this function.
-		
+		When mode dimensions are combined, a mode is primary if all the modes it is derived from 
+		were designated primary. When using modes for different execution environments/browsers etc you probably want only 
+		the first (typically fastest/simplest/most informative) mode to be primary; on the other hand if using modes to 
+		re-use the same PySysTest logic for against various input files/args you should usually set all of the modes to be 
+		primary so that all of them are executed in your test runs during local development. 
+
 		A common use case is to combine inherited modes from the parent pysysdirconfigs with a list of modes specific to 
 		this test::
 		
@@ -386,10 +426,12 @@ class TestModesConfigHelper:
 
 		NB: For efficiency reasons, don't call this method if you are just using the inherited modes. 
 		
-		:param list[dict[str,obj]] dimensions: Each argument passed to this function is a list of modes, each mode defined 
-			by a dict which may contain a ``mode`` key plus any number of parameters. 
+		:param list[dict[str,obj]]|dict[str,dict[str,obj]] dimensions: Each argument passed to this function is a list of 
+			modes, each mode defined by a dict which may contain a ``mode`` key plus any number of parameters. 
+			Alternatively, each dimension can be a dict where the mode is the key and the value is a parameters dict. 
 		:return: A list[dict[str,obj]] containing the flattened list of modes consisting of all combinations of the 
-			passed in 
+			passed in. This can be further manipulated using Python list comprehensions (e.g. to exclude certain 
+			combinations) if desired. 
 		"""
 		if len(dimensions) == 1: return dimensions[0]
 		
@@ -398,6 +440,9 @@ class TestModesConfigHelper:
 			prevModesForCombining = None if not current else current
 
 			current = {}
+			if isinstance(dimension, dict):
+				dimension = [{**{'mode':k}, **v} for k, v in dimension.items()]
+
 			for mode in dimension:
 				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
 				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode)
@@ -854,6 +899,8 @@ class _XMLDescriptorParser(object):
 				)
 			modes = modesLambda(helper) # assumes it's a callable accepting a single parameter
 			
+			if isinstance(modes, dict):
+				modes = [{**{'mode':k}, **v} for k, v in modes.items()]
 			assert isinstance(modes, list), 'Expecting a list of modes, got a %s: %r'%(modes.__class__.__name__, modes)
 			assert not modesNode or not modesNode.hasAttribute('inherit'), 'Cannot use the legacy inherit= attribute when using the modern Python eval string to define modes'
 			

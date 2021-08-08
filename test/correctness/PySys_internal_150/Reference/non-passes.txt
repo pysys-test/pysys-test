@@ -3,6 +3,10 @@ Outcome_BlockedProcess = BLOCKED: "ERROR Cannot bind TCP listening port on one o
 Outcome_FailedAssertions = FAILED: Assert that (value == expected) with value (grep('sensorValues.out', '"sensorId": "([^"]*)"')) ="ABC123def4", expected="ABC1234" (+7 other failures)
 Outcome_NotVerified = NOT VERIFIED: 
 Outcome_PerformanceInspect~CompressionGZip = REQUIRES INSPECTION: Review the charts for desired performance characteristics: my_performance_graph_n=4.svg, my_performance_graph_n=8.svg
-PySysTestPythonDescriptorSample~CompressionNone_Auth=None = SKIPPED: Skipped until Bug-1234 is fixed
-PySysTestXMLDescriptorSample~CompressionNone_Auth=None = SKIPPED: This test is skipped until Bug-1234 is fixed
+PySysTestPythonDescriptorSample~CompressionNone_Auth=None_BadPort = SKIPPED: Skipped until Bug-1234 is fixed
+PySysTestPythonDescriptorSample~CompressionNone_Auth=None_MissingPort = SKIPPED: Skipped until Bug-1234 is fixed
+PySysTestPythonDescriptorSample~CompressionNone_Auth=None_Usage = SKIPPED: Skipped until Bug-1234 is fixed
+PySysTestXMLDescriptorSample~CompressionNone_Auth=None_BadPort = SKIPPED: This test is skipped until Bug-1234 is fixed
+PySysTestXMLDescriptorSample~CompressionNone_Auth=None_MissingPort = SKIPPED: This test is skipped until Bug-1234 is fixed
+PySysTestXMLDescriptorSample~CompressionNone_Auth=None_Usage = SKIPPED: This test is skipped until Bug-1234 is fixed
 SkipOrAbortTest = SKIPPED: MyFeature is not supported on this operating system

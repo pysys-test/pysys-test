@@ -33,7 +33,7 @@ try:
 		assert not args.port, 'Cannot specify port twice'
 		args.port = config['port']
 
-	assert args.port > 0, 'Invalid port number specified: %s'%args.port
+	assert args.port and args.port > 0, 'Invalid port number specified: %s'%args.port
 
 	log.setLevel(getattr(logging, args.loglevel.upper()))
 

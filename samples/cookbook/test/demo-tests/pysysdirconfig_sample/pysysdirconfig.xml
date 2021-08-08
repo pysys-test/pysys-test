@@ -112,16 +112,16 @@
 			mode for mode in 
 				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
-					[
-							{'mode':'CompressionNone', 'compressionType':None},
-							{'mode':'CompressionGZip', 'compressionType':'gzip'},
-					], 
+					{
+							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
+							'CompressionGZip': {'compressionType':'gzip'},
+					}, 
 					[
 						{'auth':None}, # Mode name is optional
 						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
 					]) 
-			# This is a Python list comprehension syntax for filtering the items in the list
-			if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
+			# This is Python list comprehension syntax for filtering the items in the list
+			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
 		]
 	</modes>
 

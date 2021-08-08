@@ -32,7 +32,7 @@ class PySysTest(BaseTest):
 			expected=': Expecting mode dict but got 12345')
 
 		self.assertThatGrep('nonlist.err', '.+', 'expected in value', 
-			expected=": Expecting a list of modes, got a dict: {'a': 'b'}")
+			expected=": Expecting a list of modes, got a str: 'abcdef'")
 
 		self.assertThatGrep('syntaxerror.err', 'ERROR.+', 'expected in value', 
 			expected='SyntaxError - invalid syntax (<string>, line 3)')

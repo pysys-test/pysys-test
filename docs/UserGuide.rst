@@ -364,10 +364,13 @@ in multiple modes from a single execution. This could be useful for cases such
 as a web test that needs to pass against multiple supported web browsers, 
 or a set of tests that should be run against various different database but 
 can also be run against a mocked database for quick local development. 
+Another common use case is executing the same PySysTest class in different 
+modes to test different scenarios. 
 
 Using modes is fairly straightforward. First edit the ``pysystest.*`` file for a test that 
 need to run in multiple modes, and add a list of the supported modes by providing a string 
-containing a Python lambda that will be evaluated when the test descriptors are loaded:
+containing a Python lambda that will be evaluated when the test descriptors are loaded to 
+return a list of named modes that the test can run in:
 
 .. code-block:: python
 	
@@ -381,21 +384,31 @@ The ``helper`` is an instance of `pysys.config.descriptor.TestModesConfigHelper`
 access to the list of inherited modes (and more). 
 
 When naming modes, TitleCase is recommended, and dot, underscore and equals characters 
-may be used; typically dot is useful for version numbers and underscore is 
+may be used. Typically dot is useful for version numbers and underscore is 
 useful for separating out different dimensions (e.g. compression vs authentication type 
 in the example described later in this section). PySys will give an error if you use different 
-capitalization for the same mode in different places, as this would likely result in test bugs. 
+capitalization for the same mode in different places, as this can result in test bugs. 
 
 In large projects you may wish to configure modes in a ``pysysdirconfig.xml`` 
 file in a parent directory rather than in ``pysystest.*``, which will by 
-default be inherited by all nested testcases (unless an explicit ``<modes>`` 
-configuration is provided), and so there's a single place to edit the modes 
+default be inherited by all nested testcases (unless an explicit modes 
+configuration is provided), and so that there's a single place to edit the modes 
 list if you need to change them later. 
+
+By default the first mode in each list is "primary", so the test will only run in that one primary mode by 
+default during local test runs (i.e. unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
+using modes to validate the same behaviour/conditions in different execution environments e.g. 
+browsers/databases etc. It's best to choose either the fastest mode or else the one that 
+is most likely to show up interesting issues as the primary mode. 
+
+However when using modes to validate different *behaviours/conditions* (e.g. testing 
+out different command line options) using a single PySysTest class, then you should designate all your modes as 
+"primary" as you want *all of them* to execute by default in a quick local test run. 
+The `pysys.config.descriptor.TestModesConfigHelper.makeAllPrimary` helper function can do this. 
 
 The first mode listed is designated the "primary" mode which means it's the 
 one that is used by default when running your tests without a ``--mode`` 
-argument. It's best to choose either the fastest mode or else the one that 
-is most likely to show up interesting issues as the primary mode.
+argument. 
 
 Sometimes your modes will have multiple dimensions, such as database, web browser, compression type, authentication 
 type etc, and you may want your tests to run in all combinations of each item in each dimension list. 
@@ -409,29 +422,52 @@ Here is an example of multi-dimensional modes (taken from the getting-started sa
 	
 	__pysys_modes__ = r""" 
 
-			lambda helper: [
-				mode for mode in 
-					helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
-						helper.inheritedModes,
-						[
-								{'mode':'CompressionNone', 'compressionType':None},
-								{'mode':'CompressionGZip', 'compressionType':'gzip'},
-						], 
-						[
-							{'auth':None}, # Mode name is optional
-							{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
-						]) 
-				# This is a Python list comprehension syntax for filtering the items in the list
-				if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
-			]
+	lambda helper: [
+			mode for mode in 
+				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
+					helper.inheritedModes,
+					{
+							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
+							'CompressionGZip': {'compressionType':'gzip'},
+					}, 
+					[
+						{'auth':None}, # Mode name is optional
+						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
+					], 
+					
+					# By default only the first mode in each list is "primary", so the test will only run in that one mode by 
+					# default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
+					# using modes to validate the same behaviour/conditions in different execution environments e.g. 
+					# browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing 
+					# out different command line options) using a single PySysTest class, then you should have all your modes as 
+					# "primary" as you want all of them to execute by default in a quick local test run. 
+					helper.makeAllPrimary(
+						{
+							'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
+							'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
+							'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
+						}), 
+					)
+				
+			# This is Python list comprehension syntax for filtering the items in the list
+			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
+		]
 	"""
 
 This will create the following modes::
 
-	CompressionNone_Auth=None
-	CompressionGZip_Auth=None
-	CompressionNone_OS
-	CompressionGZip_OS
+	CompressionNone_Auth=None_Usage       [PRIMARY]
+	CompressionNone_Auth=None_BadPort     [PRIMARY]
+	CompressionNone_Auth=None_MissingPort [PRIMARY]
+	CompressionGZip_Auth=None_Usage
+	CompressionGZip_Auth=None_BadPort
+	CompressionGZip_Auth=None_MissingPort
+	CompressionNone_OS_Usage
+	CompressionNone_OS_BadPort
+	CompressionNone_OS_MissingPort
+	CompressionGZip_OS_Usage
+	CompressionGZip_OS_BadPort
+	CompressionGZip_OS_MissingPort
 
 When creating multi-dimensional modes you can explicitly specify the name of each mode using ``'mode':..``, but 
 if you want to avoid repeating the value of your parameters you can let PySys generate a default mode, which 
@@ -463,7 +499,7 @@ during test setup::
 
 Finally, PySys provides a rich variety of ``pysys run`` arguments to control 
 which modes your tests will run with. By default it will run every test in its 
-primary mode (for tests with no mode, the primary mode is ``self.mode==None``) - 
+primary modes (for tests with no mode, the primary mode is ``self.mode==None``) - 
 which is great for quick checks during development of your application and 
 testcases. 
 
@@ -482,8 +518,8 @@ specified modes, or even use regular expressions for even more flexibility::
   pysys run --mode MyMode.*
 
 
-After successfully getting all your tests passing in their primary mode, it could 
-be useful to run them in every mode other than the primary one::
+After successfully getting all your tests passing in their primary modes, it could 
+be useful to run them in every mode other than the primary::
 
   pysys run --mode !PRIMARY
 
@@ -615,7 +651,7 @@ correctness tests before commencing on longer running performance or soak tests.
 
 By default, PySys runs tests based on the sorting them by the full path of 
 the `pysystest.*` files. If you have tests with multiple modes, PySys will 
-run all tests in their primary mode first, then any/all tests which list a 
+run all tests in their primary modes first, then any/all tests which list a 
 second mode, followed by 3rd, 4th, etc. 
 
 All of this can be customized using the concept of an execution order hint. 
@@ -644,10 +680,10 @@ following:
   - For multi-mode tests, the ``secondaryModesHintDelta`` specified in the project 
     configuration (unless it's set to zero), multiplied by a number indicating 
     which mode this is. If a test had 3 modes Mode1, Mode2 and Mode3 then 
-    the primary mode (Mode1) would get no additional hint, Mode2 would get 
+    the primary mode(s) (Mode1) would get no additional hint, Mode2 would get 
     ``secondaryModesHintDelta`` added to its hint and Mode3 would get
     ``2 x secondaryModesHintDelta`` added to its hint. This is the mechanism 
-    PySys uses to ensure all tests run first in their primary mode before 
+    PySys uses to ensure all tests run first in their primary modes before 
     any tests run in their secondary modes. Usually the default value of 
     ``secondaryModesHintDelta = +100.0`` is useful and avoids the need for too 
     much mode-specific hint configuration (see above). However if you prefer to 
@@ -658,4 +694,4 @@ following:
 For really advanced cases, you can programmatically set the 
 ``executionOrderHint`` on each descriptor by providing a custom 
 `pysys.config.descriptor.DescriptorLoader` or in the constructor of a 
-custom `pysys.baserunner.BaseRunner` class. 
+custom `pysys.baserunner.BaseRunner` class or plugin. 

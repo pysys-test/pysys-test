@@ -1,3 +1,6 @@
+Test id:           Test_DictNoInherit
+ --> MyMode1 {myParamA='myValue1'} [PRIMARY]
+ --> MyMode2 {myParamA='myValue2'}
 Test id:           Test_EmptyModesElement
  --> MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue  {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
  --> MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=         {database='mySQL', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
@@ -36,8 +39,10 @@ Test id:           Test_MultipleSubtests
  --> SQLite_Chrome_rootmode2_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10          {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest1', iterations='100'}
  --> SQLite_Chrome_rootmode2_SoakTest_maxHours=5_fast=_Subtest2_iterations=1000_maxHours=-10         {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest2', iterations=1000}
 Test id:           Test_MultipleSubtestsNoInherit
- --> Subtest1_iterations=100  {subtest='subtest1!!!!', iterations='100'} [PRIMARY]
- --> Subtest2_iterations=1000 {subtest='subtest2', iterations='1000'}
+ --> Subtest1_iterations=100_MyModeA  {subtest='subtest1!!!!', iterations='100', myParamA=123} [PRIMARY]
+ --> Subtest1_iterations=100_MyModeB  {subtest='subtest1!!!!', iterations='100', myParamA=456}
+ --> Subtest2_iterations=1000_MyModeA {subtest='subtest2', iterations='1000', myParamA=123}
+ --> Subtest2_iterations=1000_MyModeB {subtest='subtest2', iterations='1000', myParamA=456}
 Test id:           Test_NoModesElement
  --> MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue  {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
  --> MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=         {database='mySQL', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}

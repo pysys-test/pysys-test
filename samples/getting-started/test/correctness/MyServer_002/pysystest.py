@@ -1,4 +1,4 @@
-__pysys_title__   = r""" MyServer startup - arg parsing (+ demo of PySys process starting, and use of a test plugin) """
+__pysys_title__   = r""" MyServer startup - arg parsing main cases (+ demo of PySys process starting, and use of a test plugin) """
 #                        ===============================================================================
 
 __pysys_purpose__ = r""" To demonstrate successful and unsuccessful startup of MyServer. 
