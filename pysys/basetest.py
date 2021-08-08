@@ -494,7 +494,7 @@ class BaseTest(ProcessUser):
 		in the context of some named values. 
 		
 		This method is designed to produce very clear and informative logging and failure reasons if the assertion is 
-		unsuccessful (using the `logDiffValue` method). 
+		unsuccessful (using the `logValueDiff` method). 
 		
 		Example usage::
 		
@@ -653,7 +653,7 @@ class BaseTest(ProcessUser):
 			# namesInUse impl is a bit rough-and-ready, but does a good enough job at identifying when it makes 
 			# sense to compare two of the parameters passed in
 			namesInUse = [x for x in namedvalues.keys() if x in conditionstring]
-			if (re.match(r'^ *\w+ *(==|is|>=|<=) *\w+ *$', conditionstring) or 
+			if (re.match(r'^ *\w+ *(==|is|>=|<=|in) *\w+ *$', conditionstring) or 
 				re.match(r'^ *\w+[.](startswith|endswith)[(] *\w+ *[)] *$', conditionstring)) and len(namesInUse)==2: 
 				# if we're checking a==b we can help the user see why they didn't match; 
 				# this kind of highlighting might be misleading for other conditionstrings, and certainly less useful
