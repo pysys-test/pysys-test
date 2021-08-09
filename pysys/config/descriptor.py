@@ -532,7 +532,7 @@ class TestMode(str): # subclasses string to retain compatibility for tests that 
 		return self.__name
 	
 	def __repr__(self):
-		return self.__name+str(self.__params)+(' [PRIMARY]' if self.__isPrimary else '')
+		return self.name+str(self.__params)+('[PRIMARY]' if self.__isPrimary else '')
 			
 	
 class _XMLDescriptorParser(object):
