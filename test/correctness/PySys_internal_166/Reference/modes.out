@@ -1,16 +1,19 @@
+Test id:           Test_DictNoInherit
+ --> MyMode1 {myParamA='myValue1'} [PRIMARY]
+ --> MyMode2 {myParamA='myValue2'}
 Test id:           Test_EmptyModesElement
  --> MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue  {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
  --> MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=         {database='mySQL', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
  --> MySQL_Firefox_rootmode2_SmokeTest_maxHours=1.5_fast=tRue  {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
  --> MySQL_Firefox_rootmode2_SoakTest_maxHours=5_fast=         {database='mySQL', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
- --> SQLite_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
+ --> SQLite_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'} [PRIMARY]
  --> SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast=        {database='SQLite', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
  --> SQLite_Firefox_rootmode2_SmokeTest_maxHours=1.5_fast=tRue {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
  --> SQLite_Firefox_rootmode2_SoakTest_maxHours=5_fast=        {database='SQLite', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
- --> MySQL_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue   {database='MySQL', browser='Chrome', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
- --> MySQL_Chrome_rootmode1_SoakTest_maxHours=5_fast=          {database='MySQL', browser='Chrome', testKind='SoakTest', maxHours='5', fast=''}
- --> MySQL_Chrome_rootmode2_SmokeTest_maxHours=1.5_fast=tRue   {database='MySQL', browser='Chrome', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
- --> MySQL_Chrome_rootmode2_SoakTest_maxHours=5_fast=          {database='MySQL', browser='Chrome', testKind='SoakTest', maxHours='5', fast=''}
+ --> SQLite_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue  {database='SQLite', browser='Chrome', testKind='SmokeTest', maxHours=1.5, fast='tRue'} [PRIMARY]
+ --> SQLite_Chrome_rootmode1_SoakTest_maxHours=5_fast=         {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours='5', fast=''}
+ --> SQLite_Chrome_rootmode2_SmokeTest_maxHours=1.5_fast=tRue  {database='SQLite', browser='Chrome', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
+ --> SQLite_Chrome_rootmode2_SoakTest_maxHours=5_fast=         {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours='5', fast=''}
 Test id:           Test_MultipleSubtests
  --> MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10   {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest1', iterations='100'}
  --> MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest2_iterations=1000_maxHours=-10  {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest2', iterations=1000}
@@ -19,7 +22,7 @@ Test id:           Test_MultipleSubtests
  --> MySQL_Firefox_rootmode2_SmokeTest_maxHours=1.5_fast=tRue_Subtest2_iterations=1000_maxHours=-10  {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest2', iterations=1000}
  --> MySQL_Firefox_rootmode2_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10          {database='mySQL', browser='Firefox', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest1', iterations='100'}
  --> MySQL_Firefox_rootmode2_SoakTest_maxHours=5_fast=_Subtest2_iterations=1000_maxHours=-10         {database='mySQL', browser='Firefox', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest2', iterations=1000}
- --> SQLite_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10  {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest1', iterations='100'}
+ --> SQLite_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10  {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest1', iterations='100'} [PRIMARY]
  --> SQLite_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest2_iterations=1000_maxHours=-10 {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest2', iterations=1000}
  --> SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10         {database='SQLite', browser='Firefox', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest1', iterations='100'}
  --> SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast=_Subtest2_iterations=1000_maxHours=-10        {database='SQLite', browser='Firefox', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest2', iterations=1000}
@@ -27,27 +30,29 @@ Test id:           Test_MultipleSubtests
  --> SQLite_Firefox_rootmode2_SmokeTest_maxHours=1.5_fast=tRue_Subtest2_iterations=1000_maxHours=-10 {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest2', iterations=1000}
  --> SQLite_Firefox_rootmode2_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10         {database='SQLite', browser='Firefox', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest1', iterations='100'}
  --> SQLite_Firefox_rootmode2_SoakTest_maxHours=5_fast=_Subtest2_iterations=1000_maxHours=-10        {database='SQLite', browser='Firefox', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest2', iterations=1000}
- --> MySQL_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10    {database='MySQL', browser='Chrome', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest1', iterations='100'}
- --> MySQL_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest2_iterations=1000_maxHours=-10   {database='MySQL', browser='Chrome', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest2', iterations=1000}
- --> MySQL_Chrome_rootmode1_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10           {database='MySQL', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest1', iterations='100'}
- --> MySQL_Chrome_rootmode1_SoakTest_maxHours=5_fast=_Subtest2_iterations=1000_maxHours=-10          {database='MySQL', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest2', iterations=1000}
- --> MySQL_Chrome_rootmode2_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10    {database='MySQL', browser='Chrome', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest1', iterations='100'}
- --> MySQL_Chrome_rootmode2_SmokeTest_maxHours=1.5_fast=tRue_Subtest2_iterations=1000_maxHours=-10   {database='MySQL', browser='Chrome', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest2', iterations=1000}
- --> MySQL_Chrome_rootmode2_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10           {database='MySQL', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest1', iterations='100'}
- --> MySQL_Chrome_rootmode2_SoakTest_maxHours=5_fast=_Subtest2_iterations=1000_maxHours=-10          {database='MySQL', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest2', iterations=1000}
+ --> SQLite_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10   {database='SQLite', browser='Chrome', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest1', iterations='100'} [PRIMARY]
+ --> SQLite_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue_Subtest2_iterations=1000_maxHours=-10  {database='SQLite', browser='Chrome', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest2', iterations=1000}
+ --> SQLite_Chrome_rootmode1_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10          {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest1', iterations='100'}
+ --> SQLite_Chrome_rootmode1_SoakTest_maxHours=5_fast=_Subtest2_iterations=1000_maxHours=-10         {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest2', iterations=1000}
+ --> SQLite_Chrome_rootmode2_SmokeTest_maxHours=1.5_fast=tRue_Subtest1_iterations=100_maxHours=-10   {database='SQLite', browser='Chrome', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest1', iterations='100'}
+ --> SQLite_Chrome_rootmode2_SmokeTest_maxHours=1.5_fast=tRue_Subtest2_iterations=1000_maxHours=-10  {database='SQLite', browser='Chrome', testKind='SmokeTest', maxHours=-10, fast='tRue', subtest='subtest2', iterations=1000}
+ --> SQLite_Chrome_rootmode2_SoakTest_maxHours=5_fast=_Subtest1_iterations=100_maxHours=-10          {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest1', iterations='100'}
+ --> SQLite_Chrome_rootmode2_SoakTest_maxHours=5_fast=_Subtest2_iterations=1000_maxHours=-10         {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours=-10, fast='', subtest='subtest2', iterations=1000}
 Test id:           Test_MultipleSubtestsNoInherit
- --> Subtest1_iterations=100  {subtest='subtest1!!!!', iterations='100'}
- --> Subtest2_iterations=1000 {subtest='subtest2', iterations='1000'}
+ --> Subtest1_iterations=100_MyModeA  {subtest='subtest1!!!!', iterations='100', myParamA=123} [PRIMARY]
+ --> Subtest1_iterations=100_MyModeB  {subtest='subtest1!!!!', iterations='100', myParamA=456}
+ --> Subtest2_iterations=1000_MyModeA {subtest='subtest2', iterations='1000', myParamA=123}
+ --> Subtest2_iterations=1000_MyModeB {subtest='subtest2', iterations='1000', myParamA=456}
 Test id:           Test_NoModesElement
  --> MySQL_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue  {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
  --> MySQL_Firefox_rootmode1_SoakTest_maxHours=5_fast=         {database='mySQL', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
  --> MySQL_Firefox_rootmode2_SmokeTest_maxHours=1.5_fast=tRue  {database='mySQL', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
  --> MySQL_Firefox_rootmode2_SoakTest_maxHours=5_fast=         {database='mySQL', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
- --> SQLite_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
+ --> SQLite_Firefox_rootmode1_SmokeTest_maxHours=1.5_fast=tRue {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'} [PRIMARY]
  --> SQLite_Firefox_rootmode1_SoakTest_maxHours=5_fast=        {database='SQLite', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
  --> SQLite_Firefox_rootmode2_SmokeTest_maxHours=1.5_fast=tRue {database='SQLite', browser='Firefox', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
  --> SQLite_Firefox_rootmode2_SoakTest_maxHours=5_fast=        {database='SQLite', browser='Firefox', testKind='SoakTest', maxHours='5', fast=''}
- --> MySQL_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue   {database='MySQL', browser='Chrome', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
- --> MySQL_Chrome_rootmode1_SoakTest_maxHours=5_fast=          {database='MySQL', browser='Chrome', testKind='SoakTest', maxHours='5', fast=''}
- --> MySQL_Chrome_rootmode2_SmokeTest_maxHours=1.5_fast=tRue   {database='MySQL', browser='Chrome', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
- --> MySQL_Chrome_rootmode2_SoakTest_maxHours=5_fast=          {database='MySQL', browser='Chrome', testKind='SoakTest', maxHours='5', fast=''}
+ --> SQLite_Chrome_rootmode1_SmokeTest_maxHours=1.5_fast=tRue  {database='SQLite', browser='Chrome', testKind='SmokeTest', maxHours=1.5, fast='tRue'} [PRIMARY]
+ --> SQLite_Chrome_rootmode1_SoakTest_maxHours=5_fast=         {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours='5', fast=''}
+ --> SQLite_Chrome_rootmode2_SmokeTest_maxHours=1.5_fast=tRue  {database='SQLite', browser='Chrome', testKind='SmokeTest', maxHours=1.5, fast='tRue'}
+ --> SQLite_Chrome_rootmode2_SoakTest_maxHours=5_fast=         {database='SQLite', browser='Chrome', testKind='SoakTest', maxHours='5', fast=''}

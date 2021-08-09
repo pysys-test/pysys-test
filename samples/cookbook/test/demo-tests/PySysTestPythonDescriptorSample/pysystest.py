@@ -59,18 +59,25 @@ __pysys_groups__           = "performance, disableCoverage; inherit=true"
 # using ``helper.project.PROPERTY_NAME``. Avoid expensive operations such as reading the file system from your lambda 
 # if possible. 
 # 
-# The first listed mode is the "primary" mode, which is the one that is used by default when executing tests with 
-# no ``--mode`` argument. 
+# An alternative to providing a list of dicts for each mode is to provide a dict whose keys are the mode names and 
+# values are dicts containing the parameters. 
+#
+# By default the first mode in each dimension is designated a *primary* mode (one that executes by default 
+# when no ``--modes`` argument is specified), but this can be overridden by setting ``'isPrimary': True/False`` 
+# in the dict for any mode. When mode dimensions are combined, a mode is primary is all the modes it is derived from 
+# were designated primary. When using modes for different execution environments/browsers etc you probably want only 
+# the first (typically fastest/simplest/most informative) mode to be primary, on the other hand if using modes to 
+# execute the same Python logic against various input files/args you should usually set all of the modes to be primary. 
 #
 # It's often useful to combine multiple mode 'dimensions', for example all the combinations of a list of web browsers 
 # with a list of databases, or compression methods and authentication types. Rather than writing out every combination 
 # manually, you can use the function ``helper.combineModeDimensions`` to automatically generate all combinations. 
 #
-# Modes can be used to define similar subtests that share the same test class logic, for example testing your 
-# application's output when given various different input test vectors. For this common use case, if you already (or 
+# Modes can be used to define multiple tests that share the same test class logic, for example testing your 
+# application's output when given various different input test vectors. For this use case, if you already (or 
 # plan to) define multiple execution modes inherited in a parent directory, you usually want to 
-# use ``helper.combineModeDimensions(helper.inheritedModes, [...])`` in your test so that each of the subtests you 
-# define in that second argument are executed in each of the inherited modes (if any). 
+# use ``helper.combineModeDimensions(helper.inheritedModes, helper.makeAllPrimary({...}))`` in your test so that each 
+# of the test scenarios you define in that second argument are executed in each of the inherited modes (if any). 
 #
 # A test can use self.mode to find out which mode it is executing and/or self.mode.params to access any parameters.
 #
@@ -79,16 +86,31 @@ __pysys_modes__            = r"""
 			mode for mode in 
 				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
-					[
-							{'mode':'CompressionNone', 'compressionType':None},
-							{'mode':'CompressionGZip', 'compressionType':'gzip'},
-					], 
+					{
+							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
+							'CompressionGZip': {'compressionType':'gzip'},
+					}, 
 					[
 						{'auth':None}, # Mode name is optional
 						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
-					]) 
-			# This is a Python list comprehension syntax for filtering the items in the list
-			if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
+					], 
+					
+					# By default only the first mode in each list is "primary", so the test will only run in that one mode by 
+					# default during local development (unless you supply a ``--modes`` or ``--ci`` argument). This is optimal when 
+					# using modes to validate the same behaviour/conditions in different execution environments e.g. 
+					# browsers/databases etc. However when using modes to validate different *behaviours/conditions* (e.g. testing 
+					# out different command line options) using a single PySysTest class, then you should have all your modes as 
+					# "primary" as you want all of them to execute by default in a quick local test run. 
+					helper.makeAllPrimary(
+						{
+							'Usage':        {'cmd': ['--help'], 'expectedExitStatus':'==0'}, 
+							'BadPort':      {'cmd': ['--port', '-1'],  'expectedExitStatus':'!=0'}, 
+							'MissingPort':  {'cmd': [],  'expectedExitStatus':'!=0'}, 
+						}), 
+					)
+				
+			# This is Python list comprehension syntax for filtering the items in the list
+			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
 		]
 	"""
 

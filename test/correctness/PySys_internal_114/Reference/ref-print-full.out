@@ -30,7 +30,7 @@ Test id:           Test4
 Test directory:    Test4
 Test title:        Test
 Test groups:       Group_4a, Group_4b
-Test modes:        Mode_4a, Mode_4b, Mode_4c
+Test modes:        Mode_4a [PRIMARY], Mode_4b, Mode_4c
 Test order hint:   34.0, 1054.0, 2024.0
 Test classname:    PySysTest; module: run.py
 

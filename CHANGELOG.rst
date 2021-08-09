@@ -205,7 +205,7 @@ just set the new ``pythonIndentationSpacesPerTab`` project property to a string 
 
 More powerful test modes
 ------------------------
-This PySys release adds some big usability improvements for defining and using modes:
+This PySys release adds some big usability improvements for defining and using modes.
 
 A more powerful and flexible configuration format is now provided for defining modes, which uses a Python 
 lambda to provide the list of modes. Each mode can now define any number of 'parameters' to avoid the need to 
@@ -223,9 +223,9 @@ The mode name can be automatically generated from the parameters, or provided ex
 For those still using ``pysystest.xml`` files, the same Python lambda can also be added in your ``<modes>...</modes>`` 
 element. 
 
-There is also a helper function provided to combine multiple mode "dimensions" together, for example every combination 
-of your supported databases and your supported web browsers. This allows for some quite sophisticated logic to 
-generate the mode list such as:
+There is also a helper function provided (in `pysys.config.descriptor.TestModesConfigHelper.combineModeDimensions`) 
+to combine multiple mode "dimensions" together, for example every combination of your supported databases and your 
+supported web browsers. This allows for some quite sophisticated logic to generate the mode list such as:
 
 .. code-block:: python
 	
@@ -234,18 +234,36 @@ generate the mode list such as:
 			mode for mode in 
 				helper.combineModeDimensions( # Takes any number of mode lists as arguments and returns a single combined mode list
 					helper.inheritedModes,
-					[
-							{'mode':'CompressionNone', 'compressionType':None},
-							{'mode':'CompressionGZip', 'compressionType':'gzip'},
-					], 
+					{
+							'CompressionNone': {'compressionType':None, 'isPrimary':True}, 
+							'CompressionGZip': {'compressionType':'gzip'},
+					}, 
 					[
 						{'auth':None}, # Mode name is optional
 						{'auth':'OS'}, # In practice auth=OS modes will always be excluded since MyFunkyOS is a fictional OS
-					]) 
-			# This is a Python list comprehension syntax for filtering the items in the list
-			if mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS'
+					],
+					helper.makeAllPrimary(
+						{
+							'Usage':         {'cmd': ['--help'], 
+								'expectedExitStatus':'==0', 'expectedMessage':None}, 
+							'BadPort':       {'cmd': ['--port', '-1'],  
+								'expectedExitStatus':'!=0', 'expectedMessage':'Server failed: Invalid port number specified: -1'}, 
+							'SetPortTwice':  {'cmd': ['--port', '123', '--config', helper.testDir+'/myserverconfig.json'], 
+								'expectedExitStatus':'!=0', 'expectedMessage':'Server failed: Cannot specify port twice'}, 
+						}), 
+					) 
+			# This is Python list comprehension syntax for filtering the items in the list
+			if (mode['auth'] != 'OS' or helper.import_module('sys').platform == 'MyFunkyOS')
 		]
 	"""
+
+You can specify each dimension of modes either as a dict or a list (the latter is required to benefit from automatic 
+generation of the mode name from the parameters). 
+
+Previously there was just one mode designated as *primary*, which would run when no explicit ``--modes`` or ``--ci`` 
+argument was specified. Now it is possible to configure multiple modes as primary (see above), and there is a helper 
+method to add ``'isPrimary':True`` to a whole list/dict of modes which is handy when using modes for testing 
+different test scenarios where you really want all of them executed by default even during quick local test runs. 
 
 For more details see :doc:`TestDescriptors`, :doc:`UserGuide` and the Getting Started sample. 
 
@@ -423,6 +441,11 @@ affect many users:
   - The deprecated ``pysys.process._stringToUnicode`` is now removed. 
   - The ``pysys run --ci`` flag now excludes tests tagged with group ``manual`` (in addition to excluding the 
     ``manual`` test type, since pysystest.py descriptors use groups for this rather than test type). 
+  - Removed the ``primaryMode`` attribute from `pysys.config.descriptor.TestDescriptor`, as this information is now 
+    stored in the `pysys.config.descriptor.TestMode` object. 
+  - If you created a custom `pysys.config.descriptor.DescriptorLoader` subclass to manipulate modes, you need to change 
+    it to work with `pysys.config.descriptor.TestMode` objects instead of strings, and to set at least one of them 
+    to be a primary mode. 
 
 Deprecations:
 

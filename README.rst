@@ -31,7 +31,9 @@ Key features include:
 - Ability to cycle a test many times (and in parallel) to reproduce rare race 
   conditions. 
 - Support for executing the same test in several modes during your test 
-  run (for example against different web browsers, databases, etc). 
+  run (for example against different web browsers, databases, etc). Python 
+  lambda expressions give the power to easily create complex and dynamic lists of 
+  modes that combine multi-dimensional parameter matrices. 
 - A process memory monitoring framework to check for memory leaks when soak 
   testing your application.
 - A performance monitoring framework for recording and aggregating latency, 

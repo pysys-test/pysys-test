@@ -22,7 +22,7 @@ To use this project all you need is Python 3.6+, and the latest version of PySys
 
 To run just test MyServer_001:
 
-	pysys.py run 001
+	pysys.py run 1
 
 PySys includes support for GitHub actions, and you can see the results of executing this test project in the 
 [Actions](../../actions) tab for this repo. 
@@ -50,17 +50,17 @@ For more information about the commands you see in the tests, see the [PySys doc
 
 If you want to re-run just the validation part of a test (which is a big time-saver during test development):
 
-	pysys.py run 001 --validateOnly
+	pysys.py run 1 --validateOnly
 
 PySys makes it easy to reproduce race conditions in your application by cycling a failing testcase many times, and to  
 run multiple test jobs concurrently for faster execution:
 
-	pysys.py run 001 --cycle=20 -j5
+	pysys.py run 1 --cycle=20 -j5
 
 The 003 test demonstrates the PySys concept of running a test in multiple "modes". By default just the primary mode is 
 executed, but to run all the available modes, just use --mode=ALL:
 
-	pysys.py run 003 --mode=ALL
+	pysys.py run 3 --mode=ALL
 
 There is also a performance test, and just to show that numbers aren't essential in test ids, this is given a name 
 ("SensorValuesEndpoint") rather than a number. It has a class variable called "iterations" which controls how long the 

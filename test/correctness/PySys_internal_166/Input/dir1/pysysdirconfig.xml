@@ -6,8 +6,8 @@
 					Initial letter of mode will be auto-capitalized 
 				-->
 				{"database":"mySQL",  "browser":"Firefox"},
-				{"database":"SQLite", "browser":"Firefox"},
-				{"database":"MySQL",  "browser":"Chrome"},
+				{"database":"SQLite", "browser":"Firefox", "isPrimary":True},
+				{"database":"SQLite",  "browser":"Chrome", "isPrimary":True},
 			], 
 			helper.inheritedModes,
 			<!-- Empty dimensions are ignored -->

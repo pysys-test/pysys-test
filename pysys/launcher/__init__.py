@@ -130,7 +130,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 						raise UserError('Cannot have multiple modes with same name but different capitalization: "%s" and "%s"'%(m, canonicalmodecapitalization))
 				
 				# apply modes filter
-				isprimary = m==d.primaryMode
+				isprimary = getattr(m, 'isPrimary', False) # use getattr in case a pre-2.0 str has crept in from a custom DescriptorLoader
 				
 				# excludes 
 				if isprimary and MODES_PRIMARY in modeexcludes: continue
@@ -341,7 +341,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 			hint = d.executionOrderHint
 			for hintdelta, hintmatcher in project.executionOrderHints:
 				if hintmatcher(d.groups, mode): hint += hintdelta
-			if mode: 
+			if mode and not getattr(mode, 'isPrimary', False): # bit of a fudge in the case of isPrimary!=(index==0) but good enough
 				hint += project.executionOrderSecondaryModesHintDelta * (d.modes.index(mode))
 			return hint
 		

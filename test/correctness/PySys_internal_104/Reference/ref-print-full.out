@@ -17,12 +17,13 @@
       "authors": [],
       "created": null,
       "modes": {
-         "root-mode1": {},
+         "root-mode1": {
+            "isPrimary": true
+         },
          "root-mode2": {},
          "dir2-mode": {},
          "dir3-mode": {}
       },
-      "primaryMode": "root-mode1",
       "requirements": [
          "root-req1",
          "root-req2",
@@ -66,12 +67,13 @@
       ],
       "created": "1999-12-31",
       "modes": {
-         "root-mode1": {},
+         "root-mode1": {
+            "isPrimary": true
+         },
          "root-mode2": {},
          "testcase-mode1": {},
          "testcase-mode2": {}
       },
-      "primaryMode": "root-mode1",
       "requirements": [
          "root-req1",
          "root-req2",
@@ -111,10 +113,11 @@
       "authors": [],
       "created": null,
       "modes": {
-         "root-mode1": {},
+         "root-mode1": {
+            "isPrimary": true
+         },
          "root-mode2": {}
       },
-      "primaryMode": "root-mode1",
       "requirements": [
          "root-req1",
          "root-req2"
@@ -148,9 +151,10 @@
       "authors": [],
       "created": null,
       "modes": {
-         "TestSpecificMode": {}
+         "TestSpecificMode": {
+            "isPrimary": true
+         }
       },
-      "primaryMode": "TestSpecificMode",
       "requirements": [
          "root-req1",
          "root-req2"

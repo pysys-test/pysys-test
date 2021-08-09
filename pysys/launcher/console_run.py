@@ -144,7 +144,7 @@ Selection and filtering options
    -G, --grep      STRING      run only tests whose title or id contains the specified regex (case insensitive)
    -m, --mode, --modeinclude ALL,PRIMARY,!PRIMARY,MyMode1,!MyMode2,...
                                run tests in the specifies mode(s):
-                                 - use PRIMARY to select the test's first/main mode (this is the default)
+                                 - use PRIMARY to select the test's first/main mode(s) (this is the default)
                                  - use ALL to select all modes
                                  - use !MODE as an alias for modeexclude
                                  - regular expressions can be used
@@ -165,7 +165,7 @@ to select an individual test, or a sequence of numbered tests:
    Test_001                   - a single testcase with id equal to or ending with Test_001
    _001                       - a single testcase with id equal to or ending with _001
    1                          - a single testcase ending with number 1 (but not ending '11')
-                                (if it has multiple modes, runs the primary one, or uses --mode)
+                                (if it has multiple modes, runs the primary mode(s), or uses --mode)
    Test_001~ModeA             - run testcase with id Test_001 in ModeA
    :Test_002                  - all tests up to and including the testcase with id Test_002
    Test_001:                  - all tests from Test_001 onwards

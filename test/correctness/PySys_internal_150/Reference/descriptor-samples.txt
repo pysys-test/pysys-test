@@ -7,7 +7,7 @@ Test purpose:      The purpose of this test is ... TODO.
 Test created:      1999-12-31; authors: mememe
 Test groups:       performance, disableCoverage, dirConfigSample
 Test modes:        
- --> CompressionNone_Auth=None  {compressionType=None, auth=None}
+ --> CompressionNone_Auth=None  {compressionType=None, auth=None} [PRIMARY]
  --> CompressionGZip_Auth=None  {compressionType='gzip', auth=None}
  --> CompressionNone_Auth=Basic {compressionType=None, auth='AuthBasic'}
 Test order hint:   100.0, 200.0, 300.0
@@ -30,9 +30,13 @@ Test purpose:      The purpose of this test is to check that
 Test created:      2021-07-25; authors: userid1, userid2, Joe Bloggs
 Test groups:       performance, disableCoverage
 Test modes:        
- --> CompressionNone_Auth=None {compressionType=None, auth=None}
- --> CompressionGZip_Auth=None {compressionType='gzip', auth=None}
-Test order hint:   100.0, 200.0
+ --> CompressionNone_Auth=None_Usage       {compressionType=None, auth=None, cmd=['--help'], expectedExitStatus='==0'} [PRIMARY]
+ --> CompressionNone_Auth=None_BadPort     {compressionType=None, auth=None, cmd=['--port', '-1'], expectedExitStatus='!=0'} [PRIMARY]
+ --> CompressionNone_Auth=None_MissingPort {compressionType=None, auth=None, cmd=[], expectedExitStatus='!=0'} [PRIMARY]
+ --> CompressionGZip_Auth=None_Usage       {compressionType='gzip', auth=None, cmd=['--help'], expectedExitStatus='==0'}
+ --> CompressionGZip_Auth=None_BadPort     {compressionType='gzip', auth=None, cmd=['--port', '-1'], expectedExitStatus='!=0'}
+ --> CompressionGZip_Auth=None_MissingPort {compressionType='gzip', auth=None, cmd=[], expectedExitStatus='!=0'}
+Test order hint:   100.0, 100.0, 100.0, 400.0, 500.0, 600.0
 Test classname:    PySysTest; module: <rootdir>/pysys-extensions/MySharedTestClass.py
 Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput
@@ -50,9 +54,13 @@ Test purpose:      This is a good place for a fuller description of what is in a
 Test created:      1999-12-31; authors: userid1, userid2, Joe Bloggs
 Test groups:       performance, disableCoverage
 Test modes:        
- --> CompressionNone_Auth=None {compressionType=None, auth=None}
- --> CompressionGZip_Auth=None {compressionType='gzip', auth=None}
-Test order hint:   100.0, 200.0
+ --> CompressionNone_Auth=None_Usage       {compressionType=None, auth=None, cmd=['--help'], expectedExitStatus='==0'} [PRIMARY]
+ --> CompressionNone_Auth=None_BadPort     {compressionType=None, auth=None, cmd=['--port', '-1'], expectedExitStatus='!=0'} [PRIMARY]
+ --> CompressionNone_Auth=None_MissingPort {compressionType=None, auth=None, cmd=[], expectedExitStatus='!=0'} [PRIMARY]
+ --> CompressionGZip_Auth=None_Usage       {compressionType='gzip', auth=None, cmd=['--help'], expectedExitStatus='==0'}
+ --> CompressionGZip_Auth=None_BadPort     {compressionType='gzip', auth=None, cmd=['--port', '-1'], expectedExitStatus='!=0'}
+ --> CompressionGZip_Auth=None_MissingPort {compressionType='gzip', auth=None, cmd=[], expectedExitStatus='!=0'}
+Test order hint:   100.0, 100.0, 100.0, 400.0, 500.0, 600.0
 Test classname:    PySysTest; module: <rootdir>/pysys-extensions/MySharedTestClass.py
 Test input:        <rootdir>/pysys-extensions/my_shared_input_files
 Test output:       MyOutput

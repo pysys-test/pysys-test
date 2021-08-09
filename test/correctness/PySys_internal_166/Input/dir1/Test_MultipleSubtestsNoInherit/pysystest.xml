@@ -12,9 +12,14 @@
   <classification>
   
 		<modes>
-		lambda modes: [{'subtest':"subtest1!!!!", 'iterations':"100"}, <!-- invalid chars will be stripped out -->
-			{'subtest':"subtest2", 'iterations':"1000"}
-			]
+		lambda helper: helper.combineModeDimensions(
+			[{'subtest':"subtest1!!!!", 'iterations':"100"}, <!-- invalid chars will be stripped out -->
+				{'subtest':"subtest2", 'iterations':"1000"}
+			],
+			{
+				'MyModeA':{'myParamA':123},
+				'MyModeB':{'myParamA':456},
+			})
 		</modes>
 		
   </classification>
