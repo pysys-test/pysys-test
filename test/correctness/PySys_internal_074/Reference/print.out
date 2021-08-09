@@ -17,7 +17,8 @@ Test title:        Category TODO - Test title (short, specific and sortable!) go
 Test purpose:      The purpose of this test is ... TODO.
 Test created:      <date waz here>; authors: pysystestuser
 Test groups:       myGroup, disableCoverage, performance
-Test modes:        MyMode
+Test modes:        
+ --> MyMode {MyParam=123}
 Test order hint:   0.0
 Test classname:    PySysTest; module: pysystest.py
 Test traceability: Bug-1234, UserStory-456
