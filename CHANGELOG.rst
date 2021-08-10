@@ -22,7 +22,7 @@ Highlights from this release are:
 - Removal of Python 2 and 3.5 support, and addition of Python 3.9. 
 - A new standard test structure that avoids the use of XML by allowing descriptor values such as test title to be 
   specified alongside your Python test class in a ``pysystest.py`` file, and changing the default ``self.input`` 
-  directory (for new projects) to be the main testDir instead of an ``Input/`` subdirectory. 
+  directory (for new projects) to be the main ``testDir`` instead of an ``Input/`` subdirectory. 
 - Some big extensions to the concept of "modes", allowing for more powerful configuration and use, including 
   multi-dimensional modes. 
 - A new template-based test maker, allowing easy configuration of how new tests are created on a per-directory basis, 
@@ -69,7 +69,7 @@ For a full example of all the possible options (including more details on the su
 parse correctly) see :doc:`TestDescriptors`.  
 
 Note that the ``=====`` characters act not only as an underline but also provide a guide to help test authors know 
-when their title string has exceeded 80 characters which should be avoided if possible to make pysys print output 
+when their title string has exceeded 80 characters which should be avoided if possible to make ``pysys print`` output 
 easy to read. The character and length of this guide can be customized with project property 
 ``pysystestTemplateLineLengthGuide`` if desired. 
 
@@ -79,7 +79,7 @@ populated when using ``pysys make``, but would need to be manually updated if yo
 such as copying from an existing test. 
 
 Actually PySys will recognize *any* file named ``pysystest.*`` (case insensitive) as a test not just ``pysystest.py``, 
-so the same mechanism can be used for non-Python languages, for example a file named ``PySysTest.cs` would also be 
+so the same mechanism can be used for non-Python languages, for example a file named ``PySysTest.cs`` would also be 
 identified as a PySys test. It just needs to contain at least a ``__pysys_title__ = ...``, and there would need to be 
 an associated Python class for executing it (could be configured in the same file or in a parent 
 ``pysysdirconfig.xml``). 
@@ -178,9 +178,9 @@ For customizing the PySysTest class the best approach is usually to create a ``p
 containing ``@@DEFAULT_DESCRIPTOR@@`` to include the default PySys descriptor values (this means your template will 
 automatically benefit from any future changes to the defaults), and put it in a ``_pysys_templates/<templatename>`` 
 directory alongside the ``pysystestdir.xml`` file. The ``_pysys_templates`` directory should contain a file 
-named ``.pysysignore`` file (which avoids the template being loaded as a real test). 
+named ``.pysysignore`` (which avoids the template being loaded as a real test). 
 
-other options are possible (as above) e.g. copying files from an absolute location such as under your project's 
+Other options are possible (as above) such as copying files from an absolute location such as under your project's 
 ``${testRootDir}``, copying from PySys default templates directly (if you just want to *add* files) by 
 using ``${pysysTemplatesDir}/default-test/*``, or copying from a path relative to the XML file where the template is 
 defined containing a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
@@ -192,8 +192,8 @@ is selected, but you can also specify any other template by name using the ``-t`
 templates for the current directory using ``--help``. 
 
 If you are using numeric suffixes (and assuming you don't have different prefixes in the same directory - not 
-recommended!) you can now omit the test id argument and PySys will automatically pick one by incrementing the largest 
-existing numeric id. 
+recommended!) you can now omit the test identifier/directory name argument and PySys will automatically pick one by 
+incrementing the largest existing numeric identifier. 
 
 It is possible to subclass the `pysys.launcher.console_make.DefaultTestMaker` responsible for this logic if needed. 
 The main reason to do that is to provide a `pysys.launcher.console_make.DefaultTestMaker.validateTestId` method 
@@ -208,7 +208,7 @@ More powerful test modes
 This PySys release adds some big usability improvements for defining and using modes.
 
 A more powerful and flexible configuration format is now provided for defining modes, which uses a Python 
-lambda to provide the list of modes. Each mode can now define any number of 'parameters' to avoid the need to 
+lambda to provide the list of modes. Each mode can now define any number of *parameters* to avoid the need to 
 parse/unpack from the mode string itself; these can then be accessed from a ``self.mode.params`` dictionary. 
 The mode name can be automatically generated from the parameters, or provided explicitly. 
 
@@ -267,7 +267,7 @@ different test scenarios where you really want all of them executed by default e
 
 For more details see :doc:`TestDescriptors`, :doc:`UserGuide` and the Getting Started sample. 
 
-There are also improvements to pysys.py's command line support for modes:
+There are also improvements to the ``pysys.py`` command line support for modes:
 
 - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 
   a desired subset of modes.    
