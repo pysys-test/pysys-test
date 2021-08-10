@@ -339,147 +339,138 @@ BaseTest API improvements
 -------------------------
 The most significant are:
 
-  - The unwieldy `BaseTest.getExprFromFile` is superceded (though not actually deprecated) by the simpler functions 
-    `BaseTest.grep`, `BaseTest.grepOrNone` and `BaseTest.grepAll` which provide the same capability but with more 
-    memorable/understandable names. 
-  - Added `BaseTest.unpackArchive` to make it easy to store large Input/ assets such as log files compressed 
-    (``.xz/.tar.xz`` recommended for efficiency, but several other archive types also supported). The unpacked files 
-    are automatically deleted during test cleanup to avoid consuming unnecessary disk space (especially if the test 
-    fails). 
-  - Added `pysys.constants.PREFERRED_ENCODING` which should be used in testcases instead of 
-    ``locale.getpreferredencoding()`` to avoid thread-safety issues. 
-  - Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` or 
-    `BaseTest.assertThatGrep` fail, for both primitive values and list/dict values.
-  - Added `pysys.utils.fileutils.listDirContents` for creating a normalized list of the files/directories contained 
-    recursively within a specified directory. This is useful as input for assertions. 
-  - Changed `pysys.writer.outcomes.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
-    attribute, and changed the failure node to be::
-    
-      <failure message="OUTCOME: Outcome reason" type="OUTCOME"/>
-      
-    (where OUTCOME could be FAILED, BLOCKED, etc) instead of::
-  
-      <failure message="OUTCOME">Outcome reason</failure>
-  
-    This may produce better error indicators in CI systems and IDEs that parse these files. 
+- The unwieldy `BaseTest.getExprFromFile` is superceded (though not actually deprecated) by the simpler functions 
+	`BaseTest.grep`, `BaseTest.grepOrNone` and `BaseTest.grepAll` which provide the same capability but with more 
+	memorable/understandable names. 
+- Added `BaseTest.unpackArchive` to make it easy to store large Input/ assets such as log files compressed 
+	(``.xz/.tar.xz`` recommended for efficiency, but several other archive types also supported). The unpacked files 
+	are automatically deleted during test cleanup to avoid consuming unnecessary disk space (especially if the test 
+	fails). 
+- Added `pysys.constants.PREFERRED_ENCODING` which should be used in testcases instead of 
+	``locale.getpreferredencoding()`` to avoid thread-safety issues. 
+- Improved usability of the colour highlighting and difference marker when `BaseTest.assertThat` or 
+	`BaseTest.assertThatGrep` fail, for both primitive values and list/dict values.
+- Added `pysys.utils.fileutils.listDirContents` for creating a normalized list of the files/directories contained 
+	recursively within a specified directory. This is useful as input for assertions. 
+- Changed `pysys.writer.outcomes.JUnitXMLResultsWriter` output to be more standards-compliant: added the ``timestamp`` 
+	attribute, and changed the failure node to be::
+	
+		<failure message="OUTCOME: Outcome reason" type="OUTCOME"/>
+		
+	(where OUTCOME could be FAILED, BLOCKED, etc) instead of::
+
+		<failure message="OUTCOME">Outcome reason</failure>
+
+	This may produce better error indicators in CI systems and IDEs that parse these files. 
 
 Additional improvements which will be of use to some users:
 
-  - Added `pysys.constants.EXE_SUFFIX` which is ``.exe`` on Windows and empty string on Unix. This is convenient 
-    when running executables. 
-  - Improved the failure messages for `BaseTest.assertGrep` (with contains=False) and `BaseTest.assertLineCount` 
-    (with condition="==0") to include both the first matching expression and the total number of matches. This 
-    is useful when checking log files for unexpected errors and warnings. 
-  - Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
-    pool of TCP ports. 
-  - Added ``key`` field to `pysys.process.user.STDOUTERR_TUPLE` to make it easier to create log file paths that match 
-    a process's stdout/stderr files. 
-  - Added `pysys.utils.safeeval.safeEval` for cases where you want to evaluate a Python eval string from a test 
-    plugin, for example "expected >= value". The string is evaluated in a minimal namespace unpolluted by the 
-    current module/test, but including access to standard Python modules such as ``os/sys/math`` and PySys constants. 
-  - Added ``includeCoverageFromPySysProcess`` option to `pysys.writer.coverage.PythonCoverageWriter` which is useful 
-    for measuring code coverage when testing custom PySys plugins. 
-  - Added ``testobj`` argument to `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` in case you wish 
-    to provide different runDetails based on some feature of the test object or mode. 
-  - Added `BaseTest.pollWait` which should be used instead of ``time.sleep`` when polling for something to happen 
-    without any log messages (or the existing `BaseTest.wait` for longer polls where you do want logging). 
-  - `pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
-    so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
-    occasional failures of the process monitoring. 
-  - Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
-    its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
-    refer to the old name). 
-  - Added `BaseTest.deleteFile()` which provides a simple and safe way to delete a file similar to the 
-    `BaseTest.deleteDir()` method. 
-  - Added a ``quiet=True/False`` option to `BaseTest.waitForGrep` to disable the INFO-level logging. 
+- Added `pysys.constants.EXE_SUFFIX` which is ``.exe`` on Windows and empty string on Unix. This is convenient 
+	when running executables. 
+- Improved the failure messages for `BaseTest.assertGrep` (with contains=False) and `BaseTest.assertLineCount` 
+	(with condition="==0") to include both the first matching expression and the total number of matches. This 
+	is useful when checking log files for unexpected errors and warnings. 
+- Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
+	pool of TCP ports. 
+- Added ``key`` field to `pysys.process.user.STDOUTERR_TUPLE` to make it easier to create log file paths that match 
+	a process's stdout/stderr files. 
+- Added `pysys.utils.safeeval.safeEval` for cases where you want to evaluate a Python eval string from a test 
+	plugin, for example "expected >= value". The string is evaluated in a minimal namespace unpolluted by the 
+	current module/test, but including access to standard Python modules such as ``os/sys/math`` and PySys constants. 
+- Added ``includeCoverageFromPySysProcess`` option to `pysys.writer.coverage.PythonCoverageWriter` which is useful 
+	for measuring code coverage when testing custom PySys plugins. 
+- Added ``testobj`` argument to `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` in case you wish 
+	to provide different runDetails based on some feature of the test object or mode. 
+- Added `BaseTest.pollWait` which should be used instead of ``time.sleep`` when polling for something to happen 
+	without any log messages (or the existing `BaseTest.wait` for longer polls where you do want logging). 
+- `pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
+	so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
+	occasional failures of the process monitoring. 
+- Moved the recently introduced ``pysys.writer.testoutput.PythonCoverageWriter`` to 
+	its own module `pysys.writer.coverage.PythonCoverageWriter` (without breaking existing configuration files that 
+	refer to the old name). 
+- Added `BaseTest.deleteFile()` which provides a simple and safe way to delete a file similar to the 
+	`BaseTest.deleteDir()` method. 
+- Added a ``quiet=True/False`` option to `BaseTest.waitForGrep` to disable the INFO-level logging. 
 
 Fixes
 -----
-  - Fixed the project property ``defaultEnvirons.ENVVAR`` added in 1.6.0 which did not in fact set the environment 
-    variable as described (due to an additional unwanted ``.`` character); now it does. 
-  - Avoid creating unnecessary runner output directory as a result of ``mkdir(runner.output+'/../xxx')`` by 
-    normalizing paths before calling mkdir. 
-  - Fixed `BaseTest.assertLineCount` bug in which ``reFlags`` parameter was not honoured. 
-  - Fixed numerous Python warnings. 
-  - Fixed bug in which `pysys.utils.fileutils.toLongPathSafe` and `pysys.utils.fileutils.mkdir` would incorrectly 
-    capitalize the first letter when passed a relative path. 
-  - Improved the formatting of ``pysys print --full`` so it is easier to read. Most items with empty or default values 
-    are no longer shown, so you can focus on the information that's actually interesting. 
-  - Fixed bug in which ``--modes`` argument would not be honoured if running tests with ``--ci``. 
+- Fixed the project property ``defaultEnvirons.ENVVAR`` added in 1.6.0 which did not in fact set the environment 
+	variable as described (due to an additional unwanted ``.`` character); now it does. 
+- Avoid creating unnecessary runner output directory as a result of ``mkdir(runner.output+'/../xxx')`` by 
+	normalizing paths before calling mkdir. 
+- Fixed `BaseTest.assertLineCount` bug in which ``reFlags`` parameter was not honoured. 
+- Fixed numerous Python warnings. 
+- Fixed bug in which `pysys.utils.fileutils.toLongPathSafe` and `pysys.utils.fileutils.mkdir` would incorrectly 
+	capitalize the first letter when passed a relative path. 
+- Improved the formatting of ``pysys print --full`` so it is easier to read. Most items with empty or default values 
+	are no longer shown, so you can focus on the information that's actually interesting. 
+- Fixed bug in which ``--modes`` argument would not be honoured if running tests with ``--ci``. 
 
 Migration notes
 ---------------
-Aside from the removal of Python 2 and 3.5 support, these are largely minor edge cases that will not 
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+Aside from the removal of Python 2 and 3.5 support, the breaking changes are edge cases that will not 
 affect many users:
 
-  - The minimum supported Python version is now 3.6. 
-  - It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
-    ``locale.getpreferredencoding()``, to avoid thread-safety issues. 
-  - It is now an error to have multiple test descriptor filenames in a single directory, for example ``pysystest.py`` 
-    and ``pysystest.xml``. 
-  - If a test's title ends with ``goes here TODO`` then the test will report a ``BLOCKED`` outcome, to encourage 
-    test authors to remember to fill it in. This could cause some existing tests to start blocking, though only if 
-    you have added a title ending with ``goes here TODO``. 
-  - When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
-    character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
-    mappers. This is also now more clearly documented. 
-  - Removed undocumented internal module ``pysys.utils.loader``; no-one should be using this; if you are, use Python's 
-    ``importlib.import_module()`` instead. 
-  - The deprecated ``supportMultipleModesPerRun`` project property can no longer be used - please change your tests to 
-    use the modern modes approach instead. 
-  - If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signature for 
-    `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and 
-    `pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter. 
-    Although this should not immediately break existing applications, to avoid future breaking changes you should 
-    update the signature of those methods if you override them to accept ``testobj`` and also any artibrary 
-    ``**kwargs`` that may be added in future. 
-  - The ``--json`` output of ``pysys.py print`` now has a dict representing the modes and their parameters 
-    for the ``modes`` value instead of a simple list. 
-  - On Windows the ``testDir`` (and input/output/reference dirs) no longer start with the ``\\?\`` long-path safe 
-    prefix; instead this can be added for operations where it is needed (as several key PySys methods alreayd do, e.g. 
-    ``self.copy``). It is recommended to avoid nesting tests so deeply that long path support is needed. 
-  - The deprecated ``pysys.process._stringToUnicode`` is now removed. 
-  - The ``pysys run --ci`` flag now excludes tests tagged with group ``manual`` (in addition to excluding the 
-    ``manual`` test type, since pysystest.py descriptors use groups for this rather than test type). 
-  - Removed the ``primaryMode`` attribute from `pysys.config.descriptor.TestDescriptor`, as this information is now 
-    stored in the `pysys.config.descriptor.TestMode` object. 
-  - If you created a custom `pysys.config.descriptor.DescriptorLoader` subclass to manipulate modes, you need to change 
-    it to work with `pysys.config.descriptor.TestMode` objects instead of strings, and to set at least one of them 
-    to be a primary mode. 
+- The minimum supported Python version is now 3.6. 
+- The deprecated ``supportMultipleModesPerRun`` project property can no longer be used - please change your tests to 
+	use the modern modes approach instead. 
+- When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
+	character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
+	mappers. This is also now more clearly documented. 
+- If you created a custom `pysys.config.descriptor.DescriptorLoader` subclass to manipulate modes, you need to change 
+	it to work with `pysys.config.descriptor.TestMode` objects instead of strings, and to set at least one of them 
+	to be a primary mode. 
+- It is now an error to have multiple ``pysystest.*`` filenames in a single directory, for example ``pysystest.py`` 
+	and ``pysystest.xml``. 
+- If a test's title ends with ``goes here TODO`` then the test will report a ``BLOCKED`` outcome, to encourage 
+	test authors to remember to fill it in. This could cause some existing tests to start blocking, though only if 
+	you have added a title ending with ``goes here TODO``. 
+- Removed undocumented internal module ``pysys.utils.loader``; no-one should be using this; if you are, use Python's 
+	``importlib.import_module()`` instead. 
+- On Windows the ``testDir`` (and input/output/reference dirs) no longer start with the ``\\?\`` long-path safe 
+	prefix; instead this can be added for operations where it is needed (as several key PySys methods already do, e.g. 
+	``self.copy``). It is recommended to avoid nesting tests so deeply that long path support is needed. 
+- The ``pysys run --ci`` flag now excludes tests tagged with group ``manual`` (in addition to excluding the 
+	``manual`` test type, since pysystest.py descriptors use groups for this rather than test type). 
+- The ``--json`` output of ``pysys.py print`` now has a dict representing the modes and their parameters 
+	for the ``modes`` value instead of a simple list. 
+- Removed the ``primaryMode`` attribute from `pysys.config.descriptor.TestDescriptor`, as this information is now 
+	stored in the `pysys.config.descriptor.TestMode` object. 
+- The deprecated ``pysys.process._stringToUnicode`` method is now removed, since in Python 3 it is a no-op. 
 
-Deprecations:
+Deprecations
+~~~~~~~~~~~~
 
-  - The ``pysys.xml`` package has been renamed to `pysys.config` to provide a more logical home for test descriptors 
-    and project configuration. Aliases exist so you nothing should break unless you're explicitly referencing 
-    or adding to the ``pysys/xml/templates`` directory. However it is recommended to find/rename your framework 
-    extensions to use the new name as the ``pysys.xml`` module name is deprecated and will be removed in a future 
-    release. 
-  - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. 
-  - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
-  - The old ``<mode>`` elements are deprecated in favour of the new Python lambda syntax 
-    (support for these they won't be removed any time soon, but are discouraged for new tests). 
-  - The `pysys.utils.pycompat` module is now deprecated. 
-  - The ``ConsoleMakeTestHelper`` class is now deprecated in favour of `pysys.launcher.console_maker.DefaultTestMaker`. 
+- The ``pysys.xml`` package has been renamed to `pysys.config` to provide a more logical home for test descriptors 
+	and project configuration. Aliases exist so you nothing should break unless you're explicitly referencing 
+	or adding to the ``pysys/xml/templates`` directory. However it is recommended to find/rename your framework 
+	extensions to use the new name as the ``pysys.xml`` module name is deprecated and will be removed in a future 
+	release. 
+- The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. 
+- The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
+- The old ``<mode>`` elements are deprecated in favour of the new Python lambda syntax 
+	(support for these they won't be removed any time soon, but are discouraged for new tests). 
+- The `pysys.utils.pycompat` module is now deprecated. 
+- The ``ConsoleMakeTestHelper`` class is now deprecated in favour of `pysys.launcher.console_maker.DefaultTestMaker`. 
+- If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signature for 
+	`pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and 
+	`pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter. 
+	Although this should not immediately break existing applications, to avoid future breaking changes you should 
+	update the signature of those methods if you override them to accept ``testobj`` and also any artibrary 
+	``**kwargs`` that may be added in future. 
 
-By default ``pysys make`` will generate tests with a new-style ``pysystest.py`` file, but if you prefer to keep your 
-project using the old ``pysystest.xml`` and ``run.py`` structure, just add this to your pysysdirconfig to tell 
-``pysys make`` to use an XML-based test template::
+Recommendations
+~~~~~~~~~~~~~~~
+It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
+``locale.getpreferredencoding()``, to avoid thread-safety issues. 
 
-	<pysysdirconfig>
-
-		<maker-template name="pysys-xml-test" description="an old-style test with pysystest.xml and run.py" 
-			copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
-
-	</pysysdirconfig>
-
-Many users will prefer to use the new ``pysystest.py`` style for newly created tests alongside older tests using
-the ``pysystest.xml`` style. However for anyone who wants to switch entirely to the new style, a utility script for 
-automatically converting ``pysystest.xml`` + ``run.py`` tests to ``pysystest.py`` (without losing 
-version control history) is provided as part of the cookbook sample 
-at: https://github.com/pysys-test/sample-cookbook/tree/main/util_scripts/pysystestxml_upgrader.py
-
-Existing projects are recommended to explicitly specify what directory they wish to use to store test input 
-by specifying one the following three ``<input-dir>`` configurations::
+As the default will change in a future release, existing PySys projects are recommended to explicitly specify what 
+directory they wish to use to store test input by specifying one of the following 3 ``<input-dir>`` configurations::
 
 	<pysysproject>
 	
@@ -500,6 +491,22 @@ by specifying one the following three ``<input-dir>`` configurations::
 	
 	</pysysproject>
 
+By default ``pysys make`` will generate tests with a new-style ``pysystest.py`` file, but if you prefer to keep your 
+project using the old ``pysystest.xml`` and ``run.py`` structure, just add this to your pysysdirconfig to tell 
+``pysys make`` to use an XML-based test template::
+
+	<pysysdirconfig>
+
+		<maker-template name="pysys-xml-test" description="an old-style test with pysystest.xml and run.py" 
+			copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
+
+	</pysysdirconfig>
+
+Many users will prefer to use the new ``pysystest.py`` style for newly created tests alongside older tests using
+the ``pysystest.xml`` style. However for anyone who wants to switch entirely to the new style, a utility script for 
+automatically converting ``pysystest.xml`` + ``run.py`` tests to ``pysystest.py`` (without losing 
+version control history) is provided as part of the cookbook sample 
+at: https://github.com/pysys-test/sample-cookbook/tree/main/util_scripts/pysystestxml_upgrader.py
 
 -------------------
 What's new in 1.6.1
@@ -508,18 +515,18 @@ What's new in 1.6.1
 PySys 1.6.1 was released in August 2020 and contains fixes for some edge cases regarding allocation of TCP ports 
 when running on GitHub(R) Actions:
 
-	- Improved detection of the server (non-ephemeral/dynamic) port range on Windows(R) as used by 
-	  `BaseTest.getNextAvailableTCPPort()`. This was previously incorrect on recent Windows versions leading to 
-	  potential clashes with ephemeral/dynamic/local ports or an insufficient pool of server ports. In addition, 
-	  a warning is now logged if a machine is configured with no ports available for starting server processes, 
-	  and falls back to using the IANA server port range in this case. If you get this warning on Windows you can 
-	  it by reconfiguring your system (e.g. ``netsh int ipv4 set dynamicportrange tcp ...``) or if that's not possible, 
-	  by setting the ``PYSYS_PORTS`` environment variable. 
-	- Fixed a `BaseTest.waitForSocket()` bug on macOS(R) in which the wait never succeeds although the socket is 
-	  listening. 
-	- Reduced the ``TIMEOUTS['WaitForAvailableTCPPort']`` constant from 20 minutes to 5 minutes since a properly 
-	  configured system should not spend significant amounts of time waiting for ports and it is better to 
-	  know sooner if the port pool is exhausted. 
+- Improved detection of the server (non-ephemeral/dynamic) port range on Windows(R) as used by 
+	`BaseTest.getNextAvailableTCPPort()`. This was previously incorrect on recent Windows versions leading to 
+	potential clashes with ephemeral/dynamic/local ports or an insufficient pool of server ports. In addition, 
+	a warning is now logged if a machine is configured with no ports available for starting server processes, 
+	and falls back to using the IANA server port range in this case. If you get this warning on Windows you can 
+	it by reconfiguring your system (e.g. ``netsh int ipv4 set dynamicportrange tcp ...``) or if that's not possible, 
+	by setting the ``PYSYS_PORTS`` environment variable. 
+- Fixed a `BaseTest.waitForSocket()` bug on macOS(R) in which the wait never succeeds although the socket is 
+	listening. 
+- Reduced the ``TIMEOUTS['WaitForAvailableTCPPort']`` constant from 20 minutes to 5 minutes since a properly 
+	configured system should not spend significant amounts of time waiting for ports and it is better to 
+	know sooner if the port pool is exhausted. 
 
 -------------------
 What's new in 1.6.0
@@ -529,20 +536,20 @@ PySys 1.6.0 was released in August 2020.
 
 The significant new features of PySys 1.6.0 are grouped around a few themes:
 
-    - a new "plugins" concept to encourage a more modular style when sharing functionality between tests; 
-    - easier validation with the new `BaseTest.assertThatGrep()` method, which extracts a value using a grep 
-      expression and then checks its value is as expected. For extract-and-assert use cases this approach gives much 
-      clearer messages when the assert fails than using assertGrep; 
-    - new writers for recording test results, including GitHub(R) Actions support and a writer that produces .zip 
-      archives of test output directories, plus new APIs to allow writers to publish artifacts, and to visit each of 
-      the test's output files; 
-    - a library of line mappers for more powerful copy and grep line pre-processing; 
-    - process starting enhancements such as `BaseTest.waitForBackgroundProcesses()`, automatic logging of stderr when 
-      a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file; 
-    - several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
-    - a new "getting started" `sample <https://github.com/pysys-test/sample-getting-started>`_ project which can be 
-      easily forked from GitHub(R) to create new PySys-based projects. The sample also demonstrates common techniques 
-      and best practices for writing tests in PySys.  
+- a new "plugins" concept to encourage a more modular style when sharing functionality between tests; 
+- easier validation with the new `BaseTest.assertThatGrep()` method, which extracts a value using a grep 
+	expression and then checks its value is as expected. For extract-and-assert use cases this approach gives much 
+	clearer messages when the assert fails than using assertGrep; 
+- new writers for recording test results, including GitHub(R) Actions support and a writer that produces .zip 
+	archives of test output directories, plus new APIs to allow writers to publish artifacts, and to visit each of 
+	the test's output files; 
+- a library of line mappers for more powerful copy and grep line pre-processing; 
+- process starting enhancements such as `BaseTest.waitForBackgroundProcesses()`, automatic logging of stderr when 
+	a process fails, and `BaseTest.waitForGrep()` can now abort based on error messages in a different file; 
+- several pysys.py and project configuration enhancements that make running and configuring PySys easier. 
+- a new "getting started" `sample <https://github.com/pysys-test/sample-getting-started>`_ project which can be 
+	easily forked from GitHub(R) to create new PySys-based projects. The sample also demonstrates common techniques 
+	and best practices for writing tests in PySys.  
 
 As this is a major release of PySys there are also some changes in this release that may require changes to your 
 project configuration file and/or runner/basetest/writer framework extension classes you've written (though in most 
