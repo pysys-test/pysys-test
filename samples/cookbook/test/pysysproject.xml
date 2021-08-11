@@ -182,12 +182,10 @@
 
 	<!-- 
 	Use a custom maker class for constructing new testcases. Custom maker classes can extend from the 
-	`pysys.launcher.console_make.ConsoleMakeTestHelper` class in order to create templated run.py scripts e.g. when a 
-	test module has a repeatable pattern for running or validating etc. 
+	`pysys.launcher.console_make.DefaultTestMaker` class in order to customize details such as the automatic 
+	validation of new test ids. 
 	-->
-	<!--
-	<maker classname="myorg.MyTestMaker"/>
-	-->
+	<maker classname="myorg.mymaker.MyTestMaker"/>
 
 	<!--
 	Writers

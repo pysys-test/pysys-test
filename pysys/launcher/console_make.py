@@ -193,7 +193,7 @@ class DefaultTestMaker(object):
 			return True
 		return False
 
-	def validateTestId(self, prefix, numericSuffix, **kwargs):
+	def validateTestId(self, parentDir, prefix, numericSuffix, **kwargs):
 		"""
 		This method can be overridden to provide customized validation of a proposed new test directory name, for example 
 		to prevent clashes with existing tests committed to version control.
@@ -207,6 +207,7 @@ class DefaultTestMaker(object):
 		The command line option ``--skipValidation`` can be used to disable this checking, for example when 
 		disconnected from the network. 
 		
+		:param str parentDir: The absolute path of the directory in which the test is to be created. 
 		:param str prefix: The proposed test id, excluding any numeric suffix.
 		:param str numericSuffix: The numeric suffix (including padding), if any, or '' if this is not a numeric test id. 
 		
@@ -246,14 +247,15 @@ class DefaultTestMaker(object):
 
 		if len(arguments) == 1:
 			self.dest = arguments[0]
+			parentdir = os.path.dirname(os.path.abspath(self.dest))
 			
 			try:
 				if not skipValidation:
 					match = splitNumericSuffix.match(os.path.basename(self.dest))
 					if match:
-						self.validateTestId(match.group(1), match.group(2))
+						self.validateTestId(match.group(1), match.group(2), parentdir)
 					else:
-						self.validateTestId(os.path.basename(self.dest), '')
+						self.validateTestId(os.path.basename(self.dest), '', parentdir)
 			except Exception as ex:
 				sys.stderr.write(f'Test id "{self.dest}" was rejected by validator: {ex} (if needed, use --skipValidation to disable checking)\n')
 				sys.exit(1)
@@ -276,7 +278,7 @@ class DefaultTestMaker(object):
 					
 					try:
 						if not skipValidation:
-							self.validateTestId(prefix, f'{newNum:0{pad}}')
+							self.validateTestId(prefix, f'{newNum:0{pad}}', self.parentDir)
 					except ProposeNewTestIdNumericSuffixException as ex:
 						newNum = int(ex.newNumericSuffix)
 					except Exception as ex:

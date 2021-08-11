@@ -23,7 +23,7 @@ class PySysTest(pysys.basetest.BaseTest):
 
 		self.mkdir('tests/MyPrefix_0101')
 		# will take padding from the largest number
-		self.pysys.pysys('make-auto', ['make'], workingDir=self.output+'/tests')
+		self.pysys.pysys('make-auto3', ['make'], workingDir=self.output+'/tests')
 
 		self.mkdir('tests/MyOtherPrefix_0101')
 		self.pysys.pysys('make-multiple-prefixes', ['make'], workingDir=self.output+'/tests', expectedExitStatus='!=0')
@@ -41,6 +41,9 @@ class PySysTest(pysys.basetest.BaseTest):
 		self.assertThatGrep('make-multiple-prefixes.err', '.*', 
 			expected='When using numeric test ids you should use the same prefix for all tests in each directory, but multiple prefixes were found: MyOtherPrefix_, MyPrefix_')
 	
+		self.assertThatGrep('make-auto.out', ' INFO +(.*)', 'value.startswith(expected)',
+			expected="Called validateTestId for numericSuffix='05' and parentDir=")
+
 		self.assertThat('finalTestDirs == expected', 
 			finalTestDirs=sorted(os.listdir(self.output+'/tests')), expected=sorted([
 				# static content:
@@ -54,3 +57,4 @@ class PySysTest(pysys.basetest.BaseTest):
 				'MyPrefix_0102', # takes padding from largest number so far
 				
 		]))
+		
