@@ -144,7 +144,7 @@ class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
 	
 	The format can include the following placeholders:
 	
-		- ``@testFile@``: the absolute path to the test file (e.g. run.py), using platform-specific slashes.
+		- ``@testFile@``: the absolute path to the test file (e.g. pysystest.py/run.py), using platform-specific slashes.
 		- ``@testFile/@``: the absolute path to the test file, using forward slashes on all OSes.
 		- ``@testFileLine@``: the line number in the test file (if available, else 0).
 		- ``@runLogFile@``: the absolute path to the run log (e.g. run.log), using platform-specific slashes.
@@ -164,7 +164,7 @@ class ConsoleFailureAnnotationsWriter(BaseRecordResultsWriter):
 
 	The output looks like this::
 	
-		c:\\myproject\\tests\\MyTest_001\\run.py:4: error: TIMED OUT - This test timed out (MyTest_001 [CYCLE 03])
+		c:\\myproject\\tests\\MyTest_001\\pysystest.py:4: error: TIMED OUT - This test timed out (MyTest_001 [CYCLE 03])
 	
 	which is similar to output from "make" and so should be parseable by many tools and IDEs. 
 	

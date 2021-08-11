@@ -227,7 +227,7 @@ methods and further examples in the documentation:
 	- `pysys.mappers`
 
 Now take a look at `pysys.basetest` to begin exploring more of the powerful functionality 
-PySys provides to help you implement your own ``run.py`` system tests. 
+PySys provides to help you implement your own ``pysystest.py`` system tests. 
 
 The sample projects under https://github.com/pysys-test are a great starting point for learning more about PySys, and 
 for creating your first project. 

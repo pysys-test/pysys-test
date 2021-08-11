@@ -144,9 +144,9 @@
 	<!-- Comment/uncomment this to mark all tests under this directory as skipped. -->
 	<skipped reason="These tests are skipped until Bug-1234 is fixed"/>
 	
-	<!-- By convention the test class uses module="run.py" located in the test directory, but 
-	it is possible to use a different path (even an absolute path). If you want to use a single 
-	Python class for lots of tests rather, omit the module= attribute and make sure it's available 
+	<!-- By convention the test class uses the ``pysystest.py` module if present or else module="run.py" located 
+	in the test directory, but it is possible to use a different path (even an absolute path). If you want to use 
+	a single Python class for lots of tests rather, omit the module= attribute and make sure it's available 
 	on the project's <pythonpath> . 
 	-->
 	<class name="PySysTest" module="${testRootDir}/pysys-extensions/MySharedTestClass.py"/>

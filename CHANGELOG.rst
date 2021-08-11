@@ -463,7 +463,7 @@ Deprecations
 - The old ``<mode>`` elements are deprecated in favor of the new Python lambda syntax 
   (support for these won't be removed any time soon, but are discouraged for new tests). 
 - The `pysys.utils.pycompat` module is now deprecated. 
-- The ``ConsoleMakeTestHelper`` class is now deprecated in favor of `pysys.launcher.console_maker.DefaultTestMaker`. 
+- The ``ConsoleMakeTestHelper`` class is now deprecated in favor of `pysys.launcher.console_make.DefaultTestMaker`. 
 - If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signature for 
   `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and 
   `pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter. 
@@ -700,7 +700,7 @@ New and improved result writers
   parsing. An instance of this writer is automatically added to every project, and enables itself if 
   the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable is set, producing make-style console output::
   
-    C:\project\test\MyTest_001\run.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness (MyTest_001 [CYCLE 02])
+    C:\project\test\MyTest_001\pysystest.py:12: error: TIMED OUT - Reason for timed out outcome is general tardiness (MyTest_001 [CYCLE 02])
   
   The format can be customized using the ``PYSYS_CONSOLE_FAILURE_ANNOTATIONS`` environment variable, or alternatively 
   additional instances can be added to the project writers configuration and configured using the properties 

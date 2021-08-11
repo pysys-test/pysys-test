@@ -29,7 +29,7 @@ PySys includes support for GitHub actions, and you can see the results of execut
 
 # Exploring the sample tests
 
-Now it's time to start exploring the run.py files in each of the tests. 
+Now it's time to start exploring the pysystest.py files in each of the tests. 
 
 The best way to find out what each test does is to print out the test titles like this:
 
@@ -39,7 +39,7 @@ Start with 001 test in the correctness/ directory which is a simple example to s
 higher numbered tests to explore in more detail how to execute processes, validate results and more. 
 
 This project also a performance test under the performance/ directory, which records throughput and latency summary 
-statistics for our sample server. Have a look at how the run.py is written to see some recommended patterns for 
+statistics for our sample server. Have a look at how the pysystest.py is written to see some recommended patterns for 
 recording performance summary results, and then open the .csv file in the test/__pysys_performance directory to see 
 what the performance summary looks like. In the performance directory there is an example of a pysysdirconfig.xml 
 file that provides defaults for all tests under that directory.

@@ -17,7 +17,7 @@ For finer grained platform detection we recommend using the facilities built int
 
 Skipping tests
 --------------
-If your ``run.py`` logic detects that a test should not be executed for this 
+If your tests' ``.py`` logic detects that a test should not be executed for this 
 platform or mode, simply use `self.skipTest(...) <BaseTest.skipTest>` near the top of the test's 
 `execute() <BaseTest.execute>` method, specifying the reason for the skip::
 
