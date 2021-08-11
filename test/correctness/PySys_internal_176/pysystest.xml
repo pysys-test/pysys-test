@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto">
+    
+  <description> 
+    <title>Samples - cookbook print/make</title>    
+    <purpose><![CDATA[
+Run the sample tests
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>samples</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+
+  <execution-order hint="-5"/> <!-- because this is a slower test, start it earlier-->
+
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>
