@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# PySys System Test Framework, Copyright (C) 2006-2018 M.B.Grieve
+# PySys System Test Framework, Copyright (C) 2006-2021 M.B.Grieve
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,9 @@
 """
 Compatibility utilities for older Python versions. 
 
-This module is now deprecated. 
+This module is now deprecated as all functionality can be provided by the Python standard library. 
+
+Instead of ``quotestring`` use `pysys.utils.misc.quoteString`. 
 """
 
 import sys, os, io, locale
@@ -30,15 +32,17 @@ __log = logging.getLogger('pysys.pycompat')
 
 PY2 = sys.version_info[0] == 2
 
-string_types = (basestring,) if PY2 else (str,)
+string_types = (str,)
 
-binary_type = str if PY2 else bytes
+binary_type = bytes
 
 def isstring(s): 
 	""" Returns True if the specified object is a python string. 
-	On python 3 this must be a character str. 
+	
+	Deprecated - use ``isinstance(s, str)`` instead.
+	
 	"""
-	return isinstance(s, string_types)
+	return isinstance(s, str)
 
 def quotestring(s):
 	""" Adds double quotation marks around the specified character or byte string, 
@@ -70,11 +74,11 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	explicitly specified, in which case a file stream 
 	yielding (unicode) character strings is always returned. 
 	
-	Specifically:
-	
-	On Python 3+ this method returns a file stream yielding character strings 
+	This method returns a file stream yielding character strings 
 	unless a binary mode was specified in which case a stream yielding 
 	bytes is returned. 
+	
+	Instead of this method, just use ``io.open(pysys.utils.fileutils.toLongPathSafe(path), ...)``. 
 	
 	:param path: The path to open; must be an absolute path. 
 		Even on Windows this path can be long (e.g. more than the usual 256 
@@ -107,10 +111,8 @@ def openfile(path, mode='r', encoding=None, errors=None, **kwargs):
 	from pysys.utils.fileutils import toLongPathSafe # import here to avoid circular dependency
 	path = toLongPathSafe(path, onlyIfNeeded=True)
 	
-	if encoding or (not PY2):
-		if encoding: assert 'b' not in mode, 'cannot open file %s with binary mode %s as an encoding was specified'%(path, mode)
-		return io.open(path, mode=mode, encoding=encoding, errors=errors, **kwargs)
-	return open(path, mode=mode, **kwargs)
+	if encoding: assert 'b' not in mode, 'cannot open file %s with binary mode %s as an encoding was specified'%(path, mode)
+	return io.open(path, mode=mode, encoding=encoding, errors=errors, **kwargs)
 
 from enum import Enum
 
@@ -129,3 +131,5 @@ class makeReadOnlyDict(dict):
 		
 		def __copy__(self): return dict(self)
 		def __deepcopy__(self, memo): return copy.deepcopy(dict(self))
+
+from pysys.utils.misc import quoteString as quotestring # for pre-2.0 compatibility

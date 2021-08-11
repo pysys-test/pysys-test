@@ -16,17 +16,41 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 """
-Miscellanous utilities such as `pysys.utils.misc.compareVersions` and `pysys.utils.misc.setInstanceVariablesFromDict`.
+Miscellanous utilities such as `pysys.utils.misc.compareVersions`, `pysys.utils.misc.setInstanceVariablesFromDict`, 
+and `pysys.utils.misc.quoteString`.
 """
 
 import logging
-from pysys.constants import *
-from pysys.utils.pycompat import *
+import re
 
 __all__ = [
 	'setInstanceVariablesFromDict',
-	'compareVersions',
+	'compareVersions', 
+	'quoteString',
 ]
+
+def quoteString(s):
+	""" Adds double quotation marks around the specified character or byte string, 
+	and additional escaping only if needed to make the meaning clear, but trying to 
+	avoid double-slashes unless actually needed since it makes paths harder to read. 
+	
+	If a byte string is provided then the 
+	``repr()`` representation is used instead. 
+	"""
+	# this function exists primarily to provide the same quoting behaviour 
+	# for str/unicode in Python 2 and str in Python 3, but avoiding 
+	# the confusing "b'valuehere'" representation that "%s" would 
+	# produce for python 3 bytes objects
+	r = repr(s)
+	if not isinstance(s, str): return r
+	
+	if '\\' in r.replace('\\\\',''): # if it contains escape sequences like \n to \" we'd better just use repr so it's unambiguous
+		return r
+	
+	# repr uses single quotes, so using double quotes is a good way to make it distinguishable 
+	# (the other option would be using r'...' since essentially this is like a Python raw string
+
+	return '"%s"'%s
 
 def compareVersions(v1, v2):
 	""" Compares two alphanumeric dotted version strings to see which is more recent. 
@@ -36,7 +60,7 @@ def compareVersions(v1, v2):
 	
 	def normversion(v):
 		# convert from bytes to strings if necessary
-		if isinstance(v, binary_type): v = v.decode('utf-8')
+		if isinstance(v, bytes): v = v.decode('utf-8')
 		
 		# normalize versions into a list of components, with integers for the numeric bits
 		v = [int(x) if x.isdigit() else x for x in re.split(u'([0-9]+|[.])', v.lower().replace('-','.').replace('_','.')) if (x and x != u'.') ]
@@ -87,7 +111,7 @@ def getTypedValueOrDefault(key, value, default):
 	:raises Exception: If the value cannot be converted to default.
 	"""
 	if value is None: return default
-	if not isstring(value): return value
+	if not isinstance(value, str): return value
 	if default is True or default is False:
 		if value.lower()=='true': return True
 		if value.lower()=='false' or value=='': return False
@@ -98,7 +122,7 @@ def getTypedValueOrDefault(key, value, default):
 		return float(value)
 	elif isinstance(default, list):
 		return [v.strip() for v in value.replace(',','\n').split('\n') if v.strip()]
-	elif isstring(default):
+	elif isinstance(default, str):
 		return value # nothing to do. allow it to be empty string
 	else:
 		raise Exception('Unsupported type for "%s" value default: %s'%(key, type(default).__name__))
@@ -121,7 +145,7 @@ def setInstanceVariablesFromDict(obj, d, errorOnMissingVariables=False):
 		if errorOnMissingVariables and not hasattr(obj, key):
 			raise KeyError('Cannot set unexpected property "%s" on %s'%(key, type(obj).__name__))
 		defvalue = getattr(obj, key, None)
-		if defvalue is not None and isstring(val):
+		if defvalue is not None and isinstance(val, str):
 			# attempt type coersion to keep the type the same
 			val = getTypedValueOrDefault(key, val, defvalue)
 		setattr(obj, key, val)

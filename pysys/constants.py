@@ -26,9 +26,9 @@ be referenced directly.
 # undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT
 
 import sys, re, os, os.path, socket, traceback, locale
+from enum import Enum
 
 from pysys import stdoutHandler
-from pysys.utils.pycompat import Enum
 
 # set the platform and platform related constants
 HOSTNAME = socket.getfqdn()
