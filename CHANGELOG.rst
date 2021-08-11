@@ -461,7 +461,7 @@ Deprecations
   `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and 
   `pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter. 
   Although this should not immediately break existing applications, to avoid future breaking changes you should 
-  update the signature of those methods if you override them to accept ``testobj`` and also any artibary 
+  update the signature of those methods if you override them to accept ``testobj`` and also any arbitrary 
   ``**kwargs`` that may be added in future. 
 
 Recommendations
