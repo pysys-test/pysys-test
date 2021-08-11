@@ -413,44 +413,51 @@ Migration notes
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
-Aside from the removal of Python 2 and 3.5 support, the breaking changes are edge cases that will not 
-affect many users:
+The main changes that might require changes to existing projects/tests are:
 
-- The minimum supported Python version is now 3.6. 
-- The deprecated ``supportMultipleModesPerRun`` project property can no longer be used - please change your tests to 
-  use the modern modes approach instead. 
+- Removal of Python 2 and 3.5 support; the minimum supported Python version is now 3.6. 
 - When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
   character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
   mappers. This is also now more clearly documented. 
+- The deprecated ``supportMultipleModesPerRun=false`` project property can no longer be used - please change your tests 
+  to use the modern modes approach instead. 
+- On Windows the ``testDir`` (and input/output/reference directories) no longer start with the ``\\?\`` long-path safe 
+  prefix; instead this can be added for operations where it is needed using `pysys.utils.fileutils.toLongPathSafe` 
+  (as most standard PySys methods already do, for example ``self.copy``). 
+  Where possible it is recommended to avoid nesting tests and output directories so deeply that long path support is 
+  needed. 
+
+The remaining breaking changes are unlikely edge cases or in rarely used APIs that are unlikely to affect many users:
+
+- The ``pysys.xml`` package has been renamed to `pysys.config` to provide a more logical home for test descriptors 
+  and project configuration. Aliases exist so nothing should break, however if you have added extra files to the 
+  ``pysys/xml/templates`` directory such as customized ``pysys makeproject`` templates these should now be moved to 
+  the ``pysys/config/templates`` directory. It is also recommended to find/rename your framework extensions to use the 
+  new name as the ``pysys.xml`` module name is deprecated and will be removed in a future 
+  release. 
+- The deprecated ``pysys.process._stringToUnicode`` method is now removed, since in Python 3 it is a no-op. 
 - If you created a custom `pysys.config.descriptor.DescriptorLoader` subclass to manipulate modes, you need to change 
   it to work with `pysys.config.descriptor.TestMode` objects instead of strings, and to set at least one of them 
   to be a primary mode. 
 - It is now an error to have multiple ``pysystest.*`` filenames in a single directory, for example ``pysystest.py`` 
   and ``pysystest.xml``. 
-- If a test's title ends with ``goes here TODO`` then the test will report a ``BLOCKED`` outcome, to encourage 
+- If a test's title ends with ``"goes here TODO"`` then the test will report a ``BLOCKED`` outcome, to encourage 
   test authors to remember to fill it in. This could cause some existing tests to start blocking, though only if 
-  you have added a title ending with ``goes here TODO``. 
+  you have added a title ending with ``"goes here TODO"``. 
 - Removed undocumented internal module ``pysys.utils.loader``; no-one should be using this; if you are, use Python's 
   ``importlib.import_module()`` instead. 
-- On Windows the ``testDir`` (and input/output/reference directories) no longer start with the ``\\?\`` long-path safe 
-  prefix; instead this can be added for operations where it is needed (as several key PySys methods already do, for 
-  example ``self.copy``). It is recommended to avoid nesting tests so deeply that long path support is needed. 
 - The ``pysys run --ci`` flag now excludes tests tagged with group ``manual`` (in addition to excluding the 
   ``manual`` test type, since ``pysystest.py`` descriptors use groups for this rather than test type). 
 - The ``--json`` output of ``pysys.py print`` now has a dict representing the modes and their parameters 
   for the ``modes`` value instead of a simple list. 
 - Removed the ``primaryMode`` attribute from `pysys.config.descriptor.TestDescriptor`, as this information is now 
   stored in the `pysys.config.descriptor.TestMode` object. 
-- The deprecated ``pysys.process._stringToUnicode`` method is now removed, since in Python 3 it is a no-op. 
 
 Deprecations
 ~~~~~~~~~~~~
 
-- The ``pysys.xml`` package has been renamed to `pysys.config` to provide a more logical home for test descriptors 
-  and project configuration. Aliases exist so nothing should break unless you're explicitly referencing 
-  or adding to the ``pysys/xml/templates`` directory. However it is recommended to find/rename your framework 
-  extensions to use the new name as the ``pysys.xml`` module name is deprecated and will be removed in a future 
-  release. 
+- It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
+  Python's built-in ``locale.getpreferredencoding()`` function, to avoid thread-safety issues in your tests. 
 - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. 
 - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
 - The old ``<mode>`` elements are deprecated in favor of the new Python lambda syntax 
@@ -464,12 +471,17 @@ Deprecations
   update the signature of those methods if you override them to accept ``testobj`` and also any arbitrary 
   ``**kwargs`` that may be added in future. 
 
-Recommendations
-~~~~~~~~~~~~~~~
-It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
-``locale.getpreferredencoding()``, to avoid thread-safety issues. 
+A quick way to check for the removed and deprecated items using a regular expression is shown in the following grep 
+command::
 
-As the default will change in a future release, existing PySys projects are recommended to explicitly specify what 
+	grep -r "\(supportMultipleModesPerRun.*alse\|DescriptorLoader\|pysys.utils.loader\|_stringToUnicode\|pysys[.]xml\|pysys.utils.fileunzip\|DEFAULT_DESCRIPTOR\|pysys.utils.pycompat\|ConsoleMakeTestHelper\|def getRunDetails\|def getRunHeader\|locale.getpreferredencoding\|addResource\|CommonProcessWrapper\|TEST_TEMPLATE\|DESCRIPTOR_TEMPLATE\|ThreadFilter\)" .
+
+(This also contains some removed/deprecated items from the previous 1.6.0 release, though does not attempt to cover 
+any earlier releases). 
+
+Optional steps
+~~~~~~~~~~~~~~
+As the default may change in a future release, existing PySys projects are recommended to explicitly specify what 
 directory they wish to use to store test input by specifying one of the following 3 ``<input-dir>`` configurations::
 
   <pysysproject>
@@ -491,22 +503,26 @@ directory they wish to use to store test input by specifying one of the followin
   
   </pysysproject>
 
-By default ``pysys make`` will generate tests with a new-style ``pysystest.py`` file, but if you prefer to keep your 
-project using the old ``pysystest.xml`` and ``run.py`` structure, just add this to your ``pysysdirconfig.xml`` to tell 
-``pysys make`` to use an XML-based test template::
-
-  <pysysdirconfig>
-
-    <maker-template name="pysys-xml-test" description="an old-style test with pysystest.xml and run.py" 
-      copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
-
-  </pysysdirconfig>
-
 Many users will prefer to use the new ``pysystest.py`` style for newly created tests alongside older tests using
 the ``pysystest.xml`` style. However for anyone who wants to switch entirely to the new style, a utility script for 
 automatically converting ``pysystest.xml`` + ``run.py`` tests to ``pysystest.py`` (without losing 
 version control history) is provided as part of the cookbook sample 
 at https://github.com/pysys-test/sample-cookbook/tree/main/util_scripts/pysystestxml_upgrader.py
+
+By default ``pysys make`` will generate tests with a new-style ``pysystest.py`` file, but if you prefer to keep your 
+project using the previous ``pysystest.xml`` and ``run.py`` structure, just add this to your ``pysysdirconfig.xml`` to 
+configure ``pysys make`` to use a template that based around ``pysystest.xml`` instead::
+
+  <pysysdirconfig>
+
+    <maker-template name="pysys-xml-test" description="a pre-v2.0 PySys test with pysystest.xml and run.py files" 
+      copy="${pysysTemplatesDir}/pysystest-xml-test/*"/>
+
+  </pysysdirconfig>
+
+Some users may wish to run their tests with the ``PYTHONWARNINGS=error`` environment variable or ``-Werror` command 
+line argument, which is prevents use of language features that Python itself has deprecated or which are likely to 
+result in test bugs.
 
 -------------------
 What's new in 1.6.1
