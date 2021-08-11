@@ -25,7 +25,7 @@ def prepareDocBuild():
 	print('Creating dynamically-generated PySys .rst files')
 	def readtmpl(path):
 		with codecs.open(ROOT_DIR+'/'+path, 'r', 'ascii') as f:
-			return f.read()
+			return f.read().replace('\r', '')
 	with codecs.open(ROOT_DIR+'/docs/TestDescriptors.rst', 'w', 'ascii') as rstout:
 		rstout.write(readtmpl('docs/TestDescriptors.rst.tmpl')\
 			.replace('@PYSYSTESTXML@', '\n  '+'\n  '.join(readtmpl('samples/cookbook/test/demo-tests/PySysTestXMLDescriptorSample/pysystest.xml').split('\n')))\
@@ -36,7 +36,7 @@ def prepareDocBuild():
 		rstout.write(readtmpl('docs/ProjectConfiguration.rst.tmpl'))
 		
 		inXML = False
-		proj = readtmpl('samples/cookbook/test/pysysproject.xml').replace('\r','')
+		proj = readtmpl('samples/cookbook/test/pysysproject.xml')
 
 		for item in re.split(r'^([ \t]*<!--.*?-->[^\n]*\n)', proj, flags=re.MULTILINE | re.DOTALL):
 			if not item.strip(): continue
