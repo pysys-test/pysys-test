@@ -520,7 +520,7 @@ configure ``pysys make`` to use a template that based around ``pysystest.xml`` i
 
   </pysysdirconfig>
 
-Some users may wish to run their tests with the ``PYTHONWARNINGS=error`` environment variable or ``-Werror` command 
+Some users may wish to run their tests with the ``PYTHONWARNINGS=error`` environment variable or ``-Werror`` command 
 line argument, which is prevents use of language features that Python itself has deprecated or which are likely to 
 result in test bugs.
 
