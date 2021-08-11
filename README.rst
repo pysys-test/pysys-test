@@ -155,8 +155,9 @@ To run your testcases, simply execute::
 
 	> pysys.py run
 
-To give a flavour for what's possible, here's a system test for checking the behaviour of a server application, which 
-shows of the most common PySys methods:
+To give a flavour for what's possible, here's a system test for checking the behaviour of a server application 
+called MyServer, which shows of the most common PySys methods. It checks that the server can be started and 
+respond to basic HTTP requests:
 
 .. code-block:: python
   

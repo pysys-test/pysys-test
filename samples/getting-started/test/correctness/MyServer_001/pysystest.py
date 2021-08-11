@@ -16,9 +16,6 @@ import pysys
 from pysys.constants import *
 
 class PySysTest(pysys.basetest.BaseTest):
-	""" This is a system test for a server process called MyServer. It checks that the server can be started and 
-	respond to basic HTTP requests. """
-	
 	def execute(self):
 		# Ask PySys to pick a free TCP port to start the server on (this allows running tests in 
 		# parallel without clashes).
