@@ -156,17 +156,17 @@ To run your testcases, simply execute::
 	> pysys.py run
 
 To give a flavour for what's possible, here's a system test for checking the behaviour of a server application 
-called MyServer, which shows of the most common PySys methods. It checks that the server can be started and 
-respond to basic HTTP requests:
+called MyServer, which shows of the most common PySys methods:
 
 .. code-block:: python
+
+  __pysys_title__   = r""" MyServer startup - basic sanity test (+ demo of PySys basics) """
   
+  __pysys_purpose__ = r""" To demonstrate that MyServer can startup and response to basic requests. 
+    """
+
   class PySysTest(pysys.basetest.BaseTest):
-    """ This is a system test for a server process called MyServer. It checks that the server can be started and 
-      respond to basic requests. """
-    
     def execute(self):
-    
       # Ask PySys to allocate a free TCP port to start the server on (this allows running many tests in 
       # parallel without clashes)
       serverPort = self.getNextAvailableTCPPort()
