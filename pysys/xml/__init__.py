@@ -15,6 +15,8 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+""":meta private: Deprecated from 2.0 onwards and replaced by the pysys.config module ."""
 
 # Exists for compatibility with Pysys <= 1.6.1 before the xml module was renamed to config
 __all__ = [ "descriptor", "project", "manual" ]
+
