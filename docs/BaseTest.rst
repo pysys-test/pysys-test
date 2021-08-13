@@ -6,7 +6,7 @@ The BaseTest Class
 .. currentmodule:: pysys.basetest.BaseTest
 
 In PySys each test is a class which contains the methods needed to execute your 
-test logic and then to validate the results against the expected behaviour to product a final "outcome" for the test. 
+test logic and then to validate the results against the expected behaviour to produce a final "outcome" for the test. 
 
 All test classes inherit (directly or indirectly) from the ``BaseTest`` class, which provides everything you need to 
 create your own tests. 
