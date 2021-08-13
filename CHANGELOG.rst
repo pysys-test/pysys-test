@@ -458,7 +458,8 @@ Deprecations
 
 - It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
   Python's built-in ``locale.getpreferredencoding()`` function, to avoid thread-safety issues in your tests. 
-- The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. 
+- The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. For example, replace 
+  ``unzip(gzfilename, binary=True)` with ``self.unpackArchive(gzfilename, gzfilename[:-3])``. 
 - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
 - The old ``<mode>`` elements are deprecated in favor of the new Python lambda syntax 
   (support for these won't be removed any time soon, but are discouraged for new tests). 
