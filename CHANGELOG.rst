@@ -475,7 +475,7 @@ Deprecations
 A quick way to check for the removed and deprecated items using a regular expression is shown in the following grep 
 command::
 
-	grep -r "\(supportMultipleModesPerRun.*alse\|DescriptorLoader\|pysys.utils.loader\|_stringToUnicode\|pysys[.]xml\|pysys.utils.fileunzip\|DEFAULT_DESCRIPTOR\|pysys.utils.pycompat\|ConsoleMakeTestHelper\|def getRunDetails\|def getRunHeader\|locale.getpreferredencoding\|addResource\|CommonProcessWrapper\|TEST_TEMPLATE\|DESCRIPTOR_TEMPLATE\|ThreadFilter\)" .
+	grep -r "\(supportMultipleModesPerRun.*alse\|DescriptorLoader\|pysys.utils.loader\|_stringToUnicode\|pysys[.]xml\|pysys.utils.fileunzip\|DEFAULT_DESCRIPTOR\|pysys.utils.pycompat\|openfile\|ConsoleMakeTestHelper\|def getRunDetails\|def getRunHeader\|locale.getpreferredencoding\|addResource\|CommonProcessWrapper\|TEST_TEMPLATE\|DESCRIPTOR_TEMPLATE\|ThreadFilter\)" .
 
 (This also contains some removed/deprecated items from the previous 1.6.0 release, though does not attempt to cover 
 any earlier releases). 
