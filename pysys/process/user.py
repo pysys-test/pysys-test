@@ -106,9 +106,6 @@ class ProcessUser(object):
 	"""
 	
 	def __init__(self):
-		"""Default constructor.
-		
-		"""
 		self.log = log
 		"""The logger instance that should be used to log from this class. """
 		

@@ -44,6 +44,14 @@ class BaseLogFormatter(logging.Formatter):
 	This implementation delegates everything to logging.Formatter using the messagefmt and datefmt
 	properties. Subclasses may be implemented to provide required customizations, and can be registered
 	by specifying classname in the formatter node of the project configuration file.
+	
+	The class is constructed with a dictionary of properties, which are configured by providing
+	<property name="..." value="..."/> elements or attributes on the formatter node of the project
+	configuration file. Entries in the properties should be specific to the class, and removed
+	when passing the properties to the super class, which will throw an exception if any unexpected
+	options are present
+	
+	:param propertiesDict: dictionary of formatter-specific options
 	"""
 
 	# the key to add to the extra={} dict of a logger call to specify the category
@@ -68,17 +76,6 @@ class BaseLogFormatter(logging.Formatter):
 
 
 	def __init__(self, propertiesDict):
-		"""Create an instance of the formatter class.
-
-		The class is constructed with a dictionary of properties, which are configured by providing
-		<property name="..." value="..."/> elements or attributes on the formatter node of the project
-		configuration file. Entries in the properties should be specific to the class, and removed
-		when passing the properties to the super class, which will throw an exception if any unexpected
-		options are present
-		
-		:param propertiesDict: dictionary of formatter-specific options
-
-		"""
 		self.name = propertiesDict.pop('name', None) # probably not used
 		
 		__formatterName = propertiesDict.pop('__formatterName', None)

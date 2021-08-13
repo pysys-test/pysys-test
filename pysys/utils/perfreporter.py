@@ -344,6 +344,9 @@ class CSVPerformanceFile(object):
 	:ivar str ~.RESULT_DETAILS: The constant prefix identifying detailed information about a given result
 	
 	:ivar list ~.COLUMNS: Constant list of the columns in the performance output
+
+	:param str contents: A string containing the contents of the file to be parsed (can be empty)
+
 	"""
 	COLUMNS = ['resultKey','testId','value','unit','biggerIsBetter','toleranceStdDevs','samples','stdDev']
 	RUN_DETAILS = '#runDetails:#'
@@ -439,11 +442,6 @@ class CSVPerformanceFile(object):
 			raise Exception('Unsupported input type: %s'%values.__class__.__name__)
 		
 	def __init__(self, contents):
-		"""Construct an instance of the CSV performance file class.
-
-		:param contents: a string containing the contents of the file (can be empty)
-
-		"""
 		header = None
 		self.results = []
 		self.runDetails = None

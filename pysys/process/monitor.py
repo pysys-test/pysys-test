@@ -146,6 +146,25 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 	
 	If any value cannot be retrieved or is unavailable on this operating 
 	system, a -1 value will be written instead. 
+	
+	Uses default values set on the instance unless keyword overrides 
+	are provided; see L{setDefaults}.
+
+	:param str file: An absolute path string or open file handle to which 
+		process monitor data lines will be written. 
+	
+	:param list[str] columns: An ordered list of the columns from L{ProcessMonitorKey} that 
+		should be included in the file. If not specified, the columns specified 
+		by L{DEFAULT_COLUMNS} will be used. 
+	
+	:param str delimiter: The delimiter string used between each column. 
+		If not specified, the string specified by L{DEFAULT_DELIMITER} will be 
+		used. 
+	
+	:param bool writeHeaderLine: Determines whether a header line prefixed 
+		by `#` will be written at the start of the file. If not overridden, the 
+		default is taken from L{DEFAULT_WRITE_HEADER_LINE}.
+
 	"""
 	
 	DEFAULT_COLUMNS = [
@@ -209,27 +228,6 @@ class ProcessMonitorTextFileHandler(BaseProcessMonitorHandler):
 		if delimiter is not None: ProcessMonitorTextFileHandler.DEFAULT_DELIMITER = delimiter
 	
 	def __init__(self, file, columns=None, delimiter=None, writeHeaderLine=None):
-		"""
-		Constructor. 
-		
-		Uses default values set on the instance unless keyword overrides 
-		are provided; see L{setDefaults}.
-
-		:param file: An absolute path string or open file handle to which 
-			process monitor data lines will be written. 
-		
-		:param columns: An ordered list of the columns from L{ProcessMonitorKey} that 
-			should be included in the file. If not specified, the columns specified 
-			by L{DEFAULT_COLUMNS} will be used. 
-		
-		:param delimiter: The delimiter string used between each column. 
-			If not specified, the string specified by L{DEFAULT_DELIMITER} will be 
-			used. 
-		
-		:param writeHeaderLine: Determines whether a header line prefixed 
-			by `#` will be written at the start of the file. If not overridden, the 
-			default is taken from L{DEFAULT_WRITE_HEADER_LINE}.
-		"""
 		self.columns = columns or self.DEFAULT_COLUMNS
 		self.delimiter = delimiter or self.DEFAULT_DELIMITER
 		if PY2 and isinstance(self.delimiter, str): self.delimiter=self.delimiter.decode('utf-8')
@@ -283,25 +281,22 @@ class BaseProcessMonitor(object):
 
 	Monitors are automatically terminated during cleanup at the end 
 	of a test, or can be manually stopped before that using the L{stop} method. 
+
+	:param owner: The BaseTest owning this monitor. 
+	
+	:param process: The process wrapper object. A numeric pid can be specified 
+		instead but with reduced functionality, so use a process object if you 
+		have one. 
+	
+	:param interval: The interval in seconds between polling for each data 
+		sample. 
+	
+	:param pmargs: Keyword arguments to allow parameterization of the 
+		returned data. An exception will be raised for any arguments not 
+		expected by this class. 
 	"""
 	
 	def __init__(self, owner, process, interval, handlers, **pmargs):
-		"""Construct an instance of the process monitor.
-		
-		:param owner: The BaseTest owning this monitor. 
-		
-		:param process: The process wrapper object. A numeric pid can be specified 
-			instead but with reduced functionality, so use a process object if you 
-			have one. 
-		
-		:param interval: The interval in seconds between polling for each data 
-			sample. 
-		
-		:param pmargs: Keyword arguments to allow parameterization of the 
-			returned data. An exception will be raised for any arguments not 
-			expected by this class. 
-		"""
-		
 		# NB: this could be subclassed to support different platforms and/or add extra 
 		# data
 		
