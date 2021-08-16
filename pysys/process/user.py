@@ -369,7 +369,7 @@ class ProcessUser(object):
 			diagnostic information (perhaps using the stdout/err of the process) and/or extracting and returning an 
 			error message from the output, for example: ``onError=lambda process: self.logFileContents(process.stderr, tail=True) or self.logFileContents(process.stdout, tail=True)``.
 
-			If a string value is returned from it will be added to the failure reason, e.g. ``onError=lambda process: self.logFileContents(process.stderr, tail=True) and self.getExprFromFile(process.stderr, 'Error: (.*)')``.
+			If a string value is returned from it will be added to the failure reason, e.g. ``onError=lambda process: self.logFileContents(process.stderr, tail=True) and self.grepOrNone(process.stderr, 'Error: (.*)')``.
 			
 			If no onError function is specified, the default is to log the last few lines of stderr (or if empty, stdout) 
 			when a process fails and abortOnError=True. 
