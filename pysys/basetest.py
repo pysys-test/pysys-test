@@ -328,7 +328,7 @@ class BaseTest(ProcessUser):
 		UI not explicitly stopped within a test will automatically be stopped via the L{cleanup} method of the 
 		BaseTest.
 		
-		:param file: The name of the manual test xml input file (see L{pysys.xml.manual} for details on the DTD)
+		:param file: The name of the manual test xml input file
 		:param filedir: The directory containing the manual test xml input file (defaults to the output subdirectory)
 		:param state: Start the manual tester either in the C{FOREGROUND} or C{BACKGROUND} (defaults to C{FOREGROUND})
 		:param timeout: The timeout period after which to termintate a manual tester running in the C{FOREGROUND}

@@ -46,17 +46,17 @@ can be accessed via instance attributes on ``self``:
   project, directory (or even testcase) level.  
   
   Here is an example of copying a configuration file template from the input directory::
-	
-		self.copy(self.input+'/serverconfig.xml', self.output, mappers=[lambda line: line.replace('@PORT@', str(myport))])
-	
-	When storing large text files in the input directory it is recommended to use compression; see 
-	`pysys.basetest.BaseTest.unpackArchive` for details of how to decompress input files. 
-	
-	Do *not* use the ``self.input`` field as a way to locate other resources that are in directories above Input/ (since 
-	this will fail when the input directory is empty and using a version control system (e.g. git) that doesn't commit 
-	empty directories). For other test resource locations the recommended approach is to use ``self.project.testRootDir``, 
-	define a specific project property for the directory (if widely used), or if that's not practical then use 
-	``self.descriptor.testDir`` to get the test directory. 
+  
+    self.copy(self.input+'/serverconfig.xml', self.output, mappers=[lambda line: line.replace('@PORT@', str(myport))])
+  
+  When storing large text files in the input directory it is recommended to use compression; see 
+  `pysys.basetest.BaseTest.unpackArchive` for details of how to decompress input files. 
+  
+  Do *not* use the ``self.input`` field as a way to locate other resources that are in directories above Input/ (since 
+  this will fail when the input directory is empty and using a version control system (e.g. git) that doesn't commit 
+  empty directories). For other test resource locations the recommended approach is to use ``self.project.testRootDir``, 
+  define a specific project property for the directory (if widely used), or if that's not practical then use 
+  ``self.descriptor.testDir`` to get the test directory. 
 
 - ``self.output`` *(str)*: Full path to the output directory of the testcase, which is the only location to which the 
   test should write output files, temporary files and logs. The output directory is automatically created and 
@@ -72,26 +72,26 @@ can be accessed via instance attributes on ``self``:
 - ``self.log`` *(logging.Logger)*: The Python ``Logger`` instance that should be used to record progress and status 
   information. For example:: 
   
-	self.log.info("Starting myserver on port %d", serverport)
+    self.log.info("Starting myserver on port %d", serverport)
 
 - ``self.mode`` (`pysys.config.descriptor.TestMode`): The user-defined mode this test object is running. Tests can use 
-	this to modify how the test executed based upon the mode, for example to allow the test to run against either a mock 
-	or a real database. TestMode subclasses str so you can include this in situation where you need the name of the mode 
-	such as when recording performance result, and you can also use the ``.params`` attribute to access any parameters 
-	defined on the mode. 
+  this to modify how the test executed based upon the mode, for example to allow the test to run against either a mock 
+  or a real database. TestMode subclasses str so you can include this in situation where you need the name of the mode 
+  such as when recording performance result, and you can also use the ``.params`` attribute to access any parameters 
+  defined on the mode. 
 
 - ``self.testCycle`` *(int)*: The cycle in which this test is running. Numbering starts from 1 in a multi-cycle test run. 
   The special value of 0 is used to indicate that this is not part of a multi-cycle run. 
 
-- ``self.descriptor`` (`pysys.xml.descriptor.TestDescriptor`): The descriptor contains 
+- ``self.descriptor`` (`pysys.config.descriptor.TestDescriptor`): The descriptor contains 
   information about this testcase such as the test id, groups and test type, and typically comes from the 
-  test's ``pysystest.xml`` file. 
+  test's ``pysystest.*`` file. 
 
 - ``self.runner`` (`pysys.baserunner.BaseRunner`): A reference to the singleton runner instance that's 
   responsible for orchestrating all the tests in this project. The runner is where any cross-test state can be held, 
   for example if you want to have multiple tests share use of a single server, VM, or other resource. 
 
-- ``self.project`` (`pysys.xml.project.Project`): A reference to the singleton project instance containing the 
+- ``self.project`` (`pysys.config.project.Project`): A reference to the singleton project instance containing the 
   configuration of this PySys test project as defined by ``pysysproject.xml``. 
   The project can be used to access information such as the project properties which are shared across all tests 
   (e.g. for hosts and credentials). 
