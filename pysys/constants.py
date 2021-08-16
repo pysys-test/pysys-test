@@ -23,7 +23,7 @@ The convention is to import all contents of the module so that the constants can
 be referenced directly. 
 
 """
-# undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, loadproject, PROJECT
+# undocumented (no longer in public API): ENVSEPERATOR, SITE_PACKAGES_DIR, DEFAULT_STYLESHEET, TRUE, FALSE, PROJECT
 
 import sys, re, os, os.path, socket, traceback, locale
 from enum import Enum
