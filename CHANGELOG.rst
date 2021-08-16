@@ -419,6 +419,10 @@ The main changes that might require changes to existing projects/tests are:
 - When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
   character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
   mappers. This is also now more clearly documented. 
+- Some mistakes in the ``pysystest.xml`` structure that were previously tolerated will now produce stderr warning 
+  messages (e.g. incorrectly nesting ``<modes>`` inside ``<groups>``) and others will produce a fatal error 
+  (e.g. multiple occurrences of the same element). To find out if any tests need fixing up, just execute 
+  ``pysys print``  in your PySys project directory and act on any warning or error messages. 
 - The deprecated ``supportMultipleModesPerRun=false`` project property can no longer be used - please change your tests 
   to use the modern modes approach instead. 
 - On Windows the ``testDir`` (and input/output/reference directories) no longer start with the ``\\?\`` long-path safe 

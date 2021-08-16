@@ -747,7 +747,7 @@ class _XMLDescriptorParser(object):
 	
 	def getID(self):
 		'''Return the id of the test, or for a pysysdirconfig, the id prefix.'''
-		id = self.defaults.id + self.kvDict.pop('id-prefix','')+self.getElementTextOrDefault('id-prefix', default='')
+		id = self.defaults.id + self.kvDict.pop('id-prefix','')+self.getElementTextOrDefault('id-prefix', default='', optionalParents=['classification'])
 		
 		for c in u'\\/:~#<>':
 			# reserve a few characters that we might need for other purposes; _ and . can be used however
@@ -1093,7 +1093,7 @@ class _XMLDescriptorParser(object):
 		if len(nodes) > 1: 
 			raise UserError('Expected one element <%s> but found more than one in %s' % (tagName, self.file))
 		if nodes[0].parentNode.tagName not in ['pysystest', 'pysysdirconfig']+optionalParents: 
-				raise UserError("Element <%s> is not permitted under <%s> of \"%s\""%(tagName, nodes[0].parentNode.tagName, self.file))
+				sys.stderr.write("WARNING: XML descriptor element <%s> is not permitted under <%s> of \"%s\"\n"%(tagName, nodes[0].parentNode.tagName, self.file))
 		return nodes[0]
 
 	def getElementTextOrDefault(self, tagName, default=None, parent=None, optionalParents=[]):
