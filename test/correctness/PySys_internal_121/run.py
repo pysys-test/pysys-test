@@ -50,7 +50,7 @@ pysys
 		if len(docdir)==1: 
 			docdir = docdir[0]
 		else:
-			docdir = pysysroot+'/docs'
+			docdir = pysysroot+'/docs/pysys'
 		self.log.info('Checking completeness of %s/BaseTest.rst', docdir)
 		with codecs.open(docdir+'/BaseTest.rst', 'r', encoding='ascii') as f: # this also serves to check we don't have non-ascii chars creeping in
 			for l in f:
