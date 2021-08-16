@@ -39,7 +39,7 @@ log = logging.getLogger('pysys.config.descriptor')
 
 class TestDescriptor(object):
 	"""Descriptor metadata for an individual testcase (``pysystest.*``) or defaults for tests under a directory 
-	subtree (``pysysdirconfig.xml``); see :doc:`../TestDescriptors`. 
+	subtree (``pysysdirconfig.xml``); see :doc:`/pysys/TestDescriptors`. 
 	
 	The `DescriptorLoader` class is responsible for determining the available 
 	descriptor instances. 

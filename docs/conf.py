@@ -43,10 +43,10 @@ project = f'PySys v{pysys_release}'
 
 sys.path.append(DOC_SOURCE_DIR+'/ext') # temporary measure to get sphinx_autodocgen
 
-assert os.path.exists(DOC_SOURCE_DIR+'/ProjectConfiguration.rst'), 'must run setup.py first, to generate docs/ProjectConfig.rst'
+assert os.path.exists(DOC_SOURCE_DIR+'/pysys/ProjectConfiguration.rst'), 'must run setup.py first, to generate docs/pysys/ProjectConfig.rst'
 
-# To refer to another .rst document use                  :doc:`TestDescriptors`
-# To refer to a section inside another .rst document use :ref:`TestDescriptors:Sample pysysdirconfig.xml`
+# To refer to another .rst document use                  :doc:`/pysys/TestDescriptors`
+# To refer to a section inside another .rst document use :ref:`pysys/TestDescriptors:Sample pysysdirconfig.xml`
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -62,7 +62,7 @@ extensions = [
 
 default_role = 'py:obj' # So that `xxx` is converted to a Python reference. Use ``xxx`` for monospaced non-links.
 
-autosectionlabel_prefix_document = True
+autosectionlabel_prefix_document = True # namespaces :ref: links with "pysys/rstFileName:"
 
 autoclass_content = 'both' # include __init__ params in doc strings for class
 

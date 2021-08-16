@@ -44,7 +44,7 @@ Version and documentation changes
 
 - Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
   PySys.
-- Documentation for :doc:`ProjectConfiguration` and :doc:`TestDescriptors` is much improved. 
+- Documentation for :doc:`/pysys/ProjectConfiguration` and :doc:`/pysys/TestDescriptors` is much improved. 
 
 New test structure and descriptors
 ----------------------------------
@@ -66,7 +66,7 @@ separated from the ``run.py`` in a different file made tests harder to navigate.
 	#__pysys_skipped_reason__  = "Skipped until Bug-1234 is fixed"
 
 For a full example of all the possible options (including more details on the subset of Python syntax PySys will 
-parse correctly) see :doc:`TestDescriptors`.  
+parse correctly) see :doc:`/pysys/TestDescriptors`.  
 
 Note that the ``=====`` characters act not only as an underline but also provide a guide to help test authors know 
 when their title string has exceeded 80 characters which should be avoided if possible to make ``pysys print`` output 
@@ -185,7 +185,7 @@ Other options are possible (as above) such as copying files from an absolute loc
 using ``${pysysTemplatesDir}/default-test/*``, or copying from a path relative to the XML file where the template is 
 defined containing a real (but simple) test to copy from (with suitable regex replacements to make it more generic). 
 
-See :doc:`TestDescriptors` for more information about how to configure templates in a ``pysysdirconfig.xml`` file. 
+See :doc:`/pysys/TestDescriptors` for more information about how to configure templates in a ``pysysdirconfig.xml`` file. 
 
 When creating tests using ``pysys make``, by default the first template (from the more specific ``pysysdirconfig.xml``) 
 is selected, but you can also specify any other template by name using the ``-t`` option, and get a list of available 
@@ -265,7 +265,7 @@ argument was specified. Now it is possible to configure multiple modes as primar
 method to add ``'isPrimary':True`` to a whole list/dict of modes which is handy when using modes for testing 
 different test scenarios where you really want all of them executed by default even during quick local test runs. 
 
-For more details see :doc:`TestDescriptors`, :doc:`UserGuide` and the Getting Started sample. 
+For more details see :doc:`/pysys/TestDescriptors`, :doc:`/pysys/UserGuide` and the Getting Started sample. 
 
 There are also improvements to the ``pysys.py`` command line support for modes:
 

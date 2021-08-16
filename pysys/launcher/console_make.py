@@ -40,7 +40,7 @@ class DefaultTestMaker(object):
 	The default implementation of ``pysys.py make``, which creates tests and other assets using templates configurable 
 	on a per-directory basis using ``<maker-template>`` configuration in ``pysysdirconfig.xml`` (and project) files.
 	
-	See :doc:`../TestDescriptors` for information about how to configure templates. 
+	See :doc:`/pysys/TestDescriptors` for information about how to configure templates. 
 	
 	A subclass can be specified in the project if further customization is required using::
 	

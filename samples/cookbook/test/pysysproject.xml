@@ -129,7 +129,7 @@
 	Configuring plugins
 	~~~~~~~~~~~~~~~~~~~
 	
-	See also :ref:`UserGuide:Sharing logic across tests using plugins`.
+	See also :ref:`pysys/UserGuide:Sharing logic across tests using plugins`.
 	-->
 
 	<!-- If you want to provide some custom plugins/extensions you need to add them to the PYTHONPATH used by PySys 
@@ -348,7 +348,7 @@
 	~~~~~~~~~~~~~~~~~~~~~~~~
 	
 	A project file can contain a ``pysysdirconfig`` element to configure directory-level defaults that will apply to 
-	all test descriptors. See the :doc:`TestDescriptors` documentation for more information about the available options, 
+	all test descriptors. See the :doc:`/pysys/TestDescriptors` documentation for more information about the available options, 
 	including how to customize how new tests are created using maker templates. 
 	
 	-->

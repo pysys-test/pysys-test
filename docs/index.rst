@@ -14,10 +14,10 @@ Documentation contents
    
    Installation.rst
    GettingStarted.rst
-   BaseTest.rst
-   UserGuide.rst
-   ProjectConfiguration.rst
-   TestDescriptors.rst
+   pysys/BaseTest.rst
+   pysys/UserGuide.rst
+   pysys/ProjectConfiguration.rst
+   pysys/TestDescriptors.rst
    autodocgen/pysys
    license.rst
    ChangeLog.rst
