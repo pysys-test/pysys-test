@@ -149,7 +149,7 @@ Selection and filtering options
                                  - use !MODE as an alias for modeexclude
                                  - regular expressions can be used
    --modeexclude MyMode1,MyMode2,...
-                               run tests excluding specified mode(s)
+                               run tests excluding specified mode(s); excludes take precedence over includes
    -a, --type      STRING      set the test type to run (auto or manual, default is both)"
    -t, --trace     STRING      set the requirement id for the test run
 

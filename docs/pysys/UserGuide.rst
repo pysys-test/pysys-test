@@ -383,9 +383,10 @@ The ``helper`` is an instance of `pysys.config.descriptor.TestModesConfigHelper`
 access to the list of inherited modes (and more). 
 
 When naming modes, TitleCase is recommended, and dot, underscore and equals characters 
-may be used. Typically dot is useful for version numbers and underscore is 
+may be used. Typically dot is useful for version numbers and underscore ``_`` is 
 useful for separating out different dimensions (e.g. compression vs authentication type 
-in the example described later in this section). PySys will give an error if you use different 
+in the example described later in this section); separating dimensions cleanly will make it 
+much easier to include/exclude the test modes you want. PySys will give an error if you use different 
 capitalization for the same mode in different places, as this can result in test bugs. 
 
 In large projects you may wish to configure modes in a ``pysysdirconfig.xml`` 
