@@ -370,6 +370,10 @@ Additional improvements which will be of use to some users:
 - Improved the failure messages for `BaseTest.assertGrep` (with ``contains=False``) and `BaseTest.assertLineCount` 
   (with ``condition="==0"``) to include both the first matching expression and the total number of matches. This 
   is useful when checking log files for unexpected errors and warnings. 
+- Added `pysys.utils.allocport.excludedTCPPorts` which can be set before the `pysys.baserunner.BaseRunner` is 
+  constructed to prevent the specified ports being allocated by `~pysys.basetest.BaseTest.getNextAvailableTCPPort`. 
+  By default PySys comes with exclusions for a handful of ports that are commonly blocked by web browsers for security 
+  reasons. 
 - Added `pysys.utils.allocport.logPortAllocationStats` which can be useful for configuring an appropriately sized 
   pool of TCP ports. 
 - Added ``key`` field to `pysys.process.user.STDOUTERR_TUPLE` to make it easier to create log file paths that match 
@@ -383,6 +387,7 @@ Additional improvements which will be of use to some users:
   to provide different ``runDetails`` based on some feature of the test object or mode. 
 - Added `BaseTest.pollWait` which should be used instead of ``time.sleep`` when polling for something to happen 
   without any log messages (or the existing `BaseTest.wait` for longer polls where you do want logging). 
+  In a future release this method will be able to abort early if a test run is cancelled. 
 - `pysys.process.monitor.BaseProcessMonitor.stop` now waits for the process monitor to terminate before returning, 
   so that during test cleanup the process monitors will always be stopped before any processes are killed, avoiding 
   occasional failures of the process monitoring. 

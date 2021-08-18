@@ -4,7 +4,11 @@ import logging, os
 
 import pysys.utils.allocport
 
-# check we can monkey patch this if we need to
+# first a quick test that we can manually change the excluded range
+pysys.utils.allocport.excludedTCPPorts.add(6002)
+assert 6002 not in pysys.utils.allocport.getServerTCPPorts()
+
+# then check we can monkey patch this if we need to
 def patched_getEphemeralTCPPortRange():
 	raise Exception('Simulated exception getting ephemeral port range')
 assert pysys.utils.allocport.getEphemeralTCPPortRange

@@ -27,7 +27,7 @@ class PySysTest(BaseTest):
 		# this has a custom runner which tries to override the default method of getting ephemeral ports
 		runPySys(self, 'pysys-expect-failure', ['run'], workingDir='test', expectedExitStatus='!=0')
 
-		runPySys(self, 'pysys-env-var', ['run', '-o', self.output+'/env-var-out'], workingDir='test', environs={'PYSYS_PORTS':'  2000 - 2020, 65000, 65020-65018 , 65040-65042 '}, defaultproject=True)
+		runPySys(self, 'pysys-env-var', ['run', '-o', self.output+'/env-var-out'], workingDir='test', environs={'PYSYS_PORTS':'  2000 - 2020, 6000, 6001, 65000, 65020-65018 , 65040-65042 '}, defaultproject=True)
 			
 	def validate(self):
 		self.assertGrep('pysys-expect-failure.err', expr='Simulated exception getting ephemeral port range')
@@ -35,4 +35,7 @@ class PySysTest(BaseTest):
 		# should not have tried to get ephemeral range until runner init
 		self.assertGrep('pysys-expect-failure.err', expr='baserunner.py.+__init__')
 
+		# nb: this should exclude 6000 which is on the excludedTCPPorts list
 		self.assertDiff('env-var-out/NestedPass/server_ports.txt', 'server_ports.txt')
+		
+
