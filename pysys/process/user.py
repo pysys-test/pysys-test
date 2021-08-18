@@ -828,9 +828,8 @@ class ProcessUser(object):
 		:param float secs: The time to sleep for, typically a few hundred milliseconds. Do not use this method for 
 			really long waits. 
 		"""
-		assert secs > 0, secs
 		if secs > 5: self.log.debug('pollWait %s secs', secs)
-		time.sleep(secs)
+		time.sleep(secs) # no-op if secs == 0
 
 	def waitForBackgroundProcesses(self, includes=[], excludes=[], timeout=TIMEOUTS['WaitForProcess'], abortOnError=None, checkExitStatus=True):
 		"""Wait for any running background processes to terminate, then check that all background processes 
