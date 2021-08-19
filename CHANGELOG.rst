@@ -15,33 +15,35 @@ Change Log
 What's new in 2.0
 -------------------
 
-PySys 2.0 is under development. 
+PySys 2.0 was released in August 2021. Highlights from this release are:
 
-Highlights from this release are:
-
-- Removal of Python 2 and 3.5 support, and addition of Python 3.9. 
-- A new standard test structure that avoids the use of XML by allowing descriptor values such as test title to be 
-  specified alongside your Python test class in a ``pysystest.py`` file, and changing the default ``self.input`` 
-  directory (for new projects) to be the main ``testDir`` instead of an ``Input/`` subdirectory. 
-- Some big extensions to the concept of "modes", allowing for more powerful configuration and use, including 
-  multi-dimensional modes. 
-- A new template-based test maker, allowing easy configuration of how new tests are created on a per-directory basis, 
-  and auto-generation of numeric test ids. 
-- Some useful improvements to the `pysys.mappers` API, for transforming text files during copy and grep operations. 
-- More powerful configuration options available for project and test descriptor configuration files. 
-- A slew of minor features, many based on end-user requests. Also some bug fixes. 
+- Addition of Python 3.9 support, and removal of Python 2 and 3.5 support. 
+- A new standard test structure that avoids the use of XML by allowing descriptor values such as the test title to be 
+  specified alongside your Python test class in a single ``pysystest.py`` file, instead of separate ``run.py`` and 
+  ``pysystest.xml`` files. You can mix and match the old and new styles within the same project. For new PySys projects 
+  a simpler directory layout is now recommended in which ``self.input`` directory is configured to be the main 
+  ``testDir/`` (which also contains the the ``pysystest.py`` file) instead of having a separate ``testDir/Input/`` 
+  subdirectory for input files. This can make test contents easier to navigate. 
+- Some big extensions to the concept of "modes" that allow for more powerful configuration and use, including 
+  mode parameters for easier handling of multi-dimensional modes, and dynamic mode lists configured with a Python 
+  lambda expression. 
+- A new template-based implementation of ``pysys make``, allowing easy configuration of how new tests are created - 
+  on a per-directory basis - and also automatic generation of test identifiers for new tests (when using numeric 
+  identifiers). 
+- Several improvements to the `pysys.mappers` API for more easily transforming text files during copy and grep 
+  operations, including support for multi-line exception stack traces. 
+- A large set of smaller additions, many based on end-user requests. PySys "power users" are encouraged to read through 
+  the full Change Log below to ensure they're aware of all the new functionality they might be able to benefit from. 
 - There are a few breaking changes (see Migration Notes below) but in practice these are likely to affect few 
   users. 
 
 Version and documentation changes
 ---------------------------------
-- Removed support for Python 2 and 3.5, which are now end-of-life. 
 - Added support for Python 3.9.
-
+- Removed support for Python 2 and 3.5, which are now end-of-life. 
 - PySys releases now use a simpler 2-digit semantic version, so this release is v2.0 compared to the previous 
-  v1.6.1. The first digit changes when there are changes that are likely to require changes to some users' existing 
-  tests.
-
+  v1.6.1. The first digit changes when there are potentially breaking changes that are likely to require users to 
+  update their existing tests.
 - Added a new "cookbook" sample which is a great repository of copyable snippets for configurating and extending 
   PySys.
 - Documentation for :doc:`/pysys/ProjectConfiguration` and :doc:`/pysys/TestDescriptors` is much improved. 
@@ -428,11 +430,11 @@ The main changes that might require changes to existing projects/tests are:
   messages (e.g. incorrectly nesting ``<modes>`` inside ``<groups>``) and others will produce a fatal error 
   (e.g. multiple occurrences of the same element). To find out if any tests need fixing up, just execute 
   ``pysys print``  in your PySys project directory and act on any warning or error messages. 
-- The deprecated ``supportMultipleModesPerRun=false`` project property can no longer be used - please change your tests 
-  to use the modern modes approach instead. 
-- On Windows the ``testDir`` (and input/output/reference directories) no longer start with the ``\\?\`` long-path safe 
-  prefix; instead this can be added for operations where it is needed using `pysys.utils.fileutils.toLongPathSafe` 
-  (as most standard PySys methods already do, for example ``self.copy``). 
+- The deprecated ``supportMultipleModesPerRun=false`` project property (only used in very old PySys projects) can no 
+  longer be used - please change your tests to use the modern modes approach instead. 
+- On Windows the ``testDir`` (and the input/output/reference directories) no longer start with the ``\\?\`` 
+  long path prefix; instead this can be added for operations where it is needed using 
+  `pysys.utils.fileutils.toLongPathSafe` (as the standard PySys methods already do, for example ``self.copy``). 
   Where possible it is recommended to avoid nesting tests and output directories so deeply that long path support is 
   needed. 
 
@@ -468,6 +470,12 @@ Deprecations
 
 - It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
   Python's built-in ``locale.getpreferredencoding()`` function, to avoid thread-safety issues in your tests. 
+- If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signature for
+  `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and
+  `pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter.
+  Although this should not immediately break existing applications, to avoid future breaking changes you should
+  update the signature of those methods if you override them to accept ``testobj`` and also any arbitrary
+  ``**kwargs`` that may be added in future.
 - The ``pysys.xml`` module is deprecated; use `pysys.config` instead. 
 - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. For example, replace 
   ``unzip(gzfilename, binary=True)` with ``self.unpackArchive(gzfilename, gzfilename[:-3])``. 
@@ -476,12 +484,6 @@ Deprecations
   (support for these won't be removed any time soon, but are discouraged for new tests). 
 - The `pysys.utils.pycompat` module is now deprecated. 
 - The ``ConsoleMakeTestHelper`` class is now deprecated in favor of `pysys.launcher.console_make.DefaultTestMaker`. 
-- If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signature for 
-  `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and 
-  `pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter. 
-  Although this should not immediately break existing applications, to avoid future breaking changes you should 
-  update the signature of those methods if you override them to accept ``testobj`` and also any arbitrary 
-  ``**kwargs`` that may be added in future. 
 
 A quick way to check for the removed and deprecated items using a regular expression is shown in the following grep 
 command::
