@@ -986,8 +986,6 @@ class BaseRunner(ProcessUser):
 		
 		if self.cycle > 1: # only log if this runner is doing multiple cycles
 			log.info("Cycle: %s", str(cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
-		if self.cycle > 1: # only log if this runner is doing multiple cycles
-			log.info("Cycle: %s", str(cycle+1), extra=BaseLogFormatter.tag(LOG_TEST_DETAILS, 0))
 		log.debug('Execution order hint: %s', descriptor.executionOrderHint)
 		log.info(62*"=")
 	
