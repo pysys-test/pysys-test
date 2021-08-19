@@ -2352,7 +2352,12 @@ class ProcessUser(object):
 		shutil.copystat(src, dest)
 		if renameDestAtEnd:
 			os.remove(src)
-			os.rename(dest, src)
+			try:
+				os.rename(dest, src)
+			except Exception: # pragma: no cover - work around windows file locking issues
+				self.pollWait(20)
+				os.rename(dest, src)
 			return src
+			
 		return dest
 		
