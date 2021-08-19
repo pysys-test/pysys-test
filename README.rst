@@ -20,11 +20,11 @@ Key features include:
   starting, orchestration, and cleanup, for both Windows and Unix-based 
   systems. Includes common operations such as:
 
-   * dynamically picking a free TCP/IP port, 
-   * waiting until a server is running on a specified port,
-   * waiting until a file contains a specified message, 
-   * powerful primitives for pre-processing text files (e.g. configuration input files, or output logs)
-   * aborting early with a clear failure messages if an error is detected in a log file
+  * dynamically picking a free TCP/IP port, 
+  * waiting until a server is running on a specified port,
+  * waiting until a file contains a specified message, 
+  * powerful primitives for pre-processing text files (e.g. configuration input files, or output logs)
+  * aborting early with a clear failure messages if an error is detected in a log file
 
 - Support for executing tests in parallel to significantly speed up execution 
   time, with a flexible mechanism for controlling execution order.
@@ -128,10 +128,10 @@ After installation, to see the available options to the pysys.py script use::
  
 The script has four main commands: 
 
-  - ``makeproject`` to create your top-level testing project configuration file, 
-  - ``make`` to create individual testcases, 
-  - ``run`` to execute them, and 
-  - ``clean`` to delete testcase output after execution.
+- ``makeproject`` to create your top-level testing project configuration file, 
+- ``make`` to create individual testcases, 
+- ``run`` to execute them, and 
+- ``clean`` to delete testcase output after execution.
 
 For detailed information, see the ``--help`` command line. 
 
@@ -218,14 +218,14 @@ called MyServer, which shows of the most common PySys methods:
 If you're curious about any of the functionality demonstrated above, there's lots of helpful information on these 
 methods and further examples in the documentation:
 
-	- `pysys.basetest.BaseTest.getNextAvailableTCPPort()`
-	- `pysys.basetest.BaseTest.copy()`
-	- `pysys.basetest.BaseTest.startProcess()` (+ `pysys.basetest.BaseTest.createEnvirons()` and `pysys.basetest.BaseTest.startPython()`)
-	- `pysys.basetest.BaseTest.waitForGrep()`
-	- `pysys.basetest.BaseTest.assertGrep()`
-	- `pysys.basetest.BaseTest.assertThat()`
-	- `pysys.basetest.BaseTest.logFileContents()`
-	- `pysys.mappers`
+- `pysys.basetest.BaseTest.getNextAvailableTCPPort()`
+- `pysys.basetest.BaseTest.copy()`
+- `pysys.basetest.BaseTest.startProcess()` (+ `pysys.basetest.BaseTest.createEnvirons()` and `pysys.basetest.BaseTest.startPython()`)
+- `pysys.basetest.BaseTest.waitForGrep()`
+- `pysys.basetest.BaseTest.assertGrep()`
+- `pysys.basetest.BaseTest.assertThat()`
+- `pysys.basetest.BaseTest.logFileContents()`
+- `pysys.mappers`
 
 Now take a look at `pysys.basetest` to begin exploring more of the powerful functionality 
 PySys provides to help you implement your own ``pysystest.py`` system tests. 
