@@ -1250,7 +1250,7 @@ class DescriptorLoader(object):
 				continue
 
 			if descriptorSet is None: 
-				intersection = [f for f in files if f.lower().startswith('pysystest.')]
+				intersection = [f for f in files if f.lower().startswith('pysystest.') and not f.endswith(('.tmp', '.bak'))]
 			else: # compatibility mode
 				intersection = descriptorSet & set(files)
 			if intersection: 
