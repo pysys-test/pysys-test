@@ -90,7 +90,8 @@ It is also possible to embed an entire XML descriptor inside a ``pysystest.py`` 
 which may be useful for some users. However note that parsing XML is really quite slow, so avoiding use of XML is an 
 advantage, particularly if your project may grow large. 
 
-See migration notes for more information about optionally switching to the new ``pysystest.py`` structure. 
+See migration notes for more information about optionally switching to the new ``pysystest.py`` structure, including a 
+sample utility to assist in migrating existing tests. 
 
 Newly created PySys projects now store ``self.input`` files in the top-level ``<testDir>/`` of each test instead of the 
 ``<testDir>/Input/`` subdirectory, to make tests easier to navigate. Existing projects could be updated to follow the 
