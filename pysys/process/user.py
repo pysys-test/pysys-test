@@ -1475,7 +1475,8 @@ class ProcessUser(object):
 		
 		The port is taken from the pool of available server (non-ephemeral) ports on this machine, and will not 
 		be available for use by any other code in the current PySys process until this object's `cleanup` method is 
-		called to return it to the pool of available ports. 
+		called to return it to the pool of available ports. For advanced options such as port exclusions see 
+		`pysys.utils.allocport'. 
 
 		To allocate an IPv4 port for use only on this host::
 		
