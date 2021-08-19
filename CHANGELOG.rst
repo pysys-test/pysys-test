@@ -21,8 +21,8 @@ PySys 2.0 was released in August 2021. Highlights from this release are:
 - A new standard test structure that avoids the use of XML by allowing descriptor values such as the test title to be 
   specified alongside your Python test class in a single ``pysystest.py`` file, instead of separate ``run.py`` and 
   ``pysystest.xml`` files. You can mix and match the old and new styles within the same project. For new PySys projects 
-  a simpler directory layout is now recommended in which ``self.input`` directory is configured to be the main 
-  ``testDir/`` (which also contains the the ``pysystest.py`` file) instead of having a separate ``testDir/Input/`` 
+  a simpler directory layout is now recommended in which the ``self.input`` directory is configured to be the main 
+  ``testDir/`` (which also contains the ``pysystest.py`` file) instead of having a separate ``testDir/Input/`` 
   subdirectory for input files. This can make test contents easier to navigate. 
 - Some big extensions to the concept of "modes" that allow for more powerful configuration and use, including 
   mode parameters for easier handling of multi-dimensional modes, and dynamic mode lists configured with a Python 
