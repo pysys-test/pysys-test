@@ -428,8 +428,8 @@ The main changes that might require changes to existing projects/tests are:
   error for a mapper to strip off the trailing ``\\n`` character at the end of each line, as failure to do so can have 
   unintended consequences on later mappers. This requirement is also more clearly documented. 
 - Some mistakes in the ``pysystest.xml`` structure that were previously tolerated will now produce stderr warning 
-  messages (e.g. incorrectly nesting ``<modes>`` inside ``<groups>``) and others will produce a fatal error 
-  (e.g. multiple occurrences of the same element). To find out if any tests need fixing up, just execute 
+  messages (such as incorrectly nesting ``<modes>`` inside ``<groups>``) and others will produce a fatal error 
+  (for example multiple occurrences of the same element). To find out if any tests need fixing up, just execute 
   ``pysys print``  in your PySys project directory and act on any warning or error messages. 
 - The deprecated ``supportMultipleModesPerRun=false`` project property (only used in very old PySys projects) can no 
   longer be used - please change your tests to use the modern modes approach instead. 
@@ -471,15 +471,15 @@ Deprecations
 
 - It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
   Python's built-in ``locale.getpreferredencoding()`` function, to avoid thread-safety issues in your tests. 
-- If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signature for
+- If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signatures for
   `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and
   `pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter.
   Although this should not immediately break existing applications, to avoid future breaking changes you should
-  update the signature of those methods if you override them to accept ``testobj`` and also any arbitrary
+  update the signatures of those methods if you override them to accept a ``testobj`` parameter and also any arbitrary
   ``**kwargs`` that may be added in future.
 - The ``pysys.xml`` module is deprecated; use `pysys.config` instead. 
 - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. For example, replace 
-  ``unzip(gzfilename, binary=True)` with ``self.unpackArchive(gzfilename, gzfilename[:-3])``. 
+  ``unzip(gzfilename, binary=True)`` with ``self.unpackArchive(gzfilename, gzfilename[:-3])``. 
 - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
 - The old ``<mode>`` elements are deprecated in favor of the new Python lambda syntax 
   (support for these won't be removed any time soon, but are discouraged for new tests). 
