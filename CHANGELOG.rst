@@ -421,9 +421,9 @@ Breaking changes
 The main changes that might require changes to existing projects/tests are:
 
 - Removal of Python 2 and 3.5 support; the minimum supported Python version is now 3.6. 
-- When user-defined mappers are used (see `pysys.mappers`), there is now checking to ensure that the trailing ``\\n`` 
-  character at the end of each line is preserved, as failure to do so can have unintended consequences on later 
-  mappers. This is also now more clearly documented. 
+- When user-defined ``mappers=`` are used (for example during ``self.copy``; see also `pysys.mappers`), it is now an 
+  error for a mapper to strip off the trailing ``\\n`` character at the end of each line, as failure to do so can have 
+  unintended consequences on later mappers. This requirement is also more clearly documented. 
 - Some mistakes in the ``pysystest.xml`` structure that were previously tolerated will now produce stderr warning 
   messages (e.g. incorrectly nesting ``<modes>`` inside ``<groups>``) and others will produce a fatal error 
   (e.g. multiple occurrences of the same element). To find out if any tests need fixing up, just execute 
