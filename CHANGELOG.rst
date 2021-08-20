@@ -403,6 +403,9 @@ Additional improvements which will be of use to some users:
 
 Fixes
 -----
+- Fixed methods such as `BaseTest.assertGrep` to treat ``ignores='a string'`` as a list containing that string, 
+  rather than as separate expressions containing each letter in the string which could lead to ignoring lines 
+  that shoudl not be ignored. 
 - Fixed the project property ``defaultEnvirons.ENVVAR`` added in 1.6.0 which did not in fact set the environment 
   variable as described (due to an additional unwanted ``.`` character); now it does. 
 - Avoid creating unnecessary runner output directory as a result of ``mkdir(runner.output+'/../xxx')`` by 

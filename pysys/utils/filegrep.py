@@ -52,6 +52,7 @@ def getmatches(file, regexpr, ignores=None, encoding=None, flags=0, mappers=[], 
 	
 	log.debug("Looking for expression \"%s\" in input file %s" %(regexpr, file))
 
+	if isinstance(ignores, str): ignores = [ignores] # it's easy to pass in a str by mistake and we definitely don't want to be ignoring lines containing any letter from that string!
 	ignores = [re.compile(i, flags=flags) for i in (ignores or [])]
 
 	if not pathexists(file):
