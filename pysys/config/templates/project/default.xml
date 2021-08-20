@@ -10,7 +10,7 @@
 	<!-- Property identifying the home directory of the application build being tested. -->
 	<property name="appHome" value="${env.PYSYS_APP_HOME}" default="${testRootDir}/.." pathMustExist="true"/>
 
-	<!-- User-defined properties (use lowerCamelCase for property names) -->
+	<!-- Add user-defined properties here (use lowerCamelCase for property names) -->
 	
 	<!-- Custom test framework plugins, if needed -->
 	<!--
