@@ -22,6 +22,11 @@ on:
     types:
       - created
 
+env:
+  # This is necessary to avoid earlier bytecode writing from stopping PYTHONWARNINGS=error set in individual tests 
+  # from working
+  PYTHONDONTWRITEBYTECODE=true
+
 jobs:
   test:
     strategy:
