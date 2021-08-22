@@ -15,7 +15,7 @@ class PySysTest(BaseTest):
 			self.assertThat('%s == %s', e.outcome, BLOCKED)
 			self.log.info('Got abort: %s', e.value)
 			self.assertThat('outcomeReason.endswith(expected)', 
-				outcomeReason=e.value, expected=' aborted due to errorIf=goodexpr')
+				outcomeReason=e.value, expected=' aborted due to errorIf returning goodexpr')
 
 	def validate(self):
 		pass # see above

@@ -1231,7 +1231,7 @@ class ProcessUser(object):
 			if errorIf is not None:
 				errmsg = errorIf()
 				if errmsg:
-					msg = "%s aborted due to errorIf=%s"%(msg, errmsg)
+					msg = "%s aborted due to errorIf returning %s"%(msg, errmsg)
 					if abortOnError:
 						self.abort(BLOCKED, msg, self.__callRecord())
 					else:
