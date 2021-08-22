@@ -596,9 +596,11 @@ class Project(object):
 		self.projectHelp = parser.expandProperties(self.projectHelp, default=None, name='project-help')
 		
 		self._defaultDirConfig = None # this field is not public API
-		for e in parser.root.getElementsByTagName('pysysdirconfig'): # expecting 0 or 1
+		e = parser.root.getElementsByTagName('pysysdirconfig')
+		assert len(e) <= 1, 'Cannot have more than one pysysdirconfig element in pysysproject.xml'
+		if e:
 			self._defaultDirConfig = pysys.config.descriptor._XMLDescriptorParser.parse(self.projectFile, istest=False, 
-				project=self, xmlRootElement=e)
+				project=self, xmlRootElement=e[0])
 		
 		# set the data attributes
 		parser.unlink()
