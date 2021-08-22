@@ -303,11 +303,11 @@ def logPortAllocationStats(logger=logging.getLogger('pysys.portAllocationStats')
 		pysys run -v portAllocationStats=DEBUG
 	
 	"""
-	logger.debug('TCP server port allocation stats: peakAllocatedPorts=%s, portPoolSize=%s, lifetimeTotalAllocatedPorts=%s',
+	logger.debug('TCP server port allocation stats: portPoolSize=%s, peakAllocatedPorts=%s, lifetimeTotalAllocatedPorts=%s',
 		__peakAllocatedPorts, __totalServerPorts, __totalAllocatedPorts)
 	return { # undocumented for now, but might be useful for hacking around
-		'peakAllocatedPorts': __peakAllocatedPorts,
 		'totalServerPorts': __totalServerPorts,
+		'peakAllocatedPorts': __peakAllocatedPorts,
 		'lifetimeTotalAllocatedPorts': __totalAllocatedPorts,
 	}
 
