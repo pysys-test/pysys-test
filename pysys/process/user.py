@@ -1211,7 +1211,7 @@ class ProcessUser(object):
 						errmatches = getmatches(f, err+'.*', encoding=encoding, ignores=ignores, flags=reFlags, mappers=mappers) # add .* to capture entire err msg for a better outcome reason
 						if errmatches:
 							err = errmatches[0].group(0).strip()
-							msg = '%s found while %s'%(quotestring(err), msg)
+							msg = '%s found while %s'%(quotestring(err), msg[0].lower()+msg[1:])
 							# always report outcome for this case; additionally abort if requested to
 							self.addOutcome(BLOCKED, outcomeReason=msg, abortOnError=abortOnError, callRecord=self.__callRecord())
 							return {} if namedGroupsMode else matches
