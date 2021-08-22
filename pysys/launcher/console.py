@@ -20,6 +20,7 @@
 
 import os.path, stat, getopt, logging, traceback, sys
 
+import pysys
 from pysys import __version__
 from pysys.constants import *
 
@@ -67,5 +68,11 @@ def main(args):
 			printTest(args[1:])
 		elif mode == "clean":
 			cleanTest(args[1:])
+		elif mode == "debug": # undocumented
+			sys.stderr.write(f"Using PySys {__version__} from {os.path.normpath(os.path.dirname(pysys.__file__))}\n")
+			sys.stderr.write(f"Using Python {sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]} from {os.path.normpath(sys.executable)}\n")
+			sys.stderr.write(f'   with Python libs in {os.path.dirname(stat.__file__)}\n')
+			for k in sorted(os.environ.keys()):
+				if k.startswith(('PYTHON', 'PYSYS_')): sys.stderr.write(f'   env {k} = "{os.environ[k]}"\n')
 		else:
 			printUsage()
