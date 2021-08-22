@@ -211,8 +211,8 @@ e.g.
 
 		log.debug('PySys arguments: tests=%s options=%s', self.arguments, optlist)
 
-		EXPR1 = re.compile("^[\w\.]*=.*$")
-		EXPR2 = re.compile("^[\w\.]*$")
+		EXPR1 = re.compile(r"^[\w\.]*=.*$")
+		EXPR2 = re.compile(r"^[\w\.]*$")
 
 		printLogs = None
 		defaultAbortOnError = None

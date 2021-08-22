@@ -32,7 +32,7 @@ from pysys.utils.pycompat import PY2, openfile
 log = logging.getLogger('pysys.fileutils')
 
 def toLongPathSafe(path, onlyIfNeeded=False):
-	"""
+	r"""
 	Converts the specified path string to a form suitable for passing to API 
 	calls if it exceeds the maximum path length on this OS. 
 	
@@ -86,7 +86,7 @@ def toLongPathSafe(path, onlyIfNeeded=False):
 	return path
 
 def fromLongPathSafe(path):
-	"""
+	r"""
 	Strip off ``\\?\`` prefixes added by L{toLongPathSafe}. 
 	
 	Note that this function does not convert unicode strings back to byte 
@@ -102,7 +102,7 @@ def fromLongPathSafe(path):
 	return result
 
 def pathexists(path):
-	""" Returns True if the specified path is an existing file or directory, 
+	r""" Returns True if the specified path is an existing file or directory, 
 	as returned by C{os.path.exists}. 
 	
 	This method is safe to call on paths that may be over the Windows 256 
@@ -113,7 +113,7 @@ def pathexists(path):
 	return path and os.path.exists(toLongPathSafe(path))
 
 def mkdir(path):
-	"""
+	r"""
 	Create a directory, with recursive creation of any parent directories.
 	
 	This function is a no-op (does not throw) if the directory already exists. 
@@ -135,7 +135,7 @@ def mkdir(path):
 	return origpath
 
 def deletedir(path, retries=1, ignore_errors=False, onerror=None):
-	"""
+	r"""
 	Recursively delete the specified directory, with optional retries. 
 	
 	Does nothing if it does not exist. Raises an exception if the deletion fails (unless ``onerror=`` is specified), 
@@ -169,7 +169,7 @@ def deletedir(path, retries=1, ignore_errors=False, onerror=None):
 		deletedir(path, retries = retries-1, onerror=onerror)
 
 def deletefile(path, retries=1, ignore_errors=False):
-	"""
+	r"""
 	Delete the specified file, with optional retries. 
 	
 	Does nothing if it does not exist. 
@@ -197,7 +197,7 @@ def deletefile(path, retries=1, ignore_errors=False):
 		deletefile(path, retries = retries-1, ignore_errors=ignore_errors)
 
 def listDirContents(path, recurse=True):
-	"""
+	r"""
 	Recursively scans the specified directory and returns a sorted list of the file/directory paths under it suitable 
 	for diffing. 
 	
@@ -235,7 +235,7 @@ def listDirContents(path, recurse=True):
 	return list(listRecursively(path))
 
 def loadProperties(path, encoding='utf-8-sig'):
-	"""
+	r"""
 	Reads keys and values from the specified ``.properties`` file. 
 	
 	Support ``#`` and ``!`` comments but does not perform any special handling of backslash ``\\`` characters 
@@ -262,7 +262,7 @@ def loadProperties(path, encoding='utf-8-sig'):
 
 
 def loadJSON(path, **kwargs):
-	"""
+	r"""
 	Reads JSON from the specified path. 
 	
 	This is a small wrapper around Python's ``json.load()`` function. 

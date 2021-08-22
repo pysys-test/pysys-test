@@ -34,6 +34,7 @@ def runPySys(processowner, stdouterr, args, ignoreExitStatus=False, abortOnError
 
 	# Error on warnings, to keep everything clean
 	environs.setdefault("PYTHONWARNINGS", "error")
+	environs.setdefault("PYTHONDONTWRITEBYTECODE", "true")
 
 	if defaultproject:
 		createProjectConfig(os.path.join(processowner.output, kwargs.get('workingDir', '.')))

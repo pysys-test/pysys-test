@@ -490,7 +490,7 @@ class BaseTest(ProcessUser):
 			return False
 			
 	def assertThat(self, conditionstring, *positional_arguments, **kwargs):
-		"""Performs equality/range tests or any general-purpose validation by evaluating a Python ``eval()`` expression 
+		r"""Performs equality/range tests or any general-purpose validation by evaluating a Python ``eval()`` expression 
 		in the context of some named values. 
 		
 		This method is designed to produce very clear and informative logging and failure reasons if the assertion is 
@@ -960,7 +960,7 @@ class BaseTest(ProcessUser):
 		return path.split(self.output+os.sep, 1)[-1].split(self.descriptor.testDir+os.sep, 1)[-1]
 
 	def assertThatGrep(self, file, grepRegex, conditionstring='value == expected', encoding=None, reFlags=0, mappers=[], **kwargsForAssertThat):
-		"""Perform a validation by using a regular expression to extract a "value" from a text file and then check 
+		r"""Perform a validation by using a regular expression to extract a "value" from a text file and then check 
 		the extracted value using an `assertThat` conditionstring.
 
 		For example::
@@ -1011,11 +1011,11 @@ class BaseTest(ProcessUser):
 			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
 			be used because expressions are matched against one line at a time.
 
-		:param abortOnError=False: Set to True to make the test immediately abort if the
+		:param bool abortOnError: Set to True to make the test immediately abort if the
 			assertion fails. By default this method produces a BLOCKED output 
 			but does not throw if the eval(...) cannot be executed. 
 
-		:param assertMessage='': Overrides the string used to describe this 
+		:param str assertMessage: Overrides the string used to describe this 
 			assertion in log messages and the outcome reason. We do not recommend using this as the automatically 
 			generated assertion message is usually clearer. If you want to add some additional information to 
 			that message (e.g. which file/server it pertains to etc), just add the info as a string with an extra 
@@ -1039,7 +1039,7 @@ class BaseTest(ProcessUser):
 
 	def assertGrep(self, file, _expr=None, _unused=None, contains=True, ignores=None, literal=False, encoding=None, 
 			abortOnError=False, assertMessage=None, reFlags=0, mappers=[], expr='', filedir=None):
-		"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
+		r"""Perform a validation by checking for the presence or absence of a regular expression in the specified text file.
 
 		Note that if your goal is to check that a value in the file matches some criteria, it is better to 
 		use `assertThatGrep` instead of this function, as assertThatGrep can produce better messages on failure, and 
@@ -1091,8 +1091,8 @@ class BaseTest(ProcessUser):
 				\ seconds\. # in verbose regex mode we escape spaces with a slash
 				\""")
 
-		Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
-		be treated as literal values. If you have a string with a lot of backslashes, it's best to use a 'raw' 
+		Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\`` if you want them to 
+		be treated as literal values. If you have a regular expression string with backslashes, it's best to use a 'raw' 
 		Python string so that you don't need to double-escape them, e.g. ``self.assertGrep(..., expr=r'c:\\Foo\\filename\.txt')``.
 		
 		If you want to search for a string that needs lots of regex escaping, a nice trick is to use a 
@@ -1109,7 +1109,7 @@ class BaseTest(ProcessUser):
 		:param str expr: The regular expression to check for in the file (or a string literal if literal=True), 
 			for example ``" ERROR .*"``. 
 			
-			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\`` if you want them to 
 			be treated as literal values. 
 			
 			If you wish to do something with the text inside the match you can use the ``re`` named 
@@ -1130,7 +1130,7 @@ class BaseTest(ProcessUser):
 			provides the ability to filter in/out sections of a file and `pysys.mappers.JoinLines` can combine related 
 			error lines such as stack trace to provide all the information in the test outcome reason. 
 			
-			Mappers must always preserve the final ``\\n`` of each line (if present). 
+			Mappers must always preserve the final ``\n`` of each line (if present). 
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 			
@@ -1158,7 +1158,6 @@ class BaseTest(ProcessUser):
 			For details see the ``re`` module in the Python standard library. Note that ``re.MULTILINE`` cannot 
 			be used because expressions are matched against one line at a time. Added in PySys 1.5.1. 
 			
-
 		:return: The ``re.Match`` object, or None if there was no match (note the return value is not affected by 
 			the contains=True/False parameter). 
 			
@@ -1407,7 +1406,7 @@ class BaseTest(ProcessUser):
 	
 	def assertLineCount(self, file, _expr='', _unused=None, condition=">=1", ignores=None, encoding=None, 
 			abortOnError=False, assertMessage=None, reFlags=0, expr='', filedir=None, mappers=[]):
-		"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
+		r"""Perform a validation assert on the count of lines in a text file matching a specific regular expression.
 		
 		This method will add a C{PASSED} outcome to the outcome list if the number of lines in the 
 		input file matching the specified regular expression evaluate to true when evaluated against 
@@ -1428,7 +1427,7 @@ class BaseTest(ProcessUser):
 			provides the ability to filter in/out sections of a file and `pysys.mappers.JoinLines` can combine related 
 			error lines such as stack trace to provide all the information in the test outcome reason. 
 			
-			Mappers must always preserve the final ``\\n`` of each line (if present). 
+			Mappers must always preserve the final ``\n`` of each line (if present). 
 			
 			Do not share mapper instances across multiple tests or threads as this can cause race conditions. 
 			

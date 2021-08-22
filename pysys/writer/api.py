@@ -285,7 +285,7 @@ class TestOutputVisitor(object):
 	"""
 
 	def visitTestOutputFile(self, testObj, path, **kwargs):
-		"""
+		r"""
 		Called after execution of each test (and before purging of files) for each file found in the output 
 		directory. 
 		

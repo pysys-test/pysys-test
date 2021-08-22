@@ -1531,7 +1531,7 @@ class ProcessUser(object):
 		return os.path.splitext(file)[0] == os.path.splitext(sys.modules[clazz.__module__].__file__)[0]
 
 	def grep(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
-		"""Returns the first occurrence of a regular expression in the specified file, or raises an exception if not found. 
+		r"""Returns the first occurrence of a regular expression in the specified file, or raises an exception if not found. 
 
 		See also `grepOrNone` and `grepAll` or no-error-on-missing and return-all behaviour. 
 
@@ -1555,7 +1555,7 @@ class ProcessUser(object):
 
 		:param str expr: the regular expression, optionally containing named groups. 
 		
-			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\`` if you want them to 
 			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
 			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
 
@@ -1585,7 +1585,7 @@ class ProcessUser(object):
 			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def grepOrNone(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
-		"""Returns the first occurrence of a regular expression in the specified file, or None if not found. 
+		r"""Returns the first occurrence of a regular expression in the specified file, or None if not found. 
 
 		See also `grep` and `grepAll` for error-on-missing and return-all behaviour. 
 
@@ -1611,7 +1611,7 @@ class ProcessUser(object):
 
 		:param str expr: the regular expression, optionally containing named groups. 
 		
-			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\`` if you want them to 
 			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
 			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
 
@@ -1642,7 +1642,7 @@ class ProcessUser(object):
 			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def grepAll(self, path, expr, encoding=None, reFlags=0, mappers=[], **kwargs):
-		"""Returns a list of all the occurrences of a regular expression in the specified file. 
+		r"""Returns a list of all the occurrences of a regular expression in the specified file. 
 
 		See also `grep` and `grepOrNone` for return-first-only behaviour. 
 
@@ -1661,7 +1661,7 @@ class ProcessUser(object):
 
 		:param str expr: the regular expression, optionally containing named groups. 
 		
-			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\`` if you want them to 
 			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
 			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
 
@@ -1691,7 +1691,7 @@ class ProcessUser(object):
 			encoding=encoding, reFlags=reFlags, mappers=mappers, **kwargs)
 
 	def getExprFromFile(self, path, expr, groups=[1], returnAll=False, returnNoneIfMissing=False, encoding=None, reFlags=0, mappers=[]):
-		""" Searches for a regular expression in the specified file, and returns it. 
+		r""" Searches for a regular expression in the specified file, and returns it. 
 		
 		Use of this function is discouraged - consider using `grep` / `grepOrNone` / `grepAll` instead. 
 
@@ -1722,7 +1722,7 @@ class ProcessUser(object):
 
 		:param str expr: the regular expression, optionally containing the regex group operator ``(...)``
 		
-			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\\`` if you want them to 
+			Remember to escape regular expression special characters such as ``.``, ``(``, ``[``, ``{`` and ``\`` if you want them to 
 			be treated as literal values. If you have a string with regex backslashes, it's best to use a 'raw' 
 			Python string so that you don't need to double-escape them, e.g. ``expr=r'function[(]"str", 123[.]4, (\d+), .*[)]'``.
 
@@ -2053,13 +2053,13 @@ class ProcessUser(object):
 		return pysys.utils.misc.compareVersions(v1, v2)
 
 	def write_text(self, file, text, encoding=None):
-		"""
+		r"""
 		Writes the specified characters to a file in the output directory. 
 		
 		:param file: The path of the file to write, either an absolute path or 
 			relative to the `self.output` directory. 
 		
-		:param text: The string to write to the file, with `\\n` 
+		:param text: The string to write to the file, with ``\n`` 
 			for newlines (do not use `os.linesep` as the file will be opened in 
 			text mode so platform line separators will be added automatically).
 			
@@ -2168,7 +2168,7 @@ class ProcessUser(object):
 		return dest
 
 	def copy(self, src, dest, mappers=[], encoding=None, symlinks=False, ignoreIf=None, skipMappersIf=None, overwrite=None):
-		"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
+		r"""Copy a directory or a single text or binary file, optionally tranforming the contents by filtering each line through a list of mapping functions. 
 		
 		If any `pysys.mappers` are provided, the file is copied in text mode and 
 		each mapper is given the chance to modify or omit each line, or even reorder the lines of the file. 
@@ -2221,7 +2221,7 @@ class ProcessUser(object):
 					return '"'+self.src+'": '+line
 				
 				def fileFinished(self, srcPath, destPath, srcFile, destFile):
-					destFile.write('\\n' + 'footer added by CustomLineMapper')
+					destFile.write('\n' + 'footer added by CustomLineMapper')
 			self.copy('src.txt', 'dest.txt', mappers=[CustomLineMapper()])
 
 		.. versionchanged:: 1.6.0
@@ -2255,7 +2255,7 @@ class ProcessUser(object):
 			in order, to map each line from source to destination. Each function accepts a string for 
 			the current line as input and returns either a string to write or 
 			None if the line is to be omitted. Any ``None`` items in the mappers list will be ignored. 
-			Mappers must always preserve the final ``\\n`` of each line (if present). 
+			Mappers must always preserve the final ``\n`` of each line (if present). 
 			
 			See `pysys.mappers` for some useful predefined mappers such as `pysys.mappers.IncludeLinesBetween`, 
 			`pysys.mappers.RegexReplace` and `pysys.mappers.SortLines`. 
