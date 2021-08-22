@@ -10,10 +10,23 @@ Change Log
   request in the PySys test framework. For how-tos and advice, 
   `ask a question <https://stackoverflow.com/questions/ask?tags=pysys>`_. 
 
+-----------------
+What's new in 2.1
+-----------------
 
--------------------
+PySys 2.1 is under development. 
+
+New features:
+
+- XXX
+
+Fixes:
+
+- YYY
+
+-----------------
 What's new in 2.0
--------------------
+-----------------
 
 PySys 2.0 was released in August 2021. Highlights from this release are:
 
