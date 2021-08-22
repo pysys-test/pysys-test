@@ -152,9 +152,9 @@ jobs:
           # from working
           export PYTHONDONTWRITEBYTECODE=true
 
-          pysys.py --version
+          #pysys.py --version
 
-          python ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
+          python -Werror ../scripts/pysys.py run -XpythonCoverage --ci --outdir main
           # have to delete coverage.xml otherwise codecov doesn't look for .coverage* files
           rm ./__coverage_python.main/coverage.xml
           
