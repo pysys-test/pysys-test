@@ -147,9 +147,9 @@ Then to create your first test, run::
 
 	> pysys.py make MyApplication_001
 
-This will create a ``MyApplication_001`` subdirectory with a ``pysystest.py`` file "descriptor" metadata about the test 
-such as its title, and Python class where you can add the logic to ``execute`` your test, and to ``validate`` that 
-the results are as expected. 
+This will create a ``MyApplication_001`` subdirectory with a ``pysystest.py`` file that contains both "descriptor" 
+metadata about the test such as its title, and a Python class where you can add the logic to ``execute`` your test, 
+and to ``validate`` that the results are as expected. 
 
 To run your testcases, simply execute::
 
