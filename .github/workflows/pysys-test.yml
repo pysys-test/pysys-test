@@ -25,7 +25,7 @@ on:
 env:
   # This is necessary to avoid earlier bytecode writing from stopping PYTHONWARNINGS=error set in individual tests 
   # from working
-  PYTHONDONTWRITEBYTECODE=true
+  PYTHONDONTWRITEBYTECODE: true
 
 jobs:
   test:
