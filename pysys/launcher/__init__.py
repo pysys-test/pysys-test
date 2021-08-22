@@ -109,7 +109,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 			# for tests that have no modes, there is only one descriptor and it's treated as the primary mode; 
 			# user can also specify '' to indicate no mode
 			if modeincludesnone:
-				d.mode = None
+				if expandmodes: d.mode = None
 				modedescriptors[d.id] = [d]
 			else:
 				modedescriptors[d.id] = []
@@ -321,7 +321,7 @@ def createDescriptors(testIdSpecs, type, includes, excludes, trace, dir=None, mo
 				tests.pop(index)
 			else:
 				index = index + 1
-	
+
 	# expand based on modes (unless we're printing without any mode filters in which case expandmodes=False)
 	if expandmodes: 
 		expandedtests = []

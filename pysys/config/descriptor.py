@@ -197,7 +197,7 @@ class TestDescriptor(object):
 		d = collections.OrderedDict()
 		d['id'] = self.id
 		d['testDir'] = self.testDir
-		d['xmlDescriptor'] = self.file
+		d['descriptorFile'] = self.file
 		d['type'] = self.type
 		d['state'] = self.state
 		d['skippedReason'] = self.skippedReason

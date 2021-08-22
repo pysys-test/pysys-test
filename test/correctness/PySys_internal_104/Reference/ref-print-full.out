@@ -2,7 +2,7 @@
    {
       "id": "rootprefix_dir3prefix_Test_SubdirMinimalDescriptor",
       "testDir": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor",
-      "xmlDescriptor": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml",
+      "descriptorFile": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\dir2\\dir3\\Test_SubdirMinimalDescriptor\\pysystest.xml",
       "type": "manual",
       "state": "skipped",
       "skippedReason": "<unknown skipped reason>",
@@ -49,7 +49,7 @@
    {
       "id": "rootprefix_testprefix.Test_RootFullDescriptor",
       "testDir": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor",
-      "xmlDescriptor": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml",
+      "descriptorFile": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootFullDescriptor\\pysystest.xml",
       "type": "manual",
       "state": "deprecated",
       "skippedReason": null,
@@ -100,7 +100,7 @@
    {
       "id": "rootprefix_Test_RootMinimalDescriptor",
       "testDir": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor",
-      "xmlDescriptor": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\pysystest.xml",
+      "descriptorFile": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootMinimalDescriptor\\pysystest.xml",
       "type": "auto",
       "state": "runnable",
       "skippedReason": null,
@@ -139,7 +139,7 @@
    {
       "id": "rootprefix_Test_RootNoInheritDescriptor",
       "testDir": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor",
-      "xmlDescriptor": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml",
+      "descriptorFile": "C:\\dev\\pysys\\test\\correctness\\PySys_internal_104\\Input\\dir1\\Test_RootNoInheritDescriptor\\pysystest.xml",
       "type": "auto",
       "state": "runnable",
       "skippedReason": null,

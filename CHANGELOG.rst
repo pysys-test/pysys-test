@@ -464,8 +464,9 @@ The remaining breaking changes are unlikely edge cases or in rarely used APIs th
 - The ``pysys run --ci`` flag now excludes tests tagged with group ``manual`` (in addition to excluding the 
   ``manual`` test type, since ``pysystest.py`` descriptors use groups for this rather than test type). 
 - The ``--json`` output of ``pysys.py print`` now has a dict representing the modes and their parameters 
-  for the ``modes`` value instead of a simple list. Also the non-JSON ``pysys print`` output has changed slightly, 
-  especially around modes; use ``--json`` instead of parsing the non-JSON output. 
+  for the ``modes`` value instead of a simple list, and the ``xmlDescriptor`` field was renamed to ``descriptorFile``. 
+  Also the non-JSON ``pysys print`` output has changed slightly, especially around modes; use ``--json`` instead of 
+  parsing the non-JSON output directly . 
 - Removed the ``primaryMode`` attribute from `pysys.config.descriptor.TestDescriptor`, as this information is now 
   stored in the `pysys.config.descriptor.TestMode` object. 
 
