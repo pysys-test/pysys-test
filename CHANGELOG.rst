@@ -479,20 +479,22 @@ Deprecations
 ~~~~~~~~~~~~
 
 - It is strongly recommended to use the new `pysys.constants.PREFERRED_ENCODING` constant instead of 
-  Python's built-in ``locale.getpreferredencoding()`` function, to avoid thread-safety issues in your tests. 
+  Python's built-in ``locale.getpreferredencoding()`` function, to avoid thread-safety issues in your tests - use of 
+  that function within tests should be considered as deprecated. 
 - If you have a custom `pysys.utils.perfreporter.CSVPerformanceReporter` subclass, the signatures for
   `pysys.utils.perfreporter.CSVPerformanceReporter.getRunDetails` and
   `pysys.utils.perfreporter.CSVPerformanceReporter.getRunHeader` have changed to include a ``testobj`` parameter.
   Although this should not immediately break existing applications, to avoid future breaking changes you should
   update the signatures of those methods if you override them to accept a ``testobj`` parameter and also any arbitrary
   ``**kwargs`` that may be added in future.
-- The ``pysys.xml`` module is deprecated; use `pysys.config` instead. 
+- The ``pysys.xml`` module is deprecated; rename any imports to use `pysys.config` instead. 
 - The `pysys.utils.fileunzip` module is deprecated; use `BaseTest.unpackArchive` instead. For example, replace 
   ``unzip(gzfilename, binary=True)`` with ``self.unpackArchive(gzfilename, gzfilename[:-3])``. 
 - The (undocumented) ``DEFAULT_DESCRIPTOR`` constant is now deprecated and should not be used. 
 - The old ``<mode>`` elements are deprecated in favor of the new Python lambda syntax 
   (support for these won't be removed any time soon, but are discouraged for new tests). 
-- The `pysys.utils.pycompat` module is now deprecated.
+- The `pysys.utils.pycompat` module is now deprecated; see the documentation inside that module for details on 
+  how to upgrade code that is using it.
 - The ``ConsoleMakeTestHelper`` class is now deprecated in favor of `pysys.launcher.console_make.DefaultTestMaker`. 
 
 A quick way to check for the removed and deprecated items using a regular expression is shown in the following grep 
@@ -500,7 +502,7 @@ command::
 
 	grep -r "\(supportMultipleModesPerRun.*alse\|DescriptorLoader\|pysys.utils.loader\|_stringToUnicode\|pysys[.]xml\|pysys.utils.fileunzip\|[^_@]DEFAULT_DESCRIPTOR\|pysys.utils.pycompat\|PY2\|string_types\|binary_type\|isstring[(]\|quotestring[(]\|openfile[(]\|ConsoleMakeTestHelper\|def getRunDetails\|def getRunHeader\|locale.getpreferredencoding\|addResource\|CommonProcessWrapper\|TEST_TEMPLATE\|DESCRIPTOR_TEMPLATE\|ThreadFilter\)" .
 
-(This also contains some removed/deprecated items from the previous 1.6.0 release, though does not attempt to cover 
+(This expression also contains some removed/deprecated items from the previous 1.6.0 release, though does not attempt to cover 
 any earlier releases). 
 
 Optional steps
