@@ -456,7 +456,7 @@ class TestModesConfigHelper:
 
 			for mode in dimension:
 				assert isinstance(mode, dict), 'Each mode must be a {...} dict but found unexpected object %r (%s)'%(mode, mode.__class__.__name__)
-				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode)
+				modeString, params = _XMLDescriptorParser.splitModeNameAndParams(mode, project=self.project)
 				current[modeString] = mode
 			# end for mode
 			
@@ -838,7 +838,7 @@ class _XMLDescriptorParser(object):
 	
 		
 	@staticmethod 
-	def splitModeNameAndParams(mode):
+	def splitModeNameAndParams(mode, project):
 		"""
 		Returns (modename, params). Auto-generates a mode name if one is not already provided. 
 		
@@ -858,7 +858,8 @@ class _XMLDescriptorParser(object):
 		modeString = modeString.strip('_') # avoid leading/trailing _'s
 
 		# Enforce consistent naming convention of initial caps
-		modeString = modeString[0].upper()+modeString[1:]
+		if project.getProperty('enforceModeCapitalization', True):
+			modeString = modeString[0].upper()+modeString[1:]
 
 		assert modeString, 'Mode name cannot be empty'
 		return modeString, mode
@@ -917,7 +918,7 @@ class _XMLDescriptorParser(object):
 			already = set()
 			expectedparams = None
 			for m in modes:
-				modeString, params = self.splitModeNameAndParams(m)
+				modeString, params = self.splitModeNameAndParams(m, project=self.project)
 				isPrimary = params.pop('isPrimary', False)
 				assert isPrimary in [True, False], 'isPrimary must be set to True or False, not %r'%isPrimary
 
@@ -935,7 +936,8 @@ class _XMLDescriptorParser(object):
 				assert '__' not in modeString, 'Invalid mode "%s" cannot contain double underscore'%modeString
 
 				# Enforce consistent naming convention of initial caps
-				modeString = modeString[0].upper()+modeString[1:]
+				if self.project.getProperty('enforceModeCapitalization', True):
+					modeString = modeString[0].upper()+modeString[1:]
 			
 				assert modeString not in already, 'Duplicate mode "%s"'%modeString
 				already.add(modeString)

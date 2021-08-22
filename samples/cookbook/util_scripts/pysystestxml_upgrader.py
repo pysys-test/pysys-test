@@ -127,10 +127,12 @@ def xmlToPy(xmlpath):
 	doc.unlink()
 
 	if oldmodes: 
+		if any(m[0].islower() for m in oldmodes):
+				warnings.append(f'Some modes in this test start with a lowercase letter; these will be renamed to start with a capital letter (unless the enforceModeCapitalization=false project property is specified) - {oldmodes}')
 		modes = 'lambda helper: '
 		if modesinherit[0].lower() == 'true':
-			modes += "helper.inheritedModes+' + '"
-		modes += repr(oldmodes)
+			modes += "helper.inheritedModes + "
+		modes += repr([{'mode':m} for m in oldmodes])
 		d['modes'] = modes
 	
 	def cleanIndentation(x):

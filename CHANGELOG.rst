@@ -270,6 +270,11 @@ different test scenarios where you really want all of them executed by default e
 
 For more details see :doc:`/pysys/TestDescriptors`, :doc:`/pysys/UserGuide` and the Getting Started sample. 
 
+Note that when using the new lambda-based mode configuration, the convention that modes begin with a capital letter 
+is enforced by automatic upper-casing of the initial letter. If needed this can be turned off for existing projects 
+which use lowercase mode names and have a mixture of old and new modes styles by setting the project property 
+``enforceModeCapitalization`` to ``false``. 
+
 There are also improvements to the ``pysys.py`` command line support for modes:
 
 - ``pysys run --mode MODES`` now accepts regular expressions for modes, permitting more powerful selection of 
